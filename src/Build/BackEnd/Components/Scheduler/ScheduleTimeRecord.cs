@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -32,12 +31,20 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Retrieve the accumulated time.
+        /// If the timer is still running, returns the accumulated time so far
+        /// (elapsed time since the timer started plus any previously accumulated time)
+        /// instead of throwing.
         /// </summary>
         public TimeSpan AccumulatedTime
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_startTimeForCurrentState == DateTime.MinValue, "Can't get the accumulated time while the timer is still running.");
+                if (_startTimeForCurrentState != DateTime.MinValue)
+                {
+                    // Timer is still running — return best-effort elapsed time.
+                    return _accumulatedTime + (DateTime.UtcNow - _startTimeForCurrentState);
+                }
+
                 return _accumulatedTime;
             }
         }
@@ -47,7 +54,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void StartState(DateTime currentTime)
         {
-            ErrorUtilities.VerifyThrow(_startTimeForCurrentState == DateTime.MinValue, "Cannot start the counter when it is already running.");
+            Assumed.Equal(_startTimeForCurrentState, DateTime.MinValue, "Cannot start the counter when it is already running.");
             _startTimeForCurrentState = currentTime;
         }
 

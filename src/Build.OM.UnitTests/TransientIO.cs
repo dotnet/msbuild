@@ -8,6 +8,7 @@ namespace Microsoft.Build.UnitTests
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using Microsoft.Build.Framework;
     using Microsoft.Build.Shared;
 
     public class TransientIO : IDisposable

@@ -3,10 +3,10 @@
 
 #if NETFRAMEWORK
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-using Microsoft.Build.Shared;
 #endif
 
 using System.Diagnostics.CodeAnalysis;
@@ -22,10 +22,10 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Exports a managed assembly to a windows runtime metadata.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class WinMDExp : ToolTaskExtension, IWinMDExpTaskContract
     {
         #region Properties
-
         /// <summary>
         /// Set of references to pass to the winmdexp tool.
         /// </summary>
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(References));
+                ArgumentNullException.ThrowIfNull(value, nameof(References));
                 Bag[nameof(References)] = value;
             }
         }
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(DisabledWarnings));
+                ArgumentNullException.ThrowIfNull(value, nameof(DisabledWarnings));
                 Bag[nameof(DisabledWarnings)] = value;
             }
         }
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(InputDocumentationFile));
+                ArgumentNullException.ThrowIfNull(value, nameof(InputDocumentationFile));
                 Bag[nameof(InputDocumentationFile)] = value;
             }
         }
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(OutputDocumentationFile));
+                ArgumentNullException.ThrowIfNull(value, nameof(OutputDocumentationFile));
                 Bag[nameof(OutputDocumentationFile)] = value;
             }
         }
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(InputPDBFile));
+                ArgumentNullException.ThrowIfNull(value, nameof(InputPDBFile));
                 Bag[nameof(InputPDBFile)] = value;
             }
         }
@@ -106,7 +106,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(OutputPDBFile));
+                ArgumentNullException.ThrowIfNull(value, nameof(OutputPDBFile));
                 Bag[nameof(OutputPDBFile)] = value;
             }
         }
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(WinMDModule));
+                ArgumentNullException.ThrowIfNull(value, nameof(WinMDModule));
                 Bag[nameof(WinMDModule)] = value;
             }
         }
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(OutputWindowsMetadataFile));
+                ArgumentNullException.ThrowIfNull(value, nameof(OutputWindowsMetadataFile));
                 Bag[nameof(OutputWindowsMetadataFile)] = value;
             }
         }
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(AssemblyUnificationPolicy));
+                ArgumentNullException.ThrowIfNull(value, nameof(AssemblyUnificationPolicy));
                 Bag[nameof(AssemblyUnificationPolicy)] = value;
             }
         }
@@ -240,9 +240,24 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The full path of the tool to execute.
         /// </summary>
-        protected override string GenerateFullPathToTool()
+        protected override string GenerateFullPathToTool() => SdkToolsPathUtility.GeneratePathToTool(
+                f => !string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                    : SdkToolsPathUtility.FileInfoExists(f),
+                Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
+                SdkToolsPath,
+                ToolExe,
+                Log,
+                true);
+
+        protected override ProcessStartInfo GetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
         {
-            return SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
+            if (!string.IsNullOrEmpty(pathToTool) && Path.GetFileName(pathToTool).Length != pathToTool.Length)
+            {
+                pathToTool = TaskEnvironment.GetAbsolutePath(pathToTool);
+            }
+
+            return base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
         }
 
         /// <summary>
@@ -266,11 +281,13 @@ namespace Microsoft.Build.Tasks
         {
             if (!String.IsNullOrEmpty(OutputWindowsMetadataFile))
             {
-                var outputWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(OutputWindowsMetadataFile);
-                var winMDModuleWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(WinMDModule);
+                AbsolutePath outputWindowsMetadataFile = TaskEnvironment.GetAbsolutePath(OutputWindowsMetadataFile);
+                AbsolutePath winMDModule = TaskEnvironment.GetAbsolutePath(WinMDModule);
+
+                var outputWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputWindowsMetadataFile);
+                var winMDModuleWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(winMDModule);
 
                 // If the last write time of the input file is less than the last write time of the output file
-                // then the output is newer then the input so we do not need to re-run the tool.
                 if (outputWriteTime > winMDModuleWriteTime)
                 {
                     return true;
@@ -279,6 +296,7 @@ namespace Microsoft.Build.Tasks
 
             return false;
         }
+
         #endregion
     }
 

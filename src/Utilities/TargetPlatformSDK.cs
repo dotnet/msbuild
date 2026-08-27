@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -42,8 +41,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TargetPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformIdentifier);
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
+            ArgumentNullException.ThrowIfNull(targetPlatformIdentifier);
+            ArgumentNullException.ThrowIfNull(targetPlatformVersion);
             TargetPlatformIdentifier = targetPlatformIdentifier;
             TargetPlatformVersion = targetPlatformVersion;
             Path = path;
@@ -105,7 +104,7 @@ namespace Microsoft.Build.Utilities
         public string Path
         {
             get => _path;
-            set => _path = value != null ? FrameworkFileUtilities.EnsureTrailingSlash(value) : null;
+            set => _path = value != null ? FileUtilities.EnsureTrailingSlash(value) : null;
         }
 
         /// <summary>
@@ -144,7 +143,8 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Override GetHashCode
         /// </summary>
-        public override int GetHashCode() => TargetPlatformIdentifier.ToLowerInvariant().GetHashCode() ^ TargetPlatformVersion.GetHashCode();
+        public override int GetHashCode()
+            => StringComparer.OrdinalIgnoreCase.GetHashCode(TargetPlatformIdentifier) ^ TargetPlatformVersion.GetHashCode();
 
         /// <summary>
         /// Override equals

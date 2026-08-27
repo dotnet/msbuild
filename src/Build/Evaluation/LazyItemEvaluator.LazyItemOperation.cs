@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -122,9 +123,7 @@ namespace Microsoft.Build.Evaluation
 
                 public ItemOperationMetadataTable(I operationItem, Dictionary<string, I> capturedItems)
                 {
-                    ErrorUtilities.VerifyThrow(
-                        capturedItems.Comparer == StringComparer.OrdinalIgnoreCase,
-                        "MSBuild assumes case insensitive item name comparison");
+                    Assumed.Equal(capturedItems.Comparer, StringComparer.OrdinalIgnoreCase, "MSBuild assumes case insensitive item name comparison");
 
                     _operationItem = operationItem;
                     _capturedItems = capturedItems;

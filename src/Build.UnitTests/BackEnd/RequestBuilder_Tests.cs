@@ -4,14 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -24,6 +27,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
     public class RequestBuilder_Tests : IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private AutoResetEvent _newBuildRequestsEvent;
         private BuildRequestEntry _newBuildRequests_Entry;
         private FullyQualifiedBuildRequest[] _newBuildRequests_FQRequests;
@@ -50,8 +54,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #pragma warning restore xUnit1013
 
-        public RequestBuilder_Tests()
+        public RequestBuilder_Tests(ITestOutputHelper output)
         {
+            _output = output;
             _originalWorkingDirectory = Directory.GetCurrentDirectory();
             _nodeRequestId = 1;
             _host = new MockHost();
@@ -241,6 +246,170 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(typeof(InvalidProjectFileException), _buildRequestCompleted_Entry.Result.Exception.GetType());
         }
 
+        [Fact]
+        public void BuildProject_ConfigurationCacheSweepDuringBuild_DoesNotCacheConfiguration()
+        {
+            BuildRequestConfiguration configuration = CreateTestProject(1);
+            try
+            {
+                TestTargetBuilder targetBuilder = (TestTargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+                IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+
+                configCache.AddConfiguration(configuration);
+
+                BuildRequest request = CreateNewBuildRequest(1, new string[1] { "target1" });
+                BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
+                BuildResult result = new BuildResult(request);
+                result.AddResultsForTarget("target1", GetEmptySuccessfulTargetResult());
+                targetBuilder.SetResultsToReturn(result);
+
+                bool? cachedDuringBuild = null;
+
+                // Simulate the BuildRequestEngine memory pressure sweep running on another thread while
+                // the request builder is still using the project instance of the configuration it builds.
+                targetBuilder.ActionBeforeReturningResult = () =>
+                {
+                    Task.Run(() => configCache.WriteConfigurationsToDisk()).GetAwaiter().GetResult();
+                    cachedDuringBuild = configuration.IsCached;
+                };
+
+                _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
+
+                WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
+
+                cachedDuringBuild.ShouldBe(false);
+                _buildRequestCompleted_Entry.Result.Exception.ShouldBeNull();
+                Assert.Equal(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
+            }
+            finally
+            {
+                configuration.ClearCacheFile();
+                DeleteTestProject(configuration);
+            }
+        }
+
+        [Fact]
+        public void RequestThreadProcEventsIncludeRequestContext()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            using var eventSourceTestListener = new EventSourceTestHelper();
+
+            TransientTestProjectWithFiles testProject = env.CreateTestProjectWithFiles(
+                """
+                <Project>
+                    <Target Name="Build" />
+                </Project>
+                """);
+
+            TestTargetBuilder targetBuilder = (TestTargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            string defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
+                ? ObjectModelHelpers.MSBuildDefaultToolsVersion
+                : "2.0";
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(
+                1,
+                new BuildRequestData(
+                    testProject.ProjectFile,
+                    new Dictionary<string, string>(),
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                    Array.Empty<string>(),
+                    null),
+                defaultToolsVersion);
+            configCache.AddConfiguration(configuration);
+
+            BuildRequest request = CreateNewBuildRequest(configuration.ConfigurationId, ["Build"]);
+            request.GlobalRequestId = 42;
+
+            BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget("Build", GetEmptySuccessfulTargetResult());
+            targetBuilder.SetResultsToReturn(result);
+
+            _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
+
+            WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
+
+            var requestThreadProcEvents = eventSourceTestListener
+                .GetEvents()
+                .Where(eventData => IsRequestThreadProcEventForRequest(eventData, testProject.ProjectFile, request.GlobalRequestId))
+                .ToArray();
+
+            requestThreadProcEvents.Length.ShouldBe(2);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[0], 37, testProject.ProjectFile, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[1], 38, testProject.ProjectFile, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId);
+
+            Directory.SetCurrentDirectory(_originalWorkingDirectory);
+        }
+
+        [Fact]
+        public void RequestThreadProcStopEventIsEmittedWhenBuildThrows()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output, ignoreBuildErrorFiles: true);
+            using var eventSourceTestListener = new EventSourceTestHelper();
+
+            string missingProjectPath = Path.Combine(env.DefaultTestDirectory.Path, "missing.proj");
+            IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(
+                1,
+                new BuildRequestData(missingProjectPath, new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null),
+                "2.0");
+            configCache.AddConfiguration(configuration);
+
+            BuildRequest request = CreateNewBuildRequest(configuration.ConfigurationId, ["target1"]);
+            request.GlobalRequestId = 43;
+
+            BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
+            _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
+
+            WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
+
+            var requestThreadProcEvents = eventSourceTestListener
+                .GetEvents()
+                .Where(eventData => IsRequestThreadProcEventForRequest(eventData, missingProjectPath, request.GlobalRequestId))
+                .ToArray();
+
+            requestThreadProcEvents.Length.ShouldBe(2);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[0], 37, missingProjectPath, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[1], 38, missingProjectPath, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId);
+            entry.State.ShouldBe(BuildRequestEntryState.Complete);
+            _buildRequestCompleted_Entry.ShouldBe(entry);
+            _buildRequestCompleted_Entry.Result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            _buildRequestCompleted_Entry.Result.Exception.ShouldBeOfType<InvalidProjectFileException>();
+        }
+
+        private static void AssertRequestThreadProcEvent(
+            System.Diagnostics.Tracing.EventWrittenEventArgs eventData,
+            int expectedEventId,
+            string expectedProjectPath,
+            int expectedConfigurationId,
+            int expectedGlobalRequestId,
+            int expectedNodeRequestId)
+        {
+            eventData.EventId.ShouldBe(expectedEventId);
+            eventData.PayloadNames.ShouldNotBeNull();
+            eventData.Payload.ShouldNotBeNull();
+            eventData.PayloadNames.ToArray().ShouldBe(["projectPath", "configurationId", "globalRequestId", "nodeRequestId"]);
+            eventData.Payload.Count.ShouldBe(4);
+            eventData.Payload[0].ShouldBe(expectedProjectPath);
+            eventData.Payload[1].ShouldBe(expectedConfigurationId);
+            eventData.Payload[2].ShouldBe(expectedGlobalRequestId);
+            eventData.Payload[3].ShouldBe(expectedNodeRequestId);
+        }
+
+        private static bool IsRequestThreadProcEventForRequest(
+            System.Diagnostics.Tracing.EventWrittenEventArgs eventData,
+            string expectedProjectPath,
+            int expectedGlobalRequestId)
+        {
+            return eventData.EventId is 37 or 38
+                && eventData.Payload is not null
+                && eventData.Payload.Count == 4
+                && eventData.Payload[0] is string projectPath
+                && eventData.Payload[2] is int globalRequestId
+                && projectPath == expectedProjectPath
+                && globalRequestId == expectedGlobalRequestId;
+        }
+
         private BuildRequestConfiguration CreateTestProject(int configId)
         {
             string projectFileContents = @"
@@ -340,6 +509,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             return new NodeLoggingContext(_host, 1, false);
         }
+
+        /// <summary>
+        /// Verifies NeedsResultsTransfer returns false in MT mode, even when ResultsNodeId
+        /// points to a different node. In MT mode all in-proc nodes share the same cache,
+        /// so results are already accessible without transfer.
+        /// See https://github.com/dotnet/msbuild/issues/13188
+        /// </summary>
+        [Theory]
+        [InlineData(true, 1, 2, false)]                      // MT mode, results on different node → skip transfer (shared cache)
+        [InlineData(true, 1, 1, false)]                      // MT mode, results on same node → no transfer needed
+        [InlineData(true, Scheduler.InvalidNodeId, 2, false)]  // MT mode, results unset → no transfer needed
+        [InlineData(false, 1, 2, true)]                      // ST mode, results on different node → transfer needed
+        [InlineData(false, 1, 1, false)]                     // ST mode, results on same node → no transfer needed
+        [InlineData(false, Scheduler.InvalidNodeId, 2, false)] // ST mode, results unset → no transfer needed
+        public void NeedsResultsTransfer_SkipsInMultiThreadedMode(
+            bool isMultiThreaded, int resultsNodeId, int currentNodeId, bool expectedNeedsTransfer)
+        {
+            bool result = RequestBuilder.NeedsResultsTransfer(resultsNodeId, currentNodeId, isMultiThreaded);
+            result.ShouldBe(expectedNeedsTransfer);
+        }
     }
 
     internal sealed class TestTargetBuilder : ITargetBuilder, IBuildComponent
@@ -352,6 +541,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             _cache.AddResult(result);
         }
+
+        /// <summary>
+        /// Invoked right before the cached result is returned, allowing tests to observe the state
+        /// of the build while the request builder is still building the project.
+        /// </summary>
+        internal Action ActionBeforeReturningResult { get; set; }
 
         internal void SetNewBuildRequests(FullyQualifiedBuildRequest[] requests)
         {
@@ -400,8 +595,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
 
-            return Task<BuildResult>.FromResult(_cache.GetResultForRequest(entry.Request));
-        }
+            ActionBeforeReturningResult?.Invoke();
+
+            return Task<BuildResult>.FromResult(_cache.GetResultForRequest(entry.Request));        }
 
         #endregion
 

@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 #endif
 
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Client
 {
@@ -77,7 +76,7 @@ namespace Microsoft.Build.BackEnd.Client
 
         public MSBuildClientPacketPump(Stream stream)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stream);
+            ArgumentNullException.ThrowIfNull(stream);
 
             _stream = stream;
             _isServerDisconnecting = false;
@@ -257,11 +256,11 @@ namespace Microsoft.Build.BackEnd.Client
                                             break;
                                         }
 
-                                        ErrorUtilities.ThrowInternalError("Server disconnected abruptly");
+                                        InternalError.Throw("Server disconnected abruptly");
                                     }
                                     else
                                     {
-                                        ErrorUtilities.ThrowInternalError("Incomplete header read.  {0} of {1} bytes read", headerBytesRead, headerByte.Length);
+                                        InternalError.Throw($"Incomplete header read.  {headerBytesRead} of {headerByte.Length} bytes read");
                                     }
                                 }
 
@@ -282,11 +281,8 @@ namespace Microsoft.Build.BackEnd.Client
                                     ValueTask<int> bytesReadTask = localStream.ReadAsync(packetData.AsMemory(packetBytesRead, packetLength - packetBytesRead));
                                     int bytesRead = bytesReadTask.IsCompleted ? bytesReadTask.Result : bytesReadTask.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
 #endif
-                                    if (bytesRead == 0)
-                                    {
-                                        // Incomplete read.  Abort.
-                                        ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
-                                    }
+
+                                    Assumed.NotEqual(bytesRead, 0, $"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
 
                                     packetBytesRead += bytesRead;
                                 }
@@ -298,7 +294,7 @@ namespace Microsoft.Build.BackEnd.Client
                                 catch
                                 {
                                     // Error while deserializing or handling packet. Logging additional info.
-                                    CommunicationsUtilities.Trace("Packet factory failed to receive package. Exception while deserializing packet {0}.", packetType);
+                                    CommunicationsUtilities.Trace($"Packet factory failed to receive package. Exception while deserializing packet {packetType}.");
                                     throw;
                                 }
 
@@ -321,7 +317,7 @@ namespace Microsoft.Build.BackEnd.Client
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError("WaitId {0} out of range.", waitId);
+                            Assumed.Unreachable($"WaitId {waitId} out of range.");
                             break;
                     }
                 }
@@ -329,7 +325,7 @@ namespace Microsoft.Build.BackEnd.Client
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Exception occurred in the packet pump: {0}", ex);
+                CommunicationsUtilities.Trace($"Exception occurred in the packet pump: {ex}");
                 PacketPumpException = ex;
             }
 

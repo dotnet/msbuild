@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -59,8 +60,7 @@ namespace Microsoft.Build.Evaluation
         {
             // We currently have no support (and no scenarios) for disallowing property references
             // in Conditions.
-            ErrorUtilities.VerifyThrow(0 != (options & ParserOptions.AllowProperties),
-                "Properties should always be allowed.");
+            Assumed.True((options & ParserOptions.AllowProperties) != 0, "Properties should always be allowed.");
 
             _expression = expressionToParse;
             _parsePoint = 0;
@@ -474,7 +474,7 @@ namespace Microsoft.Build.Evaluation
                 expression = expression.Substring(period + 1);
             }
 
-            bool isItemSpecModifier = FileUtilities.ItemSpecModifiers.IsItemSpecModifier(expression);
+            bool isItemSpecModifier = ItemSpecModifiers.IsItemSpecModifier(expression);
 
             if (((_options & ParserOptions.AllowBuiltInMetadata) == 0) &&
                 isItemSpecModifier)

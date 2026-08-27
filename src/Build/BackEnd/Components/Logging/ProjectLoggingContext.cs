@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -269,7 +268,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="success">Did the build succeede or not</param>
         internal void LogProjectFinished(bool success)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
+            Assumed.True(this.IsValid, "invalid");
             LoggingService.LogProjectFinished(BuildEventContext, _projectFullPath, success);
             this.IsValid = false;
         }
@@ -279,7 +278,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal TargetLoggingContext LogTargetBatchStarted(string projectFullPath, ProjectTargetInstance target, string parentTargetName, TargetBuiltReason buildReason)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
+            Assumed.True(this.IsValid, "invalid");
             return new TargetLoggingContext(this, projectFullPath, target, parentTargetName, buildReason);
         }
     }

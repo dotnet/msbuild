@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 #endif
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -206,6 +207,7 @@ namespace Microsoft.Build.Construction
         /// <param name="sdkResolverService">An <see cref="ISdkResolverService"/> to use.</param>
         /// <param name="submissionId">The current build submission ID.</param>
         /// <returns>An array of ProjectInstances.  The first instance is the traversal project, the remaining are the metaprojects for each project referenced in the solution.</returns>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         internal static ProjectInstance[] Generate(
             SolutionFile solution,
             IDictionary<string, string> globalProperties,
@@ -418,6 +420,7 @@ namespace Microsoft.Build.Construction
             string copyLocalFilesItemName = referenceItemName + "_CopyLocalFiles";
             string targetFrameworkDirectoriesName = GenerateSafePropertyName(project, "_TargetFrameworkDirectories");
             string fullFrameworkRefAssyPathName = GenerateSafePropertyName(project, "_FullFrameworkReferenceAssemblyPaths");
+            string dependsOnNetStandardPropertyName = GenerateSafePropertyName(project, "_DependsOnNETStandard");
             string destinationFolder = String.Format(CultureInfo.InvariantCulture, @"$({0})\Bin\", GenerateSafePropertyName(project, "AspNetPhysicalPath"));
 
             // This is a bit of a hack.  We're actually calling the "Copy" task on all of
@@ -451,15 +454,61 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("FindSerializationAssemblies", "true");
             rarTask.SetParameter("FindRelatedFiles", "true");
             rarTask.SetParameter("TargetFrameworkMoniker", project.TargetFrameworkMoniker);
+
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_7))
+            {
+                // Parse the target framework version to determine if we should pass it to RAR.
+                // Only pass TargetFrameworkVersion for .NET Framework 4.7.1+ which has netstandard 2.0 support.
+                // For older frameworks, omitting this preserves the existing warning behavior (MSB3268)
+                // when netstandard dependencies cannot be resolved.
+                try
+                {
+                    var frameworkName = new FrameworkName(project.TargetFrameworkMoniker);
+                    var minVersionForNetstandard = new Version(4, 7, 1);
+
+                    if (frameworkName.Version >= minVersionForNetstandard)
+                    {
+                        // Pass TargetFrameworkVersion so RAR can find netstandard facades
+                        rarTask.SetParameter("TargetFrameworkVersion", $"v{frameworkName.Version}");
+                        // Pass web.config as AppConfigFile so RAR can detect assembly binding redirects
+                        rarTask.SetParameter("AppConfigFile", "$(WebConfigFileName)");
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // If the TargetFrameworkMoniker is malformed, skip setting TargetFrameworkVersion/AppConfigFile.
+                    // This preserves existing behavior while avoiding an unhandled exception.
+                }
+            }
+
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
+
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_7))
+            {
+                // Capture whether RAR detected a dependency on netstandard
+                rarTask.AddOutputProperty("DependsOnNETStandard", dependsOnNetStandardPropertyName, null);
+            }
 
             // Copy all the copy-local files (reported by RAR) to the web project's "bin"
             // directory.
             ProjectTaskInstance copyTask = target.AddTask("Copy", conditionDescribingValidConfigurations, null);
             copyTask.SetParameter("SourceFiles", "@(" + copyLocalFilesItemName + ")");
+            copyTask.SetParameter("SkipUnchangedFiles", "true");
             copyTask.SetParameter(
                 "DestinationFiles",
                 String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
+
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_7))
+            {
+                // If any references depend on netstandard, copy netstandard.dll from the Facades folder.
+                // .NET Framework 4.7.1+ has netstandard 2.0 support in the Facades folder.
+                string netstandardFacadePath = String.Format(CultureInfo.InvariantCulture, @"$({0})Facades\netstandard.dll", targetFrameworkDirectoriesName);
+                string copyFacadesCondition = String.Format(CultureInfo.InvariantCulture, "'$({0})' == 'true' AND Exists('{1}')", dependsOnNetStandardPropertyName, netstandardFacadePath);
+                ProjectTaskInstance copyFacadesTask = target.AddTask("Copy", copyFacadesCondition, null);
+                copyFacadesTask.SetParameter("SourceFiles", netstandardFacadePath);
+                copyFacadesTask.SetParameter("SkipUnchangedFiles", "true");
+                copyFacadesTask.SetParameter("DestinationFolder", destinationFolder);
+            }
         }
 
         /// <summary>
@@ -689,6 +738,7 @@ namespace Microsoft.Build.Construction
         /// project to be generated is the private variable "msbuildProject" and the SolutionFile containing information
         /// about the solution is the private variable "solutionFile"
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         private ProjectInstance[] Generate()
         {
             // The Version is not available in the new parser.
@@ -716,6 +766,7 @@ namespace Microsoft.Build.Construction
         /// Given a parsed solution, generate a top level traversal project and the metaprojects representing the dependencies for each real project
         /// referenced in the solution.
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         private ProjectInstance[] CreateSolutionProject(string wrapperProjectToolsVersion, bool explicitToolsVersionSpecified)
         {
             AddFakeReleaseSolutionConfigurationIfNecessary();
@@ -852,6 +903,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Creates the traversal project instance.  This has all of the properties against which we can perform evaluations for the remainder of the process.
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         private ProjectInstance CreateTraversalInstance(string wrapperProjectToolsVersion, bool explicitToolsVersionSpecified, List<ProjectInSolution> projectsInOrder)
         {
             // Create the traversal project's root element.  We will later instantiate this, and use it for evaluation of conditions on
@@ -1020,7 +1072,7 @@ namespace Microsoft.Build.Construction
         private (ProjectImportElement ImportBeforeSln, ProjectImportElement ImportAfterSln) CreateBeforeAndAfterSolutionImports(ProjectRootElement traversalProject)
         {
             string escapedSolutionFileName = EscapingUtilities.Escape(Path.GetFileName(_solutionFile.FullPath));
-            if (escapedSolutionFileName.EndsWith(".slnx"))
+            if (escapedSolutionFileName.EndsWith(".slnx", StringComparison.Ordinal))
             {
                 // We want to load only after.{solutionFileName}.sln.targets for solution files with .slnx extension
                 escapedSolutionFileName = escapedSolutionFileName.Substring(0, escapedSolutionFileName.Length - 1);
@@ -1242,6 +1294,16 @@ namespace Microsoft.Build.Construction
                     "AspNetCompiler.UnsupportedMSBuildVersion",
                     project.ProjectName);
 #else
+                // Set WebConfigFileName property if web.config exists (for RAR AppConfigFile parameter)
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_7))
+                {
+                    string webConfigPath = Path.Combine(project.AbsolutePath, "web.config");
+                    if (File.Exists(webConfigPath))
+                    {
+                        metaprojectInstance.SetProperty("WebConfigFileName", webConfigPath);
+                    }
+                }
+
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, null);
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Clean");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
@@ -1308,7 +1370,7 @@ namespace Microsoft.Build.Construction
                 baseName = project.ProjectName;
             }
 
-            baseName = FrameworkFileUtilities.EnsureNoTrailingSlash(baseName);
+            baseName = FileUtilities.EnsureNoTrailingSlash(baseName);
 
             return GetMetaprojectName(baseName);
         }
@@ -2131,6 +2193,7 @@ namespace Microsoft.Build.Construction
         /// Loads each MSBuild project in this solution and looks for its project-to-project references so that
         /// we know what build order we should use when building the solution.
         /// </summary>
+        [RequiresUnreferencedCode("Constructs and evaluates projects, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         private void ScanProjectDependencies(string childProjectToolsVersion, string fullSolutionConfigurationName)
         {
             // Don't bother with all this if the solution configuration doesn't even exist.

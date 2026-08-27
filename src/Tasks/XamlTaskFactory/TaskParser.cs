@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xaml;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;
@@ -89,8 +90,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public bool Parse(string contentOrFile, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile);
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
+            ArgumentException.ThrowIfNullOrEmpty(contentOrFile);
+            ArgumentException.ThrowIfNullOrEmpty(desiredRule);
 
             bool parseSuccessful = ParseAsContentOrFile(contentOrFile, desiredRule);
             if (!parseSuccessful)
@@ -186,8 +187,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal bool ParseXamlDocument(TextReader reader, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reader);
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
+            ArgumentNullException.ThrowIfNull(reader);
+            ArgumentException.ThrowIfNullOrEmpty(desiredRule);
 
             object rootObject = XamlServices.Load(reader);
             if (rootObject != null)

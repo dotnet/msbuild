@@ -5,6 +5,7 @@
 /*  This test is designed especially to test Configuration parsing in net5.0
  *  which means it WON'T work in net472 and thus we don't run it in net472 */
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -75,6 +76,28 @@ namespace Microsoft.Build.UnitTests.Evaluation
             toolsetProperties["VCTargetsPath"].ShouldNotBeNullOrEmpty();
             toolsetProperties["MSBuildToolsRoot"].ShouldNotBeNullOrEmpty();
             toolsetProperties["MSBuildExtensionsPath"].ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        // When the EnableConfigurationFileToolsets feature switch is disabled (as a trimmed or Native AOT host bakes
+        // it off so System.Configuration.ConfigurationManager can be trimmed), explicitly requesting
+        // ToolsetDefinitionLocations.ConfigurationFile must fail observably with an ArgumentException rather than
+        // silently returning no configuration-file toolsets.
+        public void ToolsetDefinitionLocationsIsConfigurationThrowsWhenFeatureDisabled()
+        {
+            const string SwitchName = "Microsoft.Build.EnableConfigurationFileToolsets";
+            bool switchWasSet = AppContext.TryGetSwitch(SwitchName, out bool originalValue);
+            try
+            {
+                AppContext.SetSwitch(SwitchName, false);
+
+                Should.Throw<ArgumentException>(() => new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile));
+            }
+            finally
+            {
+                // The switch defaults to true when unset, so restore that effective default if it was not set before.
+                AppContext.SetSwitch(SwitchName, !switchWasSet || originalValue);
+            }
         }
     }
 }

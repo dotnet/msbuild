@@ -1,13 +1,13 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -71,7 +71,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 getAssemblyName: (path) => throw new NotImplementedException(), // not called in this code path
                 fileExists: p => FileUtilities.FileExistsNoThrow(p),
                 getRuntimeVersion: (path) => throw new NotImplementedException(), // not called in this code path
-                targetedRuntimeVesion: Version.Parse("4.0.30319"));
+                targetedRuntimeVesion: Version.Parse("4.0.30319"),
+                taskEnvironment: TaskEnvironmentHelper.CreateForTest());
 
             var result = hintPathResolver.Resolve(new AssemblyNameExtension("FakeSystem.Net.Http"),
                 sdkName: "",

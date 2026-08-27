@@ -15,16 +15,175 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
-#if ENABLE_TRACKER_TESTS // https://github.com/dotnet/msbuild/issues/12063
-using Microsoft.CodeAnalysis.BuildTasks;
-#endif
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 
+using Shouldly;
 using Xunit;
-using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Threading;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
 
 #nullable disable
+
+namespace Microsoft.Build.UnitTests.FileTracking
+{
+    /// <summary>
+    /// Test-only CreateProcess fixture used by the (currently skipped) FileTracker tests.
+    /// Routes through <c>Windows.Win32.PInvoke.CreateProcess</c>; keeps the original API
+    /// surface that the tests were written against so the call sites read the same way.
+    /// </summary>
+    internal static class BackEndNativeMethods
+    {
+        public static readonly IntPtr NullPtr = IntPtr.Zero;
+        public static readonly IntPtr InvalidHandle = new IntPtr(-1);
+
+        public const uint NORMALPRIORITYCLASS = 0x0020;
+        public const uint CREATENOWINDOW = 0x08000000;
+        public const int STARTFUSESTDHANDLES = 0x00000100;
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        internal struct STARTUP_INFO
+        {
+            internal int cb;
+            internal string lpReserved;
+            internal string lpDesktop;
+            internal string lpTitle;
+            internal int dwX;
+            internal int dwY;
+            internal int dwXSize;
+            internal int dwYSize;
+            internal int dwXCountChars;
+            internal int dwYCountChars;
+            internal int dwFillAttribute;
+            internal int dwFlags;
+            internal short wShowWindow;
+            internal short cbReserved2;
+            internal IntPtr lpReserved2;
+            internal IntPtr hStdInput;
+            internal IntPtr hStdOutput;
+            internal IntPtr hStdError;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct SECURITY_ATTRIBUTES
+        {
+            public int nLength;
+            public IntPtr lpSecurityDescriptor;
+            public int bInheritHandle;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct PROCESS_INFORMATION
+        {
+            public IntPtr hProcess;
+            public IntPtr hThread;
+            public int dwProcessId;
+            public int dwThreadId;
+        }
+
+        // Forwards to Windows.Win32.PInvoke.CreateProcess with the same parameter shape
+        // the existing tests use. Note that this code path is currently exercised only by
+        // tests gated on FEATURE_FILE_TRACKER, all of which are skipped (see issue #649).
+        public static unsafe bool CreateProcess(
+            string lpApplicationName,
+            string lpCommandLine,
+            ref SECURITY_ATTRIBUTES lpProcessAttributes,
+            ref SECURITY_ATTRIBUTES lpThreadAttributes,
+            bool bInheritHandles,
+            uint dwCreationFlags,
+            IntPtr lpEnvironment,
+            string lpCurrentDirectory,
+            ref STARTUP_INFO lpStartupInfo,
+            out PROCESS_INFORMATION lpProcessInformation)
+        {
+            // The managed STARTUP_INFO above has `string` fields, so it isn't blittable and
+            // cannot be reinterpret-cast to STARTUPINFOW*. Marshal into a Win32-shaped struct
+            // for the duration of the call. CreateProcess only consumes lpStartupInfo, so we
+            // don't need to copy anything back.
+            Windows.Win32.System.Threading.STARTUPINFOW si = default;
+            si.cb = (uint)sizeof(Windows.Win32.System.Threading.STARTUPINFOW);
+            si.dwX = (uint)lpStartupInfo.dwX;
+            si.dwY = (uint)lpStartupInfo.dwY;
+            si.dwXSize = (uint)lpStartupInfo.dwXSize;
+            si.dwYSize = (uint)lpStartupInfo.dwYSize;
+            si.dwXCountChars = (uint)lpStartupInfo.dwXCountChars;
+            si.dwYCountChars = (uint)lpStartupInfo.dwYCountChars;
+            si.dwFillAttribute = (uint)lpStartupInfo.dwFillAttribute;
+            si.dwFlags = (STARTUPINFOW_FLAGS)lpStartupInfo.dwFlags;
+            si.wShowWindow = (ushort)lpStartupInfo.wShowWindow;
+            si.hStdInput = new HANDLE(lpStartupInfo.hStdInput.ToPointer());
+            si.hStdOutput = new HANDLE(lpStartupInfo.hStdOutput.ToPointer());
+            si.hStdError = new HANDLE(lpStartupInfo.hStdError.ToPointer());
+
+            Windows.Win32.Security.SECURITY_ATTRIBUTES pSec = new()
+            {
+                nLength = (uint)sizeof(Windows.Win32.Security.SECURITY_ATTRIBUTES),
+                lpSecurityDescriptor = (void*)lpProcessAttributes.lpSecurityDescriptor,
+                bInheritHandle = lpProcessAttributes.bInheritHandle != 0,
+            };
+            Windows.Win32.Security.SECURITY_ATTRIBUTES tSec = new()
+            {
+                nLength = (uint)sizeof(Windows.Win32.Security.SECURITY_ATTRIBUTES),
+                lpSecurityDescriptor = (void*)lpThreadAttributes.lpSecurityDescriptor,
+                bInheritHandle = lpThreadAttributes.bInheritHandle != 0,
+            };
+
+            Windows.Win32.System.Threading.PROCESS_INFORMATION pi = default;
+
+            // CreateProcessW is documented to be allowed to modify lpCommandLine in place
+            // (it parses argv[0] out of it on the way in). Pinning a managed string would let
+            // native code write to immutable string storage, so copy into a fresh char[] —
+            // sized for the null terminator — and pin that.
+            char[] cmdLineBuffer;
+            if (lpCommandLine is null)
+            {
+                cmdLineBuffer = null;
+            }
+            else
+            {
+                cmdLineBuffer = new char[lpCommandLine.Length + 1];
+                lpCommandLine.CopyTo(0, cmdLineBuffer, 0, lpCommandLine.Length);
+                // CLR initializes the array to 0, so cmdLineBuffer[length] is the terminator.
+            }
+
+            bool ok;
+            fixed (char* pApp = lpApplicationName)
+            {
+                fixed (char* pCmd = cmdLineBuffer)
+                {
+                    fixed (char* pCwd = lpCurrentDirectory)
+                    {
+                        ok = PInvoke.CreateProcess(
+                            new PCWSTR(pApp),
+                            new PWSTR(pCmd),
+                            &pSec,
+                            &tSec,
+                            bInheritHandles,
+                            (PROCESS_CREATION_FLAGS)dwCreationFlags,
+                            (void*)lpEnvironment,
+                            new PCWSTR(pCwd),
+                            &si,
+                            &pi);
+                    }
+                }
+            }
+
+            lpProcessInformation = new PROCESS_INFORMATION
+            {
+                hProcess = (IntPtr)pi.hProcess.Value,
+                hThread = (IntPtr)pi.hThread.Value,
+                dwProcessId = (int)pi.dwProcessId,
+                dwThreadId = (int)pi.dwThreadId,
+            };
+
+            return ok;
+        }
+    }
+}
 
 namespace Microsoft.Build.UnitTests.FileTracking
 {
@@ -90,6 +249,33 @@ namespace Microsoft.Build.UnitTests.FileTracking
                 s_oldPath = null;
             }
             FileTrackerTestHelper.CleanTlogs();
+        }
+
+        [WindowsOnlyFact]
+        public void CompileCSharpExecutable_CompilesSimpleProgram()
+        {
+            string outputFile = Path.Combine(Path.GetTempPath(), $"TestCompile_{Guid.NewGuid()}.exe");
+            try
+            {
+                string codeContent = @"
+using System;
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(""Hello from compiled code!"");
+    }
+}";
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
+                File.Exists(outputFile).ShouldBeTrue("Output executable should exist");
+            }
+            finally
+            {
+                if (File.Exists(outputFile))
+                {
+                    File.Delete(outputFile);
+                }
+            }
         }
 
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
@@ -286,8 +472,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.True(foundCreateFileW || foundCreateFileA);
         }
 
-
-#if ENABLE_TRACKER_TESTS // https://github.com/dotnet/msbuild/issues/12063
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
         public void FileTrackerExtendedDirectoryTracking()
         {
@@ -296,7 +480,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
             File.Delete("directoryattributes.read.1.tlog");
             File.Delete("directoryattributes.write.1.tlog");
 
-            string codeFile = null;
             string outputFile = Path.Combine(Path.GetTempPath(), "directoryattributes.exe");
             string codeContent = @"
 using System.IO;
@@ -321,13 +504,7 @@ namespace ConsoleApplication4
 
             try
             {
-                codeFile = FileUtilities.GetTemporaryFileName();
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine3();
-                csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.Execute();
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -338,8 +515,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // Should track directories when '/e' is passed
-                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -351,8 +528,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files.
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -364,8 +541,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With neither '/a' nor '/e', should not do any directory tracking whatsoever
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -377,7 +554,7 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // Should track directories when '/e' is passed
-                FileTrackerTestHelper.AssertFoundStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -389,7 +566,7 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files.
-                FileTrackerTestHelper.AssertDidntFindStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -401,11 +578,10 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With neither '/a' nor '/e', should not do any directory tracking whatsoever
-                FileTrackerTestHelper.AssertDidntFindStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
             }
             finally
             {
-                File.Delete(codeFile);
                 File.Delete(outputFile);
             }
         }
@@ -418,21 +594,14 @@ namespace ConsoleApplication4
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
-            string codeFile = null;
             string outputFile = Path.Combine(Path.GetTempPath(), "readtwice.exe");
             File.Delete(outputFile);
 
             try
             {
                 string inputPath = Path.GetFullPath("test.in");
-                codeFile = FileUtilities.GetTemporaryFileName();
                 string codeContent = @"using System.IO; class X { static void Main() { File.ReadAllText(@""" + inputPath + @"""); File.ReadAllText(@""" + inputPath + @"""); }}";
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine3();
-                csc.Sources = new[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.Execute();
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -444,7 +613,6 @@ namespace ConsoleApplication4
             }
             finally
             {
-                File.Delete(codeFile);
                 File.Delete(outputFile);
             }
 
@@ -474,7 +642,6 @@ namespace ConsoleApplication4
             try
             {
                 writeFile = Path.Combine(testDirectory, "test.out");
-                string codeFile = Path.Combine(testDirectory, "code.cs");
                 string codeContent = @"
 using System.IO;
 using System.Runtime.InteropServices;
@@ -488,14 +655,7 @@ class X
     }
 }";
 
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine3();
-                csc.Sources = new[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                bool success = csc.Execute();
-
-                Assert.True(success);
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -516,7 +676,6 @@ class X
             FileTrackerTestHelper.AssertDidntFindStringInTLog("CreateFileW, Desired Access=0xc0000000, Creation Disposition=0x1:" + writeFile.ToUpperInvariant(), "writenoread.read.1.tlog");
             FileTrackerTestHelper.AssertFoundStringInTLog("CreateFileW, Desired Access=0xc0000000, Creation Disposition=0x1:" + writeFile.ToUpperInvariant(), "writenoread.write.1.tlog");
         }
-#endif // ENABLE_TRACKER_TESTS
 
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
         public void FileTrackerFindStrInCommandLine()
@@ -900,12 +1059,12 @@ class X
             // The short path to temp
             string tempShortPath = NativeMethodsShared.IsUnixLike
                                        ? tempPath
-                                       : FrameworkFileUtilities.EnsureTrailingSlash(
+                                       : FileUtilities.EnsureTrailingSlash(
                                            NativeMethodsShared.GetShortFilePath(tempPath).ToUpperInvariant());
             // The long path to temp
             string tempLongPath = NativeMethodsShared.IsUnixLike
                                       ? tempPath
-                                      : FrameworkFileUtilities.EnsureTrailingSlash(
+                                      : FileUtilities.EnsureTrailingSlash(
                                           NativeMethodsShared.GetLongFilePath(tempPath).ToUpperInvariant());
 
             // We don't want to be including these as dependencies or outputs:
@@ -2232,7 +2391,6 @@ class X
             }
         }
 
-#if ENABLE_TRACKER_TESTS // https://github.com/dotnet/msbuild/issues/12063
         [Fact(Skip = "Needs investigation")]
         public void LaunchMultipleOfSameTool_ToolLaunchesOthers()
         {
@@ -2277,16 +2435,7 @@ namespace ConsoleApplication4
 
                 File.Delete(outputFile);
 
-                string codeFile = Path.Combine(testDir, "Program.cs");
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine3();
-                csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.Platform = "x86";
-                bool compileSucceeded = csc.Execute();
-
-                Assert.True(compileSucceeded);
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile, "x86");
 
                 // Item1: appname
                 // Item2: command line
@@ -2318,7 +2467,6 @@ namespace ConsoleApplication4
                 }
             }
         }
-#endif // ENABLE_TRACKER_TESTS
 
         private static void InProcTrackingSpawnsToolWithTracker(bool useTrackerResponseFile)
         {
@@ -2563,6 +2711,73 @@ namespace ConsoleApplication4
         }
 
         public static void AssertFoundStringInTLog(string file, string tlog) => AssertFoundStringInTLog(file, tlog, 1);
+
+        /// <summary>
+        /// Compiles C# source code into an executable using Roslyn.
+        /// </summary>
+        /// <param name="sourceCode">The C# source code to compile.</param>
+        /// <param name="outputPath">The path where the executable will be written.</param>
+        /// <param name="platform">Optional platform target (e.g., "x86", "x64", "AnyCpu"). Defaults to AnyCpu.</param>
+        /// <exception cref="InvalidOperationException">Thrown when compilation fails; the message contains the compiler diagnostics.</exception>
+        public static void CompileCSharpExecutable(string sourceCode, string outputPath, string platform = null)
+        {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
+
+            string assemblyName = Path.GetFileNameWithoutExtension(outputPath);
+
+            // Add references to required assemblies
+            var references = new List<MetadataReference>
+            {
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.IO.File).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Diagnostics.Process).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Runtime.InteropServices.DllImportAttribute).Assembly.Location),
+            };
+
+            // Add reference to System.Runtime for core types
+            string runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            string systemRuntimePath = Path.Combine(runtimePath, "System.Runtime.dll");
+            if (File.Exists(systemRuntimePath))
+            {
+                references.Add(MetadataReference.CreateFromFile(systemRuntimePath));
+            }
+
+            // Determine platform
+            Platform targetPlatform = string.IsNullOrEmpty(platform)
+                ? Platform.AnyCpu
+                : platform.ToLowerInvariant() switch
+                {
+                    "x86" => Platform.X86,
+                    "x64" => Platform.X64,
+                    _ => Platform.AnyCpu,
+                };
+
+            CSharpCompilationOptions options = new CSharpCompilationOptions(
+                OutputKind.ConsoleApplication,
+                optimizationLevel: OptimizationLevel.Release,
+                platform: targetPlatform);
+
+            CSharpCompilation compilation = CSharpCompilation.Create(
+                assemblyName,
+                syntaxTrees: [syntaxTree],
+                references: references,
+                options: options);
+
+            EmitResult result = compilation.Emit(outputPath);
+
+            if (!result.Success)
+            {
+                string diagnostics = string.Join(
+                    Environment.NewLine,
+                    result.Diagnostics
+                        .Where(d => d.Severity == DiagnosticSeverity.Error)
+                        .Select(d => d.ToString()));
+
+                throw new InvalidOperationException(
+                    $"Compilation failed for '{outputPath}'.{Environment.NewLine}{diagnostics}");
+            }
+        }
     }
 }
 #endif

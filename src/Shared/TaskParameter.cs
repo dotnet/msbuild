@@ -1,12 +1,12 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Build.Collections;
 
 #if FEATURE_APPDOMAIN
@@ -41,12 +41,14 @@ namespace Microsoft.Build.BackEnd
         PrimitiveTypeArray,
 
         /// <summary>
-        /// Parameter is a value type.  Note:  Must be <see cref="IConvertible"/>.
+        /// Parameter is a non-primitive value serialized as a string (for example a value type
+        /// such as <see cref="AbsolutePath"/>, or <see cref="FileInfo"/>/<see cref="DirectoryInfo"/>).
         /// </summary>
         ValueType,
 
         /// <summary>
-        /// Parameter is an array of value types.  Note:  Must be <see cref="IConvertible"/>.
+        /// Parameter is an array of non-primitive values serialized as strings (for example an array
+        /// of value types, or <see cref="FileInfo"/>[]/<see cref="DirectoryInfo"/>[]).
         /// </summary>
         ValueTypeArray,
 
@@ -114,10 +116,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // It's not null or invalid, so it should be a valid parameter type.
-            ErrorUtilities.VerifyThrow(
-                    TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
-                    "How did we manage to get a task parameter of type {0} that isn't a valid parameter type?",
-                    wrappedParameterType);
+            Assumed.True(TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType), $"How did we manage to get a task parameter of type {wrappedParameterType} that isn't a valid parameter type?");
 
             if (wrappedParameterType.IsArray)
             {
@@ -128,7 +127,7 @@ namespace Microsoft.Build.BackEnd
                     _parameterTypeCode = typeCode;
                     _wrappedParameter = wrappedParameter;
                 }
-                else if (typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(wrappedParameterType.GetTypeInfo()))
+                else if (typeof(ITaskItem[]).IsAssignableFrom(wrappedParameterType))
                 {
                     _parameterType = TaskParameterType.ITaskItemArray;
                     ITaskItem[] inputAsITaskItemArray = (ITaskItem[])wrappedParameter;
@@ -144,14 +143,17 @@ namespace Microsoft.Build.BackEnd
 
                     _wrappedParameter = taskItemArrayParameter;
                 }
-                else if (wrappedParameterType.GetElementType().GetTypeInfo().IsValueType)
+                else if (wrappedParameterType.GetElementType().IsValueType
+                    || wrappedParameterType.GetElementType() == typeof(FileInfo)
+                    || wrappedParameterType.GetElementType() == typeof(DirectoryInfo))
                 {
+                    // Value-type arrays as well as FileInfo[]/DirectoryInfo[] are serialized as strings.
                     _parameterType = TaskParameterType.ValueTypeArray;
                     _wrappedParameter = wrappedParameter;
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
             else
@@ -179,14 +181,17 @@ namespace Microsoft.Build.BackEnd
                     _parameterType = TaskParameterType.ITaskItem;
                     _wrappedParameter = new TaskParameterTaskItem((ITaskItem)wrappedParameter);
                 }
-                else if (wrappedParameterType.GetTypeInfo().IsValueType)
+                else if (wrappedParameterType.IsValueType
+                    || wrappedParameterType == typeof(FileInfo)
+                    || wrappedParameterType == typeof(DirectoryInfo))
                 {
+                    // Value types as well as FileInfo/DirectoryInfo are serialized as strings.
                     _parameterType = TaskParameterType.ValueType;
                     _wrappedParameter = wrappedParameter;
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
         }
@@ -257,7 +262,7 @@ namespace Microsoft.Build.BackEnd
                     _wrappedParameter = exceptionParam;
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                     break;
             }
         }
@@ -434,27 +439,31 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        Type elementType = _parameterTypeCode switch
+                        Type arrayType = _parameterTypeCode switch
                         {
-                            TypeCode.Char => typeof(char),
-                            TypeCode.SByte => typeof(sbyte),
-                            TypeCode.Byte => typeof(byte),
-                            TypeCode.Int16 => typeof(short),
-                            TypeCode.UInt16 => typeof(ushort),
-                            TypeCode.UInt32 => typeof(uint),
-                            TypeCode.Int64 => typeof(long),
-                            TypeCode.UInt64 => typeof(ulong),
-                            TypeCode.Single => typeof(float),
-                            TypeCode.Double => typeof(double),
-                            TypeCode.Decimal => typeof(decimal),
-                            TypeCode.DateTime => typeof(DateTime),
+                            TypeCode.Char => typeof(char[]),
+                            TypeCode.SByte => typeof(sbyte[]),
+                            TypeCode.Byte => typeof(byte[]),
+                            TypeCode.Int16 => typeof(short[]),
+                            TypeCode.UInt16 => typeof(ushort[]),
+                            TypeCode.UInt32 => typeof(uint[]),
+                            TypeCode.Int64 => typeof(long[]),
+                            TypeCode.UInt64 => typeof(ulong[]),
+                            TypeCode.Single => typeof(float[]),
+                            TypeCode.Double => typeof(double[]),
+                            TypeCode.Decimal => typeof(decimal[]),
+                            TypeCode.DateTime => typeof(DateTime[]),
                             _ => throw new NotImplementedException(),
                         };
 
                         int length = 0;
                         translator.Translate(ref length);
 
-                        Array array = Array.CreateInstance(elementType, length);
+#if NET
+                        Array array = Array.CreateInstanceFromArrayType(arrayType, length);
+#else
+                        Array array = Array.CreateInstance(arrayType.GetElementType(), length);
+#endif
                         for (int i = 0; i < length; i++)
                         {
                             string valueString = null;
@@ -468,37 +477,39 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Serializes or deserializes the value type instance wrapped by this <see cref="TaskParameter"/>.
+        /// Serializes or deserializes the value instance wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
         /// <remarks>
-        /// The value type is converted to/from string using the <see cref="Convert"/> class. Note that we require
-        /// task parameter types to be <see cref="IConvertible"/> so this conversion is guaranteed to work for parameters
-        /// that have made it this far.
+        /// The value is converted to a string on the write side using <see cref="TaskParameterValueStringConverter.ToString"/>,
+        /// the same canonical conversion the in-process engine uses when gathering task outputs
+        /// (see TaskExecutionHost.GetValueOutputs). This guarantees identical string output across the
+        /// in-process and out-of-process task host paths. The value is not converted back to its original
+        /// type on the read side: this is fine because output task parameters are anyway converted to strings
+        /// by the engine and input task parameters of custom value types are not supported.
         /// </remarks>
         private void TranslateValueType(ITranslator translator)
         {
             string valueString = null;
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                valueString = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+                valueString = TaskParameterValueStringConverter.ToString(_wrappedParameter);
             }
 
             translator.Translate(ref valueString);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                // We don't know how to convert the string back to the original value type. This is fine because output
-                // task parameters are anyway converted to strings by the engine (see TaskExecutionHost.GetValueOutputs)
-                // and input task parameters of custom value types are not supported.
                 _wrappedParameter = valueString;
             }
         }
 
         /// <summary>
-        /// Serializes or deserializes the value type array instance wrapped by this <see cref="TaskParameter"/>.
+        /// Serializes or deserializes the array instance wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
         /// <remarks>
-        /// The array is assumed to be non-null.
+        /// The array is assumed to be non-null. Each element is converted to a string on the write side
+        /// using <see cref="TaskParameterValueStringConverter.ToString"/>, the same canonical conversion the in-process engine
+        /// uses when gathering task outputs.
         /// </remarks>
         private void TranslateValueTypeArray(ITranslator translator)
         {
@@ -511,7 +522,7 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < length; i++)
                 {
-                    string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
+                    string valueString = TaskParameterValueStringConverter.ToString(array.GetValue(i));
                     translator.Translate(ref valueString);
                 }
             }
@@ -535,16 +546,24 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Super simple ITaskItem derivative that we can use as a container for read items.
         /// </summary>
+        /// <remarks>
+        /// This is a flattened view of an engine item. An engine item keeps metadata set directly on the item apart
+        /// from metadata inherited from an item definition, and expands only the latter on read, so that a value such
+        /// as <c>%(Filename)</c> follows the item it is read from. Both kinds arrive here in one dictionary, so that
+        /// origin is recovered instead: a value that evaluation already expanded has no <c>%(</c> left in it, and a
+        /// value the task itself writes is recorded as it is written.
+        ///
+        /// Reads that hand a value to a task expand; reads that hand back the whole collection do not, so a value
+        /// returns to the engine as it left. Keep any new accessor on the side of the one it resembles.
+        /// </remarks>
         private class TaskParameterTaskItem :
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif
             ITaskItem,
             ITaskItem2,
-            ITranslatable
-#if !TASKHOST
-            , IMetadataContainer
-#endif
+            ITranslatable,
+            IMetadataContainer
         {
             /// <summary>
             /// The item spec
@@ -562,9 +581,14 @@ namespace Microsoft.Build.BackEnd
             private Dictionary<string, string> _customEscapedMetadata = null;
 
             /// <summary>
-            /// Cache for fullpath metadata
+            /// Cache for derivable modifier values
             /// </summary>
-            private string _fullPath;
+            private ItemSpecModifiers.Cache _cachedModifiers;
+
+            /// <summary>
+            /// Names of metadata the task wrote on this item. The values of these metadata are returned without expansion.
+            /// </summary>
+            private HashSet<string> _writtenByTask = null;
 
             /// <summary>
             /// Constructor for serialization
@@ -574,7 +598,7 @@ namespace Microsoft.Build.BackEnd
                 if (copyFrom is ITaskItem2 copyFromAsITaskItem2)
                 {
                     _escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
-                    _escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                    _escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
 
                     IDictionary nonGenericEscapedMetadata = copyFromAsITaskItem2.CloneCustomMetadataEscaped();
                     _customEscapedMetadata = nonGenericEscapedMetadata as Dictionary<string, string>;
@@ -595,7 +619,7 @@ namespace Microsoft.Build.BackEnd
                     // TaskParameterTaskItem's constructor expects escaped values, so escaping them all
                     // is the closest approximation to correct we can get.
                     _escapedItemSpec = EscapingUtilities.Escape(copyFrom.ItemSpec);
-                    _escapedDefiningProject = EscapingUtilities.EscapeWithCaching(copyFrom.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
+                    _escapedDefiningProject = EscapingUtilities.Escape(copyFrom.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath), cache: true);
 
                     IDictionary customMetadata = copyFrom.CloneCustomMetadata();
                     _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
@@ -609,12 +633,41 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ErrorUtilities.VerifyThrowInternalNull(_escapedItemSpec);
+                // RecursiveDir cannot be derived from the item spec, only from the wildcard the item was expanded
+                // from, and CloneCustomMetadataEscaped() does not return built-in metadata. Carry it over explicitly
+                // so it survives the boundary. See https://github.com/dotnet/msbuild/issues/13140.
+                // Written straight to the dictionary rather than through SetMetadata: this is the item being built,
+                // not a task writing to it, and the value is already expanded.
+                if (copyFrom is ITaskItem2 copyFromForRecursiveDir)
+                {
+                    string recursiveDirEscaped = copyFromForRecursiveDir.GetMetadataValueEscaped(ItemSpecModifiers.RecursiveDir);
+                    if (!string.IsNullOrEmpty(recursiveDirEscaped))
+                    {
+                        _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                        _customEscapedMetadata[ItemSpecModifiers.RecursiveDir] = recursiveDirEscaped;
+                    }
+                }
+                else
+                {
+                    string recursiveDir = copyFrom.GetMetadata(ItemSpecModifiers.RecursiveDir);
+                    if (!string.IsNullOrEmpty(recursiveDir))
+                    {
+                        _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                        _customEscapedMetadata[ItemSpecModifiers.RecursiveDir] = EscapingUtilities.Escape(recursiveDir);
+                    }
+                }
+
+                Assumed.NotNull(_escapedItemSpec);
             }
 
             private TaskParameterTaskItem()
             {
             }
+
+            /// <summary>
+            /// Returns the escaped item-spec (evaluated include), matching engine task items.
+            /// </summary>
+            public override string ToString() => _escapedItemSpec;
 
             /// <summary>
             /// Gets or sets the item "specification" e.g. for disk-based items this would be the file path.
@@ -633,6 +686,7 @@ namespace Microsoft.Build.BackEnd
                 set
                 {
                     _escapedItemSpec = value;
+                    _cachedModifiers.Clear();
                 }
             }
 
@@ -646,7 +700,11 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     List<string> metadataNames = (_customEscapedMetadata == null) ? new List<string>() : new List<string>(_customEscapedMetadata.Keys);
-                    metadataNames.AddRange(FileUtilities.ItemSpecModifiers.All);
+
+                    foreach (string name in ItemSpecModifiers.All)
+                    {
+                        metadataNames.Add(name);
+                    }
 
                     return metadataNames;
                 }
@@ -662,7 +720,7 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     int count = (_customEscapedMetadata == null) ? 0 : _customEscapedMetadata.Count;
-                    return count + FileUtilities.ItemSpecModifiers.All.Length;
+                    return count + ItemSpecModifiers.All.Length;
                 }
             }
 
@@ -679,6 +737,7 @@ namespace Microsoft.Build.BackEnd
                 set
                 {
                     _escapedItemSpec = value;
+                    _cachedModifiers.Clear();
                 }
             }
 
@@ -704,15 +763,22 @@ namespace Microsoft.Build.BackEnd
             /// <param name="metadataValue">The metadata value.</param>
             public void SetMetadata(string metadataName, string metadataValue)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(metadataName);
+                ArgumentException.ThrowIfNullOrEmpty(metadataName);
 
                 // Non-derivable metadata can only be set at construction time.
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
-                ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
+                ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "CannotChangeItemSpecModifiers", metadataName);
 
                 _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
                 _customEscapedMetadata[metadataName] = metadataValue ?? String.Empty;
+
+                // Only a value that would otherwise be expanded on read has to be remembered.
+                if (IsUnexpanded(metadataValue))
+                {
+                    _writtenByTask ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+                    _writtenByTask.Add(metadataName);
+                }
             }
 
             /// <summary>
@@ -721,8 +787,8 @@ namespace Microsoft.Build.BackEnd
             /// <param name="metadataName">The name of the metadata to remove.</param>
             public void RemoveMetadata(string metadataName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(metadataName);
-                ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
+                ArgumentNullException.ThrowIfNull(metadataName);
+                ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(metadataName), "CannotChangeItemSpecModifiers", metadataName);
 
                 if (_customEscapedMetadata == null)
                 {
@@ -730,6 +796,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 _customEscapedMetadata.Remove(metadataName);
+                _writtenByTask?.Remove(metadataName);
             }
 
             /// <summary>
@@ -744,18 +811,21 @@ namespace Microsoft.Build.BackEnd
             /// <param name="destinationItem">The item to copy metadata to.</param>
             public void CopyMetadataTo(ITaskItem destinationItem)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
+                ArgumentNullException.ThrowIfNull(destinationItem);
 
                 // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
                 // between items, and need to know the source item where the metadata came from
                 string originalItemSpec = destinationItem.GetMetadata("OriginalItemSpec");
 
-#if !TASKHOST
                 if (_customEscapedMetadata != null && destinationItem is IMetadataContainer destinationItemAsMetadataContainer)
                 {
                     // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
+                    // The destination has no notion of an unexpanded value, so hand it expanded ones, as an engine
+                    // item does when copying onto an item a task can reach. ExpandIfFromItemDefinition returns the
+                    // value it was given when there is nothing to expand, which is the usual case.
                     IEnumerable<KeyValuePair<string, string>> metadataToImport = _customEscapedMetadata
-                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
+                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)))
+                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, ExpandIfFromItemDefinition(metadatum.Key, metadatum.Value)));
 
 #if FEATURE_APPDOMAIN
                     if (RemotingServices.IsTransparentProxy(destinationItem))
@@ -767,9 +837,7 @@ namespace Microsoft.Build.BackEnd
 
                     destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
                 }
-                else
-#endif
-                if (_customEscapedMetadata != null)
+                else if (_customEscapedMetadata != null)
                 {
                     foreach (KeyValuePair<string, string> entry in _customEscapedMetadata)
                     {
@@ -777,7 +845,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (String.IsNullOrEmpty(value))
                         {
-                            destinationItem.SetMetadata(entry.Key, entry.Value);
+                            destinationItem.SetMetadata(entry.Key, ExpandIfFromItemDefinition(entry.Key, entry.Value));
                         }
                     }
                 }
@@ -830,23 +898,50 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             string ITaskItem2.GetMetadataValueEscaped(string metadataName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(metadataName);
+                ArgumentNullException.ThrowIfNull(metadataName);
 
-                string metadataValue = null;
-
-                if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
+                if (ItemSpecModifiers.TryGetDerivableModifierKind(metadataName, out ItemSpecModifierKind modifierKind))
                 {
                     // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                     // Passing in a null for currentDirectory indicates we are already in the correct current directory
-                    metadataValue = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(null, _escapedItemSpec, _escapedDefiningProject, metadataName, ref _fullPath);
-                }
-                else if (_customEscapedMetadata != null)
-                {
-                    _customEscapedMetadata.TryGetValue(metadataName, out metadataValue);
+                    return ItemSpecModifiers.GetItemSpecModifier(_escapedItemSpec, modifierKind, null, _escapedDefiningProject, ref _cachedModifiers);
                 }
 
-                return metadataValue ?? String.Empty;
+                string metadataValue = null;
+                _customEscapedMetadata?.TryGetValue(metadataName, out metadataValue);
+
+                if (metadataValue is null)
+                {
+                    return string.Empty;
+                }
+
+                return ExpandIfFromItemDefinition(metadataName, metadataValue);
             }
+
+            /// <summary>
+            /// Expands a stored value if it came from an item definition, and returns it as stored otherwise.
+            /// </summary>
+            private string ExpandIfFromItemDefinition(string metadataName, string escapedValue)
+            {
+                if (!IsUnexpanded(escapedValue) || _writtenByTask?.Contains(metadataName) == true)
+                {
+                    return escapedValue;
+                }
+
+                // RecursiveDir comes from the wildcard the item was expanded from, not from the item spec, so it is
+                // read from the item's own metadata rather than derived.
+                _customEscapedMetadata.TryGetValue(ItemSpecModifiers.RecursiveDir, out string escapedRecursiveDir);
+
+                return BuiltInMetadataExpander.Expand(escapedValue, _escapedItemSpec, _escapedDefiningProject, escapedRecursiveDir, ref _cachedModifiers);
+            }
+
+            /// <summary>
+            /// Indicates whether a value still holds a built-in metadata reference, and so was never expanded.
+            /// Evaluation expands every other expression form, so this is what distinguishes a value inherited from
+            /// an item definition from one set directly on the item.
+            /// </summary>
+            private static bool IsUnexpanded(string escapedValue)
+                => escapedValue is not null && BuiltInMetadataExpander.IndexOfMetadataMarker(escapedValue, 0) >= 0;
 
             /// <summary>
             /// Sets the exact metadata value given to the metadata name requested.
@@ -933,8 +1028,8 @@ namespace Microsoft.Build.BackEnd
                 translator.Translate(ref _escapedDefiningProject);
                 translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
 
-                ErrorUtilities.VerifyThrowInternalNull(_escapedItemSpec);
-                ErrorUtilities.VerifyThrowInternalNull(_customEscapedMetadata);
+                Assumed.NotNull(_escapedItemSpec);
+                Assumed.NotNull(_customEscapedMetadata);
             }
 
             internal static TaskParameterTaskItem FactoryForDeserialization(ITranslator translator)

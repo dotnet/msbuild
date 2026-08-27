@@ -6,6 +6,7 @@ using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal ProjectMetadataInstance(string name, string escapedValue, bool allowItemSpecModifiers)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             if (allowItemSpecModifiers)
             {
@@ -175,7 +176,7 @@ namespace Microsoft.Build.Execution
         void ITranslatable.Translate(ITranslator translator)
         {
             // Read implementation is directly in the constructor so that fields can be read-only
-            ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
+            Assumed.Equal(translator.Mode, TranslationDirection.WriteToStream, "write only");
 
             string mutableName = _name;
             string mutableValue = _escapedValue;
@@ -240,12 +241,10 @@ namespace Microsoft.Build.Execution
             // PERF: This sequence of checks is faster than a full HashSet lookup since finding a match is an error case.
             // Otherwise, many keys would still match to a bucket and begin a string comparison.
             VerifyThrowReservedNameAllowItemSpecModifiers(name);
-            foreach (string itemSpecModifier in FileUtilities.ItemSpecModifiers.All)
+
+            if (ItemSpecModifiers.IsItemSpecModifier(name))
             {
-                if (itemSpecModifier.Length == name.Length && itemSpecModifier[0] == char.ToUpperInvariant(name[0]))
-                {
-                    ErrorUtilities.VerifyThrowArgument(!MSBuildNameIgnoreCaseComparer.Default.Equals(itemSpecModifier, name), "OM_ReservedName", name);
-                }
+                ErrorUtilities.ThrowArgument("OM_ReservedName", name);
             }
         }
 
@@ -257,7 +256,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal static void VerifyThrowReservedNameAllowItemSpecModifiers(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
             foreach (string reservedName in XMakeElements.ReservedItemNames)
             {
                 if (reservedName.Length == name.Length && reservedName[0] == name[0])

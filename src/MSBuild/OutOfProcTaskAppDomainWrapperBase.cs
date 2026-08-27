@@ -9,11 +9,11 @@ using System.Threading;
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-#if !NET35
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
-#endif
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -58,9 +58,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private string taskName;
 
-#if !NET35
         private HostServices _hostServices;
-#endif
 
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
@@ -110,9 +108,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
-#if !NET35
                 HostServices hostServices,
-#endif
                 IDictionary<string, TaskParameter> taskParams)
         {
             buildEngine = oopTaskHostNode;
@@ -121,15 +117,13 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
             _taskAppDomain = null;
 #endif
-#if !NET35
             _hostServices = hostServices;
-#endif
             wrappedTask = null;
 
             LoadedType taskType = null;
             try
             {
-                TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
+                TypeLoader typeLoader = TypeLoader.Create<ITask>();
                 taskType = typeLoader.Load(
                     taskName,
                     AssemblyLoadInfo.Create(null, taskLocation),
@@ -146,6 +140,18 @@ namespace Microsoft.Build.CommandLine
                 return new OutOfProcTaskHostTaskResult(
                                 TaskCompleteType.CrashedDuringInitialization,
                                 exceptionToReturn,
+                                "TaskInstantiationFailureError",
+                                [taskName, taskLocation, String.Empty]);
+            }
+
+            // TypeLoader.Load returns null (rather than throwing) when the requested type cannot be
+            // found in the assembly. Guard against that here so we surface an actionable diagnostic
+            // instead of crashing later with an opaque NullReferenceException.
+            if (taskType == null)
+            {
+                return new OutOfProcTaskHostTaskResult(
+                                TaskCompleteType.CrashedDuringInitialization,
+                                new TypeLoadException(),
                                 "TaskInstantiationFailureError",
                                 [taskName, taskLocation, String.Empty]);
             }
@@ -285,11 +291,7 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-#if CLR2COMPATIBILITY
-                taskRunnerFinished.Close();
-#else
                 taskRunnerFinished.Dispose();
-#endif
                 taskRunnerFinished = null;
             }
 
@@ -336,6 +338,10 @@ namespace Microsoft.Build.CommandLine
                     taskLine,
                     taskColumn,
                     new TaskLoader.LogError(LogErrorDelegate),
+                    // The out-of-proc task host runs tasks in multi-process mode, where each process provides
+                    // its own isolated environment. Supply the fallback environment so a task that only declares
+                    // a TaskEnvironment constructor can still be instantiated here.
+                    TaskEnvironment.Fallback,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     // custom app domain assembly loading won't be available for task host
@@ -348,12 +354,10 @@ namespace Microsoft.Build.CommandLine
                     );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
-#if !NET35
                 if (projectFile != null && _hostServices != null)
                 {
                     wrappedTask.HostObject = _hostServices.GetHostObject(projectFile, targetName, taskName);
                 }
-#endif
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
@@ -402,11 +406,16 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // If it didn't crash and return before now, we're clear to go ahead and execute here.
+                MSBuildEventSource.Log.TaskExecuteInHostStart(taskName);
                 success = wrappedTask.Execute();
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 return new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
+            }
+            finally
+            {
+                MSBuildEventSource.Log.TaskExecuteInHostStop(taskName, success);
             }
 
             PropertyInfo[] finalPropertyValues = wrappedTask.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -447,19 +456,17 @@ namespace Microsoft.Build.CommandLine
         /// Logs errors from TaskLoader
         /// </summary>
         private void LogErrorDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
-        {
-            buildEngine.LogErrorEvent(new BuildErrorEventArgs(
-                null,
-                null,
-                taskLocation,
-                taskLine,
-                taskColumn,
-                0,
-                0,
-                ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
-                null,
-                taskName));
-        }
+            => buildEngine.LogErrorEvent(new BuildErrorEventArgs(
+                subcategory: null,
+                code: null,
+                file: taskLocation,
+                lineNumber: taskLine,
+                columnNumber: taskColumn,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message: MessageFormatter.Format(AssemblyResources.GetString(message), messageArgs),
+                helpKeyword: null,
+                senderName: taskName));
 
         /// <summary>
         /// Filters null elements from a string[] task output.

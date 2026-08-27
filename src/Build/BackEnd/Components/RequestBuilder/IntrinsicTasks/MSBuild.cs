@@ -165,30 +165,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string SkipNonexistentProjects
         {
-            get
+            get => _skipNonExistentProjects switch
             {
-                switch (_skipNonExistentProjects)
-                {
-                    case SkipNonExistentProjectsBehavior.Undefined:
-                        return "Undefined";
+                SkipNonExistentProjectsBehavior.Undefined => "Undefined",
+                SkipNonExistentProjectsBehavior.Build => "Build",
+                SkipNonExistentProjectsBehavior.Error => "False",
+                SkipNonExistentProjectsBehavior.Skip => "True",
 
-                    case SkipNonExistentProjectsBehavior.Build:
-                        return "Build";
-
-                    case SkipNonExistentProjectsBehavior.Error:
-                        return "False";
-
-                    case SkipNonExistentProjectsBehavior.Skip:
-                        return "True";
-
-                    default:
-                        ErrorUtilities.ThrowInternalError("Unexpected case {0}", _skipNonExistentProjects);
-                        break;
-                }
-
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+                _ => Assumed.Unreachable<string>($"Unexpected case {_skipNonExistentProjects}"),
+            };
 
             set
             {
@@ -394,7 +379,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonExistProjects);
+                        Assumed.Equal(skipNonExistProjects, SkipNonExistentProjectsBehavior.Error, $"skipNonexistentProjects has unexpected value {skipNonExistProjects}");
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", project.ItemSpec);
                         success = false;
                     }
@@ -711,7 +696,7 @@ namespace Microsoft.Build.BackEnd
                                         // Set a metadata on the output items called "MSBuildProjectFile" which tells you which project file produced this item.
                                         if (String.IsNullOrEmpty(outputItemFromTarget.GetMetadata(ItemMetadataNames.msbuildSourceProjectFile)))
                                         {
-                                            outputItemFromTarget.SetMetadata(ItemMetadataNames.msbuildSourceProjectFile, projects[i].GetMetadata(FileUtilities.ItemSpecModifiers.FullPath));
+                                            outputItemFromTarget.SetMetadata(ItemMetadataNames.msbuildSourceProjectFile, projects[i].GetMetadata(ItemSpecModifiers.FullPath));
                                         }
                                     }
 

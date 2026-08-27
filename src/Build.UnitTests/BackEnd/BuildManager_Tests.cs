@@ -24,7 +24,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 using Constants = Microsoft.Build.Framework.Constants;
 
@@ -233,7 +232,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A simple successful graph build.
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void SimpleGraphBuild()
         {
             string contents = CleanupFileContents(@"
@@ -267,7 +265,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             propertyValue.ShouldBe("InitialProperty3", StringCompareShould.IgnoreCase);
         }
 
-#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Verify that the environment between two msbuild calls to the same project are stored
         /// so that on the next call we get access to them
@@ -277,7 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string contents1 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <UsingTask TaskName='SetEnvv' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
+ <UsingTask TaskName='SetEnvv' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                                 <Code Language='cs'>
                                     System.Environment.SetEnvironmentVariable(""MOO"", ""When the dawn comes, tonight will be a memory too"");
@@ -315,7 +312,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("What does a cat say : When the dawn comes, tonight will be a memory too");
         }
-#endif
 
         /// <summary>
         /// Verify if idle nodes are shutdown when BuildManager.ShutdownAllNodes is evoked.
@@ -1001,7 +997,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(normalMessage);
             logger.AssertLogContains(lowMessage);
 
-            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred")).ToArray();
+            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred", StringComparison.Ordinal)).ToArray();
 
             deferredMessages.Length.ShouldBe(3);
 
@@ -1515,6 +1511,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously: needs to be async for xunit's timeout system
 #pragma warning disable IDE0390 // Method can be made synchronous
+#pragma warning disable xUnit1069 // Test method 'CancelledBuild' has a Timeout but does not reference TestContext.Current.CancellationToken
         /// <summary>
         /// A canceled build
         /// </summary>
@@ -1522,6 +1519,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public async System.Threading.Tasks.Task CancelledBuild()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 #pragma warning restore IDE0390 // Method can be made synchronous
+#pragma warning restore xUnit1069 // Test method 'CancelledBuild' has a Timeout but does not reference TestContext.Current.CancellationToken
         {
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
@@ -2069,6 +2067,156 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.BuildRequest(data2);
             _buildManager.EndBuild();
             _logger.AssertLogContains("Value:FOO");
+        }
+
+        /// <summary>
+        /// A cache that reloads changed files from disk - the one the MSBuild Server entry node reuses across builds -
+        /// already notices whatever an implicit restore rewrote, so <see cref="BuildRequestDataFlags.ClearCachesAfterBuild"/>
+        /// must leave it populated. Discarding it would only force the build that follows restore to re-parse the
+        /// entire import closure. Opting out of the change wave restores the unconditional flush.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ClearCachesAfterBuildKeepsCacheThatReloadsFromDisk(bool changeWaveEnabled)
+        {
+            if (!changeWaveEnabled)
+            {
+                ChangeWaves.ResetStateForTests();
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            }
+
+            // Matches how the MSBuild Server entry node configures its cache.
+            ProjectRootElementCache cache = RunSubmission(autoReloadFromDisk: true, BuildRequestDataFlags.ClearCachesAfterBuild, out string projectPath);
+
+            if (changeWaveEnabled)
+            {
+                cache.TryGet(projectPath).ShouldNotBeNull();
+            }
+            else
+            {
+                cache.TryGet(projectPath).ShouldBeNull();
+            }
+        }
+
+        /// <summary>
+        /// A cache that cannot notice that a file changed on disk has no way to pick up what restore rewrote, so it
+        /// must still be discarded even when the change wave is enabled.
+        /// </summary>
+        [Fact]
+        public void ClearCachesAfterBuildStillClearsCacheThatDoesNotReloadFromDisk()
+        {
+            // Control: the same submission without the flag leaves the project in the cache, so the assertion
+            // below fails if the entry ever stops being discarded, rather than passing because a build of this
+            // shape never populated the cache in the first place.
+            RunSubmission(autoReloadFromDisk: false, BuildRequestDataFlags.None, out string controlProjectPath)
+                .TryGet(controlProjectPath).ShouldNotBeNull();
+
+            ProjectRootElementCache cache = RunSubmission(autoReloadFromDisk: false, BuildRequestDataFlags.ClearCachesAfterBuild, out string projectPath);
+
+            cache.TryGet(projectPath).ShouldBeNull();
+        }
+
+        /// <summary>
+        /// Keeping the cache is only safe because the entries a restore can invalidate are reloaded from disk on the
+        /// next read. This is the invariant the optimization rests on: the build that follows a submission which
+        /// rewrote an imported file must observe the rewrite, even though the cache was never flushed.
+        /// </summary>
+        [Fact]
+        public void ClearCachesAfterBuildKeptCacheStillSeesRewrittenImport()
+        {
+            TransientTestFolder folder = _env.CreateFolder();
+            string importPath = Path.Combine(folder.Path, "generated.props");
+
+            File.WriteAllText(importPath, "<Project><PropertyGroup><PropertyFromImport>before</PropertyFromImport></PropertyGroup></Project>");
+
+            // Make sure the rewrite below lands on a different timestamp regardless of file system granularity.
+            File.SetLastWriteTime(importPath, DateTime.Now.AddMinutes(-1));
+
+            string rewrittenImport = "&lt;Project&gt;&lt;PropertyGroup&gt;&lt;PropertyFromImport&gt;after&lt;/PropertyFromImport&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;";
+            string projectPath = _env.CreateFile(folder, "test.proj", $@"
+<Project>
+  <Import Project=""{importPath}"" />
+  <Target Name=""Restore"">
+    <WriteLinesToFile File=""{importPath}"" Overwrite=""true"" Lines=""{rewrittenImport}"" />
+  </Target>
+  <Target Name=""Build"">
+    <Error Text=""Stale import: PropertyFromImport was '$(PropertyFromImport)'"" Condition=""'$(PropertyFromImport)' != 'after'"" />
+  </Target>
+</Project>").Path;
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk: true);
+            _parameters.ProjectRootElementCache = cache;
+
+            // Restore runs in its own build session, the way MSBuild.exe sequences an implicit restore.
+            _buildManager.BeginBuild(_parameters);
+            _buildManager.BuildRequest(new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "Restore" },
+                null,
+                BuildRequestDataFlags.ClearCachesAfterBuild)).OverallResult.ShouldBe(BuildResultCode.Success);
+            _buildManager.EndBuild();
+
+            // The cache survived the flush, which is the optimization. Reading the project file does not disturb
+            // the cache because the restore did not rewrite it.
+            cache.TryGet(projectPath).ShouldNotBeNull();
+
+            // The build that follows still sees what the restore rewrote.
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "Build" },
+                null,
+                BuildRequestDataFlags.None));
+            _buildManager.EndBuild();
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // It saw it because reading the rewritten file revalidated its timestamp, dropped the stale entry and
+            // reloaded from disk, so the cache now holds the rewritten content instead of what it read before the
+            // restore. That revalidation is what makes keeping the rest of the cache safe.
+            ProjectRootElement reloadedImport = cache.TryGet(importPath);
+            reloadedImport.ShouldNotBeNull();
+            reloadedImport.Properties.ShouldContain(property => property.Name == "PropertyFromImport" && property.Value == "after");
+        }
+
+        /// <summary>
+        /// Runs a single build request carrying <paramref name="flags"/> against a trivial project, and returns the
+        /// cache it used so the caller can assert on what survived.
+        /// </summary>
+        private ProjectRootElementCache RunSubmission(bool autoReloadFromDisk, BuildRequestDataFlags flags, out string projectPath)
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test' />
+</Project>
+");
+
+            projectPath = _env.CreateFile(".proj").Path;
+            File.WriteAllText(projectPath, contents);
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk);
+            _parameters.ProjectRootElementCache = cache;
+
+            var data = new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "test" },
+                null,
+                flags);
+
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(data);
+            _buildManager.EndBuild();
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            return cache;
         }
 
         /// <summary>
@@ -3861,6 +4009,89 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Pins the interaction between a target's <c>Returns</c> attribute and <c>AfterTargets</c>:
+        /// a target's returned item set is captured when that target itself completes, before its
+        /// after-targets run. Items that an after-target adds to the same ItemGroup are therefore not
+        /// observed in the predecessor target's returned outputs (the same set the MSBuild task's
+        /// TargetOutputs would observe for that target).
+        /// </summary>
+        [Fact]
+        public void ReturnsCapturedBeforeAfterTargetsRun()
+        {
+            string contents = CleanupFileContents("""
+                <Project>
+                  <Target Name="A" Returns="@(MyItem)">
+                    <ItemGroup>
+                      <MyItem Include="FromA" />
+                    </ItemGroup>
+                  </Target>
+                  <Target Name="B" AfterTargets="A">
+                    <ItemGroup>
+                      <MyItem Include="FromB" />
+                    </ItemGroup>
+                    <Message Text="[B-ran]" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            BuildRequestData data = GetBuildRequestData(contents, ["A"]);
+            ProjectInstance projectInstance = data.ProjectInstance;
+            BuildResult result = _buildManager.Build(_parameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Sanity: the after-target B must actually have run, otherwise this test would pass trivially.
+            _logger.AssertLogContains("[B-ran]");
+
+            // A's Returns snapshot is taken when A completes, before B runs, so only FromA is captured;
+            // the FromB that B adds is not present.
+            result.ResultsByTarget["A"].Items.ShouldHaveSingleItem().ItemSpec.ShouldBe("FromA");
+
+            // The live project item state, by contrast, does see B's mutation: the FromB that is
+            // absent from A's returned snapshot was genuinely added to the item group, just too late
+            // for A's Returns.
+            projectInstance.GetItems("MyItem").Select(i => i.EvaluatedInclude).ShouldBe(["FromA", "FromB"]);
+        }
+
+        /// <summary>
+        /// Pins the same <c>Returns</c>/<c>AfterTargets</c> timing as <see cref="ReturnsCapturedBeforeAfterTargetsRun"/>,
+        /// but for a <c>Returns</c> that expands a property value: the value is captured when the target
+        /// completes, before its after-targets run, so a later property change in an after-target is not
+        /// reflected in the predecessor target's returned outputs.
+        /// </summary>
+        [Fact]
+        public void ReturnsCapturedPropertyValueBeforeAfterTargetsRun()
+        {
+            string contents = CleanupFileContents("""
+                <Project>
+                  <PropertyGroup>
+                    <MyProp>FromA</MyProp>
+                  </PropertyGroup>
+                  <Target Name="A" Returns="$(MyProp)" />
+                  <Target Name="B" AfterTargets="A">
+                    <PropertyGroup>
+                      <MyProp>FromB</MyProp>
+                    </PropertyGroup>
+                    <Message Text="[B-ran]" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            BuildRequestData data = GetBuildRequestData(contents, ["A"]);
+            ProjectInstance projectInstance = data.ProjectInstance;
+            BuildResult result = _buildManager.Build(_parameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Sanity: the after-target B must actually have run, otherwise this test would pass trivially.
+            _logger.AssertLogContains("[B-ran]");
+
+            // A's Returns expands $(MyProp) when A completes, before B runs, so it captures FromA.
+            result.ResultsByTarget["A"].Items.ShouldHaveSingleItem().ItemSpec.ShouldBe("FromA");
+
+            // The live project property state, by contrast, does see B's change to FromB.
+            projectInstance.GetPropertyValue("MyProp").ShouldBe("FromB");
+        }
+
+        /// <summary>
         /// When a <see cref="ProjectInstance"/> based <see cref="BuildRequestData"/> is built out of proc, the node should
         /// not reload it from disk but instead fully utilize the entire translate project instance state
         /// to do the build.
@@ -4221,7 +4452,6 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildValid()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4304,7 +4534,6 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildFail()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4484,6 +4713,230 @@ $@"<Project InitialTargets=`Sleep`>
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
             _logger.AssertLogContains("MSB4040");
+        }
+
+        /// <summary>
+        /// Verifies that MT mode builds with multiple projects referencing the same dependency
+        /// with different target sets do not crash with "Results for configuration X were not
+        /// retrieved from node Y" (GitHub issue #13188).
+        ///
+        /// The bug: in MT mode, BuildRequestConfiguration.ResultsNodeId is shared across all
+        /// in-proc nodes. When multiple nodes need to build different targets of the same config,
+        /// the results cache can't fully resolve the request, so the scheduler assigns it to a
+        /// new node. That node's BuildProject() sees ResultsNodeId pointing to the original node
+        /// and enters the results transfer block, which races on ResultsNodeId when multiple
+        /// nodes do this concurrently.
+        ///
+        /// The fix: skip the results transfer block entirely in MT mode, since all in-proc nodes
+        /// share the same ConfigCache and ResultsCache — results are already accessible.
+        ///
+        /// This test forces the scenario by having multiple parallel projects reference the same
+        /// dependency with DIFFERENT target sets, causing cache misses that force the scheduler
+        /// to assign the same config to different nodes.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuild_SharedConfiguration_DoesNotCrash()
+        {
+            // Shared dependency project with multiple targets.
+            // Different parent projects will request different target combinations,
+            // causing partial cache misses that force re-scheduling on different nodes.
+            var sharedDep = _env.CreateFile(".proj").Path;
+            var projRoot = _env.CreateFile(".proj").Path;
+
+            // Create many parallel referencing projects to maximize the chance of
+            // scheduling the same config on different nodes.
+            const int projectCount = 8;
+            var childProjects = new string[projectCount];
+            for (int i = 0; i < projectCount; i++)
+            {
+                childProjects[i] = _env.CreateFile(".proj").Path;
+            }
+
+            // The shared dep has multiple targets. Each parent project requests a different
+            // combination so the cache can't satisfy the request from a previous build.
+            string sharedDepContents = CleanupFileContents("""
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                  <Target Name="TargetA">
+                    <Message Text="TargetA built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetB">
+                    <Message Text="TargetB built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetC">
+                    <Message Text="TargetC built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetD">
+                    <Message Text="TargetD built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetE">
+                    <Message Text="TargetE built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetF">
+                    <Message Text="TargetF built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetG">
+                    <Message Text="TargetG built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetH">
+                    <Message Text="TargetH built" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            File.WriteAllText(sharedDep, sharedDepContents);
+
+            // Each child project requests a different cumulative set of targets from the shared dep.
+            // Child 0: TargetA
+            // Child 1: TargetA;TargetB  (cache has TargetA but not TargetB → miss → re-schedule)
+            // Child 2: TargetA;TargetB;TargetC  (cache has A,B but not C → miss → re-schedule)
+            // etc.
+            // This forces the scheduler to schedule the shared dep's config on different nodes
+            // each time a new target is needed, triggering the ResultsNodeId != currentNodeId check.
+            string[] targetNames = ["TargetA", "TargetB", "TargetC", "TargetD", "TargetE", "TargetF", "TargetG", "TargetH"];
+            for (int i = 0; i < projectCount; i++)
+            {
+                string targets = string.Join(";", targetNames.Take(i + 1));
+                string childContents = CleanupFileContents($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                      <Target Name="Build">
+                        <MSBuild Projects="{sharedDep}" Targets="{targets}" />
+                        <Message Text="Child{i} built" Importance="High" />
+                      </Target>
+                    </Project>
+                    """);
+                File.WriteAllText(childProjects[i], childContents);
+            }
+
+            // Root project builds all children in parallel, maximizing the chance that multiple
+            // nodes simultaneously need the shared dependency with different target sets.
+            string allChildProjects = string.Join(";", childProjects);
+            string rootContents = CleanupFileContents($"""
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                  <Target Name="Build">
+                    <MSBuild Projects="{allChildProjects}" BuildInParallel="true" />
+                  </Target>
+                </Project>
+                """);
+            File.WriteAllText(projRoot, rootContents);
+
+            var buildParameters = new BuildParameters
+            {
+                MaxNodeCount = 8,
+                EnableNodeReuse = false,
+                MultiThreaded = true,
+                DisableInProcNode = false,
+                // MT mode needs SaveOperatingEnvironment=false to allow multiple in-proc nodes.
+                // With it enabled, the operating environment semaphore limits to one in-proc node.
+                SaveOperatingEnvironment = false,
+                Loggers = [_logger],
+            };
+
+            var data = new BuildRequestData(projRoot, new Dictionary<string, string>(), null,
+                ["Build"], null);
+
+            // Use DefaultBuildManager for MT mode (needs proper in-proc node setup).
+            BuildManager.DefaultBuildManager.Dispose();
+            BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify all targets of the shared dep were built.
+            foreach (string target in targetNames)
+            {
+                _logger.AssertLogContains($"{target} built");
+            }
+
+            // Verify all child projects completed.
+            for (int i = 0; i < projectCount; i++)
+            {
+                _logger.AssertLogContains($"Child{i} built");
+            }
+        }
+
+        /// <summary>
+        /// Regression test: when MSBUILDDEBUGSCHEDULER is enabled in multithreaded (-mt) mode,
+        /// multiple in-proc node engines write trace output to the same EngineTrace_{PID}.txt file.
+        /// Previously, each engine used lock(this) which only serialized within one instance,
+        /// allowing concurrent FileStream opens with FileShare.Read. The IOException fatally crashed
+        /// the ActionBlock work queue, silently dropping subsequent request completions and causing
+        /// a deadlock.
+        ///
+        /// The fix uses a static lock across all engine instances so a single trace file is safe,
+        /// and catches non-critical exceptions so trace failures can never crash the build engine.
+        /// </summary>
+#pragma warning disable xUnit1069 // Test method 'MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock' has a Timeout but does not reference TestContext.Current.CancellationToken
+        [Fact(Timeout = 30_000)]
+        public async System.Threading.Tasks.Task MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock()
+#pragma warning restore xUnit1069 // Test method 'MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock' has a Timeout but does not reference TestContext.Current.CancellationToken
+        {
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                string debugPath = _env.CreateFolder().Path;
+                _env.SetEnvironmentVariable("MSBUILDDEBUGSCHEDULER", "1");
+                _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath);
+                FrameworkDebugUtils.SetDebugPath();
+
+                // Create a root project that builds several independent child projects in parallel.
+                // This forces multiple in-proc nodes to run concurrently, which triggers
+                // concurrent TraceEngine() calls.
+                const int childCount = 4;
+                string[] childPaths = new string[childCount];
+
+                string childContent = CleanupFileContents("""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                      <Target Name="Build">
+                        <Message Text="Child built" Importance="High" />
+                      </Target>
+                    </Project>
+                    """);
+
+                for (int i = 0; i < childCount; i++)
+                {
+                    childPaths[i] = _env.CreateFile(".proj").Path;
+                    File.WriteAllText(childPaths[i], childContent);
+                }
+
+                string rootContent = CleanupFileContents($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                      <Target Name="Build">
+                        <MSBuild Projects="{string.Join(";", childPaths)}" BuildInParallel="true" />
+                        <Message Text="Root completed" Importance="High" />
+                      </Target>
+                    </Project>
+                    """);
+
+                string rootPath = _env.CreateFile(".proj").Path;
+                File.WriteAllText(rootPath, rootContent);
+
+                var buildParameters = new BuildParameters
+                {
+                    MaxNodeCount = childCount + 1,
+                    EnableNodeReuse = false,
+                    MultiThreaded = true,
+                    DisableInProcNode = false,
+                    SaveOperatingEnvironment = false,
+                    Loggers = [_logger],
+                };
+
+                var data = new BuildRequestData(rootPath, new Dictionary<string, string>(), null,
+                    ["Build"], null);
+
+                BuildManager.DefaultBuildManager.Dispose();
+                BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, data);
+
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+                _logger.AssertLogContains("Root completed");
+
+                // Verify that scheduler tracing actually produced at least one non-empty trace file
+                // in the configured debug directory.
+                string[] traceFiles = Directory.GetFiles(debugPath, "EngineTrace_*.txt");
+                traceFiles.ShouldNotBeEmpty("Expected at least one EngineTrace_*.txt file to be created in the debug directory.");
+
+                bool hasNonEmptyTraceFile = traceFiles
+                    .Select(path => new FileInfo(path))
+                    .Any(info => info.Length > 0);
+
+                hasNonEmptyTraceFile.ShouldBeTrue("Expected at least one EngineTrace_*.txt file to contain trace data.");
+            });
         }
     }
 }

@@ -7,8 +7,7 @@ using System.Diagnostics;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.Debugging;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -301,7 +300,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unknown event args type.");
+                        InternalError.Throw("Unknown event args type.");
                         break;
                 }
             }
@@ -350,7 +349,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 case WorkerNodeTelemetryEventArgs:
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalError("Unknown event args type.");
+                    InternalError.Throw("Unknown event args type.");
                     break;
             }
         }
@@ -421,7 +420,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // We ought to dump this further up the stack, but if for example a task is logging an event within a
                         // catch(Exception) block and not rethrowing it, there's the possibility that this exception could
                         // just get silently eaten.  So better to have duplicates than to not log the problem at all. :)
-                        ExceptionHandling.DumpExceptionToFile(exception);
+                        DebugUtils.DumpExceptionToFile(exception);
 
                         throw;
                     }
@@ -431,7 +430,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // We ought to dump this further up the stack, but if for example a task is logging an event within a
                     // catch(Exception) block and not rethrowing it, there's the possibility that this exception could
                     // just get silently eaten.  So better to have duplicates than to not log the problem at all. :)
-                    ExceptionHandling.DumpExceptionToFile(exception);
+                    DebugUtils.DumpExceptionToFile(exception);
 
                     if (ExceptionHandling.IsCriticalException(exception))
                     {

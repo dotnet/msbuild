@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -86,6 +87,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
+        [RequiresUnreferencedCode("Reads a ClickOnce manifest, which deserializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Reads a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private static Manifest ReadEmbeddedManifest(string path)
         {
             Stream m = EmbeddedManifestReader.Read(path);
@@ -106,6 +109,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">The name of the input file.</param>
         /// <param name="preserveStream">Specifies whether to preserve the input stream in the InputStream property of the resulting manifest object. Used by ManifestWriter to reconstitute input which is not represented in the object representation. This option is not honored if the specified input file is an embedded manfiest in a PE.</param>
         /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
+        [RequiresUnreferencedCode("Reads a ClickOnce manifest, which deserializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Reads a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static Manifest ReadManifest(string path, bool preserveStream)
         {
             if (path == null)
@@ -132,6 +137,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">The name of the input file.</param>
         /// <param name="preserveStream">Specifies whether to preserve the input stream in the InputStream property of the resulting manifest object. Used by ManifestWriter to reconstitute input which is not represented in the object representation. This option is not honored if the specified input file is an embedded manfiest in a PE.</param>
         /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
+        [RequiresUnreferencedCode("Reads a ClickOnce manifest, which deserializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Reads a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static Manifest ReadManifest(string manifestType, string path, bool preserveStream)
         {
             Manifest m;
@@ -160,6 +167,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="input">Specifies an input stream.</param>
         /// <param name="preserveStream">Specifies whether to preserve the input stream in the InputStream property of the resulting manifest object. Used by ManifestWriter to reconstitute input which is not represented in the object representation.</param>
         /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
+        [RequiresUnreferencedCode("Reads a ClickOnce manifest, which deserializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Reads a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static Manifest ReadManifest(Stream input, bool preserveStream)
         {
             return ReadManifest(null, input, preserveStream);
@@ -172,6 +181,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="input">Specifies an input stream.</param>
         /// <param name="preserveStream">Specifies whether to preserve the input stream in the InputStream property of the resulting manifest object. Used by ManifestWriter to reconstitute input which is not represented in the object representation.</param>
         /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
+        [RequiresUnreferencedCode("Reads a ClickOnce manifest, which deserializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Reads a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static Manifest ReadManifest(string manifestType, Stream input, bool preserveStream)
         {
             int t1 = Environment.TickCount;
@@ -221,6 +232,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return m;
         }
 
+        [RequiresUnreferencedCode("Deserializes the manifest with XmlSerializer, which reflects over the manifest types; members may be trimmed.")]
+        [RequiresDynamicCode("XmlSerializer generates serialization code at runtime, which is not supported with Native AOT.")]
         private static Manifest Deserialize(Stream s)
         {
             s.Position = 0;

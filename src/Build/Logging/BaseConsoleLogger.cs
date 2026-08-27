@@ -292,9 +292,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     return LoggerVerbosity.Detailed;
 
                 default:
-                    ErrorUtilities.ThrowInternalError("Impossible");
                     lightenText = false;
-                    return LoggerVerbosity.Detailed;
+                    return Assumed.Unreachable<LoggerVerbosity>();
             }
         }
 
@@ -964,7 +963,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual bool ApplyParameter(string parameterName, string parameterValue)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName);
+            ArgumentNullException.ThrowIfNull(parameterName);
 
             switch (parameterName.ToUpperInvariant())
             {

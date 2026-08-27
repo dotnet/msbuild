@@ -26,13 +26,11 @@ namespace Microsoft.Build.BackEnd
     {
         private readonly List<ISandboxedProcess> _sandboxedProcesses = new();
 
-        private readonly BuildParameters.IBuildParameters _environmentVariables = CreateEnvironmentVariables();
-
         private IFileAccessManager _fileAccessManager;
 
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.NodeLauncher);
             return new DetouredNodeLauncher();
         }
 
@@ -54,27 +52,27 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Creates a new MSBuild process using the specified launch configuration.
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId)
+        public Process Start(NodeLaunchData launchData, int nodeId)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
+            Assumed.NotNullOrEmpty(launchData.MSBuildLocation);
 
-            ErrorUtilities.VerifyThrowInternalNull(_fileAccessManager, nameof(_fileAccessManager));
+            Assumed.NotNull(_fileAccessManager);
 
-            if (!FileSystems.Default.FileExists(msbuildLocation))
+            if (!FileSystems.Default.FileExists(launchData.MSBuildLocation))
             {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
+                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", launchData.MSBuildLocation));
             }
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
+            var commandLineArgs = $"\"{launchData.MSBuildLocation}\" {launchData.CommandLineArgs}";
 
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
+            CommunicationsUtilities.Trace($"Launching node from {launchData.MSBuildLocation}");
 
-            string exeName = msbuildLocation;
+            string exeName = launchData.MSBuildLocation;
 
 #if RUNTIME_TYPE_NETCORE
             // Run the child process with the same host as the currently-running process.
@@ -95,7 +93,7 @@ namespace Microsoft.Build.BackEnd
                 PipDescription = "MSBuild",
                 PipSemiStableHash = 0,
                 Arguments = commandLineArgs,
-                EnvironmentVariables = _environmentVariables,
+                EnvironmentVariables = CreateEnvironmentVariables(launchData.EnvironmentOverrides),
                 MaxLengthInMemory = 0, // Don't buffer any output
             };
 
@@ -139,17 +137,24 @@ namespace Microsoft.Build.BackEnd
                 _sandboxedProcesses.Add(sp);
             }
 
-            CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", sp.ProcessId, exeName);
+            CommunicationsUtilities.Trace($"Successfully launched {exeName} node with PID {sp.ProcessId}");
             return Process.GetProcessById(sp.ProcessId);
         }
 
-        private static BuildParameters.IBuildParameters CreateEnvironmentVariables()
+        /// <summary>
+        /// Creates environment variables with optional overrides for app host bootstrap.
+        /// </summary>
+#nullable enable annotations
+        private static BuildParameters.IBuildParameters CreateEnvironmentVariables(IDictionary<string, string?>? environmentOverrides)
+#nullable disable annotations
         {
             var envVars = new Dictionary<string, string>();
             foreach (DictionaryEntry baseVar in Environment.GetEnvironmentVariables())
             {
                 envVars.Add((string)baseVar.Key, (string)baseVar.Value);
             }
+
+            DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(envVars, environmentOverrides);
 
             return BuildParameters.GetFactory().PopulateFromDictionary(envVars);
         }
@@ -181,7 +186,9 @@ namespace Microsoft.Build.BackEnd
                     (Experimental.FileAccess.FlagsAndAttributes)fileAccessData.FlagsAndAttributes,
                     fileAccessData.Path,
                     fileAccessData.ProcessArgs,
-                    fileAccessData.IsAnAugmentedFileAccess),
+                    fileAccessData.IsAnAugmentedFileAccess,
+                    fileAccessData.EnumeratePattern,
+                    (Experimental.FileAccess.FlagsAndAttributes)fileAccessData.OpenedFileOrDirectoryAttributes),
                 _nodeId);
 
             public override void HandleProcessData(ProcessData processData) => _fileAccessManager.ReportProcess(

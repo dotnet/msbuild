@@ -1,8 +1,7 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 
 namespace Microsoft.Build.Framework
 {
@@ -41,11 +40,24 @@ namespace Microsoft.Build.Framework
         public readonly bool ForceAllTasksOutOfProcToTaskHost = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
 
         /// <summary>
+        /// Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build),
+        /// equivalent to passing -multiThreaded / -mt on the command line.
+        /// </summary>
+        public readonly bool ForceMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDFORCEMULTITHREADED") == "1";
+
+        /// <summary>
+        /// Enable MSBuild multi-threaded mode by default while allowing an explicit
+        /// -multiThreaded:false / -mt:false command-line switch to disable it.
+        /// </summary>
+        public readonly bool EnableMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDENABLEMULTITHREADED") == "1";
+
+        /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
         public readonly bool ThrowOnDriveEnumeratingWildcard = Environment.GetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD") == "1";
+        public readonly bool UseLegacyCultureSensitiveFileGlobs = Environment.GetEnvironmentVariable("MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS") == "1";
 
         /// <summary>
         /// Cache file existence for the entire process
@@ -82,7 +94,7 @@ namespace Microsoft.Build.Framework
         /// (default) uses the empirical default in Copy.cs, greater than zero can allow
         /// perf tuning beyond the defaults chosen.
         /// </summary>
-        public readonly int CopyTaskParallelism = ParseIntFromEnvironmentVariableOrDefault("MSBUILDCOPYTASKPARALLELISM", -1);
+        public readonly int CopyTaskParallelism = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDCOPYTASKPARALLELISM", -1);
 
         /// <summary>
         /// Instruct MSBuild to write out the generated "metaproj" file to disk when building a solution file.
@@ -117,12 +129,37 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Log property tracking information.
         /// </summary>
-        public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
+        public readonly int LogPropertyTracking = EnvironmentUtilities.GetValueAsInt32OrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
 
         /// <summary>
         /// When evaluating items, this is the minimum number of items on the running list to use a dictionary-based remove optimization.
         /// </summary>
-        public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
+        public readonly int DictionaryBasedItemRemoveThreshold = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
+
+        /// <summary>
+        /// Size in bytes of the kernel buffers backing the named pipes used to communicate with out-of-process
+        /// .NET nodes (worker nodes and .NET TaskHosts). A larger buffer lets the sending side queue more (or
+        /// larger) packets before it blocks waiting for the receiver to drain, which removes most of the
+        /// backpressure stalls when shipping large TaskHostConfiguration packets to sidecar TaskHosts in
+        /// multi-threaded (-mt) builds. Tunable via MSBUILDNODECONNECTIONBUFFERSIZE; when unset it defaults to
+        /// 1 MB under change wave 18.9, falling back to the historical 128 KB when that wave is opted out.
+        /// Note: the legacy .NET Framework 3.5 task host (MSBuildTaskHost) uses its own endpoint and is
+        /// intentionally unaffected by this setting - it keeps the historical 128 KB buffer.
+        /// </summary>
+        public readonly int NodeConnectionBufferSize = GetNodeConnectionBufferSize();
+
+        private static int GetNodeConnectionBufferSize()
+        {
+            int configured = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDNODECONNECTIONBUFFERSIZE", -1);
+            if (configured > 0)
+            {
+                return configured;
+            }
+
+            const int DefaultBufferSize = 1024 * 1024;
+            const int LegacyBufferSize = 128 * 1024;
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9) ? DefaultBufferSize : LegacyBufferSize;
+        }
 
         /// <summary>
         /// Launches a persistent RAR process.
@@ -131,10 +168,14 @@ namespace Microsoft.Build.Framework
         public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
 
         /// <summary>
-        /// Enable IBuildEngine callbacks in the TaskHost process.
-        /// Temporary escape hatch until all callback stages are complete and PacketVersion is bumped to 3.
+        /// Enables the build coordinator for cross-process node budget management.
         /// </summary>
-        public readonly bool EnableTaskHostCallbacks = Environment.GetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS") == "1";
+        public readonly bool EnableCoordinator = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(UseCoordinatorEnvVarName));
+
+        /// <summary>
+        /// Name of environment variable used to enable the build coordinator.
+        /// </summary>
+        public const string UseCoordinatorEnvVarName = "MSBUILDUSECOORDINATOR";
 
         /// <summary>
         /// Name of environment variables used to enable MSBuild server.
@@ -163,7 +204,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool EmitLogsAsMessage = string.Equals(Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName), "message", StringComparison.OrdinalIgnoreCase);
 
-        public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
+        public readonly bool DebugEngine =
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine")) ||
+            // some CI systems force env vars to uppercase and that's also the standard in MSBuild, so allow it here
+            (!NativeMethods.IsWindows && // Windows env vars are case-insensitive so no need to explicitly check
+             !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGENGINE"))); 
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
         public readonly bool DebugUnitTests = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugUnitTests"));
@@ -185,12 +230,12 @@ namespace Microsoft.Build.Framework
         /// mirroring
         /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry
         /// </summary>
-        public bool SdkTelemetryOptOut = IsEnvVarOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
-        public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
-        public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
-        public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
+        public bool SdkTelemetryOptOut = EnvironmentUtilities.IsValueOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
+        public bool FrameworkTelemetryOptOut = EnvironmentUtilities.IsValueOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
+        public bool ExcludeTasksDetailsFromTelemetry = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
+        public bool FlushNodesTelemetryIntoConsole = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
 
-        public bool EnableTargetOutputLogging = IsEnvVarOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
+        public bool EnableTargetOutputLogging = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
 
         // for VS17.14
         public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
@@ -198,25 +243,7 @@ namespace Microsoft.Build.Framework
         public static void UpdateFromEnvironment()
         {
             // Re-create Traits instance to update values in Traits according to current environment.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                _instance = new Traits();
-            }
-        }
-
-        private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
-        {
-            return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
-                ? result
-                : defaultValue;
-        }
-
-        internal static bool IsEnvVarOneOrTrue(string name)
-        {
-            string? value = Environment.GetEnvironmentVariable(name);
-            return value != null &&
-                   (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
-                    value.Equals("true", StringComparison.OrdinalIgnoreCase));
+            _instance = new Traits();
         }
     }
 
@@ -258,6 +285,13 @@ namespace Microsoft.Build.Framework
         /// Disables skipping full drive/filesystem globs that are behind a false condition.
         /// </summary>
         public readonly bool AlwaysEvaluateDangerousGlobs = Environment.GetEnvironmentVariable("MSBuildAlwaysEvaluateDangerousGlobs") == "1";
+
+        /// <summary>
+        /// Disables automatic loading of Directory.Parse.config from global locations
+        /// (MSBuild exe directory, user profile, MSBUILD_PARSE_CONFIG env var).
+        /// When set, configuration must be explicitly provided via ProjectCollection or BuildParameters.
+        /// </summary>
+        public readonly bool DisableParseConfig = Environment.GetEnvironmentVariable("MSBUILD_DISABLE_PARSE_CONFIG") == "1";
 
         /// <summary>
         /// Disables skipping full up to date check for immutable files. See FileClassifier class.
@@ -403,6 +437,13 @@ namespace Microsoft.Build.Framework
         public readonly bool UseSingleLoadContext = Environment.GetEnvironmentVariable("MSBUILDSINGLELOADCONTEXT") == "1";
 
         /// <summary>
+        /// Use custom AssemblyLoadContext for loading dependencies found in the MSBuild tools directory.
+        /// When enabled, assemblies found in the MSBuild tools directory are loaded into the plugin's isolated context
+        /// instead of the shared default context, preventing potential version conflicts with the host application.
+        /// </summary>
+        public readonly bool UseCustomLoadContextForDependenciesInToolsDirectory = Environment.GetEnvironmentVariable("MSBUILDUSECUSTOMLOADCONTEXTFORDEPENDENCIESINTOOLSDIRECTORY") == "1";
+
+        /// <summary>
         /// Enables the user of autorun functionality in CMD.exe on Windows which is disabled by default in MSBuild.
         /// </summary>
         public readonly bool UseAutoRunWhenLaunchingProcessUnderCmd = Environment.GetEnvironmentVariable("MSBUILDUSERAUTORUNINCMD") == "1";
@@ -461,14 +502,6 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        public bool UnquoteTargetSwitchParameters
-        {
-            get
-            {
-                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
-            }
-        }
-
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
@@ -478,14 +511,9 @@ namespace Microsoft.Build.Framework
                 return null;
             }
 
-            if (bool.TryParse(value, out bool result))
-            {
-                return result;
-            }
-
-            ThrowInternalError($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
-
-            return null;
+            return bool.TryParse(value, out bool result)
+                ? result
+                : InternalError.Throw<bool?>($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
         }
 
         private static ProjectInstanceTranslationMode? ComputeProjectInstanceTranslation()
@@ -507,9 +535,7 @@ namespace Microsoft.Build.Framework
                 return ProjectInstanceTranslationMode.Partial;
             }
 
-            ThrowInternalError($"Invalid escape hatch for project instance translation: {mode}");
-
-            return null;
+            return InternalError.Throw<ProjectInstanceTranslationMode?>($"Invalid escape hatch for project instance translation: {mode}");
         }
 
         private static SdkReferencePropertyExpansionMode? ComputeSdkReferencePropertyExpansion()
@@ -547,9 +573,7 @@ namespace Microsoft.Build.Framework
                 return SdkReferencePropertyExpansionMode.ExpandLeaveEscaped;
             }
 
-            ThrowInternalError($"Invalid escape hatch for SdkReference property expansion: {mode}");
-
-            return null;
+            return InternalError.Throw<SdkReferencePropertyExpansionMode?>($"Invalid escape hatch for SdkReference property expansion: {mode}");
         }
 
         public enum ProjectInstanceTranslationMode
@@ -564,75 +588,6 @@ namespace Microsoft.Build.Framework
             DefaultExpand,
             ExpandUnescape,
             ExpandLeaveEscaped
-        }
-
-        /// <summary>
-        /// Throws InternalErrorException.
-        /// </summary>
-        /// <remarks>
-        /// Clone of ErrorUtilities.ThrowInternalError which isn't available in Framework.
-        /// </remarks>
-        internal static void ThrowInternalError(string message)
-        {
-            throw new InternalErrorException(message);
-        }
-
-        /// <summary>
-        /// Throws InternalErrorException.
-        /// This is only for situations that would mean that there is a bug in MSBuild itself.
-        /// </summary>
-        /// <remarks>
-        /// Clone from ErrorUtilities which isn't available in Framework.
-        /// </remarks>
-        internal static void ThrowInternalError(string message, params object?[] args)
-        {
-            throw new InternalErrorException(FormatString(message, args));
-        }
-
-        /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        ///
-        /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
-        /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        ///
-        /// Thread safe.
-        /// </summary>
-        /// <param name="unformatted">The string to format.</param>
-        /// <param name="args">Optional arguments for formatting the given string.</param>
-        /// <returns>The formatted string.</returns>
-        /// <remarks>
-        /// Clone from ResourceUtilities which isn't available in Framework.
-        /// </remarks>
-        internal static string FormatString(string unformatted, params object?[] args)
-        {
-            string formatted = unformatted;
-
-            // NOTE: String.Format() does not allow a null arguments array
-            if ((args?.Length > 0))
-            {
-#if DEBUG
-                // If you accidentally pass some random type in that can't be converted to a string,
-                // FormatResourceString calls ToString() which returns the full name of the type!
-                foreach (object? param in args)
-                {
-                    // Check it has a real implementation of ToString() and the type is not actually System.String
-                    if (param != null)
-                    {
-                        if (string.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal) &&
-                            param.GetType() != typeof(string))
-                        {
-                            ThrowInternalError("Invalid resource parameter type, was {0}",
-                                param.GetType().FullName);
-                        }
-                    }
-                }
-#endif
-                // Format the string, using the variable arguments passed in.
-                // NOTE: all String methods are thread-safe
-                formatted = String.Format(CultureInfo.CurrentCulture, unformatted, args);
-            }
-
-            return formatted;
         }
     }
 }

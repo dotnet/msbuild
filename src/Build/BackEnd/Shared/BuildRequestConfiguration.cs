@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -126,6 +126,11 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<string, int> _activelyBuildingTargets;
 
         /// <summary>
+        /// The number of operations currently using the in-memory project state.
+        /// </summary>
+        private int _projectInstanceUsageCount;
+
+        /// <summary>
         /// The node where this configuration's master results are stored.
         /// </summary>
         private int _resultsNodeId = Scheduler.InvalidNodeId;
@@ -140,12 +145,25 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _savedCurrentDirectory;
 
+        /// <summary>
+        /// Saves the evaluation ID for the project so that it's accessible even when the underlying Project becomes cached.
+        /// </summary>
+        private int _projectEvaluationId = BuildEventContext.InvalidEvaluationId;
+
         #endregion
+
+        /// <summary>
+        /// The target names that were requested to execute. Backed by a field so that it can be
+        /// serialized across nodes; without this, a configuration that crosses a node boundary
+        /// would lose its requested targets, which is needed (for example) to generate the correct
+        /// set of targets in a solution metaproject.
+        /// </summary>
+        private List<string> _requestedTargets = [];
 
         /// <summary>
         /// The target names that were requested to execute.
         /// </summary>
-        internal IReadOnlyCollection<string> RequestedTargets { get; }
+        internal IReadOnlyCollection<string> RequestedTargets => _requestedTargets;
 
         /// <summary>
         /// Initializes a configuration from a BuildRequestData structure.  Used by the BuildManager.
@@ -169,15 +187,15 @@ namespace Microsoft.Build.BackEnd
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
         internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(data);
-            ErrorUtilities.VerifyThrowInternalLength(data.ProjectFullPath, "data.ProjectFullPath");
+            ArgumentNullException.ThrowIfNull(data);
+            Assumed.NotNullOrEmpty(data.ProjectFullPath);
 
             _configId = configId;
             _projectFullPath = data.ProjectFullPath;
             _explicitToolsVersionSpecified = data.ExplicitToolsVersionSpecified;
             _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion);
             _globalProperties = data.GlobalPropertiesDictionary;
-            RequestedTargets = new List<string>(data.TargetNames);
+            _requestedTargets = new List<string>(data.TargetNames);
 
             // The following information only exists when the request is populated with an existing project.
             if (data.ProjectInstance != null)
@@ -186,6 +204,7 @@ namespace Microsoft.Build.BackEnd
                 _projectInitialTargets = data.ProjectInstance.InitialTargets;
                 _projectDefaultTargets = data.ProjectInstance.DefaultTargets;
                 _projectTargets = GetProjectTargets(data.ProjectInstance.Targets);
+                _projectEvaluationId = data.ProjectInstance.EvaluationId;
                 if (data.PropertiesToTransfer != null)
                 {
                     _transferredProperties = new List<ProjectPropertyInstance>();
@@ -211,7 +230,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="instance">The project instance.</param>
         internal BuildRequestConfiguration(int configId, ProjectInstance instance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(instance);
+            ArgumentNullException.ThrowIfNull(instance);
 
             _configId = configId;
             _projectFullPath = instance.FullPath;
@@ -223,6 +242,7 @@ namespace Microsoft.Build.BackEnd
             _projectInitialTargets = instance.InitialTargets;
             _projectDefaultTargets = instance.DefaultTargets;
             _projectTargets = GetProjectTargets(instance.Targets);
+            _projectEvaluationId = instance.EvaluationId;
             IsCacheable = false;
         }
 
@@ -231,9 +251,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BuildRequestConfiguration(int configId, BuildRequestConfiguration other)
         {
-            ErrorUtilities.VerifyThrow(configId != InvalidConfigurationId, "Configuration ID must not be invalid when using this constructor.");
-            ErrorUtilities.VerifyThrowArgumentNull(other);
-            ErrorUtilities.VerifyThrow(other._transferredState == null, "Unexpected transferred state still set on other configuration.");
+            Assumed.NotEqual(configId, InvalidConfigurationId, "Configuration ID must not be invalid when using this constructor.");
+            ArgumentNullException.ThrowIfNull(other);
+            Assumed.Null(other._transferredState, "Unexpected transferred state still set on other configuration.");
 
             _project = other._project;
             _transferredProperties = other._transferredProperties;
@@ -246,7 +266,8 @@ namespace Microsoft.Build.BackEnd
             _globalProperties = other._globalProperties;
             IsCacheable = other.IsCacheable;
             _configId = configId;
-            RequestedTargets = other.RequestedTargets;
+            _requestedTargets = other._requestedTargets;
+            _projectEvaluationId = other._projectEvaluationId;
         }
 
         /// <summary>
@@ -288,6 +309,15 @@ namespace Microsoft.Build.BackEnd
         /// Flag indicating if the configuration is cached or not.
         /// </summary>
         public bool IsCached { get; private set; }
+
+        /// <summary>
+        /// The evaluation ID for this project, persisted so it remains available even when the project is cached.
+        /// </summary>
+        public int ProjectEvaluationId
+        {
+            get => _projectEvaluationId;
+            internal set => _projectEvaluationId = value;
+        }
 
         /// <summary>
         /// Flag indicating if this configuration represents a traversal project.  Traversal projects
@@ -352,7 +382,7 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrow((_configId == InvalidConfigurationId) || (WasGeneratedByNode && (value > InvalidConfigurationId)), "Configuration ID must be invalid, or it must be less than invalid and the new config must be greater than invalid.  It was {0}, the new value was {1}.", _configId, value);
+                Assumed.True((_configId == InvalidConfigurationId) || (WasGeneratedByNode && (value > InvalidConfigurationId)), $"Configuration ID must be invalid, or it must be less than invalid and the new config must be greater than invalid.  It was {_configId}, the new value was {value}.");
                 _configId = value;
             }
         }
@@ -383,7 +413,7 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             get
             {
-                ErrorUtilities.VerifyThrow(!IsCached, "We shouldn't be accessing the ProjectInstance when the configuration is cached.");
+                Assumed.False(IsCached, "We shouldn't be accessing the ProjectInstance when the configuration is cached.");
                 return _project;
             }
 
@@ -395,7 +425,7 @@ namespace Microsoft.Build.BackEnd
                 // If we have transferred the state of a project previously, then we need to assume its items and properties.
                 if (_transferredState != null)
                 {
-                    ErrorUtilities.VerifyThrow(_transferredProperties == null, "Shouldn't be transferring entire state of ProjectInstance when transferredProperties is not null.");
+                    Assumed.Null(_transferredProperties, "Shouldn't be transferring entire state of ProjectInstance when transferredProperties is not null.");
                     _project.UpdateStateFrom(_transferredState);
                     _transferredState = null;
                 }
@@ -415,7 +445,7 @@ namespace Microsoft.Build.BackEnd
 
         private void SetProjectBasedState(ProjectInstance project)
         {
-            ErrorUtilities.VerifyThrow(project != null, "Cannot set null project.");
+            Assumed.NotNull(project, "Cannot set null project.");
             _project = project;
             _baseLookup = null;
 
@@ -424,6 +454,7 @@ namespace Microsoft.Build.BackEnd
             _projectInitialTargets = null;
             _projectTargets = null;
 
+            _projectEvaluationId = _project.EvaluationId;
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
             ProjectTargets = GetProjectTargets(_project.Targets);
@@ -444,7 +475,7 @@ namespace Microsoft.Build.BackEnd
             int submissionId,
             int nodeId)
         {
-            ErrorUtilities.VerifyThrow(!IsLoaded, "Already loaded the project for this configuration id {0}.", ConfigurationId);
+            Assumed.False(IsLoaded, $"Already loaded the project for this configuration id {ConfigurationId}.");
 
             InitializeProject(componentHost.BuildParameters, () =>
             {
@@ -521,7 +552,7 @@ namespace Microsoft.Build.BackEnd
                 _project.LateInitialize(buildParameters.ProjectRootElementCache, buildParameters.HostServices);
             }
 
-            ErrorUtilities.VerifyThrow(IsLoaded, $"This {nameof(BuildRequestConfiguration)} must be loaded at the end of this method");
+            Assumed.True(IsLoaded, $"This {nameof(BuildRequestConfiguration)} must be loaded at the end of this method");
         }
 
         internal void CreateUniqueGlobalProperty()
@@ -548,7 +579,7 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrow(_projectInitialTargets == null, "Initial targets cannot be reset once they have been set.");
+                Assumed.Null(_projectInitialTargets, "Initial targets cannot be reset once they have been set.");
                 _projectInitialTargets = value;
             }
         }
@@ -564,7 +595,7 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrow(_projectDefaultTargets == null, "Default targets cannot be reset once they have been set.");
+                Assumed.Null(_projectDefaultTargets, "Default targets cannot be reset once they have been set.");
                 _projectDefaultTargets = value;
             }
         }
@@ -579,9 +610,7 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrow(
-                    _projectTargets == null,
-                    "Targets cannot be reset once set.");
+                Assumed.Null(_projectTargets, "Targets cannot be reset once set.");
                 _projectTargets = value;
             }
         }
@@ -598,7 +627,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                ErrorUtilities.VerifyThrow(!IsCached, "Configuration is cached, we shouldn't be accessing the lookup.");
+                Assumed.False(IsCached, "Configuration is cached, we shouldn't be accessing the lookup.");
 
                 if (_baseLookup == null)
                 {
@@ -614,6 +643,48 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public Dictionary<string, int> ActivelyBuildingTargets => _activelyBuildingTargets ?? (_activelyBuildingTargets =
                                                                       new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase));
+
+        /// <summary>
+        /// Keeps the <see cref="ProjectInstance"/> in memory while the caller uses it, preventing a concurrent
+        /// memory-pressure cache sweep. Retrieves the project first if it was already cached.
+        /// </summary>
+        /// <remarks>
+        /// The usage count belongs to this configuration. A shallow clone that shares the same
+        /// <see cref="ProjectInstance"/> has independent synchronization and usage tracking.
+        /// </remarks>
+        internal ProjectInstanceUsageScope AcquireProjectInstanceUsage() => new(this);
+
+        /// <summary>
+        /// Tracks one active <see cref="ProjectInstance"/> consumer. Consume with <see langword="using"/>;
+        /// do not dispose copies.
+        /// </summary>
+        internal readonly struct ProjectInstanceUsageScope : IDisposable
+        {
+            private readonly BuildRequestConfiguration _configuration;
+
+            internal ProjectInstanceUsageScope(BuildRequestConfiguration configuration)
+            {
+                _configuration = configuration;
+
+                lock (_configuration._syncLock)
+                {
+                    _configuration.RetrieveFromCache();
+                    Assumed.False(_configuration.IsCached, "Configuration could not be retrieved before accessing the project.");
+                    _configuration._projectInstanceUsageCount++;
+                }
+            }
+
+            public void Dispose()
+            {
+                Assumed.NotNull(_configuration, "ProjectInstance usage scope was not initialized.");
+
+                lock (_configuration._syncLock)
+                {
+                    Assumed.True(_configuration._projectInstanceUsageCount > 0, "No active ProjectInstance usage to complete.");
+                    _configuration._projectInstanceUsageCount--;
+                }
+            }
+        }
 
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
@@ -701,7 +772,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_syncLock)
             {
-                if (IsActivelyBuilding || IsCached || !IsLoaded || !IsCacheable)
+                if (_projectInstanceUsageCount > 0 || IsActivelyBuilding || IsCached || !IsLoaded || !IsCacheable)
                 {
                     return;
                 }
@@ -775,15 +846,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>An array of t</returns>
         public List<(string name, TargetBuiltReason reason)> GetTargetsUsedToBuildRequest(BuildRequest request)
         {
-            ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
-            ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
-            ErrorUtilities.VerifyThrow(_projectDefaultTargets != null, "Default targets have not been set.");
+            Assumed.Equal(request.ConfigurationId, ConfigurationId, "Request does not match configuration.");
+            Assumed.NotNull(_projectInitialTargets, "Initial targets have not been set.");
+            Assumed.NotNull(_projectDefaultTargets, "Default targets have not been set.");
 
             if (request.ProxyTargets != null)
             {
-                ErrorUtilities.VerifyThrow(
-                    CollectionHelpers.SetEquivalent(request.Targets, request.ProxyTargets.ProxyTargetToRealTargetMap.Keys),
-                    "Targets must be same as proxy targets");
+                Assumed.True(CollectionHelpers.SetEquivalent(request.Targets, request.ProxyTargets.ProxyTargetToRealTargetMap.Keys), "Targets must be same as proxy targets");
             }
 
             bool hasInitialTargets = request.Targets.Count == 0 ? false : true;
@@ -819,9 +888,9 @@ namespace Microsoft.Build.BackEnd
 
         public bool ShouldSkipIsolationConstraintsForReference(string referenceFullPath)
         {
-            ErrorUtilities.VerifyThrowInternalNull(Project);
-            ErrorUtilities.VerifyThrowInternalLength(referenceFullPath, nameof(referenceFullPath));
-            ErrorUtilities.VerifyThrow(Path.IsPathRooted(referenceFullPath), "Method does not treat path normalization cases");
+            Assumed.NotNull(Project);
+            Assumed.NotNullOrEmpty(referenceFullPath);
+            Assumed.True(Path.IsPathRooted(referenceFullPath), "Method does not treat path normalization cases");
 
             if (shouldSkipStaticGraphIsolationOnReference == null)
             {
@@ -941,6 +1010,8 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _savedCurrentDirectory);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
+            translator.Translate(ref _projectEvaluationId);
+            translator.Translate(ref _requestedTargets);
 
             // if the  entire state is translated, then the transferred state represents the full evaluation data
             if (translator.Mode == TranslationDirection.ReadFromStream && _transferredState?.TranslateEntireState == true)
@@ -959,6 +1030,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectInitialTargets);
             translator.Translate(ref _projectTargets);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _projectEvaluationId);
         }
 
         /// <summary>

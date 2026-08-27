@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
@@ -61,6 +62,16 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? ServerFallbackReason { get; set; }
 
         /// <summary>
+        /// Why MSBuild server was engaged for this invocation. One of:
+        ///   "EnvVar"      — MSBUILDUSESERVER=1 was set (explicit opt-in)
+        ///   "ImpliedByMt" — this is a multithreaded (-mt) build and MSBUILDUSESERVER was unset
+        ///   null          — server was not engaged
+        /// Lets dashboards measure adoption of the implicit -mt-implies-server path separately
+        /// from the explicit env-var path.
+        /// </summary>
+        public string? ServerEnableReason { get; set; }
+
+        /// <summary>
         /// Version of MSBuild.
         /// </summary>
         public Version? BuildEngineVersion { get; set; }
@@ -72,8 +83,40 @@ namespace Microsoft.Build.Framework.Telemetry
 
         /// <summary>
         /// Path to project file.
+        /// Only the file name (no directory) is emitted in telemetry to avoid leaking PII
+        /// (usernames, directory structure) that are commonly embedded in full paths.
         /// </summary>
         public string? ProjectPath { get; set; }
+
+        /// <summary>
+        /// Well-known target names that are safe to emit in cleartext.
+        /// Custom target names could reveal project internals and are hashed.
+        /// </summary>
+        private static readonly HashSet<string> KnownTargetNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Build",
+            "Clean",
+            "Rebuild",
+            "Restore",
+            "Pack",
+            "Publish",
+            "Test",
+            "VSTest",
+            "Run",
+            "GetTargetFrameworks",
+            "GetTargetFrameworksWithPlatformForSingleTargetFramework",
+            "GetReferenceNearestTargetFrameworkTask",
+            "GetTargetPath",
+            "GetNativeManifest",
+            "ResolveAssemblyReferences",
+            "ResolveProjectReferences",
+            "CoreCompile",
+            "Compile",
+            "PrepareForBuild",
+            "GenerateBuildDependencyFile",
+            "GenerateBindingRedirects",
+            "GenerateRuntimeConfigurationFiles",
+        };
 
         /// <summary>
         /// Host in which MSBuild build was executed.
@@ -95,6 +138,12 @@ namespace Microsoft.Build.Framework.Telemetry
         /// True if Smart Application Control was enabled.
         /// </summary>
         public bool? SACEnabled { get; set; }
+
+        /// <summary>
+        /// Time in milliseconds spent waiting for a deferred coordinator node grant.
+        /// Null if no wait occurred (immediate grant or coordinator not used).
+        /// </summary>
+        public double? CoordinatorWaitDurationMs { get; set; }
 
         /// <summary>
         /// State of MSBuild server process before this build.
@@ -137,11 +186,12 @@ namespace Microsoft.Build.Framework.Telemetry
 
             AddIfNotNull(BuildEngineHost);
             AddIfNotNull(BuildSuccess);
-            AddIfNotNull(BuildTarget);
+            AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
             AddIfNotNull(BuildEngineVersion);
             AddIfNotNull(BuildCheckEnabled);
             AddIfNotNull(MultiThreadedModeEnabled);
             AddIfNotNull(SACEnabled);
+            AddIfNotNull(CoordinatorWaitDurationMs);
             AddIfNotNull(IsStandaloneExecution);
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts);
@@ -165,14 +215,16 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildEngineFrameworkName);
             AddIfNotNull(BuildEngineHost);
             AddIfNotNull(InitialMSBuildServerState);
-            AddIfNotNull(ProjectPath);
+            AddIfNotNull(ProjectPath != null ? Path.GetFileName(ProjectPath) : null, nameof(ProjectPath));
             AddIfNotNull(ServerFallbackReason);
-            AddIfNotNull(BuildTarget);
+            AddIfNotNull(ServerEnableReason);
+            AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
             AddIfNotNull(BuildEngineVersion?.ToString(), nameof(BuildEngineVersion));
             AddIfNotNull(BuildSuccess?.ToString(), nameof(BuildSuccess));
             AddIfNotNull(BuildCheckEnabled?.ToString(), nameof(BuildCheckEnabled));
             AddIfNotNull(MultiThreadedModeEnabled?.ToString(), nameof(MultiThreadedModeEnabled));
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
+            AddIfNotNull(CoordinatorWaitDurationMs?.ToString(CultureInfo.InvariantCulture), nameof(CoordinatorWaitDurationMs));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts?.ToString(), nameof(ErrorCounts));
@@ -199,6 +251,34 @@ namespace Microsoft.Build.Framework.Telemetry
                     properties[key] = value;
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the build target name if it is a well-known target, otherwise returns a SHA-256 hash.
+        /// This prevents custom target names (which could reveal proprietary project details) from being
+        /// sent in cleartext telemetry.
+        /// BuildTarget may be a comma-separated list of target names (e.g., "Build,Clean"),
+        /// so each target is sanitized individually.
+        /// </summary>
+        internal static string? SanitizeBuildTarget(string? buildTarget)
+        {
+            if (buildTarget is null)
+            {
+                return null;
+            }
+
+            // BuildTarget can be a comma-separated list (set via string.Join(",", targetNames)).
+            // Split, sanitize each target individually, and rejoin.
+            string[] targets = buildTarget.Split(',');
+            for (int i = 0; i < targets.Length; i++)
+            {
+                string target = targets[i].Trim();
+                targets[i] = KnownTargetNames.Contains(target)
+                    ? target
+                    : TelemetryDataUtils.GetHashed(target);
+            }
+
+            return string.Join(",", targets);
         }
     }
 }

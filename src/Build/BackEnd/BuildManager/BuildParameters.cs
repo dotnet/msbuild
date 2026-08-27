@@ -10,10 +10,10 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The startup directory.
         /// </summary>
-        private static string s_startupDirectory = NativeMethodsShared.GetCurrentDirectory();
+        private static string s_startupDirectory = Environment.CurrentDirectory;
 
         /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.
@@ -237,6 +237,12 @@ namespace Microsoft.Build.Execution
         private bool _reportFileAccesses;
 
         /// <summary>
+        /// The configuration for allowed unknown attributes/elements during parsing.
+        /// Loaded on the main node and serialized to worker nodes.
+        /// </summary>
+        private ParserIgnoreConfiguration _ParserIgnoreConfiguration = ParserIgnoreConfiguration.Empty;
+
+        /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
         public BuildParameters()
@@ -250,7 +256,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">The ProjectCollection from which the BuildParameters should populate itself.</param>
         public BuildParameters(ProjectCollection projectCollection)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             Initialize(new PropertyDictionary<ProjectPropertyInstance>(projectCollection.EnvironmentProperties), projectCollection.ProjectRootElementCache, new ToolsetProvider(projectCollection.Toolsets));
 
@@ -262,6 +268,7 @@ namespace Microsoft.Build.Execution
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
             _propertiesFromCommandLine = projectCollection.PropertiesFromCommandLine;
+            _ParserIgnoreConfiguration = projectCollection.ParserIgnoreConfiguration;
         }
 
         /// <summary>
@@ -277,7 +284,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal BuildParameters(BuildParameters other, bool resetEnvironment = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(other);
+            Assumed.NotNull(other);
 
             _buildId = other._buildId;
             _culture = other._culture;
@@ -330,6 +337,7 @@ namespace Microsoft.Build.Execution
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
+            _ParserIgnoreConfiguration = other._ParserIgnoreConfiguration;
         }
 
         /// <summary>
@@ -361,6 +369,22 @@ namespace Microsoft.Build.Execution
         /// Gets the environment variables which were set when this build was created.
         /// </summary>
         public IDictionary<string, string> BuildProcessEnvironment => BuildProcessEnvironmentInternal;
+
+        internal void SetBuildProcessEnvironmentVariable(string name, string value)
+        {
+            Dictionary<string, string> environment = new(BuildProcessEnvironmentInternal, CommunicationsUtilities.EnvironmentVariableComparer);
+
+            if (value is null)
+            {
+                environment.Remove(name);
+            }
+            else
+            {
+                environment[name] = value;
+            }
+
+            _buildProcessEnvironment = environment.ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
+        }
 
         /// <summary>
         /// The name of the culture to use during the build.
@@ -651,38 +675,38 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the internal msbuild thread stack size.
         /// </summary>
-        internal static int ThreadStackSize => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDTHREADSTACKSIZE", DefaultThreadStackSize);
+        internal static int ThreadStackSize
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDTHREADSTACKSIZE", DefaultThreadStackSize);
 
         /// <summary>
         /// Gets the endpoint shutdown timeout.
         /// </summary>
-        internal static int EndpointShutdownTimeout => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDENDPOINTSHUTDOWNTIMEOUT", DefaultEndpointShutdownTimeout);
+        internal static int EndpointShutdownTimeout
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDENDPOINTSHUTDOWNTIMEOUT", DefaultEndpointShutdownTimeout);
 
         /// <summary>
         /// Gets or sets the engine shutdown timeout.
         /// </summary>
-        internal static int EngineShutdownTimeout => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDENGINESHUTDOWNTIMEOUT", DefaultEngineShutdownTimeout);
+        internal static int EngineShutdownTimeout
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDENGINESHUTDOWNTIMEOUT", DefaultEngineShutdownTimeout);
 
         /// <summary>
         /// Gets the maximum number of idle request builders to retain.
         /// </summary>
-        internal static int IdleRequestBuilderLimit => GetStaticIntVariableOrDefault("MSBUILDIDLEREQUESTBUILDERLIMIT",
-            ref s_idleRequestBuilderLimit, DefaultIdleRequestBuilderLimit);
+        internal static int IdleRequestBuilderLimit
+            => s_idleRequestBuilderLimit ??= EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDIDLEREQUESTBUILDERLIMIT", DefaultIdleRequestBuilderLimit);
 
         /// <summary>
         /// Gets the logging thread shutdown timeout.
         /// </summary>
-        internal static int LoggingThreadShutdownTimeout => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDLOGGINGTHREADSHUTDOWNTIMEOUT", DefaultLoggingThreadShutdownTimeout);
+        internal static int LoggingThreadShutdownTimeout
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDLOGGINGTHREADSHUTDOWNTIMEOUT", DefaultLoggingThreadShutdownTimeout);
 
         /// <summary>
         /// Gets the request builder shutdown timeout.
         /// </summary>
-        internal static int RequestBuilderShutdownTimeout => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDREQUESTBUILDERSHUTDOWNTIMEOUT", DefaultRequestBuilderShutdownTimeout);
+        internal static int RequestBuilderShutdownTimeout
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDREQUESTBUILDERSHUTDOWNTIMEOUT", DefaultRequestBuilderShutdownTimeout);
 
         /// <summary>
         /// Gets the startup directory.
@@ -700,37 +724,35 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Indicates whether the build plan is enabled or not.
         /// </summary>
-        internal static bool EnableBuildPlan => GetStaticBoolVariableOrDefault("MSBUILDENABLEBUILDPLAN",
-            ref s_enableBuildPlan, false);
+        internal static bool EnableBuildPlan
+            => s_enableBuildPlan ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDENABLEBUILDPLAN", false);
 
         /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.
         /// </summary>
         internal static bool WarnOnUninitializedProperty
         {
-            get => GetStaticBoolVariableOrDefault("MSBUILDWARNONUNINITIALIZEDPROPERTY",
-                ref s_warnOnUninitializedProperty, false);
-
+            get => s_warnOnUninitializedProperty ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDWARNONUNINITIALIZEDPROPERTY", false);
             set => s_warnOnUninitializedProperty = value;
         }
 
         /// <summary>
         /// Indicates whether we should dump string interning stats
         /// </summary>
-        internal static bool DumpOpportunisticInternStats => GetStaticBoolVariableOrDefault(
-            "MSBUILDDUMPOPPORTUNISTICINTERNSTATS", ref s_dumpStringInterningStats, false);
+        internal static bool DumpOpportunisticInternStats
+            => s_dumpStringInterningStats ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDDUMPOPPORTUNISTICINTERNSTATS", false);
 
         /// <summary>
         /// Indicates whether we should dump debugging information about the expander
         /// </summary>
-        internal static bool DebugExpansion => GetStaticBoolVariableOrDefault("MSBUILDDEBUGEXPANSION",
-            ref s_debugExpansion, false);
+        internal static bool DebugExpansion
+            => s_debugExpansion ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDDEBUGEXPANSION", false);
 
         /// <summary>
         /// Indicates whether we should keep duplicate target outputs
         /// </summary>
-        internal static bool KeepDuplicateOutputs => GetStaticBoolVariableOrDefault("MSBUILDKEEPDUPLICATEOUTPUTS",
-            ref s_keepDuplicateOutputs, false);
+        internal static bool KeepDuplicateOutputs
+            => s_keepDuplicateOutputs ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDKEEPDUPLICATEOUTPUTS", false);
 
         /// <summary>
         /// Gets or sets the build id.
@@ -757,7 +779,7 @@ namespace Microsoft.Build.Execution
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "EnvironmentPropertiesInternal");
+                Assumed.NotNull(value, valueExpression: "EnvironmentPropertiesInternal");
                 _environmentProperties = value;
             }
         }
@@ -806,6 +828,16 @@ namespace Microsoft.Build.Execution
         {
             get => _projectLoadSettings;
             set => _projectLoadSettings = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
+        /// When set, this configuration is used for parsing and evaluation.
+        /// </summary>
+        internal ParserIgnoreConfiguration ParserIgnoreConfiguration
+        {
+            get => _ParserIgnoreConfiguration;
+            set => _ParserIgnoreConfiguration = value;
         }
 
         /// <summary>
@@ -980,6 +1012,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
+            translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.
@@ -1000,40 +1033,6 @@ namespace Microsoft.Build.Execution
         }
 
         #endregion
-
-        /// <summary>
-        /// Gets the value of a boolean environment setting which is not expected to change.
-        /// </summary>
-        private static bool GetStaticBoolVariableOrDefault(string environmentVariable, ref bool? backing, bool @default)
-        {
-            if (!backing.HasValue)
-            {
-                backing = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable(environmentVariable)) || @default;
-            }
-
-            return backing.Value;
-        }
-
-        /// <summary>
-        /// Gets the value of an integer environment variable, or returns the default if none is set or it cannot be converted.
-        /// </summary>
-        private static int GetStaticIntVariableOrDefault(string environmentVariable, ref int? backingValue, int defaultValue)
-        {
-            if (!backingValue.HasValue)
-            {
-                string environmentValue = Environment.GetEnvironmentVariable(environmentVariable);
-                if (String.IsNullOrEmpty(environmentValue))
-                {
-                    backingValue = defaultValue;
-                }
-                else
-                {
-                    backingValue = Int32.TryParse(environmentValue, out var parsedValue) ? parsedValue : defaultValue;
-                }
-            }
-
-            return backingValue.Value;
-        }
 
         /// <summary>
         /// Centralization of the common parts of construction.

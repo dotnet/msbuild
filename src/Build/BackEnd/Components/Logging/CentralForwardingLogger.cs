@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -78,7 +77,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">EventSource is null</exception>
         public void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrow(eventSource != null, "eventSource is null");
+            Assumed.NotNull(eventSource, "eventSource is null");
             eventSource.AnyEventRaised += EventSource_AnyEventRaised;
 
             IEventSource2 eventSource2 = eventSource as IEventSource2;

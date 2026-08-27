@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -291,7 +292,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths to redist lists under given framework directory.</returns>
         public static string[] GetRedistListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
+            ArgumentNullException.ThrowIfNull(frameworkDirectory);
 
             lock (s_locker)
             {
@@ -429,7 +430,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool FrameworkAssemblyEntryInRedist(AssemblyNameExtension assemblyName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
+            ArgumentNullException.ThrowIfNull(assemblyName);
 
             if (!_assemblyNameInRedist.TryGetValue(assemblyName, out bool isAssemblyNameInRedist))
             {
@@ -620,8 +621,8 @@ namespace Microsoft.Build.Tasks
                         if (allowListErrors.Count == errorsBeforeReadCall)
                         {
                             // The allowList errors passes back problems reading the redist file through the use of an array containing exceptions
-                            allowListErrors.Add(new Exception(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", info.Path)));
-                            allowListErrorFileNames.Add(info.Path);
+                            allowListErrors.Add(new Exception(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", info.Path.OriginalValue)));
+                            allowListErrorFileNames.Add(info.Path.OriginalValue);
                         }
                     }
                 }
@@ -688,7 +689,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Redist name of the redist list just read in</returns>
         internal static string ReadFile(AssemblyTableInfo assemblyTableInfo, List<AssemblyEntry> assembliesList, List<Exception> errorsList, List<string> errorFilenamesList, List<AssemblyRemapping> remapEntries)
         {
-            string path = assemblyTableInfo.Path;
+            string path = assemblyTableInfo.Path.Value;
             string redistName = null;
             XmlReader reader = null;
 
@@ -977,17 +978,36 @@ namespace Microsoft.Build.Tasks
     {
         private string _descriptor;
 
-        internal AssemblyTableInfo(string path, string frameworkDirectory)
+        /// <summary>
+        /// Creates an <see cref="AssemblyTableInfo"/> from a potentially relative path,
+        /// absolutizing it and canonicalizing it if possible using the provided <paramref name="taskEnvironment"/>.
+        /// </summary>
+        /// <param name="path">Path to the assembly table file (can be relative).</param>
+        /// <param name="frameworkDirectory">Framework directory path.</param>
+        /// <param name="taskEnvironment">TaskEnvironment for path conversion.</param>
+        /// <param name="log">Logger for diagnostic messages when canonicalization fails.</param>
+        internal static AssemblyTableInfo CreateFromRelativePath(string path, string frameworkDirectory, TaskEnvironment taskEnvironment, TaskLoggingHelper log)
         {
-            Path = FileUtilities.NormalizeForPathComparison(path);
+            AbsolutePath canonicalPath = taskEnvironment.GetAbsolutePath(FileUtilities.NormalizeForPathComparison(path)).GetCanonicalFormNoThrow(log);
+            return new AssemblyTableInfo(canonicalPath, FileUtilities.NormalizeForPathComparison(frameworkDirectory));
+        }
+
+        /// <summary>
+        /// Constructor that expects absolute paths. Use this when paths are already fully qualified.
+        /// </summary>
+        /// <param name="absolutePath">Absolute path to the assembly table file</param>
+        /// <param name="frameworkDirectory">Framework directory path</param>
+        internal AssemblyTableInfo(string absolutePath, string frameworkDirectory)
+        {
+            Path = new AbsolutePath(FileUtilities.NormalizeForPathComparison(absolutePath));
             FrameworkDirectory = FileUtilities.NormalizeForPathComparison(frameworkDirectory);
         }
 
-        internal string Path { get; }
+        internal AbsolutePath Path { get; }
 
         internal string FrameworkDirectory { get; }
 
-        internal string Descriptor => _descriptor ?? (_descriptor = Path + FrameworkDirectory);
+        internal string Descriptor => _descriptor ?? (_descriptor = Path.Value + FrameworkDirectory);
 
         public int CompareTo(object obj)
         {
@@ -1031,7 +1051,7 @@ namespace Microsoft.Build.Tasks
         /// found in the target framework directories. This can happen if the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor);
+            ArgumentNullException.ThrowIfNull(subsetToSearchFor);
             _subsetToSearchFor = subsetToSearchFor;
         }
 
@@ -1055,7 +1075,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths locations to subset lists under the given framework directory.</returns>
         public string[] GetSubsetListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
+            ArgumentNullException.ThrowIfNull(frameworkDirectory);
 
             // Make sure we have some subset names to search for it is possible that no subsets are asked for
             // so we should return as quickly as possible in that case.

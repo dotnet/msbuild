@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -107,14 +108,16 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool()
         {
             string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
-                SdkToolsPathUtility.FileInfoExists,
+                f => !string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                    : SdkToolsPathUtility.FileInfoExists(f),
                 Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
                 SdkToolsPath,
                 ToolName,
                 Log,
                 true);
 
-            return pathToTool;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
 
         /// <summary>
@@ -123,10 +126,8 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if parameters are valid</returns>
         protected override bool ValidateParameters()
         {
-            // Verify that a path for the tool exists -- if the tool doesn't exist in it
-            // we'll worry about that later
-            if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(ToolPath)) &&
-                (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(SdkToolsPath)))
+            if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(ToolPath))) &&
+                (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(SdkToolsPath))))
             {
                 Log.LogErrorWithCodeFromResources("AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                 return false;
@@ -155,6 +156,7 @@ namespace Microsoft.Build.Tasks
             // throw an error.
             //
             // So use /publickey if that's all our KeyFile contains, but KeyFile otherwise.
+            // Relative paths are allowed in the KeyFile path.
             if (_delaySigningAndKeyFileOnlyContainsPublicKey)
             {
                 commandLine.AppendSwitchIfNotNull("/publickey:", KeyFile);
@@ -175,12 +177,16 @@ namespace Microsoft.Build.Tasks
         private bool ValidateStrongNameParameters()
         {
             bool keyFileExists = false;
+            AbsolutePath keyFileForRead = default;
 
             // Make sure that if KeyFile is defined, it's a real file.
             if (!String.IsNullOrEmpty(KeyFile))
             {
-                if (FileSystems.Default.FileExists(KeyFile))
+                AbsolutePath absolutePathFromKeyFile = TaskEnvironment.GetAbsolutePath(KeyFile);
+
+                if (FileSystems.Default.FileExists(absolutePathFromKeyFile))
                 {
+                    keyFileForRead = absolutePathFromKeyFile;
                     keyFileExists = true;
                 }
                 else
@@ -216,7 +222,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    StrongNameUtils.GetStrongNameKey(Log, KeyFile, KeyContainer, out keyPair, out publicKey);
+                    StrongNameUtils.GetStrongNameKey(Log, keyFileForRead, KeyContainer, out keyPair, out publicKey);
                 }
                 catch (StrongNameException e)
                 {

@@ -10,11 +10,12 @@ using System.IO;
 using System.Resources;
 using System.Text;
 #if FEATURE_APPDOMAIN
-using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
+using System.Runtime.Remoting.Lifetime;
 #endif
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -49,7 +50,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="taskInstance">task containing an instance of this class</param>
         public TaskLoggingHelper(ITask taskInstance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskInstance);
+            ArgumentNullException.ThrowIfNull(taskInstance);
             _taskInstance = taskInstance;
             TaskName = taskInstance.GetType().Name;
         }
@@ -59,8 +60,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TaskLoggingHelper(IBuildEngine buildEngine, string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildEngine);
-            ErrorUtilities.VerifyThrowArgumentLength(taskName);
+            ArgumentNullException.ThrowIfNull(buildEngine);
+            ArgumentException.ThrowIfNullOrEmpty(taskName);
             TaskName = taskName;
             _buildEngine = buildEngine;
         }
@@ -178,11 +179,15 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public string ExtractMessageCode(string message, out string messageWithoutCodePrefix)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
-            messageWithoutCodePrefix = ResourceUtilities.ExtractMessageCode(false /* any code */, message, out string code);
+            if (MessageParser.TryParseAnyCode(message, out string code, out messageWithoutCodePrefix))
+            {
+                return code;
+            }
 
-            return code;
+            messageWithoutCodePrefix = message;
+            return null;
         }
 
         /// <summary>
@@ -202,12 +207,12 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="InvalidOperationException">Thrown when the <c>TaskResources</c> property of the owner task is not set.</exception>
         public virtual string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName);
-            ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
+            ArgumentNullException.ThrowIfNull(resourceName);
+            ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "TaskResourcesNotRegistered", TaskName);
 
             string resourceString = TaskResources.GetString(resourceName, CultureInfo.CurrentUICulture);
 
-            ErrorUtilities.VerifyThrowArgument(resourceString != null, "Shared.TaskResourceNotFound", resourceName, TaskName);
+            ErrorUtilities.VerifyThrowArgument(resourceString != null, "TaskResourceNotFound", resourceName, TaskName);
 
             return FormatString(resourceString, args);
         }
@@ -222,9 +227,9 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>unformatted</c> is null.</exception>
         public virtual string FormatString([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string unformatted, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(unformatted);
+            ArgumentNullException.ThrowIfNull(unformatted);
 
-            return ResourceUtilities.FormatString(unformatted, args);
+            return MessageFormatter.Format(unformatted, args);
         }
 
         /// <summary>
@@ -291,12 +296,12 @@ namespace Microsoft.Build.Utilities
         public void LogMessage(MessageImportance importance, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message, params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 #if DEBUG
             if (messageArgs?.Length > 0)
             {
                 // Verify that message can be formatted using given arguments
-                ResourceUtilities.FormatString(message, messageArgs);
+                MessageFormatter.Format(message, messageArgs);
             }
 #endif
             if (!LogsMessagesOfImportance(importance))
@@ -322,12 +327,12 @@ namespace Microsoft.Build.Utilities
             }
 
             BuildEngine.LogMessageEvent(e);
+
 #if DEBUG
-            // Assert that the message does not contain an error code.  Only errors and warnings
-            // should have error codes.
-            string errorCode;
-            ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, message, out errorCode);
-            ErrorUtilities.VerifyThrow(errorCode == null, "This message contains an error code (" + errorCode + "), yet it was logged as a regular message: " + message);
+            // Assert that the message does not contain an error code.  Only errors and warnings should have error codes.
+            Assumed.False(
+                MessageParser.TryGetMSBuildCode(message, out string code),
+                $"This message contains an error code ({code}), yet it was logged as a regular message: {message}");
 #endif
         }
 
@@ -361,7 +366,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             if (!LogsMessagesOfImportance(importance))
             {
@@ -423,7 +428,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -487,7 +492,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             if (!LogsMessagesOfImportance(importance))
             {
@@ -495,12 +500,13 @@ namespace Microsoft.Build.Utilities
             }
 
             LogMessage(importance, GetResourceMessage(messageResourceName), messageArgs);
+
 #if DEBUG
-            // Assert that the message does not contain an error code.  Only errors and warnings
-            // should have error codes.
-            string errorCode;
-            ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, FormatResourceString(messageResourceName, messageArgs), out errorCode);
-            ErrorUtilities.VerifyThrow(errorCode == null, errorCode, FormatResourceString(messageResourceName, messageArgs));
+            // Assert that the message does not contain an error code.  Only errors and warnings should have error codes.
+            string message = FormatResourceString(messageResourceName, messageArgs);
+            Assumed.False(
+                MessageParser.TryGetMSBuildCode(message, out string code),
+                $"This message contains an error code ({code}), yet it was logged as a regular message: {message}");
 #endif
         }
 
@@ -511,8 +517,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="content">The content of the file.</param>
         public void LogIncludeGeneratedFile(string filePath, string content)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(filePath);
-            ErrorUtilities.VerifyThrowArgumentNull(content);
+            ArgumentNullException.ThrowIfNull(filePath);
+            ArgumentNullException.ThrowIfNull(content);
 
             var e = new GeneratedFileUsedEventArgs(filePath, content);
 
@@ -602,7 +608,7 @@ namespace Microsoft.Build.Utilities
         public void LogCommandLine(MessageImportance importance, string commandLine)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(commandLine);
+            ArgumentNullException.ThrowIfNull(commandLine);
 
             if (!LogsMessagesOfImportance(importance))
             {
@@ -698,7 +704,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -775,7 +781,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             string subcategory = null;
 
@@ -784,15 +790,16 @@ namespace Microsoft.Build.Utilities
                 subcategory = FormatResourceString(subcategoryResourceName);
             }
 
+            string message = FormatResourceString(messageResourceName, messageArgs);
+
 #if DEBUG
             // If the message does have a message code, LogErrorWithCodeFromResources
             // should have been called instead, so that the errorCode field gets populated.
             // Check this only in debug, to avoid the cost of attempting to extract a
             // message code when there probably isn't one.
-            string messageCode;
-            string throwAwayMessageBody = ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, FormatResourceString(messageResourceName, messageArgs), out messageCode);
-
-            ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(messageCode), "Called LogErrorFromResources instead of LogErrorWithCodeFromResources, but message '" + throwAwayMessageBody + "' does have an error code '" + messageCode + "'");
+            Assumed.False(
+                MessageParser.TryGetMSBuildCode(message, out string code),
+                $"Called {nameof(LogErrorFromResources)} instead of {nameof(LogErrorWithCodeFromResources)}, but message '{message}' does have an error code '{code}'");
 #endif
 
             LogError(
@@ -804,7 +811,7 @@ namespace Microsoft.Build.Utilities
                 columnNumber,
                 endLineNumber,
                 endColumnNumber,
-                FormatResourceString(messageResourceName, messageArgs));
+                message);
         }
 
         /// <summary>
@@ -858,7 +865,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             string subcategory = null;
 
@@ -867,7 +874,12 @@ namespace Microsoft.Build.Utilities
                 subcategory = FormatResourceString(subcategoryResourceName);
             }
 
-            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, FormatResourceString(messageResourceName, messageArgs), out string errorCode);
+            string message = FormatResourceString(messageResourceName, messageArgs);
+
+            if (MessageParser.TryParseAnyCode(message, out string errorCode, out string strippedMessage))
+            {
+                message = strippedMessage;
+            }
 
             string helpKeyword = null;
 
@@ -926,7 +938,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(exception);
+            ArgumentNullException.ThrowIfNull(exception);
 
             // For an AggregateException call LogErrorFromException on each inner exception
             if (exception is AggregateException aggregateException)
@@ -1020,7 +1032,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -1116,7 +1128,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             string subcategory = null;
 
@@ -1125,13 +1137,16 @@ namespace Microsoft.Build.Utilities
                 subcategory = FormatResourceString(subcategoryResourceName);
             }
 
+            string message = FormatResourceString(messageResourceName, messageArgs);
+
 #if DEBUG
             // If the message does have a message code, LogWarningWithCodeFromResources
             // should have been called instead, so that the errorCode field gets populated.
             // Check this only in debug, to avoid the cost of attempting to extract a
             // message code when there probably isn't one.
-            string throwAwayMessageBody = ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, FormatResourceString(messageResourceName, messageArgs), out string messageCode);
-            ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(messageCode), "Called LogWarningFromResources instead of LogWarningWithCodeFromResources, but message '" + throwAwayMessageBody + "' does have an error code '" + messageCode + "'");
+            Assumed.False(
+                MessageParser.TryGetMSBuildCode(message, out string code),
+                $"Called {nameof(LogWarningFromResources)} instead of {nameof(LogWarningWithCodeFromResources)}, but message '{message}' does have an error code '{code}'");
 #endif
 
             LogWarning(
@@ -1143,7 +1158,7 @@ namespace Microsoft.Build.Utilities
                 columnNumber,
                 endLineNumber,
                 endColumnNumber,
-                FormatResourceString(messageResourceName, messageArgs));
+                message);
         }
 
         /// <summary>
@@ -1197,7 +1212,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             string subcategory = null;
 
@@ -1206,7 +1221,12 @@ namespace Microsoft.Build.Utilities
                 subcategory = FormatResourceString(subcategoryResourceName);
             }
 
-            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, FormatResourceString(messageResourceName, messageArgs), out string warningCode);
+            string message = FormatResourceString(messageResourceName, messageArgs);
+
+            if (MessageParser.TryParseAnyCode(message, out string warningCode, out string strippedMessage))
+            {
+                message = strippedMessage;
+            }
 
             string helpKeyword = null;
 
@@ -1249,7 +1269,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(exception);
+            ArgumentNullException.ThrowIfNull(exception);
 
             string message = exception.Message;
 
@@ -1291,7 +1311,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(fileName);
+            ArgumentNullException.ThrowIfNull(fileName);
 
             bool errorsFound;
 
@@ -1318,7 +1338,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(stream);
+            ArgumentNullException.ThrowIfNull(stream);
 
             bool errorsFound = false;
             string lineOfText;
@@ -1346,7 +1366,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(lineOfText);
+            ArgumentNullException.ThrowIfNull(lineOfText);
 
             bool isError = false;
             CanonicalError.Parts messageParts = CanonicalError.Parse(lineOfText);
@@ -1404,7 +1424,7 @@ namespace Microsoft.Build.Utilities
                         }
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Impossible canonical part.");
+                        InternalError.Throw("Impossible canonical part.");
                         break;
                 }
             }
@@ -1546,8 +1566,8 @@ namespace Microsoft.Build.Utilities
             string messageResourceName,
             params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(exception);
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(exception);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             if (exception is AggregateException aggregateException)
             {
@@ -1559,7 +1579,7 @@ namespace Microsoft.Build.Utilities
             }
 
             string formattedResourceMessage = FormatResourceString(messageResourceName, messageArgs);
-            ResourceUtilities.ExtractMessageCode(false /* all codes */, formattedResourceMessage, out string errorCode);
+            MessageParser.TryGetAnyCode(formattedResourceMessage, out string errorCode);
             string helpKeyword = HelpKeywordPrefix != null ? HelpKeywordPrefix + messageResourceName : null;
             string message = GetFormattedExceptionDetails(exception, showStackTrace, showDetail);
 

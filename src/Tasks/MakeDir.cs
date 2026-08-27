@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -22,7 +21,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_directories, nameof(Directories));
+                ArgumentNullException.ThrowIfNull(_directories, nameof(Directories));
                 return _directories;
             }
 
@@ -35,7 +34,7 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         private ITaskItem[] _directories;
 
@@ -63,7 +62,7 @@ namespace Microsoft.Build.Tasks
                         // For speed, eliminate duplicates caused by poor targets authoring, don't absolutize yet to save allocation
                         if (!directoriesSet.Contains(directory.ItemSpec))
                         {
-                            absolutePath = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(directory.ItemSpec));
+                            absolutePath = TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(directory.ItemSpec));
                             // Only log a message if we actually need to create the folder
                             if (!FileUtilities.DirectoryExistsNoThrow(absolutePath))
                             {

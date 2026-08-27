@@ -214,10 +214,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
-            ErrorUtilities.VerifyThrowArgumentLength(toolsPath);
-            ErrorUtilities.VerifyThrowArgumentNull(environmentProperties);
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
+            ArgumentException.ThrowIfNullOrEmpty(toolsPath);
+            ArgumentNullException.ThrowIfNull(environmentProperties);
+            ArgumentNullException.ThrowIfNull(globalProperties);
 
             _toolsVersion = toolsVersion;
             this.ToolsPath = toolsPath;
@@ -294,8 +294,8 @@ namespace Microsoft.Build.Evaluation
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, ProjectCollection projectCollection, DirectoryGetFiles getFiles, LoadXmlFromPath loadXmlFromPath, string msbuildOverrideTasksPath, DirectoryExists directoryExists)
             : this(toolsVersion, toolsPath, buildProperties, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, null, msbuildOverrideTasksPath, null)
         {
-            ErrorUtilities.VerifyThrowInternalNull(getFiles);
-            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath);
+            Assumed.NotNull(getFiles);
+            Assumed.NotNull(loadXmlFromPath);
 
             _directoryExists = directoryExists;
             _getFiles = getFiles;
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Evaluation
                 // technically hurt anything, but it doesn't look nice.)
                 string toolsPathToUse = value;
 
-                if (FrameworkFileUtilities.EndsWithSlash(toolsPathToUse))
+                if (FileUtilities.EndsWithSlash(toolsPathToUse))
                 {
                     string rootPath = Path.GetPathRoot(Path.GetFullPath(toolsPathToUse));
 

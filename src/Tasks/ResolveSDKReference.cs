@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(SDKReferences));
+                ArgumentNullException.ThrowIfNull(value, nameof(SDKReferences));
                 _sdkReferences = value;
             }
         }
@@ -141,7 +141,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(InstalledSDKs));
+                ArgumentNullException.ThrowIfNull(value, nameof(InstalledSDKs));
                 _installedSDKs = value;
             }
         }
@@ -730,9 +730,9 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public SDKReference(ITaskItem taskItem, string sdkName, string sdkVersion)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(taskItem);
-                ErrorUtilities.VerifyThrowArgumentLength(sdkName);
-                ErrorUtilities.VerifyThrowArgumentLength(sdkVersion);
+                ArgumentNullException.ThrowIfNull(taskItem);
+                ArgumentException.ThrowIfNullOrEmpty(sdkName);
+                ArgumentException.ThrowIfNullOrEmpty(sdkVersion);
 
                 ReferenceItem = taskItem;
                 SimpleName = sdkName;
@@ -916,7 +916,7 @@ namespace Microsoft.Build.Tasks
                     _prefer32BitFromProject = prefer32Bit;
 
                     // There must be a trailing slash or else the ExpandSDKReferenceAssemblies will not work.
-                    ResolvedPath = FrameworkFileUtilities.EnsureTrailingSlash(sdk.ItemSpec);
+                    ResolvedPath = FileUtilities.EnsureTrailingSlash(sdk.ItemSpec);
 
                     System.Version.TryParse(sdk.GetMetadata(SDKPlatformVersion), out Version targetPlatformVersionFromItem);
 

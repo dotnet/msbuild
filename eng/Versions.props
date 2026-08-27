@@ -3,31 +3,30 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.5.0</VersionPrefix>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
+    <VersionPrefix>18.12.0</VersionPrefix>
+    <PreReleaseVersionLabel>1</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">$(PreReleaseVersionLabel)-test</PreReleaseVersionLabel>
+    <PackageValidationBaselineVersion>18.11.0-1.26426.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
-    <!-- differentiate experimental insertions to avoid package id conflicts, 
-     it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
-    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <!--
       Don't use shipping versions when building in the VMR unless the VMR directs the build to use shipping versions.
       This can cause issues when building downstream repos in the orchestrated build if the time MSBuild
       is built crosses a UTC date boundary.
     -->
     <DotNetUseShippingVersions Condition="'$(DotNetBuildFromVMR)' != 'true'">true</DotNetUseShippingVersions>
-    <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
-    <SemanticVersioningV1>true</SemanticVersioningV1>
-    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
 
   <!-- Arcade features -->
   <PropertyGroup>
-    <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
-    <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
+    <UsingToolIbcOptimization Condition="'$(DotNetBuild)' != 'true'">true</UsingToolIbcOptimization>
+    <UsingToolVisualStudioIbcTraining Condition="'$(DotNetBuild)' != 'true'">true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
+    <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
+
+    <!-- Tools.csproj's SwixBuild PackageReference reads this exact property name; MicroBuildPluginsSwixBuildVersion (no Microsoft/VisualStudioEng prefix) is a different, unused property. -->
+    <MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>1.1.973</MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
 
   <!-- Production Dependencies -->
@@ -51,37 +50,28 @@
     <SystemMemoryVersion>4.6.3</SystemMemoryVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.1.2</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemThreadingTasksExtensionsVersion>4.6.3</SystemThreadingTasksExtensionsVersion>
-    <SystemValueTupleVersion>4.6.1</SystemValueTupleVersion>
+    <SystemValueTupleVersion>4.6.2</SystemValueTupleVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <!-- dotnet/runtime packages -->
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
-  </PropertyGroup>
 
-  <PropertyGroup>
     <MicrosoftVisualStudioTelemetryVersion>17.14.18</MicrosoftVisualStudioTelemetryVersion>
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
-  </PropertyGroup>
 
-  <!-- Toolset Dependencies -->
-  <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
-  </PropertyGroup>
 
-  <PropertyGroup>
     <!-- These are manually updated since they are text-only source packages and can't be
        overridden in source-build, see https://github.com/dotnet/msbuild/issues/6960.
-       When updating the version make sure to add the new version to source-build-reference-packages first. -->
+       When updating the version make sure to add the new version to source-build-assets first. -->
     <MicrosoftCodeAnalysisCollectionsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftCodeAnalysisContractsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisContractsVersion>
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
-  </PropertyGroup>
 
-  <PropertyGroup>
-    <BootstrapSdkVersion>10.0.103</BootstrapSdkVersion>
+    <BootstrapSdkVersion>11.0.100-rc.1.26420.103</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
@@ -92,7 +82,7 @@
          not ok for MSBuild because we have a fixed AssemblyVersion for
          compat (15.1.0.0), but varied FileVersion, which is user-visible
          via $(MSBuildVersion) and msbuild -version.
-
+  
          So: we want this to match the NuGet package version and also the
          AssemblyInformationalVersion. Jump through hoops to do so.
          -->
@@ -102,4 +92,3 @@
   </Target>
 
 </Project>
-

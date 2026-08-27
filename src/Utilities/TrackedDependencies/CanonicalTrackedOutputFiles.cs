@@ -110,7 +110,7 @@ namespace Microsoft.Build.Utilities
 
             // Record the current directory (which under normal circumstances will be the project directory)
             // so that we can compare tracked paths against it for inclusion in the dependency graph
-            string currentProjectDirectory = FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory());
+            string currentProjectDirectory = FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory());
 
             if (!_tlogAvailable)
             {
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>An array of the rooting markers that were removed.</returns>
         public string[] RemoveRootsWithSharedOutputs(ITaskItem[] sources)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources);
+            ArgumentNullException.ThrowIfNull(sources);
 
             var removedMarkers = new List<string>();
             string currentRoot = FileTracker.FormatRootingMarker(sources);

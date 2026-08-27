@@ -80,7 +80,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     {
                         SdkResolverManifest manifest = ParseSdkResolverElement(reader, filePath);
 
-                        manifest.Path = FrameworkFileUtilities.FixFilePath(manifest.Path);
+                        manifest.Path = FileUtilities.FixFilePath(manifest.Path);
                         if (!System.IO.Path.IsPathRooted(manifest.Path))
                         {
                             manifest.Path = System.IO.Path.Combine(manifestFolder, manifest.Path);
@@ -130,7 +130,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                                     }
                                     catch (ArgumentException ex)
                                     {
-                                        ErrorUtilities.ThrowInternalError("A regular expression parsing error occurred while parsing {0}.", ex, filePath);
+                                        InternalError.Throw($"A regular expression parsing error occurred while parsing {filePath}.", ex);
                                     }
                                     break;
                                 default:

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_FILE_TRACKER
@@ -79,23 +79,23 @@ namespace Microsoft.Build.Utilities
         /// This must be the base system-wide temp path because we use it to filter out I/O of tools outside of our control.
         /// Tools running under the tracker may put temp files in the temp base or in a sub-directory of their choosing.
         /// </remarks>
-        private static readonly string s_tempPath = FrameworkFileUtilities.EnsureTrailingSlash(Path.GetTempPath());
+        private static readonly string s_tempPath = FileUtilities.EnsureTrailingSlash(Path.GetTempPath());
 
         // The short path to temp
-        private static readonly string s_tempShortPath = FrameworkFileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());
+        private static readonly string s_tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());
 
         // The long path to temp
-        private static readonly string s_tempLongPath = FrameworkFileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetLongFilePath(s_tempPath).ToUpperInvariant());
+        private static readonly string s_tempLongPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetLongFilePath(s_tempPath).ToUpperInvariant());
 
         // The path to ApplicationData (is equal to %USERPROFILE%\Application Data folder in Windows XP and %USERPROFILE%\AppData\Roaming in Vista and later)
-        private static readonly string s_applicationDataPath = FrameworkFileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).ToUpperInvariant());
+        private static readonly string s_applicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).ToUpperInvariant());
 
         // The path to LocalApplicationData (is equal to %USERPROFILE%\Local Settings\Application Data folder in Windows XP and %USERPROFILE%\AppData\Local in Vista and later).
-        private static readonly string s_localApplicationDataPath = FrameworkFileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).ToUpperInvariant());
+        private static readonly string s_localApplicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).ToUpperInvariant());
 
         // The path to the LocalLow folder. In Vista and later, user application data is organized across %USERPROFILE%\AppData\LocalLow,  %USERPROFILE%\AppData\Local (%LOCALAPPDATA%)
         // and %USERPROFILE%\AppData\Roaming (%APPDATA%). The LocalLow folder is not present in XP.
-        private static readonly string s_localLowApplicationDataPath = FrameworkFileUtilities.EnsureTrailingSlash(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData\\LocalLow").ToUpperInvariant());
+        private static readonly string s_localLowApplicationDataPath = FileUtilities.EnsureTrailingSlash(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData\\LocalLow").ToUpperInvariant());
 
         // The path to the common Application Data, which is also used by some programs (e.g. antivirus) that we wish to ignore.
         // Is equal to C:\Documents and Settings\All Users\Application Data on XP, and C:\ProgramData on Vista+.
@@ -127,18 +127,18 @@ namespace Microsoft.Build.Utilities
         {
             List<string> commonApplicationDataPaths = new();
 
-            string defaultCommonApplicationDataPath = FrameworkFileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).ToUpperInvariant());
+            string defaultCommonApplicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).ToUpperInvariant());
             commonApplicationDataPaths.Add(defaultCommonApplicationDataPath);
 
             string defaultRootDirectory = Path.GetPathRoot(defaultCommonApplicationDataPath);
-            string alternativeCommonApplicationDataPath1 = FrameworkFileUtilities.EnsureTrailingSlash(Path.Combine(defaultRootDirectory, @"Documents and Settings\All Users\Application Data").ToUpperInvariant());
+            string alternativeCommonApplicationDataPath1 = FileUtilities.EnsureTrailingSlash(Path.Combine(defaultRootDirectory, @"Documents and Settings\All Users\Application Data").ToUpperInvariant());
 
             if (!alternativeCommonApplicationDataPath1.Equals(defaultCommonApplicationDataPath, StringComparison.Ordinal))
             {
                 commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath1);
             }
 
-            string alternativeCommonApplicationDataPath2 = FrameworkFileUtilities.EnsureTrailingSlash(Path.Combine(defaultRootDirectory, @"Users\All Users\Application Data").ToUpperInvariant());
+            string alternativeCommonApplicationDataPath2 = FileUtilities.EnsureTrailingSlash(Path.Combine(defaultRootDirectory, @"Users\All Users\Application Data").ToUpperInvariant());
 
             if (!alternativeCommonApplicationDataPath2.Equals(defaultCommonApplicationDataPath, StringComparison.Ordinal))
             {
@@ -281,7 +281,7 @@ namespace Microsoft.Build.Utilities
             // Ensure that the path has a trailing slash that we are checking under
             // By default the paths that we check for most often will have, so this will
             // return fast and not allocate memory in the process
-            return FileIsUnderNormalizedPath(fileName, FrameworkFileUtilities.EnsureTrailingSlash(path));
+            return FileIsUnderNormalizedPath(fileName, FileUtilities.EnsureTrailingSlash(path));
         }
 
         internal static bool FileIsUnderNormalizedPath(string fileName, string path)
@@ -338,7 +338,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputs">ITaskItem array of outputs.</param>
         public static string FormatRootingMarker(ITaskItem[] sources, ITaskItem[] outputs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources);
+            ArgumentNullException.ThrowIfNull(sources);
 
             // So we don't have to deal with null checks.
             outputs ??= Array.Empty<ITaskItem>();
@@ -559,11 +559,8 @@ namespace Microsoft.Build.Utilities
         {
             // Make sure that if someone starts passing the wrong thing to this method we don't silently
             // eat it and do something possibly unexpected.
-            ErrorUtilities.VerifyThrow(
-                                       s_TrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase) ||
-                                       s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase),
-                                       "This method should only be passed s_TrackerFilename or s_FileTrackerFilename, but was passed {0} instead!",
-                                       filename);
+            Assumed.True(s_TrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase) ||
+                s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase), $"This method should only be passed s_TrackerFilename or s_FileTrackerFilename, but was passed {filename} instead!");
 
             // Look for FileTracker.dll/Tracker.exe in the MSBuild tools directory. They may exist elsewhere on disk,
             // but other copies aren't guaranteed to be compatible with the latest.
@@ -615,7 +612,7 @@ namespace Microsoft.Build.Utilities
             {
                 intermediateDirectory = FileUtilities.NormalizePath(intermediateDirectory);
                 // If the intermediate directory ends up with a trailing slash, then be rid of it!
-                if (FrameworkFileUtilities.EndsWithSlash(intermediateDirectory))
+                if (FileUtilities.EndsWithSlash(intermediateDirectory))
                 {
                     intermediateDirectory = Path.GetDirectoryName(intermediateDirectory);
                 }
@@ -757,7 +754,7 @@ namespace Microsoft.Build.Utilities
             // Only log when we have been passed a TaskLoggingHelper
             if (Log != null)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+                ArgumentNullException.ThrowIfNull(messageResourceName);
 
                 Log.LogMessage(importance, AssemblyResources.GetString(messageResourceName), messageArgs);
             }

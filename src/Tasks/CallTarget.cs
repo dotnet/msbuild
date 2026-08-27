@@ -13,6 +13,10 @@ namespace Microsoft.Build.Tasks
     /// project file.  Marked RunInMTA because we do not want this task to ever be invoked explicitly
     /// on the STA if the RequestBuilder is running on another thread, as this will cause thread
     /// id validation checks to fail.
+    ///
+    /// NOTE: This class is not the implementation that actually runs at build time. The MSBuild engine
+    /// resolves &lt;CallTarget&gt; to a private implementation. This type is retained only for
+    /// backwards compatibility in case a third-party task derives from it; it should not be used.
     /// </remarks>
     [RunInMTA]
     public class CallTarget : TaskExtension

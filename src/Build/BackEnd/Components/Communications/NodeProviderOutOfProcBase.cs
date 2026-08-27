@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -13,9 +13,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Eventing;
 
 #if NETFRAMEWORK
-using Microsoft.Build.Eventing;
 using System.Security.Principal;
 #endif
 
@@ -96,7 +96,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet);
+            ArgumentNullException.ThrowIfNull(packet);
             context.SendData(packet);
         }
 
@@ -116,23 +116,39 @@ namespace Microsoft.Build.BackEnd
                                 !Console.IsInputRedirected &&
                                 Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
 
+            // Determine which nodes should actually be reused based on system-wide node count
+            bool[] shouldReuseNode = DetermineNodesForReuse(contextsToShutDown.Count, enableReuse);
+
             Task[] waitForExitTasks = waitForExit && contextsToShutDown.Count > 0 ? new Task[contextsToShutDown.Count] : null;
             int i = 0;
+            int contextIndex = 0;
             var loggingService = _componentHost.LoggingService;
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
                 if (nodeContext is null)
                 {
+                    contextIndex++;
                     continue;
                 }
-                nodeContext.SendData(new NodeBuildComplete(enableReuse));
-                if (waitForExit)
+
+                // Use the per-node reuse decision
+                bool reuseThisNode = shouldReuseNode[contextIndex++];
+                nodeContext.SendData(new NodeBuildComplete(reuseThisNode));
+
+                if (!reuseThisNode || waitForExit)
                 {
-                    waitForExitTasks[i++] = nodeContext.WaitForExitAsync(loggingService);
+                    if (i < (waitForExitTasks?.Length ?? 0))
+                    {
+                        waitForExitTasks[i++] = nodeContext.WaitForExitAsync(loggingService);
+                    }
                 }
             }
-            if (waitForExitTasks != null)
+            if (waitForExitTasks != null && i > 0)
             {
+                if (i < waitForExitTasks.Length)
+                {
+                    Array.Resize(ref waitForExitTasks, i);
+                }
                 Task.WaitAll(waitForExitTasks);
             }
         }
@@ -173,7 +189,7 @@ namespace Microsoft.Build.BackEnd
                 if (nodeStream != null)
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
-                    CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
+                    CommunicationsUtilities.Trace($"Shutting down node with pid = {nodeProcess.Id}");
                     NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode, result.NegotiatedPacketVersion);
                     nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
                     nodeStream.Dispose();
@@ -182,18 +198,23 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finds or creates a child processes which can act as a node.
+        /// Finds or creates child processes which can act as nodes using the provided launch data.
         /// </summary>
+        /// <param name="nodeLaunchData">The launch configuration containing executable path, arguments, and environment overrides.</param>
+        /// <param name="nextNodeId">The next node ID to use.</param>
+        /// <param name="factory">The packet factory for communication.</param>
+        /// <param name="createNode">Callback when a node is created.</param>
+        /// <param name="terminateNode">Callback when a node terminates.</param>
+        /// <param name="numberOfNodesToCreate">Number of nodes to create.</param>
         protected IList<NodeContext> GetNodes(
-            string msbuildLocation,
-            string commandLineArgs,
+            NodeLaunchData nodeLaunchData,
             int nextNodeId,
             INodePacketFactory factory,
-            Handshake hostHandshake,
             NodeContextCreatedDelegate createNode,
             NodeContextTerminateDelegate terminateNode,
             int numberOfNodesToCreate)
         {
+            string commandLineArgs = nodeLaunchData.CommandLineArgs;
 #if DEBUG
             if (Execution.BuildManager.WaitForDebugger)
             {
@@ -201,10 +222,28 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
+            var msbuildLocation = nodeLaunchData.MSBuildLocation;
             if (String.IsNullOrEmpty(msbuildLocation))
             {
                 msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
             }
+
+            // Extract the expected NodeMode from the command line arguments
+            NodeMode? expectedNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLineArgs);
+
+#if RUNTIME_TYPE_NETCORE
+            // When MSBuild is hosted by dotnet.exe (e.g. `dotnet build`), NodeExeLocation may resolve
+            // to the AppHost (MSBuild.exe on Windows, MSBuild on Unix) because BuildEnvironmentHelper
+            // prefers the AppHost over MSBuild.dll. Launching worker nodes as MSBuild.exe AppHost
+            // processes is measurably slower than using dotnet MSBuild.dll. Prefer MSBuild.dll so
+            // worker nodes are launched via dotnet.exe, matching the parent process.
+            // This only applies to regular out-of-proc worker nodes (nodemode:1), not task host nodes
+            // (nodemode:2) which may need the AppHost for COM host object support.
+            if (expectedNodeMode == NodeMode.OutOfProcNode)
+            {
+                msbuildLocation = RemapAppHostToManagedDllIfHostedByDotnet(msbuildLocation);
+            }
+#endif
 
             if (String.IsNullOrEmpty(msbuildLocation))
             {
@@ -217,11 +256,8 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(hostHandshake.HandshakeOptions, HandshakeOptions.NodeReuse);
-            
-            // Extract the expected NodeMode from the command line arguments
-            NodeMode? expectedNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLineArgs);
-            
+            bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.NodeReuse);
+
             // Get all process of possible running node processes for reuse and put them into ConcurrentQueue.
             // Processes from this queue will be concurrently consumed by TryReusePossibleRunningNodes while
             //    trying to connect to them and reuse them. When queue is empty, no process to reuse left
@@ -233,12 +269,14 @@ namespace Microsoft.Build.BackEnd
             if (nodeReuseRequested)
             {
                 IList<Process> possibleRunningNodesList;
+                MSBuildEventSource.Log.NodeReuseScanStart();
                 (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
+                MSBuildEventSource.Log.NodeReuseScanStop(possibleRunningNodesList.Count);
                 possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
 
                 if (possibleRunningNodesList.Count > 0)
                 {
-                    CommunicationsUtilities.Trace("Attempting to connect to {1} existing processes '{0}'...", expectedProcessName, possibleRunningNodesList.Count);
+                    CommunicationsUtilities.Trace($"Attempting to connect to {possibleRunningNodesList.Count} existing processes '{expectedProcessName}'...");
                 }
             }
 
@@ -249,6 +287,8 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
+                    MSBuildEventSource.Log.NodeConnectStart(nodeId);
+
                     if (nodeReuseRequested && TryReuseAnyFromPossibleRunningNodes(currentProcessId, nodeId))
                     {
                         return;
@@ -268,7 +308,9 @@ namespace Microsoft.Build.BackEnd
             });
             if (!exceptions.IsEmpty)
             {
-                ErrorUtilities.ThrowInternalError("Cannot acquire required number of nodes.", new AggregateException(exceptions.ToArray()));
+                InternalError.Throw(
+                    $"Cannot acquire required number of nodes. MSBuildLocation: '{msbuildLocation}', CommandLineArgs: '{commandLineArgs}', NumberOfNodesToCreate: {numberOfNodesToCreate}, NextNodeId: {nextNodeId}.",
+                    new AggregateException(exceptions.ToArray()));
             }
 
             return nodeContexts.ToList();
@@ -277,14 +319,14 @@ namespace Microsoft.Build.BackEnd
             {
                 while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
                 {
-                    CommunicationsUtilities.Trace("Trying to connect to existing process {2} with id {1} to establish node {0}...", nodeId, nodeToReuse.Id, nodeToReuse.ProcessName);
+                    CommunicationsUtilities.Trace($"Trying to connect to existing process {nodeToReuse.ProcessName} with id {nodeToReuse.Id} to establish node {nodeId}...");
                     if (nodeToReuse.Id == currentProcessId)
                     {
                         continue;
                     }
 
                     // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
-                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, nodeToReuse.Id);
+                    string nodeLookupKey = GetProcessesToIgnoreKey(nodeLaunchData.Handshake, nodeToReuse.Id);
                     if (_processesToIgnore.ContainsKey(nodeLookupKey))
                     {
                         continue;
@@ -294,11 +336,13 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.TryAdd(nodeLookupKey, default);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, hostHandshake, out HandshakeResult result);
+                    MSBuildEventSource.Log.NodePipeConnectStart(nodeId, nodeToReuse.Id);
+                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out HandshakeResult result);
+                    MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuse.Id, succeeded: nodeStream != null);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
-                        CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeToReuse.Id);
+                        CommunicationsUtilities.Trace($"Successfully connected to existing node {nodeId} which is PID {nodeToReuse.Id}");
                         string msg = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeReused", nodeId, nodeToReuse.Id);
                         _componentHost.LoggingService.LogBuildEvent(new BuildMessageEventArgs(msg, null, null, MessageImportance.Low)
                         {
@@ -306,6 +350,7 @@ namespace Microsoft.Build.BackEnd
                         });
 
                         CreateNodeContext(nodeId, nodeToReuse, nodeStream, result.NegotiatedPacketVersion);
+                        MSBuildEventSource.Log.NodeConnectStop(nodeId, nodeToReuse.Id, isReused: true);
                         return true;
                     }
                 }
@@ -319,7 +364,7 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace("Could not connect to existing process, now creating a process...");
 
                 // We try this in a loop because it is possible that there is another MSBuild multiproc
-                // host process running somewhere which is also trying to create nodes right now.  It might
+                // host process running somewhere which is also trying to create nodes right now. It might
                 // find our newly created node and connect to it before we get a chance.
                 int retries = NodeCreationRetries;
                 while (retries-- > 0)
@@ -334,10 +379,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
                         {
-                            CommunicationsUtilities.Trace(
-                                "Failed to launch node from {0}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {1}",
-                                msbuildLocation,
-                                commandLineArgs);
+                            CommunicationsUtilities.Trace($"Failed to launch node from {msbuildLocation}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {commandLineArgs}");
 
                             string nodeFailedToLaunchError = ResourceUtilities.GetResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
                             throw new NodeFailedToLaunchException(null, nodeFailedToLaunchError);
@@ -346,22 +388,28 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
-                    Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
+                    NodeLaunchData launchData = new(msbuildLocation, commandLineArgs, nodeLaunchData.Handshake, nodeLaunchData.EnvironmentOverrides);
+                    MSBuildEventSource.Log.NodeLaunchStart(nodeId);
+                    Process msbuildProcess = nodeLauncher.Start(launchData, nodeId);
+                    MSBuildEventSource.Log.NodeLaunchStop(nodeId, msbuildProcess.Id);
 
-                    _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
+                    _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(nodeLaunchData.Handshake, msbuildProcess.Id), default);
 
                     // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                     // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                     // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                     // Now try to connect to it.
-                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake, out HandshakeResult result);
+                    MSBuildEventSource.Log.NodePipeConnectStart(nodeId, msbuildProcess.Id);
+                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, nodeLaunchData.Handshake, out HandshakeResult result);
+                    MSBuildEventSource.Log.NodePipeConnectStop(nodeId, msbuildProcess.Id, succeeded: nodeStream != null);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
-                        CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
+                        CommunicationsUtilities.Trace($"Successfully connected to created node {nodeId} which is PID {msbuildProcess.Id}");
 
                         CreateNodeContext(nodeId, msbuildProcess, nodeStream, result.NegotiatedPacketVersion);
+                        MSBuildEventSource.Log.NodeConnectStop(nodeId, msbuildProcess.Id, isReused: false);
                         return true;
                     }
 
@@ -371,19 +419,19 @@ namespace Microsoft.Build.BackEnd
                         {
                             try
                             {
-                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup", msbuildProcess.Id, msbuildProcess.ExitCode);
+                                CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it has exited with exit code {msbuildProcess.ExitCode}. This can indicate a crash at startup");
                             }
                             catch (InvalidOperationException)
                             {
                                 // This case is common on Windows where we called CreateProcess and the Process object
                                 // can't get the exit code.
-                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with unknown exit code. This can indicate a crash at startup", msbuildProcess.Id);
+                                CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it has exited with unknown exit code. This can indicate a crash at startup");
                             }
                         }
                     }
                     else
                     {
-                        CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node", msbuildProcess.Id);
+                        CommunicationsUtilities.Trace($"Could not connect to node with PID {msbuildProcess.Id}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node");
                     }
                 }
 
@@ -392,7 +440,7 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, hostHandshake.HandshakeOptions);
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, nodeLaunchData.Handshake.HandshakeOptions);
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -400,25 +448,299 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
-        /// Discovers both msbuild.exe processes and dotnet processes hosting MSBuild.dll.
-        /// Filters candidates by NodeMode when available.
         /// </summary>
-        /// <param name="msbuildLocation">The location of the MSBuild executable</param>
-        /// <param name="expectedNodeMode">The NodeMode to filter for, or null to include all</param>
+        /// <param name="msbuildLocation">The location of the MSBuild executable used to derive the expected process name. </param>
+        /// <param name="expectedNodeMode">The NodeMode to filter for, or null to include all.</param>
         /// <returns>
         /// Item 1 is a descriptive name of the processes being searched for.
         /// Item 2 is the list of matching processes, sorted by ID.
         /// </returns>
-        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null, NodeMode? expectedNodeMode = null)
+        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(
+            string msbuildLocation = null,
+            NodeMode? expectedNodeMode = null)
         {
-            if (String.IsNullOrEmpty(msbuildLocation))
+            string[] processNamesToSearch = ResolveProcessNamesToSearch(
+                msbuildLocation,
+                _componentHost?.BuildParameters?.NodeExeLocation);
+
+            Assumed.Positive(processNamesToSearch.Length, "Expected at least one process name to search for.");
+            string expectedProcessName = processNamesToSearch.Length == 1
+                ? processNamesToSearch[0]
+                : string.Join(", ", processNamesToSearch);
+
+            // Enumerate all candidate processes matching any of the target names.
+            List<Process> processes = new();
+            foreach (string name in processNamesToSearch)
             {
-                msbuildLocation = Constants.MSBuildExecutableName;
+                try
+                {
+                    processes.AddRange(Process.GetProcessesByName(name));
+                }
+                catch
+                {
+                    // Process enumeration can fail due to permissions or transient OS errors.
+                }
             }
 
-            var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
-            
-            // Get all processes with the expected MSBuild executable name
+            bool shouldFilterByNodeMode = expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5);
+            if (shouldFilterByNodeMode)
+            {
+                return (expectedProcessName, FilterProcessesByNodeMode(processes, expectedNodeMode.Value, expectedProcessName));
+            }
+
+            processes.Sort(static (left, right) => left.Id.CompareTo(right.Id));
+
+            return (expectedProcessName, processes);
+        }
+
+        /// <summary>
+        /// Returns the candidate process names to search for when locating worker nodes.
+        /// On the reuse path (<paramref name="msbuildLocation"/> non-null) returns the single name
+        /// that location would produce. On the shutdown path (<paramref name="msbuildLocation"/> null)
+        /// derives the name from <paramref name="configuredNodeExeLocation"/> or the current MSBuild
+        /// path — mirroring <see cref="GetNodes"/> — and adds the alternate host as a defensive
+        /// fallback for idle nodes started by an earlier build under a different host kind.
+        /// <paramref name="configuredNodeExeLocation"/> is a parameter (rather than instance state)
+        /// so the resolver can be unit-tested in isolation.
+        /// </summary>
+        internal static string[] ResolveProcessNamesToSearch(string msbuildLocation, string configuredNodeExeLocation)
+        {
+            if (msbuildLocation != null)
+            {
+                return [GetProcessNameForLocation(msbuildLocation)];
+            }
+
+            string wouldLaunchPath = !string.IsNullOrEmpty(configuredNodeExeLocation)
+                ? configuredNodeExeLocation
+                : BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+
+#if RUNTIME_TYPE_NETCORE
+            wouldLaunchPath = RemapAppHostToManagedDllIfHostedByDotnet(wouldLaunchPath);
+#endif
+
+            string primary = !string.IsNullOrEmpty(wouldLaunchPath)
+                ? GetProcessNameForLocation(wouldLaunchPath)
+                : (Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost()) ?? Constants.MSBuildAppName);
+
+            string alternate = string.Equals(primary, Constants.MSBuildAppName, StringComparison.OrdinalIgnoreCase)
+                ? Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost())
+                : Constants.MSBuildAppName;
+
+            return string.IsNullOrEmpty(alternate) || string.Equals(primary, alternate, StringComparison.OrdinalIgnoreCase)
+                ? [primary]
+                : [primary, alternate];
+
+            // AppHost path -> "MSBuild"; managed DLL path -> current host name (e.g. "dotnet").
+            static string GetProcessNameForLocation(string location)
+            {
+                bool isAppHost = Path.GetFileName(location)
+                    .Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+
+                return Path.GetFileNameWithoutExtension(
+                    isAppHost ? location : (CurrentHost.GetCurrentHost() ?? location));
+            }
+        }
+
+#if RUNTIME_TYPE_NETCORE
+        /// <summary>
+        /// When the current process is <c>dotnet</c> and <paramref name="msbuildLocation"/> points
+        /// at the MSBuild AppHost, returns the sibling <c>MSBuild.dll</c> (so workers launch via
+        /// <c>dotnet MSBuild.dll</c> instead of the AppHost). Otherwise returns the input
+        /// unchanged. Shared by <see cref="GetNodes"/> and <see cref="ResolveProcessNamesToSearch"/>.
+        /// </summary>
+        /// <remarks>
+        /// This is a point-in-time workaround, not a permanent design choice. The AppHost was
+        /// disabled for worker nodes by https://github.com/dotnet/msbuild/pull/13452 because it
+        /// caused a NuGet restore performance regression (devdiv2857570). Once that regression is
+        /// understood and resolved, worker nodes should launch via the AppHost again and this
+        /// remap (along with its callers) should be removed. Tracked by
+        /// https://github.com/dotnet/msbuild/issues/13464.
+        /// </remarks>
+        private static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
+        {
+            if (string.IsNullOrEmpty(msbuildLocation)
+                || !Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
+                || !string.Equals(Path.GetFileName(EnvironmentUtilities.ProcessPath), Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase))
+            {
+                return msbuildLocation;
+            }
+
+            string dllPath = Path.Combine(Path.GetDirectoryName(msbuildLocation), Constants.MSBuildAssemblyName);
+            return File.Exists(dllPath) ? dllPath : msbuildLocation;
+        }
+#endif
+
+        /// <summary>
+        /// Filters candidate processes whose command-line NodeMode argument matches the expected value.
+        /// Processes whose command line cannot be retrieved (unsupported platform) are included
+        /// unconditionally to preserve node reuse on those platforms.
+        /// </summary>
+        private static IList<Process> FilterProcessesByNodeMode(List<Process> processes, NodeMode expectedNodeMode, string expectedProcessName)
+        {
+            CommunicationsUtilities.Trace($"Filtering {processes.Count} candidate processes by NodeMode {expectedNodeMode} for process name '{expectedProcessName}'");
+
+            List<Process> filtered = new(capacity: processes.Count);
+
+            foreach (Process process in processes)
+            {
+                try
+                {
+                    if (!process.TryGetCommandLine(out string commandLine))
+                    {
+                        CommunicationsUtilities.Trace($"Skipping process {process.Id} - unable to retrieve command line");
+                        continue;
+                    }
+
+                    if (commandLine is null)
+                    {
+                        // Command-line retrieval is not supported on this platform.
+                        // Include the process so that node reuse is not silently broken.
+                        CommunicationsUtilities.Trace($"Including process {process.Id} - command line retrieval not supported on this platform");
+                        filtered.Add(process);
+                        continue;
+                    }
+
+                    NodeMode? processNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLine);
+                    if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode)
+                    {
+                        CommunicationsUtilities.Trace($"Including process {process.Id} with matching NodeMode {processNodeMode.Value}");
+                        filtered.Add(process);
+                    }
+                    else
+                    {
+                        CommunicationsUtilities.Trace(
+                            $"Skipping process {process.Id} - NodeMode mismatch. Expected: {expectedNodeMode}, Found: {processNodeMode?.ToString() ?? "<null>"}. Command line: {commandLine}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CommunicationsUtilities.Trace($"Skipping process {process.Id} - error retrieving command line: {ex.Message}");
+                }
+            }
+
+            filtered.Sort(static (left, right) => left.Id.CompareTo(right.Id));
+
+            CommunicationsUtilities.Trace($"Filtered to {filtered.Count} processes matching NodeMode {expectedNodeMode}");
+
+            return filtered;
+        }
+
+        /// <summary>
+        /// Generate a string from task host context and the remote process to be used as key to lookup processes we have already
+        /// attempted to connect to or are already connected to
+        /// </summary>
+        private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId) =>
+#if NET
+            string.Create(CultureInfo.InvariantCulture, $"{hostHandshake}|{nodeProcessId}");
+#else
+            $"{hostHandshake}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
+#endif
+
+        /// <summary>
+        /// Determines which nodes should be reused based on system-wide node count to avoid over-provisioning.
+        /// </summary>
+        /// <param name="nodeCount">The number of nodes in this MSBuild instance</param>
+        /// <param name="enableReuse">Whether reuse is enabled at all</param>
+        /// <returns>Array indicating which nodes should be reused (true) or terminated (false)</returns>
+        protected virtual bool[] DetermineNodesForReuse(int nodeCount, bool enableReuse)
+        {
+            bool[] shouldReuse = new bool[nodeCount];
+
+            // If reuse is disabled, no nodes should be reused
+            if (!enableReuse)
+            {
+                return shouldReuse; // All false
+            }
+
+            // Get threshold for this node type
+            int maxNodesToKeep = GetNodeReuseThreshold();
+
+            // If threshold is 0, terminate all nodes in this instance
+            if (maxNodesToKeep == 0)
+            {
+                CommunicationsUtilities.Trace($"Node reuse threshold is 0, terminating all {nodeCount} nodes");
+                return shouldReuse; // All false
+            }
+
+            // Count system-wide active nodes of the same type
+            int systemWideNodeCount = CountSystemWideActiveNodes();
+
+            CommunicationsUtilities.Trace($"System-wide node count: {systemWideNodeCount}, threshold: {maxNodesToKeep}, this instance has: {nodeCount} nodes");
+
+            // If we're already under the threshold system-wide, keep all our nodes
+            if (systemWideNodeCount <= maxNodesToKeep)
+            {
+                for (int i = 0; i < nodeCount; i++)
+                {
+                    shouldReuse[i] = true;
+                }
+                return shouldReuse;
+            }
+
+            // We're over-provisioned. Determine how many of our nodes to keep.
+            // Strategy: Keep nodes up to the threshold, terminate the rest.
+            // This instance's contribution is limited to help reach the threshold.
+            int nodesToKeepInThisInstance = Math.Max(0, maxNodesToKeep - (systemWideNodeCount - nodeCount));
+
+            CommunicationsUtilities.Trace($"Keeping {nodesToKeepInThisInstance} of {nodeCount} nodes in this instance to help meet threshold of {maxNodesToKeep}");
+
+            // Mark the first N nodes for reuse
+            for (int i = 0; i < Math.Min(nodesToKeepInThisInstance, nodeCount); i++)
+            {
+                shouldReuse[i] = true;
+            }
+
+            return shouldReuse;
+        }
+
+        /// <summary>
+        /// Gets the maximum number of nodes of this type that should remain active system-wide.
+        /// </summary>
+        /// <returns>The threshold for node reuse</returns>
+        protected virtual int GetNodeReuseThreshold()
+        {
+            // Default for worker nodes: 1.5 * NUM_PROCS - aka if there are more nodes than 1 build would create
+            return Math.Max(1, (3 * NativeMethodsShared.GetLogicalCoreCount()) / 2);
+        }
+
+        /// <summary>
+        /// Counts the number of active MSBuild node processes of the same type system-wide.
+        /// Uses improved node detection logic to filter by NodeMode and handle dotnet processes.
+        /// </summary>
+        /// <returns>The count of active node processes</returns>
+        protected virtual int CountSystemWideActiveNodes()
+            => CountActiveNodesWithMode(NodeMode.OutOfProcNode);
+
+        /// <summary>
+        /// Counts the number of active MSBuild processes running with the specified <see cref="NodeMode"/>.
+        /// Includes the current process in the count if it matches.
+        /// Used by out-of-proc nodes (e.g., server node) to detect over-provisioning at build completion.
+        /// </summary>
+        /// <param name="nodeMode">The node mode to filter for.</param>
+        /// <returns>The number of matching processes, or 0 if enumeration fails or the feature wave is disabled.</returns>
+        internal static int CountActiveNodesWithMode(NodeMode nodeMode)
+        {
+            try
+            {
+                (_, IList<Process> nodeProcesses) = GetPossibleRunningNodes(nodeMode);
+                int count = nodeProcesses.Count;
+                foreach (var process in nodeProcesses)
+                {
+                    process?.Dispose();
+                }
+                return count;
+            }
+            catch (Exception ex)
+            {
+                CommunicationsUtilities.Trace($"Error counting system-wide nodes with mode {nodeMode}: {ex.Message}");
+                return 0;
+            }
+        }
+
+        private static (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(NodeMode? expectedNodeMode)
+        {
+            var expectedProcessName = Constants.MSBuildAppName;
+
             Process[] processes;
             try
             {
@@ -426,89 +748,46 @@ namespace Microsoft.Build.BackEnd
             }
             catch
             {
-                // Process enumeration failed, return empty list
                 return (expectedProcessName, Array.Empty<Process>());
             }
 
-            // If we have an expected NodeMode, filter by command line parsing
             if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
             {
-                CommunicationsUtilities.Trace("Filtering {0} candidate processes by NodeMode {1} for process name '{2}'", 
-                    processes.Length, expectedNodeMode.Value, expectedProcessName);
                 List<Process> filteredProcesses = [];
-                bool isDotnetProcess = expectedProcessName.Equals(Path.GetFileNameWithoutExtension(Constants.DotnetProcessName), StringComparison.OrdinalIgnoreCase);
-                
+
                 foreach (var process in processes)
                 {
                     try
                     {
                         if (!process.TryGetCommandLine(out string commandLine))
                         {
-                            // If we can't get the command line, skip this process
-                            CommunicationsUtilities.Trace("Skipping process {0} - unable to retrieve command line", process.Id);
                             continue;
                         }
 
                         if (commandLine is null)
                         {
-                            // If we can't get the command line, then allow it as a candidate. This allows reuse to work on platforms where command line retrieval isn't supported, but still filters by NodeMode on platforms where it is supported.
-                            CommunicationsUtilities.Trace("Including process {0} with unknown NodeMode because command line retrieval is not supported on this platform", process.Id);
                             filteredProcesses.Add(process);
                             continue;
                         }
 
-                        // If expected process is dotnet, filter to only those hosting MSBuild.dll
-                        if (isDotnetProcess && !commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
-                        {
-                            CommunicationsUtilities.Trace("Skipping dotnet process {0} - not hosting MSBuild.dll. Command line: {1}", process.Id, commandLine);
-                            continue;
-                        }
-
-                        // Extract NodeMode from command line
                         NodeMode? processNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLine);
-                        
-                        // Only include processes that match the expected NodeMode
                         if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode.Value)
                         {
-                            CommunicationsUtilities.Trace("Including process {0} with matching NodeMode {1}", process.Id, processNodeMode.Value);
                             filteredProcesses.Add(process);
                         }
-                        else
-                        {
-                            CommunicationsUtilities.Trace("Skipping process {0} - NodeMode mismatch. Expected: {1}, Found: {2}. Command line: {3}", 
-                                process.Id, expectedNodeMode.Value, processNodeMode?.ToString() ?? "<null>", commandLine);
-                        }
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        // If we encounter any error processing this process, skip it but log
-                        CommunicationsUtilities.Trace("Failed to get command line for process {0}: {1}", process.Id, ex.Message);
                         continue;
                     }
                 }
 
-                // Sort by process ID for consistent ordering
                 filteredProcesses.Sort((left, right) => left.Id.CompareTo(right.Id));
-                CommunicationsUtilities.Trace("Filtered to {0} processes matching NodeMode {1}", filteredProcesses.Count, expectedNodeMode.Value);
                 return (expectedProcessName, filteredProcesses);
             }
 
-            // No NodeMode filtering, return all processes sorted by ID
             Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));
             return (expectedProcessName, processes);
-        }
-
-        /// <summary>
-        /// Generate a string from task host context and the remote process to be used as key to lookup processes we have already
-        /// attempted to connect to or are already connected to
-        /// </summary>
-        private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId)
-        {
-#if NET
-            return string.Create(CultureInfo.InvariantCulture, $"{hostHandshake}|{nodeProcessId}");
-#else
-            return $"{hostHandshake}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
-#endif
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
@@ -517,16 +796,11 @@ namespace Microsoft.Build.BackEnd
         private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
             SecurityIdentifier identifier = s_currentWindowsIdentity.Owner;
-#if FEATURE_PIPE_SECURITY
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-#else
-            var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
-                System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
-#endif
             IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
             if (remoteOwner != identifier)
             {
-                CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
+                CommunicationsUtilities.Trace($"The remote pipe owner {remoteOwner.Value} does not match {identifier.Value}");
                 throw new UnauthorizedAccessException();
             }
         }
@@ -551,7 +825,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
+            CommunicationsUtilities.Trace($"Attempting connect to PID {nodeProcessId} with pipe {pipeName} with timeout {timeout} ms");
 
             try
             {
@@ -561,7 +835,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, result.ErrorMessage.TrimEnd());
+                    CommunicationsUtilities.Trace($"Failed to connect to pipe {pipeName}. {result.ErrorMessage.TrimEnd()}");
                     nodeStream?.Dispose();
                     return null;
                 }
@@ -573,7 +847,7 @@ namespace Microsoft.Build.BackEnd
                 // IOException -- Couldn't connect, already in use.
                 // TimeoutException -- Couldn't connect, might not be a node.
                 // InvalidOperationException – Couldn’t connect, probably a different build
-                CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
+                CommunicationsUtilities.Trace($"Failed to connect to pipe {pipeName}. {e.Message.TrimEnd()}");
 
                 // If we don't close any stream, we might hang up the child
                 nodeStream?.Dispose();
@@ -588,7 +862,7 @@ namespace Microsoft.Build.BackEnd
         /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
         /// <remarks>
-        /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
+        /// Reused by MSBuild server client <see cref="Microsoft.Build.Server.MSBuildClient"/>.
         /// </remarks>
         internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {
@@ -610,14 +884,14 @@ namespace Microsoft.Build.BackEnd
             HandshakeComponents handshakeComponents = handshake.RetrieveHandshakeComponents();
             foreach (var component in handshakeComponents.EnumerateComponents())
             {
-                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", component.Key, component.Value, pipeName);
+                CommunicationsUtilities.Trace($"Writing handshake part {component.Key} ({component.Value}) to pipe {pipeName}");
                 nodeStream.WriteIntForHandshake(component.Value);
             }
 
             // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
             nodeStream.WriteEndOfHandshakeSignal();
 
-            CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+            CommunicationsUtilities.Trace($"Reading handshake from pipe {pipeName}");
 
             if (nodeStream.TryReadEndOfHandshakeSignal(
                 true,
@@ -627,7 +901,7 @@ namespace Microsoft.Build.BackEnd
                 out HandshakeResult innerResult))
             {
                 // We got a connection.
-                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                CommunicationsUtilities.Trace($"Successfully connected to pipe {pipeName}...!");
                 result = HandshakeResult.Success(0, innerResult.NegotiatedPacketVersion);
                 return true;
             }
@@ -652,6 +926,13 @@ namespace Microsoft.Build.BackEnd
 
             // The pipe(s) used to communicate with the node.
             private readonly Stream _pipeStream;
+
+#if !FEATURE_APM
+            /// <summary>
+            /// Stream used for async packet reads.
+            /// </summary>
+            private readonly Stream _readStream;
+#endif
 
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
@@ -737,6 +1018,25 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private readonly byte _negotiatedPacketVersion;
 
+            /// <summary>
+            /// A snapshot of the build process environment most recently sent in full to this task-host connection.
+            /// Used to avoid re-transmitting the (invariant) environment in every <see cref="TaskHostConfiguration"/>:
+            /// when an outgoing configuration's environment matches this baseline it is sent as
+            /// <see cref="InvariantPayloadTransferMode.Identical"/> instead.
+            /// </summary>
+            private Dictionary<string, string> _forwardEnvironmentBaseline;
+
+            /// <summary>
+            /// A snapshot of the global properties most recently sent in full to this task-host connection.
+            /// Used to avoid re-transmitting the (largely invariant) global properties in every
+            /// <see cref="TaskHostConfiguration"/>: when an outgoing configuration's global properties match this
+            /// baseline they are sent as <see cref="InvariantPayloadTransferMode.Identical"/> instead. Held as a defensive
+            /// copy for robustness and for consistency with <see cref="_forwardEnvironmentBaseline"/>; unlike the
+            /// environment, the configuration's global-properties dictionary is freshly allocated per configuration
+            /// today, so it is not actually aliased to a mutated-in-place source.
+            /// </summary>
+            private Dictionary<string, string> _forwardGlobalParametersBaseline;
+
 
 #if FEATURE_APM
             // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead
@@ -758,6 +1058,11 @@ namespace Microsoft.Build.BackEnd
                 _nodeId = nodeId;
                 _process = process;
                 _pipeStream = nodePipe;
+#if !FEATURE_APM
+                _readStream = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                    ? new BufferedReadStream(nodePipe, 64 * 1024)
+                    : nodePipe;
+#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _readBufferMemoryStream = new MemoryStream();
@@ -812,7 +1117,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await _pipeStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
+                        int bytesRead = await _readStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -820,7 +1125,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     catch (IOException e)
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in RunPacketReadLoopAsync: {0}", e);
+                        CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in RunPacketReadLoopAsync: {e}");
                         _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                         Close();
                         return;
@@ -837,7 +1142,7 @@ namespace Microsoft.Build.BackEnd
                         int totalBytesRead = 0;
                         while (totalBytesRead < packetLength)
                         {
-                            int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            int bytesRead = await _readStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
                             if (bytesRead == 0)
                             {
                                 break;
@@ -853,7 +1158,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     catch (IOException e)
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in RunPacketReadLoopAsync (Reading): {0}", e);
+                        CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in RunPacketReadLoopAsync (Reading): {e}");
                         _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                         Close();
                         return;
@@ -890,6 +1195,52 @@ namespace Microsoft.Build.BackEnd
                 }
                 _packetWriteQueue.Enqueue(packet);
                 _packetEnqueued.Set();
+            }
+
+            /// <summary>
+            /// Marks an outgoing config <see cref="InvariantPayloadTransferMode.Identical"/> when its
+            /// environment matches the connection baseline (leaving the dictionary off the wire); otherwise sends
+            /// it in full and updates the baseline. Only <see cref="DrainPacketQueue"/> calls this, in wire order,
+            /// and the child applies the same updates in the same order, so the baselines never drift and no
+            /// locking is needed.
+            /// </summary>
+            private void MarkEnvironmentTransferMode(TaskHostConfiguration configuration)
+            {
+                Dictionary<string, string> environment = configuration.BuildProcessEnvironment;
+
+                if (_forwardEnvironmentBaseline != null && CommunicationsUtilities.AreDictionariesEquivalent(environment, _forwardEnvironmentBaseline))
+                {
+                    configuration.EnvironmentMode = InvariantPayloadTransferMode.Identical;
+                }
+                else
+                {
+                    configuration.EnvironmentMode = InvariantPayloadTransferMode.Full;
+                    _forwardEnvironmentBaseline = new Dictionary<string, string>(environment, CommunicationsUtilities.EnvironmentVariableComparer);
+                }
+            }
+
+            /// <summary>
+            /// Marks an outgoing config <see cref="InvariantPayloadTransferMode.Identical"/> when its global properties
+            /// match the connection baseline (leaving the dictionary off the wire); otherwise sends them in full and
+            /// snapshots them as the new baseline. As in <see cref="MarkEnvironmentTransferMode"/>, only
+            /// <see cref="DrainPacketQueue"/> calls this in wire order, so the baselines never drift and no locking
+            /// is needed.
+            /// </summary>
+            private void MarkGlobalParametersTransferMode(TaskHostConfiguration configuration)
+            {
+                Dictionary<string, string> globalParameters = configuration.GlobalProperties;
+
+                if (_forwardGlobalParametersBaseline != null && CommunicationsUtilities.AreDictionariesEquivalent(globalParameters, _forwardGlobalParametersBaseline))
+                {
+                    configuration.GlobalParametersMode = InvariantPayloadTransferMode.Identical;
+                }
+                else
+                {
+                    configuration.GlobalParametersMode = InvariantPayloadTransferMode.Full;
+                    _forwardGlobalParametersBaseline = globalParameters == null
+                        ? null
+                        : new Dictionary<string, string>(globalParameters, StringComparer.OrdinalIgnoreCase);
+                }
             }
 
             /// <summary>
@@ -937,6 +1288,15 @@ namespace Microsoft.Build.BackEnd
                                 writeTranslator.NegotiatedPacketVersion = 0;
                             }
 
+                            // When the negotiated wire format supports it, send the (invariant) build process
+                            // environment and global properties only when they changed; otherwise mark them
+                            // as unchanged on the wire.
+                            if (packet is TaskHostConfiguration taskHostConfiguration && writeTranslator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
+                            {
+                                context.MarkEnvironmentTransferMode(taskHostConfiguration);
+                                context.MarkGlobalParametersTransferMode(taskHostConfiguration);
+                            }
+
                             packet.Translate(writeTranslator);
 
                             int writeStreamLength = (int)writeStream.Position;
@@ -953,26 +1313,38 @@ namespace Microsoft.Build.BackEnd
 
                                 serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                             }
-
-                            if (packet is NodeBuildComplete)
-                            {
-                                if (IsExitPacket(packet))
-                                {
-                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                    context._packetQueueDrainDelayCancellation.Cancel();
-                                }
-
-                                return;
-                            }
                         }
                         catch (IOException e)
                         {
                             // Do nothing here because any exception will be caught by the async read handler
-                            CommunicationsUtilities.Trace(context._nodeId, "EXCEPTION in SendData: {0}", e);
+                            CommunicationsUtilities.Trace(context._nodeId, $"EXCEPTION in SendData: {e}");
                         }
                         catch (ObjectDisposedException) // This happens if a child dies unexpectedly
                         {
                             // Do nothing here because any exception will be caught by the async read handler
+                        }
+
+                        // Once the NodeBuildComplete packet has been dequeued, the node is shutting down and no
+                        // further packets will be enqueued, so the drain thread must terminate. This has to run even
+                        // when writing the packet above threw (e.g. the child already exited and the pipe was
+                        // disposed); otherwise the thread loops back to WaitOne() and blocks forever, leaking the
+                        // thread and the NodeContext it captures. In a long-lived host like Visual Studio these
+                        // leaked threads accumulate across builds.
+                        if (packet is NodeBuildComplete)
+                        {
+                            if (IsExitPacket(packet))
+                            {
+                                context._exitPacketState = ExitPacketState.ExitPacketSent;
+                                try
+                                {
+                                    context._packetQueueDrainDelayCancellation.Cancel();
+                                }
+                                catch (ObjectDisposedException)
+                                {
+                                }
+                            }
+
+                            return;
                         }
                     }
                 }
@@ -1023,7 +1395,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (_exitPacketState == ExitPacketState.ExitPacketSent)
                 {
-                    CommunicationsUtilities.Trace("Waiting for node with pid = {0} to exit", _process.Id);
+                    CommunicationsUtilities.Trace($"Waiting for node with pid = {_process.Id} to exit");
 
                     // .NET 5 introduces a real WaitForExitAsyc.
                     // This is a poor man's implementation that uses polling.
@@ -1051,7 +1423,7 @@ namespace Microsoft.Build.BackEnd
                     BuildEventFileInfo.Empty,
                     "KillingProcessWithPid",
                     _process.Id);
-                CommunicationsUtilities.Trace("Killing node with pid = {0}", _process.Id);
+                CommunicationsUtilities.Trace($"Killing node with pid = {_process.Id}");
 
                 _process.KillTree(timeoutMilliseconds: 5000);
             }
@@ -1060,21 +1432,21 @@ namespace Microsoft.Build.BackEnd
             {
                 if (bytesRead != _headerByte.Length)
                 {
-                    CommunicationsUtilities.Trace(_nodeId, "COMMUNICATIONS ERROR (HRC) Node: {0} Process: {1} Bytes Read: {2} Expected: {3}", _nodeId, _process.Id, bytesRead, _headerByte.Length);
+                    CommunicationsUtilities.Trace(_nodeId, $"COMMUNICATIONS ERROR (HRC) Node: {_nodeId} Process: {_process.Id} Bytes Read: {bytesRead} Expected: {_headerByte.Length}");
                     try
                     {
                         if (_process.HasExited)
                         {
-                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} has exited.", _process.Id);
+                            CommunicationsUtilities.Trace(_nodeId, $"   Child Process {_process.Id} has exited.");
                         }
                         else
                         {
-                            CommunicationsUtilities.Trace(_nodeId, "   Child Process {0} is still running.", _process.Id);
+                            CommunicationsUtilities.Trace(_nodeId, $"   Child Process {_process.Id} is still running.");
                         }
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "Unable to retrieve remote process information. {0}", e);
+                        CommunicationsUtilities.Trace(_nodeId, $"Unable to retrieve remote process information. {e}");
                     }
 
                     _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
@@ -1114,7 +1486,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (IOException e)
                 {
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in HeaderReadComplete: {0}", e);
+                    CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in HeaderReadComplete: {e}");
                     _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                     Close();
                     return;
@@ -1136,7 +1508,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (bytesRead != packetLength)
                 {
-                    CommunicationsUtilities.Trace(_nodeId, "Bad packet read for packet {0} - Expected {1} bytes, got {2}", packetType, packetLength, bytesRead);
+                    CommunicationsUtilities.Trace(_nodeId, $"Bad packet read for packet {packetType} - Expected {packetLength} bytes, got {bytesRead}");
                     _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                     Close();
                     return false;
@@ -1149,11 +1521,13 @@ namespace Microsoft.Build.BackEnd
                 try
                 {
                     _readBufferMemoryStream.Position = 0;
+
+                    _readTranslator.NegotiatedPacketVersion = _negotiatedPacketVersion;
                     _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, _readTranslator);
                 }
                 catch (IOException e)
                 {
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in ReadAndRoutPacket: {0}", e);
+                    CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in ReadAndRoutePacket: {e}");
                     _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                     Close();
                     return false;
@@ -1193,7 +1567,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (IOException e)
                 {
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in BodyReadComplete (Reading): {0}", e);
+                    CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in BodyReadComplete (Reading): {e}");
                     _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                     Close();
                     return;

@@ -17,7 +17,6 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 // can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
@@ -2051,16 +2050,26 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void BuildDisabled()
         {
-            Project project = new Project();
+            using ProjectCollection collection = new ProjectCollection();
+            Project project = new Project(collection);
             project.Xml.AddTarget("t");
             project.IsBuildEnabled = false;
             MockLogger mockLogger = new MockLogger();
-            ProjectCollection.GlobalProjectCollection.RegisterLogger(mockLogger);
+            collection.RegisterLogger(mockLogger);
 
-            bool result = project.Build();
+            bool result;
+
+            try
+            {
+                result = project.Build();
+            }
+            finally
+            {
+                collection.UnregisterAllLoggers();
+            }
 
             result.ShouldBeFalse();
-
+            mockLogger.ErrorCount.ShouldBe(1);
             mockLogger.Errors[0].Code.ShouldBe("MSB4112"); // "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
         }
 
@@ -2089,7 +2098,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'>
                 </Project>");
 
-            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".proj";
+            string importFileName = FileUtilities.GetTemporaryFileName() + ".proj";
             File.WriteAllText(importFileName, importProjectContent);
 
             string projectContent =
@@ -3350,7 +3359,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ("A", Operation.Include, Provenance.StringLiteral, 1)
             };
 
-            AssertProvenanceResult(expected, project, FileUtilities.GetIsFileSystemCaseSensitive() ? "a" : "A");
+            AssertProvenanceResult(expected, project, FileUtilities.IsFileSystemCaseSensitive ? "a" : "A");
         }
 
 

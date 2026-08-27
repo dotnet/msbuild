@@ -72,10 +72,20 @@
         <target state="translated">작업이 최신 상태가 아니므로 건너뛸 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEOFTimeout">
+        <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
+        <target state="translated">파이프 EOF가 {0}초 내에 수신되지 않았습니다. 손자 프로세스가 여전히 파이프를 열어 둔 상태일 수 있습니다. 이미 전달된 출력은 기록되었습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: "{0}"이(가) 종료되었습니다(코드: {1}).</target>
         <note>{StrBegin="MSB6006: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.ToolCommandExitedZeroWithErrors">
+        <source>The command exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">명령이 반환 값 0으로 종료되었지만 실행 중 오류가 감지되었습니다. ExitCode가 -1로 설정되었습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolExecutableNotFound">
         <source>MSB6004: The specified task executable location "{0}" is invalid.</source>
@@ -291,6 +301,21 @@
         <source>Build succeeded.</source>
         <target state="translated">빌드했습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="KillingProcess">
+        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
+        <target state="translated">MSB5002: 작업 실행 파일 "{0}"이(가) 지정한 제한 시간인 {1}밀리초 안에 완료되지 않았으므로 종료합니다.</target>
+        <note>{StrBegin="MSB5002: "}</note>
+      </trans-unit>
+      <trans-unit id="KillingProcessByCancellation">
+        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
+        <target state="translated">MSB5021: 빌드가 취소되었으므로 작업 실행 파일 "{0}" 및 자식 프로세스를 종료합니다.</target>
+        <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+      <trans-unit id="FailedDeletingTempFile">
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
+        <target state="translated">MSB5018: 임시 파일 "{0}"을(를) 삭제하지 못했습니다. {1} {2}</target>
+        <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
     </body>
   </file>

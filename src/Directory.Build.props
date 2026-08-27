@@ -55,6 +55,7 @@
     <GenerateResourceMSBuildRuntime>CurrentRuntime</GenerateResourceMSBuildRuntime>
 
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisMode>Default</AnalysisMode>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 

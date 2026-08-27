@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -69,6 +68,15 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
+        /// Constructor taking a specified comparer and initial capacity for the keys.
+        /// Pre-sizing avoids repeated dictionary resizes when the number of keys is known.
+        /// </summary>
+        internal MultiDictionary(int capacity, IEqualityComparer<K> keyComparer)
+        {
+            _backing = new Dictionary<K, SmallList<V>>(capacity, keyComparer);
+        }
+
+        /// <summary>
         /// Number of keys
         /// </summary>
         internal int KeyCount => _backing.Count;
@@ -108,7 +116,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Add(K key, V value)
         {
-            ErrorUtilities.VerifyThrow(value != null, "Null value not allowed");
+            Assumed.NotNull(value, "Null value not allowed");
 
             if (!_backing.TryGetValue(key, out SmallList<V> entry))
             {
@@ -128,7 +136,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(K key, V value)
         {
-            ErrorUtilities.VerifyThrow(value != null, "Null value not allowed");
+            Assumed.NotNull(value, "Null value not allowed");
 
             if (!_backing.TryGetValue(key, out SmallList<V> entry))
             {

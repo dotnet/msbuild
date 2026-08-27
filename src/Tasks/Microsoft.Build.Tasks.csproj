@@ -1,12 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
@@ -31,30 +33,24 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <!-- Binary serialization by ITranslatable -->
-    <Compile Include="..\Shared\InterningBinaryReader.cs" />
-    <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <!-- Node communication -->
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePipeBase.cs" />
     <Compile Include="..\Shared\NodePipeClient.cs" />
     <Compile Include="..\Shared\NodePipeServer.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="BuiltInTasks.cs" />
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
     </Compile>
@@ -67,15 +63,6 @@
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
       <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderItem.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>BuildEnvironmentHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameComparer.cs">
-      <Link>AssemblyNameComparer.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameReverseVersionComparer.cs">
-      <Link>AssemblyDependency\AssemblyNameReverseVersionComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>CanonicalError.cs</Link>
     </Compile>
@@ -84,18 +71,11 @@
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>ExtensionFoldersRegistryKey.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>FileDelegates.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
-      <Link>ReadOnlyEmptyCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
       <Link>RegistryDelegates.cs</Link>
@@ -103,51 +83,17 @@
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StrongNameHelpers.cs">
-      <Link>StrongNameHelpers.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\SolutionConfiguration.cs">
-      <Link>SolutionConfiguration.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
-    <Compile Include="..\Shared\MetadataConversionUtilities.cs">
-      <Link>MetadataConversionUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\StringUtils.cs">
-      <Link>StringUtils.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>EscapingUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileMatcher.cs" />
-    <Compile Include="..\Shared\Modifiers.cs">
-      <Link>Modifiers.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyCollection.cs" />
-    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\VersionUtilities.cs">
-      <Link>VersionUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyNameExtension.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
-    <Compile Include="..\Shared\ConversionUtilities.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\LanguageParser\token.cs" />
     <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />
@@ -162,9 +108,6 @@
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
-    <Compile Include="..\Shared\XMakeAttributes.cs" />
-    <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="AppConfig\*.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
@@ -222,6 +165,7 @@
     <Compile Include="CommandLineBuilderExtension.cs" />
     <Compile Include="ResourceHandling\*.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
+    <Compile Include="IFixedTypeInfo.cs" />
     <Compile Include="SetRidAgnosticValueForProjects.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
@@ -246,7 +190,6 @@
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
-    <Compile Include="Interop.cs" />
     <Compile Include="ErrorFromResources.cs" />
     <Compile Include="ExtractedClassName.cs" />
     <Compile Include="FileIO\ReadLinesFromFile.cs" />
@@ -283,6 +226,9 @@
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="AssemblyDependency\Fusion\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Metadata\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="TypeLib\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
     <Compile Include="MSBuildInternalMessage.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="AddToWin32Manifest.cs" />
@@ -307,13 +253,16 @@
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
     <Compile Include="TaskExtension.cs" />
     <Compile Include="TaskTranslatorHelpers.cs" />
+    <Compile Include="TaskEnvironmentExtensions.cs" />
     <Compile Include="Telemetry.cs" />
     <Compile Include="ToolTaskExtension.cs" />
     <Compile Include="Touch.cs" />
     <Compile Include="Unzip.cs" />
+    <Compile Include="Utilities\StrongNameHelpers.cs" />
     <Compile Include="VisualBasicParserUtilities.cs" />
     <Compile Include="Warning.cs" />
     <Compile Include="XslTransformation.cs" />
+    <Compile Include="XmlTaskUtility.cs" />
     <Compile Include="AssignCulture.cs" />
     <Compile Include="Culture.cs" />
     <Compile Include="CultureInfoCache.cs" />
@@ -326,6 +275,12 @@
     <Compile Include="SystemState.cs" />
     <Compile Include="DependencyFile.cs" />
     <Compile Include="ZipDirectory.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- TarDirectory relies on System.Formats.Tar which is only available on .NET (not .NET Framework). -->
+    <Compile Include="TarDirectory.cs" />
+    <!-- Untar relies on System.Formats.Tar which is only available on .NET (not .NET Framework). -->
+    <Compile Include="Untar.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TaskRequiresFramework.cs" />
@@ -477,11 +432,6 @@
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="ManifestUtil\Resources\Strings.ManifestUtilities.resx">
       <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
@@ -662,20 +612,34 @@
   <ItemGroup>
     <None Include="Resources\default.win32manifest" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(SkipNetstandardRefAssembliesForBenchmarks)' != 'true'">
+    <!-- These netstandard2.0 builds supply RoslynCodeTaskFactory's reference payload. BenchmarkDotNet's
+         DllGatherer redirects every project reference to one output directory, where these reference-only
+         Framework and Utilities assemblies can overwrite the current-TFM implementation assemblies and cause
+         the generated benchmark executable to fail with BadImageFormatException. Benchmark builds do not need
+         the RoslynCodeTaskFactory payload. -->
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+  </ItemGroup>
+  <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
+  <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
+    <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005;MSBuildTask0006;MSBuildTask0007;MSBuildTask0008</WarningsNotAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
-  <!-- Mimics AddRefAssemblies from MSBuild.csproj -->
-  <Target Name="AddRefAssemblies" DependsOnTargets="ResolveAssemblyReferences" BeforeTargets="AssignTargetPaths">
+  <!-- Mimics AddRefAssemblies from MSBuild.csproj. Use the same benchmark condition as the references above
+       so the disabled RoslynCodeTaskFactory payload is not added to the benchmark output. -->
+  <Target Name="AddRefAssemblies" DependsOnTargets="ResolveAssemblyReferences" BeforeTargets="AssignTargetPaths" Condition="'$(SkipNetstandardRefAssembliesForBenchmarks)' != 'true'">
     <ItemGroup>
       <Content Include="@(NetstandardRefAssemblies)" CopyToOutputDirectory="PreserveNewest" Link="ref\%(Filename)%(Extension)" />
     </ItemGroup>
@@ -693,9 +657,6 @@
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
@@ -710,7 +671,6 @@
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
     <PackageReference Update="System.CodeDom" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
     <PackageReference Update="System.Resources.Extensions" PrivateAssets="all" />

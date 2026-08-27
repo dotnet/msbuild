@@ -8,6 +8,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -875,9 +876,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
             else
             {
-#if NETFRAMEWORK
-                logger.AssertLogContains("MSB4102");
-#endif
+                logger.AssertLogDoesntContain("MSB4102");
             }
         }
 

@@ -5,12 +5,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+
+using ProjectItemInstanceTaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -158,6 +163,135 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(2, stringArray.Length);
             Assert.Equal(value[0].ToString(CultureInfo.InvariantCulture), stringArray[0]);
             Assert.Equal(value[1].ToString(CultureInfo.InvariantCulture), stringArray[1]);
+        }
+
+        /// <summary>
+        /// A default <see cref="AbsolutePath"/> (null Value) must serialize cleanly. This is the
+        /// scenario that crashed the out-of-proc task host: a struct-typed output is never null, so
+        /// it always gets serialized, and the old code threw InvalidCastException because AbsolutePath
+        /// is not IConvertible. See https://github.com/dotnet/msbuild/pull/13016.
+        /// </summary>
+        [Fact]
+        public void DefaultAbsolutePathParameter()
+        {
+            TaskParameter t = new TaskParameter(default(AbsolutePath));
+
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            // A default AbsolutePath has a null Value and serializes to the empty string.
+            Assert.Equal(string.Empty, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+        }
+
+        [Fact]
+        public void AbsolutePathParameter()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "TaskParameterTests_file.txt");
+            AbsolutePath value = new AbsolutePath(path);
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            // Path types are serialized using the same canonical conversion as the in-process engine.
+            Assert.Equal(value.Value, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+        }
+
+        [Fact]
+        public void AbsolutePathArrayParameter()
+        {
+            AbsolutePath[] value = new AbsolutePath[]
+            {
+                new AbsolutePath(Path.Combine(Path.GetTempPath(), "a.txt")),
+                new AbsolutePath(Path.Combine(Path.GetTempPath(), "b.txt")),
+            };
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
+            Assert.Equal(value[0].Value, stringArray[0]);
+            Assert.Equal(value[1].Value, stringArray[1]);
+        }
+
+        [Fact]
+        public void FileInfoParameter()
+        {
+            FileInfo value = new FileInfo(Path.Combine(Path.GetTempPath(), "TaskParameterTests_file.txt"));
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            // FileInfo is serialized as its full path, matching ValueTypeParser/the in-process engine.
+            Assert.Equal(value.FullName, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+        }
+
+        [Fact]
+        public void DirectoryInfoParameter()
+        {
+            DirectoryInfo value = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "TaskParameterTests_dir"));
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            Assert.Equal(value.FullName, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+        }
+
+        [Fact]
+        public void FileInfoArrayParameter()
+        {
+            FileInfo[] value = new FileInfo[]
+            {
+                new FileInfo(Path.Combine(Path.GetTempPath(), "a.txt")),
+                new FileInfo(Path.Combine(Path.GetTempPath(), "b.txt")),
+            };
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
+            Assert.Equal(value[0].FullName, stringArray[0]);
+            Assert.Equal(value[1].FullName, stringArray[1]);
+        }
+
+        [Fact]
+        public void DirectoryInfoArrayParameter()
+        {
+            DirectoryInfo[] value = new DirectoryInfo[]
+            {
+                new DirectoryInfo(Path.Combine(Path.GetTempPath(), "dirA")),
+                new DirectoryInfo(Path.Combine(Path.GetTempPath(), "dirB")),
+            };
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
+            Assert.Equal(value[0].FullName, stringArray[0]);
+            Assert.Equal(value[1].FullName, stringArray[1]);
         }
 
         private enum TestEnumForParameter
@@ -470,6 +604,355 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("c1)d1", foo2.GetMetadata("b"));
             Assert.Equal("a1(b1", foo2.GetMetadataValueEscaped("a"));
             Assert.Equal("c1)d1", foo2.GetMetadataValueEscaped("b"));
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/14763
+        /// Metadata inherited from an item definition is stored unexpanded and expanded on read, so a task must
+        /// observe the same value whether or not the item crossed the TaskHost boundary.
+        /// </summary>
+        [Theory]
+        [InlineData("%(Filename)", "hello")]
+        [InlineData("%( Filename )", "hello")]
+        [InlineData("%(filename)", "hello")]
+        [InlineData("pre-%(Filename)-post", "pre-hello-post")]
+        [InlineData("%(Filename)%(Extension)", "hello.txt")]
+        [InlineData("no expression", "no expression")]
+        // An escaped reference is text, not an expression.
+        [InlineData("%25(Filename)", "%(Filename)")]
+        // Malformed references are not expressions either.
+        [InlineData("%(Filename", "%(Filename")]
+        [InlineData("a%(", "a%(")]
+        [InlineData("%()", "%()")]
+        public void ItemDefinitionMetadataReadsTheSameAcrossTaskHostBoundary(string definitionValue, string expected)
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", definitionValue);
+
+            item.GetMetadata("NameMeta").ShouldBe(expected);
+            RoundTrip(item).GetMetadata("NameMeta").ShouldBe(expected);
+        }
+
+        /// <summary>
+        /// A task that reassigns ItemSpec sees item definition metadata re-derived from the new spec. That must
+        /// hold on both sides of the TaskHost boundary, so the value cannot simply be expanded up front.
+        /// </summary>
+        [Fact]
+        public void ItemDefinitionMetadataFollowsReassignedItemSpecAcrossTaskHostBoundary()
+        {
+            string renamed = $"other{Path.DirectorySeparatorChar}renamed.txt";
+
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)");
+            ITaskItem marshalled = RoundTrip(item);
+
+            item.ItemSpec = renamed;
+            marshalled.ItemSpec = renamed;
+
+            item.GetMetadata("NameMeta").ShouldBe("renamed");
+            marshalled.GetMetadata("NameMeta").ShouldBe("renamed");
+        }
+
+        /// <summary>
+        /// A value the task writes is read back as stored, matching what the same task would see in-proc.
+        /// </summary>
+        [Fact]
+        public void MetadataWrittenByTheTaskIsNotExpanded()
+        {
+            ITaskItem marshalled = RoundTrip(CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)"));
+
+            marshalled.SetMetadata("NameMeta", "%(Filename)");
+            marshalled.SetMetadata("Other", "%(Filename)");
+
+            marshalled.GetMetadata("NameMeta").ShouldBe("%(Filename)");
+            marshalled.GetMetadata("Other").ShouldBe("%(Filename)");
+
+            // The two origins were flattened into one dictionary when the item crossed the boundary, so removal
+            // leaves nothing behind. An engine item would uncover the item definition value here.
+            marshalled.RemoveMetadata("NameMeta");
+            marshalled.GetMetadata("NameMeta").ShouldBe("");
+        }
+
+        /// <summary>
+        /// Bulk metadata reads report values unexpanded, matching what an engine item reports in-proc.
+        /// </summary>
+        [Fact]
+        public void BulkMetadataReadsMatchEngineItemAcrossTaskHostBoundary()
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)");
+            ITaskItem marshalled = RoundTrip(item);
+
+            ((IDictionary)((ITaskItem2)item).CloneCustomMetadataEscaped())["NameMeta"].ShouldBe("%(Filename)");
+            ((IDictionary)((ITaskItem2)marshalled).CloneCustomMetadataEscaped())["NameMeta"].ShouldBe("%(Filename)");
+        }
+
+        /// <summary>
+        /// RecursiveDir comes from the wildcard the item was expanded from rather than from the item spec, so it
+        /// has to be resolved from the item's own metadata to keep patterns such as
+        /// <c>out\%(RecursiveDir)%(Filename)%(Extension)</c> producing the same path on both sides of the boundary.
+        /// </summary>
+        [Fact]
+        public void RecursiveDirReferenceIsExpandedAcrossTaskHostBoundary()
+        {
+            string sep = Path.DirectorySeparatorChar.ToString();
+            string expected = $"out{sep}sub1{sep}sub2{sep}hello.txt";
+
+            ProjectItemDefinitionInstance definition = new(
+                "Thing",
+                ImmutableDictionaryExtensions.EmptyMetadata.SetItem("NameMeta", $"out{sep}%(RecursiveDir)%(Filename)%(Extension)"));
+
+            ProjectItemInstanceTaskItem item = new(
+                includeEscaped: $"tree{sep}sub1{sep}sub2{sep}hello.txt",
+                includeBeforeWildcardExpansionEscaped: $"tree{sep}**{sep}*.txt",
+                directMetadata: null,
+                itemDefinitions: [definition],
+                projectDirectory: Directory.GetCurrentDirectory(),
+                immutable: false,
+                definingFileEscaped: "test.proj");
+
+            item.GetMetadata("NameMeta").ShouldBe(expected);
+            RoundTrip(item).GetMetadata("NameMeta").ShouldBe(expected);
+        }
+
+        /// <summary>
+        /// A task that clones its input, whether through <c>CopyMetadataTo</c> or the copy constructor that calls
+        /// it, must get the same values the engine item hands out. The destination has no notion of an unexpanded
+        /// value, so the copy has to be made with expanded ones.
+        /// </summary>
+        [Fact]
+        public void CopyingMetadataExpandsReferencesAcrossTaskHostBoundary()
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)");
+            ITaskItem marshalled = RoundTrip(item);
+
+            new TaskItem(item).GetMetadata("NameMeta").ShouldBe("hello");
+            new TaskItem(marshalled).GetMetadata("NameMeta").ShouldBe("hello");
+
+            TaskItem viaCopyFromEngineItem = new("dest");
+            TaskItem viaCopyFromMarshalledItem = new("dest");
+
+            item.CopyMetadataTo(viaCopyFromEngineItem);
+            marshalled.CopyMetadataTo(viaCopyFromMarshalledItem);
+
+            viaCopyFromEngineItem.GetMetadata("NameMeta").ShouldBe("hello");
+            viaCopyFromMarshalledItem.GetMetadata("NameMeta").ShouldBe("hello");
+        }
+
+        /// <summary>
+        /// A value the task wrote is read as stored, so cloning has to carry it across as written.
+        /// </summary>
+        [Fact]
+        public void MetadataWrittenByTheTaskIsCopiedAsStored()
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)");
+            ITaskItem marshalled = RoundTrip(item);
+
+            item.SetMetadata("Local", "%(Filename)");
+            marshalled.SetMetadata("Local", "%(Filename)");
+
+            new TaskItem(marshalled).GetMetadata("Local").ShouldBe(new TaskItem(item).GetMetadata("Local"));
+        }
+
+        /// <summary>
+        /// Metadata derived from the item's path is cached, so reassigning ItemSpec has to invalidate it. Otherwise
+        /// a value read before the move leaks into one read after it.
+        /// </summary>
+        [Fact]
+        public void ReassigningItemSpecInvalidatesCachedPathMetadataAcrossTaskHostBoundary()
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("PathMeta", "%(Directory)");
+            ITaskItem marshalled = RoundTrip(item);
+
+            // Read first so that anything derived from the original path is cached.
+            item.GetMetadata("FullPath").ShouldBe(marshalled.GetMetadata("FullPath"));
+
+            string renamed = $"other{Path.DirectorySeparatorChar}renamed.txt";
+            item.ItemSpec = renamed;
+            marshalled.ItemSpec = renamed;
+
+            marshalled.GetMetadata("FullPath").ShouldBe(item.GetMetadata("FullPath"));
+            marshalled.GetMetadata("Directory").ShouldBe(item.GetMetadata("Directory"));
+            marshalled.GetMetadata("PathMeta").ShouldBe(item.GetMetadata("PathMeta"));
+        }
+
+        /// <summary>
+        /// The expansion here is a deliberately minimal stand-in for the evaluation expander, so it has to agree
+        /// with it for every built-in metadata name, including any added later. Driving the theory from
+        /// <see cref="ItemSpecModifiers.All"/> rather than a fixed list is what keeps that true over time.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(AllItemSpecModifiers))]
+        public void EveryBuiltInMetadataReferenceReadsTheSameAcrossTaskHostBoundary(string modifier)
+        {
+            // A wildcard origin so that RecursiveDir is a real value rather than empty on both sides.
+            string sep = Path.DirectorySeparatorChar.ToString();
+
+            ProjectItemDefinitionInstance definition = new(
+                "Thing",
+                ImmutableDictionaryExtensions.EmptyMetadata.SetItem("NameMeta", $"[%({modifier})]"));
+
+            ProjectItemInstanceTaskItem item = new(
+                includeEscaped: $"tree{sep}sub1{sep}sub2{sep}hello.txt",
+                includeBeforeWildcardExpansionEscaped: $"tree{sep}**{sep}*.txt",
+                directMetadata: null,
+                itemDefinitions: [definition],
+                projectDirectory: Directory.GetCurrentDirectory(),
+                immutable: false,
+                definingFileEscaped: "test.proj");
+
+            string expected = item.GetMetadata("NameMeta");
+
+            // The time-based modifiers read the file system and are empty for an item that does not exist. They go
+            // through the same shared call as the rest, so equality is still worth asserting, but only the others
+            // can be required to resolve to something.
+            if (!modifier.EndsWith("Time", StringComparison.Ordinal))
+            {
+                expected.ShouldNotBe("[]", $"%({modifier}) should resolve to something for this test to mean anything");
+            }
+
+            RoundTrip(item).GetMetadata("NameMeta").ShouldBe(expected, $"for %({modifier})");
+        }
+
+        public static TheoryData<string> AllItemSpecModifiers
+        {
+            get
+            {
+                TheoryData<string> data = [];
+
+                foreach (string modifier in ItemSpecModifiers.All)
+                {
+                    data.Add(modifier);
+                }
+
+                return data;
+            }
+        }
+
+        /// <summary>
+        /// A reference qualified by an item type is left as written. The engine resolves built-in metadata against
+        /// a table with no item type, so a qualified reference never matches and evaluates to an empty string;
+        /// expanding to empty here instead would mean blanking any text of that shape. This pins the difference so
+        /// that it stays a decision rather than an accident.
+        /// </summary>
+        [Theory]
+        [InlineData("%(Thing.Filename)")]
+        [InlineData("%( Thing.Filename )")]
+        [InlineData("%(Other.Filename)")]
+        public void QualifiedMetadataReferenceIsLeftAsWritten(string definitionValue)
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", definitionValue);
+
+            item.GetMetadata("NameMeta").ShouldBe("");
+            RoundTrip(item).GetMetadata("NameMeta").ShouldBe(definitionValue);
+        }
+
+        /// <summary>
+        /// Only values the task writes are read as stored. Nothing on the receiving path may record metadata that
+        /// way, or item definition values would stop being expanded.
+        /// </summary>
+        [Fact]
+        public void ReceivingAnItemDoesNotMarkItsMetadataAsWrittenByTheTask()
+        {
+            ITaskItem marshalled = RoundTrip(CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)"));
+
+            marshalled.GetMetadata("NameMeta").ShouldBe("hello");
+
+            // A second hop must not change that either.
+            RoundTrip(marshalled).GetMetadata("NameMeta").ShouldBe("hello");
+        }
+
+        private static ProjectItemInstanceTaskItem CreateItemWithDefinitionMetadata(string name, string escapedValue)
+        {
+            string itemSpec = $"folder{Path.DirectorySeparatorChar}hello.txt";
+
+            ProjectItemDefinitionInstance definition = new(
+                "Thing",
+                ImmutableDictionaryExtensions.EmptyMetadata.SetItem(name, escapedValue));
+
+            return new ProjectItemInstanceTaskItem(
+                includeEscaped: itemSpec,
+                includeBeforeWildcardExpansionEscaped: itemSpec,
+                directMetadata: null,
+                itemDefinitions: [definition],
+                projectDirectory: Directory.GetCurrentDirectory(),
+                immutable: false,
+                definingFileEscaped: "test.proj");
+        }
+
+        private static ITaskItem RoundTrip(ITaskItem item)
+        {
+            TaskParameter t = new(item);
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+
+            return (ITaskItem)TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator()).WrappedParameter;
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13140
+        /// RecursiveDir (built-in, non-derivable metadata) must survive TaskParameter
+        /// serialization, which is the TaskHost boundary crossed in -mt mode.
+        /// </summary>
+        [Fact]
+        public void RecursiveDirSurvivesTaskParameterSerialization()
+        {
+            string sep = Path.DirectorySeparatorChar.ToString();
+            string itemSpec = $"src{sep}sub1{sep}sub2{sep}file.txt";
+            string wildcardPattern = $"src{sep}**{sep}file.txt";
+            string expectedRecursiveDir = $"sub1{sep}sub2{sep}";
+
+            // ProjectItemInstance.TaskItem computes RecursiveDir as built-in metadata
+            // from the wildcard pattern — it is NOT in CloneCustomMetadataEscaped().
+            var item = new ProjectItemInstanceTaskItem(
+                includeEscaped: itemSpec,
+                includeBeforeWildcardExpansionEscaped: wildcardPattern,
+                directMetadata: null,
+                itemDefinitions: null,
+                projectDirectory: Directory.GetCurrentDirectory(),
+                immutable: false,
+                definingFileEscaped: "test.proj");
+
+            item.GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+            ((ITaskItem2)item).CloneCustomMetadataEscaped().Contains("RecursiveDir").ShouldBeFalse();
+
+            // Wrap in TaskParameter (TaskHost serialization boundary)
+            TaskParameter t = new TaskParameter(item);
+            (t.WrappedParameter as ITaskItem).GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+
+            // Round-trip serialize/deserialize
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            (t2.WrappedParameter as ITaskItem).GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13896
+        /// ToString() on the marshaled task item must return the item-spec (matching every other
+        /// ITaskItem implementation), not the .NET type name. In -mt mode (and out-of-proc TaskHost)
+        /// task outputs come back as TaskParameterTaskItem; tasks that consume them may call ToString()
+        /// expecting the spec. Without the override they would get
+        /// "Microsoft.Build.BackEnd.TaskParameter+TaskParameterTaskItem" instead.
+        /// </summary>
+        [Fact]
+        public void ITaskItemParameter_ToStringReturnsItemSpec()
+        {
+            TaskParameter t = new TaskParameter(new TaskItem("some/path/foo.dll"));
+
+            ITaskItem wrapped = t.WrappedParameter as ITaskItem;
+            wrapped.ShouldNotBeNull();
+            wrapped.ToString().ShouldBe("some/path/foo.dll");
+
+            // The spec is returned in its escaped form, matching ProjectItemInstance.TaskItem.ToString().
+            ITaskItem wrappedEscaped = new TaskParameter(new TaskItem("foo%3bbar")).WrappedParameter as ITaskItem;
+            wrappedEscaped.ShouldNotBeNull();
+            wrappedEscaped.ToString().ShouldBe("foo%3bbar");
+            wrappedEscaped.ItemSpec.ShouldBe("foo;bar");
+
+            // The spec survives serialization (the TaskHost / -mt marshaling boundary).
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            ITaskItem wrapped2 = t2.WrappedParameter as ITaskItem;
+            wrapped2.ShouldNotBeNull();
+            wrapped2.ToString().ShouldBe("some/path/foo.dll");
         }
 
 #if FEATURE_APPDOMAIN

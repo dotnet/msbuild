@@ -7,8 +7,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 #endif
 using System.Threading;
-using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.Debugging;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 
 #nullable disable
@@ -107,7 +106,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="nodeId">The ID of the node this endpoint manages.</param>
         private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host, int nodeId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
 
             _status = LinkStatus.Inactive;
             _mode = commMode;
@@ -169,7 +168,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory);
+            Assumed.NotNull(factory);
             _packetFactory = factory;
 
             // Initialize our thread in async mode so we are ready when the Node-side endpoint "connects".
@@ -187,7 +186,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory);
+            Assumed.NotNull(factory);
             _packetFactory = factory;
 
             // Set up asynchronous packet pump, if necessary.
@@ -217,7 +216,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Active, "Cannot send when link status is not active. Current status {0}", _status);
+            Assumed.Equal(_status, LinkStatus.Active, $"Cannot send when link status is not active. Current status {_status}");
 
             if (_mode == EndpointMode.Synchronous)
             {
@@ -309,7 +308,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void InternalDisconnect()
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Active, "Endpoint is not connected. Current status {0}", _status);
+            Assumed.Equal(_status, LinkStatus.Active, $"Endpoint is not connected. Current status {_status}");
 
             ChangeLinkStatus(LinkStatus.Inactive);
 
@@ -326,7 +325,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The status the node should now be in.</param>
         private void ChangeLinkStatus(LinkStatus newStatus)
         {
-            ErrorUtilities.VerifyThrow(_status != newStatus, "Attempting to change status to existing status {0}.", _status);
+            Assumed.NotEqual(_status, newStatus, $"Attempting to change status to existing status {_status}.");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
         }
@@ -339,10 +338,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet);
-            ErrorUtilities.VerifyThrow(_mode == EndpointMode.Asynchronous, "EndPoint mode is synchronous, should be asynchronous");
-            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
+            ArgumentNullException.ThrowIfNull(packet);
+            Assumed.Equal(_mode, EndpointMode.Asynchronous, "EndPoint mode is synchronous, should be asynchronous");
+            Assumed.NotNull(_packetQueue, "packetQueue is null");
+            Assumed.NotNull(_packetAvailable, "packetAvailable is null");
 
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();
@@ -355,10 +354,10 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
-                ErrorUtilities.VerifyThrow(_packetPump == null, "packetPump != null");
-                ErrorUtilities.VerifyThrow(_packetAvailable == null, "packetAvailable != null");
-                ErrorUtilities.VerifyThrow(_terminatePacketPump == null, "terminatePacketPump != null");
-                ErrorUtilities.VerifyThrow(_packetQueue == null, "packetQueue != null");
+                Assumed.Null(_packetPump, "packetPump != null");
+                Assumed.Null(_packetAvailable, "packetAvailable != null");
+                Assumed.Null(_terminatePacketPump, "terminatePacketPump != null");
+                Assumed.Null(_packetQueue, "packetQueue != null");
 
 #if FEATURE_THREAD_CULTURE
                 _packetPump = new Thread(PacketPumpProc);
@@ -392,10 +391,10 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
-                ErrorUtilities.VerifyThrow(_packetPump != null, "packetPump == null");
-                ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable == null");
-                ErrorUtilities.VerifyThrow(_terminatePacketPump != null, "terminatePacketPump == null");
-                ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue == null");
+                Assumed.NotNull(_packetPump, "packetPump == null");
+                Assumed.NotNull(_packetAvailable, "packetAvailable == null");
+                Assumed.NotNull(_terminatePacketPump, "terminatePacketPump == null");
+                Assumed.NotNull(_packetQueue, "packetQueue == null");
 
                 _terminatePacketPump.Set();
                 if (!_packetPump.Join((int)new TimeSpan(0, 0, BuildParameters.EndpointShutdownTimeout).TotalMilliseconds))
@@ -451,7 +450,7 @@ namespace Microsoft.Build.BackEnd
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError("waitId {0} out of range.", waitId);
+                            Assumed.Unreachable($"waitId {waitId} out of range.");
                             break;
                     }
                 }
@@ -462,7 +461,7 @@ namespace Microsoft.Build.BackEnd
                 // Dump all engine exceptions to a temp file
                 // so that we have something to go on in the
                 // event of a failure
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
                 throw;
             }
         }

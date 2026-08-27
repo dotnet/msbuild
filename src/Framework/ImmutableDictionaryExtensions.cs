@@ -16,7 +16,6 @@ namespace Microsoft.Build.Framework
         public static readonly ImmutableDictionary<string, string> EmptyMetadata =
             ImmutableDictionary<string, string>.Empty.WithComparers(MSBuildNameIgnoreCaseComparer.Default);
 
-#if !TASKHOST
         /// <summary>
         /// Sets the given items while running a validation function on each key.
         /// </summary>
@@ -42,6 +41,5 @@ namespace Microsoft.Build.Framework
 
             return builder.ToImmutable();
         }
-#endif
     }
 }

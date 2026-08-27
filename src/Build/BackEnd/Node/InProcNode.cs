@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -10,7 +10,7 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
@@ -145,7 +145,7 @@ namespace Microsoft.Build.BackEnd
                 WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
                 // Get the current directory before doing work. We need this so we can restore the directory when the node shuts down.
-                _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+                _savedCurrentDirectory = Environment.CurrentDirectory;
                 while (true)
                 {
                     int index = WaitHandle.WaitAny(waitHandles);
@@ -187,11 +187,11 @@ namespace Microsoft.Build.BackEnd
                 // Dump all engine exceptions to a temp file
                 // so that we have something to go on in the
                 // event of a failure
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
 
                 // This is fatal: process will terminate: make sure the
                 // debugger launches
-                ErrorUtilities.ThrowInternalError(e.Message, e);
+                InternalError.Throw(e.Message, e);
                 throw;
             }
 
@@ -222,20 +222,15 @@ namespace Microsoft.Build.BackEnd
         /// Not necessary for in-proc node - we don't serialize.
         /// </summary>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
-        {
             // The in-proc endpoint shouldn't be serializing, just routing.
-            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializeAndRoutePacket on the in-proc node.");
-        }
+            => InternalError.Throw("Unexpected call to DeserializeAndRoutePacket on the in-proc node.");
 
         /// <summary>
         /// Not necessary for in-proc node - we don't serialize.
         /// </summary>
         public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
-        {
             // The in-proc endpoint shouldn't be serializing, just routing.
-            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializePacket on the in-proc node.");
-            return null;
-        }
+            => InternalError.Throw<INodePacket>("Unexpected call to DeserializePacket on the in-proc node.");
 
         /// <summary>
         /// Routes the packet to the appropriate handler.
@@ -484,7 +479,7 @@ namespace Microsoft.Build.BackEnd
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
             // Save the current directory.
-            _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+            _savedCurrentDirectory = Environment.CurrentDirectory;
 
             // Set the node id.
             _componentHost.BuildParameters.NodeId = configuration.NodeId;

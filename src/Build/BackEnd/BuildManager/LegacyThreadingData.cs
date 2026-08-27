@@ -55,7 +55,7 @@ namespace Microsoft.Build.Execution
 
             set
             {
-                ErrorUtilities.VerifyThrow(_instanceForMainThread == null || (_instanceForMainThread != null && value == null) || (_instanceForMainThread == value), "Should not assign to instanceForMainThread twice without cleaning it");
+                Assumed.True(_instanceForMainThread == null || (_instanceForMainThread != null && value == null) || (_instanceForMainThread == value), "Should not assign to instanceForMainThread twice without cleaning it");
                 _instanceForMainThread = value;
             }
         }
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Execution
         {
             lock (_legacyThreadingEventsLock)
             {
-                ErrorUtilities.VerifyThrow(!_legacyThreadingEventsById.ContainsKey(submissionId), "Submission {0} should not already be registered with LegacyThreadingData", submissionId);
+                Assumed.False(_legacyThreadingEventsById.ContainsKey(submissionId), $"Submission {submissionId} should not already be registered with LegacyThreadingData");
 
                 _legacyThreadingEventsById[submissionId] = new Tuple<AutoResetEvent, ManualResetEvent>(
                                 new AutoResetEvent(false),
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Execution
         {
             lock (_legacyThreadingEventsLock)
             {
-                ErrorUtilities.VerifyThrow(_legacyThreadingEventsById.ContainsKey(submissionId), "Submission {0} should have been previously registered with LegacyThreadingData", submissionId);
+                Assumed.True(_legacyThreadingEventsById.ContainsKey(submissionId), $"Submission {submissionId} should have been previously registered with LegacyThreadingData");
 
                 // Dispose the events
                 _legacyThreadingEventsById[submissionId].Item1?.Dispose();
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Execution
                 _legacyThreadingEventsById.TryGetValue(submissionId, out legacyThreadingEvents);
             }
 
-            ErrorUtilities.VerifyThrow(legacyThreadingEvents != null, "We're trying to wait on the legacy thread for submission {0}, but that submission has not been registered.", submissionId);
+            Assumed.NotNull(legacyThreadingEvents, $"We're trying to wait on the legacy thread for submission {submissionId}, but that submission has not been registered.");
 
             return legacyThreadingEvents.Item1;
         }
@@ -145,7 +145,7 @@ namespace Microsoft.Build.Execution
                 _legacyThreadingEventsById.TryGetValue(submissionId, out legacyThreadingEvents);
             }
 
-            ErrorUtilities.VerifyThrow(legacyThreadingEvents != null, "We're trying to track when the legacy thread for submission {0} goes inactive, but that submission has not been registered.", submissionId);
+            Assumed.NotNull(legacyThreadingEvents, $"We're trying to track when the legacy thread for submission {submissionId} goes inactive, but that submission has not been registered.");
 
             return legacyThreadingEvents.Item2.ToTask();
         }
@@ -155,9 +155,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void SignalLegacyThreadStart(RequestBuilder instance)
         {
-            ErrorUtilities.VerifyThrow(
-                    instance?.RequestEntry?.Request != null,
-                    "Cannot signal legacy thread start for a RequestBuilder without a request");
+            Assumed.NotNull(instance?.RequestEntry?.Request, "Cannot signal legacy thread start for a RequestBuilder without a request");
 
             int submissionId = instance.RequestEntry.Request.SubmissionId;
             InstanceForMainThread = instance;
@@ -168,7 +166,7 @@ namespace Microsoft.Build.Execution
                 _legacyThreadingEventsById.TryGetValue(submissionId, out legacyThreadingEvents);
             }
 
-            ErrorUtilities.VerifyThrow(legacyThreadingEvents != null, "We're trying to signal that the legacy thread is ready for submission {0} to execute, but that submission has not been registered", submissionId);
+            Assumed.NotNull(legacyThreadingEvents, $"We're trying to signal that the legacy thread is ready for submission {submissionId} to execute, but that submission has not been registered");
 
             // signal that this submission is currently controlling the legacy thread
             legacyThreadingEvents.Item1.Set();
@@ -190,7 +188,7 @@ namespace Microsoft.Build.Execution
                 _legacyThreadingEventsById.TryGetValue(submissionId, out legacyThreadingEvents);
             }
 
-            ErrorUtilities.VerifyThrow(legacyThreadingEvents != null, "We're trying to signal that submission {0} is done with the legacy thread, but that submission has not been registered", submissionId);
+            Assumed.NotNull(legacyThreadingEvents, $"We're trying to signal that submission {submissionId} is done with the legacy thread, but that submission has not been registered");
 
             // The legacy thread is now idle
             legacyThreadingEvents.Item2.Set();

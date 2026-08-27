@@ -394,8 +394,12 @@
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
   <data name="Exec.AllDriveLettersMappedError">
-    <value>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</value>
+    <value>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</value>
     <comment>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</comment>
+  </data>
+  <data name="Exec.MissingCommandError">
+    <value>MSB3072: The "Exec" task needs a command to execute.</value>
+    <comment>{StrBegin="MSB3072: "}LOCALIZATION: "Exec" should not be localized.</comment>
   </data>
   <data name="Exec.CommandFailed">
     <value>MSB3073: The command "{0}" exited with code {1}.</value>
@@ -412,9 +416,9 @@
     <value>MSB3076: The regular expression "{0}" that was supplied is invalid. {1}</value>
     <comment>{StrBegin="MSB3076: "}</comment>
   </data>
-  <data name="Exec.MissingCommandError">
-    <value>MSB3072: The "Exec" task needs a command to execute.</value>
-    <comment>{StrBegin="MSB3072: "}LOCALIZATION: "Exec" should not be localized.</comment>
+  <data name="Exec.CommandExitedZeroWithErrors">
+    <value>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</value>
+    <comment>{StrBegin="MSB3077: "}</comment>
   </data>
   <data name="Exec.InvalidWorkingDirectory">
     <value>The working directory "{0}" does not exist.</value>
@@ -495,6 +499,9 @@
   </data>
   <data name="General.ExpectedFileMissing">
     <value>Expected file "{0}" does not exist.</value>
+  </data>
+  <data name="General.FailedToCanonicalizePath">
+    <value>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</value>
   </data>
   <data name="General.FrameworksFileNotFound">
     <value>MSB3082: Task failed because "{0}" was not found, or the .NET Framework {1} is not installed.  Please install the .NET Framework {1}.</value>
@@ -1153,7 +1160,7 @@
     <comment>{StrBegin="MSB3820: "}</comment>
   </data>
   <data name="GenerateResource.MOTW">
-    <value>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</value>
+    <value>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</value>
     <comment>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</comment>
   </data>
   <data name="GenerateResource.PreserializedResourcesRequiresExtensions">
@@ -1177,6 +1184,23 @@
   <data name="GenerateResource.MimeTypeNotSupportedOnCore">
     <value>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</value>
     <comment>{StrBegin="MSB3826: "}</comment>
+  </data>
+
+  <data name="GenerateResource.STRPropertySkippedReservedName">
+    <value>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</value>
+    <comment>{StrBegin="MSB3827: "}</comment>
+  </data>
+  <data name="GenerateResource.STRPropertySkippedInvalidIdentifier">
+    <value>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</value>
+    <comment>{StrBegin="MSB3828: "}</comment>
+  </data>
+  <data name="GenerateResource.STRPropertySkippedNameCollision">
+    <value>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</value>
+    <comment>{StrBegin="MSB3829: "}</comment>
+  </data>
+  <data name="GenerateResource.STRPropertySkippedVoidType">
+    <value>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</value>
+    <comment>{StrBegin="MSB3830: "}</comment>
   </data>
 
   <!--
@@ -1507,6 +1531,10 @@
   <data name="ResolveAssemblyReference.InvalidAppConfig">
     <value>MSB3249: Application Configuration file "{0}" is invalid. {1}</value>
     <comment>{StrBegin="MSB3249: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.AppConfigFilePathEmpty">
+    <value>Application Configuration file path cannot be empty.</value>
+    <comment>This message can be used as the {1} in MSB3249</comment>
   </data>
   <data name="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
     <value>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</value>
@@ -2302,6 +2330,10 @@
       <value>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</value>
     <comment>{StrBegin="MSB3724: "}</comment>
   </data>
+  <data name="Xaml.CommandExitedZeroWithErrors">
+    <value>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</value>
+    <comment>{StrBegin="MSB3725: "}</comment>
+  </data>
 
   <!--
         The XslTransformation message bucket is: MSB3701-3710.
@@ -2319,6 +2351,10 @@
     <value>MSB3703: Unable to execute transformation. {0}</value>
     <comment>{StrBegin="MSB3703: "}</comment>
   </data>
+  <data name="XslTransform.TransformDtdProhibited" xml:space="preserve">
+    <value>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</value>
+    <comment>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</comment>
+  </data>
   <data name="XslTransform.XmlInput.TooMany" xml:space="preserve">
     <value>Only one of XmlContent or XmlInputPaths arguments can be set.</value>
   </data>
@@ -2334,6 +2370,10 @@
   <data name="XslTransform.XsltLoadError" xml:space="preserve">
     <value>MSB3704: Unable to load the specified Xslt. {0}</value>
     <comment>{StrBegin="MSB3704: "}</comment>
+  </data>
+  <data name="XslTransform.XsltLoadDtdProhibited" xml:space="preserve">
+    <value>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</value>
+    <comment>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</comment>
   </data>
   <data name="XslTransform.MustSpecifyType" xml:space="preserve">
     <value>When specifying assembly "{0}", you must specify the type as well.</value>
@@ -2383,6 +2423,9 @@
   <data name="XmlPeekPoke.InputFileError" xml:space="preserve">
     <value>MSB3733: Input file "{0}" cannot be opened. {1}</value>
     <comment>{StrBegin="MSB3733: "}</comment>
+  </data>
+  <data name="XmlPeekPoke.InputDtdProhibited" xml:space="preserve">
+    <value>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</value>
   </data>
   <data name="XmlPeekPoke.XPathError" xml:space="preserve">
     <value>MSB3734: XPath Query "{0}" cannot be loaded. {1}</value>
@@ -3056,6 +3099,101 @@
   </data>
 
   <!--
+        MSB4311 - MSB4320   Task: FormatUrl
+  -->
+  <data name="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+    <value>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</value>
+    <comment>{StrBegin="MSB4311: "}</comment>
+  </data>
+
+  <!--
+        MSB4321 - MSB4330   Task: TarDirectory
+  -->
+  <data name="TarDirectory.ErrorDirectoryDoesNotExist">
+    <value>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB4321: "}</comment>
+  </data>
+  <data name="TarDirectory.ErrorFileExists">
+    <value>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</value>
+    <comment>{StrBegin="MSB4322: "}</comment>
+  </data>
+  <data name="TarDirectory.ErrorFailed">
+    <value>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</value>
+    <comment>{StrBegin="MSB4323: "}</comment>
+  </data>
+  <data name="TarDirectory.InvalidDeterministicTimestamp">
+    <value>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</value>
+    <comment>{StrBegin="MSB4324: "}</comment>
+  </data>
+  <data name="TarDirectory.ErrorFailIfNotIncremental">
+    <value>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</value>
+    <comment>{StrBegin="MSB4325: "}</comment>
+  </data>
+  <data name="TarDirectory.InvalidFormat">
+    <value>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</value>
+    <comment>{StrBegin="MSB4326: "}</comment>
+  </data>
+  <data name="TarDirectory.InvalidCompression">
+    <value>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</value>
+    <comment>{StrBegin="MSB4327: "}</comment>
+  </data>
+  <data name="TarDirectory.Comment">
+    <value>Creating tar archive from directory "{0}" to "{1}".</value>
+  </data>
+
+  <!--
+        MSB4331 - MSB4340   Task: Untar
+  -->
+  <data name="Untar.ErrorCouldNotCreateDestinationDirectory">
+    <value>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</value>
+    <comment>{StrBegin="MSB4331: "}</comment>
+  </data>
+  <data name="Untar.ErrorFileDoesNotExist">
+    <value>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB4332: "}</comment>
+  </data>
+  <data name="Untar.ErrorCouldNotOpenFile">
+    <value>MSB4333: Failed to open tar file "{0}".  {1}</value>
+    <comment>{StrBegin="MSB4333: "}</comment>
+  </data>
+  <data name="Untar.ErrorExtractingResultsInFilesOutsideDestination">
+    <value>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</value>
+    <comment>{StrBegin="MSB4334: "}</comment>
+  </data>
+  <data name="Untar.ErrorCouldNotMakeFileWriteable">
+    <value>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</value>
+    <comment>{StrBegin="MSB4335: "}</comment>
+  </data>
+  <data name="Untar.ErrorCouldNotExtractFile">
+    <value>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</value>
+    <comment>{StrBegin="MSB4336: "}</comment>
+  </data>
+  <data name="Untar.ErrorParsingPatternInvalidPath">
+    <value>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</value>
+    <comment>{StrBegin="MSB4337: "}</comment>
+  </data>
+  <data name="Untar.ErrorParsingPatternPropertyReferences">
+    <value>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</value>
+    <comment>{StrBegin="MSB4338: "}</comment>
+  </data>
+  <data name="Untar.ErrorFailIfNotIncremental">
+    <value>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</value>
+    <comment>{StrBegin="MSB4339: "}</comment>
+  </data>
+  <data name="Untar.DidNotUntarBecauseOfFileMatch">
+    <value>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
+  </data>
+  <data name="Untar.DidNotUntarBecauseOfFilter">
+    <value>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</value>
+  </data>
+  <data name="Untar.DidNotUntarBecauseOfEntryType">
+    <value>Did not untar entry "{0}" because its entry type "{1}" is not supported.</value>
+  </data>
+  <data name="Untar.FileComment">
+    <value>Untarring file "{0}" to "{1}".</value>
+  </data>
+
+  <!--
         MSB9901 - MSB9990   MSBuild common targets messages
   -->
   <data name="CommonSdk.SpecifiedSeverityDoesNotExist">
@@ -3219,7 +3357,9 @@
             MSB3981 - MSB3990   Task: GetCompatiblePlatform
             MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
             MSB4300 - MSB4310   Task: AddToWin32Manifest
-
+            MSB4311 - MSB4320   Task: FormatUrl
+            MSB4321 - MSB4330   Task: TarDirectory
+            MSB4331 - MSB4340   Task: Untar
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
 

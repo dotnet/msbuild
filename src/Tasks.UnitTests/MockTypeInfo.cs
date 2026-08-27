@@ -1,11 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 using Xunit;
-using IFixedTypeInfo = Microsoft.Build.Tasks.IFixedTypeInfo;
 using Marshal = System.Runtime.InteropServices.Marshal;
 using VarEnum = System.Runtime.InteropServices.VarEnum;
 
@@ -108,7 +109,15 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Mock class for the ITypeInfo interface
     /// </summary>
-    public class MockTypeInfo : ITypeInfo, ICompositeTypeInfo, IFixedTypeInfo
+    /// <remarks>
+    /// This deliberately implements ONLY the built-in <see cref="ITypeInfo"/> (and <see cref="ICompositeTypeInfo"/>),
+    /// NOT Microsoft.Build.Tasks.IFixedTypeInfo. The two interfaces share the same IID (00020401-0000-0000-C000-000000000046)
+    /// but have different ABIs (IFixedTypeInfo uses IntPtr handles, ITypeInfo uses int). The tests hand this mock to the
+    /// struct-based ComDependencyWalker as a COM-callable-wrapper pointer (Marshal.GetComInterfaceForObject), which performs a
+    /// real QueryInterface for IID 00020401. If this class implemented both interfaces, that QueryInterface would be ambiguous
+    /// and could expose the wrong vtable, corrupting the call. Do NOT add IFixedTypeInfo to the base list.
+    /// </remarks>
+    public class MockTypeInfo : ITypeInfo, ICompositeTypeInfo
     {
         private static int s_HREF_IMPLTYPES_OFFSET = 1000;
         private static int s_HREF_VARS_OFFSET = 2000;
@@ -242,47 +251,6 @@ namespace Microsoft.Build.UnitTests
         {
             _memoryHelper.AssertAllHandlesReleased();
         }
-
-        #region IFixedTypeInfo members
-
-        void IFixedTypeInfo.GetRefTypeOfImplType(int index, out System.IntPtr href)
-        {
-            Assert.True(index >= 0 && index < _typeAttributes.cImplTypes);
-
-            _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetRefTypeOfImplType);
-
-            href = ((System.IntPtr)index + s_HREF_IMPLTYPES_OFFSET);
-        }
-
-        void IFixedTypeInfo.GetRefTypeInfo(System.IntPtr hRef, out IFixedTypeInfo ppTI)
-        {
-            _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetRefTypeInfo);
-            int hRefInt = (int)hRef;
-
-            if (hRefInt >= s_HREF_IMPLTYPES_OFFSET && hRefInt <= s_HREF_IMPLTYPES_OFFSET + s_HREF_RANGE)
-            {
-                ppTI = _implementedTypes[hRefInt - s_HREF_IMPLTYPES_OFFSET];
-            }
-            else if (hRefInt >= s_HREF_VARS_OFFSET && hRefInt <= s_HREF_VARS_OFFSET + s_HREF_RANGE)
-            {
-                ppTI = _definedVariables[hRefInt - s_HREF_VARS_OFFSET].GetFinalTypeInfo();
-            }
-            else if (hRefInt >= s_HREF_FUNCSRET_OFFSET && hRefInt <= s_HREF_FUNCSRET_OFFSET + s_HREF_RANGE)
-            {
-                ppTI = _definedFunctions[hRefInt - s_HREF_FUNCSRET_OFFSET].returnType.GetFinalTypeInfo();
-            }
-            else if (hRefInt >= s_HREF_FUNCSPARAM_OFFSET && hRefInt <= s_HREF_FUNCSPARAM_OFFSET + s_HREF_RANGE)
-            {
-                ppTI = _definedFunctions[(hRefInt - s_HREF_FUNCSPARAM_OFFSET) / s_HREF_FUNCSPARAM_OFFSET_PERFUNC].parameters[(hRefInt - s_HREF_FUNCSPARAM_OFFSET) % s_HREF_FUNCSPARAM_OFFSET_PERFUNC].GetFinalTypeInfo();
-            }
-            else
-            {
-                ppTI = null;
-                Assert.Fail("unexpected hRef value");
-            }
-        }
-
-        #endregion
 
         #region Implemented ITypeInfo members
 
@@ -497,3 +465,5 @@ namespace Microsoft.Build.UnitTests
         #endregion
     }
 }
+
+#endif

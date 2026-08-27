@@ -3,10 +3,12 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Runtime.Hosting;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -307,6 +309,74 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                     File.Delete(tempKeyContainer);
                 }
             }
+        }
+
+        /// <summary>
+        /// Regression test for the multithreaded task migration: a relative KeyFile must be
+        /// resolved against the task's project directory (via TaskEnvironment), not the
+        /// process working directory.
+        /// </summary>
+        [Fact]
+        public void RelativeKeyFile_ResolvedAgainstTaskEnvironmentProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectDir = env.CreateFolder().Path;
+            string keyFileName = "myKey.key";
+            string keyFilePath = Path.Combine(projectDir, keyFileName);
+            File.WriteAllBytes(keyFilePath, new byte[] { 0x01, 0x02, 0x03, 0x04 });
+
+            var t = new ResolveComReference.AxImp
+            {
+                ActiveXControlName = "FakeControl.ocx",
+                ToolPath = projectDir,
+                KeyFile = keyFileName, // relative — must be resolved against projectDir
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
+            };
+
+            // Precondition: process CWD must differ from projectDir, otherwise this test
+            // would pass trivially without exercising the TaskEnvironment-based resolution.
+            Assert.NotEqual(projectDir, Environment.CurrentDirectory);
+
+            MockEngine e = new MockEngine();
+            t.BuildEngine = e;
+            t.Execute().ShouldBeFalse();
+
+            Utilities.VerifyLogDoesNotContainErrorFromResource(e, t.Log, "AxTlbBaseTask.InvalidKeyFileSpecified", keyFileName);
+            Utilities.VerifyLogContainsErrorFromResource(e, t.Log, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile", keyFileName);
+        }
+
+        /// <summary>
+        /// Regression test for the multithreaded task migration: a relative ToolPath must be
+        /// resolved against the task's project directory (via TaskEnvironment), not the
+        /// process working directory.
+        /// </summary>
+        [Fact]
+        public void RelativeToolPath_ResolvedAgainstTaskEnvironmentProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectDir = env.CreateFolder().Path;
+            string toolDirName = "tools";
+            Directory.CreateDirectory(Path.Combine(projectDir, toolDirName));
+
+            var t = new ResolveComReference.AxImp
+            {
+                ActiveXControlName = "FakeControl.ocx",
+                ToolPath = toolDirName, // relative — must be resolved against projectDir
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
+            };
+
+            // Precondition: process CWD must differ from projectDir, otherwise this test
+            // would pass trivially without exercising the TaskEnvironment-based resolution.
+            Assert.NotEqual(projectDir, Environment.CurrentDirectory);
+
+            // With the multithreaded fix the relative ToolPath resolves via
+            // TaskEnvironment.ProjectDirectory, so the "SdkOrToolPathNotSpecifiedOrInvalid"
+            // error must not be logged.
+            MockEngine e = new MockEngine();
+            t.BuildEngine = e;
+            t.Execute().ShouldBeFalse(); // task still fails for other reasons (missing tool exe)
+
+            Utilities.VerifyLogDoesNotContainErrorFromResource(e, t.Log, "AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", t.SdkToolsPath ?? "", t.ToolPath ?? "");
         }
     }
 

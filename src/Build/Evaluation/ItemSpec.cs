@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -122,9 +123,9 @@ namespace Microsoft.Build.Evaluation
                         ExpanderOptions.ExpandItems,
                         includeNullEntries: false,
                         isTransformExpression: out _,
-                        itemsFromCapture: out var itemsFromCapture);
+                        entries: out var entries);
                     _referencedItems =
-                        itemsFromCapture?.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList() ?? [];
+                        entries?.Select(i => new ReferencedItem(i.Item, new ValueFragment(i.Value, ProjectDirectory))).ToList() ?? [];
 
                     return true;
                 }
@@ -261,25 +262,18 @@ namespace Microsoft.Build.Evaluation
         {
             isItemListExpression = false;
 
-            // Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
-            if (expression.Length == 0)
+            if (Expander<P, I>.TryExpandSingleItemVectorExpression(
+                    expression,
+                    ExpanderOptions.ExpandItems,
+                    elementLocation,
+                    out ExpressionShredder.ItemExpressionCapture itemVector))
             {
-                return null;
+                isItemListExpression = true;
+
+                return new ItemExpressionFragment(itemVector, expression, this, projectDirectory);
             }
 
-            var capture = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
-                expression,
-                ExpanderOptions.ExpandItems,
-                elementLocation);
-
-            if (capture == null)
-            {
-                return null;
-            }
-
-            isItemListExpression = true;
-
-            return new ItemExpressionFragment(capture.Value, expression, this, projectDirectory);
+            return null;
         }
 
         /// <summary>
@@ -394,7 +388,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (var fragment in Fragments)
             {
-                if (fragment is ValueFragment || fragment is GlobFragment)
+                if (fragment is ValueFragment or GlobFragment)
                 {
                     yield return fragment.TextFragment;
                 }
@@ -407,7 +401,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
         }

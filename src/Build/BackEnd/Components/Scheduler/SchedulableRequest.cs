@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -126,9 +125,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public SchedulableRequest(SchedulingData collection, BuildRequest request, SchedulableRequest parent)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(collection);
-            ErrorUtilities.VerifyThrowArgumentNull(request);
-            ErrorUtilities.VerifyThrow((parent == null) || (parent._schedulingData == collection), "Parent request does not belong to the same collection.");
+            ArgumentNullException.ThrowIfNull(collection);
+            ArgumentNullException.ThrowIfNull(request);
+            Assumed.True((parent == null) || (parent._schedulingData == collection), "Parent request does not belong to the same collection.");
 
             _schedulingData = collection;
             _request = request;
@@ -253,7 +252,7 @@ namespace Microsoft.Build.BackEnd
 
             set
             {
-                ErrorUtilities.VerifyThrow(_creationTime == DateTime.MinValue, "Cannot set CreationTime twice.");
+                Assumed.Equal(_creationTime, DateTime.MinValue, "Cannot set CreationTime twice.");
                 _creationTime = value;
             }
         }
@@ -270,7 +269,7 @@ namespace Microsoft.Build.BackEnd
 
             set
             {
-                ErrorUtilities.VerifyThrow(_startTime == DateTime.MinValue, "Cannot set StartTime twice.");
+                Assumed.Equal(_startTime, DateTime.MinValue, "Cannot set StartTime twice.");
                 _startTime = value;
             }
         }
@@ -287,7 +286,7 @@ namespace Microsoft.Build.BackEnd
 
             set
             {
-                ErrorUtilities.VerifyThrow(_endTime == DateTime.MinValue, "Cannot set EndTime twice.");
+                Assumed.Equal(_endTime, DateTime.MinValue, "Cannot set EndTime twice.");
                 _endTime = value;
             }
         }
@@ -311,7 +310,7 @@ namespace Microsoft.Build.BackEnd
         public void Yield(string[] activeTargets)
         {
             VerifyState(SchedulableRequestState.Executing);
-            ErrorUtilities.VerifyThrowArgumentNull(activeTargets);
+            ArgumentNullException.ThrowIfNull(activeTargets);
             _activeTargetsWhenBlocked = activeTargets;
             ChangeToState(SchedulableRequestState.Yielding);
         }
@@ -335,15 +334,15 @@ namespace Microsoft.Build.BackEnd
         public void BlockByRequest(SchedulableRequest blockingRequest, string[] activeTargets, string blockingTarget = null)
         {
             VerifyOneOfStates([SchedulableRequestState.Blocked, SchedulableRequestState.Executing]);
-            ErrorUtilities.VerifyThrowArgumentNull(blockingRequest);
-            ErrorUtilities.VerifyThrowArgumentNull(activeTargets);
-            ErrorUtilities.VerifyThrow(BlockingTarget == null, "Cannot block again if we're already blocked on a target");
+            ArgumentNullException.ThrowIfNull(blockingRequest);
+            ArgumentNullException.ThrowIfNull(activeTargets);
+            Assumed.Null(BlockingTarget, "Cannot block again if we're already blocked on a target");
 
             // Note that the blocking request will typically be our parent UNLESS it is a request we blocked on because it was executing a target we wanted to execute.
             // Thus, we do not assert the parent-child relationship here.
             BlockingRequestKey key = new BlockingRequestKey(blockingRequest.BuildRequest);
-            ErrorUtilities.VerifyThrow(!_requestsWeAreBlockedBy.ContainsKey(key), "We are already blocked by this request.");
-            ErrorUtilities.VerifyThrow(!blockingRequest._requestsWeAreBlocking.Contains(this), "The blocking request thinks it is already blocking us.");
+            Assumed.False(_requestsWeAreBlockedBy.ContainsKey(key), "We are already blocked by this request.");
+            Assumed.False(blockingRequest._requestsWeAreBlocking.Contains(this), "The blocking request thinks it is already blocking us.");
 
             // This method is only called when a request reports that it is blocked on other requests.  If the request is being blocked by a brand new
             // request, that request will be unscheduled.  If this request is blocked by an in-progress request which was executing a target it needed
@@ -372,7 +371,7 @@ namespace Microsoft.Build.BackEnd
         public void UnblockWithPartialResultForBlockingTarget(BuildResult result)
         {
             VerifyOneOfStates([SchedulableRequestState.Blocked, SchedulableRequestState.Unscheduled]);
-            ErrorUtilities.VerifyThrowArgumentNull(result);
+            ArgumentNullException.ThrowIfNull(result);
 
             BlockingRequestKey key = new BlockingRequestKey(result);
             DisconnectRequestWeAreBlockedBy(key);
@@ -385,7 +384,7 @@ namespace Microsoft.Build.BackEnd
         public void UnblockWithResult(BuildResult result)
         {
             VerifyOneOfStates([SchedulableRequestState.Blocked, SchedulableRequestState.Unscheduled]);
-            ErrorUtilities.VerifyThrowArgumentNull(result);
+            ArgumentNullException.ThrowIfNull(result);
 
             BlockingRequestKey key = new BlockingRequestKey(result);
             DisconnectRequestWeAreBlockedBy(key);
@@ -398,14 +397,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ResumeExecution(int nodeId)
         {
-            ErrorUtilities.VerifyThrow(_assignedNodeId == Scheduler.InvalidNodeId || _assignedNodeId == nodeId, "Request must always resume on the same node on which it was started.");
+            Assumed.True(_assignedNodeId == Scheduler.InvalidNodeId || _assignedNodeId == nodeId, "Request must always resume on the same node on which it was started.");
 
             VerifyOneOfStates([SchedulableRequestState.Ready, SchedulableRequestState.Unscheduled]);
-            ErrorUtilities.VerifyThrow((_state == SchedulableRequestState.Ready) || !_schedulingData.IsRequestScheduled(this), "Another instance of request {0} is already scheduled.", _request.GlobalRequestId);
-            ErrorUtilities.VerifyThrow(!_schedulingData.IsNodeWorking(nodeId), "Cannot resume execution of request {0} because node {1} is already working.", _request.GlobalRequestId, nodeId);
+            Assumed.True((_state == SchedulableRequestState.Ready) || !_schedulingData.IsRequestScheduled(this), $"Another instance of request {_request.GlobalRequestId} is already scheduled.");
+            Assumed.False(_schedulingData.IsNodeWorking(nodeId), $"Cannot resume execution of request {_request.GlobalRequestId} because node {nodeId} is already working.");
 
             int requiredNodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(_request.ConfigurationId);
-            ErrorUtilities.VerifyThrow(requiredNodeId == Scheduler.InvalidNodeId || requiredNodeId == nodeId, "Request {0} cannot be assigned to node {1} because its configuration is already assigned to node {2}", _request.GlobalRequestId, nodeId, requiredNodeId);
+            Assumed.True(requiredNodeId == Scheduler.InvalidNodeId || requiredNodeId == nodeId, $"Request {_request.GlobalRequestId} cannot be assigned to node {nodeId} because its configuration is already assigned to node {requiredNodeId}");
 
             _assignedNodeId = nodeId;
             ChangeToState(SchedulableRequestState.Executing);
@@ -417,8 +416,8 @@ namespace Microsoft.Build.BackEnd
         public void Complete(BuildResult result)
         {
             VerifyOneOfStates([SchedulableRequestState.Ready, SchedulableRequestState.Executing, SchedulableRequestState.Unscheduled]);
-            ErrorUtilities.VerifyThrow(_state != SchedulableRequestState.Ready || result.CircularDependency, "Request can only be Completed from the Ready state if the result indicates a circular dependency occurred.");
-            ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.Count == 0, "We can't be complete if we are still blocked on requests.");
+            Assumed.True(_state != SchedulableRequestState.Ready || result.CircularDependency, "Request can only be Completed from the Ready state if the result indicates a circular dependency occurred.");
+            Assumed.Zero(_requestsWeAreBlockedBy.Count, "We can't be complete if we are still blocked on requests.");
 
             // Any requests we were blocking we will no longer be blocking.
             List<SchedulableRequest> requestsToUnblock = new List<SchedulableRequest>(_requestsWeAreBlocking);
@@ -436,8 +435,8 @@ namespace Microsoft.Build.BackEnd
         public void Delete()
         {
             VerifyState(SchedulableRequestState.Unscheduled);
-            ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.Count == 0, "We are blocked by requests.");
-            ErrorUtilities.VerifyThrow(_requestsWeAreBlocking.Count == 0, "We are blocking by requests.");
+            Assumed.Zero(_requestsWeAreBlockedBy.Count, "We are blocked by requests.");
+            Assumed.Zero(_requestsWeAreBlocking.Count, "We are blocking by requests.");
             ChangeToState(SchedulableRequestState.Completed);
         }
 
@@ -446,7 +445,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void VerifyState(SchedulableRequestState requiredState)
         {
-            ErrorUtilities.VerifyThrow(_state == requiredState, "Request {0} expected to be in state {1} but state is actually {2}", _request.GlobalRequestId, requiredState, _state);
+            Assumed.Equal(_state, requiredState, $"Request {_request.GlobalRequestId} expected to be in state {requiredState} but state is actually {_state}");
         }
 
         /// <summary>
@@ -462,7 +461,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            ErrorUtilities.ThrowInternalError("State {0} is not one of the expected states.", _state);
+            InternalError.Throw($"State {_state} is not one of the expected states.");
         }
 
         public bool IsProxyBuildRequest() => BuildRequest.IsProxyBuildRequest();
@@ -638,8 +637,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectRequestWeAreBlockedBy(BlockingRequestKey blockingRequestKey)
         {
-            ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.TryGetValue(blockingRequestKey, out SchedulableRequest unblockingRequest), "We are not blocked by the specified request.");
-            ErrorUtilities.VerifyThrow(unblockingRequest._requestsWeAreBlocking.Contains(this), "The request unblocking us doesn't think it is blocking us.");
+            Assumed.True(_requestsWeAreBlockedBy.TryGetValue(blockingRequestKey, out SchedulableRequest unblockingRequest), "We are not blocked by the specified request.");
+            Assumed.True(unblockingRequest._requestsWeAreBlocking.Contains(this), "The request unblocking us doesn't think it is blocking us.");
 
             _requestsWeAreBlockedBy.Remove(blockingRequestKey);
             unblockingRequest._requestsWeAreBlocking.Remove(this);

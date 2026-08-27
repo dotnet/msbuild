@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.ObjectModelRemoting;
@@ -35,7 +36,7 @@ namespace Microsoft.Build.Construction
         internal ProjectImportElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject, SdkReference sdkReference = null)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
             SdkReference = sdkReference;
         }
 
@@ -52,10 +53,10 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Project
         {
-            get => FrameworkFileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.project));
+            get => FileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.project));
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.project);
 
                 SetOrRemoveAttribute(XMakeAttributes.project, value, "Set Import Project {0}", value);
             }
@@ -71,10 +72,10 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Sdk
         {
-            get => FrameworkFileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.sdk));
+            get => FileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.sdk));
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.sdk);
                 if (UpdateSdkReference(name: value, SdkReference?.Version, SdkReference?.MinimumVersion))
                 {
                     SetOrRemoveAttribute(XMakeAttributes.sdk, value, "Set Import Sdk {0}", value);

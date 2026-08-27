@@ -30,9 +30,11 @@ internal class BuildCheckTelemetry
         {
             properties["ExceptionType"] = exceptionType;
         }
-        if (exception.Message != null)
+
+        string? sanitizedMessage = CrashTelemetry.TruncateMessage(exception.Message);
+        if (sanitizedMessage != null)
         {
-            properties["ExceptionMessage"] = exception.Message;
+            properties["ExceptionMessage"] = sanitizedMessage;
         }
 
         return (FailedAcquisitionEventName, properties);

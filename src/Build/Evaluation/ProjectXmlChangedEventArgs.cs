@@ -4,7 +4,6 @@
 using System;
 using System.Globalization;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -34,7 +33,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="formattingParameter">The formatting parameter to use with <paramref name="unformattedReason"/>.</param>
         internal ProjectXmlChangedEventArgs(ProjectRootElement projectXml, string unformattedReason, string formattingParameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectXml);
+            ArgumentNullException.ThrowIfNull(projectXml);
 
             this.ProjectXml = projectXml;
             _unformattedReason = unformattedReason;

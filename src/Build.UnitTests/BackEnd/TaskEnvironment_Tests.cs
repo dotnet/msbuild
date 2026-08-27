@@ -31,8 +31,8 @@ namespace Microsoft.Build.UnitTests
         {
             return environmentType switch
             {
-                StubEnvironmentName => TaskEnvironmentHelper.CreateForTest(),
-                MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
+                StubEnvironmentName => TaskEnvironment.Fallback,
+                MultithreadedEnvironmentName => TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(GetResolvedTempPath()),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
         }
@@ -130,6 +130,41 @@ namespace Microsoft.Build.UnitTests
             {
                 DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(testVarName, null);
+            }
+        }
+
+        /// <summary>
+        /// Regression test for the task-host environment-delta self-clear bug. In multithreaded mode
+        /// <see cref="TaskEnvironment.GetEnvironmentVariables"/> returns the driver's backing dictionary by
+        /// reference, so the "environment unchanged" task-host completion path can pass that very dictionary
+        /// back to SetEnvironment. A naive Clear()-then-copy implementation would self-empty the environment
+        /// because the source and destination are the same object; this verifies the environment is preserved.
+        /// </summary>
+        [Fact]
+        public void TaskEnvironment_SetEnvironment_WithAliasedDictionary_PreservesEnvironment()
+        {
+            var taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(GetResolvedTempPath());
+            try
+            {
+                string testVarName = $"MSBUILD_ALIAS_TEST_{Guid.NewGuid():N}";
+                taskEnvironment.SetEnvironmentVariable(testVarName, "alias_value");
+
+                int countBefore = taskEnvironment.GetEnvironmentVariables().Count;
+                countBefore.ShouldBeGreaterThan(1);
+
+                // Pass the driver's own (aliased) dictionary back to SetEnvironment, exactly as the
+                // task-host "environment unchanged" path does for the multithreaded driver.
+                var aliased = (IDictionary<string, string>)taskEnvironment.GetEnvironmentVariables();
+                taskEnvironment.SetEnvironment(aliased);
+
+                var after = taskEnvironment.GetEnvironmentVariables();
+                after.Count.ShouldBe(countBefore);
+                after.TryGetValue(testVarName, out string? value).ShouldBeTrue();
+                value.ShouldBe("alias_value");
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
             }
         }
 
@@ -306,7 +341,7 @@ namespace Microsoft.Build.UnitTests
             string testVarName = $"MSBUILD_STUB_ISOLATION_TEST_{Guid.NewGuid():N}";
             string testVarValue = "stub_test_value";
 
-            var stubEnvironment = TaskEnvironmentHelper.CreateForTest();
+            var stubEnvironment = TaskEnvironment.Fallback;
 
             try
             {
@@ -336,10 +371,9 @@ namespace Microsoft.Build.UnitTests
             string testVarName = $"MSBUILD_MULTITHREADED_ISOLATION_TEST_{Guid.NewGuid():N}";
             string testVarValue = "multithreaded_test_value";
 
-            using var driver = new MultiThreadedTaskEnvironmentDriver(
+            var multithreadedEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(
                 GetResolvedTempPath(),
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
-            var multithreadedEnvironment = new TaskEnvironment(driver);
 
             try
             {
@@ -358,6 +392,111 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable(testVarName, null);
             }
+        }
+
+        [Fact]
+        public void TaskEnvironment_Fallback_ReadsProcessEnvironment()
+        {
+            string testVarName = $"MSBUILD_DEFAULT_ENV_TEST_{Guid.NewGuid():N}";
+            string testVarValue = "default_env_test_value";
+
+            try
+            {
+                Environment.SetEnvironmentVariable(testVarName, testVarValue);
+
+                TaskEnvironment.Fallback.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(testVarName, null);
+            }
+        }
+
+        [Fact]
+        public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_SnapshotsCurrentEnvironment()
+        {
+            string testVarName = $"MSBUILD_CREATE_MT_TEST_{Guid.NewGuid():N}";
+            string testVarValue = "snapshot_test_value";
+            string projectDir = GetResolvedTempPath();
+
+            try
+            {
+                Environment.SetEnvironmentVariable(testVarName, testVarValue);
+
+                TaskEnvironment env = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir);
+
+                env.ShouldNotBeNull();
+                env.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
+                env.ProjectDirectory.Value.ShouldBe(projectDir);
+
+                // Changing the process env var after snapshot should not affect the isolated environment.
+                Environment.SetEnvironmentVariable(testVarName, "changed_after_snapshot");
+                env.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(testVarName, null);
+            }
+        }
+
+        [Fact]
+        public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_WithCustomEnvironment_UsesProvidedDictionary()
+        {
+            string excludedVarName = $"MSBUILD_EXCLUDED_VAR_{Guid.NewGuid():N}";
+            string projectDir = GetResolvedTempPath();
+
+            try
+            {
+                // Set a process-level env var that should NOT appear in the custom environment.
+                Environment.SetEnvironmentVariable(excludedVarName, "process_level_value");
+
+                var customEnv = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["MY_CUSTOM_VAR"] = "custom_value",
+                    ["ANOTHER_VAR"] = "another_value"
+                };
+
+                TaskEnvironment env = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir, customEnv);
+
+                env.ShouldNotBeNull();
+                env.GetEnvironmentVariable("MY_CUSTOM_VAR").ShouldBe("custom_value");
+                env.GetEnvironmentVariable("ANOTHER_VAR").ShouldBe("another_value");
+                env.GetEnvironmentVariable(excludedVarName).ShouldBeNull();
+                env.ProjectDirectory.Value.ShouldBe(projectDir);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(excludedVarName, null);
+            }
+        }
+
+        [Fact]
+        public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_ReturnsIsolatedInstances()
+        {
+            string projectDir = GetResolvedTempPath();
+
+            TaskEnvironment env1 = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir);
+            TaskEnvironment env2 = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir);
+
+            env1.ShouldNotBeSameAs(env2);
+
+            string testVarName = $"MSBUILD_ISOLATION_TEST_{Guid.NewGuid():N}";
+            env1.SetEnvironmentVariable(testVarName, "only_in_env1");
+
+            env1.GetEnvironmentVariable(testVarName).ShouldBe("only_in_env1");
+            env2.GetEnvironmentVariable(testVarName).ShouldNotBe("only_in_env1");
+        }
+
+        [Fact]
+        public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_NullProjectDirectory_Throws()
+        {
+            Should.Throw<ArgumentNullException>(() => TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(null!));
+        }
+
+        [Fact]
+        public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_EmptyProjectDirectory_Throws()
+        {
+            Should.Throw<ArgumentException>(() => TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(string.Empty));
         }
 
         [Theory]

@@ -58,26 +58,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        public void KnownRelativePathsAreResolvedToFullPaths()
-        {
-            const string AppConfigFileName = "App.config";
-            const string StateFileName = "AssemblyReference.cache";
-            ResolveAssemblyReference clientRar = new()
-            {
-                BuildEngine = new MockEngine(),
-                AppConfigFile = AppConfigFileName,
-                StateFile = StateFileName,
-            };
-            RarNodeExecuteRequest request = new(clientRar);
-
-            ResolveAssemblyReference nodeRar = new();
-            request.SetTaskInputs(nodeRar, CreateBuildEngine());
-
-            Assert.Equal(Path.GetFullPath(AppConfigFileName), nodeRar.AppConfigFile);
-            Assert.Equal(Path.GetFullPath(StateFileName), nodeRar.StateFile);
-        }
-
-        [Fact]
         public void BuildEngineSettingsArePropagated()
         {
             MockEngine mockEngine = new()

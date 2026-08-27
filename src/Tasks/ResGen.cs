@@ -363,7 +363,7 @@ namespace Microsoft.Build.Tasks
             /// <param name="commandLine">Gets filled with command line options</param>
             protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
             {
-                ErrorUtilities.VerifyThrow(!IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
+                Assumed.False(IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
 
                 var resGenArguments = new CommandLineBuilderExtension();
                 GenerateResGenCommands(resGenArguments, false /* don't line-delimit arguments; spaces are just fine */);
@@ -402,7 +402,7 @@ namespace Microsoft.Build.Tasks
             /// <returns>True if parameters are valid</returns>
             protected override bool ValidateParameters()
             {
-                ErrorUtilities.VerifyThrow(!IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
+                Assumed.False(IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
 
                 // make sure that if the output resources were set, they exactly match the number of input sources
                 if (!IsNullOrEmpty(OutputFiles) && (OutputFiles.Length != InputFiles.Length))
@@ -471,7 +471,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             private void GenerateOutputFileNames()
             {
-                ErrorUtilities.VerifyThrow(!IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
+                Assumed.False(IsNullOrEmpty(InputFiles), "If InputFiles is empty, the task should have returned before reaching this point");
 
                 ITaskItem[] inputFiles = InputFiles;
                 ITaskItem[] outputFiles = new ITaskItem[inputFiles.Length];

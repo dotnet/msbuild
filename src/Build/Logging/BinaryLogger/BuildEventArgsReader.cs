@@ -330,6 +330,8 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
                 BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
                 BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
+                BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
+                BinaryLogRecordKind.MSBuildServerLifecycle => ReadMSBuildServerLifecycleEventArgs(),
                 _ => null
             };
 
@@ -1254,6 +1256,33 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
+        private MSBuildServerLifecycleEventArgs ReadMSBuildServerLifecycleEventArgs()
+        {
+            // Field order/count MUST stay in sync with BuildEventArgsWriter.Write(MSBuildServerLifecycleEventArgs)
+            // and with MSBuildServerLifecycleEventArgs.CreateFromStream (the node-packet path). ReadInt32() is a
+            // 7-bit-encoded int, paired with the writer's Write(int).
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+
+            MSBuildServerLifecycleKind kind = (MSBuildServerLifecycleKind)ReadInt32();
+            int processId = ReadInt32();
+            string? reason = ReadDeduplicatedString();
+            string? reasonCode = ReadDeduplicatedString();
+            bool shortLived = ReadBoolean();
+
+            var e = new MSBuildServerLifecycleEventArgs(
+                kind,
+                processId,
+                reason,
+                reasonCode,
+                fields.Message,
+                fields.Importance,
+                shortLived);
+            SetCommonFields(e, fields);
+            e.ProjectFile = fields.ProjectFile;
+
+            return e;
+        }
+
         private BuildEventArgs ReadBuildCheckTracingEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
@@ -1282,6 +1311,38 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields();
             var e = new BuildCanceledEventArgs(fields.Message);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadLoggersRegisteredEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            int count = ReadInt32();
+            var loggers = new List<RegisteredLoggerInfo>(count);
+            for (int i = 0; i < count; i++)
+            {
+                string loggerName = ReadDeduplicatedString()!;
+                string parameters = ReadDeduplicatedString()!;
+
+                LoggerVerbosity? verbosity = null;
+                if (ReadBoolean())
+                {
+                    verbosity = (LoggerVerbosity)ReadInt32();
+                }
+
+                int pathCount = ReadInt32();
+                var outputFilePaths = new string[pathCount];
+                for (int j = 0; j < pathCount; j++)
+                {
+                    outputFilePaths[j] = ReadDeduplicatedString()!;
+                }
+
+                loggers.Add(new RegisteredLoggerInfo(loggerName, outputFilePaths, verbosity, parameters));
+            }
+
+            var e = new LoggersRegisteredEventArgs(loggers);
             SetCommonFields(e, fields);
 
             return e;

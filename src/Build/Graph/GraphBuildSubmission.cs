@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
 {
@@ -35,6 +35,7 @@ namespace Microsoft.Build.Graph
         /// Starts the request asynchronously and immediately returns control to the caller.
         /// </summary>
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         public void ExecuteAsync(GraphBuildSubmissionCompleteCallback? callback, object? context)
         {
             void Clb(BuildSubmissionBase<GraphBuildRequestData, GraphBuildResult> submission)
@@ -49,21 +50,20 @@ namespace Microsoft.Build.Graph
         /// Starts the request and blocks until results are available.
         /// </summary>
         /// <exception cref="System.InvalidOperationException">The request has already been started or is already complete.</exception>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         public override GraphBuildResult Execute()
         {
             ExecuteAsync(null, null);
             WaitHandle.WaitOne();
 
-            ErrorUtilities.VerifyThrow(BuildResult != null,
-                "BuildResult is not populated after Execute is done.");
+            Assumed.NotNull(BuildResult, "BuildResult is not populated after Execute is done.");
 
             return BuildResult!;
         }
 
         protected internal override void CheckResultValidForCompletion(GraphBuildResult result)
         {
-            ErrorUtilities.VerifyThrow(result.SubmissionId == SubmissionId,
-                "GraphBuildResult's submission id doesn't match GraphBuildSubmission's");
+            Assumed.Equal(result.SubmissionId, SubmissionId, "GraphBuildResult's submission id doesn't match GraphBuildSubmission's");
         }
 
         protected internal override GraphBuildResult CreateFailedResult(Exception exception)

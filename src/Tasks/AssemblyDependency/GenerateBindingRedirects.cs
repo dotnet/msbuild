@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -20,7 +20,8 @@ namespace Microsoft.Build.Tasks
     /// Take suggested redirects (from the ResolveAssemblyReference and GenerateOutOfBandAssemblyTables tasks)
     /// and add them to an intermediate copy of the App.config file.
     /// </summary>
-    public class GenerateBindingRedirects : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class GenerateBindingRedirects : TaskExtension, IMultiThreadableTask
     {
         // <param name="SuggestedRedirects">RAR suggested binding redirects.</param>
         // <param name="AppConfigFile">The source App.Config file.</param>
@@ -48,6 +49,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem OutputAppConfigFile { get; set; }
+
+        /// <inheritdoc/>
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Execute the task.
@@ -105,13 +109,14 @@ namespace Microsoft.Build.Tasks
             runtimeNode.Add(redirectNodes);
 
             var writeOutput = true;
-            var outputExists = FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec);
+            AbsolutePath outputAppConfigFile = TaskEnvironment.GetAbsolutePath(OutputAppConfigFile.ItemSpec);
+            var outputExists = FileSystems.Default.FileExists(outputAppConfigFile);
 
             if (outputExists)
             {
                 try
                 {
-                    var outputDoc = LoadAppConfig(OutputAppConfigFile);
+                    var outputDoc = LoadAppConfig(outputAppConfigFile);
                     if (outputDoc.ToString() == doc.ToString())
                     {
                         writeOutput = false;
@@ -135,7 +140,7 @@ namespace Microsoft.Build.Tasks
             if (writeOutput)
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
-                using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
+                using (var stream = FileUtilities.OpenWrite(outputAppConfigFile, false))
                 {
                     doc.Save(stream);
                 }
@@ -192,7 +197,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void UpdateExistingBindingRedirects(XElement runtimeNode, IDictionary<AssemblyName, string> redirects)
         {
-            ErrorUtilities.VerifyThrow(runtimeNode != null, "This should not be called if the \"runtime\" node is missing.");
+            Assumed.NotNull(runtimeNode, "This should not be called if the \"runtime\" node is missing.");
 
             var assemblyBindingNodes = runtimeNode.Nodes()
                 .OfType<XElement>()
@@ -336,17 +341,25 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
-                using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigItem.ItemSpec), xrs))
-                {
-                    document = XDocument.Load(xr);
-                }
+                document = LoadAppConfig(TaskEnvironment.GetAbsolutePath(appConfigItem.ItemSpec));
+            }
 
-                if (document.Root == null || document.Root.Name != "configuration")
-                {
-                    Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode");
-                    return null;
-                }
+            return document;
+        }
+
+        private XDocument LoadAppConfig(AbsolutePath appConfigFile)
+        {
+            XDocument document;
+            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
+            using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigFile), xrs))
+            {
+                document = XDocument.Load(xr);
+            }
+
+            if (document.Root == null || document.Root.Name != "configuration")
+            {
+                Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode");
+                return null;
             }
 
             return document;
@@ -358,7 +371,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private IDictionary<AssemblyName, string> ParseSuggestedRedirects()
         {
-            ErrorUtilities.VerifyThrow(SuggestedRedirects?.Length > 0, "This should not be called if there is no suggested redirect.");
+            Assumed.Positive(SuggestedRedirects?.Length ?? 0, "This should not be called if there is no suggested redirect.");
 
             var map = new Dictionary<AssemblyName, string>();
             foreach (var redirect in SuggestedRedirects)

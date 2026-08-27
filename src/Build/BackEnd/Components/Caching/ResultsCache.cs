@@ -6,8 +6,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -68,7 +66,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_resultsByConfiguration.TryGetValue(result.ConfigurationId, out BuildResult buildResult))
                 {
-                    if (Object.ReferenceEquals(buildResult, result))
+                    if (ReferenceEquals(buildResult, result))
                     {
                         // Merging results would be meaningless as we would be merging the object with itself.
                         return;
@@ -81,10 +79,7 @@ namespace Microsoft.Build.BackEnd
                     // Note that we are not making a copy here.  This is by-design.  The TargetBuilder uses this behavior
                     // to ensure that re-entering a project will be able to see all previously built targets and avoid
                     // building them again.
-                    if (!_resultsByConfiguration.TryAdd(result.ConfigurationId, result))
-                    {
-                        ErrorUtilities.ThrowInternalError("Failed to add result for configuration {0}", result.ConfigurationId);
-                    }
+                    Assumed.True(_resultsByConfiguration.TryAdd(result.ConfigurationId, result), $"Failed to add result for configuration {result.ConfigurationId}");
                 }
             }
         }
@@ -112,7 +107,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The build results for the specified request.</returns>
         public BuildResult GetResultForRequest(BuildRequest request)
         {
-            ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
+            Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
 
             lock (_resultsByConfiguration)
             {
@@ -120,7 +115,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     foreach (string target in request.Targets)
                     {
-                        ErrorUtilities.VerifyThrow(result.HasResultsForTarget(target), "No results in cache for target " + target);
+                        Assumed.True(result.HasResultsForTarget(target), "No results in cache for target " + target);
                     }
 
                     return result;
@@ -165,17 +160,14 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
         {
-            ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
+            Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
 
             lock (_resultsByConfiguration)
             {
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                        ? AreBuildResultFlagsCompatible(request, allResults) : true;
-
-                    if (buildDataFlagsSatisfied)
+                    if (AreBuildResultFlagsCompatible(request, allResults))
                     {
                         // Check for targets explicitly specified.
                         bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss);
@@ -281,7 +273,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
         }
 
         /// <summary>
@@ -299,7 +291,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ResultsCache, "Cannot create components of type {0}", componentType);
+            Assumed.Equal(componentType, BuildComponentType.ResultsCache, $"Cannot create components of type {componentType}");
             return new ResultsCache();
         }
 

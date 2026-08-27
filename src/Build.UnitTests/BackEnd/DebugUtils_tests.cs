@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Shouldly;
@@ -16,27 +16,43 @@ namespace Microsoft.Build.UnitTests
     public class DebugUtils_Tests
     {
         [Fact]
+        public void UppercaseDebugEngineEnvironmentVariableEnablesDebugEngine()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBuildDebugEngine", null);
+            env.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
+
+            new Traits().DebugEngine.ShouldBeTrue();
+        }
+
+        [Fact]
         public void DumpExceptionToFileShouldWriteInDebugDumpPath()
         {
-            ExceptionHandling.ResetDebugDumpPathInRunningTests = true;
-            var exceptionFilesBefore = Directory.GetFiles(ExceptionHandling.DebugDumpPath, "MSBuild_*failure.txt");
-
-            string[] exceptionFiles = null;
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder debugPath = env.CreateFolder();
+            var transientDebugPath = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath.Path);
 
             try
             {
-                ExceptionHandling.DumpExceptionToFile(new Exception("hello world"));
-                exceptionFiles = Directory.GetFiles(ExceptionHandling.DebugDumpPath, "MSBuild_*failure.txt");
+                FrameworkDebugUtils.SetDebugPath();
+                DebugUtils.ResetDebugDumpPathInRunningTests = true;
+                _ = DebugUtils.DebugDumpPath;
+
+                DebugUtils.DumpExceptionToFile(new Exception("hello world"));
+                string[] exceptionFiles = Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt");
+                exceptionFiles.Length.ShouldBe(1);
+
+                string exceptionFile = exceptionFiles[0];
+                File.ReadAllText(exceptionFile).ShouldContain("hello world");
+                File.Delete(exceptionFile);
             }
             finally
             {
-                exceptionFilesBefore.ShouldNotBeNull();
-                exceptionFiles.ShouldNotBeNull();
-                (exceptionFiles.Length - exceptionFilesBefore.Length).ShouldBe(1);
+                transientDebugPath.Revert();
+                FrameworkDebugUtils.SetDebugPath();
 
-                var exceptionFile = exceptionFiles.Except(exceptionFilesBefore).Single();
-                File.ReadAllText(exceptionFile).ShouldContain("hello world");
-                File.Delete(exceptionFile);
+                DebugUtils.ResetDebugDumpPathInRunningTests = true;
+                _ = DebugUtils.DebugDumpPath;
             }
         }
 
@@ -58,8 +74,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    DebugUtils.SetDebugPath();
-                    string resultPath = DebugUtils.DebugPath;
+                    FrameworkDebugUtils.SetDebugPath();
+                    string resultPath = FrameworkDebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(relativePath, ".MSBuild_Logs"));
                     Directory.Exists(resultPath).ShouldBeTrue();
@@ -69,7 +85,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    DebugUtils.SetDebugPath();
+                    FrameworkDebugUtils.SetDebugPath();
                 }
             }
         }
@@ -93,8 +109,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    DebugUtils.SetDebugPath();
-                    string resultPath = DebugUtils.DebugPath;
+                    FrameworkDebugUtils.SetDebugPath();
+                    string resultPath = FrameworkDebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(fullInSolutionPath, ".MSBuild_Logs"));
                 }
@@ -103,7 +119,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    DebugUtils.SetDebugPath();
+                    FrameworkDebugUtils.SetDebugPath();
                 }
             }
         }
@@ -124,8 +140,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    DebugUtils.SetDebugPath();
-                    string resultPath = DebugUtils.DebugPath;
+                    FrameworkDebugUtils.SetDebugPath();
+                    string resultPath = FrameworkDebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), ".MSBuild_Logs"));
                 }
@@ -134,7 +150,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    DebugUtils.SetDebugPath();
+                    FrameworkDebugUtils.SetDebugPath();
                 }
             }
         }
@@ -144,7 +160,7 @@ namespace Microsoft.Build.UnitTests
         {
             // When running in the main test process (no /nodemode argument),
             // we should not be in a TaskHost node
-            DebugUtils.IsInTaskHostNode().ShouldBeFalse();
+            FrameworkDebugUtils.IsInTaskHostNode().ShouldBeFalse();
         }
     }
 }

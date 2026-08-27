@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -220,6 +219,11 @@ namespace Microsoft.Build.Framework
                 {
                     writer.Write7BitEncodedInt(0);
                 }
+            }
+            else if (item is AbsolutePath absolutePath)
+            {
+                writer.Write(absolutePath.OriginalValue ?? string.Empty);
+                writer.Write7BitEncodedInt(0);
             }
             else // string or ValueType
             {

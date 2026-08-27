@@ -12,7 +12,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
@@ -104,9 +103,7 @@ namespace Microsoft.Build.Evaluation
             public ReentrancyGuard()
             {
                 s_getEntriesNumber++;
-                ErrorUtilities.VerifyThrow(
-                    s_getEntriesNumber == 1,
-                    "Reentrance to the ProjectRootElementCache.Get function detected.");
+                Assumed.Equal(s_getEntriesNumber, 1, "Reentrance to the ProjectRootElementCache.Get function detected.");
             }
 
             public void Dispose()
@@ -253,9 +250,7 @@ namespace Microsoft.Build.Evaluation
             using var reentrancyGuard = new ReentrancyGuard();
 
             // Verify that we never call this with _locker held, as that would create a lock ordering inversion with the per-file lock.
-            ErrorUtilities.VerifyThrow(
-                !System.Threading.Monitor.IsEntered(_locker),
-                "Detected lock ordering inversion in ProjectRootElementCache.");
+            Assumed.False(System.Threading.Monitor.IsEntered(_locker), "Detected lock ordering inversion in ProjectRootElementCache.");
 #endif
             // Should already have been canonicalized
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
@@ -346,12 +341,8 @@ namespace Microsoft.Build.Evaluation
             if (projectRootElement == null || projectRootElementIsInvalid)
             {
                 projectRootElement = loadProjectRootElement(projectFile, this);
-                ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
-                ErrorUtilities.VerifyThrow(
-                    projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
-                    "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
-                    projectFile,
-                    projectRootElement.FullPath);
+                Assumed.NotNull(projectRootElement);
+                Assumed.Equal(projectRootElement.FullPath, projectFile, StringComparison.OrdinalIgnoreCase, $"Got project back with incorrect path. Expected path: {projectFile}, received path: {projectRootElement.FullPath}.");
 
                 // An implicit load will never reset the explicit flag.
                 if (isExplicitlyLoaded)
@@ -394,7 +385,7 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath);
+                ArgumentException.ThrowIfNullOrEmpty(oldFullPath);
                 RenameEntryInternal(oldFullPath, projectRootElement);
             }
         }
@@ -457,6 +448,24 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        /// <inheritdoc />
+        internal override void ClearCachesAfterBuildIfNeeded()
+        {
+            if (!_autoReloadFromDisk || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            {
+                base.ClearCachesAfterBuildIfNeeded();
+                return;
+            }
+
+            // Nothing to discard. The only files a restore rewrites that this cache may already hold are the ones it
+            // generates next to the project, such as nuget.g.props and nuget.g.targets, and IsInvalidEntry reloads
+            // those on the next read because their timestamp changed. The entries it never revalidates are the ones
+            // under a location FileClassifier treats as immutable - the NuGet cache, where a package's content is
+            // fixed by its version and is never rewritten in place, and the SDK and Visual Studio install, which a
+            // build does not write to at all - so a restore cannot have invalidated them either.
+            DebugTraceCache("Keeping cache after build (auto reload from disk): ", _weakCache.Count);
+        }
+
         /// <summary>
         /// Discard any entries (weak and strong) which do not have the explicitlyLoaded flag set.
         /// </summary>
@@ -514,7 +523,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
 
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)
@@ -535,12 +544,12 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private void RenameEntryInternal(string oldFullPathIfAny, ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElement.FullPath, "FullPath");
+            Assumed.NotNull(projectRootElement.FullPath);
 
             if (oldFullPathIfAny != null)
             {
                 ErrorUtilities.VerifyThrowInternalRooted(oldFullPathIfAny);
-                ErrorUtilities.VerifyThrow(_weakCache[oldFullPathIfAny] == projectRootElement, "Should already be present");
+                Assumed.Equal(_weakCache[oldFullPathIfAny], projectRootElement, "Should already be present");
                 _weakCache.Remove(oldFullPathIfAny);
             }
 

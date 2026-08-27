@@ -267,14 +267,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="value">The value to be translated.</param>
         void Translate(ref TimeSpan value);
 
-        // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext,
-        // which is what current implementations of this method use.  However, it also does not ever need to translate
-        // BuildEventContexts, so it should be perfectly safe to compile this method out of that assembly. I am compiling
-        // the method out of the interface as well, instead of just making the method empty, so that if we ever do need
-        // to translate BuildEventContexts from the CLR 3.5 task host, it will become immediately obvious, rather than
-        // failing or misbehaving silently.
-#if !CLR2COMPATIBILITY
-
         /// <summary>
         /// Translates a BuildEventContext
         /// </summary>
@@ -284,7 +276,6 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         /// <param name="value">The context to be translated.</param>
         void Translate(ref BuildEventContext value);
-#endif
 
         /// <summary>
         /// Translates an enumeration.

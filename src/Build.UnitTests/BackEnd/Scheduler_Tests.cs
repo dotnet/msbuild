@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -700,6 +701,103 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// A node the scheduler has no executing request for has to be reported as such rather than throwing, since
+        /// the node may still be reporting file accesses for the binaries it needs in order to run.
+        /// </summary>
+        [Fact]
+        public void GetExecutingRequestByNodeReflectsTheNodesCurrentRequest()
+        {
+            // A node the scheduler has never seen has no entry at all, which must not throw.
+            _scheduler.GetExecutingRequestByNode(2).ShouldBeNull();
+
+            CreateConfiguration(1, "foo.proj");
+            BuildRequest request = CreateBuildRequest(1, 1);
+            _scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(request.ParentGlobalRequestId, Array.Empty<string>(), new[] { request })).ToList();
+
+            _scheduler.GetExecutingRequestByNode(1).ShouldBe(request);
+
+            // Completing the request leaves the node's entry in place, so the node must stop reporting it.
+            _scheduler.ReportResult(1, CreateBuildResult(request, "foo", BuildResultUtilities.GetSuccessResult())).ToList();
+
+            _scheduler.GetExecutingRequestByNode(1).ShouldBe(_defaultParentRequest);
+
+            // Completing the last request leaves the node's entry in place with nothing against it. That is the exact
+            // state a file access arriving on another thread has to be able to observe without throwing.
+            _scheduler.ReportResult(1, CreateBuildResult(_defaultParentRequest, "", BuildResultUtilities.GetSuccessResult())).ToList();
+
+            _scheduler.GetExecutingRequestByNode(1).ShouldBeNull();
+        }
+
+        /// <summary>
+        /// File accesses for detoured nodes are reported on the thread draining the sandbox's report pipe, which does
+        /// not hold the BuildManager's lock, so <see cref="Scheduler.GetExecutingRequestByNode"/> has to tolerate the
+        /// node's executing request being cleared underneath it instead of throwing.
+        /// </summary>
+        [Fact]
+        public void GetExecutingRequestByNodeToleratesConcurrentRequestCompletion()
+        {
+            const int Iterations = 2000;
+
+            using CancellationTokenSource readerCancellation = new();
+            Exception readerException = null;
+            bool sawExecutingRequest = false;
+            bool sawIdleNode = false;
+
+            Thread reader = new Thread(() =>
+            {
+                try
+                {
+                    while (!readerCancellation.IsCancellationRequested)
+                    {
+                        if (_scheduler.GetExecutingRequestByNode(1) is null)
+                        {
+                            sawIdleNode = true;
+                        }
+                        else
+                        {
+                            sawExecutingRequest = true;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    readerException = e;
+                }
+            })
+            {
+                IsBackground = true,
+                Name = nameof(GetExecutingRequestByNodeToleratesConcurrentRequestCompletion),
+            };
+            reader.Start();
+
+            try
+            {
+                for (int i = 0; i < Iterations && readerException is null; i++)
+                {
+                    // Cycle node 1 between executing a request and executing nothing. Completing a request stores a
+                    // null against the node, which is the value the reader must not dereference.
+                    int configId = DefaultConfigId + 1 + i;
+                    CreateConfiguration(configId, $"foo{configId}.proj");
+                    BuildRequest request = CreateBuildRequest(configId, configId);
+
+                    _scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(request.ParentGlobalRequestId, Array.Empty<string>(), new[] { request })).ToList();
+                    _scheduler.ReportResult(1, CreateBuildResult(request, "foo", BuildResultUtilities.GetSuccessResult())).ToList();
+                }
+            }
+            finally
+            {
+                readerCancellation.Cancel();
+                reader.Join();
+            }
+
+            readerException.ShouldBeNull($"Reading the executing request concurrently threw: {readerException}");
+
+            // Guard against the test silently going vacuous if the scheduler stops cycling node 1.
+            sawExecutingRequest.ShouldBeTrue("The reader never observed node 1 executing a request.");
+            sawIdleNode.ShouldBeTrue("The reader never observed node 1 with no executing request.");
+        }
+
+        /// <summary>
         /// Tests that the detailed summary setting causes the summary to be produced.
         /// </summary>
         [Fact]
@@ -967,6 +1065,52 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             var buildResult = new BuildResult(_defaultParentRequest);
             _scheduler.ReportResult(_defaultParentRequest.NodeRequestId, buildResult);
+        }
+
+        [Fact]
+        public void ScheduleTimeRecord_AccumulatedTime_DoesNotThrowWhenTimerIsRunning()
+        {
+            var record = new ScheduleTimeRecord();
+            DateTime startTime = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            // Before starting: accumulated time should be zero.
+            record.AccumulatedTime.ShouldBe(TimeSpan.Zero);
+
+            // Start the timer.
+            record.StartState(startTime);
+
+            // While running: should NOT throw — should return a positive elapsed time.
+            record.AccumulatedTime.ShouldBeGreaterThan(TimeSpan.Zero);
+
+            // Stop the timer.
+            DateTime endTime = startTime.AddMilliseconds(500);
+            record.EndState(endTime);
+
+            // After stopping: should return the accumulated time.
+            record.AccumulatedTime.ShouldBe(TimeSpan.FromMilliseconds(500));
+        }
+
+        [Fact]
+        public void ScheduleTimeRecord_AccumulatedTime_IncludesPreviousAccumulation()
+        {
+            var record = new ScheduleTimeRecord();
+            DateTime t0 = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            // First interval: 200ms.
+            record.StartState(t0);
+            record.EndState(t0.AddMilliseconds(200));
+            record.AccumulatedTime.ShouldBe(TimeSpan.FromMilliseconds(200));
+
+            // Start a second interval.
+            record.StartState(t0.AddMilliseconds(300));
+
+            // While second interval is running: should include the 200ms from
+            // the first interval plus the elapsed time of the current interval.
+            record.AccumulatedTime.ShouldBeGreaterThan(TimeSpan.FromMilliseconds(200));
+
+            // Stop second interval after 100ms.
+            record.EndState(t0.AddMilliseconds(400));
+            record.AccumulatedTime.ShouldBe(TimeSpan.FromMilliseconds(300));
         }
     }
 }

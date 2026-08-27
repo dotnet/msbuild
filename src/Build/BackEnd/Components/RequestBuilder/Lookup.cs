@@ -101,8 +101,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(IItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems);
-            ErrorUtilities.VerifyThrowInternalNull(properties);
+            Assumed.NotNull(projectItems);
+            Assumed.NotNull(properties);
 
             _baseItems = projectItems;
             _lookupScopes = new Lookup.Scope(this, "Lookup()", properties);
@@ -262,8 +262,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LeaveScope(Lookup.Scope scopeToLeave)
         {
-            ErrorUtilities.VerifyThrow(_lookupScopes.Count >= 2, "Too many calls to Leave().");
-            ErrorUtilities.VerifyThrow(Object.ReferenceEquals(scopeToLeave, _lookupScopes), "Attempting to leave with scope '{0}' but scope '{1}' is on top of the stack.", scopeToLeave.Description, _lookupScopes.Description);
+            Assumed.GreaterThanOrEqual(_lookupScopes.Count, 2, "Too many calls to Leave().");
+            Assumed.True(Object.ReferenceEquals(scopeToLeave, _lookupScopes), $"Attempting to leave with scope '{scopeToLeave.Description}' but scope '{_lookupScopes.Description}' is on top of the stack.");
 
             // Our lookup works by stopping the first time it finds an item group of the appropriate type.
             // So we can't apply an add directly into the table below because that could create a new group
@@ -450,7 +450,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ProjectPropertyInstance GetProperty(string name)
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
+            Assumed.NotNullOrEmpty(name);
 
             return GetProperty(name, 0, name.Length - 1);
         }
@@ -551,10 +551,28 @@ namespace Microsoft.Build.BackEnd
                 return groupFound;
             }
 
-            // Set the initial sizes to avoid resizing during import
+            // Set the initial sizes to avoid resizing during import. allAdds and allRemoves
+            // are List<List<...>>, so .Count gives the number of inner lists (one per scope
+            // level); we need the total item count across all those lists to size correctly.
             int itemsCount = groupFound?.Count ?? 0;    // Start with initial set
-            itemsCount += allAdds?.Count ?? 0;          // Add all the additions
-            itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
+            int totalAdds = 0;
+            if (allAdds != null)
+            {
+                foreach (List<ProjectItemInstance> adds in allAdds)
+                {
+                    totalAdds += adds.Count;
+                }
+            }
+            itemsCount += totalAdds;
+            int totalRemoves = 0;
+            if (allRemoves != null)
+            {
+                foreach (List<ProjectItemInstance> removes in allRemoves)
+                {
+                    totalRemoves += removes.Count;
+                }
+            }
+            itemsCount -= totalRemoves;
             if (itemsCount < 0)
             {
                 itemsCount = 0;
@@ -566,19 +584,42 @@ namespace Microsoft.Build.BackEnd
             // a new one.
             List<ProjectItemInstance> result = new(itemsCount);
 
+            // PERF: When there are any removes, build a HashSet for O(1) membership tests
+            // while filtering groupFound and adds.
+            //
+            // HashSet uses default reference-equality semantics: ProjectItemInstance does not
+            // override Equals/GetHashCode, matching the pre-#12320 ItemDictionary _nodes
+            // (a Dictionary<T, LinkedListNode<T>>). If ProjectItemInstance ever gains
+            // value-equality semantics, this GetItems contract must be re-examined.
+            //
+            // Skip the HashSet allocation if there is nothing to filter against (no items
+            // in groupFound and no adds) or if every per-scope remove list is empty.
+            HashSet<ProjectItemInstance> removeSet = null;
+            bool willFilter = (groupFound?.Count > 0) || allAdds != null;
+            if (willFilter && totalRemoves > 0)
+            {
+                removeSet = new HashSet<ProjectItemInstance>(totalRemoves);
+                foreach (List<ProjectItemInstance> removes in allRemoves)
+                {
+                    foreach (ProjectItemInstance remove in removes)
+                    {
+                        removeSet.Add(remove);
+                    }
+                }
+            }
+
             if (groupFound?.Count > 0)
             {
-                if (allRemoves == null)
+                if (removeSet == null)
                 {
-                    // No removes, so use fast path for ICollection<T>.
+                    // No removes (or nothing to filter), so use fast path for ICollection<T>.
                     result.AddRange(groupFound);
                 }
                 else
                 {
-                    // Otherwise, need to filter any items marked for removal.
                     foreach (ProjectItemInstance item in groupFound)
                     {
-                        if (!ShouldRemoveItem(item, allRemoves))
+                        if (!removeSet.Contains(item))
                         {
                             result.Add(item);
                         }
@@ -593,17 +634,16 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (List<ProjectItemInstance> adds in allAdds)
                 {
-                    if (allRemoves == null)
+                    if (removeSet == null)
                     {
                         // No removes, so use fast path for ICollection<T>.
                         result.AddRange(adds);
                     }
                     else
                     {
-                        // Otherwise, need to filter any items marked for removal.
                         foreach (ProjectItemInstance item in adds)
                         {
-                            if (!ShouldRemoveItem(item, allRemoves))
+                            if (!removeSet.Contains(item))
                             {
                                 result.Add(item);
                             }
@@ -619,34 +659,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return result;
-
-            // Helper to perform a linear search across the removes.
-            // PERF: This linear search is still cheaper than combining all removes into hashsets and performing a lookup
-            // due to allocation and hashcode costs, provided that we can quickly filter out false matches.
-            static bool ShouldRemoveItem(ProjectItemInstance item, List<List<ProjectItemInstance>> allRemoves)
-            {
-                ITaskItem2 itemAsTaskItem = item;
-                string evaluatedInclude = itemAsTaskItem.EvaluatedIncludeEscaped;
-
-                foreach (List<ProjectItemInstance> removes in allRemoves)
-                {
-                    foreach (ProjectItemInstance remove in removes)
-                    {
-                        // Get access to allocation-free item spec property.
-                        ITaskItem2 removeAsTaskItem = remove;
-
-                        // Start with the item spec length as a fast filter for false matches.
-                        if (evaluatedInclude.Length == removeAsTaskItem.EvaluatedIncludeEscaped.Length
-                            && StringComparer.Ordinal.Equals(evaluatedInclude, removeAsTaskItem.EvaluatedIncludeEscaped)
-                            && itemAsTaskItem == removeAsTaskItem)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
         }
 
         /// <summary>
@@ -667,7 +679,7 @@ namespace Microsoft.Build.BackEnd
 
             PrimaryTable ??= new ItemDictionarySlim();
             ICollection<ProjectItemInstance> existing = PrimaryTable[itemType];
-            ErrorUtilities.VerifyThrow(existing == null, "Cannot add an itemgroup of this type.");
+            Assumed.Null(existing, "Cannot add an itemgroup of this type.");
 
             PrimaryTable.ImportItemsOfType(itemType, group);
         }
@@ -694,7 +706,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         internal void TruncateLookupsForItemTypes(ICollection<string> itemTypes)
         {
-            ErrorUtilities.VerifyThrow(_lookupScopes.ItemTypesToTruncateAtThisScope == null, "Cannot add an itemgroup of this type.");
+            Assumed.Null(_lookupScopes.ItemTypesToTruncateAtThisScope, "Cannot add an itemgroup of this type.");
 
             // Add the item types to truncate at this scope
             _lookupScopes.ItemTypesToTruncateAtThisScope =
@@ -903,7 +915,7 @@ namespace Microsoft.Build.BackEnd
                     result[i] = cloneItem;
 
                     // This will be null if the item wasn't in the result group, ie, it had been removed after being modified
-                    ErrorUtilities.VerifyThrow(!_cloneTable.ContainsKey(cloneItem), "Should be new, not already in table!");
+                    Assumed.False(_cloneTable.ContainsKey(cloneItem), "Should be new, not already in table!");
                     _cloneTable[cloneItem] = originalItem;
                 }
             }
@@ -1034,7 +1046,7 @@ namespace Microsoft.Build.BackEnd
                 List<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
                 {
-                    ErrorUtilities.VerifyThrow(!tableOfItemsOfSameType.Contains(item), "Item should not be in table");
+                    Assumed.False(tableOfItemsOfSameType.Contains(item), "Item should not be in table");
                 }
             }
         }
@@ -1049,7 +1061,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (tableOfItemsOfSameType is not null)
                 {
-                    ErrorUtilities.VerifyThrow(!tableOfItemsOfSameType.ContainsKey(item), "Item should not be in table");
+                    Assumed.False(tableOfItemsOfSameType.ContainsKey(item), "Item should not be in table");
                 }
             }
         }
@@ -1080,7 +1092,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeOuterScope()
         {
-            ErrorUtilities.VerifyThrow(_lookupScopes.Parent != null, "Operation in outer scope not supported");
+            Assumed.NotNull(_lookupScopes.Parent, "Operation in outer scope not supported");
         }
 
         #endregion
@@ -1255,7 +1267,7 @@ namespace Microsoft.Build.BackEnd
 
                 set
                 {
-                    ErrorUtilities.VerifyThrowInternalNull(value, "value");
+                    Assumed.NotNull(value);
                     _modifications[metadataName] = value;
                 }
             }
@@ -1313,7 +1325,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="modificationType">The type of modification to make.</param>
             private MetadataModification(ModificationType modificationType)
             {
-                ErrorUtilities.VerifyThrow(modificationType != ModificationType.Update, "Modification type may only be update when a value is specified.");
+                Assumed.NotEqual(modificationType, ModificationType.Update, "Modification type may only be update when a value is specified.");
                 _remove = modificationType == ModificationType.Remove;
                 _newValue = null;
             }

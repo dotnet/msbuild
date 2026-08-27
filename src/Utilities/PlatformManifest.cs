@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -28,7 +29,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public PlatformManifest(string pathToManifest)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pathToManifest);
+            ArgumentException.ThrowIfNullOrEmpty(pathToManifest);
             _pathToManifest = pathToManifest;
             LoadManifestFile();
         }

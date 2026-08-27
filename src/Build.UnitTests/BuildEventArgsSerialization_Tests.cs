@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
@@ -107,6 +108,33 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(args,
                 e => e.Message,
                 e => e.Timestamp.ToString());
+        }
+
+        [Fact]
+        public void RoundtripLoggersRegisteredEventArgs()
+        {
+            var args = new LoggersRegisteredEventArgs(new List<RegisteredLoggerInfo>
+            {
+                new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }),
+                new RegisteredLoggerInfo("BinaryLogger"),
+                new RegisteredLoggerInfo(
+                    "ConsoleLogger",
+                    outputFilePaths: null,
+                    verbosity: LoggerVerbosity.Detailed,
+                    parameters: "ShowTimestamp;ShowEventId"),
+                new RegisteredLoggerInfo(
+                    "MultiFileLogger",
+                    outputFilePaths: new[] { @"C:\logs\a.log", @"C:\logs\b.log" },
+                    verbosity: LoggerVerbosity.Diagnostic,
+                    parameters: "LogFile=a.log;LogFile=b.log"),
+            });
+
+            Roundtrip(args,
+                e => e.Loggers.Count.ToString(CultureInfo.InvariantCulture),
+                e => string.Join("|", e.Loggers.Select(l => l.LoggerName)),
+                e => string.Join("|", e.Loggers.Select(l => l.Parameters ?? "<null>")),
+                e => string.Join("|", e.Loggers.Select(l => l.Verbosity?.ToString() ?? "<null>")),
+                e => string.Join("|", e.Loggers.Select(l => string.Join(",", l.OutputFilePaths))));
         }
 
         [Fact]
@@ -512,6 +540,115 @@ namespace Microsoft.Build.UnitTests
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
+        /// <summary>
+        /// The MSBuild Server lifecycle events are logged as a dedicated <see cref="MSBuildServerLifecycleEventArgs"/>
+        /// recorded under its own <see cref="BinaryLogRecordKind.MSBuildServerLifecycle"/>. This keeps the data in a
+        /// specific, versionable event type (not an ad-hoc message); binary-log readers that predate the record kind
+        /// skip it via the forward-compatible, length-prefixed record framing.
+        /// </summary>
+        [Fact]
+        public void RoundtripMSBuildServerLifecycleEventArgs()
+        {
+            var args = new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Spawned,
+                processId: 4321,
+                reason: null,
+                reasonCode: null,
+                "MSBuild Server node started for this build only; it will shut down afterward (process ID 4321).",
+                MessageImportance.Low,
+                shortLived: true)
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+            };
+
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            // The event serializes under its OWN dedicated record kind (not Message), so readers that predate it
+            // skip the unknown record via the forward-compatible length-prefixed framing rather than mis-reading it.
+            memoryStream.Position = 0;
+            using (var rawReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var eventsReader = new BuildEventArgsReader(rawReader, BinaryLogger.FileFormatVersion))
+            {
+                BinaryLogRecordKind eventRecordKind;
+                do
+                {
+                    eventRecordKind = eventsReader.ReadRaw().RecordKind;
+                }
+                while (eventRecordKind is BinaryLogRecordKind.String
+                    or BinaryLogRecordKind.NameValueList
+                    or BinaryLogRecordKind.ProjectImportArchive);
+
+                eventRecordKind.ShouldBe(BinaryLogRecordKind.MSBuildServerLifecycle);
+            }
+
+            // A current reader reconstructs the strongly-typed event with all of its structured fields.
+            memoryStream.Position = 0;
+            using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion))
+            {
+                var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
+                deserialized.Kind.ShouldBe(MSBuildServerLifecycleKind.Spawned);
+                deserialized.ShortLived.ShouldBeTrue();
+                deserialized.ProcessId.ShouldBe(4321);
+                deserialized.Reason.ShouldBeNull();
+                deserialized.ReasonCode.ShouldBeNull();
+                deserialized.Message.ShouldBe("MSBuild Server node started for this build only; it will shut down afterward (process ID 4321).");
+            }
+        }
+
+        /// <summary>
+        /// Companion to <see cref="RoundtripMSBuildServerLifecycleEventArgs"/> covering the <c>NotUsed</c> kind
+        /// with a non-null <see cref="MSBuildServerLifecycleEventArgs.Reason"/> /
+        /// <see cref="MSBuildServerLifecycleEventArgs.ReasonCode"/> (the deduplicated-string branch the Spawned
+        /// case leaves null) and the <c>Reused</c> kind (a non-zero enum value). Verifies every structured field
+        /// round-trips through the binary-log writer/reader.
+        /// </summary>
+        [Fact]
+        public void RoundtripMSBuildServerLifecycleEventArgs_NotUsedAndReused()
+        {
+            RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.NotUsed,
+                processId: 0,
+                reason: "node reuse is disabled",
+                reasonCode: "node-reuse-disabled",
+                "MSBuild Server was requested but not used for this build: node reuse is disabled.",
+                MessageImportance.Low));
+
+            RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Reused,
+                processId: 9876,
+                reason: null,
+                reasonCode: null,
+                "Reusing the running MSBuild Server node for this build (process ID 9876).",
+                MessageImportance.Low));
+
+            static void RoundtripAndAssert(MSBuildServerLifecycleEventArgs args)
+            {
+                args.BuildEventContext = BuildEventContext.Invalid;
+
+                var memoryStream = new MemoryStream();
+                using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(binaryWriter).Write(args);
+                }
+
+                memoryStream.Position = 0;
+                using var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+                using var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+                var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
+                deserialized.Kind.ShouldBe(args.Kind);
+                deserialized.ProcessId.ShouldBe(args.ProcessId);
+                deserialized.Reason.ShouldBe(args.Reason);
+                deserialized.ReasonCode.ShouldBe(args.ReasonCode);
+                deserialized.ShortLived.ShouldBe(args.ShortLived);
+                deserialized.Message.ShouldBe(args.Message);
+            }
+        }
+
         [Fact]
         public void RoundtripAssemblyLoadBuild()
         {
@@ -737,6 +874,98 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.ColumnNumber.ToString(),
                 e => TranslationHelpers.GetItemsString(e.Items));
+        }
+
+        [Fact]
+        public void AbsolutePathTaskParameterTextUsesOriginalValue()
+        {
+            var basePath = new AbsolutePath(Path.GetFullPath("."));
+            var path = new AbsolutePath("input.txt", basePath);
+
+            ItemGroupLoggingHelper.GetStringFromParameterValue(path).ShouldBe("input.txt");
+        }
+
+        [Fact]
+        public void TaskParameterEventForwardingPreservesAbsolutePathOriginalValue()
+        {
+            TaskParameterEventArgs args = CreateAbsolutePathTaskParameterEventArgs();
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                args.WriteToStream(binaryWriter);
+            }
+
+            memoryStream.Position = 0;
+#pragma warning disable SYSLIB0050 // Required to exercise the legacy event forwarding deserializer.
+            var forwardedArgs = (TaskParameterEventArgs)FormatterServices.GetUninitializedObject(typeof(TaskParameterEventArgs));
+#pragma warning restore SYSLIB0050
+            using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                forwardedArgs.CreateFromStream(binaryReader, version: 0);
+            }
+
+            forwardedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)forwardedArgs.Items[0]).ItemSpec.ShouldBe("input.txt");
+        }
+
+        [Fact]
+        public void BinaryLogSerializationPreservesAbsolutePathOriginalValue()
+        {
+            TaskParameterEventArgs args = CreateAbsolutePathTaskParameterEventArgs();
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            memoryStream.Position = 0;
+            using var reader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+
+            replayedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)replayedArgs.Items[0]).ItemSpec.ShouldBe("input.txt");
+            replayedArgs.Message.ShouldContain("input.txt");
+            replayedArgs.Message.ShouldNotContain(Path.GetFullPath("input.txt"));
+        }
+
+        [Fact]
+        public void BinaryLogSerializationWritesEmptyItemSpecForDefaultAbsolutePath()
+        {
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskInput,
+                "File",
+                propertyName: null,
+                "File",
+                new object[] { default(AbsolutePath) },
+                logItemMetadata: false,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            memoryStream.Position = 0;
+            using var reader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+
+            replayedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)replayedArgs.Items[0]).ItemSpec.ShouldBe(string.Empty);
+        }
+
+        private static TaskParameterEventArgs CreateAbsolutePathTaskParameterEventArgs()
+        {
+            var basePath = new AbsolutePath(Path.GetFullPath("."));
+            return new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskInput,
+                "File",
+                propertyName: null,
+                "File",
+                new object[] { new AbsolutePath("input.txt", basePath) },
+                logItemMetadata: false,
+                DateTime.MinValue);
         }
 
         [Fact]
@@ -1038,17 +1267,16 @@ namespace Microsoft.Build.UnitTests
             // Some future data that are not known in current version
             binaryWriter.Write(new byte[] { 1, 2, 3, 4 });
 
-
             int positionAfterFirstEvent = (int)memoryStream.Position;
             memoryStream.Position = 0;
             // event type
-            Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            binaryReader.Read7BitEncodedInt();
             int eventSizePos = (int)memoryStream.Position;
-            int eventSize = Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            int eventSize = binaryReader.Read7BitEncodedInt();
             int positionAfterFirstEventSize = (int)memoryStream.Position;
             memoryStream.Position = eventSizePos;
             // the extra 4 bytes
-            Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, eventSize + 4);
+            binaryWriter.Write7BitEncodedInt(eventSize + 4);
             memoryStream.Position.ShouldBe(positionAfterFirstEventSize, "The event size need to be overwritten in place - without overwriting any bytes after the size info");
             memoryStream.Position = positionAfterFirstEvent;
 
@@ -1102,13 +1330,13 @@ namespace Microsoft.Build.UnitTests
             int positionAfterFirstEvent = (int)memoryStream.Position;
             memoryStream.Position = 0;
             // event type
-            Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            binaryReader.Read7BitEncodedInt();
             int eventSizePos = (int)memoryStream.Position;
             memoryStream.Position = 0;
 
             // some future type that is not known in current version
             BinaryLogRecordKind unknownType = (BinaryLogRecordKind)Enum.GetValues(typeof(BinaryLogRecordKind)).Cast<BinaryLogRecordKind>().Select(e => (int)e).Max() + 2;
-            Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, (int)unknownType);
+            binaryWriter.Write7BitEncodedInt((int)unknownType);
             memoryStream.Position.ShouldBe(eventSizePos, "The event type need to be overwritten in place - without overwriting any bytes after the type info");
             memoryStream.Position = positionAfterFirstEvent;
 
@@ -1156,8 +1384,8 @@ namespace Microsoft.Build.UnitTests
             int positionAfterFirstEvent = (int)memoryStream.Position;
             memoryStream.Position = 0;
             // event type
-            Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
-            int eventSize = Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            binaryReader.Read7BitEncodedInt();
+            int eventSize = binaryReader.Read7BitEncodedInt();
             // overwrite the entire event with garbage
             binaryWriter.Write(Enumerable.Repeat(byte.MaxValue, eventSize).ToArray());
 
@@ -1208,13 +1436,13 @@ namespace Microsoft.Build.UnitTests
             int positionAfterFirstEvent = (int)memoryStream.Position;
             memoryStream.Position = 0;
             // event type
-            Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            binaryReader.Read7BitEncodedInt();
             int eventSizePos = (int)memoryStream.Position;
-            int eventSize = Microsoft.Build.Shared.BinaryReaderExtensions.Read7BitEncodedInt(binaryReader);
+            int eventSize = binaryReader.Read7BitEncodedInt();
             int positionAfterFirstEventSize = (int)memoryStream.Position;
             memoryStream.Position = eventSizePos;
             // simulate there are 4 bytes less in the future version of the event - while our reader expects those
-            Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, eventSize - 4);
+            binaryWriter.Write7BitEncodedInt(eventSize - 4);
             memoryStream.Position.ShouldBe(positionAfterFirstEventSize, "The event size need to be overwritten in place - without overwriting any bytes after the size info");
             // remove the 4 bytes - so that actual size of event is inline with it's written size.
             memoryStream.Position = positionAfterFirstEvent - 4;

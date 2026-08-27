@@ -36,6 +36,11 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="BinlogFormatVersionMismatch">
+        <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
+        <target state="translated">MSB4281: 二进制日志文件是用比当前版本(格式版本 {1})更新的 MSBuild (格式版本 {0})创建的。结果中可能缺少某些数据。</target>
+        <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
+      </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
         <source>Content already acquired as StreamReader via GetContentReader.</source>
         <target state="translated">已通过 GetContentReader 以 StreamReader 形式获取的内容。</target>
@@ -135,6 +140,11 @@
         <source>Writing is not supported.</source>
         <target state="translated">不支持写入。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
+        <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
+        <target state="translated">MSB4284: 无法加载自定义生成检查“{0}”，因为此 MSBuild 主机禁用了自定义插件探测(例如在已裁剪或本机 AOT 构建中)，无法通过反射加载检查程序集。请使用基于 JIT 的 MSBuild 进行构建以运行自定义检查。</target>
+        <note>{StrBegin="MSB4284: "}{0} is the path to the custom build check assembly.</note>
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
@@ -416,6 +426,38 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CoordinatorFailedToConnect">
+        <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
+        <target state="translated">未能连接到生成协调器。生成将不进行节点协调的情况下继续进行。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorFailedToLaunch">
+        <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
+        <target state="translated">未能启动生成协调器。生成将不进行节点协调的情况下继续进行。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorFailedToNegotiate">
+        <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
+        <target state="translated">未能与生成协调器协商。生成将不进行节点协调的情况下继续进行。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorLaunchTimedOut">
+        <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
+        <target state="translated">等待启动生成协调器时超时。生成将不进行节点协调的情况下继续进行。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorNodeGrantReceived">
+        <source>Coordinator granted {0} node(s) for this build.</source>
+        <target state="translated">协调器为此生成授权了 {0} 个节点。</target>
+        <note>
+      LOCALIZATION: {0} is the number of nodes granted by the coordinator.
+    </note>
+      </trans-unit>
+      <trans-unit id="CoordinatorWaitingForNodes">
+        <source>Waiting for coordinator to grant build resources...</source>
+        <target state="translated">正在等待协调器授权生成资源...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
         <target state="translated">找不到指定的自定义检查程序集: {0}。请检查它是否存在。</target>
@@ -465,6 +507,11 @@
         <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
         <target state="translated">MSB4280: 环境变量 DOTNET_HOST_PATH 设置为目录(“{0}”)，而不是指向 dotnet 可执行文件的路径。这可能导致使用该变量的任务(如 Roslyn 编译器)出现构建错误。请取消设置该变量，或将其更新为直接指向 dotnet 可执行文件的路径(例如 "C:\Program Files\dotnet\dotnet.exe")。</target>
         <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
+      </trans-unit>
+      <trans-unit id="DotnetHostPathNotSet">
+        <source>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</source>
+        <target state="translated">未设置 DOTNET_HOST_PATH。无法确定应用托管进程启动的运行时位置。在 .NET SDK 下运行时，应始终设置此项。</target>
+        <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
@@ -580,6 +627,11 @@
         <target state="translated">正在加载以下项目缓存插件: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled loggers: {0}</source>
+        <target state="translated">启用的记录器: {0}</target>
+        <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">日志记录详细程度设置为: {0}。</target>
@@ -591,6 +643,11 @@
         <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
         <target state="translated">这些参数在此点之前已被截断。若要查看所有参数，请清除 MSBUILDTRUNCATETASKINPUTLOGGING 环境变量。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="translated">SkipNonexistentTargets="true" 从调用方跨元项目边界继承。</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
@@ -637,6 +694,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_ConfigurationFileToolsetsNotSupported">
+        <source>Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</source>
+        <target state="translated">在此已裁剪或本机 AOT 主机中，不支持从应用程序配置文件(ToolsetDefinitionLocations.ConfigurationFile)读取工具集定义。从请求的工具集位置移除 ConfigurationFile，或运行基于 JIT 的 MSBuild。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
         <target state="translated">使用 MatchOnMetadata 删除时，只能引用项类型。</target>
@@ -656,6 +718,21 @@
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
         <target state="translated">MatchOnMetadata 不能在 &lt;Target&gt; 外部使用。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationCannotBuild">
+        <source>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</source>
+        <target state="translated">无法生成项目实例，因为它仅被部分评估(评估在“{0}”阶段后停止)。需要完全评估才能生成项目。</target>
+        <note>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationMemberUnavailable">
+        <source>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</source>
+        <target state="translated">“{0}”成员不可用，因为项目仅被部分评估(评估在“{1}”阶段后停止)。若要访问此成员，请至少使用“{2}”评估阶段重新评估项目。</target>
+        <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
+        <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
+        <target state="translated">创建项目时不支持部分评估(“{0}”评估阶段)。使用 ProjectInstance 执行部分评估，或使用“完全评估”阶段创建项目。</target>
+        <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
@@ -820,6 +897,17 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
+        <source>The project file '{0}' could not be loaded when referenced by {1}.</source>
+        <target state="translated">项目文件“{0}”在被 {1} 引用时无法加载。</target>
+        <note>
+      This message is shown during static graph construction when a referenced project file cannot be loaded,
+      along with information about which project(s) are referencing the failed project.
+      {0} is the full path to the project that failed to load
+      {1} is a comma-separated list of full paths to the projects that reference the failed project
+      The specific reason for the load failure (e.g., "Could not find file '...'") is appended separately in code.
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
         <target state="translated">由于表达式评估为空字符串，因此项目“{0}”不由 ({2}、{3}) 处的“{1}”导入。</target>
@@ -845,6 +933,16 @@
         <target state="translated">MSB4274: 使用发出代理构建请求的项目缓存插件时，禁用 inproc 节点会导致性能下降。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReflectiveLoggerLoadingNotSupported">
+        <source>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</source>
+        <target state="translated">MSB4285: 无法通过程序集和类名创建记录器，因为此已裁剪或本机 AOT 的主机不支持通过反射加载记录器。请将已构建的 ILogger 实例提供给引擎作为记录器，或使用基于 JIT 的 MSBuild 进行构建。</target>
+        <note>{StrBegin="MSB4285: "}</note>
+      </trans-unit>
+      <trans-unit id="ReflectiveTaskExecutionNotSupported">
+        <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
+        <target state="translated">MSB4283: 无法运行“{0}”任务，因为执行任务需要通过反射加载任务程序集和类型，而此已裁剪或本机 AOT 的主机不支持此操作。请使用基于 JIT 的 MSBuild 进行构建以运行任务。</target>
+        <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">当前仅支持使用 x64 风格的 MSBuild 来报告文件访问情况。</target>
@@ -852,7 +950,7 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">还原完成({0})</target>
+        <target state="translated">还原完成({0}秒)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -920,6 +1018,16 @@ Errors: {3}</source>
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
         <target state="translated">SDK 尝试将环境变量 "{0}" 设置为 "{1}"，但它已由另一个 SDK 设置为 "{2}"。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
+        <target state="translated">某个 SDK 将环境变量“{0}”设置为“{1}”，覆盖了从进程继承的值“{2}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkResolverDynamicLoadingNotSupported">
+        <source>MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</source>
+        <target state="translated">MSB4282: 无法解析 SDK“{0}”，因为它需要一个必须动态加载 SDK 解析程序(“{1}”)，而此已裁剪或本机 AOT 的主机中不支持此操作。支持 SDK 安装中附带的 SDK；若要使用 NuGet、工作负载或自定义 SDK 解析程序，请使用基于 JIT 的 MSBuild 进行构建。</target>
+        <note>{StrBegin="MSB4282: "}{0} is the SDK name; {1} is the SDK resolver manifest display name.</note>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
@@ -1001,6 +1109,11 @@ Errors: {3}</source>
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
         <target state="translated">已从“{0}”加载任务程序集，但所需位置为“{1}”。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
+        <target state="translated">任务“{0}”在调用方进程 {2} 生成的 TaskHost 进程 {1} 中运行。为此调用生成了新的 TaskHost: {3}。TaskHost 是可重用的挎斗: {4}。节点重用: {5}。</target>
+        <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
@@ -3205,6 +3318,142 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
         <target state="translated">MSB4247: 无法加载 SDK 解析程序。清单文件存在，但无法找到 SDK 解析程序 DLL 文件的路径。清单文件路径“{0}”。 SDK 解析程序路径: {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
+      </trans-unit>
+      <trans-unit id="BuildAborted">
+        <source>MSB4188: Build was canceled.</source>
+        <target state="translated">MSB4188: 已取消生成。</target>
+        <note>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</note>
+      </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">不支持自定义事件类型“{0}”，因为所有自定义事件类型都已弃用。请改用 Extended*EventArgs。有关详细信息，请访问 :https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProjectFile">
+        <source>MSB4025: The project file could not be loaded. {0}</source>
+        <target state="translated">MSB4025: 未能加载项目文件。{0}</target>
+        <note>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
+    invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
+    provided separately to loggers.
+    LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
+      </trans-unit>
+      <trans-unit id="InvalidVerbosity">
+        <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
+        <target state="translated">MSB4103: "{0}" 不是有效的记录器详细程度。</target>
+        <note>{StrBegin="MSB4103: "}</note>
+      </trans-unit>
+      <trans-unit id="OM_NotSupportedReadOnlyCollection">
+        <source>This collection is read-only.</source>
+        <target state="translated">此集合是只读的。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFileIsMalformed">
+        <source>MSB5019: The project file is malformed: "{0}". {1}</source>
+        <target state="translated">MSB5019: 项目文件格式不正确: “{0}”。{1}</target>
+        <note>{StrBegin="MSB5019: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectFileCouldNotBeLoaded">
+        <source>MSB5020: Could not load the project file: "{0}". {1}</source>
+        <target state="translated">MSB5020: 未能加载项目文件: “{0}”。{1}</target>
+        <note>{StrBegin="MSB5020: "}</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="translated">MSB5028: 位于“{0}”的解决方案筛选器文件包含“{2}”处的解决方案文件中没有的项目“{1}”。</target>
+        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterJsonParsingError">
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="translated">MSB5025: 解决方案筛选器文件“{0}”中的 JSON 的格式不正确。</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterMissingSolutionError">
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="translated">MSB5026: 位于“{0}”的解决方案筛选器文件指定“{1}”处将存在一个解决方案文件，但该文件不存在。</target>
+        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseDuplicateProject">
+        <source>MSB5004: The solution file has two projects named "{0}".</source>
+        <target state="translated">MSB5004: 解决方案文件有两个名为“{0}”的项目。</target>
+        <note>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameCharacters">
+        <source>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</source>
+        <target state="translated">MSB5005: 分析项目“{0}”的项目节时出错。项目文件名“{1}”包含无效字符。</target>
+        <note>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameEmpty">
+        <source>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</source>
+        <target state="translated">MSB5006: 分析项目“{0}”的项目节时出错。项目文件名为空。</target>
+        <note>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectSolutionConfigurationEntry">
+        <source>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5007: 分析解决方案文件中的项目配置节时出错。“{0}”项无效。</target>
+        <note>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidSolutionConfigurationEntry">
+        <source>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5008: 分析解决方案文件中的解决方案配置节时出错。“{0}”项无效。</target>
+        <note>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectError">
+        <source>MSB5009: Error parsing the nested project section in solution file.</source>
+        <target state="translated">MSB5009: 分析解决方案文件中的嵌套项目节时出错。</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
+        <source>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</source>
+        <target state="translated">MSB5009: 分析 GUID 为 "{1}" 的项目 "{0}" 部分时出错。它嵌套在 "{2}" 下，但在解决方案中未找到该项目。</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectUndefinedError">
+        <source>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</source>
+        <target state="translated">MSB5023: 分析解决方案文件中的嵌套项目节时出错。GUID 为“{0}”的项目列为嵌套在项目“{1}”下，但不存在于解决方案中。</target>
+        <note>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNoHeaderError">
+        <source>MSB5010: No file format header found.</source>
+        <target state="translated">MSB5010: 未找到文件格式头。</target>
+        <note>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectDepGuidError">
+        <source>MSB5011: Parent project GUID not found in "{0}" project dependency section.</source>
+        <target state="translated">MSB5011: 在“{0}”项目依赖项节中未找到父项目 GUID。</target>
+        <note>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectEofError">
+        <source>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</source>
+        <target state="translated">MSB5012: 在“{0}”项目节内部意外到达文件尾。</target>
+        <note>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectError">
+        <source>MSB5013: Error parsing a project section.</source>
+        <target state="translated">MSB5013: 分析项目节时出错。</target>
+        <note>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseVersionMismatchError">
+        <source>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</source>
+        <target state="translated">MSB5014: 无法识别文件格式版本。MSBuild 只能读取版本 {0}.0 到 {1}.0 之间(包括这两个版本)的解决方案文件。</target>
+        <note>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseWebProjectPropertiesError">
+        <source>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</source>
+        <target state="translated">MSB5015: 未能从“{0}”项目的 WebsiteProperties 节中读取属性。</target>
+        <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSolutionParsingErrors">
+        <source>Solution file</source>
+        <target state="translated">解决方案文件</target>
+        <note>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
+      "MSBUILD : Solution file error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedSolutionComment">
+        <source>Unrecognized solution version "{0}", attempting to continue.</source>
+        <target state="translated">无法识别解决方案版本“{0}”，正在尝试继续。</target>
+        <note />
       </trans-unit>
     </body>
   </file>

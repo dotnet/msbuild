@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -39,9 +40,22 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             var resolvers = !string.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
                 new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
+
+            // Fold in any resolvers the host registered in-process via SdkResolver.Register. These run on
+            // this reflection-free path (no Assembly.LoadFrom), so they work in a trimmed / Native AOT host
+            // and never reach the dynamic-loading failure (MSB4282). They are ordered with the built-in
+            // resolver by Priority, matching how disk-discovered resolvers are ordered.
+            IReadOnlyList<SdkResolver> registeredResolvers = SdkResolver.RegisteredResolvers;
+            if (registeredResolvers.Count > 0)
+            {
+                resolvers.AddRange(registeredResolvers);
+                resolvers.Sort((left, right) => left.Priority.CompareTo(right.Priority));
+            }
+
             return resolvers;
         }
 
+        [RequiresUnreferencedCode("Loads SDK resolver assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         internal virtual IReadOnlyList<SdkResolver> LoadAllResolvers(ElementLocation location)
         {
             MSBuildEventSource.Log.SdkResolverLoadAllResolversStart();
@@ -220,48 +234,46 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return true;
         }
 
+        [RequiresUnreferencedCode("Reflects over an SDK resolver assembly's exported types, which is incompatible with trimming.")]
         protected virtual IEnumerable<Type> GetResolverTypes(Assembly assembly)
         {
             return assembly.ExportedTypes
-                .Select(type => new { type, info = type.GetTypeInfo() })
-                .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
-                .Select(t => t.type);
+                .Where(t => t.IsClass && t.IsPublic && !t.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t));
         }
 
+        [RequiresUnreferencedCode("Loads an SDK resolver assembly from disk, which is incompatible with trimming.")]
         protected virtual Assembly LoadResolverAssembly(string resolverPath)
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+            string resolverFileName = Path.GetFileNameWithoutExtension(resolverPath);
+            if (resolverFileName.Equals("Microsoft.DotNet.MSBuildSdkResolver", StringComparison.OrdinalIgnoreCase))
             {
-                string resolverFileName = Path.GetFileNameWithoutExtension(resolverPath);
-                if (resolverFileName.Equals("Microsoft.DotNet.MSBuildSdkResolver", StringComparison.OrdinalIgnoreCase))
+                // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
+                // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
+                var buildEnvironment = BuildEnvironmentHelper.Instance;
+                AssemblyName assemblyName = CreateAssemblyNameWithCodeBase(resolverFileName, resolverPath);
+
+                // Need fallback for scenarios where we're not running directly in MSBuild.exe app host.
+                // RunningInMSBuildExe is true when the actual process is MSBuild.exe (app host),
+                // false when running via dotnet CLI (dotnet MSBuild.dll), external API callers, or test runners.
+                // VS and MSBuild.exe app host can use Assembly.Load reliably and benefit from NGEN.
+                bool needsFallback = buildEnvironment.Mode == BuildEnvironmentMode.Standalone && !buildEnvironment.RunningInMSBuildExe;
+
+                if (needsFallback)
                 {
-                    // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
-                    // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
-                    var buildEnvironment = BuildEnvironmentHelper.Instance;
-                    AssemblyName assemblyName = CreateAssemblyNameWithCodeBase(resolverFileName, resolverPath);
-                    
-                    // Check if we're in a scenario that needs fallback (API usage or dotnet CLI)
-                    // These scenarios are detected by: Mode = Standalone and not running in MSBuild.exe
-                    // This matches the condition set by TryFromMSBuildAssembly when MSBuild is called from external APIs
-                    // VS and MSBuild.exe direct usage can use Assembly.Load reliably, so they don't need fallback
-                    bool needsFallback = buildEnvironment.Mode == BuildEnvironmentMode.Standalone && !buildEnvironment.RunningInMSBuildExe;
-                    
-                    if (needsFallback)
-                    {
-                        // For external API users and dotnet CLI, use LoadFrom directly
-                        // Assembly.Load fails in these scenarios due to assembly resolution context,
-                        // so we use LoadFrom which works reliably without needing try-catch
-                        return Assembly.LoadFrom(resolverPath);
-                    }
-                    else
-                    {
-                        // VS and MSBuild.exe direct usage: use Assembly.Load directly without fallback
-                        // These scenarios should work reliably with Assembly.Load and benefit from NGEN
-                        return Assembly.Load(assemblyName);
-                    }
+                    // For external API users and dotnet CLI, use LoadFrom directly
+                    // Assembly.Load fails in these scenarios due to assembly resolution context,
+                    // so we use LoadFrom which works reliably without needing try-catch
+                    return Assembly.LoadFrom(resolverPath);
+                }
+                else
+                {
+                    // VS and MSBuild.exe direct usage: use Assembly.Load directly without fallback
+                    // These scenarios should work reliably with Assembly.Load and benefit from NGEN
+                    return Assembly.Load(assemblyName);
                 }
             }
+
             return Assembly.LoadFrom(resolverPath);
 #else
             return s_loader.LoadFromPath(resolverPath);
@@ -278,6 +290,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 #endif
 
+        [RequiresUnreferencedCode("Loads SDK resolver assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         protected internal virtual IReadOnlyList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, ElementLocation location)
         {
             MSBuildEventSource.Log.SdkResolverLoadResolversStart();
@@ -293,6 +306,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return resolvers;
         }
 
+        [RequiresUnreferencedCode("Loads an SDK resolver assembly from disk and instantiates its resolver types, which is incompatible with trimming.")]
         protected virtual void LoadResolvers(string resolverPath, ElementLocation location, List<SdkResolver> resolvers)
         {
             Assembly assembly;

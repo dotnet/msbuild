@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -19,7 +20,7 @@ namespace Microsoft.Build.Execution
             string outputCacheFile,
             ProjectIsolationMode projectIsolationMode)
         {
-            ErrorUtilities.VerifyThrowInternalNull(outputCacheFile);
+            Assumed.NotNull(outputCacheFile);
 
             try
             {
@@ -37,34 +38,19 @@ namespace Microsoft.Build.Execution
                 {
                     var translator = BinaryTranslator.GetWriteTranslator(fileStream);
 
-                    ConfigCache configCacheToSerialize = null;
-                    ResultsCache resultsCacheToSerialize = null;
-
-                    switch (configCache)
+                    var configCacheToSerialize = configCache switch
                     {
-                        case ConfigCache asConfigCache:
-                            configCacheToSerialize = asConfigCache;
-                            break;
-                        case ConfigCacheWithOverride configCacheWithOverride:
-                            configCacheToSerialize = configCacheWithOverride.CurrentCache;
-                            break;
-                        default:
-                            ErrorUtilities.ThrowInternalErrorUnreachable();
-                            break;
-                    }
+                        ConfigCache asConfigCache => asConfigCache,
+                        ConfigCacheWithOverride configCacheWithOverride => configCacheWithOverride.CurrentCache,
+                        _ => Assumed.Unreachable<ConfigCache>(),
+                    };
 
-                    switch (resultsCache)
+                    var resultsCacheToSerialize = resultsCache switch
                     {
-                        case ResultsCache asResultsCache:
-                            resultsCacheToSerialize = asResultsCache;
-                            break;
-                        case ResultsCacheWithOverride resultsCacheWithOverride:
-                            resultsCacheToSerialize = resultsCacheWithOverride.CurrentCache;
-                            break;
-                        default:
-                            ErrorUtilities.ThrowInternalErrorUnreachable();
-                            break;
-                    }
+                        ResultsCache asResultsCache => asResultsCache,
+                        ResultsCacheWithOverride resultsCacheWithOverride => resultsCacheWithOverride.CurrentCache,
+                        _ => Assumed.Unreachable<ResultsCache>(),
+                    };
 
                     // Avoid creating new config and results caches if no projects were built in violation
                     // of isolation mode.
@@ -127,8 +113,8 @@ namespace Microsoft.Build.Execution
                     translator.Translate(ref resultsCache);
                 }
 
-                ErrorUtilities.VerifyThrowInternalNull(configCache);
-                ErrorUtilities.VerifyThrowInternalNull(resultsCache);
+                Assumed.NotNull(configCache);
+                Assumed.NotNull(resultsCache);
 
                 return (configCache, resultsCache, null);
             }

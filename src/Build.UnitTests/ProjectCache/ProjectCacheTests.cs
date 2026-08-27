@@ -14,7 +14,6 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
-using Microsoft.Build.Internal;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
@@ -23,14 +22,17 @@ using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 {
     public class ProjectCacheTests : IDisposable
     {
-        private static string s_currentTargetNETFramework = $"net{RunnerUtilities.BootstrapSdkVersion.Split('.')?.FirstOrDefault()}.0";
+        // The sample plugin and the helper apps built by these tests target the runtime MSBuild itself
+        // targets (LatestDotNetCoreForMSBuild), which can lag the bootstrap SDK's TFM.
+        // Derive the TFM from the runtime actually executing these
+        // tests rather than from BootstrapSdkVersion, so the plugin/app paths resolve to the built output.
+        private static string s_currentTargetNETFramework = $"net{Environment.Version.Major}.0";
 
         public ProjectCacheTests(ITestOutputHelper output)
         {
@@ -1338,6 +1340,41 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
                 StringShouldContainSubstring(logger.FullLog, $"{AssemblyMockCache}: EndBuildAsync", expectedOccurrences: 1);
             }
+        }
+
+        [Fact]
+        public async Task CriticalExceptionFromGraphBuildCompletesSubmission()
+        {
+            const string exceptionMessage = "Critical exception from graph build";
+
+            var project = _env.CreateFile(
+                "1.proj",
+                """
+                <Project>
+                  <Target Name="Build" />
+                </Project>
+                """);
+            var graph = new ProjectGraph(project.Path);
+            var cache = new DelegatingMockCache(
+                (_, _, _) => throw new InternalErrorException(exceptionMessage));
+            var buildParameters = new BuildParameters
+            {
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(cache),
+                ShutdownInProcNodeOnBuildFinish = true
+            };
+            var requestData = new GraphBuildRequestData(graph, ["Build"]);
+
+            Task<InternalErrorException> buildTask = Task.Run(
+                () =>
+                {
+                    using var buildManager = new BuildManager();
+                    return Should.Throw<InternalErrorException>(() => buildManager.Build(buildParameters, requestData));
+                });
+
+            Task completedTask = await Task.WhenAny(buildTask, Task.Delay(TimeSpan.FromSeconds(10)));
+
+            completedTask.ShouldBeSameAs(buildTask, "Graph builds should complete after a critical exception.");
+            (await buildTask).Message.ShouldContain(exceptionMessage);
         }
 
         [Fact]

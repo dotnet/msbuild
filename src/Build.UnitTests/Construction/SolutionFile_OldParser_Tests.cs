@@ -8,10 +8,10 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -664,7 +664,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 string errCode;
-                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out _, "Shared.InvalidProjectFile",
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out _, "ProjectFileIsMalformed",
                    "someproj.etp", String.Empty);
                 foreach (string warningString in solution.SolutionParserWarnings)
                 {
@@ -699,7 +699,7 @@ namespace Microsoft.Build.UnitTests.Construction
             File.Delete(proj1Path);
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             string errCode;
-            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out _, "ProjectFileCouldNotBeLoaded",
                   "someproj.etp", String.Empty);
             solution.SolutionParserErrorCodes[0].ShouldContain(errCode);
         }

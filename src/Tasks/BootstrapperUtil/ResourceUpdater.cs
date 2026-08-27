@@ -1,20 +1,22 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
+#if FEATURE_WINDOWSINTEROP
+using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Build.Shared;
-
+using Windows.Win32;
+using Windows.Win32.Foundation;
+#endif
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal class ResourceUpdater
     {
-        private const int ERROR_SHARING_VIOLATION = -2147024864;
         private readonly List<StringResource> _stringResources = new List<StringResource>();
         private readonly List<FileResource> _fileResources = new List<FileResource>();
 
@@ -28,116 +30,163 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             _fileResources.Add(new FileResource(filename, key));
         }
 
-        public bool UpdateResources(string filename, BuildResults results)
+        /// <summary>
+        /// Updates resources on the target binary.
+        /// </summary>
+        /// <param name="filename">
+        /// Absolute path to the binary to update.
+        /// </param>
+        /// <param name="results">Sink for build messages.</param>
+        public bool UpdateResources(AbsolutePath filename, BuildResults results)
         {
+#if FEATURE_WINDOWSINTEROP
+#pragma warning disable CA1416 // Win32 API guarded by FEATURE_WINDOWSINTEROP; bootstrapper resource updates are Windows-only.
             bool returnValue = true;
             int beginUpdateRetries = 20;    // Number of retries
             const int beginUpdateRetryInterval = 100; // In milliseconds
             bool endUpdate = false; // Only call EndUpdateResource() if this is true
 
-            // Directory.GetCurrentDirectory() has previously been set to the project location
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), filename);
+            string filePath = filename.Value;
 
             if (_stringResources.Count == 0 && _fileResources.Count == 0)
             {
                 return true;
             }
-            IntPtr hUpdate = IntPtr.Zero;
+            HANDLE hUpdate = HANDLE.Null;
 
             try
             {
-                hUpdate = NativeMethods.BeginUpdateResourceW(filePath, false);
-                while (IntPtr.Zero == hUpdate && Marshal.GetHRForLastWin32Error() == ERROR_SHARING_VIOLATION && beginUpdateRetries > 0) // If it equals 0x80070020 (ERROR_SHARING_VIOLATION), sleep & retry
+                hUpdate = PInvoke.BeginUpdateResource(filePath, false);
+                while (hUpdate == HANDLE.Null && Marshal.GetHRForLastWin32Error() == (int)(HRESULT)WIN32_ERROR.ERROR_SHARING_VIOLATION && beginUpdateRetries > 0) // If it equals 0x80070020 (ERROR_SHARING_VIOLATION), sleep & retry
                 {
                     // This warning can be useful for debugging, but shouldn't be displayed to an actual user
                     // results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.General", String.Format("Unable to begin updating resource for {0} with error {1:X}, trying again after short sleep", filename, Marshal.GetHRForLastWin32Error())));
-                    hUpdate = NativeMethods.BeginUpdateResourceW(filePath, false);
+                    hUpdate = PInvoke.BeginUpdateResource(filePath, false);
                     beginUpdateRetries--;
                     Thread.Sleep(beginUpdateRetryInterval);
                 }
                 // If after all that we still failed, throw a build error
-                if (IntPtr.Zero == hUpdate)
+                if (hUpdate == HANDLE.Null)
                 {
                     results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                        $"Unable to begin updating resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                        $"Unable to begin updating resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                     return false;
                 }
 
                 endUpdate = true;
 
-                if (hUpdate != IntPtr.Zero)
+                foreach (StringResource resource in _stringResources)
                 {
-                    foreach (StringResource resource in _stringResources)
-                    {
-                        byte[] data = StringToByteArray(resource.Data);
+                    byte[] data = StringToByteArray(resource.Data);
 
-                        if (!NativeMethods.UpdateResourceW(hUpdate, (IntPtr)resource.Type, resource.Name, 0, data, data.Length))
-                        {
-                            results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                                $"Unable to update resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
-                            return false;
-                        }
+                    if (!UpdateResource(hUpdate, resource.Type, resource.Name, data))
+                    {
+                        results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
+                            $"Unable to update resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
+                        return false;
+                    }
+                }
+
+                if (_fileResources.Count > 0)
+                {
+                    int index = 0;
+                    byte[] countArray = StringToByteArray(_fileResources.Count.ToString("G", CultureInfo.InvariantCulture));
+                    if (!UpdateResource(hUpdate, 42, "COUNT", countArray))
+                    {
+                        results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
+                            $"Unable to update count resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
+                        return false;
                     }
 
-                    if (_fileResources.Count > 0)
+                    foreach (FileResource resource in _fileResources)
                     {
-                        int index = 0;
-                        byte[] countArray = StringToByteArray(_fileResources.Count.ToString("G", CultureInfo.InvariantCulture));
-                        if (!NativeMethods.UpdateResourceW(hUpdate, (IntPtr)42, "COUNT", 0, countArray, countArray.Length))
+                        // Read in the file data
+                        int fileLength;
+                        byte[] fileContent;
+                        using (FileStream fs = File.OpenRead(resource.Filename))
+                        {
+                            fileLength = (int)fs.Length;
+                            fileContent = new byte[fileLength];
+                            fs.ReadFromStream(fileContent, 0, fileLength);
+                        }
+
+                        // Update the resources to include this file's data
+                        string dataName = string.Format(CultureInfo.InvariantCulture, "FILEDATA{0}", index);
+
+                        if (!UpdateResource(hUpdate, 42, dataName, fileContent.AsSpan(0, fileLength)))
                         {
                             results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                                $"Unable to update count resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                                $"Unable to update data resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                             return false;
                         }
 
-                        foreach (FileResource resource in _fileResources)
+                        // Add this file's key to the resources
+                        string keyName = string.Format(CultureInfo.InvariantCulture, "FILEKEY{0}", index);
+                        byte[] data = StringToByteArray(resource.Key);
+                        if (!UpdateResource(hUpdate, 42, keyName, data))
                         {
-                            // Read in the file data
-                            int fileLength;
-                            byte[] fileContent;
-                            using (FileStream fs = File.OpenRead(resource.Filename))
-                            {
-                                fileLength = (int)fs.Length;
-                                fileContent = new byte[fileLength];
-                                fs.ReadFromStream(fileContent, 0, fileLength);
-                            }
-
-                            // Update the resources to include this file's data
-                            string dataName = string.Format(CultureInfo.InvariantCulture, "FILEDATA{0}", index);
-
-                            if (!NativeMethods.UpdateResourceW(hUpdate, (IntPtr)42, dataName, 0, fileContent, fileLength))
-                            {
-                                results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                                    $"Unable to update data resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
-                                return false;
-                            }
-
-                            // Add this file's key to the resources
-                            string keyName = string.Format(CultureInfo.InvariantCulture, "FILEKEY{0}", index);
-                            byte[] data = StringToByteArray(resource.Key);
-                            if (!NativeMethods.UpdateResourceW(hUpdate, (IntPtr)42, keyName, 0, data, data.Length))
-                            {
-                                results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                                    $"Unable to update key resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
-                                return false;
-                            }
-
-                            index++;
+                            results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
+                                $"Unable to update key resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
+                            return false;
                         }
+
+                        index++;
                     }
                 }
             }
             finally
             {
-                if (endUpdate && !NativeMethods.EndUpdateResource(hUpdate, false))
+                if (endUpdate && !PInvoke.EndUpdateResource(hUpdate, false))
                 {
                     results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                        $"Unable to finish updating resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                        $"Unable to finish updating resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                     returnValue = false;
                 }
             }
 
             return returnValue;
+#pragma warning restore CA1416
+#else
+            results.AddMessage(BuildMessage.CreateMessage(
+                BuildMessageSeverity.Error,
+                "GenerateBootstrapper.General",
+                $"Unable to update resources for {filename.OriginalValue}: bootstrapper resource updates require Windows interop support, which is not available in this build."));
+            return false;
+#endif
+        }
+
+        /// <summary>
+        /// Back-compat overload for callers that have not yet been migrated to the AbsolutePath-based API
+        /// (currently <see cref="GenerateBootstrapper"/>). Wraps the input without rooted-path validation
+        /// to preserve the legacy "use the string as-is" semantics; <c>OriginalValue</c> equals <c>Value</c>.
+        /// </summary>
+        // TODO: This can be removed after GenerateBootstrapper is fully migrated to the AbsolutePath-based API.
+        public bool UpdateResources(string filename, BuildResults results)
+            => UpdateResources(new AbsolutePath(filename, ignoreRootedCheck: true), results);
+
+#if FEATURE_WINDOWSINTEROP
+        /// <summary>
+        /// Calls UpdateResource with an integer resource type (MAKEINTRESOURCE) and a string name.
+        /// </summary>
+        [System.Runtime.Versioning.SupportedOSPlatform("windows5.0")]
+        private static unsafe bool UpdateResource(HANDLE hUpdate, int lpType, string lpName, ReadOnlySpan<byte> data)
+        {
+            // MAKEINTRESOURCE: Windows treats pointer values below 0x10000 as integer resource IDs.
+            System.Diagnostics.Debug.Assert(lpType is >= 0 and < 0x10000, "MAKEINTRESOURCE values must be below 64K.");
+
+            fixed (char* pName = lpName)
+            {
+                fixed (byte* pData = data)
+                {
+                    return PInvoke.UpdateResource(
+                        hUpdate,
+                        lpType: (PCWSTR)(char*)lpType,
+                        lpName: pName,
+                        wLanguage: 0,
+                        lpData: pData,
+                        cb: (uint)data.Length);
+                }
+            }
         }
 
         private static byte[] StringToByteArray(string str)
@@ -149,6 +198,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             data[data.Length - 1] = 0;
             return data;
         }
+#endif
 
         private class StringResource
         {

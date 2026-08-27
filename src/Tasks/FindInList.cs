@@ -5,7 +5,6 @@ using System;
 using System.IO;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -28,7 +27,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_list, nameof(List));
+                ArgumentNullException.ThrowIfNull(_list, nameof(List));
                 return _list;
             }
             set => _list = value;
@@ -105,7 +104,7 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                var path = FrameworkFileUtilities.FixFilePath(item.ItemSpec);
+                var path = FileUtilities.FixFilePath(item.ItemSpec);
                 string filename = (MatchFileNameOnly ? Path.GetFileName(path) : path);
 
                 if (String.Equals(filename, ItemSpecToFind, comparison))

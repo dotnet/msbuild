@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectUsingTaskElement(XmlElementWithLocation xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
         }
 
         /// <summary>
@@ -48,14 +48,14 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string AssemblyFile
         {
-            get => FrameworkFileUtilities.FixFilePath(
+            get => FileUtilities.FixFilePath(
                 GetAttributeValue(XMakeAttributes.assemblyFile));
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.assemblyName);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.assemblyName);
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(AssemblyName), "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName);
-                value = FrameworkFileUtilities.FixFilePath(value);
+                value = FileUtilities.FixFilePath(value);
                 SetOrRemoveAttribute(XMakeAttributes.assemblyFile, value, "Set usingtask AssemblyFile {0}", value);
             }
         }
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.assemblyName);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.assemblyName);
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(AssemblyFile), "OM_EitherAttributeButNotBoth", XMakeElements.usingTask, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName);
                 SetOrRemoveAttribute(XMakeAttributes.assemblyName, value, "Set usingtask AssemblyName {0}", value);
             }
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.taskName);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.taskName);
                 SetOrRemoveAttribute(XMakeAttributes.taskName, value, "Set usingtask TaskName {0}", value);
             }
         }
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Construction
 
             if (!String.IsNullOrEmpty(assemblyFile))
             {
-                usingTask.AssemblyFile = FrameworkFileUtilities.FixFilePath(assemblyFile);
+                usingTask.AssemblyFile = FileUtilities.FixFilePath(assemblyFile);
             }
             else
             {

@@ -82,7 +82,7 @@ namespace Microsoft.Build.Internal
         /// <param name="s">Can be empty string, but not null.</param>
         internal static void SetXmlNodeInnerContents(XmlElementWithLocation node, string s)
         {
-            ErrorUtilities.VerifyThrow(s != null, "Need value to set.");
+            Assumed.NotNull(s, "Need value to set.");
 
             if (s.Contains('<'))
             {
@@ -194,12 +194,21 @@ namespace Microsoft.Build.Internal
 
             // XmlNode.InnerXml is much more expensive than InnerText. Don't use it for trivial cases.
             // (single child node with a trivial value or no child nodes)
-            if (!node.HasChildNodes || (node.ChildNodes.Count == 1 && node.FirstChild.NodeType == XmlNodeType.Whitespace))
+            // Avoid accessing node.ChildNodes -- it allocates a new XmlChildNodes wrapper on every call.
+            // Use FirstChild/NextSibling linked-list traversal instead (allocation-free).
+            XmlNode firstChild = node.FirstChild;
+            if (firstChild is null)
             {
                 return String.Empty;
             }
 
-            if (node.ChildNodes.Count == 1 && (node.FirstChild.NodeType == XmlNodeType.Text || node.FirstChild.NodeType == XmlNodeType.CDATA))
+            bool isSingleChild = firstChild.NextSibling is null;
+            if (isSingleChild && firstChild.NodeType == XmlNodeType.Whitespace)
+            {
+                return String.Empty;
+            }
+
+            if (isSingleChild && (firstChild.NodeType == XmlNodeType.Text || firstChild.NodeType == XmlNodeType.CDATA))
             {
                 return node.InnerText;
             }
@@ -454,7 +463,7 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(toolsVersionToUse), "Should always return a ToolsVersion");
+            Assumed.NotNullOrEmpty(toolsVersionToUse, "Should always return a ToolsVersion");
 
             var explicitToolsVersionSpecified = explicitToolsVersion != null;
             usingDifferentToolsVersionFromProjectFile = UsingDifferentToolsVersionFromProjectFile(toolsVersionFromProject, toolsVersionToUse, explicitToolsVersionSpecified);

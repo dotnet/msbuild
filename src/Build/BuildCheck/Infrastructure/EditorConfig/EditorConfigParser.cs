@@ -5,7 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
 
@@ -45,7 +45,7 @@ internal sealed class EditorConfigParser
     {
         var editorConfigDataFromFilesList = new List<EditorConfigFile>();
 
-        var directoryOfTheProject = Path.GetDirectoryName(filePath);
+        var directoryOfTheProject = Path.GetDirectoryName(filePath)!;
         // The method will look for the file in parent directory if not found in current until found or the directory is root.
         var editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, directoryOfTheProject);
         while (editorConfigFilePath != string.Empty)
@@ -64,7 +64,7 @@ internal sealed class EditorConfigParser
             else
             {
                 // search in upper directory
-                editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, Path.GetDirectoryName(Path.GetDirectoryName(editorConfigFilePath)));
+                editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, Path.GetDirectoryName(Path.GetDirectoryName(editorConfigFilePath))!);
             }
         }
 

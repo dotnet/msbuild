@@ -1,11 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <RootNamespace>Microsoft.Build.Utilities</RootNamespace>
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
     <EnableDocumentationFile>true</EnableDocumentationFile>
@@ -20,21 +22,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Collections.Immutable" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' and '$(DotNetBuildSourceOnly)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
-  </ItemGroup>
-
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
-    <PackageReference Update="Microsoft.IO.Redist" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
     <PackageReference Update="System.Configuration.ConfigurationManager" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
@@ -54,62 +48,17 @@
       <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
     </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>Shared\BuildEnvironmentHelper.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>Shared\CanonicalError.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>Shared\ExtensionFoldersRegistryKey.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>Shared\FileDelegates.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
-      <Link>Shared\CopyOnWriteDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Shared\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>Shared\EscapingUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EventArgsFormatting.cs">
-      <Link>Shared\EventArgsFormatting.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>Shared\ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>Shared\FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileMatcher.cs">
-      <Link>Shared\FileMatcher.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>Shared\FileUtilitiesRegex.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
-      <Link>Shared\FrameworkLocationHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\IKeyed.cs">
-      <Link>Shared\IKeyed.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Modifiers.cs">
-      <Link>Shared\Modifiers.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>Shared\InprocTrackingNativeMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProcessExtensions.cs">
-      <Link>Shared\ProcessExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
-      <Link>Shared\ReadOnlyEmptyCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
-      <Link>Shared\Collections\ReadOnlyEmptyDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
       <Link>Shared\RegistryDelegates.cs</Link>
@@ -123,17 +72,8 @@
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>Shared\TaskLoggingHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs">
-      <Link>Shared\TempFileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\Tracing.cs">
       <Link>Shared\Tracing.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\VersionUtilities.cs">
-      <Link>Shared\VersionUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ToolsetElement.cs">
-      <Link>Shared\ToolsetElement.cs</Link>
     </Compile>
   </ItemGroup>
 
@@ -145,12 +85,6 @@
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
       <Generator></Generator>
-    </EmbeddedResource>
-
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 </Project>

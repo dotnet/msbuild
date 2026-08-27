@@ -11,7 +11,6 @@ using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -183,6 +182,7 @@ namespace Microsoft.Build.UnitTests
         /// Using the CreateItem task to expand wildcards and verifying that the RecursiveDir metadatum is successfully
         /// serialized/deserialized cross process.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14429")]
         [Fact]
         public void RecursiveDirOutOfProc()
         {
@@ -330,7 +330,6 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during task item creation on Unix platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [UnixOnlyTheory]
         [InlineData(@"\**")]
         [InlineData(@"\**\*.log")]
@@ -422,7 +421,6 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logs warning when encountering wildcard drive enumeration during CreateItem task execution on Unix platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [UnixOnlyTheory]
         [InlineData(
             CreateItemWithInclude,

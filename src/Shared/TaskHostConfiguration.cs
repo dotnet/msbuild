@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -32,6 +31,16 @@ namespace Microsoft.Build.BackEnd
         /// The process environment.
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment;
+
+        /// <summary>
+        /// How <see cref="_buildProcessEnvironment"/> is represented on the wire.
+        /// </summary>
+        private InvariantPayloadTransferMode _environmentMode = InvariantPayloadTransferMode.Full;
+
+        /// <summary>
+        /// How <see cref="_globalParameters"/> is represented on the wire.
+        /// </summary>
+        private InvariantPayloadTransferMode _globalParametersMode = InvariantPayloadTransferMode.Full;
 
         /// <summary>
         /// The culture
@@ -95,9 +104,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _projectFile;
 
-#if !NET35
         private HostServices _hostServices;
-#endif
 
         /// <summary>
         /// The set of parameters to apply to the task prior to execution.
@@ -167,9 +174,7 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> buildProcessEnvironment,
             CultureInfo culture,
             CultureInfo uiCulture,
-#if !NET35
             HostServices hostServices,
-#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -188,8 +193,8 @@ namespace Microsoft.Build.BackEnd
             ICollection<string> warningsNotAsErrors,
             ICollection<string> warningsAsMessages)
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowInternalLength(taskLocation, nameof(taskLocation));
+            Assumed.NotNullOrEmpty(taskName);
+            Assumed.NotNullOrEmpty(taskLocation);
 
             _nodeId = nodeId;
             _startupDirectory = startupDirectory;
@@ -206,9 +211,7 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
-#if !NET35
             _hostServices = hostServices;
-#endif
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
@@ -276,6 +279,48 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// How the build process environment is transferred on the wire. See <see cref="InvariantPayloadTransferMode"/>.
+        /// Set by the sender (per connection) when the negotiated packet version supports environment delta transfer.
+        /// </summary>
+        internal InvariantPayloadTransferMode EnvironmentMode
+        {
+            [DebuggerStepThrough]
+            get { return _environmentMode; }
+            [DebuggerStepThrough]
+            set { _environmentMode = value; }
+        }
+
+        /// <summary>
+        /// Fills in the build process environment after deserialization when it was sent as
+        /// <see cref="InvariantPayloadTransferMode.Identical"/> (i.e. reconstructed from the connection's baseline).
+        /// </summary>
+        internal void SetResolvedBuildProcessEnvironment(Dictionary<string, string> environment)
+        {
+            _buildProcessEnvironment = environment;
+        }
+
+        /// <summary>
+        /// How the global properties are transferred on the wire. See <see cref="InvariantPayloadTransferMode"/>.
+        /// Set by the sender, per connection.
+        /// </summary>
+        internal InvariantPayloadTransferMode GlobalParametersMode
+        {
+            [DebuggerStepThrough]
+            get { return _globalParametersMode; }
+            [DebuggerStepThrough]
+            set { _globalParametersMode = value; }
+        }
+
+        /// <summary>
+        /// Fills in the global properties after deserialization when they were sent as
+        /// <see cref="InvariantPayloadTransferMode.Identical"/> (i.e. reconstructed from the connection's baseline).
+        /// </summary>
+        internal void SetResolvedGlobalParameters(Dictionary<string, string> globalParameters)
+        {
+            _globalParameters = globalParameters;
+        }
+
+        /// <summary>
         /// The culture
         /// </summary>
         public CultureInfo Culture
@@ -308,7 +353,6 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
-#if !NET35
         /// <summary>
         /// The HostServices to be used by the task host.
         /// </summary>
@@ -318,7 +362,6 @@ namespace Microsoft.Build.BackEnd
             get
             { return _hostServices; }
         }
-#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined.
@@ -475,7 +518,7 @@ namespace Microsoft.Build.BackEnd
         {
             translator.Translate(ref _nodeId);
             translator.Translate(ref _startupDirectory);
-            translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            TranslateBuildProcessEnvironment(translator);
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
@@ -522,28 +565,62 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _isTaskInputLoggingEnabled);
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
-            translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+            TranslateGlobalProperties(translator);
             translator.Translate(collection: ref _warningsAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
             translator.Translate(collection: ref _warningsNotAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
+        }
+
+        /// <summary>
+        /// Translates the build process environment.
+        /// </summary>
+        private void TranslateBuildProcessEnvironment(ITranslator translator)
+        {
+            // For packet version >= 5 an EnvironmentMode marker precedes the dictionary; InvariantPayloadTransferMode.Identical
+            // omits the dictionary and the receiver rebuilds it from the connection baseline via SetResolvedBuildProcessEnvironment.
+            // Older versions use the legacy full-dictionary format.
+            if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
+            {
+                translator.TranslateEnum(ref _environmentMode, (int)_environmentMode);
+
+                if (_environmentMode == InvariantPayloadTransferMode.Full)
+                {
+                    translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+            else
+            {
+                translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        /// <summary>
+        /// Translates the global properties.
+        /// </summary>
+        private void TranslateGlobalProperties(ITranslator translator)
+        {
+            // For packet version >= 5 a GlobalParametersMode marker precedes the dictionary; InvariantPayloadTransferMode.Identical
+            // omits the dictionary and the receiver rebuilds it from the connection baseline via SetResolvedGlobalParameters.
+            // Older versions use the legacy full-dictionary format.
+            if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
+            {
+                translator.TranslateEnum(ref _globalParametersMode, (int)_globalParametersMode);
+
+                if (_globalParametersMode == InvariantPayloadTransferMode.Full)
+                {
+                    translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+            else
+            {
+                translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>

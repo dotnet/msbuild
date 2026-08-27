@@ -71,7 +71,7 @@ namespace Microsoft.Build.Shared.Debugging
         private static readonly Lazy<string> _artifactsLogs = new Lazy<string>(
             () =>
             {
-                var executingAssembly = FileUtilities.ExecutingAssemblyPath;
+                var executingAssembly = typeof(PrintLineDebuggerWriters).GetAssemblyPath();
 
                 var binPart = $"bin";
 

@@ -490,9 +490,14 @@
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
-        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="translated">MSB3071: Alle Laufwerkbuchstaben von A: bis Z: werden zurzeit verwendet. Da das Arbeitsverzeichnis "{0}" ein UNC-Pfad ist, ist für die Exec-Aufgabe ein freier Laufwerkbuchstabe für die Zuordnung des UNC-Pfads erforderlich. Trennen Sie die Verbindung mindestens einer freigegebenen Ressource, um Laufwerkbuchstaben freizugeben, oder geben Sie ein lokales Arbeitsverzeichnis an, bevor Sie diesen Befehl wiederholen.</target>
+        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
+        <target state="translated">MSB3071: Alle Laufwerkbuchstaben von A: bis Z: werden zurzeit verwendet. Da das Arbeitsverzeichnis „{0}“ (aufgelöst in UNC-Pfad „{1}“) eine UNC-Zuordnung erfordert, benötigt die Aufgabe „Exec“ einen freien Laufwerkbuchstaben, um den UNC-Pfad zuzuordnen. Trennen Sie die Verbindung mindestens einer freigegebenen Ressource, um Laufwerkbuchstaben freizugeben, oder geben Sie ein lokales Arbeitsverzeichnis an, bevor Sie diesen Befehl wiederholen.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">MSB3077: Der Befehl „{0}“ wurde mit dem Rückgabewert 0 beendet, jedoch wurden während der Ausführung Fehler festgestellt. ExitCode wurde auf -1 festgelegt.</target>
+        <note>{StrBegin="MSB3077: "}</note>
       </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
@@ -559,6 +564,11 @@
         <target state="translated">MSB3541: {0} enthält einen ungültigen Wert "{1}". {2}</target>
         <note>{StrBegin="MSB3541: "}</note>
       </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="translated">MSB4311: Der InputUrl-Wert „{0}“ ist kein gültiger Pfad unter Windows, da er nur aus Leerzeichen besteht.</target>
+        <note>{StrBegin="MSB4311: "}</note>
+      </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>
         <target state="translated">MSB3102: Die Zustandsdatei "{0}" konnte nicht gelöscht werden. {1}</target>
@@ -612,6 +622,11 @@
       <trans-unit id="General.ExpectedFileMissing">
         <source>Expected file "{0}" does not exist.</source>
         <target state="translated">Die erwartete Datei "{0}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
+        <target state="translated">Der Pfad „{0}“ konnte nicht normalisiert werden, indem die Segmente „.“ und „..“ aufgelöst wurden: {1}. Der Pfad wird wie besehen verwendet.</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
@@ -1210,8 +1225,8 @@
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
-        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
-        <target state="translated">MSB3821: Die Datei "{0}" konnte nicht verarbeitet werden, weil sie sich im Internet oder in der Zone eingeschränkter Websites befindet oder die Webmarkierung aufweist. Entfernen Sie die Webmarkierung, wenn Sie diese Dateien verarbeiten möchten.</target>
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</source>
+        <target state="translated">MSB3821: Die Datei "{0}" konnte nicht verarbeitet werden, weil sie sich im Internet oder in der Zone eingeschränkter Websites befindet oder die Webmarkierung aufweist. Entfernen Sie die Markierung des Webs, wenn Sie diesen Dateien vertrauen und sie verarbeiten möchten. Bitte beachten Sie die bewährten Methoden für die sichere Verwendung von MSBuild: https://aka.ms/msbuild-security-documentation</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
@@ -1263,6 +1278,26 @@
         <source>MSB3557: Error(s) generating strongly typed resources for file "{0}".</source>
         <target state="translated">MSB3557: Fehler beim Generieren stark typisierter Ressourcen für die Datei "{0}".</target>
         <note>{StrBegin="MSB3557: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedInvalidIdentifier">
+        <source>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</source>
+        <target state="translated">MSB3828: Die Generierung stark typisierter Ressourceneigenschaften für die Ressource „{0}“ wird übersprungen: Der Name kann nicht in einen gültigen Bezeichner umgewandelt werden.</target>
+        <note>{StrBegin="MSB3828: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedNameCollision">
+        <source>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</source>
+        <target state="translated">MSB3829: Die Generierung stark typisierter Ressourceneigenschaften für die Ressource „{0}“ wird übersprungen: Nach der Normalisierung des Bezeichners besteht ein Namenskonflikt mit der Ressource „{1}“.</target>
+        <note>{StrBegin="MSB3829: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedReservedName">
+        <source>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</source>
+        <target state="translated">MSB3827: Die Generierung stark typisierter Ressourceneigenschaften für die Ressource „{0}“ wird übersprungen: Der Name steht im Konflikt mit einem reservierten Namen. Reservierte Namen: {1}.</target>
+        <note>{StrBegin="MSB3827: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedVoidType">
+        <source>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</source>
+        <target state="translated">MSB3830: Die Generierung stark typisierter Ressourceneigenschaften für die Ressource „{0}“ wird übersprungen: Der Ressourcenwerttyp ist „void“. Er kann nicht als Eigenschaftstyp verwendet werden.</target>
+        <note>{StrBegin="MSB3830: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnknownFileExtension">
         <source>MSB3558: Unsupported file extension "{0}" on file "{1}".</source>
@@ -1958,6 +1993,11 @@
         <target state="translated">MSB3249: Die Anwendungskonfigurationsdatei "{0}" ist ungültig. {1}</target>
         <note>{StrBegin="MSB3249: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="translated">Der Dateipfad der Anwendungskonfiguration darf nicht leer sein.</target>
+        <note>This message can be used as the {1} in MSB3249</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>
         <target state="translated">MSB3250: Die Datei "{0}" kann nicht gelesen werden und wird daher ignoriert. Diese Datei wurde an InstalledAssemblyTables übergeben oder beim Durchsuchen des Ordners "{1}" in den TargetFrameworkDirectories gefunden. {2}</target>
@@ -2632,6 +2672,46 @@
         <target state="translated">MSB3353: Der für die verzögerte Signierung erforderliche öffentliche Schlüssel wurde nicht angegeben.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.Comment">
+        <source>Creating tar archive from directory "{0}" to "{1}".</source>
+        <target state="translated">Ein tar-Archiv wird aus dem Verzeichnis „{0}“ in „{1}“ erstellt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB4321: Das Verzeichnis „{0}“ konnte nicht in eine tar-Datei umgewandelt werden, weil es nicht vorhanden ist oder nicht darauf zugegriffen werden kann.</target>
+        <note>{StrBegin="MSB4321: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
+        <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
+        <target state="translated">MSB4325: Das Verzeichnis „{0}“ konnte nicht in die Datei „{1}“ als tar-Archiv geschrieben werden, da das Archiv veraltet ist und ein inkrementeller Build angefordert wurde.</target>
+        <note>{StrBegin="MSB4325: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFailed">
+        <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="translated">MSB4323: Fehler beim Erstellen der tar-Datei für das Verzeichnis „{0}“ in die Datei „{1}“.  {2} {3}</target>
+        <note>{StrBegin="MSB4323: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFileExists">
+        <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="translated">MSB4322: Fehler beim Erstellen der tar-Datei „{0}“, weil sie bereits vorhanden ist.  Löschen Sie die Datei, oder benennen Sie sie um, und versuchen Sie es dann erneut.</target>
+        <note>{StrBegin="MSB4322: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidCompression">
+        <source>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</source>
+        <target state="translated">MSB4327: Der Komprimierungswert „{0}“ ist ungültig. Geben Sie „None“, „GZip“ oder „ZStandard“ an.</target>
+        <note>{StrBegin="MSB4327: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
+        <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
+        <target state="translated">MSB4324: Der DeterministicTimestamp-Wert „{0}“ ist ungültig. Geben Sie ein RFC-3339-Datum und eine Uhrzeit (z. B. „2024-01-01T00:00:00Z“) oder eine ganze Zahl von Sekunden seit der Unix-Epoche an.</target>
+        <note>{StrBegin="MSB4324: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidFormat">
+        <source>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</source>
+        <target state="translated">MSB4326: Der Formatwert „{0}“ ist ungültig. Geben Sie „Pax“, „Ustar“, „V7“ oder „Gnu“ an.</target>
+        <note>{StrBegin="MSB4326: "}</note>
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: Die Aufgabe "{0}" wird für die .NET Core-Version von MSBuild nicht unterstützt. Verwenden Sie die .NET Framework-Version von MSBuild. Weitere Informationen finden Sie unter https://aka.ms/msbuild/MSB4803.</target>
@@ -2736,6 +2816,71 @@
         <source>MSB3394: Type library "{0}" is not registered, cannot unregister.</source>
         <target state="translated">MSB3394: Die Typbibliothek "{0}" ist nicht registriert und kann daher nicht aus der Registrierung entfernt werden.</target>
         <note>{StrBegin="MSB3394: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfEntryType">
+        <source>Did not untar entry "{0}" because its entry type "{1}" is not supported.</source>
+        <target state="translated">Der Eintrag „{0}“ wurde nicht entpackt, da der Eintragstyp „{1}“ nicht unterstützt wird.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfFileMatch">
+        <source>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="translated">Die Datei „{0}“ konnte nicht von Datei „{1}“ entpackt werden, da der Parameter „{2}“ im Projekt auf „{3}“ festgelegt wurde und die Größen und Zeitstempel der Dateien übereinstimmen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfFilter">
+        <source>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
+        <target state="translated">Die Datei „{0}“ konnte nicht entpackt werden, weil sie nicht dem Einschlussfilter entsprach oder weil sie dem Ausschlussfilter entsprach.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</source>
+        <target state="translated">MSB4331: Fehler beim Entpacken in Verzeichnis „{0}“, da es nicht erstellt werden konnte.  {1}</target>
+        <note>{StrBegin="MSB4331: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotExtractFile">
+        <source>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</source>
+        <target state="translated">MSB4336: Fehler beim Entpacken der Datei „{0}“ nach „{1}“.  {2}</target>
+        <note>{StrBegin="MSB4336: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotMakeFileWriteable">
+        <source>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
+        <target state="translated">MSB4335: Fehler beim Entpacken der Datei „{0}“, da die Zieldatei „{1}“ schreibgeschützt ist und nicht schreibbar gemacht werden konnte.  {2} {3}</target>
+        <note>{StrBegin="MSB4335: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotOpenFile">
+        <source>MSB4333: Failed to open tar file "{0}".  {1}</source>
+        <target state="translated">MSB4333: Die tar-Datei „{0}“ konnte nicht geöffnet werden.  {1}</target>
+        <note>{StrBegin="MSB4333: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="translated">MSB4334: Fehler beim Entpacken der Datei „{0}“ nach „{1}“, weil sie sich außerhalb des Zielverzeichnisses befindet.</target>
+        <note>{StrBegin="MSB4334: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorFileDoesNotExist">
+        <source>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="translated">MSB4332: Fehler beim Entpacken der Datei „{0}“, weil die Datei nicht vorhanden ist oder nicht darauf zugegriffen werden kann.</target>
+        <note>{StrBegin="MSB4332: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorParsingPatternInvalidPath">
+        <source>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
+        <target state="translated">MSB4337: Fehler beim Analysieren des Musters „{0}“, weil es ein ungültiges Pfadzeichen enthält.</target>
+        <note>{StrBegin="MSB4337: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorParsingPatternPropertyReferences">
+        <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
+        <target state="translated">MSB4338: Fehler beim Analysieren des Musters „{0}“, weil es einen Eigenschaftsverweis enthält, der nicht unterstützt wird.</target>
+        <note>{StrBegin="MSB4338: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorFailIfNotIncremental">
+        <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
+        <target state="translated">MSB4339: Fehler beim Entpacken der Datei „{0}“ nach „{1}“, da das Ziel veraltet ist und ein inkrementeller Build angefordert wurde.</target>
+        <note>{StrBegin="MSB4339: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.FileComment">
+        <source>Untarring file "{0}" to "{1}".</source>
+        <target state="translated">Datei „{0}“ wird nach „{1}“ entpackt.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
@@ -2897,6 +3042,11 @@
         <target state="translated">Der Transaktionsmodus wird verwendet, um in die Datei „{0}“ zu schreiben.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">MSB3725: Der Befehl „{0}“ wurde mit dem Rückgabewert 0 beendet, jedoch wurden während der Ausführung Fehler festgestellt. ExitCode wurde auf -1 festgelegt.</target>
+        <note>{StrBegin="MSB3725: "}</note>
+      </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
         <target state="translated">MSB3724: Die XAML-Aufgabe kann nicht erstellt werden. Doppelter Eigenschaftenname "{0}".</target>
@@ -2962,6 +3112,11 @@
         <target state="translated">MSB3723: Für das Festlegen von Parameter "{0}" ist der fehlende Parameter "{1}" erforderlich.</target>
         <note>{StrBegin="MSB3723: "}</note>
       </trans-unit>
+      <trans-unit id="XmlPeekPoke.InputDtdProhibited">
+        <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="translated">MSB3733: Die XML-Eingabe enthält eine DTD. DTDs sind aus Sicherheitsgründen standardmäßig unzulässig. Entfernen Sie die DTD, oder unterdrücken Sie sie, indem Sie „{0}“ auf „false“ für den „{1}“-Task festlegen, um DTDs zu ignorieren.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
         <source>MSB3701: Unable to load arguments for the XslTransformation task. {0}</source>
         <target state="translated">MSB3701: Die Argumente für die XslTransformation-Aufgabe können nicht geladen werden. {0}</target>
@@ -2976,6 +3131,11 @@
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
         <target state="translated">Sie aktivieren lockere XSLT-Sicherheitseinstellungen über den Parameter "UseTrustedSettings". Weitere Informationen zu den Auswirkungen dieser Einstellung auf die Sicherheit finden Sie unter https://aka.ms/msbuild/xsltransformation-task</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.TransformDtdProhibited">
+        <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
+        <target state="translated">MSB3703: Die Transformation kann nicht ausgeführt werden, da die XML-Eingabe „{0}“ eine DTD enthält. DTDs sind aus Sicherheitsgründen standardmäßig unzulässig. Entfernen Sie die DTD, oder legen Sie „{1}“ auf „false“ für den „{2}“-Task fest, um DTDs zu ignorieren.</target>
+        <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
@@ -3006,6 +3166,11 @@
         <source>One of XslContent, XslInputPath and XslCompiledDllPath arguments must be set.</source>
         <target state="translated">Eines der folgenden Argumente muss festgelegt werden: XslContent, XslInputPath und XslCompiledDllPath.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.XsltLoadDtdProhibited">
+        <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="translated">MSB3704: Die angegebene XSLT kann nicht geladen werden, da sie eine DTD enthält. DTDs sind aus Sicherheitsgründen standardmäßig unzulässig. Entfernen Sie die DTD, oder legen Sie „{0}“ auf „false“ für den „{1}“-Task fest, um DTDs zu ignorieren.</target>
+        <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">
         <source>MSB3704: Unable to load the specified Xslt. {0}</source>

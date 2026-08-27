@@ -1206,15 +1206,15 @@ namespace Microsoft.Build.UnitTests
             {
                 // Ensure we're getting the right temp path (%TMP% == GetTempPath())
                 Assert.Equal(
-                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
-                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
+                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
+                    FileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
                 Assert.False(Directory.Exists(newTempPath));
 
                 Environment.SetEnvironmentVariable("TMP", newTempPath);
 
                 Assert.Equal(
-                    FrameworkFileUtilities.EnsureTrailingSlash(newTempPath),
-                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
+                    FileUtilities.EnsureTrailingSlash(newTempPath),
+                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
 
                 MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
                 mockLogger.AssertLogContains("Hello, World!");
@@ -1471,7 +1471,7 @@ namespace Microsoft.Build.UnitTests
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 
             // check to make sure that only 1 tmp file is created
-            var tmpFiles = zipArchive.Entries.Where(zE => zE.Name.EndsWith("CustomTask-compilation-file.tmp")).ToList();
+            var tmpFiles = zipArchive.Entries.Where(zE => zE.Name.EndsWith("CustomTask-compilation-file.tmp", StringComparison.Ordinal)).ToList();
             tmpFiles.Count.ShouldBe(1, $"Expected exactly one file ending with 'CustomTask-compilation-file.tmp' in ProjectImports.zip, but found {tmpFiles.Count}.");
         }
                 /// <summary>

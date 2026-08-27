@@ -15,6 +15,7 @@ namespace Microsoft.Build.Tasks
     /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class CreateVisualBasicManifestResourceName : CreateManifestResourceName
     {
         protected override string SourceFileExtension => ".vb";
@@ -102,7 +103,7 @@ namespace Microsoft.Build.Tasks
                 embeddedFileName = fileName;
             }
 
-            dependentUponFileName = FrameworkFileUtilities.FixFilePath(dependentUponFileName);
+            dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info;
 
             if (!string.IsNullOrEmpty(culture) && enableCustomCulture)
@@ -116,8 +117,8 @@ namespace Microsoft.Build.Tasks
             else
             {
                 info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, treatAsCultureNeutral);
+
                 // If the item has a culture override, respect that.
-                // We need to recheck here due to changewave in condition above - after Wave17_14 removal, this should be unconditional.
                 if (!string.IsNullOrEmpty(culture))
                 {
                     info.culture = culture;

@@ -70,7 +70,7 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleProjectEvaluationFinishedEvent(ProjectEvaluationFinishedEventArgs eventArgs)
     {
-        if (!IsMetaProjFile(eventArgs.ProjectFile))
+        if (!FileUtilities.IsMetaprojectFilename(eventArgs.ProjectFile))
         {
             _buildCheckManager.ProcessEvaluationFinishedEventArgs(
                 _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
@@ -82,7 +82,7 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleProjectEvaluationStartedEvent(ProjectEvaluationStartedEventArgs eventArgs)
     {
-        if (!IsMetaProjFile(eventArgs.ProjectFile))
+        if (!FileUtilities.IsMetaprojectFilename(eventArgs.ProjectFile))
         {
             var checkContext = _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!);
             _buildCheckManager.ProjectFirstEncountered(
@@ -131,9 +131,38 @@ internal class BuildCheckBuildEventHandler
                 eventArgs);
 
     private void HandleBuildCheckAcquisitionEvent(BuildCheckAcquisitionEventArgs eventArgs)
-        => _buildCheckManager.ProcessCheckAcquisition(
-                eventArgs.ToCheckAcquisitionData(),
-                _checkContextFactory.CreateCheckContext(GetBuildEventContext(eventArgs)));
+    {
+        CheckAcquisitionData acquisitionData = eventArgs.ToCheckAcquisitionData();
+        ICheckContext checkContext = _checkContextFactory.CreateCheckContext(GetBuildEventContext(eventArgs));
+
+        // Acquiring a custom check loads its assembly from disk and reflects over its types, which a
+        // trimmed or Native AOT host cannot do. EnableCustomPluginProbing is a [FeatureGuard], so the
+        // analyzer treats the reflective ProcessCheckAcquisition call below as unreachable when the
+        // switch is off. Built-in checks are unaffected - they need no reflection.
+        if (FeatureSwitches.EnableCustomPluginProbing)
+        {
+            _buildCheckManager.ProcessCheckAcquisition(acquisitionData, checkContext);
+        }
+        else
+        {
+            // The project explicitly requested this custom check. Per the trim/AOT design criteria
+            // (documentation/aot/managing-trimming-and-aot.md), do NOT silently drop it: fail the
+            // build with an error so a host such as the AOT dotnet CLI can detect the failure and fall
+            // back to a JIT-based MSBuild that can load the check. This branch performs no reflection.
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                out string? errorCode,
+                out string? helpKeyword,
+                "BuildCheckCustomCheckNotSupportedInTrimmedHost",
+                acquisitionData.AssemblyPath);
+
+            checkContext.DispatchAsErrorFromText(
+                null,
+                errorCode,
+                helpKeyword,
+                string.IsNullOrEmpty(acquisitionData.ProjectPath) ? BuildEventFileInfo.Empty : new BuildEventFileInfo(acquisitionData.ProjectPath),
+                message);
+        }
+    }
 
     private void HandleEnvironmentVariableReadEvent(EnvironmentVariableReadEventArgs eventArgs)
         => _buildCheckManager.ProcessEnvironmentVariableReadEventArgs(
@@ -144,8 +173,6 @@ internal class BuildCheckBuildEventHandler
         => _buildCheckManager.ProcessProjectImportedEventArgs(
                 _checkContextFactory.CreateCheckContext(GetBuildEventContext(eventArgs)),
                 eventArgs);
-
-    private bool IsMetaProjFile(string? projectFile) => projectFile?.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase) == true;
 
     private readonly BuildCheckTracingData _tracingData = new BuildCheckTracingData();
 

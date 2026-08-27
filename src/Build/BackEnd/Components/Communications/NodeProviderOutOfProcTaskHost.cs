@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -19,6 +19,19 @@ using Constants = Microsoft.Build.Framework.Constants;
 
 namespace Microsoft.Build.BackEnd
 {
+    /// <summary>
+    /// Represents a unique key for identifying task host nodes.
+    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
+    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// </summary>
+    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
+    /// <param name="NodeId">
+    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
+    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
+    /// its own task host, so the node ID is used to distinguish them.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
+
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
@@ -93,20 +106,15 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<int, TaskHostNodeKey> _nodeIdToNodeKey;
 
         /// <summary>
-        /// A mapping of all of the INodePacketFactories wrapped by this provider.
-        /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
-        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
-        /// can simultaneously create their own taskhosts.
+        /// Per-node handler stacks for routing packets from OOP TaskHost processes.
+        /// Keyed by communication node ID (one per OOP process). Each node can have
+        /// multiple OOP processes for different architectures (x86, x64, ARM64).
+        /// The stack supports nested BuildProjectFile callbacks: when Task A calls
+        /// BuildProjectFile and blocks, Task B is dispatched to the same process --
+        /// handler B is pushed on top. Packets always route to Peek() (the active task).
+        /// When Task B finishes, handler B is popped and Task A's handler is restored.
         /// </summary>
-        private ConcurrentDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
-
-        /// <summary>
-        /// A mapping of all of the INodePacketHandlers wrapped by this provider.
-        /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
-        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
-        /// can simultaneously create their own taskhosts.
-        /// </summary>
-        private ConcurrentDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
+        private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
 
         /// <summary>
         /// Keeps track of the set of node IDs for which we have not yet received shutdown notification.
@@ -161,17 +169,14 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                if (s_msbuildTaskHostName == null)
+                string name = s_msbuildTaskHostName;
+                if (name is null)
                 {
-                    s_msbuildTaskHostName = Environment.GetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME");
-
-                    if (s_msbuildTaskHostName == null)
-                    {
-                        s_msbuildTaskHostName = "MSBuildTaskHost.exe";
-                    }
+                    name = Environment.GetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME") ?? "MSBuildTaskHost.exe";
+                    s_msbuildTaskHostName = name;
                 }
 
-                return s_msbuildTaskHostName;
+                return name;
             }
         }
 
@@ -201,7 +206,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         internal void SendData(TaskHostNodeKey nodeKey, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), "Invalid host context specified: {0}.", nodeKey);
+            Assumed.True(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), $"Invalid host context specified: {nodeKey}.");
 
             SendData(context, packet);
         }
@@ -237,11 +242,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            this.ComponentHost = host;
+            ComponentHost = host;
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
-            _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
-            _nodeIdToPacketHandler = new ConcurrentDictionary<int, INodePacketHandler>();
+            _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
             _activeNodes = [];
             _nextNodeId = 0;
 
@@ -251,6 +255,13 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+
+            // Register callback request packet types so we can deserialize them when
+            // they arrive from TaskHost processes. These are forwarded to the current
+            // TaskHostTask handler via the handler stack.
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
         }
 
         /// <summary>
@@ -286,20 +297,17 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Takes a serializer, deserializes the packet and routes it to the appropriate handler.
+        /// Always uses the local packet factory for deserialization, which routes through
+        /// our PacketReceived method (using the handler stack).
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
-            {
-                nodePacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
-            }
-            else
-            {
-                _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
-            }
+            // Always route through our local factory which handles deserialization
+            // and routes to our PacketReceived, which uses the handler stack.
+            _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
         /// <summary>
@@ -313,20 +321,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Routes the specified packet
+        /// Routes the specified packet through our PacketReceived method (handler stack).
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
-            {
-                nodePacketFactory.RoutePacket(nodeId, packet);
-            }
-            else
-            {
-                _localPacketFactory.RoutePacket(nodeId, packet);
-            }
+            _localPacketFactory.RoutePacket(nodeId, packet);
         }
 
         #endregion
@@ -341,27 +342,41 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            if (_nodeIdToPacketHandler.TryGetValue(node, out INodePacketHandler packetHandler))
+            if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack))
             {
-                packetHandler.PacketReceived(node, packet);
-            }
-            else
-            {
-                ErrorUtilities.VerifyThrow(packet.Type == NodePacketType.NodeShutdown, "We should only ever handle packets of type NodeShutdown -- everything else should only come in when there's an active task");
-
-                // May also be removed by unnatural termination, so don't assume it's there
-                lock (_activeNodes)
+                lock (handlerStack)
                 {
-                    if (_activeNodes.Contains(node))
+                    if (handlerStack.Count > 0)
                     {
-                        _activeNodes.Remove(node);
-                    }
-
-                    if (_activeNodes.Count == 0)
-                    {
-                        _noNodesActiveEvent.Set();
+                        INodePacketHandler packetHandler = handlerStack.Peek();
+                        packetHandler.PacketReceived(node, packet);
+                        return;
                     }
                 }
+            }
+
+            // No handler. Handle node-level events directly.
+            switch (packet.Type)
+            {
+                case NodePacketType.NodeShutdown:
+                    lock (_activeNodes)
+                    {
+                        if (_activeNodes.Contains(node))
+                        {
+                            _activeNodes.Remove(node);
+                        }
+
+                        if (_activeNodes.Count == 0)
+                        {
+                            _noNodesActiveEvent.Set();
+                        }
+                    }
+
+                    break;
+
+                default:
+                    Assumed.Unreachable($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
+                    break;
             }
         }
 
@@ -372,13 +387,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, "Factory cannot create components of type {0}", componentType);
+            Assumed.Equal(componentType, BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProcTaskHost();
         }
 
         /// <summary>
         /// Clears out our cached values for the various task host names and paths.
-        /// FOR UNIT TESTING ONLY
+        /// FOR UNIT TESTING ONLY. Must not be called concurrently with methods that
+        /// read or populate these statics (e.g. GetMSBuildExecutablePathForNonNETRuntimes),
+        /// otherwise cleared fields may be partially reinstated by an in-flight caller.
         /// </summary>
         internal static void ClearCachedTaskHostPaths()
         {
@@ -399,36 +416,26 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
             {
                 return TaskHostNameForClr2TaskHost;
             }
 
-            if (string.IsNullOrEmpty(s_msbuildName))
+            string name = s_msbuildName;
+            if (string.IsNullOrEmpty(name))
             {
-                s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-                if (!string.IsNullOrEmpty(s_msbuildName))
+                name = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
+                if (string.IsNullOrEmpty(name))
                 {
-                    return s_msbuildName;
+                    // Default based on whether it's .NET or Framework
+                    name = Constants.MSBuildExecutableName;
                 }
 
-#if NETFRAMEWORK
-                // In .NET Framework, use dotnet for .NET task hosts
-                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
-                {
-                    s_msbuildName = Constants.DotnetProcessName;
-
-                    return s_msbuildName;
-                }
-#endif
-                // Default based on whether it's .NET or Framework
-                s_msbuildName = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
-                    ? Constants.MSBuildAssemblyName
-                    : Constants.MSBuildExecutableName;
+                s_msbuildName = name;
             }
 
-            return s_msbuildName;
+            return name;
         }
 
         /// <summary>
@@ -441,39 +448,58 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         internal static string GetMSBuildExecutablePathForNonNETRuntimes(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
             var toolName = GetTaskHostNameFromHostContext(hostContext);
-            s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
-            s_baseTaskHostPathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
+
+            // Snapshot to locals so concurrent callers never read a null static
+            // that another thread hasn't written yet. Redundant computation is
+            // harmless — BuildEnvironmentHelper properties are deterministic.
+            string basePath = s_baseTaskHostPath;
+            if (basePath is null)
+            {
+                basePath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+                s_baseTaskHostPath = basePath;
+            }
+
+            string basePath64 = s_baseTaskHostPath64;
+            if (basePath64 is null)
+            {
+                basePath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
+                s_baseTaskHostPath64 = basePath64;
+            }
+
+            string basePathArm64 = s_baseTaskHostPathArm64;
+            if (basePathArm64 is null)
+            {
+                basePathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
+                s_baseTaskHostPathArm64 = basePathArm64;
+            }
 
             bool isX64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64);
             bool isArm64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
             bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
 
-            // Unsupported combinations
-            if (isArm64 && isCLR2)
-            {
-                ErrorUtilities.ThrowInternalError("ARM64 CLR2 task hosts are not supported.");
-            }
-
             if (isCLR2)
             {
-                return isX64 ? Path.Combine(GetOrInitializeX64Clr2Path(toolName), toolName) : Path.Combine(GetOrInitializeX32Clr2Path(toolName), toolName);
+                Assumed.False(isArm64, "ARM64 CLR2 task hosts are not supported.");
+
+                return isX64
+                    ? Path.Combine(GetOrInitializeX64Clr2Path(toolName, basePath64), toolName)
+                    : Path.Combine(GetOrInitializeX32Clr2Path(toolName, basePath), toolName);
             }
 
             if (isX64)
             {
-                return Path.Combine(s_pathToX64Clr4 ??= s_baseTaskHostPath64, toolName);
+                return Path.Combine(s_pathToX64Clr4 ??= basePath64, toolName);
             }
 
             if (isArm64)
             {
-                return Path.Combine(s_pathToArm64Clr4 ??= s_baseTaskHostPathArm64, toolName);
+                return Path.Combine(s_pathToArm64Clr4 ??= basePathArm64, toolName);
             }
 
-            return Path.Combine(s_pathToX32Clr4 ??= s_baseTaskHostPath, toolName);
+            return Path.Combine(s_pathToX32Clr4 ??= basePath, toolName);
         }
 
         /// <summary>
@@ -482,16 +508,16 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// A tuple containing:
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
-        /// - MSBuildAssemblyPath: The full path to MSBuild.dll that will be loaded by the dotnet host.
+        /// - MSBuildPath: The path to MSBuild.dll/MSBuild app host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
+        internal static (string RuntimeHostPath, string MSBuildPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            return (taskHostParameters.DotnetHostPath, GetMSBuildAssemblyPath(taskHostParameters));
+            return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters));
         }
 
-        private static string GetMSBuildAssemblyPath(in TaskHostParameters taskHostParameters)
+        private static string GetMSBuildPath(in TaskHostParameters taskHostParameters)
         {
             if (taskHostParameters.MSBuildAssemblyPath != null)
             {
@@ -500,7 +526,12 @@ namespace Microsoft.Build.BackEnd
                 return taskHostParameters.MSBuildAssemblyPath;
             }
 
+#if NET
+            // In .NET we resolve the full path based on the tools directory that points to the directory with App Host
+            return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+#else
             throw new InvalidProjectFileException(ResourceUtilities.GetResourceString("NETHostTaskLoad_Failed"));
+#endif
 
             static void ValidateNetHostSdkVersion(string path)
             {
@@ -508,12 +539,12 @@ namespace Microsoft.Build.BackEnd
 
                 if (string.IsNullOrEmpty(path))
                 {
-                    ErrorUtilities.ThrowInternalError(ResourceUtilities.GetResourceString("SDKPathResolution_Failed"));
+                    InternalError.Throw(ResourceUtilities.GetResourceString("SDKPathResolution_Failed"));
                 }
 
                 if (!FileSystems.Default.DirectoryExists(path))
                 {
-                    ErrorUtilities.ThrowInternalError(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SDKPathCheck_Failed", path));
+                    InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SDKPathCheck_Failed", path));
                 }
 
                 var sdkVersion = ExtractSdkVersionFromPath(path);
@@ -528,7 +559,7 @@ namespace Microsoft.Build.BackEnd
         /// Extracts the major version number from an SDK directory path by parsing the last directory name.
         /// </summary>
         /// <param name="path">
-        /// The full path to an SDK directory. 
+        /// The full path to an SDK directory.
         /// Example: "C:\Program Files\dotnet\sdk\10.0.100-preview.7.25322.101".
         /// </param>
         /// <returns>
@@ -540,8 +571,8 @@ namespace Microsoft.Build.BackEnd
         /// 1. Extracting the last directory name from the path (e.g., "10.0.100-preview.7.25322.101")
         /// 2. Finding the first dot in that directory name
         /// 3. Parsing the substring before the first dot as an integer (the major version)
-        /// 
-        /// Returns null if the path is invalid, the last directory name is empty, 
+        ///
+        /// Returns null if the path is invalid, the last directory name is empty,
         /// there's no dot in the directory name, or the major version cannot be parsed as an integer.
         /// </remarks>
         private static int? ExtractSdkVersionFromPath(string path)
@@ -564,18 +595,14 @@ namespace Microsoft.Build.BackEnd
                 : null;
         }
 
-        private static string GetOrInitializeX64Clr2Path(string toolName)
+        private static string GetOrInitializeX64Clr2Path(string toolName, string basePath64)
         {
-            s_pathToX64Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION64", s_baseTaskHostPath64, toolName);
-
-            return s_pathToX64Clr2;
+            return s_pathToX64Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION64", basePath64, toolName);
         }
 
-        private static string GetOrInitializeX32Clr2Path(string toolName)
+        private static string GetOrInitializeX32Clr2Path(string toolName, string basePath)
         {
-            s_pathToX32Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION", s_baseTaskHostPath, toolName);
-
-            return s_pathToX32Clr2;
+            return s_pathToX32Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION", basePath, toolName);
         }
 
         private static string GetPathFromEnvironmentOrDefault(string environmentVariable, string defaultPath, string toolName)
@@ -602,11 +629,17 @@ namespace Microsoft.Build.BackEnd
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            in TaskHostParameters taskHostParameters)
+            in TaskHostParameters taskHostParameters,
+            out int hostProcessId,
+            out bool wasNewlyCreated)
         {
+            hostProcessId = -1;
+            wasNewlyCreated = false;
+
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(nodeKey))
             {
+                wasNewlyCreated = true;
                 nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
             }
             else
@@ -618,9 +651,22 @@ namespace Microsoft.Build.BackEnd
             if (nodeCreationSucceeded)
             {
                 NodeContext context = _nodeContexts[nodeKey];
-                // Map the transport ID directly to the handlers for O(1) packet routing
-                _nodeIdToPacketFactory[context.NodeId] = factory;
-                _nodeIdToPacketHandler[context.NodeId] = handler;
+
+                Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
+                lock (handlerStack)
+                {
+                    handlerStack.Push(handler);
+                }
+
+                try
+                {
+                    hostProcessId = context.Process?.Id ?? -1;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
+                    hostProcessId = -1;
+                }
 
                 // Configure the node.
                 context.SendData(configuration);
@@ -635,21 +681,29 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectFromHost(TaskHostNodeKey nodeKey)
         {
-            // The node context might already have been removed by NodeContextTerminated if the task host
-            // process terminated before we got here. This is a valid race condition - just return early.
-            // Note: NodeContextTerminated does NOT remove handlers, so they'll be orphaned in this case,
-            // but that's acceptable since the task host is dead and the handlers will be cleaned up
-            // when the provider is shut down.
             if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
             {
-                CommunicationsUtilities.Trace("DisconnectFromHost: Node context already removed for key: {0}", nodeKey);
+                CommunicationsUtilities.Trace($"DisconnectFromHost: Node context already removed for key: {nodeKey}");
                 return;
             }
 
-            bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(context.NodeId, out _);
-            bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(context.NodeId, out _);
+            int nodeId = context.NodeId;
 
-            ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
+            if (_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlerStack))
+            {
+                lock (handlerStack)
+                {
+                    if (handlerStack.Count > 0)
+                    {
+                        handlerStack.Pop();
+                    }
+
+                    if (handlerStack.Count == 0)
+                    {
+                        _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -657,8 +711,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, in TaskHostParameters taskHostParameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory);
-            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
+            ArgumentNullException.ThrowIfNull(factory);
+            Assumed.False(_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 
@@ -668,70 +722,143 @@ namespace Microsoft.Build.BackEnd
             // Create callbacks that capture the TaskHostNodeKey
             void OnNodeContextCreated(NodeContext context) => NodeContextCreated(context, nodeKey);
 
-            IList<NodeContext> nodeContexts;
+            NodeLaunchData nodeLaunchData = ResolveNodeLaunchConfiguration(hostContext, taskHostParameters);
 
-            // Handle .NET task host context
-#if NETFRAMEWORK
-            if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+            if (nodeLaunchData.MSBuildLocation == null)
             {
-                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETRuntime(hostContext, taskHostParameters);
-
-                CommunicationsUtilities.Trace("For a host context of {0}, spawning dotnet.exe from {1}.", hostContext.ToString(), runtimeHostPath);
-
-                var handshake = new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath);
-
-                string commandLineArgs = $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{NodeReuseIsEnabled(hostContext).ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion}";
-
-                // There is always one task host per host context so we always create just 1 one task host node here.      
-                nodeContexts = GetNodes(
-                    runtimeHostPath,
-                    commandLineArgs,
-                    communicationNodeId,
-                    this,
-                    handshake,
-                    OnNodeContextCreated,
-                    NodeContextTerminated,
-                    1);
-
-                return nodeContexts.Count == 1;
-            }
-#endif
-
-            string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(hostContext);
-
-            // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.
-            if (msbuildLocation == null)
-            {
-                return false;
+                return default;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? Constants.MSBuildExecutableName);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, spawning executable from {nodeLaunchData.MSBuildLocation}.");
 
-            string nonNetCommandLineArgs = $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{NodeReuseIsEnabled(hostContext).ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion}";
-
-            nodeContexts = GetNodes(
-                msbuildLocation,
-                nonNetCommandLineArgs,
+            IList<NodeContext> nodeContexts = GetNodes(
+                nodeLaunchData,
                 communicationNodeId,
                 this,
-                new Handshake(hostContext),
                 OnNodeContextCreated,
                 NodeContextTerminated,
                 1);
 
             return nodeContexts.Count == 1;
 
-            // Determines whether node reuse should be enabled for the given host context.
-            // Node reuse allows MSBuild to reuse existing task host processes for better performance,
-            // but is disabled for CLR2 because it uses legacy MSBuildTaskHost.
-            bool NodeReuseIsEnabled(HandshakeOptions hostContext)
+            // Resolves the node launch configuration based on the host context.
+            NodeLaunchData ResolveNodeLaunchConfiguration(HandshakeOptions hostContext, in TaskHostParameters taskHostParameters)
             {
-                bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+                // Handle .NET task host context
+                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+                {
+                    return ResolveAppHostOrFallback(GetMSBuildPath(taskHostParameters), taskHostParameters.DotnetHostPath, hostContext, IsNodeReuseEnabled(hostContext));
+                }
 
-                return Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse)
-                    && !isCLR2;
+#if FEATURE_NET35_TASKHOST
+                // CLR2 task host (MSBuildTaskHost.exe) requires special handling:
+                // - Empty command-line args (MSBuildTaskHost.Main() takes no arguments)
+                // - Handshake with toolsDirectory set to the EXE's directory so the
+                //   salt matches what the child process computes on startup.
+                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
+                {
+                    string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(hostContext);
+                    string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
+                    return new NodeLaunchData(msbuildLocation, string.Empty, new Handshake(hostContext, toolsDirectory));
+                }
+#endif
+
+                // CLR4 task host (MSBuild.exe on .NET Framework)
+                return new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
             }
         }
+
+        /// <summary>
+        /// Determines whether node reuse should be enabled for the given host context.
+        /// Node reuse is disabled for CLR2 because it uses legacy MSBuildTaskHost.
+        /// </summary>
+        private static bool IsNodeReuseEnabled(HandshakeOptions hostContext) =>
+            Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse) && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+
+        /// <summary>
+        /// Resolves whether to use the MSBuild app host or fall back to dotnet.exe.
+        /// </summary>
+        /// <param name="msbuildAssemblyPath">Path to the MSBuild assembly/app host directory.</param>
+        /// <param name="dotnetHostPath">Path to the dotnet executable.</param>
+        /// <param name="hostContext">The handshake options for the host context.</param>
+        /// <param name="nodeReuseEnabled">Whether node reuse is enabled.</param>
+        /// <returns>The resolved node launch configuration.</returns>
+        private NodeLaunchData ResolveAppHostOrFallback(
+            string msbuildAssemblyPath,
+            string dotnetHostPath,
+            HandshakeOptions hostContext,
+            bool nodeReuseEnabled)
+        {
+            string commandLineArgs = BuildCommandLineArgs(nodeReuseEnabled);
+            (string launchPath, bool useAppHost) = ResolveNetTaskHostLaunchPath(msbuildAssemblyPath);
+
+            // The child task host (NodeEndpointOutOfProcTaskHost) computes its handshake
+            // toolsDirectory from BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot,
+            // which derives from AppContext.BaseDirectory (resolves symlinks).
+            //
+            // On .NET Framework, the parent MSBuild (VS) is in a different directory than the
+            // child .NET task host (SDK), so we must pass msbuildAssemblyPath explicitly to
+            // match the child's location. Windows has no symlink issues so this is safe.
+            //
+            // On .NET Core, parent and child are always from the same SDK directory. Passing
+            // msbuildAssemblyPath from $(NetCoreSdkRoot) can cause a handshake mismatch on
+            // macOS where /tmp -> /private/tmp symlink means the property value differs from
+            // AppContext.BaseDirectory. By omitting toolsDirectory, both sides default to
+            // BuildEnvironmentHelper which resolves symlinks consistently.
+#if RUNTIME_TYPE_NETCORE
+            Handshake handshake = new Handshake(hostContext);
+#else
+            Handshake handshake = new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath);
+#endif
+
+            if (useAppHost)
+            {
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {launchPath}.");
+
+                var dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
+
+                return dotnetOverrides == null
+                    ? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet"))
+                    : new NodeLaunchData(
+                        launchPath,
+                        commandLineArgs,
+                        handshake,
+                        dotnetOverrides);
+            }
+
+            // Auto-discover dotnet host path when not explicitly provided.
+            string resolvedDotnetHostPath = dotnetHostPath;
+#if RUNTIME_TYPE_NETCORE
+            if (string.IsNullOrEmpty(resolvedDotnetHostPath))
+            {
+                resolvedDotnetHostPath = CurrentHost.GetCurrentHost();
+            }
+#endif
+
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found, falling back to dotnet.exe ({resolvedDotnetHostPath}) hosting {launchPath}.");
+
+            return new NodeLaunchData(
+                resolvedDotnetHostPath,
+                $"\"{launchPath}\" {commandLineArgs}",
+                handshake);
+        }
+
+        /// <summary>
+        /// Resolves the .NET task host launch target for an SDK directory: the MSBuild app host
+        /// (<c>MSBuild[.exe]</c>) when present, otherwise <c>MSBuild.dll</c> (which is launched via
+        /// <c>dotnet[.exe]</c>). Single source of truth for the apphost-vs-fallback decision,
+        /// shared by the launch path and any caller that needs to describe the launch target
+        /// (e.g. error messages).
+        /// </summary>
+        internal static (string LaunchPath, bool UseAppHost) ResolveNetTaskHostLaunchPath(string msbuildAssemblyPath)
+        {
+            string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
+            return FileSystems.Default.FileExists(appHostPath)
+                ? (appHostPath, true)
+                : (Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), false);
+        }
+
+        private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
 
         /// <summary>
         /// Method called when a context created.

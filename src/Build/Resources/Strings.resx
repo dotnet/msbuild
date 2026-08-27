@@ -1,17 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -145,7 +145,7 @@
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
-  <data name="EnvironmentDerivedPropertyRead">
+  <data name="EnvironmentDerivedPropertyRead" xml:space="preserve">
     <value>Property '{0}' with value '{1}' expanded from the environment.</value>
   </data>
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
@@ -169,6 +169,10 @@
   </data>
   <data name="BuildFinishedSuccess" xml:space="preserve">
     <value>Build succeeded.</value>
+  </data>
+  <data name="LogEnabledLogs" xml:space="preserve">
+    <value>Enabled loggers: {0}</value>
+    <comment>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</comment>
   </data>
   <data name="BuildStartedWithTime" xml:space="preserve">
     <value>Build started {0}.</value>
@@ -479,7 +483,7 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
-  <data name="General.TwoVectorsMustHaveSameLength">
+  <data name="General.TwoVectorsMustHaveSameLength" xml:space="preserve">
     <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
     <comment>{StrBegin="MSB3094: "}</comment>
   </data>
@@ -604,7 +608,7 @@
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
   </data>
-  <data name="CouldNotDifferentiateBetweenCompatibleMethods">
+  <data name="CouldNotDifferentiateBetweenCompatibleMethods" xml:space="preserve">
     <value>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</value>
   </data>
   <data name="InvalidFunctionPropertyExpression" xml:space="preserve">
@@ -749,6 +753,10 @@
   <data name="MissingTaskError" xml:space="preserve">
     <value>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</value>
     <comment>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</comment>
+  </data>
+  <data name="MSBuildTaskInheritedSkipNonexistentTargets" xml:space="preserve">
+    <value>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</value>
+    <comment>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</comment>
   </data>
   <data name="MSBuildToolsPathIsNotSpecified" xml:space="preserve">
     <value>MSB4141: MSBuildToolsPath is not specified for the ToolsVersion "{0}" defined at "{1}", or the value specified evaluates to the empty string.</value>
@@ -1171,7 +1179,7 @@
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized
     </comment>
   </data>
-  <data name="TaskReturnedFalseButDidNotLogError">
+  <data name="TaskReturnedFalseButDidNotLogError" xml:space="preserve">
     <value>MSB4181: The "{0}" task returned false but did not log an error.</value>
     <comment>{StrBegin="MSB4181: "}</comment>
   </data>
@@ -1226,6 +1234,10 @@
   <data name="TaskHostAcquireFailed" xml:space="preserve">
     <value>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</value>
     <comment>{StrBegin="MSB4216: "}</comment>
+  </data>
+  <data name="TaskHostDetails" xml:space="preserve">
+    <value>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</value>
+    <comment>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</comment>
   </data>
   <data name="TaskHostNodeFailedToLaunch" xml:space="preserve">
     <value>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</value>
@@ -1301,7 +1313,7 @@
     <value>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized.</value>
     <comment>{StrBegin="MSB4067: "}</comment>
   </data>
-  <data name="PropertyOutsidePropertyGroupInTarget" xml:space="preserve" Condition="$([MSBuild]::AreFeaturesEnabled('17.6'))">
+  <data name="PropertyOutsidePropertyGroupInTarget" xml:space="preserve">
     <value>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</value>
     <comment>{StrBegin="MSB4067: "}</comment>
   </data>
@@ -1324,6 +1336,22 @@
   <data name="CouldNotResolveSdk" xml:space="preserve">
     <value>MSB4236: The SDK '{0}' specified could not be found.</value>
     <comment>{StrBegin="MSB4236: "}</comment>
+  </data>
+  <data name="SdkResolverDynamicLoadingNotSupported" xml:space="preserve">
+    <value>MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</value>
+    <comment>{StrBegin="MSB4282: "}{0} is the SDK name; {1} is the SDK resolver manifest display name.</comment>
+  </data>
+  <data name="ReflectiveTaskExecutionNotSupported" xml:space="preserve">
+    <value>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</value>
+    <comment>{StrBegin="MSB4283: "}{0} is the task name.</comment>
+  </data>
+  <data name="BuildCheckCustomCheckNotSupportedInTrimmedHost" xml:space="preserve">
+    <value>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</value>
+    <comment>{StrBegin="MSB4284: "}{0} is the path to the custom build check assembly.</comment>
+  </data>
+  <data name="ReflectiveLoggerLoadingNotSupported" xml:space="preserve">
+    <value>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</value>
+    <comment>{StrBegin="MSB4285: "}</comment>
   </data>
   <data name="CouldNotLoadSdkResolver" xml:space="preserve">
     <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>
@@ -1389,7 +1417,9 @@ Errors: {3}</value>
   <data name="SdkEnvironmentVariableAlreadySetBySdk" xml:space="preserve">
     <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</value>
   </data>
-
+  <data name="SdkEnvironmentVariableOverridingAmbient" xml:space="preserve">
+    <value>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</value>
+  </data>
   <data name="UnrecognizedParentElement" xml:space="preserve">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
@@ -1557,6 +1587,18 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_NotSupportedConvertingCollectionValueToBacking" xml:space="preserve">
     <value>This collection cannot convert from the specified value to the backing value.</value>
   </data>
+  <data name="OM_PartialEvaluationMemberUnavailable" xml:space="preserve">
+    <value>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</value>
+    <comment>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</comment>
+  </data>
+  <data name="OM_PartialEvaluationCannotBuild" xml:space="preserve">
+    <value>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</value>
+    <comment>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</comment>
+  </data>
+  <data name="OM_PartialEvaluationNotSupportedForProject" xml:space="preserve">
+    <value>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</value>
+    <comment>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</comment>
+  </data>
   <data name="OM_CannotCreateReservedProperty" xml:space="preserve">
     <value>The "{0}" property name is reserved.</value>
     <comment>UE: This message is shown when the user tries to redefine one of the reserved MSBuild properties e.g. $(MSBuildProjectFile) through the object model</comment>
@@ -1613,6 +1655,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="OM_TargetNameNullOrEmpty" xml:space="preserve">
     <value>Method {0} cannot be called with a collection containing null or empty target names.</value>
+  </data>
+  <data name="OM_ConfigurationFileToolsetsNotSupported" xml:space="preserve">
+    <value>Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</value>
   </data>
   <data name="OM_NoOtherwiseBeforeWhenOrOtherwise" xml:space="preserve">
     <value>An &lt;Otherwise&gt; element cannot be located before a &lt;When&gt; or &lt;Otherwise&gt; element.</value>
@@ -1768,7 +1813,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</value>
     <comment>{StrBegin="MSB4231: "}</comment>
   </data>
-  <data name="LogTaskInputs.Truncated">
+  <data name="LogTaskInputs.Truncated" xml:space="preserve">
     <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
   </data>
   <data name="MetaprojectGenerated" xml:space="preserve">
@@ -1828,6 +1873,16 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>
       {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
+    </comment>
+  </data>
+  <data name="ProjectGraphProjectFileCannotBeLoadedWithReferrers" xml:space="preserve">
+    <value>The project file '{0}' could not be loaded when referenced by {1}.</value>
+    <comment>
+      This message is shown during static graph construction when a referenced project file cannot be loaded,
+      along with information about which project(s) are referencing the failed project.
+      {0} is the full path to the project that failed to load
+      {1} is a comma-separated list of full paths to the projects that reference the failed project
+      The specific reason for the load failure (e.g., "Could not find file '...'") is appended separately in code.
     </comment>
   </data>
   <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" xml:space="preserve">
@@ -1999,9 +2054,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="ProjectCacheHitWithOutputs" xml:space="preserve">
-    <value>{0} -> Cache Hit</value>
+    <value>{0} -&gt; Cache Hit</value>
     <comment>
-      {StrBegin="{0} -> "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
     </comment>
   </data>
   <data name="ProjectCacheMissWithDefaultTargets" xml:space="preserve">
@@ -2070,7 +2125,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Imported files archive exceeded 2GB limit and it's not embedded.</value>
   </data>
   <data name="Binlog_FwdCompatUnsupported" xml:space="preserve">
-    <value>Forward compatible reading is not supported for file format version {0} (needs >= 18).</value>
+    <value>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</value>
     <comment>
       LOCALIZATION: {0} is an integer number denoting version.
     </comment>
@@ -2123,6 +2178,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </comment>
   </data>
+  <data name="BinlogFormatVersionMismatch" xml:space="preserve">
+    <value>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</value>
+    <comment>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</comment>
+  </data>
   <data name="CustomCheckSuccessfulAcquisition" xml:space="preserve">
     <value>Custom check rule: '{0}' has been registered successfully.</value>
     <comment>The message is emitted on successful loading of the custom check rule in process.</comment>
@@ -2151,6 +2210,27 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheckEnabled" xml:space="preserve">
     <value>The BuildCheck is enabled for this build.</value>
+  </data>
+  <data name="CoordinatorFailedToConnect" xml:space="preserve">
+    <value>Failed to connect to the build coordinator. The build will proceed without node coordination.</value>
+  </data>
+  <data name="CoordinatorFailedToNegotiate" xml:space="preserve">
+    <value>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</value>
+  </data>
+  <data name="CoordinatorFailedToLaunch" xml:space="preserve">
+    <value>Failed to launch the build coordinator. The build will proceed without node coordination.</value>
+  </data>
+  <data name="CoordinatorLaunchTimedOut" xml:space="preserve">
+    <value>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</value>
+  </data>
+  <data name="CoordinatorNodeGrantReceived" xml:space="preserve">
+    <value>Coordinator granted {0} node(s) for this build.</value>
+    <comment>
+      LOCALIZATION: {0} is the number of nodes granted by the coordinator.
+    </comment>
+  </data>
+  <data name="CoordinatorWaitingForNodes" xml:space="preserve">
+    <value>Waiting for coordinator to grant build resources...</value>
   </data>
   <data name="CustomCheckRegistered" xml:space="preserve">
     <value>The custom check: '{0}' is registered for the build from the location: '{1}'.</value>
@@ -2189,19 +2269,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0105_Title" xml:space="preserve">
     <value>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0105_MessageFmt" xml:space="preserve">
     <value>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0106_Title" xml:space="preserve">
     <value>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0106_MessageFmt" xml:space="preserve">
     <value>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0107_Title" xml:space="preserve">
     <value>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</value>
@@ -2444,6 +2524,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="SDKPathCheck_Failed" xml:space="preserve">
     <value>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</value>
   </data>
+  <data name="DotnetHostPathNotSet" xml:space="preserve">
+    <value>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</value>
+  </data>
   <data name="ErrorCopyingBinaryLog" xml:space="preserve">
     <value>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</value>
     <comment>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</comment>
@@ -2459,11 +2542,111 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</value>
     <comment>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</comment>
   </data>
-  <!--
-        The Build message bucket is: MSB4000 - MSB4999
-
-        Next message code should be MSB4281
-
-        Don't forget to update this comment after using a new code.
-  -->
+  <data name="BuildAborted" xml:space="preserve">
+    <value>MSB4188: Build was canceled.</value>
+    <comment>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</comment>
+  </data>
+  <data name="DeprecatedEventSerialization" xml:space="preserve">
+    <value>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
+  </data>
+  <data name="InvalidProjectFile" xml:space="preserve">
+    <value>MSB4025: The project file could not be loaded. {0}</value>
+    <comment>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
+    invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
+    provided separately to loggers.
+    LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</comment>
+  </data>
+  <data name="InvalidVerbosity" xml:space="preserve">
+    <value>MSB4103: "{0}" is not a valid logger verbosity level.</value>
+    <comment>{StrBegin="MSB4103: "}</comment>
+  </data>
+  <data name="OM_NotSupportedReadOnlyCollection" xml:space="preserve">
+    <value>This collection is read-only.</value>
+  </data>
+  <data name="ProjectFileIsMalformed" xml:space="preserve">
+    <value>MSB5019: The project file is malformed: "{0}". {1}</value>
+    <comment>{StrBegin="MSB5019: "}</comment>
+  </data>
+  <data name="ProjectFileCouldNotBeLoaded" xml:space="preserve">
+    <value>MSB5020: Could not load the project file: "{0}". {1}</value>
+    <comment>{StrBegin="MSB5020: "}</comment>
+  </data>
+  <data name="SolutionFilterFilterContainsProjectNotInSolution" xml:space="preserve">
+    <value>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</value>
+    <comment>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionFilterJsonParsingError" xml:space="preserve">
+    <value>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</value>
+    <comment>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionFilterMissingSolutionError" xml:space="preserve">
+    <value>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</value>
+    <comment>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseDuplicateProject" xml:space="preserve">
+    <value>MSB5004: The solution file has two projects named "{0}".</value>
+    <comment>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseInvalidProjectFileNameCharacters" xml:space="preserve">
+    <value>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</value>
+    <comment>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseInvalidProjectFileNameEmpty" xml:space="preserve">
+    <value>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</value>
+    <comment>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseInvalidProjectSolutionConfigurationEntry" xml:space="preserve">
+    <value>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</value>
+    <comment>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseInvalidSolutionConfigurationEntry" xml:space="preserve">
+    <value>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</value>
+    <comment>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseNestedProjectError" xml:space="preserve">
+    <value>MSB5009: Error parsing the nested project section in solution file.</value>
+    <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseNestedProjectErrorWithNameAndGuid" xml:space="preserve">
+    <value>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</value>
+    <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseNestedProjectUndefinedError" xml:space="preserve">
+    <value>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</value>
+    <comment>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseNoHeaderError" xml:space="preserve">
+    <value>MSB5010: No file format header found.</value>
+    <comment>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseProjectDepGuidError" xml:space="preserve">
+    <value>MSB5011: Parent project GUID not found in "{0}" project dependency section.</value>
+    <comment>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseProjectEofError" xml:space="preserve">
+    <value>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</value>
+    <comment>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseProjectError" xml:space="preserve">
+    <value>MSB5013: Error parsing a project section.</value>
+    <comment>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseVersionMismatchError" xml:space="preserve">
+    <value>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</value>
+    <comment>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseWebProjectPropertiesError" xml:space="preserve">
+    <value>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</value>
+    <comment>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SubCategoryForSolutionParsingErrors" xml:space="preserve">
+    <value>Solution file</value>
+    <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
+      "MSBUILD : Solution file error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.</comment>
+  </data>
+  <data name="UnrecognizedSolutionComment" xml:space="preserve">
+    <value>Unrecognized solution version "{0}", attempting to continue.</value>
+  </data>
 </root>

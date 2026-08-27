@@ -1,8 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -29,7 +30,7 @@ namespace Microsoft.Build.Graph
         /// <param name="globalProperties">The global properties to use for this entry point. May be null.</param>
         public ProjectGraphEntryPoint(string projectFile, IDictionary<string, string> globalProperties)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile);
+            ArgumentException.ThrowIfNullOrEmpty(projectFile);
 
             ProjectFile = FileUtilities.NormalizePath(projectFile);
             GlobalProperties = globalProperties;

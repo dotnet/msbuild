@@ -65,9 +65,16 @@ namespace Microsoft.Build.Logging
     {
         private int? _fileFormatVersion;
         private int? _minimumReaderVersion;
+        private string? _formatVersionMismatchWarning;
 
         public int FileFormatVersion => _fileFormatVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
         public int MinimumReaderVersion => _minimumReaderVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
+
+        /// <summary>
+        /// After replay, contains a warning message if the binlog was produced by a newer version of MSBuild.
+        /// Returns <see langword="null" /> if <see cref="Replay(string)"/> has not been called yet or if the versions match.
+        /// </summary>
+        public string? FormatVersionMismatchWarning => _formatVersionMismatchWarning;
 
         /// Touches the <see cref="ItemGroupLoggingHelper"/> static constructor
         /// to ensure it initializes <see cref="TaskParameterEventArgs.MessageGetter"/>
@@ -197,7 +204,7 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(string sourceFilePath, CancellationToken cancellationToken)
         {
-            using var eventsReader = OpenBuildEventsReader(sourceFilePath);
+            using var eventsReader = OpenBuildEventsReader(OpenReader(sourceFilePath), true, AllowForwardCompatibility);
             Replay(eventsReader, cancellationToken);
         }
 
@@ -230,6 +237,9 @@ namespace Microsoft.Build.Logging
         {
             _fileFormatVersion = reader.FileFormatVersion;
             _minimumReaderVersion = reader.MinimumReaderVersion;
+            _formatVersionMismatchWarning = reader.FileFormatVersion > BinaryLogger.FileFormatVersion
+                ? ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BinlogFormatVersionMismatch", reader.FileFormatVersion, BinaryLogger.FileFormatVersion)
+                : null;
             bool supportsForwardCompatibility = reader.FileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion;
 
             // Allow any possible deferred subscriptions to be registered
@@ -254,9 +264,12 @@ namespace Microsoft.Build.Logging
                         ResourceUtilities.GetResourceString("Binlog_Source_MultiSubscribeError"));
                 }
 
-                // Forward compatible reading makes sense only for structured events reading.
-                reader.SkipUnknownEvents = supportsForwardCompatibility && AllowForwardCompatibility;
-                reader.SkipUnknownEventParts = supportsForwardCompatibility && AllowForwardCompatibility;
+                // Forward compatible reading makes sense only for structured events reading
+                // and only when the binlog is actually from a newer version.
+                bool skipUnknown = supportsForwardCompatibility && AllowForwardCompatibility
+                    && reader.FileFormatVersion > BinaryLogger.FileFormatVersion;
+                reader.SkipUnknownEvents = skipUnknown;
+                reader.SkipUnknownEventParts = skipUnknown;
                 reader.RecoverableReadError += RecoverableReadError;
 
                 while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)

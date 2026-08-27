@@ -25,10 +25,9 @@ namespace Microsoft.Build.Logging
     /// complex -- for example, there is parameter parsing in this class, plus in BaseConsoleLogger. However we have
     /// to derive FileLogger from ConsoleLogger because it shipped that way in Whidbey.
     /// </remarks>
-    public class FileLogger : ConsoleLogger
+    public class FileLogger : ConsoleLogger, IFileOutputLogger
     {
         #region Constructors
-
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -56,7 +55,7 @@ namespace Microsoft.Build.Logging
         /// <param name="eventSource">Available events.</param>
         public override void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource);
+            ArgumentNullException.ThrowIfNull(eventSource);
             eventSource.BuildFinished += FileLoggerBuildFinished;
             InitializeFileLogger(eventSource, 1);
         }
@@ -198,7 +197,7 @@ namespace Microsoft.Build.Logging
             switch (parameterName.ToUpperInvariant())
             {
                 case "LOGFILE":
-                    _logFileName = FrameworkFileUtilities.FixFilePath(parameterValue);
+                    _logFileName = FileUtilities.FixFilePath(parameterValue);
                     break;
                 case "APPEND":
                     _append = true;
@@ -238,6 +237,14 @@ namespace Microsoft.Build.Logging
         /// the default value is msbuild.log
         /// </summary>
         private string _logFileName = "msbuild.log";
+
+        /// <summary>
+        /// The path to the log file.
+        /// </summary>
+        internal string FilePath => Path.GetFullPath(_logFileName);
+
+        /// <inheritdoc/>
+        System.Collections.Generic.IReadOnlyList<string> IFileOutputLogger.OutputFilePaths => new[] { FilePath };
 
         /// <summary>
         /// fileWriter is the stream that has been opened on our log file.

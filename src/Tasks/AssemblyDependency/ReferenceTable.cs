@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -110,6 +110,11 @@ namespace Microsoft.Build.Tasks
         /// Delegate used to get the machineType from the PE header of the dll.
         /// </summary>
         private readonly ReadMachineTypeFromPEHeader _readMachineTypeFromPEHeader;
+
+        /// <summary>
+        /// TaskEnvironment for thread-safe access to environment variables and path resolution.
+        /// </summary>
+        private readonly TaskEnvironment _taskEnvironment;
 
         /// <summary>
         /// Is the file a winMD file
@@ -225,6 +230,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
         /// <param name="nonCultureResourceDirectories"></param>
+        /// <param name="taskEnvironment">TaskEnvironment for thread-safe environment variable access and path resolution.</param>
 #else
         /// <summary>
         /// Construct.
@@ -239,7 +245,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="relatedFileExtensions"></param>
         /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
         /// <param name="resolvedSDKItems">Resolved sdk items</param>
-        /// <param name="frameworkPaths">Path to the FX.</param>
+        /// <param name="frameworkPaths">Full paths to the FX.</param>
         /// <param name="installedAssemblies">Installed assembly XML tables.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targeted.</param>
         /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
@@ -265,6 +271,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
         /// <param name="nonCultureResourceDirectories"></param>
+        /// <param name="taskEnvironment">TaskEnvironment for thread-safe environment variable access and path resolution.</param>
 #endif
         internal ReferenceTable(
             IBuildEngine buildEngine,
@@ -307,7 +314,8 @@ namespace Microsoft.Build.Tasks
             bool ignoreFrameworkAttributeVersionMismatch,
             bool unresolveFrameworkAssembliesFromHigherFrameworks,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
-            string[] nonCultureResourceDirectories)
+            string[] nonCultureResourceDirectories,
+            TaskEnvironment taskEnvironment)
         {
             _log = log;
             _findDependencies = findDependencies;
@@ -339,6 +347,7 @@ namespace Microsoft.Build.Tasks
             _assemblyMetadataCache = assemblyMetadataCache;
             _nonCultureResourceDirectories = nonCultureResourceDirectories;
             _enableCustomCulture = enableCustomCulture;
+            _taskEnvironment = taskEnvironment;
 
             // Set condition for when to check assembly version against the target framework version
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -378,7 +387,8 @@ namespace Microsoft.Build.Tasks
                     getRuntimeVersion,
                     targetedRuntimeVersion,
                     getAssemblyPathInGac,
-                    log);
+                    log,
+                    taskEnvironment);
         }
 
         /// <summary>
@@ -424,7 +434,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="reference">The reference to add.</param>
         internal void AddReference(AssemblyNameExtension assemblyName, Reference reference)
         {
-            ErrorUtilities.VerifyThrow(assemblyName.Name != null, "Got an empty assembly name.");
+            Assumed.NotNull(assemblyName.Name, "Got an empty assembly name.");
             if (References.TryGetValue(assemblyName, out Reference referenceGoingToBeReplaced))
             {
                 foreach (AssemblyRemapping pair in referenceGoingToBeReplaced.RemappedAssemblyNames())
@@ -449,7 +459,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>'null' if no reference existed.</returns>
         internal Reference GetReference(AssemblyNameExtension assemblyName)
         {
-            ErrorUtilities.VerifyThrow(assemblyName.Name != null, "Got an empty assembly name.");
+            Assumed.NotNull(assemblyName.Name, "Got an empty assembly name.");
             References.TryGetValue(assemblyName, out Reference referenceToReturn);
             return referenceToReturn;
         }
@@ -468,7 +478,7 @@ namespace Microsoft.Build.Tasks
 
             if (!Path.IsPathRooted(assemblyFileName))
             {
-                reference.FullPath = Path.GetFullPath(assemblyFileName);
+                reference.FullPath = _taskEnvironment.GetAbsolutePath(assemblyFileName).GetCanonicalForm();
             }
             else
             {
@@ -477,15 +487,15 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (_fileExists(assemblyFileName))
+                if (_fileExists(reference.FullPath))
                 {
-                    assemblyName = _getAssemblyName(assemblyFileName);
+                    assemblyName = _getAssemblyName(reference.FullPath);
                     if (assemblyName != null)
                     {
                         reference.ResolvedSearchPath = assemblyFileName;
                     }
                 }
-                else if (_directoryExists(assemblyFileName))
+                else if (_directoryExists(reference.FullPath))
                 {
                     assemblyName = new AssemblyNameExtension("*directory*");
 
@@ -870,7 +880,7 @@ namespace Microsoft.Build.Tasks
             if (string.IsNullOrEmpty(name))
             {
                 // Fall back to inferring assembly name from file name.
-                name = item.GetMetadata(FileUtilities.ItemSpecModifiers.Filename);
+                name = item.GetMetadata(ItemSpecModifiers.Filename);
             }
 
             return new AssemblyNameExtension($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");
@@ -1313,14 +1323,14 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion)]);
+                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion, _taskEnvironment)]);
             }
             else
             {
                 // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
                 if (parentReferenceFolders.Count > 0 && (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name)))
                 {
-                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion, _taskEnvironment));
                 }
 
                 jaggedResolvers.Add(Resolvers);
@@ -1355,7 +1365,14 @@ namespace Microsoft.Build.Tasks
             // If the path was resolved, then specify the full path on the reference.
             if (resolvedPath != null)
             {
-                resolvedPath = FileUtilities.NormalizePath(resolvedPath);
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+                {
+                    resolvedPath = FileUtilities.FixFilePath(_taskEnvironment.GetAbsolutePath(resolvedPath).GetCanonicalForm()).Value;
+                }
+                else
+                {
+                    resolvedPath = FileUtilities.NormalizePath(_taskEnvironment.GetAbsolutePath(resolvedPath));
+                }
                 if (isImmutableFrameworkReference)
                 {
                     _externallyResolvedImmutableFiles[resolvedPath] = GetAssemblyNameFromItemMetadata(reference.PrimarySourceItem);
@@ -1674,7 +1691,7 @@ namespace Microsoft.Build.Tasks
                     moreDependencies = FindAssociatedFiles();
 
                     ++dependencyIterations;
-                    ErrorUtilities.VerifyThrow(dependencyIterations < maxIterations, "Maximum iterations exceeded while looking for dependencies.");
+                    Assumed.LessThan(dependencyIterations, maxIterations, "Maximum iterations exceeded while looking for dependencies.");
                 } while (moreDependencies);
 
                 // If everything is either resolved or unresolvable, then we can quit.
@@ -1693,7 +1710,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 ++moreResolvableIterations;
-                ErrorUtilities.VerifyThrow(moreResolvableIterations < maxIterations, "Maximum iterations exceeded while looking for resolvable references.");
+                Assumed.LessThan(moreResolvableIterations, maxIterations, "Maximum iterations exceeded while looking for resolvable references.");
             } while (moreResolvable);
         }
 
@@ -1720,7 +1737,7 @@ namespace Microsoft.Build.Tasks
                     {
                         // We don't look for associated files for FX assemblies.
                         bool hasFrameworkPath = false;
-                        string referenceDirectoryName = FrameworkFileUtilities.EnsureTrailingSlash(reference.DirectoryName);
+                        string referenceDirectoryName = FileUtilities.EnsureTrailingSlash(reference.DirectoryName);
 
                         foreach (string frameworkPath in _frameworkPaths)
                         {
@@ -2349,8 +2366,8 @@ namespace Microsoft.Build.Tasks
         private static int ResolveAssemblyNameConflict(AssemblyNameReference assemblyReference0, AssemblyNameReference assemblyReference1)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrow(assemblyReference0.assemblyName.FullName != null, "Got a null assembly name fullname. (0)");
-            ErrorUtilities.VerifyThrow(assemblyReference1.assemblyName.FullName != null, "Got a null assembly name fullname. (1)");
+            Assumed.NotNull(assemblyReference0.assemblyName.FullName, "Got a null assembly name fullname. (0)");
+            Assumed.NotNull(assemblyReference1.assemblyName.FullName, "Got a null assembly name fullname. (1)");
 
             Reference leftConflictReference = assemblyReference0.reference;
             Reference rightConflictReference = assemblyReference1.reference;
@@ -2555,8 +2572,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool CompareAssembliesIgnoringVersion(AssemblyName a, AssemblyName b)
         {
-            ErrorUtilities.VerifyThrowInternalNull(a);
-            ErrorUtilities.VerifyThrowInternalNull(b);
+            Assumed.NotNull(a);
+            Assumed.NotNull(b);
 
             if (a == b)
             {
@@ -2768,7 +2785,7 @@ namespace Microsoft.Build.Tasks
                 // Set up the satellites.
                 foreach (string satelliteFile in satellites)
                 {
-                    relatedItemBase.SetMetadata(ItemMetadataNames.destinationSubDirectory, FrameworkFileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(satelliteFile)));
+                    relatedItemBase.SetMetadata(ItemMetadataNames.destinationSubDirectory, FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(satelliteFile)));
                     AddRelatedItem(satelliteItems, relatedItemBase, Path.Combine(reference.DirectoryName, satelliteFile));
                 }
             }

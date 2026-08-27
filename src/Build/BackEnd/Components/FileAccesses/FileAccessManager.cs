@@ -10,7 +10,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.FileAccesses
@@ -37,7 +36,7 @@ namespace Microsoft.Build.FileAccesses
 
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.FileAccessManager, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.FileAccessManager);
             return new FileAccessManager();
         }
 
@@ -45,7 +44,7 @@ namespace Microsoft.Build.FileAccesses
         {
             _scheduler = host.GetComponent(BuildComponentType.Scheduler) as IScheduler;
             _configCache = host.GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
-            _tempDirectory = FrameworkFileUtilities.EnsureNoTrailingSlash(FileUtilities.TempFileDirectory);
+            _tempDirectory = FileUtilities.EnsureNoTrailingSlash(FileUtilities.TempFileDirectory);
         }
 
         public void ShutdownComponent()
@@ -69,7 +68,7 @@ namespace Microsoft.Build.FileAccesses
                 ManualResetEventSlim handle = _fileAccessCompletionWaitHandles.GetOrAdd(globalRequestId, static _ => new ManualResetEventSlim());
                 handle.Set();
             }
-            else if (_tempDirectory != null && fileAccessPath.StartsWith(_tempDirectory))
+            else if (_tempDirectory != null && fileAccessPath.StartsWith(_tempDirectory, FileUtilities.PathComparison))
             {
                 // Ignore MSBuild's temp directory as these are related to internal MSBuild functionality and not always directly related to the execution of the project itself,
                 // so should not be exposed to handlers. Note that this is not %TEMP% but instead a subdir under %TEMP% which is only expected to be used by MSBuild.
@@ -162,9 +161,7 @@ namespace Microsoft.Build.FileAccesses
 
         private BuildRequest? GetBuildRequest(int nodeId)
         {
-            ErrorUtilities.VerifyThrow(
-                _scheduler != null && _configCache != null,
-                "Component has not been initialized");
+            Assumed.True(_scheduler != null && _configCache != null, "Component has not been initialized");
 
             // Note: If the node isn't executing anything it may be accessing binaries required to run, eg. the MSBuild binaries
             return _scheduler!.GetExecutingRequestByNode(nodeId);

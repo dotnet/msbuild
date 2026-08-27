@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -7,17 +7,25 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Tasks.Metadata;
+using Microsoft.Build.Utilities;
 #endif
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+#endif
+
 #if FEATURE_ASSEMBLYLOADCONTEXT
-using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
+#else
+using Microsoft.Build.Framework;
 #endif
 using Microsoft.Build.Tasks.AssemblyDependency;
 
@@ -29,15 +37,20 @@ namespace Microsoft.Build.Tasks
     /// Collection of methods used to discover assembly metadata.
     /// Primarily stolen from manifestutility.cs AssemblyMetaDataImport class.
     /// </summary>
-    internal class AssemblyInformation : DisposableBase
+    internal unsafe class AssemblyInformation : DisposableBase
     {
         private AssemblyNameExtension[] _assemblyDependencies;
         private string[] _assemblyFiles;
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-        private readonly IMetaDataDispenser _metadataDispenser;
-        private readonly IMetaDataAssemblyImport _assemblyImport;
-        private static Guid s_importerGuid = new Guid(((GuidAttribute)Attribute.GetCustomAttribute(typeof(IMetaDataImport), typeof(GuidAttribute), false)).Value);
-        private readonly Assembly _assembly;
+        // COM pointers stored thread-agile via the GIT. Disposed in DisposeUnmanagedResources
+        // so the finalizer path also revokes the GIT cookies and releases the underlying
+        // RegMeta — matching the lifetime of the legacy Marshal.ReleaseComObject pattern.
+        // The CLR metadata object returned by IMetaDataDispenser::OpenScope implements
+        // all three of IMetaDataImport, IMetaDataImport2, and IMetaDataAssemblyImport;
+        // we QueryInterface for the two we actually call. The dispenser itself is only
+        // needed during construction and is released as soon as OpenScope returns.
+        private readonly AgileComPointer<IMetaDataAssemblyImport> _assemblyImport;
+        private readonly AgileComPointer<IMetaDataImport2> _import2;
 #endif
         private readonly string _sourceFile;
         private FrameworkName _frameworkName;
@@ -68,19 +81,71 @@ namespace Microsoft.Build.Tasks
         internal AssemblyInformation(string sourceFile)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(sourceFile);
+            ArgumentNullException.ThrowIfNull(sourceFile);
             _sourceFile = sourceFile;
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-            if (NativeMethodsShared.IsWindows)
+            // net472-only = inherently Windows. CsWin32 types used directly.
+            // Activate the dispenser by calling clr.dll's exported DllGetClassObject
+            // directly via ComClassFactory.TryCreateFromModule. Once we have
+            // IMetaDataDispenser we stay on the struct-based COM path (OpenScope, QI
+            // for IMetaDataAssemblyImport, AgileComPointer storage).
+            //
+            // IMPORTANT — do NOT call PInvoke.CoCreateInstance(CLSID_CorMetaDataDispenser, ...)
+            // here, and do NOT use Activator.CreateInstance(Type.GetTypeFromCLSID(...))
+            // (which would also block AOT on .NET 10+).
+            //
+            // CLSID_CorMetaDataDispenser is registered with mscoree.dll (the .NET
+            // Framework shim) as its InprocServer32. Raw CoCreateInstance loads the
+            // shim, which then has to bind a CLR via LoadLibraryShim before delegating
+            // to MetaDataDllGetClassObject. In hosts that did not enter the CLR via
+            // mscoree (e.g., the VC cppxplatdev test harness invoking MSBuild
+            // in-process via BuildManager), the shim's bound-runtime state is not set
+            // up and LoadLibraryShim returns CLR_E_SHIM_RUNTIMELOAD = 0x80131700
+            // ("Failed to load the runtime"). RAR catches that as a
+            // DependencyResolutionException and silently drops every transitive
+            // dependency for the failing reference. Regression introduced by
+            // dotnet/msbuild #13853; observed as VC.Tests.MsBuild.VC.MsBuild.P2PReferences.08.
+            //
+            // The right approach is what the CLR's own managed-COM activation path
+            // does internally: bypass the shim entirely for CLSIDs coming from the runtime
+            // and call DllGetClassObject directly on the currently-loaded CLR module.
+
+            if (!ComClassFactory.TryCreateFromModule(
+                "clr.dll",
+                CorMetadata.CLSID_CorMetaDataDispenser,
+                ComClassFactory.ClrDllGetClassObjectInternalExportName,
+                out ComClassFactory factory,
+                out HRESULT activationHr))
             {
-                // Create the metadata dispenser and open scope on the source file.
-                _metadataDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
-                _assemblyImport = (IMetaDataAssemblyImport)_metadataDispenser.OpenScope(sourceFile, 0, ref s_importerGuid);
+                activationHr.ThrowOnFailure();
             }
-            else
+
+            using (factory)
             {
-                _assembly = Assembly.ReflectionOnlyLoadFrom(sourceFile);
+                using ComScope<IMetaDataDispenser> dispenser = factory.TryCreateInstance<IMetaDataDispenser>(out HRESULT createHr);
+                createHr.ThrowOnFailure();
+
+                // OpenScope is asked directly for IMetaDataImport2 — the underlying CLR RegMeta
+                // coclass implements every IMetaData* interface, so this saves a QueryInterface
+                // round-trip vs. asking for the base IMetaDataImport. We still need one QI for
+                // IMetaDataAssemblyImport since OpenScope only returns one pointer. Each
+                // AgileComPointer (takeOwnership: false) AddRefs through GIT registration so
+                // the field retains the only persistent reference; ComScope releases the
+                // transient pointer on scope exit.
+                Guid import2Iid = IMetaDataImport2.IID_IMetaDataImport2;
+                using ComScope<IMetaDataImport2> import2 = new();
+                fixed (char* pPath = sourceFile)
+                {
+                    dispenser.Pointer->OpenScope(pPath, CorOpenFlags.ofRead, &import2Iid, import2).ThrowOnFailure();
+                }
+                
+                _import2 = new AgileComPointer<IMetaDataImport2>(import2.Pointer, takeOwnership: false);
+
+                Guid asmIid = IMetaDataAssemblyImport.IID_IMetaDataAssemblyImport;
+                using ComScope<IMetaDataAssemblyImport> asmImport = new();
+                import2.Pointer->QueryInterface(&asmIid, asmImport).ThrowOnFailure();
+                _assemblyImport = new AgileComPointer<IMetaDataAssemblyImport>(asmImport.Pointer, takeOwnership: false);
             }
 #endif
         }
@@ -273,96 +338,121 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal AssemblyAttributes GetAssemblyMetadata()
         {
-            IntPtr asmMetaPtr = IntPtr.Zero;
-            ASSEMBLYMETADATA asmMeta = new();
-            try
+            using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
+            using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
+
+            MdAssembly assemblyScope;
+            // Tolerate failure here: a scope with no mdAssembly token (a netmodule or other
+            // non-assembly PE) returns CLDB_E_RECORD_NOTFOUND. The legacy [PreserveSig] RCW
+            // code silently ignored that HR and fell through to the IsNil check, returning
+            // null. Preserve that contract; the GetAssembliesMetadata task has no try/catch
+            // around this call and an exception here would fail the whole task.
+            HRESULT hr = asmImport.Pointer->GetAssemblyFromScope(&assemblyScope);
+
+            // get the assembly, if there is no assembly, it is a module reference
+            if (hr.Failed || assemblyScope.IsNil)
             {
-                IMetaDataImport2 import2 = (IMetaDataImport2)_assemblyImport;
-                _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
+                return null;
+            }
 
-                // get the assembly, if there is no assembly, it is a module reference
-                if (assemblyScope == 0)
-                {
-                    return null;
-                }
+            AssemblyAttributes assemblyAttributes = new()
+            {
+                AssemblyFullPath = _sourceFile,
+                IsAssembly = true,
+            };
 
-                AssemblyAttributes assemblyAttributes = new()
-                {
-                    AssemblyFullPath = _sourceFile,
-                    IsAssembly = true,
-                };
+            // Stack-allocate everything GetAssemblyProps needs to fill in: the name buffer, the
+            // locale buffer pointed at by ASSEMBLYMETADATA.szLocale, and the struct itself. The
+            // struct is blittable so we pass &asmMeta directly — no Marshal allocation/copy.
+            // rProcessor / rOS are left null because we don't request that data.
+            using BufferScope<char> nameBuffer = new(GENMAN_STRING_BUF_SIZE);
+            char* localeBuffer = stackalloc char[GENMAN_LOCALE_BUF_SIZE];
+            ASSEMBLYMETADATA asmMeta = new()
+            {
+                szLocale = localeBuffer,
+                cbLocale = GENMAN_LOCALE_BUF_SIZE,
+            };
 
-                // will be populated with the assembly name
-                char[] defaultCharArray = new char[GENMAN_STRING_BUF_SIZE];
-                asmMetaPtr = AllocAsmMeta();
-                _assemblyImport.GetAssemblyProps(
+            void* publicKeyPtr;
+            uint publicKeyLength;
+            uint hashAlgorithmId;
+            uint nameLength;
+            CorAssemblyFlags flags;
+            fixed (char* pNameBuf = nameBuffer)
+            {
+                asmImport.Pointer->GetAssemblyProps(
                     assemblyScope,
-                    out IntPtr publicKeyPtr,
-                    out uint publicKeyLength,
-                    out uint hashAlgorithmId,
-                    defaultCharArray,
-
-                    // the default buffer size is taken from csproj call
+                    &publicKeyPtr,
+                    &publicKeyLength,
+                    &hashAlgorithmId,
+                    pNameBuf,
                     GENMAN_STRING_BUF_SIZE,
-                    out uint nameLength,
-                    asmMetaPtr,
-                    out uint flags);
-
-                assemblyAttributes.AssemblyName = new string(defaultCharArray, 0, (int)nameLength - 1);
-                assemblyAttributes.DefaultAlias = assemblyAttributes.AssemblyName;
-
-                asmMeta = (ASSEMBLYMETADATA)Marshal.PtrToStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
-                assemblyAttributes.MajorVersion = asmMeta.usMajorVersion;
-                assemblyAttributes.MinorVersion = asmMeta.usMinorVersion;
-                assemblyAttributes.RevisionNumber = asmMeta.usRevisionNumber;
-                assemblyAttributes.BuildNumber = asmMeta.usBuildNumber;
-                assemblyAttributes.Culture = Marshal.PtrToStringUni(asmMeta.rpLocale);
-
-                byte[] publicKey = new byte[publicKeyLength];
-                Marshal.Copy(publicKeyPtr, publicKey, 0, (int)publicKeyLength);
-                assemblyAttributes.PublicHexKey = BitConverter.ToString(publicKey).Replace("-", string.Empty);
-
-                if (import2 != null)
-                {
-                    assemblyAttributes.Description = GetStringCustomAttribute(import2, assemblyScope, "System.Reflection.AssemblyDescriptionAttribute");
-                    assemblyAttributes.TargetFrameworkMoniker = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.Versioning.TargetFrameworkAttribute");
-                    var guid = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.GuidAttribute");
-                    if (!string.IsNullOrEmpty(guid))
-                    {
-                        string importedFromTypeLibString = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
-                        if (!string.IsNullOrEmpty(importedFromTypeLibString))
-                        {
-                            assemblyAttributes.IsImportedFromTypeLib = true;
-                        }
-                        else
-                        {
-                            string primaryInteropAssemblyString = GetStringCustomAttribute(import2, assemblyScope, "System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute");
-                            assemblyAttributes.IsImportedFromTypeLib = !string.IsNullOrEmpty(primaryInteropAssemblyString);
-                        }
-                    }
-                }
-
-                assemblyAttributes.RuntimeVersion = GetRuntimeVersion(_sourceFile);
-
-                import2.GetPEKind(out uint peKind, out _);
-                assemblyAttributes.PeKind = peKind;
-
-                return assemblyAttributes;
+                    &nameLength,
+                    &asmMeta,
+                    &flags).ThrowOnFailure();
             }
-            finally
+
+            assemblyAttributes.AssemblyName = nameBuffer.Slice(0, (int)nameLength - 1).ToString();
+            assemblyAttributes.DefaultAlias = assemblyAttributes.AssemblyName;
+
+            assemblyAttributes.MajorVersion = asmMeta.usMajorVersion;
+            assemblyAttributes.MinorVersion = asmMeta.usMinorVersion;
+            assemblyAttributes.RevisionNumber = asmMeta.usRevisionNumber;
+            assemblyAttributes.BuildNumber = asmMeta.usBuildNumber;
+            // szLocale is null-terminated; new string(char*) reads to the terminator.
+            assemblyAttributes.Culture = asmMeta.szLocale.Value is null ? null : new string(asmMeta.szLocale);
+
+            byte[] publicKey = new byte[publicKeyLength];
+            Marshal.Copy((IntPtr)publicKeyPtr, publicKey, 0, (int)publicKeyLength);
+            assemblyAttributes.PublicHexKey = BitConverter.ToString(publicKey).Replace("-", string.Empty);
+
+            assemblyAttributes.Description = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Reflection.AssemblyDescriptionAttribute");
+            assemblyAttributes.TargetFrameworkMoniker = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Runtime.Versioning.TargetFrameworkAttribute");
+            var guid = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Runtime.InteropServices.GuidAttribute");
+            if (!string.IsNullOrEmpty(guid))
             {
-                FreeAsmMeta(asmMetaPtr, ref asmMeta);
+                string importedFromTypeLibString = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
+                if (!string.IsNullOrEmpty(importedFromTypeLibString))
+                {
+                    assemblyAttributes.IsImportedFromTypeLib = true;
+                }
+                else
+                {
+                    string primaryInteropAssemblyString = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute");
+                    assemblyAttributes.IsImportedFromTypeLib = !string.IsNullOrEmpty(primaryInteropAssemblyString);
+                }
             }
+
+            assemblyAttributes.RuntimeVersion = GetRuntimeVersion(_sourceFile);
+
+            uint peKind = 0;
+            uint machine; // out-param required by GetPEKind; value not consumed by RAR
+            // Tolerate failure: GetPEKind can return CLDB_E_FILE_BADREAD or other variant HRs
+            // on unusual PEs. The legacy [PreserveSig] code ignored the HR and left peKind at
+            // whatever value (typically 0) the call had written. Match that behavior so the
+            // GetAssembliesMetadata task does not fail end-to-end on a borderline binary.
+            _ = import2.Pointer->GetPEKind(&peKind, &machine);
+            assemblyAttributes.PeKind = peKind;
+
+            return assemblyAttributes;
         }
 
-        private string GetStringCustomAttribute(IMetaDataImport2 import2, uint assemblyScope, string attributeName)
+        // Takes a borrowed IMetaDataImport2* so callers in a hot path (GetAssemblyMetadata's
+        // 4+ attribute lookups) can reuse a single GIT round-trip instead of paying one per call.
+        private string GetStringCustomAttribute(IMetaDataImport2* import2, MdToken assemblyScope, string attributeName)
         {
-            int hr = import2.GetCustomAttributeByName(assemblyScope, attributeName, out IntPtr data, out uint valueLen);
-
-            if (hr == NativeMethodsShared.S_OK)
+            HRESULT hr;
+            void* data = null;
+            uint valueLen = 0;
+            fixed (char* pName = attributeName)
             {
-                // if an custom attribute exists, parse the contents of the blob
-                if (NativeMethods.TryReadMetadataString(_sourceFile, data, valueLen, out string propertyValue))
+                hr = import2->GetCustomAttributeByName(assemblyScope, pName, &data, &valueLen);
+            }
+
+            if (hr == HRESULT.S_OK)
+            {
+                // if a custom attribute exists, parse the contents of the blob
+                if (NativeMethods.TryReadMetadataString(_sourceFile, (IntPtr)data, valueLen, out string propertyValue))
                 {
                     return propertyValue;
                 }
@@ -378,40 +468,18 @@ namespace Microsoft.Build.Tasks
         private FrameworkName GetFrameworkName()
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-            if (!NativeMethodsShared.IsWindows)
-            {
-                CustomAttributeData attr = null;
-
-                foreach (CustomAttributeData a in _assembly.GetCustomAttributesData())
-                {
-                    try
-                    {
-                        if (a.AttributeType == typeof(TargetFrameworkAttribute))
-                        {
-                            attr = a;
-                            break;
-                        }
-                    }
-                    catch
-                    {
-                    }
-                }
-
-                string name = null;
-                if (attr != null)
-                {
-                    name = (string)attr.ConstructorArguments[0].Value;
-                }
-                return name == null ? null : new FrameworkName(name);
-            }
-
+            // net472-only = inherently Windows.
             FrameworkName frameworkAttribute = null;
             try
             {
-                var import2 = (IMetaDataImport2)_assemblyImport;
-                _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
+                MdAssembly assemblyScope;
+                using (ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface())
+                {
+                    asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).ThrowOnFailure();
+                }
 
-                string frameworkNameAttribute = GetStringCustomAttribute(import2, assemblyScope, s_targetFrameworkAttribute);
+                using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
+                string frameworkNameAttribute = GetStringCustomAttribute(import2.Pointer, assemblyScope, s_targetFrameworkAttribute);
                 if (!string.IsNullOrEmpty(frameworkNameAttribute))
                 {
                     frameworkAttribute = new FrameworkName(frameworkNameAttribute);
@@ -626,23 +694,10 @@ namespace Microsoft.Build.Tasks
 #endif
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-        /// <summary>
-        /// Release interface pointers on Dispose().
-        /// </summary>
-        protected override void DisposeUnmanagedResources()
+        protected override void DisposeManagedResources()
         {
-            if (NativeMethodsShared.IsWindows)
-            {
-                if (_assemblyImport != null)
-                {
-                    Marshal.ReleaseComObject(_assemblyImport);
-                }
-
-                if (_metadataDispenser != null)
-                {
-                    Marshal.ReleaseComObject(_metadataDispenser);
-                }
-            }
+            _import2?.Dispose();
+            _assemblyImport?.Dispose();
         }
 #endif
 
@@ -651,10 +706,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="path">path to the file</param>
         /// <returns>The CLR runtime version or empty if the path does not exist.</returns>
-        internal static string GetRuntimeVersion(string path)
+        internal static unsafe string GetRuntimeVersion(string path)
         {
 #if FEATURE_MSCOREE
-            if (NativeMethodsShared.IsWindows)
+            // net472-only = inherently Windows. CsWin32 types used directly.
             {
 #if DEBUG
                 // Just to make sure and exercise the code that uses dwLength to allocate the buffer
@@ -663,33 +718,31 @@ namespace Microsoft.Build.Tasks
 #else
                 int bufferLength = 11; // 11 is the length of a runtime version and null terminator v2.0.50727/0
 #endif
+                using BufferScope<char> buffer = new(stackalloc char[bufferLength]);
 
-                unsafe
+                fixed (char* bufferPtr = buffer)
                 {
-                    // Allocate an initial buffer
-                    char* runtimeVersion = stackalloc char[bufferLength];
-
-                    // Run GetFileVersion, this should succeed using the initial buffer.
-                    // It also returns the dwLength which is used if there is insufficient buffer.
-                    uint hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out int dwLength);
-
-                    if (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER)
+                    fixed (char* pathPtr = path)
                     {
-                        // Allocate new buffer based on the returned length.
-                        char* runtimeVersion2 = stackalloc char[dwLength];
-                        runtimeVersion = runtimeVersion2;
+                        // Run GetFileVersion, this should succeed using the initial buffer.
+                        // It also returns the dwLength which is used if there is insufficient buffer.
+                        uint dwLength = 0;
+                        HRESULT hresult = Windows.Win32.PInvoke.GetFileVersion(pathPtr, bufferPtr, (uint)bufferLength, &dwLength);
 
-                        // Get the RuntimeVersion in this second call.
-                        bufferLength = dwLength;
-                        hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out dwLength);
+                        if (hresult == (HRESULT)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
+                        {
+                            // Allocate new buffer based on the returned length.
+                            buffer.EnsureCapacity((int)dwLength);
+                            fixed (char* newBufferPtr = buffer)
+                            {
+                                // Run GetFileVersion again, this should succeed using the new buffer.
+                                hresult = Windows.Win32.PInvoke.GetFileVersion(pathPtr, newBufferPtr, dwLength, &dwLength);
+                            }
+                        }
+
+                        return hresult == HRESULT.S_OK ? buffer.Slice(0, (int)dwLength - 1).ToString() : string.Empty;
                     }
-
-                    return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength - 1) : string.Empty;
                 }
-            }
-            else
-            {
-                return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
             }
 #else
             return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
@@ -703,77 +756,90 @@ namespace Microsoft.Build.Tasks
         private AssemblyNameExtension[] ImportAssemblyDependencies()
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
+            // net472-only = inherently Windows.
             var asmRefs = new List<AssemblyNameExtension>();
 
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return _assembly.GetReferencedAssemblies().Select(a => new AssemblyNameExtension(a)).ToArray();
-            }
-
             IntPtr asmRefEnum = IntPtr.Zero;
-            var asmRefTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
+            var asmRefTokens = new MdAssemblyRef[GENMAN_ENUM_TOKEN_BUF_SIZE];
+            using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
             // Ensure the enum handle is closed.
             try
             {
                 // Enum chunks of refs in 16-ref blocks until we run out.
-                UInt32 fetched;
+                uint fetched;
+                // Stack-allocate the locale buffer once and reuse it across iterations. The buffer
+                // is overwritten on each GetAssemblyRefProps call and ConstructAssemblyName copies
+                // the locale out into a managed string before the next iteration, so reuse is safe.
+                // 64 wide chars = 128 bytes — trivially fine for the stack.
+                char* localeBuffer = stackalloc char[GENMAN_LOCALE_BUF_SIZE];
                 do
                 {
-                    _assemblyImport.EnumAssemblyRefs(
-                        ref asmRefEnum,
-                        asmRefTokens,
-                        (uint)asmRefTokens.Length,
-                        out fetched);
+                    fixed (MdAssemblyRef* pTokens = asmRefTokens)
+                    {
+                        asmImport.Pointer->EnumAssemblyRefs(
+                            &asmRefEnum,
+                            pTokens,
+                            (uint)asmRefTokens.Length,
+                            &fetched).ThrowOnFailure();
+                    }
 
                     for (uint i = 0; i < fetched; i++)
                     {
                         // Determine the length of the string to contain the name first.
-                        _assemblyImport.GetAssemblyRefProps(
+                        void* pubKeyPtr;
+                        uint pubKeyBytes;
+                        uint asmNameLength;
+                        CorAssemblyFlags flags;
+                        asmImport.Pointer->GetAssemblyRefProps(
                             asmRefTokens[i],
-                            out IntPtr pubKeyPtr,
-                            out uint pubKeyBytes,
+                            &pubKeyPtr,
+                            &pubKeyBytes,
                             null,
                             0,
-                            out uint asmNameLength,
-                            IntPtr.Zero,
-                            out _,
-                            out _,
-                            out uint flags);
+                            &asmNameLength,
+                            null,
+                            null,
+                            null,
+                            &flags).ThrowOnFailure();
+
                         // Allocate assembly name buffer.
                         var asmNameBuf = new char[asmNameLength + 1];
-                        IntPtr asmMetaPtr = IntPtr.Zero;
-                        // Ensure metadata structure is freed.
-                        try
+
+                        // ASSEMBLYMETADATA is blittable; pass &asmMeta directly. rProcessor / rOS
+                        // stay null — RAR does not consume them. Reset cbLocale every iteration
+                        // since the previous call may have shrunk it to the actual length.
+                        ASSEMBLYMETADATA asmMeta = new()
                         {
-                            // Allocate metadata structure.
-                            asmMetaPtr = AllocAsmMeta();
-                            // Retrieve the assembly reference properties.
-                            _assemblyImport.GetAssemblyRefProps(
+                            szLocale = localeBuffer,
+                            cbLocale = GENMAN_LOCALE_BUF_SIZE,
+                        };
+
+                        // Retrieve the assembly reference properties.
+                        fixed (char* pNameBuf = asmNameBuf)
+                        {
+                            asmImport.Pointer->GetAssemblyRefProps(
                                 asmRefTokens[i],
-                                out pubKeyPtr,
-                                out pubKeyBytes,
-                                asmNameBuf,
+                                &pubKeyPtr,
+                                &pubKeyBytes,
+                                pNameBuf,
                                 (uint)asmNameBuf.Length,
-                                out asmNameLength,
-                                asmMetaPtr,
-                                out _,
-                                out _,
-                                out flags);
-                            // Construct the assembly name and free metadata structure.
-                            AssemblyNameExtension asmName = ConstructAssemblyName(
-                                asmMetaPtr,
-                                asmNameBuf,
-                                asmNameLength,
-                                pubKeyPtr,
-                                pubKeyBytes,
-                                flags);
-                            // Add the assembly name to the reference list.
-                            asmRefs.Add(asmName);
+                                &asmNameLength,
+                                &asmMeta,
+                                null,
+                                null,
+                                &flags).ThrowOnFailure();
                         }
-                        finally
-                        {
-                            FreeAsmMeta(asmMetaPtr);
-                        }
+
+                        // Construct the assembly name from the populated struct.
+                        AssemblyNameExtension asmName = ConstructAssemblyName(
+                            in asmMeta,
+                            asmNameBuf,
+                            asmNameLength,
+                            (IntPtr)pubKeyPtr,
+                            pubKeyBytes,
+                            flags);
+                        // Add the assembly name to the reference list.
+                        asmRefs.Add(asmName);
                     }
                 } while (fetched > 0);
             }
@@ -781,7 +847,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (asmRefEnum != IntPtr.Zero)
                 {
-                    _assemblyImport.CloseEnum(asmRefEnum);
+                    asmImport.Pointer->CloseEnum(asmRefEnum);
                 }
             }
 
@@ -802,24 +868,40 @@ namespace Microsoft.Build.Tasks
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             var files = new List<string>();
             IntPtr fileEnum = IntPtr.Zero;
-            var fileTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
+            var fileTokens = new MdFile[GENMAN_ENUM_TOKEN_BUF_SIZE];
             var fileNameBuf = new char[GENMAN_STRING_BUF_SIZE];
+            using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
 
             // Ensure the enum handle is closed.
             try
             {
                 // Enum chunks of files until we run out.
-                UInt32 fetched;
+                uint fetched;
                 do
                 {
-                    _assemblyImport.EnumFiles(ref fileEnum, fileTokens, (uint)fileTokens.Length, out fetched);
+                    fixed (MdFile* pTokens = fileTokens)
+                    {
+                        asmImport.Pointer->EnumFiles(&fileEnum, pTokens, (uint)fileTokens.Length, &fetched).ThrowOnFailure();
+                    }
 
                     for (uint i = 0; i < fetched; i++)
                     {
                         // Retrieve file properties.
-                        _assemblyImport.GetFileProps(fileTokens[i],
-                            fileNameBuf, (uint)fileNameBuf.Length, out uint fileNameLength,
-                            out _, out _, out _);
+                        uint fileNameLength;
+                        void* hashValue;
+                        uint hashSize;
+                        uint fileFlags;
+                        fixed (char* pFileNameBuf = fileNameBuf)
+                        {
+                            asmImport.Pointer->GetFileProps(
+                                fileTokens[i],
+                                pFileNameBuf,
+                                (uint)fileNameBuf.Length,
+                                &fileNameLength,
+                                &hashValue,
+                                &hashSize,
+                                &fileFlags).ThrowOnFailure();
+                        }
 
                         // Add file to file list.
                         string file = new string(fileNameBuf, 0, (int)(fileNameLength - 1));
@@ -831,7 +913,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (fileEnum != IntPtr.Zero)
                 {
-                    _assemblyImport.CloseEnum(fileEnum);
+                    asmImport.Pointer->CloseEnum(fileEnum);
                 }
             }
 
@@ -844,41 +926,17 @@ namespace Microsoft.Build.Tasks
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
-        /// Allocate assembly metadata structure buffer.
-        /// </summary>
-        /// <returns>Pointer to structure</returns>
-        private static IntPtr AllocAsmMeta()
-        {
-            ASSEMBLYMETADATA asmMeta;
-            asmMeta.usMajorVersion = asmMeta.usMinorVersion = asmMeta.usBuildNumber = asmMeta.usRevisionNumber = 0;
-            asmMeta.cOses = asmMeta.cProcessors = 0;
-            asmMeta.rOses = asmMeta.rpProcessors = IntPtr.Zero;
-            // Allocate buffer for locale.
-            asmMeta.rpLocale = Marshal.AllocCoTaskMem(GENMAN_LOCALE_BUF_SIZE * 2);
-            asmMeta.cchLocale = GENMAN_LOCALE_BUF_SIZE;
-            // Convert to unmanaged structure.
-            int size = Marshal.SizeOf<ASSEMBLYMETADATA>();
-            IntPtr asmMetaPtr = Marshal.AllocCoTaskMem(size);
-            Marshal.StructureToPtr(asmMeta, asmMetaPtr, false);
-
-            return asmMetaPtr;
-        }
-
-        /// <summary>
         /// Construct assembly name.
         /// </summary>
-        /// <param name="asmMetaPtr">Assembly metadata structure</param>
-        /// <param name="asmNameBuf">Buffer containing the name</param>
-        /// <param name="asmNameLength">Length of that buffer</param>
-        /// <param name="pubKeyPtr">Pointer to public key</param>
+        /// <param name="asmMeta">Assembly metadata populated by GetAssemblyRefProps.</param>
+        /// <param name="asmNameBuf">Buffer containing the name.</param>
+        /// <param name="asmNameLength">Length of that buffer.</param>
+        /// <param name="pubKeyPtr">Pointer to public key.</param>
         /// <param name="pubKeyBytes">Count of bytes in public key.</param>
-        /// <param name="flags">Extra flags</param>
+        /// <param name="flags">Extra flags.</param>
         /// <returns>The assembly name.</returns>
-        private static AssemblyNameExtension ConstructAssemblyName(IntPtr asmMetaPtr, char[] asmNameBuf, UInt32 asmNameLength, IntPtr pubKeyPtr, UInt32 pubKeyBytes, UInt32 flags)
+        private static AssemblyNameExtension ConstructAssemblyName(in ASSEMBLYMETADATA asmMeta, char[] asmNameBuf, uint asmNameLength, IntPtr pubKeyPtr, uint pubKeyBytes, CorAssemblyFlags flags)
         {
-            // Marshal the assembly metadata back to a managed type.
-            ASSEMBLYMETADATA asmMeta = (ASSEMBLYMETADATA)Marshal.PtrToStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
-
             // Construct the assembly name. (Note asmNameLength should/must be > 0.)
             var assemblyName = new AssemblyName
             {
@@ -890,21 +948,16 @@ namespace Microsoft.Build.Tasks
                     asmMeta.usRevisionNumber)
             };
 
-            // Set culture info.
-            string locale = Marshal.PtrToStringUni(asmMeta.rpLocale);
-            if (locale.Length > 0)
-            {
-                assemblyName.CultureInfo = CultureInfo.CreateSpecificCulture(locale);
-            }
-            else
-            {
-                assemblyName.CultureInfo = CultureInfo.CreateSpecificCulture(String.Empty);
-            }
+            // Set culture info. szLocale is null-terminated; new string(char*) reads to the terminator.
+            string locale = asmMeta.szLocale.Value is null ? string.Empty : new string(asmMeta.szLocale);
+            assemblyName.CultureInfo = locale.Length > 0
+                ? CultureInfo.CreateSpecificCulture(locale)
+                : CultureInfo.CreateSpecificCulture(string.Empty);
 
             // Set public key or PKT.
             var publicKey = new byte[pubKeyBytes];
             Marshal.Copy(pubKeyPtr, publicKey, 0, (int)pubKeyBytes);
-            if ((flags & (uint)CorAssemblyFlags.afPublicKey) != 0)
+            if ((flags & CorAssemblyFlags.afPublicKey) != 0)
             {
                 assemblyName.SetPublicKey(publicKey);
             }
@@ -913,39 +966,8 @@ namespace Microsoft.Build.Tasks
                 assemblyName.SetPublicKeyToken(publicKey);
             }
 
-            assemblyName.Flags = (AssemblyNameFlags)flags;
+            assemblyName.Flags = (AssemblyNameFlags)(uint)flags;
             return new AssemblyNameExtension(assemblyName);
-        }
-
-        /// <summary>
-        /// Free the assembly metadata structure.
-        /// </summary>
-        /// <param name="asmMetaPtr">The pointer.</param>
-        private static void FreeAsmMeta(IntPtr asmMetaPtr)
-        {
-            if (asmMetaPtr != IntPtr.Zero)
-            {
-                // Marshal the assembly metadata back to a managed type.
-                var asmMeta = (ASSEMBLYMETADATA)Marshal.PtrToStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
-                FreeAsmMeta(asmMetaPtr, ref asmMeta);
-            }
-        }
-
-        /// <summary>
-        /// Free the assembly metadata structure.
-        /// </summary>
-        /// <param name="asmMetaPtr">The pointer.</param>
-        /// <param name="asmMeta">Marshaled assembly metadata to the managed type.</param>
-        private static void FreeAsmMeta(IntPtr asmMetaPtr, ref ASSEMBLYMETADATA asmMeta)
-        {
-            if (asmMetaPtr != IntPtr.Zero)
-            {
-                // Free unmanaged memory.
-                Marshal.FreeCoTaskMem(asmMeta.rpLocale);
-                asmMeta.rpLocale = IntPtr.Zero;
-                Marshal.DestroyStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
-                Marshal.FreeCoTaskMem(asmMetaPtr);
-            }
         }
 #endif
     }

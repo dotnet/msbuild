@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -41,9 +41,9 @@ namespace Microsoft.Build.UnitTests
             to.GetMetadata("Cat").ShouldBe("");
 
             // manipulate the item-spec a bit
-            to.GetMetadata(FileUtilities.ItemSpecModifiers.Filename).ShouldBe("Monkey");
-            to.GetMetadata(FileUtilities.ItemSpecModifiers.Extension).ShouldBe(".txt");
-            to.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).ShouldBe(string.Empty);
+            to.GetMetadata(ItemSpecModifiers.Filename).ShouldBe("Monkey");
+            to.GetMetadata(ItemSpecModifiers.Extension).ShouldBe(".txt");
+            to.GetMetadata(ItemSpecModifiers.RelativeDir).ShouldBe(string.Empty);
         }
 
         // Make sure metadata can be cloned from an existing ITaskItem
@@ -88,14 +88,14 @@ namespace Microsoft.Build.UnitTests
             TaskItem taskItem = new TaskItem("x");
 
             // Without custom metadata, should return the built in metadata
-            taskItem.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(FileUtilities.ItemSpecModifiers.All);
-            taskItem.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length);
+            taskItem.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(ItemSpecModifiers.All);
+            taskItem.MetadataCount.ShouldBe(ItemSpecModifiers.All.Length);
 
             // Now add one
             taskItem.SetMetadata("m", "m1");
 
-            taskItem.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(FileUtilities.ItemSpecModifiers.All.Concat(new[] { "m" }));
-            taskItem.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
+            taskItem.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(ItemSpecModifiers.All.Concat(new[] { "m" }));
+            taskItem.MetadataCount.ShouldBe(ItemSpecModifiers.All.Length + 1);
         }
 
         [Fact]
@@ -113,15 +113,15 @@ namespace Microsoft.Build.UnitTests
         public void ConstructFromDictionary()
         {
             Hashtable h = new Hashtable();
-            h[FileUtilities.ItemSpecModifiers.Filename] = "foo";
-            h[FileUtilities.ItemSpecModifiers.Extension] = "bar";
+            h[ItemSpecModifiers.Filename] = "foo";
+            h[ItemSpecModifiers.Extension] = "bar";
             h["custom"] = "hello";
 
             TaskItem t = new TaskItem("bamboo.baz", h);
 
             // item-spec modifiers were not overridden by dictionary passed to constructor
-            t.GetMetadata(FileUtilities.ItemSpecModifiers.Filename).ShouldBe("bamboo");
-            t.GetMetadata(FileUtilities.ItemSpecModifiers.Extension).ShouldBe(".baz");
+            t.GetMetadata(ItemSpecModifiers.Filename).ShouldBe("bamboo");
+            t.GetMetadata(ItemSpecModifiers.Extension).ShouldBe(".baz");
             t.GetMetadata("CUSTOM").ShouldBe("hello");
         }
 
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests
 
                 try
                 {
-                    t.SetMetadata(FileUtilities.ItemSpecModifiers.FullPath, "bazbaz");
+                    t.SetMetadata(ItemSpecModifiers.FullPath, "bazbaz");
                 }
                 catch (Exception e)
                 {
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
 
                 try
                 {
-                    t.RemoveMetadata(FileUtilities.ItemSpecModifiers.RootDir);
+                    t.RemoveMetadata(ItemSpecModifiers.RootDir);
                 }
                 catch (Exception e)
                 {
@@ -169,11 +169,11 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem t = new TaskItem("foo");
 
-            t.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length);
+            t.MetadataCount.ShouldBe(ItemSpecModifiers.All.Length);
 
             t.SetMetadata("grog", "RUM");
 
-            t.MetadataCount.ShouldBe(FileUtilities.ItemSpecModifiers.All.Length + 1);
+            t.MetadataCount.ShouldBe(ItemSpecModifiers.All.Length + 1);
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath).ShouldBe(
+            from.GetMetadata(ItemSpecModifiers.FullPath).ShouldBe(
                 Path.Combine(
                     Directory.GetCurrentDirectory(),
                     "Monkey.txt"));
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.RootDir).ShouldBe(Path.GetPathRoot(from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath)));
+            from.GetMetadata(ItemSpecModifiers.RootDir).ShouldBe(Path.GetPathRoot(from.GetMetadata(ItemSpecModifiers.FullPath)));
         }
 
         [Fact]
@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.Filename).ShouldBe("Monkey");
+            from.GetMetadata(ItemSpecModifiers.Filename).ShouldBe("Monkey");
         }
 
         [Fact]
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.Extension).ShouldBe(".txt");
+            from.GetMetadata(ItemSpecModifiers.Extension).ShouldBe(".txt");
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).Length.ShouldBe(0);
+            from.GetMetadata(ItemSpecModifiers.RelativeDir).Length.ShouldBe(0);
         }
 
         [Fact]
@@ -224,7 +224,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = NativeMethodsShared.IsWindows ? @"c:\subdir\Monkey.txt" : "/subdir/Monkey.txt";
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory).ShouldBe(NativeMethodsShared.IsWindows ? @"subdir\" : "subdir/");
+            from.GetMetadata(ItemSpecModifiers.Directory).ShouldBe(NativeMethodsShared.IsWindows ? @"subdir\" : "subdir/");
         }
 
         [WindowsOnlyFact("UNC is not implemented except under Windows.")]
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = @"\\local\share\subdir\Monkey.txt";
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory).ShouldBe(@"subdir\");
+            from.GetMetadata(ItemSpecModifiers.Directory).ShouldBe(@"subdir\");
         }
 
         [Fact]
@@ -241,7 +241,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
 
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir).Length.ShouldBe(0);
+            from.GetMetadata(ItemSpecModifiers.RecursiveDir).Length.ShouldBe(0);
         }
 
         [Fact]
@@ -249,7 +249,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.Identity).ShouldBe("Monkey.txt");
+            from.GetMetadata(ItemSpecModifiers.Identity).ShouldBe("Monkey.txt");
         }
 
         [Fact]
@@ -258,19 +258,19 @@ namespace Microsoft.Build.UnitTests
             TaskItem from = new TaskItem();
             from.ItemSpec = FileUtilities.GetTemporaryFile();
 
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length.ShouldBeGreaterThan(0);
+            from.GetMetadata(ItemSpecModifiers.ModifiedTime).Length.ShouldBeGreaterThan(0);
 
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length.ShouldBeGreaterThan(0);
+            from.GetMetadata(ItemSpecModifiers.CreatedTime).Length.ShouldBeGreaterThan(0);
 
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length.ShouldBeGreaterThan(0);
+            from.GetMetadata(ItemSpecModifiers.AccessedTime).Length.ShouldBeGreaterThan(0);
 
             File.Delete(from.ItemSpec);
 
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.ModifiedTime).Length.ShouldBe(0);
+            from.GetMetadata(ItemSpecModifiers.ModifiedTime).Length.ShouldBe(0);
 
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.CreatedTime).Length.ShouldBe(0);
+            from.GetMetadata(ItemSpecModifiers.CreatedTime).Length.ShouldBe(0);
 
-            from.GetMetadata(FileUtilities.ItemSpecModifiers.AccessedTime).Length.ShouldBe(0);
+            from.GetMetadata(ItemSpecModifiers.AccessedTime).Length.ShouldBe(0);
         }
 
         /// <summary>
@@ -427,7 +427,7 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             public void Run(string[] includes, IDictionary<string, string> metadataToAdd)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(includes);
+                ArgumentNullException.ThrowIfNull(includes);
 
                 CreatedTaskItems = new TaskItem[includes.Length];
 
@@ -438,5 +438,110 @@ namespace Microsoft.Build.UnitTests
             }
         }
 #endif
+    }
+
+    /// <summary>
+    /// Tests for the generic <see cref="TaskItem{T}"/> struct.
+    /// </summary>
+    public class TaskItemOfTTests
+    {
+        [Fact]
+        public void SetMetadata_DoesNotThrow()
+        {
+            var item = new TaskItem<int>(42);
+            // Should not throw - backing is a mutable TaskItem, not TaskItemData
+            item.SetMetadata("key", "value");
+            item.GetMetadata("key").ShouldBe("value");
+        }
+
+        [Fact]
+        public void RemoveMetadata_DoesNotThrow()
+        {
+            var item = new TaskItem<int>(42);
+            item.SetMetadata("key", "value");
+            item.RemoveMetadata("key");
+            item.GetMetadata("key").ShouldBeNullOrEmpty();
+        }
+
+        [Fact]
+        public void CopyMetadataTo_DoesNotThrow()
+        {
+            var source = new TaskItem<int>(42);
+            source.SetMetadata("key", "value");
+            var dest = new TaskItem("dest");
+            source.CopyMetadataTo(dest);
+            dest.GetMetadata("key").ShouldBe("value");
+        }
+
+        [Fact]
+        public void FromITaskItem_PathLikeType_UsesFullPathMetadata()
+        {
+            // FullPath is a reserved metadata computed by the MSBuild item system as the absolute path.
+            // TaskItem<FileInfo> should use FullPath so relative ItemSpecs resolve to absolute paths.
+            var backingItem = new TaskItem("relative\\path.txt");
+            string expectedAbsolutePath = backingItem.GetMetadata("FullPath");
+            expectedAbsolutePath.ShouldNotBeNullOrEmpty();
+
+            var item = new TaskItem<System.IO.FileInfo>(backingItem);
+            item.Value.FullName.ShouldBe(expectedAbsolutePath);
+        }
+
+        [Fact]
+        public void FromITaskItem_InvalidPath_ThrowsArgumentException()
+        {
+            var backingItem = new TaskItem("bad\0path");
+
+            Should.Throw<ArgumentException>(() => new TaskItem<AbsolutePath>(backingItem));
+        }
+
+        [Fact]
+        public void FromITaskItem_NonPathType_UsesItemSpec()
+        {
+            var backingItem = new TaskItem("42");
+            var item = new TaskItem<int>(backingItem);
+            item.Value.ShouldBe(42);
+        }
+
+        [Fact]
+        public void Equals_SameValue_ReturnsTrue()
+        {
+            var a = new TaskItem<int>(42);
+            var b = new TaskItem<int>(42);
+            a.Equals(b).ShouldBeTrue();
+            (a == b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Equals_DifferentValue_ReturnsFalse()
+        {
+            var a = new TaskItem<int>(1);
+            var b = new TaskItem<int>(2);
+            a.Equals(b).ShouldBeFalse();
+            (a != b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Equals_NullStringValue_HandledCorrectly()
+        {
+            // EqualityComparer<string>.Default handles null without boxing or NullReferenceException
+            var a = new TaskItem<string>((string)null!);
+            var b = new TaskItem<string>((string)null!);
+            a.Equals(b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void GetHashCode_NullValue_ReturnsZero()
+        {
+            var item = new TaskItem<string>((string)null!);
+            item.GetHashCode().ShouldBe(0);
+        }
+
+        [Fact]
+        public void GetHashCode_ConsistentWithEquality()
+        {
+            var a = new TaskItem<int>(42);
+            var b = new TaskItem<int>(42);
+            a.GetHashCode().ShouldBe(b.GetHashCode());
+        }
     }
 }
