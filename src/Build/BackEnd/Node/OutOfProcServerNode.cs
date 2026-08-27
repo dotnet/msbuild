@@ -749,12 +749,9 @@ namespace Microsoft.Build.Experimental
 
             private void TimerCallback(object? state)
             {
-                lock (_lock)
+                if (!_disposed && _bufferWriter.GetStringBuilder().Length > 0)
                 {
-                    if (!_disposed && _bufferWriter.GetStringBuilder().Length > 0)
-                    {
-                        FlushInternal();
-                    }
+                    Flush();
                 }
             }
 
