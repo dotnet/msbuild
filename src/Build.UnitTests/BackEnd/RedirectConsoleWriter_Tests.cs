@@ -28,16 +28,26 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void WriteLineAfterDisposeDoesNotThrowOrInvokeCallback()
+        public void WriteAfterDispose_IsDiscardedWithoutThrowingOrInvokingCallback()
         {
-            bool callbackInvoked = false;
-            OutOfProcServerNode.RedirectConsoleWriter writer = new(_ => callbackInvoked = true);
+            StringBuilder output = new();
+            int callbackCount = 0;
+            OutOfProcServerNode.RedirectConsoleWriter writer = new(text =>
+            {
+                callbackCount++;
+                output.Append(text);
+            });
 
+            writer.Write("before dispose");
             writer.Dispose();
-            callbackInvoked = false;
+            output.ToString().ShouldBe("before dispose");
+            int callbackCountAfterDispose = callbackCount;
 
             Should.NotThrow(() => writer.WriteLine("after dispose"));
-            callbackInvoked.ShouldBeFalse();
+            writer.Flush();
+
+            output.ToString().ShouldBe("before dispose");
+            callbackCount.ShouldBe(callbackCountAfterDispose);
         }
     }
 }
