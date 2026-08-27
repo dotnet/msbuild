@@ -111,7 +111,7 @@ namespace Microsoft.Build.Execution
             get { return _executeTargetsLocation; }
         }
 
-        internal override ProjectTargetInstanceChild DeepClone() =>
+        internal ProjectOnErrorInstance DeepClone() =>
             new ProjectOnErrorInstance(
                 _executeTargets,
                 _condition,

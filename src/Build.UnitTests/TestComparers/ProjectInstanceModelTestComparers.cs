@@ -25,7 +25,14 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             {
                 Assert.Equal(x.TranslateEntireState, y.TranslateEntireState);
                 Assert.Equal(x.Properties, y.Properties, EqualityComparer<ProjectPropertyInstance>.Default);
-                Assert.Equal(x.TestEnvironmentalProperties, y.TestEnvironmentalProperties, EqualityComparer<ProjectPropertyInstance>.Default);
+                Helpers.AssertDictionariesEqual(
+                    x.TestEnvironmentalProperties.ToDictionary(property => property.Name),
+                    y.TestEnvironmentalProperties.ToDictionary(property => property.Name),
+                    (xPair, yPair) =>
+                    {
+                        Assert.Equal(xPair.Key, yPair.Key, StringComparer.OrdinalIgnoreCase);
+                        Assert.Equal(xPair.Value, yPair.Value, EqualityComparer<ProjectPropertyInstance>.Default);
+                    });
                 Helpers.AssertDictionariesEqual(x.GlobalProperties, y.GlobalProperties);
                 Assert.Equal(((EvaluatorData)x).GlobalPropertiesToTreatAsLocal, ((EvaluatorData)y).GlobalPropertiesToTreatAsLocal);
 

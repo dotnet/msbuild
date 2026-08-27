@@ -132,7 +132,7 @@ namespace Microsoft.Build.Execution
             get { return _taskParameterLocation; }
         }
 
-        internal override ProjectTaskInstanceChild DeepClone() =>
+        internal ProjectTaskOutputPropertyInstance DeepClone() =>
             new ProjectTaskOutputPropertyInstance(
                 _propertyName,
                 _taskParameter,

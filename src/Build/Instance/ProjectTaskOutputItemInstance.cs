@@ -132,7 +132,7 @@ namespace Microsoft.Build.Execution
             get { return _itemTypeLocation; }
         }
 
-        internal override ProjectTaskInstanceChild DeepClone() =>
+        internal ProjectTaskOutputItemInstance DeepClone() =>
             new ProjectTaskOutputItemInstance(
                 _itemType,
                 _taskParameter,

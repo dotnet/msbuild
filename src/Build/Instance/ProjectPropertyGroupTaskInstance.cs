@@ -122,7 +122,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Deep clone
         /// </summary>
-        internal override ProjectTargetInstanceChild DeepClone()
+        internal ProjectPropertyGroupTaskInstance DeepClone()
         {
             return new ProjectPropertyGroupTaskInstance(this);
         }

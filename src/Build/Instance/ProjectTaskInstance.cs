@@ -354,7 +354,7 @@ namespace Microsoft.Build.Execution
             _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
         }
 
-        internal override ProjectTargetInstanceChild DeepClone()
+        internal ProjectTaskInstance DeepClone()
         {
             var parameters =
                 new CopyOnWriteDictionary<(string, ElementLocation)>(StringComparer.OrdinalIgnoreCase);
@@ -366,7 +366,7 @@ namespace Microsoft.Build.Execution
             var outputs = new List<ProjectTaskInstanceChild>(_outputs.Count);
             foreach (ProjectTaskInstanceChild output in _outputs)
             {
-                outputs.Add(output.DeepClone());
+                outputs.Add(ProjectTaskInstanceChildCloner.DeepClone(output));
             }
 
             return new ProjectTaskInstance(

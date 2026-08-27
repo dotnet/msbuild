@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
 
@@ -39,13 +40,25 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public abstract ElementLocation ConditionLocation { get; }
 
-        internal abstract ProjectTargetInstanceChild DeepClone();
-
         void ITranslatable.Translate(ITranslator translator)
             // all subclasses should be translateable
             => Assumed.Unreachable();
 
         internal static ProjectTargetInstanceChild FactoryForDeserialization(ITranslator translator)
             => translator.FactoryForDeserializingTypeWithName<ProjectTargetInstanceChild>();
+    }
+
+    internal static class ProjectTargetInstanceChildCloner
+    {
+        internal static ProjectTargetInstanceChild DeepClone(ProjectTargetInstanceChild child) =>
+            child switch
+            {
+                ProjectTaskInstance task => task.DeepClone(),
+                ProjectPropertyGroupTaskInstance propertyGroup => propertyGroup.DeepClone(),
+                ProjectItemGroupTaskInstance itemGroup => itemGroup.DeepClone(),
+                ProjectOnErrorInstance onError => onError.DeepClone(),
+                _ => throw new InvalidOperationException(
+                    $"Unsupported project target child type '{child.GetType().FullName}'."),
+            };
     }
 }

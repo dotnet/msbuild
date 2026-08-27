@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
 
@@ -44,13 +45,23 @@ namespace Microsoft.Build.Execution
             get;
         }
 
-        internal abstract ProjectTaskInstanceChild DeepClone();
-
         void ITranslatable.Translate(ITranslator translator)
             // all subclasses should be translateable
             => Assumed.Unreachable();
 
         internal static ProjectTaskInstanceChild FactoryForDeserialization(ITranslator translator)
             => translator.FactoryForDeserializingTypeWithName<ProjectTaskInstanceChild>();
+    }
+
+    internal static class ProjectTaskInstanceChildCloner
+    {
+        internal static ProjectTaskInstanceChild DeepClone(ProjectTaskInstanceChild child) =>
+            child switch
+            {
+                ProjectTaskOutputItemInstance outputItem => outputItem.DeepClone(),
+                ProjectTaskOutputPropertyInstance outputProperty => outputProperty.DeepClone(),
+                _ => throw new InvalidOperationException(
+                    $"Unsupported project task child type '{child.GetType().FullName}'."),
+            };
     }
 }

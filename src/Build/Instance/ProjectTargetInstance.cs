@@ -551,13 +551,14 @@ namespace Microsoft.Build.Execution
             var children = new List<ProjectTargetInstanceChild>(_children.Count);
             foreach (ProjectTargetInstanceChild child in _children)
             {
-                children.Add(child.DeepClone());
+                children.Add(ProjectTargetInstanceChildCloner.DeepClone(child));
             }
 
             var onErrorChildren = new List<ProjectOnErrorInstance>(_onErrorChildren.Count);
             foreach (ProjectOnErrorInstance child in _onErrorChildren)
             {
-                onErrorChildren.Add((ProjectOnErrorInstance)child.DeepClone());
+                onErrorChildren.Add(
+                    (ProjectOnErrorInstance)ProjectTargetInstanceChildCloner.DeepClone(child));
             }
 
             return new ProjectTargetInstance(
