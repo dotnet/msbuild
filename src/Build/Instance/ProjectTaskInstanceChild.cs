@@ -44,6 +44,8 @@ namespace Microsoft.Build.Execution
             get;
         }
 
+        internal abstract ProjectTaskInstanceChild DeepClone();
+
         void ITranslatable.Translate(ITranslator translator)
             // all subclasses should be translateable
             => Assumed.Unreachable();

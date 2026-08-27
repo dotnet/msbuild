@@ -132,6 +132,16 @@ namespace Microsoft.Build.Execution
             get { return _taskParameterLocation; }
         }
 
+        internal override ProjectTaskInstanceChild DeepClone() =>
+            new ProjectTaskOutputPropertyInstance(
+                _propertyName,
+                _taskParameter,
+                _condition,
+                _location,
+                _propertyNameLocation,
+                _taskParameterLocation,
+                _conditionLocation);
+
         void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)

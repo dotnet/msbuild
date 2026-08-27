@@ -152,6 +152,16 @@ namespace Microsoft.Build.Execution
             _taskItem = that._taskItem.DeepClone(newProject.IsImmutable);
         }
 
+        private ProjectItemInstance(
+            ProjectItemInstance that,
+            ProjectInstance newProject,
+            IReadOnlyDictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance> itemDefinitionClones)
+        {
+            _project = newProject;
+            _itemType = that._itemType;
+            _taskItem = that._taskItem.DeepClone(newProject.IsImmutable, itemDefinitionClones);
+        }
+
         /// <summary>
         /// Constructor for serialization
         /// </summary>
@@ -698,6 +708,13 @@ namespace Microsoft.Build.Execution
             return new ProjectItemInstance(this, newProject);
         }
 
+        internal ProjectItemInstance DeepClone(
+            ProjectInstance newProject,
+            IReadOnlyDictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance> itemDefinitionClones)
+        {
+            return new ProjectItemInstance(this, newProject, itemDefinitionClones);
+        }
+
         /// <summary>
         /// Generates a ProjectItemElement representing this instance.
         /// </summary>
@@ -895,6 +912,38 @@ namespace Microsoft.Build.Execution
                 source.CopyMetadataTo(this, addOriginalItemSpec);
                 _cachedModifiers = source._cachedModifiers;
                 _definingFileEscaped = source._definingFileEscaped;
+            }
+
+            private TaskItem(
+                TaskItem source,
+                bool isImmutable,
+                IReadOnlyDictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance> itemDefinitionClones)
+            {
+                _includeEscaped = source._includeEscaped;
+                _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
+                _directMetadata = source._directMetadata;
+                _cachedModifiers = source._cachedModifiers;
+                _definingFileEscaped = source._definingFileEscaped;
+                _projectDirectory = source._projectDirectory;
+                _isImmutable = isImmutable;
+
+                if (source._itemDefinitions is not null)
+                {
+                    _itemDefinitions =
+                        new List<ProjectItemDefinitionInstance>(source._itemDefinitions.Count);
+                    foreach (ProjectItemDefinitionInstance itemDefinition in source._itemDefinitions)
+                    {
+                        if (!itemDefinitionClones.TryGetValue(
+                                itemDefinition,
+                                out ProjectItemDefinitionInstance clone))
+                        {
+                            throw new InvalidOperationException(
+                                $"Item definition '{itemDefinition.ItemType}' is not owned by the project instance being cloned.");
+                        }
+
+                        _itemDefinitions.Add(clone);
+                    }
+                }
             }
 
             /// <summary>
@@ -2084,6 +2133,11 @@ namespace Microsoft.Build.Execution
 
                 return clone;
             }
+
+            internal TaskItem DeepClone(
+                bool isImmutable,
+                IReadOnlyDictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance> itemDefinitionClones) =>
+                new(this, isImmutable, itemDefinitionClones);
 
             /// <summary>
             /// Helper to get the value of a built-in metadatum with

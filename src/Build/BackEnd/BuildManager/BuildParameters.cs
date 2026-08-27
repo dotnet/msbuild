@@ -314,6 +314,7 @@ namespace Microsoft.Build.Execution
             DetailedSummary = other.DetailedSummary;
             _shutdownInProcNodeOnBuildFinish = other._shutdownInProcNodeOnBuildFinish;
             ProjectRootElementCache = other.ProjectRootElementCache;
+            ProjectInstanceSnapshotCache = other.ProjectInstanceSnapshotCache;
             ResetCaches = other.ResetCaches;
             LegacyThreadingSemantics = other.LegacyThreadingSemantics;
             SaveOperatingEnvironment = other.SaveOperatingEnvironment;
@@ -811,6 +812,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectRootElementCacheBase ProjectRootElementCache { get; set; }
 
+        /// <summary>
+        /// The main BuildManager-owned project instance snapshot cache, when enabled.
+        /// This reference is intentionally available only to in-process nodes.
+        /// </summary>
+        internal ProjectInstanceSnapshotCache ProjectInstanceSnapshotCache { get; set; }
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Information for configuring child AppDomains.
@@ -1015,6 +1022,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
 
             // ProjectRootElementCache is not transmitted.
+            // ProjectInstanceSnapshotCache is not transmitted.
             // ResetCaches is not transmitted.
             // LegacyThreadingSemantics is not transmitted.
             // InputResultsCacheFiles and OutputResultsCacheFile are not transmitted, as they are only used by the BuildManager

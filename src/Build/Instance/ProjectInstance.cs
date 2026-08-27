@@ -203,7 +203,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// The property and item filter used when creating this instance, or null if this is not a filtered copy
-        /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
+        /// of another ProjectInstance.
         /// </summary>
         private RequestedProjectState _requestedProjectStateFilter;
 
@@ -747,7 +747,12 @@ namespace Microsoft.Build.Execution
         /// Deep clone of this object.
         /// Useful for compiling a single file; or for keeping resolved assembly references between builds.
         /// </summary>
-        private ProjectInstance(ProjectInstance that, bool isImmutable, RequestedProjectState filter = null)
+        private ProjectInstance(
+            ProjectInstance that,
+            bool isImmutable,
+            RequestedProjectState filter = null,
+            bool cloneAllState = false,
+            bool cloneToolset = true)
         {
             Assumed.True(filter == null || isImmutable, "The result of a filtered ProjectInstance clone must be immutable.");
 
@@ -756,6 +761,7 @@ namespace Microsoft.Build.Execution
             _hostServices = that._hostServices;
             _isImmutable = isImmutable;
             _evaluationId = that.EvaluationId;
+            _evaluationStage = that._evaluationStage;
             _translateEntireState = that._translateEntireState;
             _requestedProjectStateFilter = filter?.DeepClone();
 
@@ -768,11 +774,60 @@ namespace Microsoft.Build.Execution
                     _properties.Set(property.DeepClone(_isImmutable));
                 }
 
+                Dictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance>
+                    itemDefinitionClones = null;
+                if (cloneAllState)
+                {
+                    itemDefinitionClones =
+                        new Dictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance>();
+                    var itemDefinitions =
+                        new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(
+                            that._itemDefinitions is null
+                                ? 0
+                                : ((ICollection<ProjectItemDefinitionInstance>)that._itemDefinitions).Count,
+                            MSBuildNameIgnoreCaseComparer.Default);
+                    if (that._itemDefinitions is not null)
+                    {
+                        foreach (ProjectItemDefinitionInstance itemDefinition in
+                                 (IEnumerable<ProjectItemDefinitionInstance>)that._itemDefinitions)
+                        {
+                            ProjectItemDefinitionInstance clone =
+                                itemDefinition.DeepClone();
+                            itemDefinitionClones.Add(itemDefinition, clone);
+                            itemDefinitions.Add(clone);
+                        }
+                    }
+
+                    if (isImmutable)
+                    {
+                        itemDefinitions.MakeReadOnly();
+                    }
+
+                    _itemDefinitions = itemDefinitions;
+                }
+
                 _items = new ItemDictionary<ProjectItemInstance>(that._items.Count);
 
                 foreach (ProjectItemInstance item in that.Items)
                 {
-                    _items.Add(item.DeepClone(this));
+                    _items.Add(
+                        cloneAllState
+                            ? item.DeepClone(this, itemDefinitionClones)
+                            : item.DeepClone(this));
+                }
+
+                if (cloneAllState && that._itemsByEvaluatedInclude is not null)
+                {
+                    var itemsByEvaluatedInclude =
+                        new MultiDictionary<string, ProjectItemInstance>(
+                            _items.Count,
+                            StringComparer.OrdinalIgnoreCase);
+                    foreach (ProjectItemInstance item in _items)
+                    {
+                        itemsByEvaluatedInclude.Add(item.EvaluatedInclude, item);
+                    }
+
+                    _itemsByEvaluatedInclude = itemsByEvaluatedInclude;
                 }
 
                 _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(that._globalProperties.Count);
@@ -796,33 +851,105 @@ namespace Microsoft.Build.Execution
 
                     foreach (ProjectPropertyInstance sdkResolvedEnvironmentVariable in thatEnvProps)
                     {
-                        _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentVariable.DeepClone(_isImmutable));
+                        _sdkResolvedEnvironmentVariableProperties.Set(
+                            cloneAllState &&
+                            sdkResolvedEnvironmentVariable is
+                                ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance
+                                ? new ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance(
+                                    sdkResolvedEnvironmentVariable.Name,
+                                    ((IProperty)sdkResolvedEnvironmentVariable)
+                                    .EvaluatedValueEscaped)
+                                : sdkResolvedEnvironmentVariable.DeepClone(_isImmutable));
                     }
                 }
 
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
                 this.InitialTargets = new List<string>(that.InitialTargets);
+                var thatEvaluatorData =
+                    (IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
+                        ProjectItemDefinitionInstance>)that;
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                    ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(
-                    ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                        ProjectItemDefinitionInstance>)that).BeforeTargets, StringComparer.OrdinalIgnoreCase);
+                    ProjectItemDefinitionInstance>)this).BeforeTargets =
+                    cloneAllState
+                        ? CloneTargetSpecifications(thatEvaluatorData.BeforeTargets)
+                        : CreateCloneDictionary(
+                            thatEvaluatorData.BeforeTargets,
+                            StringComparer.OrdinalIgnoreCase);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                    ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(
-                    ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
-                        ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
-                // These are immutable (or logically immutable after creation) so we don't need to clone them:
-                this.TaskRegistry = that.TaskRegistry;
-                this.Toolset = that.Toolset;
+                    ProjectItemDefinitionInstance>)this).AfterTargets =
+                    cloneAllState
+                        ? CloneTargetSpecifications(thatEvaluatorData.AfterTargets)
+                        : CreateCloneDictionary(
+                            thatEvaluatorData.AfterTargets,
+                            StringComparer.OrdinalIgnoreCase);
+                this.Toolset =
+                    cloneAllState
+                        ? cloneToolset
+                            ? that.Toolset?.DeepClone()
+                            : null
+                        : that.Toolset;
+                this.TaskRegistry =
+                    cloneAllState
+                        ? that.TaskRegistry?.CloneForBuild(
+                            Toolset,
+                            that.ProjectRootElementCache)
+                        : that.TaskRegistry;
                 this.SubToolsetVersion = that.SubToolsetVersion;
-                _targets = that._targets;
-                _itemDefinitions = that._itemDefinitions;
+                if (cloneAllState)
+                {
+                    _actualTargets =
+                        new RetrievableEntryHashSet<ProjectTargetInstance>(
+                            that._targets?.Count ?? 0,
+                            StringComparer.OrdinalIgnoreCase);
+                    if (that._targets is not null)
+                    {
+                        foreach (ProjectTargetInstance target in that._targets.Values)
+                        {
+                            _actualTargets.Add(target.DeepClone());
+                        }
+                    }
+
+                    if (isImmutable)
+                    {
+                        _actualTargets.MakeReadOnly();
+                    }
+
+                    _targets =
+                        new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(
+                            _actualTargets);
+                }
+                else
+                {
+                    _targets = that._targets;
+                    _itemDefinitions = that._itemDefinitions;
+                }
+
                 _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
-                _importPaths = that._importPaths;
+                if (cloneAllState)
+                {
+                    _usingDifferentToolsVersionFromProjectFile =
+                        that._usingDifferentToolsVersionFromProjectFile;
+                    _originalProjectToolsVersion = that._originalProjectToolsVersion;
+                    _globalPropertiesToTreatAsLocal =
+                        that._globalPropertiesToTreatAsLocal is null
+                            ? null
+                            : new HashSet<string>(
+                                that._globalPropertiesToTreatAsLocal,
+                                MSBuildNameIgnoreCaseComparer.Default);
+                }
+                _importPaths =
+                    cloneAllState
+                        ? new List<string>(that._importPaths)
+                        : that._importPaths;
                 ImportPaths = new ObjectModel.ReadOnlyCollection<string>(_importPaths);
-                _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
+                _importPathsIncludingDuplicates =
+                    cloneAllState
+                        ? new List<string>(that._importPathsIncludingDuplicates)
+                        : that._importPathsIncludingDuplicates;
                 ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
 
-                this.EvaluatedItemElements = that.EvaluatedItemElements;
+                this.EvaluatedItemElements =
+                    cloneAllState ? [] : that.EvaluatedItemElements;
 
                 this.ProjectRootElementCache = that.ProjectRootElementCache;
             }
@@ -1357,7 +1484,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// The property and item filter used when creating this instance, or null if this is not a filtered copy
-        /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
+        /// of another ProjectInstance.
         /// </summary>
         internal RequestedProjectState RequestedProjectStateFilter => _requestedProjectStateFilter;
 
@@ -2227,6 +2354,15 @@ namespace Microsoft.Build.Execution
             return new ProjectInstance(this, isImmutable);
         }
 
+        internal ProjectInstance DeepCopyAllState(
+            bool isImmutable,
+            bool cloneToolset = true) =>
+            new(
+                this,
+                isImmutable,
+                cloneAllState: true,
+                cloneToolset: cloneToolset);
+
         /// <summary>
         /// Build default target/s with loggers of the project collection.
         /// Returns true on success, false on failure.
@@ -2507,6 +2643,71 @@ namespace Microsoft.Build.Execution
             ProjectRootElementCache = projectRootElementCache;
             _taskRegistry.RootElementCache = projectRootElementCache;
             _hostServices = hostServices;
+        }
+
+        internal void PrepareForSnapshotTemplate()
+        {
+            ProjectRootElementCache = null;
+            _hostServices = null;
+            _evaluationId = BuildEventContext.InvalidEvaluationId;
+            _taskRegistry?.RebindForBuild(_toolset, projectRootElementCache: null);
+        }
+
+        internal bool TryReinitializeSnapshotMaterialization(
+            BuildParameters buildParameters,
+            int evaluationId,
+            string toolsVersion,
+            ILoggingService loggingService,
+            BuildEventContext buildEventContext)
+        {
+            ArgumentNullException.ThrowIfNull(buildParameters);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
+
+            Toolset currentToolset = buildParameters.GetToolset(toolsVersion);
+            if (currentToolset is null)
+            {
+                return false;
+            }
+
+            _toolset = currentToolset;
+            _taskRegistry.RebindForBuild(
+                _toolset,
+                buildParameters.ProjectRootElementCache);
+            ProjectRootElementCache = buildParameters.ProjectRootElementCache;
+            _hostServices = buildParameters.HostServices;
+            _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
+            _evaluationId = evaluationId;
+            _loggingContext =
+                loggingService is null || buildEventContext is null
+                    ? null
+                    : new GenericLoggingContext(loggingService, buildEventContext);
+            return true;
+        }
+
+        private static IDictionary<string, List<TargetSpecification>>
+            CloneTargetSpecifications(
+                IDictionary<string, List<TargetSpecification>> specifications)
+        {
+            var clone =
+                new Dictionary<string, List<TargetSpecification>>(
+                    specifications?.Count ?? 0,
+                    StringComparer.OrdinalIgnoreCase);
+            if (specifications is not null)
+            {
+                foreach (KeyValuePair<string, List<TargetSpecification>> entry in specifications)
+                {
+                    var values =
+                        new List<TargetSpecification>(entry.Value.Count);
+                    foreach (TargetSpecification specification in entry.Value)
+                    {
+                        values.Add(specification.DeepClone());
+                    }
+
+                    clone.Add(entry.Key, values);
+                }
+            }
+
+            return clone;
         }
 
         #region INodePacketTranslatable Members

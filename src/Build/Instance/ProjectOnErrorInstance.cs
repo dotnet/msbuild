@@ -111,6 +111,14 @@ namespace Microsoft.Build.Execution
             get { return _executeTargetsLocation; }
         }
 
+        internal override ProjectTargetInstanceChild DeepClone() =>
+            new ProjectOnErrorInstance(
+                _executeTargets,
+                _condition,
+                _location,
+                _executeTargetsLocation,
+                _conditionLocation);
+
         void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)

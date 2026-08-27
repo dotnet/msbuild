@@ -64,9 +64,14 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectItemGroupTaskInstance(ProjectItemGroupTaskInstance that)
         {
-            // All members are immutable
             _condition = that._condition;
-            _items = that._items;
+            _location = that._location;
+            _conditionLocation = that._conditionLocation;
+            _items = new List<ProjectItemGroupTaskItemInstance>(that._items.Count);
+            foreach (ProjectItemGroupTaskItemInstance item in that._items)
+            {
+                _items.Add(item.DeepClone());
+            }
         }
 
         private ProjectItemGroupTaskInstance()
@@ -117,7 +122,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Deep clone
         /// </summary>
-        internal ProjectItemGroupTaskInstance DeepClone()
+        internal override ProjectTargetInstanceChild DeepClone()
         {
             return new ProjectItemGroupTaskInstance(this);
         }

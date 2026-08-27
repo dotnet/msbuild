@@ -57,6 +57,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public List<string> SearchPaths => _searchPaths;
 
+        internal ProjectImportPathMatch DeepClone() =>
+            new(_propertyName, new List<string>(_searchPaths));
+
         public void Translate(ITranslator translator)
         {
             translator.Translate(ref _propertyName);

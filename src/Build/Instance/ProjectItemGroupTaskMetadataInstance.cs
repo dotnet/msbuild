@@ -63,10 +63,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectItemGroupTaskMetadataInstance(ProjectItemGroupTaskMetadataInstance that)
         {
-            // All fields are immutable
             _name = that._name;
             _value = that._value;
             _condition = that._condition;
+            _location = that._location;
+            _conditionLocation = that._conditionLocation;
         }
 
         private ProjectItemGroupTaskMetadataInstance()

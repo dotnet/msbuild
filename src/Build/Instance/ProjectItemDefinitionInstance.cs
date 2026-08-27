@@ -226,6 +226,9 @@ namespace Microsoft.Build.Execution
             return element;
         }
 
+        internal ProjectItemDefinitionInstance DeepClone() =>
+            new(_itemType, _metadata);
+
         void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _itemType);

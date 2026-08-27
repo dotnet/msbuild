@@ -546,6 +546,44 @@ namespace Microsoft.Build.Execution
             return task;
         }
 
+        internal ProjectTargetInstance DeepClone()
+        {
+            var children = new List<ProjectTargetInstanceChild>(_children.Count);
+            foreach (ProjectTargetInstanceChild child in _children)
+            {
+                children.Add(child.DeepClone());
+            }
+
+            var onErrorChildren = new List<ProjectOnErrorInstance>(_onErrorChildren.Count);
+            foreach (ProjectOnErrorInstance child in _onErrorChildren)
+            {
+                onErrorChildren.Add((ProjectOnErrorInstance)child.DeepClone());
+            }
+
+            return new ProjectTargetInstance(
+                _name,
+                _condition,
+                _inputs,
+                _outputs,
+                _returns,
+                _keepDuplicateOutputs,
+                _dependsOnTargets,
+                _beforeTargets,
+                _afterTargets,
+                _location,
+                _conditionLocation,
+                _inputsLocation,
+                _outputsLocation,
+                _returnsLocation,
+                _keepDuplicateOutputsLocation,
+                _dependsOnTargetsLocation,
+                _beforeTargetsLocation,
+                _afterTargetsLocation,
+                new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(children),
+                new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(onErrorChildren),
+                _parentProjectSupportsReturnsAttribute);
+        }
+
         void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _name);

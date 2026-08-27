@@ -39,6 +39,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public abstract ElementLocation ConditionLocation { get; }
 
+        internal abstract ProjectTargetInstanceChild DeepClone();
+
         void ITranslatable.Translate(ITranslator translator)
             // all subclasses should be translateable
             => Assumed.Unreachable();

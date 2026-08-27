@@ -68,9 +68,14 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectPropertyGroupTaskInstance(ProjectPropertyGroupTaskInstance that)
         {
-            // All members are immutable
             _condition = that._condition;
-            _properties = that._properties;
+            _location = that._location;
+            _conditionLocation = that._conditionLocation;
+            _properties = new List<ProjectPropertyGroupTaskPropertyInstance>(that._properties.Count);
+            foreach (ProjectPropertyGroupTaskPropertyInstance property in that._properties)
+            {
+                _properties.Add(property.DeepClone());
+            }
         }
 
         /// <summary>
@@ -117,7 +122,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Deep clone
         /// </summary>
-        internal ProjectPropertyGroupTaskInstance DeepClone()
+        internal override ProjectTargetInstanceChild DeepClone()
         {
             return new ProjectPropertyGroupTaskInstance(this);
         }

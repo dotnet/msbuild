@@ -310,6 +310,10 @@ namespace Microsoft.Build.Execution
             _nextUnnamedProjectId = 1;
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            _componentFactories.AddFactory(
+                BuildComponentType.ProjectInstanceSnapshotCache,
+                ProjectInstanceSnapshotCache.CreateComponent,
+                BuildComponentFactoryCollection.CreationPattern.Singleton);
             SerializationContractInitializer.Initialize();
             _projectStartedEvents = new Dictionary<int, BuildEventArgs>();
 
@@ -614,6 +618,16 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+                _buildParameters.ProjectInstanceSnapshotCache = null;
+
+                if (Traits.Instance.EnableProjectInstanceSnapshotCache)
+                {
+                    ProjectInstanceSnapshotCache enabledSnapshotCache =
+                        ((IBuildComponentHost)this).GetComponent<ProjectInstanceSnapshotCache>(
+                            BuildComponentType.ProjectInstanceSnapshotCache);
+                    enabledSnapshotCache.NotifyBuildStarted();
+                    _buildParameters.ProjectInstanceSnapshotCache = enabledSnapshotCache;
+                }
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
@@ -667,6 +681,27 @@ namespace Microsoft.Build.Execution
 
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
+
+                if (_buildParameters.ProjectInstanceSnapshotCache is ProjectInstanceSnapshotCache statusSnapshotCache)
+                {
+                    ProjectInstanceSnapshotCacheStatistics statistics =
+                        statusSnapshotCache.GetStatistics();
+                    loggingService.LogComment(
+                        BuildEventContext.Invalid,
+                        MessageImportance.Low,
+                        "ProjectInstanceSnapshotCacheStatus",
+                        statistics.BuildsServed,
+                        statistics.Count,
+                        statistics.CurrentSizeBytes,
+                        statistics.MaximumSizeBytes,
+                        statistics.StoredEntries,
+                        statistics.CacheHits,
+                        statistics.CacheMisses,
+                        statistics.ValidationRejections,
+                        statistics.MaterializedEntries,
+                        statistics.EvictedEntries,
+                        statistics.OversizedRejections);
+                }
 
                 // If the coordinator is enabled, request a node grant and cap MaxNodeCount.
                 // This is done after logging initialization so that waiting/grant messages
@@ -822,7 +857,7 @@ namespace Microsoft.Build.Execution
 
                 if (!usesInputCaches && (_buildParameters.ResetCaches || _configCache!.IsConfigCacheSizeLargerThanThreshold()))
                 {
-                    ResetCaches();
+                    ResetCachesCore(clearProjectInstanceSnapshotCache: false);
                 }
                 else
                 {
@@ -975,14 +1010,28 @@ namespace Microsoft.Build.Execution
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
                 ErrorIfState(BuildManagerState.Building, "BuildInProgress");
 
-                _configCache = ((IBuildComponentHost)this).GetComponent<IConfigCache>(BuildComponentType.ConfigCache);
-                _resultsCache = ((IBuildComponentHost)this).GetComponent<IResultsCache>(BuildComponentType.ResultsCache);
-                _resultsCache!.ClearResults();
+                ResetCachesCore(clearProjectInstanceSnapshotCache: true);
+            }
+        }
 
-                // This call clears out the directory.
-                _configCache!.ClearConfigurations();
+        private void ResetCachesCore(bool clearProjectInstanceSnapshotCache)
+        {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
 
-                _buildParameters?.ProjectRootElementCache.DiscardImplicitReferences();
+            _configCache = ((IBuildComponentHost)this).GetComponent<IConfigCache>(BuildComponentType.ConfigCache);
+            _resultsCache = ((IBuildComponentHost)this).GetComponent<IResultsCache>(BuildComponentType.ResultsCache);
+            _resultsCache!.ClearResults();
+
+            // This call clears out the directory.
+            _configCache!.ClearConfigurations();
+
+            _buildParameters?.ProjectRootElementCache.DiscardImplicitReferences();
+
+            if (clearProjectInstanceSnapshotCache)
+            {
+                ((IBuildComponentHost)this)
+                    .GetComponent<ProjectInstanceSnapshotCache>(BuildComponentType.ProjectInstanceSnapshotCache)
+                    .Clear();
             }
         }
 
