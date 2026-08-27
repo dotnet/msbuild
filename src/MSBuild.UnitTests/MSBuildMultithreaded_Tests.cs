@@ -103,6 +103,25 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    public class ConsoleOutputTestTask : Task
+    {
+        public bool ShouldRunInTaskHost { get; set; }
+
+        public override bool Execute()
+        {
+            bool isTaskHost = Environment.CommandLine.IndexOf("/nodemode:2", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (isTaskHost != ShouldRunInTaskHost)
+            {
+                Log.LogError($"Expected task host: {ShouldRunInTaskHost}; actual: {isTaskHost}");
+                return false;
+            }
+
+            Console.WriteLine("ConsoleOutputTestTask output");
+            Console.Error.WriteLine("ConsoleOutputTestTask error output");
+            return true;
+        }
+    }
+
     /// <summary>
     /// Integration tests for MSBuild and CallTarget tasks with TaskEnvironment support.
     /// These tests verify that tasks work correctly in both multithreaded and single-threaded scenarios
@@ -147,6 +166,34 @@ namespace Microsoft.Build.Engine.UnitTests
                 _output);
 
             success.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData(false, "/m:2 /nodereuse:false")]
+        [InlineData(true, "/m:2 /nodereuse:false /mt")]
+        public void TaskConsoleOutputIsVisible(bool shouldRunInTaskHost, string msbuildArgs)
+        {
+            string project = $"""
+                <Project>
+                    <UsingTask TaskName="ConsoleOutputTestTask" AssemblyFile="{typeof(ConsoleOutputTestTask).Assembly.Location}" />
+
+                    <Target Name="Build">
+                        <ConsoleOutputTestTask ShouldRunInTaskHost="{shouldRunInTaskHost}" />
+                    </Target>
+                </Project>
+                """;
+            TransientTestFile projectFile = _env.CreateFile("console-output.proj", project);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{projectFile.Path}\" {msbuildArgs}",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("ConsoleOutputTestTask output");
+            output.ShouldContain("ConsoleOutputTestTask error output");
         }
 
         /// <summary>

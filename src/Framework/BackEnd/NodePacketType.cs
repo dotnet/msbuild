@@ -261,7 +261,12 @@ internal enum NodePacketType : byte
     /// </summary>
     TaskHostIsRunningMultipleNodesResponse = 0x25,
 
-    // 0x26-0x27 reserved for future TaskHost callback packet types
+    /// <summary>
+    /// Enables console output forwarding in the TaskHost process.
+    /// </summary>
+    TaskHostConsoleConfiguration = 0x26,
+
+    // 0x27 reserved for future TaskHost callback packet types
 
     #endregion
 

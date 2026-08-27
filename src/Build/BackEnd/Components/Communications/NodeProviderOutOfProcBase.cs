@@ -968,6 +968,8 @@ namespace Microsoft.Build.BackEnd
 
             internal Process Process { get { return _process; } }
 
+            internal byte NegotiatedPacketVersion => _negotiatedPacketVersion;
+
             /// <summary>
             /// An array used to store the header byte for each packet when read.
             /// </summary>
