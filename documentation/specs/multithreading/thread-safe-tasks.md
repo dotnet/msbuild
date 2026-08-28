@@ -144,10 +144,10 @@ To prevent common thread-safety issues related to path handling, we introduce pa
 namespace Microsoft.Build.Framework;
 public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 {
-    // Default value returns string.Empty for Path property
+    // default(AbsolutePath) has a null Value
     public string Value { get; }
     internal AbsolutePath(string path, bool ignoreRootedCheck) { }
-    public AbsolutePath(string path); // Checks Path.IsPathRooted
+    public AbsolutePath(string path); // Checks Path.IsPathFullyQualified when supported
     public AbsolutePath(string path, AbsolutePath basePath) { }
     public AbsolutePath GetCanonicalForm();
     public static implicit operator string(AbsolutePath path) { }
@@ -158,7 +158,7 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 ```
 
 `AbsolutePath` converts implicitly to string for seamless integration with existing File/Directory APIs.
-`GetCanonicalForm()` applies `Path.GetFullPath()` canonicalization to an already rooted path, resolving `.` and `..` segments and normalizing directory separators. Use it when migrating code that previously relied on `Path.GetFullPath()`; `TaskEnvironment.GetAbsolutePath()` roots paths but intentionally does not canonicalize them.
+`GetCanonicalForm()` applies `Path.GetFullPath()` canonicalization to an already fully qualified path, resolving `.` and `..` segments and normalizing directory separators. Use it when migrating code that previously relied on `Path.GetFullPath()`; `TaskEnvironment.GetAbsolutePath()` produces fully qualified paths but intentionally does not canonicalize them.
 
 ### API Usage Example
 
@@ -172,7 +172,7 @@ public bool Execute(...)
     AbsolutePath path = TaskEnvironment.GetAbsolutePath("SomePath");
     string content = File.ReadAllText(path);
     string content2 = File.ReadAllText(path.ToString());
-    string content3 = File.ReadAllText(path.Path);
+    string content3 = File.ReadAllText(path.Value);
     ...
 }
 ```
