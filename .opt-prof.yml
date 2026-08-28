@@ -14,9 +14,13 @@ resources:
   pipelines:
   - pipeline: ComponentBuildUnderTest
     source: MSBuild\MSBuild # The name of the pipeline that produces the artifact
+    tags:
+      - ready-for-training
     trigger:
       branches:
         - vs*
+      tags:
+        - ready-for-training
   - pipeline: DartLab
     project: DevDiv
     source: DartLab
