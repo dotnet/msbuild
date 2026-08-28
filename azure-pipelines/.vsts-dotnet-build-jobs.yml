@@ -151,7 +151,7 @@ jobs:
       ArtifactName: MicroBuildOutputs
       ArtifactType: Container
     displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   - task: 1ES.PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
