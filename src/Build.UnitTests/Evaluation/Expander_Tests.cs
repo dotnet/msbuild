@@ -5437,6 +5437,108 @@ $(
         // =====================================================================
 
         [Fact]
+        public void NormalizePath_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_ParentSegment_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', '..', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "file.txt"));
+        }
+
+        [UnixOnlyFact]
+        public void NormalizePath_BackslashRootedPath_IsPlatformNormalized()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::NormalizePath('\tmp\file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe("/tmp/file.txt");
+        }
+
+        [WindowsOnlyFact]
+        public void NormalizePath_DriveRelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            string drive = Path.GetPathRoot(correctDir.Path).Substring(0, 2);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::NormalizePath('{drive}obj', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_AbsolutePath_IgnoresThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var absoluteDir = env.CreateFolder(createFolder: true);
+
+            string absolutePath = Path.Combine(absoluteDir.Path, "file.txt");
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::NormalizePath('{absolutePath}'))", correctDir.Path);
+
+            result.ShouldBe(absolutePath);
+        }
+
+        [Fact]
+        public void NormalizePath_WithoutThreadWorkingDirectory_UsesProcessWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var processDir = env.CreateFolder(createFolder: true);
+            env.SetCurrentDirectory(processDir.Path);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', 'file.txt'))", null);
+
+            result.ShouldBe(Path.Combine(processDir.Path, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_EmptyPath_ThrowsArgumentException()
+        {
+            Should.Throw<ArgumentException>(() => IntrinsicFunctions.NormalizePath([]));
+        }
+
+        [Fact]
+        public void NormalizePath_NullPathArray_ThrowsArgumentNullException()
+        {
+            Should.Throw<ArgumentNullException>(() => IntrinsicFunctions.NormalizePath((string[])null));
+        }
+
+        [Fact]
+        public void NormalizePath_IllegalPath_ThrowsArgumentException()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            env.WithTransientTestState(new TransientThreadWorkingDirectory(correctDir.Path));
+
+            Should.Throw<ArgumentException>(() => IntrinsicFunctions.NormalizePath("bad\0path"));
+        }
+
+        [Fact]
         public void FileReadAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
