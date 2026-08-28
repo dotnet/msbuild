@@ -13,6 +13,12 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
+- name: enableOptProf
+  displayName: Enable OptProf data collection for this build
+  # This servicing branch no longer has optimization data to apply and no longer
+  # collects fresh data.
+  type: boolean
+  default: false
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
@@ -38,6 +44,10 @@ variables:
       value: ${{ parameters.OptProfDropName }}
     - name: SourceBranch
       value: ''
+  # Skip applying optimization data when collection is disabled.
+  - ${{ if eq(parameters.enableOptProf, false) }}:
+    - name: SkipApplyOptimizationData
+      value: true
   - name: _DotNetArtifactsCategory
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
@@ -112,6 +122,7 @@ extends:
           isExperimental: false
           enableComponentGovernance: true
           signTypeParameter: ${{ parameters.signTypeParameter }}
+          enableOptProf: ${{ parameters.enableOptProf }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
