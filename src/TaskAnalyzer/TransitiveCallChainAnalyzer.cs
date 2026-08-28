@@ -27,12 +27,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class TransitiveCallChainAnalyzer : DiagnosticAnalyzer
     {
-        /// <summary>
-        /// Maximum BFS depth. The visited set already prevents cycles, but this limits
-        /// exploration of very deep non-cyclic call chains for performance.
-        /// </summary>
-        private const int MaxCallChainDepth = 20;
-
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(DiagnosticDescriptors.TransitiveUnsafeCall);
 
@@ -257,11 +251,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 foreach (IMethodSymbol method in GetMethodsIncludingBaseTypes(taskType))
                 {
                     // BFS from this method through the call graph
-                    var visited = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
-                    var queue = new Queue<(ISymbol current, List<string> chain)>();
+                    var methodKey = method.OriginalDefinition;
+                    var visited = new HashSet<ISymbol>(SymbolEqualityComparer.Default) { methodKey };
+                    var predecessors = new Dictionary<ISymbol, ISymbol>(SymbolEqualityComparer.Default);
+                    var queue = new Queue<ISymbol>();
 
                     // Seed with methods called directly from this task method
-                    var methodKey = method.OriginalDefinition;
                     if (callGraph.TryGetValue(methodKey, out var directCallees))
                     {
                         // Snapshot ConcurrentBag to avoid thread-local enumeration issues
@@ -269,32 +264,32 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             if (visited.Add(callee))
                             {
-                                var chain = new List<string>(4)
-                                {
-                                    FormatMethodShort(method),
-                                    FormatSymbolShort(callee),
-                                };
-                                queue.Enqueue((callee, chain));
+                                predecessors.Add(callee, methodKey);
+                                queue.Enqueue(callee);
                             }
                         }
                     }
 
                     while (queue.Count > 0)
                     {
-                        var (current, chain) = queue.Dequeue();
+                        context.CancellationToken.ThrowIfCancellationRequested();
+
+                        ISymbol current = queue.Dequeue();
 
                         // Check if this method has direct violations (from source scan)
                         if (directViolations.TryGetValue(current, out var violations))
                         {
                             foreach (var v in violations)
                             {
-                                ReportTransitiveViolation(context, method, v, chain, reportedPerTaskType);
+                                ReportTransitiveViolation(
+                                    context,
+                                    method,
+                                    methodKey,
+                                    current,
+                                    predecessors,
+                                    v,
+                                    reportedPerTaskType);
                             }
-                        }
-
-                        if (chain.Count >= MaxCallChainDepth)
-                        {
-                            continue;
                         }
 
                         // Try source-level call graph first
@@ -307,8 +302,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                             {
                                 if (visited.Add(callee))
                                 {
-                                    var newChain = new List<string>(chain) { FormatSymbolShort(callee) };
-                                    queue.Enqueue((callee, newChain));
+                                    predecessors.Add(callee, current);
+                                    queue.Enqueue(callee);
                                 }
                             }
                         }
@@ -330,8 +325,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         private static void ReportTransitiveViolation(
             CompilationAnalysisContext context,
             IMethodSymbol taskMethod,
+            ISymbol taskMethodKey,
+            ISymbol violatingMethod,
+            Dictionary<ISymbol, ISymbol> predecessors,
             ViolationInfo violation,
-            List<string> chain,
             HashSet<(string ApiDisplayName, Location Location)> reportedPerTaskType)
         {
             var taskMethodLocation = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
@@ -349,8 +346,18 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            var chainWithApi = new List<string>(chain) { violation.ApiDisplayName };
-            var chainStr = string.Join(" → ", chainWithApi);
+            var chain = new List<string>();
+            for (ISymbol current = violatingMethod;
+                 !SymbolEqualityComparer.Default.Equals(current, taskMethodKey);
+                 current = predecessors[current])
+            {
+                chain.Add(FormatSymbolShort(current));
+            }
+
+            chain.Add(FormatMethodShort(taskMethod));
+            chain.Reverse();
+            chain.Add(violation.ApiDisplayName);
+            var chainStr = string.Join(" → ", chain);
 
             var additionalLocations = hasCallSite && taskMethodLocation.SourceTree is not null
                 ? ImmutableArray.Create(taskMethodLocation)

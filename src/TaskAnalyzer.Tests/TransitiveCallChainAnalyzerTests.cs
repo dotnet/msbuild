@@ -432,10 +432,27 @@ public class TransitiveCallChainAnalyzerTests
         transitive.Select(d => d.Location.SourceSpan).Distinct().Count().ShouldBe(2);
     }
 
-    [Fact]
-    public async Task InheritedTaskMethodCallingUnsafeExtension_ProducesDiagnostic()
+    [Theory]
+    [InlineData(25)]
+    public async Task InheritedTaskMethodCallingDeepUnsafeExtension_ProducesDiagnostic(int helperCount)
     {
-        var diags = await GetAllDiagnosticsAsync("""
+        string helperTypes = string.Join(
+            "\n",
+            Enumerable.Range(0, helperCount).Select(index =>
+            {
+                string target = index + 1 == helperCount
+                    ? "TaskEnvironmentExtensions.GetTempPath(taskEnvironment)"
+                    : $"Helper{index + 1}.GetTempPath(taskEnvironment)";
+
+                return $$"""
+                    public static class Helper{{index}}
+                    {
+                        public static string GetTempPath(TaskEnvironment taskEnvironment) => {{target}};
+                    }
+                    """;
+            }));
+
+        var diags = await GetAllDiagnosticsAsync($$"""
             using System.IO;
             using Microsoft.Build.Framework;
 
@@ -444,6 +461,8 @@ public class TransitiveCallChainAnalyzerTests
                 public static string GetTempPath(this TaskEnvironment taskEnvironment) => Path.GetTempPath();
             }
 
+            {{helperTypes}}
+
             public abstract class CommandLineTaskBase
             {
                 public IBuildEngine BuildEngine { get; set; } = new BuildEngineStub();
@@ -451,7 +470,7 @@ public class TransitiveCallChainAnalyzerTests
 
                 public bool Execute()
                 {
-                    TaskEnvironment.GetTempPath();
+                    Helper0.GetTempPath(TaskEnvironment);
                     return true;
                 }
             }
@@ -472,6 +491,8 @@ public class TransitiveCallChainAnalyzerTests
         var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
         transitive.Length.ShouldBe(1);
         transitive[0].GetMessage().ShouldContain("CommandLineTaskBase.Execute");
+        transitive[0].GetMessage().ShouldContain("Helper0.GetTempPath");
+        transitive[0].GetMessage().ShouldContain($"Helper{helperCount - 1}.GetTempPath");
         transitive[0].GetMessage().ShouldContain("TaskEnvironmentExtensions.GetTempPath");
         transitive[0].GetMessage().ShouldContain("Path.GetTempPath");
     }
