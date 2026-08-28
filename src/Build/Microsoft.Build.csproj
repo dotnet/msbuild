@@ -98,21 +98,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Tasks\PropertyParser.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="Resources\ResourceUtilities.cs" />
     <Compile Include="BackEnd\Node\NodeEngineShutdownReason.cs" />
-    <Compile Include="..\Tasks\PlatformNegotiation.cs">
-      <Link>PlatformNegotiation.cs</Link>
-    </Compile>
-    <Compile Include="..\Utilities\TaskLoggingHelper.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Tasks\TaskLoggingHelperExtension.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
-    </Compile>
+    <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />

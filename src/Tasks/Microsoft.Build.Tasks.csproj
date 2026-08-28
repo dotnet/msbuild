@@ -37,27 +37,14 @@
     <!-- Node communication -->
     <!-- Source Files -->
     <Compile Include="BuiltInTasks.cs" />
-    <Compile Include="..\Utilities\AssemblyFolders\AssemblyFoldersEx.cs">
-      <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
-    </Compile>
-    <Compile Include="..\Utilities\AssemblyFolders\AssemblyFoldersFromConfig.cs">
-      <Link>AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfig.cs</Link>
-    </Compile>
-    <Compile Include="..\Utilities\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
-      <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\Utilities\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
-      <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderItem.cs</Link>
-    </Compile>
     <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="PropertyParser.cs" />
     <Compile Include="TaskLoggingHelperExtension.cs" />
+    <Compile Include="TaskLoggingHelperAdapter.cs" />
     <Compile Include="LanguageParser\*.cs" />
-    <Compile Include="PlatformNegotiation.cs" />
     <Compile Include="AppConfig\*.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />

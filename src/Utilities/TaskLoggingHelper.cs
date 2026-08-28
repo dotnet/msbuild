@@ -20,11 +20,7 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-#if BUILD_ENGINE
-namespace Microsoft.Build.BackEnd
-#else
 namespace Microsoft.Build.Utilities
-#endif
 {
     /// <summary>
     /// Helper logging class - contains all the logging methods used by tasks.
@@ -32,11 +28,7 @@ namespace Microsoft.Build.Utilities
     /// from the Task class, it is provided in the Log property.
     /// This class is thread safe: tasks can log from any threads.
     /// </summary>
-#if BUILD_ENGINE
-    internal
-#else
     public
-#endif
  class TaskLoggingHelper
 #if FEATURE_APPDOMAIN
         : MarshalByRefObject
@@ -532,14 +524,7 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         public static string GetInnerExceptionMessageString(Exception e)
         {
-            StringBuilder flattenedMessage = new StringBuilder(e.Message);
-            Exception excep = e;
-            while (excep.InnerException != null)
-            {
-                excep = excep.InnerException;
-                flattenedMessage.Append(" ---> ").Append(excep.Message);
-            }
-            return flattenedMessage.ToString();
+            return ExceptionUtilities.GetInnerExceptionMessageString(e);
         }
 
         #endregion

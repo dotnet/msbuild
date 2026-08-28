@@ -4,18 +4,11 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
 
 #nullable disable
 
-#if BUILD_ENGINE
-namespace Microsoft.Build.BackEnd
-#else
-using Microsoft.Build.Utilities;
-
-namespace Microsoft.Build.Tasks
-#endif
+namespace Microsoft.Build.Shared
 {
     internal static class PropertyParser
     {
@@ -24,7 +17,8 @@ namespace Microsoft.Build.Tasks
         /// a hash table containing the property names as keys and the property values as values.
         /// </summary>
         /// <returns>true on success, false on failure.</returns>
-        internal static bool GetTable(TaskLoggingHelper log, string parameterName, string[] propertyList, out Dictionary<string, string> propertiesTable)
+        internal static bool GetTable<TLogger>(TLogger log, string parameterName, string[] propertyList, out Dictionary<string, string> propertiesTable)
+            where TLogger : ITaskLogger
         {
             propertiesTable = null;
 
@@ -57,7 +51,10 @@ namespace Microsoft.Build.Tasks
                     if (propertyName.Length == 0)
                     {
                         // No equals sign?  No property name?  That's no good to us.
-                        log?.LogErrorWithCodeFromResources("General.InvalidPropertyError", parameterName, propertyNameValuePair);
+                        if (log.IsEnabled)
+                        {
+                            log.LogErrorWithCodeFromResources("General.InvalidPropertyError", parameterName, propertyNameValuePair);
+                        }
 
                         return false;
                     }
@@ -80,7 +77,8 @@ namespace Microsoft.Build.Tasks
         /// already.
         /// </summary>
         /// <returns>true on success, false on failure.</returns>
-        internal static bool GetTableWithEscaping(TaskLoggingHelper log, string parameterName, string syntaxName, string[] propertyNameValueStrings, out Dictionary<string, string> finalPropertiesTable)
+        internal static bool GetTableWithEscaping<TLogger>(TLogger log, string parameterName, string syntaxName, string[] propertyNameValueStrings, out Dictionary<string, string> finalPropertiesTable)
+            where TLogger : ITaskLogger
         {
             finalPropertiesTable = null;
 
@@ -110,7 +108,10 @@ namespace Microsoft.Build.Tasks
                         if (propertyName.Length == 0)
                         {
                             // No property name?  That's no good to us.
-                            log?.LogErrorWithCodeFromResources("General.InvalidPropertyError", syntaxName, propertyNameValueString);
+                            if (log.IsEnabled)
+                            {
+                                log.LogErrorWithCodeFromResources("General.InvalidPropertyError", syntaxName, propertyNameValueString);
+                            }
 
                             return false;
                         }
@@ -153,7 +154,10 @@ namespace Microsoft.Build.Tasks
                         else
                         {
                             // No equals sign in the very first property?  That's a problem.
-                            log?.LogErrorWithCodeFromResources("General.InvalidPropertyError", syntaxName, propertyNameValueString);
+                            if (log.IsEnabled)
+                            {
+                                log.LogErrorWithCodeFromResources("General.InvalidPropertyError", syntaxName, propertyNameValueString);
+                            }
 
                             return false;
                         }
@@ -162,7 +166,10 @@ namespace Microsoft.Build.Tasks
 
                 // Convert the data in the List to a Hashtable, because that's what the MSBuild task eventually
                 // needs to pass onto the engine.
-                log?.LogMessageFromText(parameterName, MessageImportance.Low);
+                if (log.IsEnabled)
+                {
+                    log.LogMessageFromText(parameterName, MessageImportance.Low);
+                }
 
                 using SpanBasedStringBuilder stringBuilder = Strings.GetSpanBasedStringBuilder();
                 foreach (PropertyNameValuePair propertyNameValuePair in finalPropertiesList)
@@ -181,9 +188,12 @@ namespace Microsoft.Build.Tasks
 
                     string propertyValue = stringBuilder.ToString();
                     finalPropertiesTable[propertyNameValuePair.Name] = propertyValue;
-                    log?.LogMessageFromText(
-                        $"  {propertyNameValuePair.Name}={propertyValue}",
-                        MessageImportance.Low);
+                    if (log.IsEnabled)
+                    {
+                        log.LogMessageFromText(
+                            $"  {propertyNameValuePair.Name}={propertyValue}",
+                            MessageImportance.Low);
+                    }
                 }
             }
 

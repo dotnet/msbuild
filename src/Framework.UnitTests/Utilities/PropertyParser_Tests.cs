@@ -2,7 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using Microsoft.Build.Tasks;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Xunit;
 
 #nullable disable
@@ -14,7 +15,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetTable1()
         {
-            Assert.True(PropertyParser.GetTable(null, "Properties", null, out Dictionary<string, string> propertiesTable));
+            Assert.True(PropertyParser.GetTable(default(NullTaskLogger), "Properties", null, out Dictionary<string, string> propertiesTable));
 
             // We should have null table.
             Assert.Null(propertiesTable);
@@ -25,7 +26,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTable3()
         {
-            Assert.True(PropertyParser.GetTable(null, "Properties",
+            Assert.True(PropertyParser.GetTable(default(NullTaskLogger), "Properties",
                 new[] { "Configuration=Debug" }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTable4()
         {
-            Assert.True(PropertyParser.GetTable(null, "Properties",
+            Assert.True(PropertyParser.GetTable(default(NullTaskLogger), "Properties",
                 new[] { "Configuration=Debug", "Platform=AnyCPU", "VBL=Lab22Dev" }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -63,7 +64,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTable5()
         {
-            Assert.True(PropertyParser.GetTable(null, "Properties",
+            Assert.True(PropertyParser.GetTable(default(NullTaskLogger), "Properties",
                 new[] { "Configuration = Debug", "Platform \t=       AnyCPU" }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -82,7 +83,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTable6()
         {
-            Assert.True(PropertyParser.GetTable(null, "Properties",
+            Assert.True(PropertyParser.GetTable(default(NullTaskLogger), "Properties",
                 new[] { "Configuration=", "Platform =  " }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -102,7 +103,21 @@ namespace Microsoft.Build.UnitTests
         public void GetPropertiesTable7()
         {
             // This is a failure case.
-            Assert.False(PropertyParser.GetTable(null, "Properties", new[] { "=Debug" }, out _));
+            Assert.False(PropertyParser.GetTable(default(NullTaskLogger), "Properties", new[] { "=Debug" }, out _));
+        }
+
+        [Fact]
+        public void InvalidPropertyIsLogged()
+        {
+            var resourceNames = new List<string>();
+
+            Assert.False(PropertyParser.GetTable(
+                new RecordingTaskLogger(resourceNames),
+                "Properties",
+                new[] { "=Debug" },
+                out _));
+
+            Assert.Equal(["General.InvalidPropertyError"], resourceNames);
         }
 
         /// <summary>
@@ -111,7 +126,7 @@ namespace Microsoft.Build.UnitTests
         public void GetPropertiesTable8()
         {
             // This is a failure case.  (Second property "x86" doesn't have a value.)
-            Assert.False(PropertyParser.GetTable(null, "Properties",
+            Assert.False(PropertyParser.GetTable(default(NullTaskLogger), "Properties",
                 new[] { "Configuration=Debug", "x86" }, out _));
         }
 
@@ -120,7 +135,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTable9()
         {
-            Assert.True(PropertyParser.GetTable(null, "Properties",
+            Assert.True(PropertyParser.GetTable(default(NullTaskLogger), "Properties",
                 new[] { "DependsOn = Clean; Build" }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -137,7 +152,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTable10()
         {
-            Assert.True(PropertyParser.GetTable(null, "Properties",
+            Assert.True(PropertyParser.GetTable(default(NullTaskLogger), "Properties",
                 new[] { "Depends On = CleanBuild" }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -152,7 +167,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTableWithEscaping1()
         {
-            Assert.True(PropertyParser.GetTableWithEscaping(null, "Properties", "Properties",
+            Assert.True(PropertyParser.GetTableWithEscaping(default(NullTaskLogger), "Properties", "Properties",
                 new[] { "Configuration = Debug", "Platform = Any CPU" }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -169,7 +184,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTableWithEscaping2()
         {
-            Assert.True(PropertyParser.GetTableWithEscaping(null, "Properties", "Properties",
+            Assert.True(PropertyParser.GetTableWithEscaping(default(NullTaskLogger), "Properties", "Properties",
                 new[] { "WarningsAsErrors = 1234", "5678", "9999", "Configuration=Debug" }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -186,7 +201,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPropertiesTableWithEscaping3()
         {
-            Assert.True(PropertyParser.GetTableWithEscaping(null, "Properties", "Properties",
+            Assert.True(PropertyParser.GetTableWithEscaping(default(NullTaskLogger), "Properties", "Properties",
                 new[] { @"OutDir=c:\Rajeev;s Stuff\binaries", "Configuration=Debug" }, out Dictionary<string, string> propertiesTable));
 
             // We should have a table that looks like this:
@@ -198,6 +213,34 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(2, propertiesTable.Count);
             Assert.Equal(@"c:\Rajeev%3bs Stuff\binaries", propertiesTable["OutDir"]);
             Assert.Equal("Debug", propertiesTable["Configuration"]);
+        }
+
+        private readonly struct RecordingTaskLogger : ITaskLogger
+        {
+            private readonly List<string> _resourceNames;
+
+            internal RecordingTaskLogger(List<string> resourceNames)
+            {
+                _resourceNames = resourceNames;
+            }
+
+            public bool IsEnabled => true;
+
+            public void LogErrorWithCodeFromResources(string messageResourceName, params object[] messageArgs)
+                => _resourceNames.Add(messageResourceName);
+
+            public void LogWarningWithCodeFromResources(string messageResourceName, params object[] messageArgs)
+            {
+            }
+
+            public void LogMessageFromResources(MessageImportance importance, string messageResourceName, params object[] messageArgs)
+            {
+            }
+
+            public bool LogMessageFromText(string message, MessageImportance importance)
+            {
+                return false;
+            }
         }
     }
 }

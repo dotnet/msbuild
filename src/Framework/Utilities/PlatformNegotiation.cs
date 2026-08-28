@@ -4,11 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-#if BUILD_ENGINE
-using Microsoft.Build.BackEnd;
-#else
-using Microsoft.Build.Utilities;
-#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -19,13 +14,45 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class PlatformNegotiation
     {
-        internal static string GetNearestPlatform(string overridePlatformValue, string referencedProjectPlatform, string projectReferencePlatformsMetadata, string projectReferenceLookupTableMetadata, string platformLookupTable, string projectPath, string currentProjectPlatform, TaskLoggingHelper? log = null)
+        internal static string GetNearestPlatform(
+            string overridePlatformValue,
+            string referencedProjectPlatform,
+            string projectReferencePlatformsMetadata,
+            string projectReferenceLookupTableMetadata,
+            string platformLookupTable,
+            string projectPath,
+            string currentProjectPlatform)
+        {
+            return GetNearestPlatform(
+                overridePlatformValue,
+                referencedProjectPlatform,
+                projectReferencePlatformsMetadata,
+                projectReferenceLookupTableMetadata,
+                platformLookupTable,
+                projectPath,
+                currentProjectPlatform,
+                default(NullTaskLogger));
+        }
+
+        internal static string GetNearestPlatform<TLogger>(
+            string overridePlatformValue,
+            string referencedProjectPlatform,
+            string projectReferencePlatformsMetadata,
+            string projectReferenceLookupTableMetadata,
+            string platformLookupTable,
+            string projectPath,
+            string currentProjectPlatform,
+            TLogger log)
+            where TLogger : ITaskLogger
         {
             Dictionary<string, string>? currentProjectLookupTable = ExtractLookupTable(platformLookupTable, log);
 
             if (string.IsNullOrEmpty(projectReferencePlatformsMetadata) && string.IsNullOrEmpty(referencedProjectPlatform))
             {
-                log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", projectPath);
+                if (log.IsEnabled)
+                {
+                    log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoPlatformsListed", projectPath);
+                }
                 return string.Empty;
             }
 
@@ -50,13 +77,19 @@ namespace Microsoft.Build.Shared
             // Don't set `buildProjectReferenceAs` and the `_GetProjectReferencePlatformProperties` target will handle the rest.
             else if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(currentProjectPlatform, StringComparison.OrdinalIgnoreCase))
             {
-                log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
+                if (log.IsEnabled)
+                {
+                    log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
+                }
             }
             // Prefer matching platforms
             else if (projectReferencePlatforms.Contains(currentProjectPlatform))
             {
                 buildProjectReferenceAs = currentProjectPlatform;
-                log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.SamePlatform");
+                if (log.IsEnabled)
+                {
+                    log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.SamePlatform");
+                }
             }
             // Prioritize platformLookupTable **metadata** attached to the ProjectReference item
             // before the current project's table. We do this to allow per-ProjectReference fine tuning.
@@ -65,7 +98,10 @@ namespace Microsoft.Build.Shared
                     projectReferencePlatforms.Contains(value))
             {
                 buildProjectReferenceAs = value;
-                log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.FoundMappingInTable", currentProjectPlatform, buildProjectReferenceAs, projectReferenceLookupTableMetadata);
+                if (log.IsEnabled)
+                {
+                    log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.FoundMappingInTable", currentProjectPlatform, buildProjectReferenceAs, projectReferenceLookupTableMetadata);
+                }
             }
             // Current project's translation table follows
             else if (currentProjectLookupTable != null &&
@@ -73,30 +109,43 @@ namespace Microsoft.Build.Shared
                     projectReferencePlatforms.Contains(value))
             {
                 buildProjectReferenceAs = value;
-                log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.FoundMappingInTable", currentProjectPlatform, buildProjectReferenceAs, platformLookupTable);
+                if (log.IsEnabled)
+                {
+                    log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.FoundMappingInTable", currentProjectPlatform, buildProjectReferenceAs, platformLookupTable);
+                }
             }
             // AnyCPU if possible
             else if (projectReferencePlatforms.Contains("AnyCPU"))
             {
                 buildProjectReferenceAs = "AnyCPU";
-                log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.AnyCPUDefault");
+                if (log.IsEnabled)
+                {
+                    log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.AnyCPUDefault");
+                }
             }
             else
             {
                 // Keep NearestPlatform empty, log a warning. Common.CurrentVersion.targets will undefine
                 // Platform/PlatformTarget when this is the case.
-                log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", projectPath);
+                if (log.IsEnabled)
+                {
+                    log.LogWarningWithCodeFromResources("GetCompatiblePlatform.NoCompatiblePlatformFound", projectPath);
+                }
             }
             // If the referenced project has a defined `Platform` that's compatible, it will build that way by default.
             // If we're about to tell the reference to build using its default platform, don't pass it as a global property.
             if (!string.IsNullOrEmpty(referencedProjectPlatform) && referencedProjectPlatform.Equals(buildProjectReferenceAs, StringComparison.OrdinalIgnoreCase))
             {
-                log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
+                if (log.IsEnabled)
+                {
+                    log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform", projectPath, referencedProjectPlatform);
+                }
                 buildProjectReferenceAs = string.Empty;
             }
             return buildProjectReferenceAs;
         }
-        internal static Dictionary<string, string>? ExtractLookupTable(string stringTable, TaskLoggingHelper? log = null)
+        private static Dictionary<string, string>? ExtractLookupTable<TLogger>(string stringTable, TLogger log)
+            where TLogger : ITaskLogger
         {
             if (string.IsNullOrEmpty(stringTable))
             {
@@ -112,14 +161,20 @@ namespace Microsoft.Build.Shared
                 // Invalid table, don't use it.
                 if (keyVal.Length != 2 || string.IsNullOrEmpty(keyVal[0]) || string.IsNullOrEmpty(keyVal[1]))
                 {
-                    log?.LogWarningWithCodeFromResources("GetCompatiblePlatform.InvalidLookupTableFormat", stringTable);
+                    if (log.IsEnabled)
+                    {
+                        log.LogWarningWithCodeFromResources("GetCompatiblePlatform.InvalidLookupTableFormat", stringTable);
+                    }
                     return null;
                 }
 
                 table[keyVal[0]] = keyVal[1];
             }
 
-            log?.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.LookupTableParsed", stringTable);
+            if (log.IsEnabled)
+            {
+                log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.LookupTableParsed", stringTable);
+            }
 
             return table;
         }
