@@ -36,19 +36,6 @@
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <!-- Node communication -->
-    <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\INodePacketFactory.cs" />
-    <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
-    <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NodePacketFactory.cs" />
-    <Compile Include="..\Shared\NodePipeBase.cs" />
-    <Compile Include="..\Shared\NodePipeClient.cs" />
-    <Compile Include="..\Shared\NodePipeServer.cs" />
-    <Compile Include="..\Shared\NodeShutdown.cs" />
-    <Compile Include="..\Shared\TaskParameter.cs" />
-    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
-    <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <!-- Source Files -->
     <Compile Include="BuiltInTasks.cs" />
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">

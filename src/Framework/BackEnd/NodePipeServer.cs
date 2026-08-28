@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.Internal
 {
@@ -29,7 +28,7 @@ namespace Microsoft.Build.Internal
         /// A timeout for the handshake. This is only used on Unix-like socket implementations, because the
         /// timeout on the PipeStream connection is ignore.
         /// </summary>
-        private static readonly int s_handshakeTimeout = NativeMethodsShared.IsWindows ? 0 : 60_000;
+        private static readonly int s_handshakeTimeout = NativeMethods.IsWindows ? 0 : 60_000;
 #endif
 
         private readonly NamedPipeServerStream _pipeServer;
@@ -156,7 +155,7 @@ namespace Microsoft.Build.Internal
                         _pipeServer.Disconnect();
                     }
 
-                    DebugUtils.DumpExceptionToFile(e);
+                    FrameworkDebugUtils.DumpExceptionToFile(e);
                     return LinkStatus.Failed;
                 }
             }

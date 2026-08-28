@@ -224,7 +224,11 @@ namespace Microsoft.Build.Internal
             return totalBytesRead;
         }
 
+#if NETSTANDARD2_0
+        private async Task<int> ReadAsync(byte[] buffer, int bytesToRead, CancellationToken cancellationToken)
+#else
         private async ValueTask<int> ReadAsync(byte[] buffer, int bytesToRead, CancellationToken cancellationToken)
+#endif
         {
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)

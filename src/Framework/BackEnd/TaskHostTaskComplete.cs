@@ -4,11 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if FEATURE_REPORTFILEACCESSES
-using Microsoft.Build.Experimental.FileAccess;
-#endif
-using Microsoft.Build.Shared;
-
 #nullable disable
 
 namespace Microsoft.Build.BackEnd
@@ -53,7 +48,7 @@ namespace Microsoft.Build.BackEnd
     internal class TaskHostTaskComplete : INodePacket
     {
 #if FEATURE_REPORTFILEACCESSES
-        private List<FileAccessData> _fileAccessData;
+        private List<TaskHostFileAccessData> _fileAccessData;
 #endif
 
         /// <summary>
@@ -107,7 +102,7 @@ namespace Microsoft.Build.BackEnd
         public TaskHostTaskComplete(
             OutOfProcTaskHostTaskResult result,
 #if FEATURE_REPORTFILEACCESSES
-            List<FileAccessData> fileAccessData,
+            List<TaskHostFileAccessData> fileAccessData,
 #endif
             IDictionary<string, string> buildProcessEnvironment)
         {
@@ -243,7 +238,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the file accesses reported by the task.
         /// </summary>
-        public List<FileAccessData> FileAccessData
+        public List<TaskHostFileAccessData> FileAccessData
         {
             [DebuggerStepThrough]
             get => _fileAccessData;
@@ -264,7 +259,7 @@ namespace Microsoft.Build.BackEnd
             TranslateBuildProcessEnvironment(translator);
 #if FEATURE_REPORTFILEACCESSES
             translator.Translate(ref _fileAccessData,
-                (ITranslator translator, ref FileAccessData data) => ((ITranslatable)data).Translate(translator));
+                (ITranslator translator, ref TaskHostFileAccessData data) => data.Translate(translator));
 #else
             bool hasFileAccessData = false;
             translator.Translate(ref hasFileAccessData);

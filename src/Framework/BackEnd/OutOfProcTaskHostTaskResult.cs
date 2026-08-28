@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.Build.BackEnd;
-
 #nullable disable
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// A result of executing a target or task.

@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using Microsoft.Build.Execution;
-
 #nullable disable
 
 namespace Microsoft.Build.BackEnd
@@ -104,7 +102,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _projectFile;
 
-        private HostServices _hostServices;
+        private TaskHostConfigurationHostServices _hostServices;
 
         /// <summary>
         /// The set of parameters to apply to the task prior to execution.
@@ -174,7 +172,7 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> buildProcessEnvironment,
             CultureInfo culture,
             CultureInfo uiCulture,
-            HostServices hostServices,
+            TaskHostConfigurationHostServices hostServices,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -354,9 +352,9 @@ namespace Microsoft.Build.BackEnd
 #endif
 
         /// <summary>
-        /// The HostServices to be used by the task host.
+        /// The serialized host services to be used by the task host.
         /// </summary>
-        public HostServices HostServices
+        public TaskHostConfigurationHostServices HostServices
         {
             [DebuggerStepThrough]
             get
@@ -553,7 +551,7 @@ namespace Microsoft.Build.BackEnd
 
             // null = CLR2 (NET35) task hosts which don't have these fields compiled in.
             // 0 = CLR4, 2+ = .NET - both support these fields.
-#if NET472 || NETCOREAPP
+#if NET472 || NETCOREAPP || NETSTANDARD2_0
             if (translator.NegotiatedPacketVersion.HasValue && translator.NegotiatedPacketVersion is 0 or >= 2)
             {
                 translator.Translate(ref _targetName);

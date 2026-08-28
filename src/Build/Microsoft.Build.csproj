@@ -110,29 +110,8 @@
       <Link>SharedUtilities\StringExtensions.cs</Link>
     </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\InvariantPayloadTransferMode.cs" />
-    <Compile Include="..\Shared\TaskHostConfiguration.cs" />
-    <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
-    <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
-    <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
-    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesRequest.cs" />
-    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
-    <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
-    <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
-    <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
-    <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
-
-    <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
-    <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
-    <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
-    <Compile Include="..\Shared\INodePacketFactory.cs" />
-    <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
-    <Compile Include="..\Shared\NodePacketFactory.cs" />
-    <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NodeShutdown.cs" />
+    <Compile Include="BackEnd\Node\NodeEngineShutdownReason.cs" />
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
@@ -142,9 +121,6 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TaskParameter.cs" />
-    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
-    <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />

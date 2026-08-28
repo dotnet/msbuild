@@ -6,7 +6,7 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.BackEnd
 {
     internal static class TaskParameterValueStringConverter
     {

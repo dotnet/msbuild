@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO.Pipes;
+using Microsoft.Build.Framework;
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
 using System;
 using System.Security.Principal;
@@ -15,7 +16,7 @@ namespace Microsoft.Build.Internal
         /// If true, sets a timeout for the handshake. This is only used on Unix-like socket implementations, because the
         /// timeout on the PipeStream connection is ignore.
         /// </summary>
-        private static readonly bool s_useHandhakeTimeout = !NativeMethodsShared.IsWindows;
+        private static readonly bool s_useHandhakeTimeout = !NativeMethods.IsWindows;
 
         private readonly NamedPipeClientStream _pipeClient;
 
