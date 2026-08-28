@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
@@ -66,6 +65,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
+            TaskTypeAnalysis taskTypeAnalysis = BuildTaskTypeAnalysis(
+                compilationContext.Compilation,
+                iTaskType,
+                iMultiThreadableTaskType,
+                multiThreadableTaskAttributeType,
+                analyzedAttributeType);
 
             // Thread-safe collections for building the graph across concurrent operation callbacks
             var callGraph = new ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>>(SymbolEqualityComparer.Default);
@@ -75,7 +80,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             compilationContext.RegisterOperationAction(opCtx =>
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
-                    taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType);
+                    taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, taskTypeAnalysis);
             },
             OperationKind.Invocation,
             OperationKind.ObjectCreation,
@@ -85,9 +90,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Phase 2: At compilation end, compute transitive closure from task methods
             compilationContext.RegisterCompilationEndAction(endCtx =>
             {
-                AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType,
-                    bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType,
-                    analyzeAllTasks, iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType);
+                AnalyzeTransitiveViolations(
+                    endCtx,
+                    callGraph,
+                    directViolations,
+                    taskTypeAnalysis,
+                    analyzeAllTasks);
             });
         }
 
@@ -104,7 +112,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
-            INamedTypeSymbol iTaskType)
+            TaskTypeAnalysis taskTypeAnalysis)
         {
             var containingSymbol = context.ContainingSymbol;
             if (containingSymbol is not IMethodSymbol containingMethod)
@@ -115,9 +123,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Normalize to OriginalDefinition for generic methods
             var callerKey = containingMethod.OriginalDefinition;
 
-            // Check if this method is inside a task type
+            // Direct analysis owns operations in task and explicitly analyzed helper hierarchies.
             var containingType = containingMethod.ContainingType;
-            bool isInsideTask = containingType is not null && ImplementsInterface(containingType, iTaskType);
+            bool isHandledByDirectAnalyzer = containingType is not null &&
+                (taskTypeAnalysis.TaskHierarchyTypes.Contains(containingType) ||
+                 taskTypeAnalysis.AnalyzedHelperHierarchyTypes.Contains(containingType));
 
             ISymbol? referencedSymbol = null;
             ImmutableArray<IArgumentOperation> arguments = default;
@@ -168,9 +178,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            // Only record violations for NON-task methods
-            // Task methods get direct analysis from MultiThreadableTaskAnalyzer
-            if (isInsideTask)
+            // Task and explicitly analyzed helper hierarchies get direct analysis
+            // from MultiThreadableTaskAnalyzer.
+            if (isHandledByDirectAnalyzer)
             {
                 return;
             }
@@ -224,38 +234,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             CompilationAnalysisContext context,
             ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>> callGraph,
             ConcurrentDictionary<ISymbol, ConcurrentBag<ViolationInfo>> directViolations,
-            INamedTypeSymbol iTaskType,
-            Dictionary<ISymbol, BannedApiEntry> bannedApiLookup,
-            ImmutableHashSet<INamedTypeSymbol> filePathTypes,
-            INamedTypeSymbol? taskEnvironmentType,
-            INamedTypeSymbol? absolutePathType,
-            INamedTypeSymbol? iTaskItemType,
-            INamedTypeSymbol? consoleType,
-            bool analyzeAllTasks,
-            INamedTypeSymbol? iMultiThreadableTaskType,
-            INamedTypeSymbol? multiThreadableTaskAttributeType,
-            INamedTypeSymbol? analyzedAttributeType)
+            TaskTypeAnalysis taskTypeAnalysis,
+            bool analyzeAllTasks)
         {
-            // Find all task types in the compilation
             var taskTypes = new List<INamedTypeSymbol>();
-            FindTaskTypes(context.Compilation.GlobalNamespace, iTaskType, taskTypes);
-
-            if (taskTypes.Count == 0)
+            foreach (INamedTypeSymbol taskType in taskTypeAnalysis.ConcreteTaskTypes)
             {
-                return;
-            }
-
-            // When scope is "multithreadable_only", filter to only multithreadable tasks
-            if (!analyzeAllTasks)
-            {
-                taskTypes = taskTypes.Where(t =>
-                    (iMultiThreadableTaskType is not null && t.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, iMultiThreadableTaskType))) ||
-                    (multiThreadableTaskAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType))) ||
-                    (analyzedAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType)))).ToList();
-
-                if (taskTypes.Count == 0)
+                if (analyzeAllTasks || taskTypeAnalysis.TypesAnalyzedAsMultiThreadableTasks.Contains(taskType))
                 {
-                    return;
+                    taskTypes.Add(taskType);
                 }
             }
 
@@ -267,13 +254,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // second, unreviewed call to the same API. Only the shortest chain per location is reported.
                 var reportedPerTaskType = new HashSet<(string ApiDisplayName, Location Location)>();
 
-                foreach (var member in taskType.GetMembers())
+                foreach (IMethodSymbol method in GetMethodsIncludingBaseTypes(taskType))
                 {
-                    if (member is not IMethodSymbol method || method.IsImplicitlyDeclared)
-                    {
-                        continue;
-                    }
-
                     // BFS from this method through the call graph
                     var visited = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
                     var queue = new Queue<(ISymbol current, List<string> chain)>();
@@ -381,45 +363,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 FormatMethodFull(taskMethod),
                 violation.ApiDisplayName,
                 chainStr));
-        }
-
-        /// <summary>
-        /// Recursively finds all types implementing ITask in the namespace tree.
-        /// </summary>
-        private static void FindTaskTypes(INamespaceSymbol ns, INamedTypeSymbol iTaskType, List<INamedTypeSymbol> result)
-        {
-            foreach (var member in ns.GetMembers())
-            {
-                if (member is INamespaceSymbol childNs)
-                {
-                    FindTaskTypes(childNs, iTaskType, result);
-                }
-                else if (member is INamedTypeSymbol type)
-                {
-                    if (!type.IsAbstract && ImplementsInterface(type, iTaskType))
-                    {
-                        result.Add(type);
-                    }
-
-                    FindNestedTaskTypes(type, iTaskType, result);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Recursively discovers task types in arbitrarily nested type hierarchies.
-        /// </summary>
-        private static void FindNestedTaskTypes(INamedTypeSymbol parentType, INamedTypeSymbol iTaskType, List<INamedTypeSymbol> result)
-        {
-            foreach (var nested in parentType.GetTypeMembers())
-            {
-                if (!nested.IsAbstract && ImplementsInterface(nested, iTaskType))
-                {
-                    result.Add(nested);
-                }
-
-                FindNestedTaskTypes(nested, iTaskType, result);
-            }
         }
 
         private static string FormatMethodShort(IMethodSymbol method)

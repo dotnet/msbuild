@@ -1909,4 +1909,41 @@ public class MultiThreadableTaskAnalyzerTests
         // IMultiThreadableTask SHOULD get MSBuildTask0002 even when scope is multithreadable_only
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldNotBeEmpty();
     }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_DeepTaskBaseClass_GetsDiagnostic()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+
+            public abstract class CommandLineTaskBase
+            {
+                public IBuildEngine BuildEngine { get; set; } = new BuildEngineStub();
+
+                protected string ReadEnvironment() => Environment.GetEnvironmentVariable("KEY");
+
+                public bool Execute()
+                {
+                    ReadEnvironment();
+                    return true;
+                }
+            }
+
+            public abstract class CompilerTaskBase : CommandLineTaskBase
+            {
+            }
+
+            public abstract class ManagedCompiler : CompilerTaskBase
+            {
+            }
+
+            public class Csc : ManagedCompiler, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        diags.Count(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBe(1);
+    }
 }

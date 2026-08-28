@@ -33,6 +33,7 @@ public class TransitiveCallChainAnalyzerTests
                 public static void DoWork() { {{helperBody}} }
             }
 
+
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public override bool Execute()
@@ -429,5 +430,49 @@ public class TransitiveCallChainAnalyzerTests
         var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
         transitive.Length.ShouldBe(2);
         transitive.Select(d => d.Location.SourceSpan).Distinct().Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task InheritedTaskMethodCallingUnsafeExtension_ProducesDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+
+            public static class TaskEnvironmentExtensions
+            {
+                public static string GetTempPath(this TaskEnvironment taskEnvironment) => Path.GetTempPath();
+            }
+
+            public abstract class CommandLineTaskBase
+            {
+                public IBuildEngine BuildEngine { get; set; } = new BuildEngineStub();
+                public TaskEnvironment TaskEnvironment { get; set; }
+
+                public bool Execute()
+                {
+                    TaskEnvironment.GetTempPath();
+                    return true;
+                }
+            }
+
+            public abstract class CompilerTaskBase : CommandLineTaskBase
+            {
+            }
+
+            public abstract class ManagedCompiler : CompilerTaskBase
+            {
+            }
+
+            public class Csc : ManagedCompiler, IMultiThreadableTask
+            {
+            }
+            """);
+
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.Length.ShouldBe(1);
+        transitive[0].GetMessage().ShouldContain("CommandLineTaskBase.Execute");
+        transitive[0].GetMessage().ShouldContain("TaskEnvironmentExtensions.GetTempPath");
+        transitive[0].GetMessage().ShouldContain("Path.GetTempPath");
     }
 }
