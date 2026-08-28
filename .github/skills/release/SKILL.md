@@ -158,6 +158,6 @@ After completing all phases, verify:
 ## Major Version Releases
 
 If `NEXT_VERSION` is a new major version (e.g., 18.x → 19.0), additional steps are needed after Phase 5. See [release.md](../../../documentation/release.md) for:
-- `src/Shared/BuildEnvironmentHelper.cs` — VS major version constants
-- `src/Shared/Constants.cs` — version constants
+- `src/Framework/BuildEnvironmentHelper.cs` — VS major version constants
+- `src/Framework/Constants.cs` — version constants
 - `src/Framework/Telemetry/TelemetryConstants.cs` — telemetry version

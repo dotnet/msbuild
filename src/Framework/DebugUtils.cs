@@ -48,8 +48,6 @@ namespace Microsoft.Build.Framework
                 }
             }
 
-            s_debugDumpPath = GetDebugDumpPath();
-
             // Initialize diagnostic fields inside the static constructor so failures
             // are caught here rather than poisoning the type with an unrecoverable
             // TypeInitializationException. On .NET Framework, EnvironmentUtilities
@@ -135,7 +133,21 @@ namespace Microsoft.Build.Framework
 
         public static string DebugPath { get; private set; }
 
-        internal static string DebugDumpPath => s_debugDumpPath;
+        internal static string DebugDumpPath
+        {
+            get
+            {
+                if (s_debugDumpPath is null)
+                {
+                    lock (typeof(FrameworkDebugUtils))
+                    {
+                        s_debugDumpPath ??= GetDebugDumpPath();
+                    }
+                }
+
+                return s_debugDumpPath;
+            }
+        }
 
         internal static string DumpFilePath => s_dumpFileName;
 
@@ -143,7 +155,7 @@ namespace Microsoft.Build.Framework
         {
             lock (typeof(FrameworkDebugUtils))
             {
-                s_debugDumpPath = GetDebugDumpPath();
+                s_debugDumpPath = null;
                 s_dumpFileName = null;
             }
         }

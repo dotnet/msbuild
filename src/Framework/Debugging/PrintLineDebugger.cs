@@ -85,11 +85,13 @@ namespace Microsoft.Build.Shared.Debugging
 
         public static void UnsetWriter()
         {
+#if DEBUG
             var currentWriter = GetStaticWriter();
 
             Assumed.NotNull(currentWriter, "Cannot unset an already null writer");
 
             CommonWriter.Writer = null;
+#endif
         }
 
         public static PrintLineDebugger Create(

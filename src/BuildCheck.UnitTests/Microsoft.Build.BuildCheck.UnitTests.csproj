@@ -38,11 +38,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Shared\UnitTests\App.config">
+    <None Include="..\UnitTests.Shared\TestAssets\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
+    <None Include="..\UnitTests.Shared\TestAssets\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestAssets\**\*">
@@ -51,7 +51,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\IsExternalInit.cs" />
+    <Compile Include="..\UnitTests.Shared\IsExternalInit.cs" />
   </ItemGroup>
 
   <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)BuildCheckUnitTestsConstants.cs">

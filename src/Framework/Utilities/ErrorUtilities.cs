@@ -13,7 +13,8 @@ namespace Microsoft.Build.Shared;
 /// <summary>
 ///  This class contains methods that are useful for error checking and validation.
 /// </summary>
-internal static class ErrorUtilities
+internal abstract class ErrorUtilitiesImpl<TResourceProvider>
+    where TResourceProvider : struct, IStringResourceProvider
 {
     /// <summary>
     /// Throws InternalErrorException.
@@ -54,7 +55,7 @@ internal static class ErrorUtilities
     [DoesNotReturn]
     internal static void ThrowInvalidOperation(string resourceName, params object?[] args)
     {
-        throw new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args));
+        throw new InvalidOperationException(ResourceUtilitiesImpl<TResourceProvider>.FormatResourceStringStripCodeAndKeyword(resourceName, args));
     }
 
     /// <summary>
@@ -62,7 +63,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
         if (!condition)
         {
             ThrowInvalidOperation(resourceName);
@@ -74,7 +75,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
         // PERF NOTE: check the condition here instead of pushing it into
         // the ThrowInvalidOperation() method, because that method always
         // allocates memory for its variable array of arguments
@@ -89,7 +90,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
         // PERF NOTE: check the condition here instead of pushing it into
         // the ThrowInvalidOperation() method, because that method always
         // allocates memory for its variable array of arguments
@@ -104,7 +105,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1, object arg2)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
         // PERF NOTE: check the condition here instead of pushing it into
         // the ThrowInvalidOperation() method, because that method always
         // allocates memory for its variable array of arguments
@@ -119,7 +120,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1, object arg2, object arg3)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
 
         // PERF NOTE: check the condition here instead of pushing it into
         // the ThrowInvalidOperation() method, because that method always
@@ -159,7 +160,7 @@ internal static class ErrorUtilities
     [DoesNotReturn]
     internal static void ThrowArgument(Exception? innerException, string resourceName, params object?[] args)
     {
-        throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
+        throw new ArgumentException(ResourceUtilitiesImpl<TResourceProvider>.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
     }
 
     /// <summary>
@@ -211,7 +212,7 @@ internal static class ErrorUtilities
     /// <param name="resourceName"></param>
     internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
         if (!condition)
         {
             ThrowArgument(innerException, resourceName);
@@ -223,7 +224,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
 
         if (!condition)
         {
@@ -236,7 +237,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0, object arg1)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
 
         if (!condition)
         {
@@ -249,7 +250,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0, object arg1, object arg2)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
 
         if (!condition)
         {
@@ -262,7 +263,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0, object arg1, object arg2, object arg3)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
 
         if (!condition)
         {
@@ -296,7 +297,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowArgumentNull([NotNull] object? parameter, string? parameterName, string resourceName)
     {
-        ResourceUtilities.VerifyResourceStringExists(resourceName);
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
         if (parameter is null)
         {
             ThrowArgumentNull(parameterName, resourceName);
@@ -307,7 +308,7 @@ internal static class ErrorUtilities
     private static void ThrowArgumentNull(string? parameterName, string resourceName)
     {
         // Most ArgumentNullException overloads append its own rather clunky multi-line message. So use the one overload that doesn't.
-        throw new ArgumentNullException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
+        throw new ArgumentNullException(ResourceUtilitiesImpl<TResourceProvider>.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
     }
 
     /// <inheritdoc cref="FrameworkErrorUtilities.VerifyCollectionCopyToArguments{T}(ICollection{T}, int, int, string, string)"/>

@@ -8,10 +8,16 @@ using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Shared
 {
+    internal interface IStringResourceProvider
+    {
+        string GetString(string name);
+    }
+
     /// <summary>
     /// This class contains utility methods for dealing with resources.
     /// </summary>
-    internal static class ResourceUtilities
+    internal abstract class ResourceUtilitiesImpl<TResourceProvider>
+        where TResourceProvider : struct, IStringResourceProvider
     {
         /// <summary>
         /// Retrieves the MSBuild F1-help keyword for the given resource string. Help keywords are used to index help topics in
@@ -28,7 +34,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string name.</param>
         /// <returns>Resource string contents.</returns>
         internal static string GetResourceString(string resourceName)
-            => AssemblyResources.GetString(resourceName);
+            => default(TResourceProvider).GetString(resourceName);
 
         /// <summary>
         /// Loads the specified string resource and formats it with the arguments passed in. If the string resource has an MSBuild
@@ -292,7 +298,7 @@ namespace Microsoft.Build.Shared
             {
                 // Look up the resource string in the engine's string table.
                 // NOTE: the AssemblyResources.GetString() method is thread-safe
-                string unformattedMessage = AssemblyResources.GetString(resourceName);
+                string unformattedMessage = default(TResourceProvider).GetString(resourceName);
 
                 Assumed.NotNull(unformattedMessage, $"The resource string \"{resourceName}\" was not found.");
             }

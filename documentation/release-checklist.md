@@ -264,6 +264,6 @@ Steps are **mostly parallel** unless noted.
 ## If {{NEXT_VERSION}} is a new major version
 
 - [ ] Update VS major version references per [release.md](./release.md):
-  - [`src/Shared/BuildEnvironmentHelper.cs`](https://github.com/dotnet/msbuild/blob/main/src/Shared/BuildEnvironmentHelper.cs)
-  - [`src/Shared/Constants.cs`](https://github.com/dotnet/msbuild/blob/main/src/Shared/Constants.cs)
+  - [`src/Framework/BuildEnvironmentHelper.cs`](https://github.com/dotnet/msbuild/blob/main/src/Framework/BuildEnvironmentHelper.cs)
+  - [`src/Framework/Constants.cs`](https://github.com/dotnet/msbuild/blob/main/src/Framework/Constants.cs)
   - [`src/Framework/Telemetry/TelemetryConstants.cs`](https://github.com/dotnet/msbuild/blob/main/src/Framework/Telemetry/TelemetryConstants.cs)

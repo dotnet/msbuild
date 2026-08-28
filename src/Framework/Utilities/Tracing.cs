@@ -24,7 +24,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// A dictionary of named counters
         /// </summary>
-        private static readonly Dictionary<string, int> s_counts;
+        private static readonly Dictionary<string, int> s_counts = new();
 
         /// <summary>
         /// Last time logging happened
@@ -42,7 +42,7 @@ namespace Microsoft.Build.Internal
         private static string s_slot = String.Empty;
 
         /// <summary>
-        /// Short name of the current assembly - to distinguish statics when this type is shared into different assemblies
+        /// Short name of the assembly that owns the tracing state.
         /// </summary>
         private static readonly string s_currentAssemblyName;
 #pragma warning restore 649
@@ -54,8 +54,6 @@ namespace Microsoft.Build.Internal
         [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Justification = "Clearly I can't inline this. Plus, it's debug only.")]
         static Tracing()
         {
-            s_counts = new Dictionary<string, int>();
-
             string val = Environment.GetEnvironmentVariable("MSBUILDTRACEINTERVAL");
             double seconds;
             if (!String.IsNullOrEmpty(val) && System.Double.TryParse(val, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out seconds))

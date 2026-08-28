@@ -67,16 +67,19 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private readonly Type _desiredInterface;
 
-        private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
+        private static readonly string[] runtimeAssemblies = FindRuntimeAssembliesWithMicrosoftBuildFramework();
 
         private static string microsoftBuildFrameworkPath;
 
         // We need to append Microsoft.Build.Framework from next to the executing assembly first to make sure it's loaded before the runtime variant.
-        private static string[] findRuntimeAssembliesWithMicrosoftBuildFramework()
+        private static string[] FindRuntimeAssembliesWithMicrosoftBuildFramework()
         {
-            string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            microsoftBuildFrameworkPath = Path.Combine(msbuildDirectory, "Microsoft.Build.Framework.dll");
-            string[] msbuildAssemblies = Directory.GetFiles(msbuildDirectory, "*.dll");
+            microsoftBuildFrameworkPath = typeof(ITaskItem).Assembly.Location;
+            // The tools directory is expected to contain the same Framework build as the loaded assembly.
+            string msbuildDirectory = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
+            string[] msbuildAssemblies = !string.IsNullOrEmpty(msbuildDirectory) && Directory.Exists(msbuildDirectory)
+                ? Directory.GetFiles(msbuildDirectory, "*.dll")
+                : [];
             string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
 
             return [.. runtimeAssemblies, .. msbuildAssemblies];

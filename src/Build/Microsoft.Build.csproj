@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\DebuggingSources.proj" />
-
   <PropertyGroup>
     <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
@@ -100,28 +98,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\CanonicalError.cs">
-      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\PropertyParser.cs">
+    <Compile Include="..\Tasks\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StringExtensions.cs">
-      <Link>SharedUtilities\StringExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\TaskLoader.cs" />
+    <Compile Include="Resources\ResourceUtilities.cs" />
     <Compile Include="BackEnd\Node\NodeEngineShutdownReason.cs" />
-    <Compile Include="..\Shared\PlatformNegotiation.cs">
+    <Compile Include="..\Tasks\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TaskLoggingHelper.cs">
+    <Compile Include="..\Utilities\TaskLoggingHelper.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
+    <Compile Include="..\Tasks\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
@@ -237,7 +228,6 @@
     <Compile Include="BackEnd\BuildManager\RequestedProjectState.cs" />
     <Compile Include="BackEnd\Components\BuildComponentFactoryCollection.cs" />
     <Compile Include="BackEnd\Components\Caching\IRegisteredTaskObjectCache.cs" />
-    <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs" />
     <Compile Include="BackEnd\Components\Caching\RegisteredTaskObjectCache.cs" />
     <Compile Include="BackEnd\Components\Logging\EvaluationLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\BuildLoggingContext.cs" />
@@ -625,31 +615,9 @@
     <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.cs" />
     <Compile Include="Xml\XmlReaderExtension.cs" />
-    <Compile Include="..\Shared\BuildEventFileInfo.cs">
-      <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <Link>Errors\ErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
-      <Link>InprocTrackingNativeMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectErrorUtilities.cs">
-      <Link>Errors\ProjectErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectFileErrorUtilities.cs">
-      <Link>Errors\ProjectFileErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <Link>SharedUtilities\ResourceUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\TypeLoader.cs">
-      <Link>SharedUtilities\TypeLoader.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\VisualStudioConstants.cs">
-      <Link>VisualStudioConstants.cs</Link>
-    </Compile>
+    <Compile Include="Errors\BuildEventFileInfo.cs" />
+    <Compile Include="Errors\ProjectErrorUtilities.cs" />
+    <Compile Include="Errors\ProjectFileErrorUtilities.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 
     <!-- Win32 RC Files -->

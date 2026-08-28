@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -16,36 +16,25 @@ namespace Microsoft.Build.Shared.Debugging
 {
     internal static class DebugUtils
     {
-        internal static bool ResetDebugDumpPathInRunningTests
+        internal static void ResetDebugDumpPath()
         {
-            get => false;
-            set
+            if (BuildEnvironmentHelper.Instance.RunningTests)
             {
-                if (value)
-                {
-                    FrameworkDebugUtils.ResetDebugDumpPath();
-                }
+                FrameworkDebugUtils.ResetDebugDumpPath();
             }
         }
 
-        /// <summary>
-        /// The directory used for diagnostic log files.
-        /// </summary>
         internal static string DebugDumpPath => FrameworkDebugUtils.DebugDumpPath;
 
-        /// <summary>
-        /// The file used for diagnostic log files.
-        /// </summary>
         internal static string DumpFilePath => FrameworkDebugUtils.DumpFilePath;
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {
             var extension = Path.GetExtension(fileName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
-
             var fullPath = Path.Combine(FrameworkDebugUtils.DebugPath, fileName);
-
             var counter = 0;
+
             while (FileSystems.Default.FileExists(fullPath))
             {
                 fileName = $"{fileNameWithoutExtension}_{counter++}{extension}";
@@ -55,9 +44,6 @@ namespace Microsoft.Build.Shared.Debugging
             return fullPath;
         }
 
-        /// <summary>
-        /// Dump any unhandled exceptions to a file so they can be diagnosed
-        /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "It is called by the CLR")]
         internal static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
         {
@@ -66,10 +52,6 @@ namespace Microsoft.Build.Shared.Debugging
             RecordCrashTelemetryForUnhandledException(ex);
         }
 
-        /// <summary>
-        /// Records and immediately flushes crash telemetry for an unhandled exception.
-        /// Best effort - must never throw, as the process is already crashing.
-        /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         private static void RecordCrashTelemetryForUnhandledException(Exception ex)
         {
@@ -80,18 +62,11 @@ namespace Microsoft.Build.Shared.Debugging
                 isCritical: ExceptionHandling.IsCriticalException(ex));
         }
 
-        /// <summary>
-        /// Dump the exception information to a file
-        /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
             FrameworkDebugUtils.DumpExceptionToFile(ex);
         }
 
-        /// <summary>
-        /// Returns the content of any exception dump files modified
-        /// since the provided time, otherwise returns an empty string.
-        /// </summary>
         internal static string ReadAnyExceptionFromFile(DateTime fromTimeUtc)
         {
             var builder = new StringBuilder();

@@ -60,7 +60,7 @@
     <DefineConstants Condition="'$(XUnitV3Version)' != '' and $([MSBuild]::VersionGreaterThanOrEquals($(XUnitV3Version), '4.0.0'))">$(DefineConstants);XUNIT_V3_4_OR_LATER</DefineConstants>
 
     <!-- Arcade sdk also carries an xunit.runner.json which sometimes overrides the one in this repo. Assign a value to the arcade properties XUnitDesktopSettingsFile and XUnitCoreSettingsFile to prevent the arcade version of the file being added. -->
-    <XUnitDesktopSettingsFile>$(MSBuildThisFileDirectory)Shared\UnitTests\xunit.runner.json</XUnitDesktopSettingsFile>
+    <XUnitDesktopSettingsFile>$(MSBuildThisFileDirectory)UnitTests.Shared\TestAssets\xunit.runner.json</XUnitDesktopSettingsFile>
     <XUnitCoreSettingsFile>$(XUnitDesktopSettingsFile)</XUnitCoreSettingsFile>
   </PropertyGroup>
 
@@ -89,7 +89,7 @@
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 
-    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" Condition="'$(IsLibraryTestProject)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
+    <Compile Include="$(RepoRoot)src\UnitTests.Shared\TestAssemblyInfo.cs" Condition="'$(IsLibraryTestProject)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>
@@ -112,7 +112,7 @@
   <ItemGroup Condition="'$(OutputType)' == 'Exe'">
     <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent
          tests from picking up these files from the repo root. -->
-    <Content Include="$(RepoRoot)src\Shared\EmptyDirectoryBuildFiles\*" CopyToOutputDirectory="PreserveNewest"
+    <Content Include="$(RepoRoot)src\UnitTests.Shared\EmptyDirectoryBuildFiles\*" CopyToOutputDirectory="PreserveNewest"
              Visible="false" Pack="false"/>
   </ItemGroup>
 

@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\DebuggingSources.proj" />
-
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
@@ -34,67 +32,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
+    <Compile Include="ResourceUtilities.cs" />
 
     <!-- Node communication -->
     <!-- Source Files -->
     <Compile Include="BuiltInTasks.cs" />
-    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
+    <Compile Include="..\Utilities\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
+    <Compile Include="..\Utilities\AssemblyFolders\AssemblyFoldersFromConfig.cs">
       <Link>AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfig.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
+    <Compile Include="..\Utilities\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
       <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderCollection.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
+    <Compile Include="..\Utilities\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
       <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderItem.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\CanonicalError.cs">
-      <Link>CanonicalError.cs</Link>
     </Compile>
     <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
-      <Link>ExtensionFoldersRegistryKey.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\PropertyParser.cs">
-      <Link>PropertyParser.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\RegistryDelegates.cs">
-      <Link>RegistryDelegates.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\RegistryHelper.cs">
-      <Link>RegistryHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
-      <Link>TaskLoggingHelperExtension.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
-      <Link>StreamMappedString.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\VisualStudioConstants.cs">
-      <Link>VisualStudioConstants.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs" />
-    <Compile Include="..\Shared\ResourceUtilities.cs" />
-    <Compile Include="..\Shared\LanguageParser\token.cs" />
-    <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />
-    <Compile Include="..\Shared\LanguageParser\tokenCharReader.cs" />
-    <Compile Include="..\Shared\LanguageParser\tokenEnumerator.cs" />
-    <Compile Include="..\Shared\LanguageParser\CSharptokenCharReader.cs" />
-    <Compile Include="..\Shared\LanguageParser\CSharptokenEnumerator.cs" />
-    <Compile Include="..\Shared\LanguageParser\CSharptokenizer.cs" />
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenCharReader.cs" />
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenEnumerator.cs" />
-    <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs" />
-    <Compile Include="..\Shared\PlatformNegotiation.cs">
-      <Link>PlatformNegotiation.cs</Link>
-    </Compile>
+    <Compile Include="PropertyParser.cs" />
+    <Compile Include="TaskLoggingHelperExtension.cs" />
+    <Compile Include="LanguageParser\*.cs" />
+    <Compile Include="PlatformNegotiation.cs" />
     <Compile Include="AppConfig\*.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />

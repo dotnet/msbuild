@@ -7,11 +7,7 @@ using Microsoft.Build.Framework;
 
 #nullable disable
 
-#if BUILD_ENGINE
-namespace Microsoft.Build.BackEnd.Components.Caching
-#else
 namespace Microsoft.Build.Shared
-#endif
 {
     /// <summary>
     /// This is a cache of objects which are registered to be disposed of at a specified time.
