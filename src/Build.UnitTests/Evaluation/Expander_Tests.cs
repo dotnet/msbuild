@@ -5565,6 +5565,265 @@ $(
         // =====================================================================
 
         [Fact]
+        public void NormalizePath_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_ParentSegment_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', '..', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "file.txt"));
+        }
+
+        [UnixOnlyFact]
+        public void NormalizePath_BackslashRootedPath_MatchesNonMultithreadedResult()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var projectDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            // Baseline: non-mt mode, where the process current directory is the project directory.
+            env.SetCurrentDirectory(projectDir.Path);
+            string expected = IntrinsicFunctions.NormalizePath(@"\tmp\file.txt");
+
+            // -mt mode must agree: on Unix a backslash is an ordinary filename character, so resolution
+            // must not normalize separators or it would silently point at a different file.
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::NormalizePath('\tmp\file.txt'))", projectDir.Path, wrongDir.Path);
+
+            result.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void NormalizePath_BackslashSeparatedPath_MatchesNonMultithreadedResult()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var projectDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            env.SetCurrentDirectory(projectDir.Path);
+            string expected = IntrinsicFunctions.NormalizePath(@"obj\..\file.txt");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::NormalizePath('obj\..\file.txt'))", projectDir.Path, wrongDir.Path);
+
+            result.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void MSBuildFileExists_BackslashSeparatedPath_MatchesNonMultithreadedResult()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var projectDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(projectDir.Path, "sub"));
+            File.WriteAllText(Path.Combine(projectDir.Path, "sub", "marker.txt"), "x");
+
+            // FileExists applies no separator normalization in either mode, so both must agree.
+            env.SetCurrentDirectory(projectDir.Path);
+            string expected = IntrinsicFunctions.FileExists(@"sub\marker.txt").ToString();
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::FileExists('sub\marker.txt'))", projectDir.Path, wrongDir.Path);
+
+            result.ShouldBe(expected);
+        }
+
+        [WindowsOnlyFact]
+        public void NormalizePath_DriveRelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+            string drive = Path.GetPathRoot(correctDir.Path).Substring(0, 2);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::NormalizePath('{drive}obj', 'file.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_AbsolutePath_IgnoresThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var absoluteDir = env.CreateFolder(createFolder: true);
+
+            string absolutePath = Path.Combine(absoluteDir.Path, "file.txt");
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::NormalizePath('{absolutePath}'))", correctDir.Path);
+
+            result.ShouldBe(absolutePath);
+        }
+
+        [Fact]
+        public void NormalizePath_WithoutThreadWorkingDirectory_UsesProcessWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var processDir = env.CreateFolder(createFolder: true);
+            env.SetCurrentDirectory(processDir.Path);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizePath('obj', 'file.txt'))", null);
+
+            result.ShouldBe(Path.Combine(processDir.Path, "obj", "file.txt"));
+        }
+
+        [Fact]
+        public void NormalizePath_EmptyPath_ThrowsArgumentException()
+        {
+            Should.Throw<ArgumentException>(() => IntrinsicFunctions.NormalizePath([]));
+        }
+
+        [Fact]
+        public void NormalizePath_NullPathArray_ThrowsArgumentNullException()
+        {
+            Should.Throw<ArgumentNullException>(() => IntrinsicFunctions.NormalizePath((string[])null));
+        }
+
+        [Fact]
+        public void NormalizePath_IllegalPath_ThrowsArgumentException()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            env.WithTransientTestState(new TransientThreadWorkingDirectory(correctDir.Path));
+
+            // Resolution against the thread working directory intentionally swallows the invalid-path
+            // exception (so that non-throwing intrinsics such as FileExists keep working); NormalizePath
+            // is still expected to surface it, matching non-mt behavior.
+            Should.Throw<ArgumentException>(() => IntrinsicFunctions.NormalizePath("bad\0path"));
+        }
+
+        [Fact]
+        public void NormalizeDirectory_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::NormalizeDirectory('obj'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "obj") + Path.DirectorySeparatorChar);
+        }
+
+        [Fact]
+        public void MSBuildFileExists_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "marker.txt"), "x");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::FileExists('marker.txt'))", correctDir.Path, wrongDir.Path)
+                .ShouldBe("True");
+            ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::FileExists('absent.txt'))", correctDir.Path, wrongDir.Path)
+                .ShouldBe("False");
+        }
+
+        [UnixOnlyFact]
+        public void MSBuildFileExists_BackslashRootedPath_MatchesNonMultithreadedResult()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var projectDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            // FileExistsNoThrow normalizes separators internally, so on Unix '\tmp\x' is rooted by the
+            // time the probe happens. Resolution must not treat it as relative to the project directory.
+            Directory.CreateDirectory(Path.Combine(projectDir.Path, "tmp"));
+            File.WriteAllText(Path.Combine(projectDir.Path, "tmp", "decoy.txt"), "x");
+
+            env.SetCurrentDirectory(projectDir.Path);
+            string expected = IntrinsicFunctions.FileExists(@"\tmp\decoy.txt").ToString();
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::FileExists('\tmp\decoy.txt'))", projectDir.Path, wrongDir.Path);
+
+            result.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void MSBuildDirectoryExists_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "obj"));
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::DirectoryExists('obj'))", correctDir.Path, wrongDir.Path)
+                .ShouldBe("True");
+            ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::DirectoryExists('absent'))", correctDir.Path, wrongDir.Path)
+                .ShouldBe("False");
+        }
+
+        [Fact]
+        public void GetDirectoryNameOfFileAbove_RelativeStartingDirectory_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "marker.txt"), "x");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::GetDirectoryNameOfFileAbove('.', 'marker.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(correctDir.Path);
+        }
+
+        [Fact]
+        public void GetPathOfFileAbove_RelativeStartingDirectory_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "marker.txt"), "x");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([MSBuild]::GetPathOfFileAbove('marker.txt', '.'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine(correctDir.Path, "marker.txt"));
+        }
+
+        [Fact]
+        public void MakeRelative_RelativeBasePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create(_output);
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string target = Path.Combine(correctDir.Path, "marker.txt");
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([MSBuild]::MakeRelative('obj', '{target}'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe(Path.Combine("..", "marker.txt"));
+        }
+
+        [Fact]
         public void FileReadAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
