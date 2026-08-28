@@ -494,6 +494,46 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
         }
 
+        [Fact]
+        public void ExtendedBuildError_RoutedThroughTaskHost_PreservesStructuredData()
+        {
+            string projectContent = CreateTestProject(
+                taskName: "ExtendedBuildErrorTestTask",
+                taskClass: "ExtendedBuildErrorTask");
+
+            string projectFile = Path.Combine(_testProjectsDir, "ExtendedBuildErrorProject.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            var logger = new MockLogger(_output);
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = true,
+                Loggers = [logger],
+                DisableInProcNode = false,
+                EnableNodeReuse = false
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                new[] { "TestTarget" },
+                null);
+
+            BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+
+            result.ShouldHaveFailed();
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "ExtendedBuildErrorTestTask");
+            logger.Errors.Count.ShouldBe(1);
+
+            ExtendedBuildErrorEventArgs error = logger.Errors[0].ShouldBeOfType<ExtendedBuildErrorEventArgs>();
+            error.Code.ShouldBe("TEST0001");
+            error.ExtendedType.ShouldBe("cpp");
+            error.ExtendedData.ShouldBe("""{"tool":"cl.exe"}""");
+            error.ExtendedMetadata.ShouldNotBeNull();
+            error.ExtendedMetadata["source"].ShouldBe("structured-output");
+        }
+
         /// <summary>
         /// Regression test: a task routed to a TaskHost must not log <c>TaskAssemblyLocationMismatch</c>.
         /// <c>TaskHostTask</c> is only an in-proc proxy for a task that is loaded in a separate process, so
@@ -625,6 +665,34 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             Log.LogMessage(MessageImportance.High, "NonEnlightenedTask executed");
             Log.LogMessage(MessageImportance.High, $"ROUTING_LEGACY_TASK_PID={Process.GetCurrentProcess().Id}");
             return true;
+        }
+    }
+
+    public class ExtendedBuildErrorTestTask : Task
+    {
+        public override bool Execute()
+        {
+            BuildEngine.LogErrorEvent(new ExtendedBuildErrorEventArgs(
+                "cpp",
+                subcategory: null,
+                code: "TEST0001",
+                file: "source.cpp",
+                lineNumber: 1,
+                columnNumber: 2,
+                endLineNumber: 1,
+                endColumnNumber: 3,
+                message: "Structured compiler error",
+                helpKeyword: null,
+                senderName: nameof(ExtendedBuildErrorTestTask))
+            {
+                ExtendedData = """{"tool":"cl.exe"}""",
+                ExtendedMetadata = new Dictionary<string, string>
+                {
+                    ["source"] = "structured-output"
+                }
+            });
+
+            return false;
         }
     }
 

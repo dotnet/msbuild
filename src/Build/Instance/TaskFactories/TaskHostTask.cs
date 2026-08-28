@@ -669,16 +669,22 @@ namespace Microsoft.Build.BackEnd
             switch (logMessagePacket.EventType)
             {
                 case LoggingEventType.BuildErrorEvent:
+                case LoggingEventType.ExtendedBuildErrorEvent:
                     this.BuildEngine.LogErrorEvent((BuildErrorEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.BuildWarningEvent:
+                case LoggingEventType.ExtendedBuildWarningEvent:
                     this.BuildEngine.LogWarningEvent((BuildWarningEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.TaskCommandLineEvent:
                 case LoggingEventType.BuildMessageEvent:
+                case LoggingEventType.CriticalBuildMessage:
+                case LoggingEventType.ExtendedBuildMessageEvent:
+                case LoggingEventType.ExtendedCriticalBuildMessageEvent:
                     this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.CustomEvent:
+                case LoggingEventType.ExtendedCustomEvent:
                     BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent.Value.Value;
 
                     // "Custom events" in terms of the communications infrastructure can also be, e.g. custom error events,
