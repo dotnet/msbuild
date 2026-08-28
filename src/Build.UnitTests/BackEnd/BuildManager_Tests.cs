@@ -744,7 +744,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(true)]
         public void MultiThreadedOutOfProcBuildUsesSingleWorkerProcess(bool designTimeBuild)
         {
+            if (Environment.ProcessorCount < 2)
+            {
+                Assert.Skip("Server GC can report as Workstation GC on single-processor machines.");
+            }
+
             _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            _env.SetEnvironmentVariable("DOTNET_gcServer", null);
+            _env.SetEnvironmentVariable("COMPlus_gcServer", null);
 
             const int childCount = 4;
             string projectDirectory = _env.CreateFolder().Path;
@@ -761,7 +768,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                               <Sleep>$([System.Threading.Thread]::Sleep(1000))</Sleep>
                             </PropertyGroup>
                             <ItemGroup>
-                              <WorkerPid Include="$(DesignTimeBuild)|$([System.Diagnostics.Process]::GetCurrentProcess().Id)" />
+                              <WorkerPid Include="$(DesignTimeBuild)|$([System.Diagnostics.Process]::GetCurrentProcess().Id)|$([System.Runtime.GCSettings]::IsServerGC)" />
                             </ItemGroup>
                           </Target>
                         </Project>
@@ -795,6 +802,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 EnableNodeReuse = false,
                 SaveOperatingEnvironment = false,
                 Loggers = [_logger],
+                NodeExeLocation = Path.Combine(AppContext.BaseDirectory, Constants.MSBuildExecutableName),
             };
             var globalProperties = new Dictionary<string, string>
             {
@@ -816,8 +824,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             workerOutputs.Length.ShouldBe(childCount);
             workerOutputs.ShouldAllBe(output => output.StartsWith($"{designTimeBuild}|", StringComparison.OrdinalIgnoreCase));
 
-            int[] workerProcessIds = workerOutputs
-                .Select(output => int.Parse(output[(output.IndexOf('|') + 1)..], CultureInfo.InvariantCulture))
+            string[][] workerOutputParts = workerOutputs
+                .Select(output => output.Split('|'))
+                .ToArray();
+            workerOutputParts.ShouldAllBe(parts => parts.Length == 3);
+            workerOutputParts.ShouldAllBe(parts => bool.Parse(parts[2]));
+
+            int[] workerProcessIds = workerOutputParts
+                .Select(parts => int.Parse(parts[1], CultureInfo.InvariantCulture))
                 .ToArray();
             workerProcessIds.Distinct().ShouldHaveSingleItem();
             workerProcessIds[0].ShouldNotBe(Process.GetCurrentProcess().Id);

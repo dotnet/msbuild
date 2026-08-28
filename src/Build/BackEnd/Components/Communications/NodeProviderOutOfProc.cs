@@ -373,7 +373,7 @@ namespace Microsoft.Build.BackEnd
                 MSBuildLocation: msbuildLocation,
                 CommandLineArgs: $"/noautoresponse /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcMultiNode)} /nodeReuse:false /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()} /m:{slotCount}",
                 Handshake: handshake,
-                EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
+                EnvironmentOverrides: CreateMultiNodeWorkerEnvironmentOverrides());
 
             INodeLauncher nodeLauncher = (INodeLauncher)ComponentHost.GetComponent(BuildComponentType.NodeLauncher);
             Process process = nodeLauncher.Start(launchData, firstNodeId);
@@ -426,6 +426,21 @@ namespace Microsoft.Build.BackEnd
             {
                 _availableMultiNodeProcessSlots.Enqueue(slot);
             }
+        }
+
+        internal static IDictionary<string, string> CreateMultiNodeWorkerEnvironmentOverrides()
+        {
+            IDictionary<string, string> baseOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+            var environmentOverrides = baseOverrides is null
+                ? new Dictionary<string, string>()
+                : new Dictionary<string, string>(baseOverrides);
+
+            if (Environment.GetEnvironmentVariable("DOTNET_gcServer") is null)
+            {
+                environmentOverrides["DOTNET_gcServer"] = "1";
+            }
+
+            return environmentOverrides;
         }
 
         private bool ShutdownMultiNodeProcess()
