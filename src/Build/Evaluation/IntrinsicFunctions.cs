@@ -554,7 +554,16 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A canonicalized full path with the correct directory separators.</returns>
         public static string NormalizePath(params string[] path)
         {
-            return FileUtilities.NormalizePath(path);
+            string combinedPath = Path.Combine(path);
+
+            if (string.IsNullOrEmpty(FileUtilities.CurrentThreadWorkingDirectory))
+            {
+                return FileUtilities.NormalizePath(combinedPath);
+            }
+
+            string fixedPath = FileUtilities.FixFilePath(combinedPath);
+            AbsolutePath? resolvedPath = FileUtilities.MakeFullPathFromThreadWorkingDirectory(fixedPath);
+            return FileUtilities.NormalizePath(resolvedPath?.Value ?? fixedPath);
         }
 
         /// <summary>
