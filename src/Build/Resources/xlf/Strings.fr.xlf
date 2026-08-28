@@ -943,6 +943,11 @@
         <target state="translated">MSB4283: la tâche « {0} » n’a pas pu être exécutée, car l’exécution des tâches nécessite le chargement par réflexion des assemblys et des types de tâches, ce qui n’est pas pris en charge dans cet hôte allégé ou Native AOT. Générez avec un MSBuild basé sur JIT pour exécuter des tâches.</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
       </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="new">File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">Les accès aux fichiers de création de rapports sont uniquement pris en charge à l’aide de la saveur x64 de MSBuild.</target>
