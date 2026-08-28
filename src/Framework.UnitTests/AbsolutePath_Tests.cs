@@ -236,6 +236,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void GetCanonicalForm_IsPublic()
+        {
+            typeof(AbsolutePath).GetMethod(nameof(AbsolutePath.GetCanonicalForm), Type.EmptyTypes).ShouldNotBeNull();
+        }
+
+        [Fact]
         public void GetCanonicalForm_NullPath_ShouldThrow()
         {
             var absolutePath = new AbsolutePath(null!, null!, ignoreRootedCheck: true);

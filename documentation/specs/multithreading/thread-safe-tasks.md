@@ -149,6 +149,7 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
     internal AbsolutePath(string path, bool ignoreRootedCheck) { }
     public AbsolutePath(string path); // Checks Path.IsPathRooted
     public AbsolutePath(string path, AbsolutePath basePath) { }
+    public AbsolutePath GetCanonicalForm();
     public static implicit operator string(AbsolutePath path) { }
     public override string ToString() => Value;
 
@@ -157,6 +158,7 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 ```
 
 `AbsolutePath` converts implicitly to string for seamless integration with existing File/Directory APIs.
+`GetCanonicalForm()` applies `Path.GetFullPath()` canonicalization to an already rooted path, resolving `.` and `..` segments and normalizing directory separators. Use it when migrating code that previously relied on `Path.GetFullPath()`; `TaskEnvironment.GetAbsolutePath()` roots paths but intentionally does not canonicalize them.
 
 ### API Usage Example
 
