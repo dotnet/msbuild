@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
@@ -66,6 +65,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
             var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
 
+            TaskTypeAnalysis taskTypeAnalysis = BuildTaskTypeAnalysis(
+                compilationContext.Compilation,
+                iTaskType,
+                iMultiThreadableTaskType,
+                multiThreadableTaskAttributeType,
+                analyzedAttributeType);
+
             // Build symbol lookup for banned APIs
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
 
@@ -77,28 +83,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 var namedType = (INamedTypeSymbol)symbolStartContext.Symbol;
 
-                // Determine what kind of task this is
-                bool isTask = ImplementsInterface(namedType, iTaskType);
-                bool isMultiThreadableTask = iMultiThreadableTaskType is not null && ImplementsInterface(namedType, iMultiThreadableTaskType);
-
-                // Helper classes can opt-in via [MSBuildMultiThreadableTaskAnalyzed] attribute
-                bool hasAnalyzedAttribute = analyzedAttributeType is not null &&
-                    namedType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType));
-
-                // Tasks marked with [MSBuildMultiThreadableTask] should be analyzed as multithreadable
-                bool hasMultiThreadableAttribute = multiThreadableTaskAttributeType is not null &&
-                    namedType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType));
-
-                if (!isTask && !hasAnalyzedAttribute)
+                bool isInTaskHierarchy = taskTypeAnalysis.TaskHierarchyTypes.Contains(namedType);
+                bool isInAnalyzedHelperHierarchy = taskTypeAnalysis.AnalyzedHelperHierarchyTypes.Contains(namedType);
+                if (!isInTaskHierarchy && !isInAnalyzedHelperHierarchy)
                 {
                     return;
                 }
 
-                // Helper classes with the attribute or tasks with [MSBuildMultiThreadableTask] are treated as IMultiThreadableTask
-                bool analyzeAsMultiThreadable = isMultiThreadableTask || hasAnalyzedAttribute || hasMultiThreadableAttribute;
-
                 // When scope is "multithreadable_only", only analyze MSBuildTask0002/0003 for multithreadable tasks
-                bool reportEnvironmentRules = analyzeAllTasks || analyzeAsMultiThreadable;
+                bool reportEnvironmentRules = analyzeAllTasks ||
+                    taskTypeAnalysis.MultiThreadableTaskHierarchyTypes.Contains(namedType) ||
+                    isInAnalyzedHelperHierarchy;
 
                 // Register operation-level analysis within this type
                 symbolStartContext.RegisterOperationAction(
