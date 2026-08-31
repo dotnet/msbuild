@@ -24,9 +24,9 @@
     <Usage Id="Microsoft.Diagnostics.NETCore.Client" Version="0.2.61701" />
     <Usage Id="Microsoft.Diagnostics.Runtime" Version="1.1.57604" />
     <Usage Id="Microsoft.Diagnostics.Tracing.TraceEvent" Version="2.0.49" />
-    <Usage Id="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.25468.4" />
+    <Usage Id="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.26423.3" />
     <Usage Id="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
-    <Usage Id="Microsoft.DotNet.SourceBuild.Tasks" Version="6.0.0-beta.25468.4" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Microsoft.DotNet.SourceBuild.Tasks" Version="6.0.0-beta.26423.3" IsDirectDependency="true" IsAutoReferenced="true" />
     <Usage Id="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.21431.1" IsDirectDependency="true" IsAutoReferenced="true" />
     <Usage Id="Microsoft.Extensions.DependencyModel" Version="5.0.0" IsDirectDependency="true" />
     <Usage Id="Microsoft.Net.Compilers.Toolset" Version="3.9.0-2.20574.26" IsDirectDependency="true" IsAutoReferenced="true" />
