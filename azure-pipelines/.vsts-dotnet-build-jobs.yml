@@ -39,6 +39,7 @@ jobs:
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\MicroBuild\Output'
       ArtifactName: MicroBuildOutputs
+      condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
     # RAINES TODO: switch to pipeline?
     - output: buildArtifacts
@@ -184,12 +185,12 @@ jobs:
 
       $paths = @(
         "log/$(BuildConfiguration)",
-        "$(Build.StagingDirectory)/MicroBuild/Output",
         "packages/$(BuildConfiguration)",
         "xsd"
       )
 
       if ("${{ parameters.enableOptProf }}" -eq "true") {
+        $paths += "$(Build.StagingDirectory)/MicroBuild/Output"
         $paths += "OptProf/$(BuildConfiguration)/Data"
         $paths += "VSSetup/$(BuildConfiguration)"
       }

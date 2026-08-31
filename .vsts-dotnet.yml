@@ -15,8 +15,10 @@ parameters:
   default: 'default'
 - name: enableOptProf
   displayName: Enable OptProf data collection for this build
+  # This servicing branch no longer has optimization data to apply and no longer
+  # collects fresh data.
   type: boolean
-  default: true
+  default: false
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
