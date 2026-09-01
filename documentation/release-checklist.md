@@ -81,12 +81,39 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
   - [ ] **1.2c** Pre-create default channel mapping for the **next** release branch (**last command — omit `--no-pr` to create the PR**). The `vs{{NEXT_VERSION}}` branch does not exist yet, so pass `-q` (non-interactive) to skip the "branch doesn't exist" prompt — otherwise the command blocks/aborts: \
   `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch vs{{NEXT_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} -q`
   - [ ] **1.2d** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE1_DARC_PR}}
-- [ ] **1.3** **Identify predecessor branches that will no longer be supported.** Record the list here — Phase 2.3e uses it to clean up their DARC subscriptions. \
+- [ ] **1.3** **Audit _every_ live `vs*` branch for retirement.** Record the list here — Phase 2.3e uses it to clean up their DARC subscriptions. \
+  ⚠️ **This is a full audit, not a single-candidate check.** Do **not** just evaluate `vs{{THIS_RELEASE_VERSION}} - 3`. Retirement is missed far more often than it is done wrongly, and every miss is permanent: nothing else in this process ever revisits an older branch, so stale branches accumulate indefinitely and keep consuming Arcade/OptProf maintenance. Enumerate the full list and judge each one. \
+  - [ ] **1.3a** Enumerate current state (both commands, plus the repo's real branches): \
+  `darc get-default-channels --source-repo https://github.com/dotnet/msbuild` \
+  `darc get-subscriptions --source-repo https://github.com/dotnet/msbuild` \
+  `git fetch upstream && git branch -r --list 'upstream/vs*'`
+
   How to identify a retired branch:
     - **The combined rule:** a branch paired with both an SDK band and a VS version is retired **only when both lifecycles agree it is out of support**. If only one side says retired but the other is still supported, **keep the branch** — the still-supported lifecycle must keep receiving fixes.
-    - **SDK lifecycle** — for branches paired with an SDK band, check https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#lifecycle. If the paired SDK band is past its support end date, the branch is SDK-retired.
-    - **VS lifecycle** — check the [VS Servicing Information wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/27212/Visual-Studio-Servicing-Information). Rule of thumb: the VS support window covers the current release plus two preceding versions, so the first candidate for VS-retirement is `vs{{THIS_RELEASE_VERSION}} - 3` — **always confirm on the wiki**, since servicing exceptions can extend specific versions beyond the rule of thumb.
+    - **SDK lifecycle.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states which VS version each SDK band pairs with and when that band's support ends. \
+    🛑 **Never infer lifecycle from Maestro.** The existence of a `.NET X.Y.Zxx SDK` channel — including `... SDK Release` channels — says nothing about support status; channels for long-dead bands persist indefinitely. Using channel existence as a proxy is how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release.
+    - **VS lifecycle — a separate source; the SDK table does not answer it.** Use [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs). \
+    **VS 2026 and later: 2 years per annual release** — one year of monthly feature updates, then one security-only year on the LTSC. Only the **LTSC baseline version** gets the second year; an ordinary monthly release falls out of support as soon as the next monthly ships. Each year exactly one `vs18.x` becomes the LTSC and must be kept ~2 years while its neighbours retire quickly — read the LTSC table on that page (`2026-LTSC` ends **November 9, 2027**). Rule of thumb for the non-LTSC ones: the window is the current release plus two preceding, so `vs{{THIS_RELEASE_VERSION}} - 3` is the **newest** candidate — never the only one. \
+    **Long-lived VS versions — hardcoded, do not re-derive each release:**
+
+      | Visual Studio | MSBuild branch | Supported until |
+      |---|---|---|
+      | Visual Studio 2022 | `vs17.14` | January 2032 |
+      | Visual Studio 2019 | `vs16.11` | April 2029 |
+      | Visual Studio 2017 | `vs15.9` | April 2027 |
+
+    - ⚠️ **A VS LTSC can expire *before* the SDK band that shipped with it** — `2026-LTSC` ends Nov 2027 while .NET 10 (LTS) runs to Nov 2028. The SDK side is therefore often what keeps a branch alive; that is why `vs18.0` stays despite being the oldest branch. Always check both directions.
     - **VS-only branches** (not paired with any active SDK band) are retired purely on the VS lifecycle.
+    - **Worked example (18.11).** `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) → **keep**, despite being the oldest branch. `vs18.6` pairs with 10.0.3xx (EOL Aug 2026) and VS 18.6 is outside the window → **retire**. `vs18.4` (10.0.2xx, EOL May 2026) and `vs18.5` (VS-only) had default channels for branches already deleted from the repo → **retire the mappings**.
+
+  - [ ] **1.3b** For **each** `vs*` default channel, apply the rules above and classify it as **keep** or **retire**. Two red flags that almost always mean "retire", and are worth checking first because they are mechanical:
+    - **No outbound subscription** — nothing consumes that branch's `VS X.Y` channel, so the branch feeds nothing. (A live branch looks like `vs18.0 → dotnet/dotnet release/10.0.1xx`.)
+    - **Default channel for a branch that does not exist** in `dotnet/msbuild` — a pure orphan; delete the mapping.
+  - [ ] **1.3c** Record the verdict for every branch in the table below, including the ones you keep and why. This is what makes the next release's audit cheap.
+
+  | Branch | Paired SDK band | Band EOL | VS supported? | Verdict |
+  |---|---|---|---|---|
+  | | | | | |
 
 ---
 
