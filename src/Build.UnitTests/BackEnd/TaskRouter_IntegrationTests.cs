@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -52,32 +53,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void NonEnlightenedTask_RunsInTaskHost_InMultiThreadedMode()
         {
             // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "NonEnlightenedTestTask",
-                taskClass: "NonEnlightenedTask");
-
-            string projectFile = Path.Combine(_testProjectsDir, "NonEnlightenedTaskProject.proj");
-            File.WriteAllText(projectFile, projectContent);
-
             var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
 
             // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result = BuildSingleTaskProject("NonEnlightenedTestTask", "NonEnlightenedTaskProject.proj", multiThreaded: true, logger);
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -97,32 +76,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void TaskWithInterface_RunsInTaskHost_InMultiThreadedMode()
         {
             // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "InterfaceTestTask",
-                taskClass: "TaskWithInterface");
-
-            string projectFile = Path.Combine(_testProjectsDir, "InterfaceTaskProject.proj");
-            File.WriteAllText(projectFile, projectContent);
-
             var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
 
             // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result = BuildSingleTaskProject("InterfaceTestTask", "InterfaceTaskProject.proj", multiThreaded: true, logger);
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -142,32 +99,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void TaskWithAttribute_RunsInProcess_InMultiThreadedMode()
         {
             // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "AttributeTestTask",
-                taskClass: "TaskWithAttribute");
-
-            string projectFile = Path.Combine(_testProjectsDir, "AttributeTaskProject.proj");
-            File.WriteAllText(projectFile, projectContent);
-
             var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
 
             // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result = BuildSingleTaskProject("AttributeTestTask", "AttributeTaskProject.proj", multiThreaded: true, logger);
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -187,32 +122,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void NonEnlightenedTask_RunsInProcess_WhenMultiThreadedModeDisabled()
         {
             // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "NonEnlightenedTestTask",
-                taskClass: "NonEnlightenedTask");
-
-            string projectFile = Path.Combine(_testProjectsDir, "NonEnlightenedTaskSingleThreaded.proj");
-            File.WriteAllText(projectFile, projectContent);
-
             var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = false, // Single-threaded mode
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
 
             // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result = BuildSingleTaskProject("NonEnlightenedTestTask", "NonEnlightenedTaskSingleThreaded.proj", multiThreaded: false, logger);
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -231,32 +144,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void TaskWithInterface_RunsInProcess_WhenMultiThreadedModeDisabled()
         {
             // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "InterfaceTestTask",
-                taskClass: "TaskWithInterface");
-
-            string projectFile = Path.Combine(_testProjectsDir, "InterfaceTaskSingleThreaded.proj");
-            File.WriteAllText(projectFile, projectContent);
-
             var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = false, // Single-threaded mode
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
 
             // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result = BuildSingleTaskProject("InterfaceTestTask", "InterfaceTaskSingleThreaded.proj", multiThreaded: false, logger);
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -289,28 +180,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>";
 
-            string projectFile = Path.Combine(_testProjectsDir, "MixedTasksProject.proj");
-            File.WriteAllText(projectFile, projectContent);
-
             var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
 
             // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result = BuildProject("MixedTasksProject.proj", projectContent, multiThreaded: true, logger);
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -347,28 +220,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>";
 
-            string projectFile = Path.Combine(_testProjectsDir, "ExplicitTaskHostFactory.proj");
-            File.WriteAllText(projectFile, projectContent);
-
             var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
 
             // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result = BuildProject("ExplicitTaskHostFactory.proj", projectContent, multiThreaded: true, logger);
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -379,6 +234,140 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
+        }
+
+        [Fact]
+        public void ExtendedBuildError_RoutedThroughTaskHost_PreservesStructuredData()
+        {
+            var logger = new MockLogger(_output);
+
+            BuildResult result = BuildSingleTaskProject("ExtendedBuildErrorTestTask", "ExtendedBuildErrorProject.proj", multiThreaded: true, logger);
+
+            result.ShouldHaveFailed();
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "ExtendedBuildErrorTestTask");
+            logger.Errors.Count.ShouldBe(1);
+
+            ExtendedBuildErrorEventArgs error = logger.Errors[0].ShouldBeOfType<ExtendedBuildErrorEventArgs>();
+            error.Code.ShouldBe("TEST0001");
+            error.ExtendedType.ShouldBe("cpp");
+            error.ExtendedData.ShouldBe("""{"tool":"cl.exe"}""");
+            error.ExtendedMetadata.ShouldNotBeNull();
+            error.ExtendedMetadata["source"].ShouldBe("structured-output");
+        }
+
+        /// <summary>
+        /// Companion to <see cref="ExtendedBuildError_RoutedThroughTaskHost_PreservesStructuredData"/>: the remaining
+        /// event kinds that <c>TaskHostTask</c> routes explicitly (critical messages, extended warnings, extended
+        /// messages, extended critical messages and extended custom events) must also reach the parent logger as their
+        /// concrete types with their structured payload intact.
+        /// </summary>
+        [Fact]
+        public void NonErrorExtendedEvents_RoutedThroughTaskHost_PreserveStructuredData()
+        {
+            var logger = new MockLogger(_output) { Verbosity = LoggerVerbosity.Diagnostic };
+
+            BuildResult result = BuildSingleTaskProject("ExtendedEventsTestTask", "ExtendedEventsProject.proj", multiThreaded: true, logger);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "ExtendedEventsTestTask");
+            logger.Errors.ShouldBeEmpty();
+
+            // LoggingEventType.CriticalBuildMessage
+            CriticalBuildMessageEventArgs criticalMessage = logger.AllBuildEvents
+                .Where(e => e.GetType() == typeof(CriticalBuildMessageEventArgs))
+                .ShouldHaveSingleItem()
+                .ShouldBeOfType<CriticalBuildMessageEventArgs>();
+            criticalMessage.Code.ShouldBe("TEST0002");
+            criticalMessage.Message.ShouldBe("Critical message");
+
+            // LoggingEventType.ExtendedBuildWarningEvent
+            ExtendedBuildWarningEventArgs warning = logger.Warnings.ShouldHaveSingleItem().ShouldBeOfType<ExtendedBuildWarningEventArgs>();
+            warning.Code.ShouldBe("TEST0003");
+            warning.ExtendedType.ShouldBe("cpp");
+            warning.ExtendedData.ShouldBe("""{"tool":"cl.exe"}""");
+            warning.ExtendedMetadata.ShouldNotBeNull();
+            warning.ExtendedMetadata["source"].ShouldBe("structured-output");
+
+            // LoggingEventType.ExtendedBuildMessageEvent
+            ExtendedBuildMessageEventArgs message = logger.AllBuildEvents
+                .OfType<ExtendedBuildMessageEventArgs>()
+                .ShouldHaveSingleItem();
+            message.Code.ShouldBe("TEST0004");
+            message.ExtendedType.ShouldBe("cpp");
+            message.ExtendedData.ShouldBe("""{"tool":"cl.exe"}""");
+            message.ExtendedMetadata.ShouldNotBeNull();
+            message.ExtendedMetadata["source"].ShouldBe("structured-output");
+
+            // LoggingEventType.ExtendedCriticalBuildMessageEvent
+            ExtendedCriticalBuildMessageEventArgs extendedCriticalMessage = logger.AllBuildEvents
+                .OfType<ExtendedCriticalBuildMessageEventArgs>()
+                .ShouldHaveSingleItem();
+            extendedCriticalMessage.Code.ShouldBe("TEST0005");
+            extendedCriticalMessage.ExtendedType.ShouldBe("cpp");
+            extendedCriticalMessage.ExtendedData.ShouldBe("""{"tool":"cl.exe"}""");
+            extendedCriticalMessage.ExtendedMetadata.ShouldNotBeNull();
+            extendedCriticalMessage.ExtendedMetadata["source"].ShouldBe("structured-output");
+
+            // LoggingEventType.ExtendedCustomEvent
+            ExtendedCustomBuildEventArgs customEvent = logger.AllBuildEvents
+                .OfType<ExtendedCustomBuildEventArgs>()
+                .ShouldHaveSingleItem();
+            customEvent.Message.ShouldBe("Structured custom event");
+            customEvent.ExtendedType.ShouldBe("cpp");
+            customEvent.ExtendedData.ShouldBe("""{"tool":"cl.exe"}""");
+            customEvent.ExtendedMetadata.ShouldNotBeNull();
+            customEvent.ExtendedMetadata["source"].ShouldBe("structured-output");
+        }
+
+        /// <summary>
+        /// Telemetry raised by a task through <see cref="IBuildEngine5.LogTelemetry"/> must survive the TaskHost
+        /// round-trip. A task can only ever supply an event name and a property bag, so forwarding those two values
+        /// reproduces exactly what the same task would have produced in-process.
+        /// </summary>
+        [Fact]
+        public void Telemetry_RoutedThroughTaskHost_ReachesLoggers()
+        {
+            // MockLogger cannot observe telemetry: EventSourceSink routes TelemetryEventArgs to TelemetryLogged only,
+            // never to AnyEventRaised. A dedicated IEventSource2 subscriber is required.
+            var logger = new MockLogger(_output);
+            var telemetryLogger = new TelemetryCapturingLogger();
+
+            BuildResult result = BuildSingleTaskProject("TelemetryTestTask", "TelemetryProject.proj", multiThreaded: true, logger, telemetryLogger);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "TelemetryTestTask");
+
+            TelemetryEventArgs telemetry = telemetryLogger.TelemetryEvents
+                .Where(e => e.EventName == "TaskHostTelemetryEvent")
+                .ShouldHaveSingleItem();
+            telemetry.Properties["tool"].ShouldBe("cl.exe");
+            telemetry.Properties["exitCode"].ShouldBe("0");
+        }
+
+        /// <summary>
+        /// The switch in <c>TaskHostTask.HandleLoggedMessage</c> is an allow-list, so any event kind without an
+        /// explicit case was silently discarded. <see cref="ExternalProjectStartedEventArgs"/> is a framework type
+        /// with its own <c>LoggingEventType</c> that a task can log through <see cref="IBuildEngine.LogCustomEvent"/>,
+        /// which makes it a representative of that whole class of dropped events. It must now reach the parent logger
+        /// as its concrete type by way of the fallback dispatch on the event's base type.
+        /// </summary>
+        [Fact]
+        public void EventKindWithoutExplicitCase_RoutedThroughTaskHost_ReachesLoggers()
+        {
+            var logger = new MockLogger(_output) { Verbosity = LoggerVerbosity.Diagnostic };
+
+            BuildResult result = BuildSingleTaskProject("UnlistedEventTestTask", "UnlistedEventProject.proj", multiThreaded: true, logger);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "UnlistedEventTestTask");
+            logger.Errors.ShouldBeEmpty();
+
+            ExternalProjectStartedEventArgs externalProjectStarted = logger.AllBuildEvents
+                .OfType<ExternalProjectStartedEventArgs>()
+                .ShouldHaveSingleItem();
+            externalProjectStarted.Message.ShouldBe("External project started");
+            externalProjectStarted.ProjectFile.ShouldBe("external.proj");
+            externalProjectStarted.TargetNames.ShouldBe("Build");
         }
 
         /// <summary>
@@ -408,27 +397,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>";
 
-            string projectFile = Path.Combine(_testProjectsDir, $"NoAssemblyLocationMismatch_{multiThreaded}.proj");
-            File.WriteAllText(projectFile, projectContent);
-
             var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = multiThreaded,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
 
             // Act
-            var result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+            BuildResult result = BuildProject($"NoAssemblyLocationMismatch_{multiThreaded}.proj", projectContent, multiThreaded, logger);
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -447,7 +419,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldNotContain(mismatchMessagePrefix);
         }
 
-        private string CreateTestProject(string taskName, string taskClass)
+        private string CreateTestProject(string taskName)
         {
             return $@"
 <Project>
@@ -458,6 +430,39 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>";
         }
+
+        /// <summary>
+        /// Writes <paramref name="projectContent"/> into the test folder and builds its <c>TestTarget</c>.
+        /// Loggers are supplied by the caller so that each test can assert against them afterwards.
+        /// </summary>
+        private BuildResult BuildProject(string projectFileName, string projectContent, bool multiThreaded, params ILogger[] loggers)
+        {
+            string projectFile = Path.Combine(_testProjectsDir, projectFileName);
+            File.WriteAllText(projectFile, projectContent);
+
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = multiThreaded,
+                Loggers = loggers,
+                DisableInProcNode = false,
+                EnableNodeReuse = false
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                ["TestTarget"],
+                null);
+
+            return BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+        }
+
+        /// <summary>
+        /// Builds a project whose single target invokes <paramref name="taskName"/> once.
+        /// </summary>
+        private BuildResult BuildSingleTaskProject(string taskName, string projectFileName, bool multiThreaded = true, params ILogger[] loggers)
+            => BuildProject(projectFileName, CreateTestProject(taskName), multiThreaded, loggers);
     }
 
     /// <summary>
@@ -492,6 +497,32 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
     }
 
+    /// <summary>
+    /// Captures telemetry events, which <see cref="MockLogger"/> cannot observe because
+    /// <c>EventSourceSink</c> routes <see cref="TelemetryEventArgs"/> exclusively to
+    /// <see cref="IEventSource2.TelemetryLogged"/>.
+    /// </summary>
+    internal sealed class TelemetryCapturingLogger : ILogger
+    {
+        public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Normal;
+
+        public string Parameters { get; set; }
+
+        public List<TelemetryEventArgs> TelemetryEvents { get; } = [];
+
+        public void Initialize(IEventSource eventSource)
+        {
+            if (eventSource is IEventSource2 eventSource2)
+            {
+                eventSource2.TelemetryLogged += (sender, e) => TelemetryEvents.Add(e);
+            }
+        }
+
+        public void Shutdown()
+        {
+        }
+    }
+
     #region Test Task Implementations
 
     /// <summary>
@@ -505,6 +536,161 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             Log.LogMessage(MessageImportance.High, "NonEnlightenedTask executed");
             return true;
         }
+    }
+
+    /// <summary>
+    /// Logs a framework event kind that <c>TaskHostTask.HandleLoggedMessage</c> has no explicit case for, so the
+    /// test can assert that the fallback dispatch forwards it instead of discarding it.
+    /// </summary>
+    public class UnlistedEventTestTask : Task
+    {
+        public override bool Execute()
+        {
+            BuildEngine.LogCustomEvent(new ExternalProjectStartedEventArgs(
+                message: "External project started",
+                helpKeyword: null,
+                senderName: nameof(UnlistedEventTestTask),
+                projectFile: "external.proj",
+                targetNames: "Build"));
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Logs telemetry the way a real task does, through <see cref="TaskLoggingHelper.LogTelemetry"/>.
+    /// </summary>
+    public class TelemetryTestTask : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogTelemetry("TaskHostTelemetryEvent", new Dictionary<string, string>
+            {
+                ["tool"] = "cl.exe",
+                ["exitCode"] = "0"
+            });
+
+            return true;
+        }
+    }
+
+    public class ExtendedBuildErrorTestTask : Task    {
+        public override bool Execute()
+        {
+            BuildEngine.LogErrorEvent(new ExtendedBuildErrorEventArgs(
+                "cpp",
+                subcategory: null,
+                code: "TEST0001",
+                file: "source.cpp",
+                lineNumber: 1,
+                columnNumber: 2,
+                endLineNumber: 1,
+                endColumnNumber: 3,
+                message: "Structured compiler error",
+                helpKeyword: null,
+                senderName: nameof(ExtendedBuildErrorTestTask))
+            {
+                ExtendedData = """{"tool":"cl.exe"}""",
+                ExtendedMetadata = new Dictionary<string, string>
+                {
+                    ["source"] = "structured-output"
+                }
+            });
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Logs one instance of each non-error event kind that <c>TaskHostTask</c> routes explicitly, so the test can
+    /// assert that each survives the TaskHost round-trip as its concrete type.
+    /// </summary>
+    public class ExtendedEventsTestTask : Task
+    {
+        private const string ExtendedDataJson = """{"tool":"cl.exe"}""";
+
+        public override bool Execute()
+        {
+            Log.LogCriticalMessage(
+                subcategory: null,
+                code: "TEST0002",
+                helpKeyword: null,
+                file: "source.cpp",
+                lineNumber: 1,
+                columnNumber: 2,
+                endLineNumber: 1,
+                endColumnNumber: 3,
+                message: "Critical message");
+
+            BuildEngine.LogWarningEvent(new ExtendedBuildWarningEventArgs(
+                "cpp",
+                subcategory: null,
+                code: "TEST0003",
+                file: "source.cpp",
+                lineNumber: 1,
+                columnNumber: 2,
+                endLineNumber: 1,
+                endColumnNumber: 3,
+                message: "Structured compiler warning",
+                helpKeyword: null,
+                senderName: nameof(ExtendedEventsTestTask))
+            {
+                ExtendedData = ExtendedDataJson,
+                ExtendedMetadata = CreateMetadata()
+            });
+
+            BuildEngine.LogMessageEvent(new ExtendedBuildMessageEventArgs(
+                "cpp",
+                subcategory: null,
+                code: "TEST0004",
+                file: "source.cpp",
+                lineNumber: 1,
+                columnNumber: 2,
+                endLineNumber: 1,
+                endColumnNumber: 3,
+                message: "Structured compiler message",
+                helpKeyword: null,
+                senderName: nameof(ExtendedEventsTestTask),
+                importance: MessageImportance.High)
+            {
+                ExtendedData = ExtendedDataJson,
+                ExtendedMetadata = CreateMetadata()
+            });
+
+            BuildEngine.LogMessageEvent(new ExtendedCriticalBuildMessageEventArgs(
+                "cpp",
+                subcategory: null,
+                code: "TEST0005",
+                file: "source.cpp",
+                lineNumber: 1,
+                columnNumber: 2,
+                endLineNumber: 1,
+                endColumnNumber: 3,
+                message: "Structured critical message",
+                helpKeyword: null,
+                senderName: nameof(ExtendedEventsTestTask))
+            {
+                ExtendedData = ExtendedDataJson,
+                ExtendedMetadata = CreateMetadata()
+            });
+
+            BuildEngine.LogCustomEvent(new ExtendedCustomBuildEventArgs(
+                "cpp",
+                message: "Structured custom event",
+                helpKeyword: null,
+                senderName: nameof(ExtendedEventsTestTask))
+            {
+                ExtendedData = ExtendedDataJson,
+                ExtendedMetadata = CreateMetadata()
+            });
+
+            return true;
+        }
+
+        private static Dictionary<string, string> CreateMetadata() => new()
+        {
+            ["source"] = "structured-output"
+        };
     }
 
     /// <summary>
