@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// exactly once so that later tasks are not failed for a file that was already reported.
         /// </summary>
         [Fact]
-        public void UnresolvedPathWriteIsDetectedOnceAndLeftOnDisk()
+        public void UnresolvedPathWriteIsDetectedOnceAndRemoved()
         {
             MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
 
@@ -122,8 +122,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 violations.UnresolvedPathWrites.ShouldBe("unresolved.txt");
                 violations.UnexpectedCurrentDirectory.ShouldBeNull();
 
-                // Left on disk for inspection, but not reported again.
-                File.Exists(Path.Combine(scope.SentinelDirectory, "unresolved.txt")).ShouldBeTrue();
+                // Removed, so that it cannot satisfy a later task's unresolved read, and not reported again.
+                File.Exists(Path.Combine(scope.SentinelDirectory, "unresolved.txt")).ShouldBeFalse();
                 scope.DetectViolations().Any.ShouldBeFalse();
             }
             finally

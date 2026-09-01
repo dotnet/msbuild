@@ -762,6 +762,14 @@ namespace Microsoft.Build.Execution
                 if (_buildParameters.MultiThreaded
                     && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict))
                 {
+                    // The output cache is serialized during EndBuild, while the process is still in the sentinel
+                    // directory, so a host that supplied a relative path has to be resolved here - the CLI does
+                    // the same for the entry project. Input caches were already read by InitializeCaches above.
+                    if (_buildParameters.UsesOutputCache())
+                    {
+                        _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(_buildParameters.OutputResultsCacheFile);
+                    }
+
                     _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.TryEnter(loggingService);
                 }
 
