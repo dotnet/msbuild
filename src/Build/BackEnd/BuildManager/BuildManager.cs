@@ -759,13 +759,15 @@ namespace Microsoft.Build.Execution
                 // Enter strict mode last: everything above (loggers in particular) still resolves paths against
                 // the directory the build was launched from, and only project execution should see the sentinel.
                 // MSBUILDMULTITHREADEDSTRICT=1 is equivalent to -mt:strict for hosts that build through the API.
-                _buildParameters.MultiThreadedStrict = _buildParameters.MultiThreaded
-                    && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict);
-
-                if (_buildParameters.MultiThreadedStrict)
+                if (_buildParameters.MultiThreaded
+                    && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict))
                 {
                     _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.TryEnter(loggingService);
                 }
+
+                // The flag drives per-task verification and the suppression of the legacy per-project current
+                // directory reset, so it must reflect what actually happened, not what was asked for.
+                _buildParameters.MultiThreadedStrict = _multiThreadedStrictModeScope is not null;
 
                 _buildManagerState = BuildManagerState.Building;
 
@@ -1210,14 +1212,15 @@ namespace Microsoft.Build.Execution
             }
             finally
             {
+                // Restore the process current directory first, and outside any code that can throw: if this is
+                // skipped, the process stays pinned to the sentinel directory for its whole remaining lifetime,
+                // which in the MSBuild Server and Visual Studio outlives this build by a long way.
+                _multiThreadedStrictModeScope?.Exit();
+                _multiThreadedStrictModeScope = null;
+
                 try
                 {
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
-
-                    // Restore the process current directory before the build-finished event, so that anything
-                    // logging or writing during shutdown sees the directory the build was launched from.
-                    _multiThreadedStrictModeScope?.Exit();
-                    _multiThreadedStrictModeScope = null;
 
                     if (loggingService != null)
                     {

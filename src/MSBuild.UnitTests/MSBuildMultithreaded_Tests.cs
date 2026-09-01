@@ -230,7 +230,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
         /// <summary>
         /// A relative path that is never resolved against the project directory writes into the sentinel
-        /// current directory, which strict mode detects and reports as MSB4288.
+        /// current directory, which strict mode detects and reports as MSB4287.
         /// </summary>
         [Fact]
         public void StrictMode_DetectsWriteThroughUnresolvedRelativePath()
@@ -238,13 +238,13 @@ namespace Microsoft.Build.Engine.UnitTests
             string output = RunStrictModeProbe("WriteRelativeFile", "/m /nodereuse:false /mt:strict", out bool success);
 
             success.ShouldBeFalse(output);
-            output.ShouldContain("MSB4288");
+            output.ShouldContain("MSB4287");
             output.ShouldContain("strict-mode-probe.txt");
         }
 
         /// <summary>
         /// Changing the process current directory corrupts path resolution for every project building in the
-        /// process, so strict mode reports it as MSB4287.
+        /// process, so strict mode reports it as MSB4286.
         /// </summary>
         [Fact]
         public void StrictMode_DetectsCurrentDirectoryChange()
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Engine.UnitTests
             string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt:strict", out bool success);
 
             success.ShouldBeFalse(output);
-            output.ShouldContain("MSB4287");
+            output.ShouldContain("MSB4286");
         }
 
         /// <summary>
@@ -265,10 +265,25 @@ namespace Microsoft.Build.Engine.UnitTests
             string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt", out bool success);
 
             success.ShouldBeTrue(output);
-            output.ShouldNotContain("MSB4287");
+            output.ShouldNotContain("MSB4286");
         }
 
-        private string RunStrictModeProbe(string behavior, string msbuildArgs, out bool success)
+        /// <summary>
+        /// The project is normally named relative to the launch directory, which strict mode moves away from.
+        /// </summary>
+        [Fact]
+        public void StrictMode_BuildsProjectGivenByRelativePath()
+        {
+            string output = RunStrictModeProbe(
+                "Nothing",
+                "/m /nodereuse:false /mt:strict",
+                out bool success,
+                useRelativeProjectPath: true);
+
+            success.ShouldBeTrue(output);
+        }
+
+        private string RunStrictModeProbe(string behavior, string msbuildArgs, out bool success, bool useRelativeProjectPath = false)
         {
             string project = $"""
                 <Project>
@@ -281,6 +296,18 @@ namespace Microsoft.Build.Engine.UnitTests
                 """;
 
             TransientTestFile projectFile = _env.CreateFile("main.proj", project);
+
+            if (useRelativeProjectPath)
+            {
+                _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
+
+                return RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"main.proj {msbuildArgs}",
+                    out success,
+                    false,
+                    _output);
+            }
 
             return RunnerUtilities.ExecMSBuild(
                 BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,

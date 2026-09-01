@@ -33,7 +33,7 @@ namespace Microsoft.Build.Execution
     /// </para>
     /// <para>
     /// This is a diagnostic aid, not a correctness feature: it is off by default, and failing to install it is
-    /// never fatal. See <see href="https://github.com/dotnet/msbuild/issues/14794"/>.
+    /// reported but never fails the build. See <see href="https://github.com/dotnet/msbuild/issues/14794"/>.
     /// </para>
     /// </remarks>
     internal sealed class MultiThreadedStrictModeScope
@@ -50,29 +50,35 @@ namespace Microsoft.Build.Execution
         private const int MaxReportedEntries = 10;
 
         /// <summary>
-        /// Guards installation, removal and any write to the process current directory performed by strict mode.
+        /// Guards installation, removal, and any write to the process current directory performed by strict mode.
         /// The current directory is process-wide state and must never be written by two scopes at once.
         /// </summary>
+        /// <remarks>
+        /// This is a leaf lock. Nothing is logged while holding it, because a synchronous logger runs user code
+        /// inline and would block worker threads that are verifying process state.
+        /// </remarks>
         private static readonly object s_stateLock = new();
 
         /// <summary>
-        /// The scope that is currently installed, or <see langword="null"/> when strict mode is not active.
+        /// The scope that currently owns the process current directory, or <see langword="null"/> when strict mode
+        /// is not active.
         /// </summary>
         private static MultiThreadedStrictModeScope? s_activeScope;
 
         /// <summary>
-        /// Gets the currently installed scope, or <see langword="null"/> when strict mode is not active.
-        /// </summary>
-        internal static MultiThreadedStrictModeScope? ActiveScope => Volatile.Read(ref s_activeScope);
-
-        /// <summary>
-        /// Entries already reported out of the sentinel directory. Stray files are deliberately left on disk for
+        /// Names already reported out of the sentinel directory. Stray files are deliberately left on disk for
         /// inspection, so they must not be reported again by every subsequent task.
         /// </summary>
         private readonly HashSet<string> _reportedEntries = new(StringComparer.Ordinal);
 
         private readonly string _sentinelDirectory;
         private readonly string _directoryToRestore;
+
+        /// <summary>
+        /// Set once the current-directory violation has been reported. A single stray call would otherwise fail
+        /// every task that happens to be running concurrently with it.
+        /// </summary>
+        private int _currentDirectoryViolationReported;
 
         private MultiThreadedStrictModeScope(string sentinelDirectory, string directoryToRestore)
         {
@@ -91,6 +97,12 @@ namespace Microsoft.Build.Execution
         internal string SentinelDirectory => _sentinelDirectory;
 
         /// <summary>
+        /// Gets the scope that currently owns the process current directory, or <see langword="null"/> when strict
+        /// mode is not active.
+        /// </summary>
+        internal static MultiThreadedStrictModeScope? ActiveScope => Volatile.Read(ref s_activeScope);
+
+        /// <summary>
         /// Moves the process current directory to an empty sentinel directory.
         /// </summary>
         /// <param name="loggingService">Logging service used to report what strict mode did. May be <see langword="null"/>.</param>
@@ -100,89 +112,81 @@ namespace Microsoft.Build.Execution
         /// </returns>
         internal static MultiThreadedStrictModeScope? TryEnter(ILoggingService? loggingService)
         {
-            // Read the startup directory before the process is moved off it so that $(MSBuildStartupDirectory)
-            // keeps reporting the directory the build was launched from.
-            string directoryToRestore = BuildParameters.StartupDirectory;
-
+            string directoryToRestore;
             try
             {
                 directoryToRestore = Directory.GetCurrentDirectory();
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                // Fall back to the startup directory as the restore target.
+                directoryToRestore = BuildParameters.StartupDirectory;
             }
 
-            string requestedSentinelDirectory = Path.Combine(FileUtilities.TempFileDirectory, SentinelDirectoryName);
+            string sentinelDirectory = Path.Combine(FileUtilities.TempFileDirectory, SentinelDirectoryName);
+
+            MultiThreadedStrictModeScope? scope = null;
+            string? failureReason;
 
             lock (s_stateLock)
             {
-                // Only one scope may be installed at a time - the current directory is process-wide state.
+                // Only one scope may own the process current directory at a time.
                 if (s_activeScope is not null)
                 {
-                    LogCouldNotEnable(
-                        loggingService,
-                        requestedSentinelDirectory,
-                        ResourceUtilities.GetResourceString("MultiThreadedStrictModeAlreadyActive"));
-
-                    return null;
+                    failureReason = ResourceUtilities.GetResourceString("MultiThreadedStrictModeAlreadyActive");
                 }
-
-                string effectiveSentinelDirectory;
-
-                try
+                else
                 {
-                    Directory.CreateDirectory(requestedSentinelDirectory);
-
-                    // Anything left over from a previous build would be misattributed to this one.
-                    TryClearDirectory(requestedSentinelDirectory);
-
-                    NativeMethodsShared.SetCurrentDirectory(requestedSentinelDirectory);
-
-                    // SetCurrentDirectory is best-effort on every platform, so confirm it took effect rather than
-                    // running a build that believes it is protected when it is not. The path cannot be compared
-                    // directly because on Unix the call resolves symbolic links (the macOS temporary folder is one),
-                    // so compare the leaf name and adopt whatever the process actually landed on as canonical.
-                    effectiveSentinelDirectory = Directory.GetCurrentDirectory();
-
-                    if (!string.Equals(GetLeafName(effectiveSentinelDirectory), SentinelDirectoryName, StringComparison.Ordinal))
+                    try
                     {
-                        LogCouldNotEnable(
-                            loggingService,
-                            requestedSentinelDirectory,
-                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                                "MultiThreadedStrictModeCurrentDirectoryNotChanged",
-                                effectiveSentinelDirectory));
+                        scope = Install(sentinelDirectory, directoryToRestore, out failureReason);
+                    }
+                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                    {
+                        scope = null;
+                        failureReason = e.Message;
+                    }
 
-                        return null;
+                    if (scope is not null)
+                    {
+                        // Publish last: until the process is actually sitting in the sentinel directory, a
+                        // concurrent verification would see a mismatch that is this method's doing, not a task's.
+                        Volatile.Write(ref s_activeScope, scope);
                     }
                 }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                {
-                    LogCouldNotEnable(loggingService, requestedSentinelDirectory, e.Message);
-
-                    return null;
-                }
-
-                loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Low, "MultiThreadedStrictModeEnabled", effectiveSentinelDirectory);
-
-                // Publish last: until the process is actually sitting in the sentinel directory, a concurrent task
-                // verification would see a mismatch that is this method's doing rather than a task's.
-                MultiThreadedStrictModeScope scope = new(effectiveSentinelDirectory, directoryToRestore);
-                Volatile.Write(ref s_activeScope, scope);
-
-                return scope;
             }
+
+            if (scope is null)
+            {
+                // Reported as a message rather than a warning: strict mode is a diagnostic aid, and failing to
+                // install it must not fail a build that uses /warnaserror.
+                loggingService?.LogComment(
+                    BuildEventContext.Invalid,
+                    MessageImportance.High,
+                    "MultiThreadedStrictModeCouldNotBeEnabled",
+                    sentinelDirectory,
+                    failureReason);
+            }
+            else
+            {
+                loggingService?.LogComment(
+                    BuildEventContext.Invalid,
+                    MessageImportance.Low,
+                    "MultiThreadedStrictModeEnabled",
+                    scope.SentinelDirectory);
+            }
+
+            return scope;
         }
 
         /// <summary>
-        /// Restores the process current directory. Safe to call more than once.
+        /// Restores the process current directory. Safe to call more than once, and a no-op for a scope that is
+        /// no longer the owner.
         /// </summary>
         internal void Exit()
         {
             lock (s_stateLock)
             {
-                if (!ReferenceEquals(s_activeScope, this))
+                if (!ReferenceEquals(Volatile.Read(ref s_activeScope), this))
                 {
                     return;
                 }
@@ -190,6 +194,13 @@ namespace Microsoft.Build.Execution
                 Volatile.Write(ref s_activeScope, null);
 
                 NativeMethodsShared.SetCurrentDirectory(_directoryToRestore);
+
+                // On Windows the process holds a handle to its current directory, so staying in the sentinel would
+                // both pin MSBuild's temporary folder and silently move every later build in this process.
+                if (IsCurrentDirectory(_sentinelDirectory))
+                {
+                    NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+                }
             }
         }
 
@@ -207,7 +218,37 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal bool VerifyAndReportProcessState(TaskLoggingContext taskLoggingContext, string taskName, ElementLocation taskLocation)
         {
-            bool violated = false;
+            Violations violations = DetectViolations();
+
+            if (violations.UnexpectedCurrentDirectory is not null)
+            {
+                taskLoggingContext.LogError(
+                    new BuildEventFileInfo(taskLocation),
+                    "MultiThreadedStrictModeCurrentDirectoryChanged",
+                    taskName,
+                    violations.UnexpectedCurrentDirectory,
+                    _sentinelDirectory);
+            }
+
+            if (violations.UnresolvedPathWrites is not null)
+            {
+                taskLoggingContext.LogError(
+                    new BuildEventFileInfo(taskLocation),
+                    "MultiThreadedStrictModeUnresolvedPathWrite",
+                    taskName,
+                    violations.UnresolvedPathWrites,
+                    _sentinelDirectory);
+            }
+
+            return violations.Any;
+        }
+
+        /// <summary>
+        /// Detects violations without logging, and repairs the process current directory if it was moved.
+        /// </summary>
+        internal Violations DetectViolations()
+        {
+            string? unexpectedCurrentDirectory = null;
 
             string currentDirectory;
             try
@@ -216,45 +257,30 @@ namespace Microsoft.Build.Execution
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                currentDirectory = _sentinelDirectory;
+                // Nothing can be concluded about a current directory that cannot be read, so only the sentinel
+                // contents are checked.
+                return new Violations(null, TakeUnreportedSentinelDirectoryEntries());
             }
 
             if (!FileUtilities.PathsEqual(currentDirectory, _sentinelDirectory))
             {
-                // Put the process back where it belongs so the rest of the build keeps the protection it asked for,
-                // but only while this scope is still the installed one - otherwise this would fight with Exit().
+                // Put the process back where it belongs so the rest of the build keeps the protection it asked
+                // for, but only while this scope is still the owner - otherwise this would fight with Exit().
                 lock (s_stateLock)
                 {
-                    if (ReferenceEquals(s_activeScope, this))
+                    if (ReferenceEquals(Volatile.Read(ref s_activeScope), this))
                     {
                         NativeMethodsShared.SetCurrentDirectory(_sentinelDirectory);
                     }
                 }
 
-                taskLoggingContext.LogError(
-                    new BuildEventFileInfo(taskLocation),
-                    "MultiThreadedStrictModeCurrentDirectoryChanged",
-                    taskName,
-                    currentDirectory,
-                    _sentinelDirectory);
-
-                violated = true;
+                if (Interlocked.Exchange(ref _currentDirectoryViolationReported, 1) == 0)
+                {
+                    unexpectedCurrentDirectory = currentDirectory;
+                }
             }
 
-            string? strayEntries = TakeUnreportedSentinelDirectoryEntries();
-            if (strayEntries is not null)
-            {
-                taskLoggingContext.LogError(
-                    new BuildEventFileInfo(taskLocation),
-                    "MultiThreadedStrictModeUnresolvedPathWrite",
-                    taskName,
-                    strayEntries,
-                    _sentinelDirectory);
-
-                violated = true;
-            }
-
-            return violated;
+            return new Violations(unexpectedCurrentDirectory, TakeUnreportedSentinelDirectoryEntries());
         }
 
         /// <summary>
@@ -264,6 +290,14 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private string? TakeUnreportedSentinelDirectoryEntries()
         {
+            // Fast path: one lock-free directory enumeration that stops at the first entry. Running clean is the
+            // overwhelmingly common case, and serializing every task completion would suppress the very
+            // concurrency this mode exists to exercise.
+            if (!HasAnyEntry(_sentinelDirectory))
+            {
+                return null;
+            }
+
             List<string> entries = new();
             bool truncated = false;
 
@@ -273,20 +307,19 @@ namespace Microsoft.Build.Execution
                 {
                     foreach (string entry in Directory.EnumerateFileSystemEntries(_sentinelDirectory))
                     {
-                        string name = Path.GetFileName(entry);
-
-                        if (!_reportedEntries.Add(name))
-                        {
-                            continue;
-                        }
-
                         if (entries.Count == MaxReportedEntries)
                         {
+                            // Leave the remainder unreported so the next check picks it up rather than dropping it.
                             truncated = true;
                             break;
                         }
 
-                        entries.Add(name);
+                        string name = Path.GetFileName(entry);
+
+                        if (_reportedEntries.Add(name))
+                        {
+                            entries.Add(name);
+                        }
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -305,19 +338,101 @@ namespace Microsoft.Build.Execution
             return truncated ? entryList + ", ..." : entryList;
         }
 
-        private static void LogCouldNotEnable(ILoggingService? loggingService, string sentinelDirectory, string reason)
+        /// <summary>
+        /// Creates and enters the sentinel directory. Must be called while holding <see cref="s_stateLock"/>.
+        /// </summary>
+        private static MultiThreadedStrictModeScope? Install(string sentinelDirectory, string directoryToRestore, out string? failureReason)
         {
-            loggingService?.LogWarning(
-                BuildEventContext.Invalid,
-                subcategoryResourceName: null,
-                BuildEventFileInfo.Empty,
-                "MultiThreadedStrictModeCouldNotBeEnabled",
-                sentinelDirectory,
-                reason);
+            failureReason = null;
+
+            Directory.CreateDirectory(sentinelDirectory);
+
+            // Anything left over from a previous build would be misattributed to this one.
+            TryClearDirectory(sentinelDirectory);
+
+            // The sentinel path cannot simply be compared against the current directory afterwards, because
+            // Directory.SetCurrentDirectory resolves symbolic links on Unix and the macOS temporary folder is one.
+            // A relative probe for a marker file resolves against the process current directory, which makes it an
+            // exact identity check regardless of how the path is spelled.
+            string markerFileName = $"strict-mode-marker-{Guid.NewGuid():N}.tmp";
+            string markerFilePath = Path.Combine(sentinelDirectory, markerFileName);
+            File.WriteAllText(markerFilePath, string.Empty);
+
+            try
+            {
+                NativeMethodsShared.SetCurrentDirectory(sentinelDirectory);
+
+                if (!File.Exists(markerFileName))
+                {
+                    string actualDirectory = TryGetCurrentDirectory() ?? sentinelDirectory;
+
+                    // SetCurrentDirectory is best effort on every platform, so leave the process where it was
+                    // rather than running a build that believes it is protected when it is not.
+                    NativeMethodsShared.SetCurrentDirectory(directoryToRestore);
+
+                    failureReason = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "MultiThreadedStrictModeCurrentDirectoryNotChanged",
+                        actualDirectory);
+
+                    return null;
+                }
+            }
+            finally
+            {
+                TryDeleteFile(markerFilePath);
+            }
+
+            // Adopt whatever the process actually landed on as the canonical sentinel path.
+            return new MultiThreadedStrictModeScope(TryGetCurrentDirectory() ?? sentinelDirectory, directoryToRestore);
         }
 
-        private static string GetLeafName(string directory)
-            => Path.GetFileName(directory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        private static bool IsCurrentDirectory(string directory)
+        {
+            string? currentDirectory = TryGetCurrentDirectory();
+
+            return currentDirectory is not null && FileUtilities.PathsEqual(currentDirectory, directory);
+        }
+
+        private static string? TryGetCurrentDirectory()
+        {
+            try
+            {
+                return Directory.GetCurrentDirectory();
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                return null;
+            }
+        }
+
+        private static bool HasAnyEntry(string directory)
+        {
+            try
+            {
+                foreach (string unused in Directory.EnumerateFileSystemEntries(directory))
+                {
+                    return true;
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Treat an unreadable sentinel as clean rather than failing the build it is meant to diagnose.
+            }
+
+            return false;
+        }
+
+        private static void TryDeleteFile(string file)
+        {
+            try
+            {
+                File.Delete(file);
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Best effort.
+            }
+        }
 
         private static void TryClearDirectory(string directory)
         {
@@ -337,6 +452,31 @@ namespace Microsoft.Build.Execution
             {
                 // Best effort.
             }
+        }
+
+        /// <summary>
+        /// The violations observed by a single verification.
+        /// </summary>
+        internal readonly struct Violations
+        {
+            internal Violations(string? unexpectedCurrentDirectory, string? unresolvedPathWrites)
+            {
+                UnexpectedCurrentDirectory = unexpectedCurrentDirectory;
+                UnresolvedPathWrites = unresolvedPathWrites;
+            }
+
+            /// <summary>
+            /// Gets the directory the process had been moved to, or <see langword="null"/> when the process is
+            /// still in the sentinel directory or the move has already been reported.
+            /// </summary>
+            internal string? UnexpectedCurrentDirectory { get; }
+
+            /// <summary>
+            /// Gets a display list of sentinel directory entries not reported before, or <see langword="null"/>.
+            /// </summary>
+            internal string? UnresolvedPathWrites { get; }
+
+            internal bool Any => UnexpectedCurrentDirectory is not null || UnresolvedPathWrites is not null;
         }
     }
 }

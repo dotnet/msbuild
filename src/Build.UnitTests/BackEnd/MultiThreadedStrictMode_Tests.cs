@@ -100,6 +100,71 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// A write through an unresolved relative path lands in the sentinel directory, and must be reported
+        /// exactly once so that later tasks are not failed for a file that was already reported.
+        /// </summary>
+        [Fact]
+        public void UnresolvedPathWriteIsDetectedOnceAndLeftOnDisk()
+        {
+            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+
+            try
+            {
+                scope.ShouldNotBeNull();
+                scope!.DetectViolations().Any.ShouldBeFalse();
+
+                // A relative path resolves against the process current directory, which is the whole defect.
+                File.WriteAllText("unresolved.txt", "probe");
+
+                MultiThreadedStrictModeScope.Violations violations = scope.DetectViolations();
+                violations.UnresolvedPathWrites.ShouldBe("unresolved.txt");
+                violations.UnexpectedCurrentDirectory.ShouldBeNull();
+
+                // Left on disk for inspection, but not reported again.
+                File.Exists(Path.Combine(scope.SentinelDirectory, "unresolved.txt")).ShouldBeTrue();
+                scope.DetectViolations().Any.ShouldBeFalse();
+            }
+            finally
+            {
+                scope?.Exit();
+            }
+        }
+
+        /// <summary>
+        /// Moving the process current directory corrupts every project building concurrently, so it must be
+        /// reported and repaired - and reported only once, however many tasks observe it.
+        /// </summary>
+        [Fact]
+        public void CurrentDirectoryChangeIsDetectedOnceAndRepaired()
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+
+            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+
+            try
+            {
+                scope.ShouldNotBeNull();
+
+                Directory.SetCurrentDirectory(originalDirectory);
+
+                MultiThreadedStrictModeScope.Violations violations = scope!.DetectViolations();
+                violations.UnexpectedCurrentDirectory.ShouldNotBeNull();
+
+                // Repaired, so the rest of the build keeps the protection it asked for.
+                Path.GetFileName(Directory.GetCurrentDirectory())
+                    .ShouldBe(MultiThreadedStrictModeScope.SentinelDirectoryName);
+
+                scope.DetectViolations().Any.ShouldBeFalse();
+            }
+            finally
+            {
+                scope?.Exit();
+            }
+
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+        }
+
+        /// <summary>
         /// Strict mode is meaningless outside multi-threaded mode, so a build that is not multi-threaded must not
         /// have the process moved out from under it even when the opt-in is present.
         /// </summary>
