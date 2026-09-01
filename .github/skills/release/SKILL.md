@@ -112,7 +112,24 @@ Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) 
 
 Each release retires the `vs*` branches that have fallen out of support. **This is an audit of every live branch, not a check of one candidate.** The rule of thumb (`vs{{THIS_RELEASE_VERSION}} - 3`) identifies only the *newest* candidate; nothing in the process ever revisits older branches, so a single missed retirement persists forever and the backlog grows every month.
 
-**The authoritative source is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions).** It maps each SDK feature band to its VS version and support end date, which decides most branches outright. Open it every release — it is cheap and it is the whole answer for SDK-paired branches.
+**Two lifecycles, two sources — you need both.** Neither one decides a branch on its own:
+
+| Lifecycle | Source |
+|---|---|
+| **SDK band** | [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) — maps each feature band to its VS version and support end date |
+| **Visual Studio** | [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) — annual releases and the LTSC table |
+
+**Long-lived VS versions — hardcoded, don't re-derive these each release.** These keep their branches alive for years:
+
+| Visual Studio | MSBuild branch | Supported until |
+|---|---|---|
+| Visual Studio 2022 | `vs17.14` | January 2032 |
+| Visual Studio 2019 | `vs16.11` | April 2029 |
+| Visual Studio 2017 | `vs15.9` | April 2027 |
+
+**VS 2026 and later use an annual model: 2 years per release** — one year of monthly feature updates, then one security-only year on the LTSC. Only the **LTSC baseline version** gets that second year; an ordinary monthly release falls out of support as soon as the next monthly ships. So each year exactly one `vs18.x` becomes the LTSC and must be kept ~2 years while its neighbours retire quickly — identify it from the LTSC table on the servicing page (`2026-LTSC` ends **November 9, 2027**).
+
+⚠️ **A VS LTSC can expire before the SDK band that shipped with it** — `2026-LTSC` ends Nov 2027, but .NET 10 (LTS) runs to Nov 2028. So the SDK side is frequently what keeps a branch alive, which is why `vs18.0` stays despite being the oldest branch.
 
 🛑 **Maestro is not a lifecycle source.** A `.NET X.Y.Zxx SDK` channel — including `... SDK Release` variants — persists long after the band dies. Reasoning "the channel still exists, so the band is supported" is invalid and is exactly how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release and had to be retired afterwards.
 

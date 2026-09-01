@@ -90,9 +90,19 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
 
   How to identify a retired branch:
     - **The combined rule:** a branch paired with both an SDK band and a VS version is retired **only when both lifecycles agree it is out of support**. If only one side says retired but the other is still supported, **keep the branch** — the still-supported lifecycle must keep receiving fixes.
-    - **SDK lifecycle — authoritative, always open it.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states outright which VS version each SDK band pairs with and when that band's support ends, which resolves most of this step by itself. \
+    - **SDK lifecycle.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states which VS version each SDK band pairs with and when that band's support ends. \
     🛑 **Never infer lifecycle from Maestro.** The existence of a `.NET X.Y.Zxx SDK` channel — including `... SDK Release` channels — says nothing about support status; channels for long-dead bands persist indefinitely. Using channel existence as a proxy is how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release.
-    - **VS lifecycle** — rule of thumb: the VS support window covers the current release plus two preceding versions, so `vs{{THIS_RELEASE_VERSION}} - 3` is the **newest** retirement candidate — never the only one. Confirm against the SDK table above, which carries the VS pairing; the [VS Servicing Information wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/27212/Visual-Studio-Servicing-Information) is **retired and now 404s**, redirecting to https://aka.ms/vsdates, and the VS-Dates page only lists the *active* train (`main` / `rel/stable` / `rel/oobstable`) — it cannot enumerate accumulated backlog.
+    - **VS lifecycle — a separate source; the SDK table does not answer it.** Use [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs). (The old [VS Servicing Information wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/27212/Visual-Studio-Servicing-Information) is retired and now 404s; `https://aka.ms/vsdates` only lists the *active* train and cannot enumerate the backlog.) \
+    **VS 2026 and later: 2 years per annual release** — one year of monthly feature updates, then one security-only year on the LTSC. Only the **LTSC baseline version** gets the second year; an ordinary monthly release falls out of support as soon as the next monthly ships. Each year exactly one `vs18.x` becomes the LTSC and must be kept ~2 years while its neighbours retire quickly — read the LTSC table on that page (`2026-LTSC` ends **November 9, 2027**). Rule of thumb for the non-LTSC ones: the window is the current release plus two preceding, so `vs{{THIS_RELEASE_VERSION}} - 3` is the **newest** candidate — never the only one. \
+    **Long-lived VS versions — hardcoded, do not re-derive each release:**
+
+      | Visual Studio | MSBuild branch | Supported until |
+      |---|---|---|
+      | Visual Studio 2022 | `vs17.14` | January 2032 |
+      | Visual Studio 2019 | `vs16.11` | April 2029 |
+      | Visual Studio 2017 | `vs15.9` | April 2027 |
+
+    - ⚠️ **A VS LTSC can expire *before* the SDK band that shipped with it** — `2026-LTSC` ends Nov 2027 while .NET 10 (LTS) runs to Nov 2028. The SDK side is therefore often what keeps a branch alive; that is why `vs18.0` stays despite being the oldest branch. Always check both directions.
     - **VS-only branches** (not paired with any active SDK band) are retired purely on the VS lifecycle.
     - **Worked example (18.11).** `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) → **keep**, despite being the oldest branch. `vs18.6` pairs with 10.0.3xx (EOL Aug 2026) and VS 18.6 is outside the window → **retire**. `vs18.4` (10.0.2xx, EOL May 2026) and `vs18.5` (VS-only) had default channels for branches already deleted from the repo → **retire the mappings**.
 
