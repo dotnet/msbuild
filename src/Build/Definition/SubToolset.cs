@@ -77,21 +77,6 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        internal SubToolset DeepClone()
-        {
-            var properties =
-                new PropertyDictionary<ProjectPropertyInstance>(_properties?.Count ?? 0);
-            if (_properties is not null)
-            {
-                foreach (ProjectPropertyInstance property in _properties)
-                {
-                    properties.Set(property.DeepClone());
-                }
-            }
-
-            return new SubToolset(_subToolsetVersion, properties);
-        }
-
         /// <summary>
         /// Translates the sub-toolset.
         /// </summary>

@@ -65,9 +65,7 @@ internal sealed class ProjectInstanceSnapshot
         long allocatedBefore = GC.GetAllocatedBytesForCurrentThread();
 #endif
 
-        ProjectInstance template = project.DeepCopyAllState(
-            isImmutable: true,
-            cloneToolset: false);
+        ProjectInstance template = project.DeepCopyAllState(isImmutable: true);
         template.PrepareForSnapshotTemplate();
 
 #if NET
@@ -97,9 +95,7 @@ internal sealed class ProjectInstanceSnapshot
         ILoggingService? loggingService = null,
         BuildEventContext? buildEventContext = null)
     {
-        ProjectInstance materialized = _template.DeepCopyAllState(
-            isImmutable: false,
-            cloneToolset: false);
+        ProjectInstance materialized = _template.DeepCopyAllState(isImmutable: false);
         if (!materialized.TryReinitializeSnapshotMaterialization(
             buildParameters,
             evaluationId,

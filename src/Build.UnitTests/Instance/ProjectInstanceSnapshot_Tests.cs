@@ -266,12 +266,14 @@ public sealed class ProjectInstanceSnapshot_Tests
         firstTarget.ShouldBeSameAs(source.Targets["Build"]);
 
         first.ItemDefinitions.ShouldNotBeSameAs(second.ItemDefinitions);
-        first.ItemDefinitions["Reference"]
-            .ShouldNotBeSameAs(second.ItemDefinitions["Reference"]);
+        ProjectItemDefinitionInstance sharedItemDefinition =
+            first.ItemDefinitions["Reference"];
+        sharedItemDefinition.ShouldBeSameAs(second.ItemDefinitions["Reference"]);
+        sharedItemDefinition.ShouldBeSameAs(source.ItemDefinitions["Reference"]);
         GetItemDefinitions(first.GetItems("Reference").Single())
-            .ShouldContain(first.ItemDefinitions["Reference"]);
-        GetItemDefinitions(first.GetItems("Reference").Single())
-            .ShouldNotContain(second.ItemDefinitions["Reference"]);
+            .ShouldContain(sharedItemDefinition);
+        GetItemDefinitions(second.GetItems("Reference").Single())
+            .ShouldContain(sharedItemDefinition);
 
         first.Toolset.ShouldBeSameAs(second.Toolset);
         first.Toolset.ShouldBeSameAs(collection.GetToolset(first.ToolsVersion));

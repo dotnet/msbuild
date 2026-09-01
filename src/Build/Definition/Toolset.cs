@@ -311,64 +311,6 @@ namespace Microsoft.Build.Evaluation
             _defaultSubToolsetVersionLazy = new Lazy<string>(ComputeDefaultSubToolsetVersion);
         }
 
-        private Toolset(Toolset that)
-        {
-            _toolsVersion = that._toolsVersion;
-            _toolsPath = that._toolsPath;
-            _properties = CloneProperties(that._properties);
-            _environmentProperties = CloneProperties(that._environmentProperties);
-            _globalProperties = CloneProperties(that._globalProperties);
-            _overrideTasksPath = that._overrideTasksPath;
-            _defaultOverrideToolsVersion = that._defaultOverrideToolsVersion;
-            _getFiles = that._getFiles;
-            _directoryExists = that._directoryExists;
-            _loadXmlFromPath = that._loadXmlFromPath;
-
-            if (that._subToolsets is not null)
-            {
-                _subToolsets =
-                    new Dictionary<string, SubToolset>(
-                        that._subToolsets.Count,
-                        StringComparer.OrdinalIgnoreCase);
-                foreach (KeyValuePair<string, SubToolset> subToolset in that._subToolsets)
-                {
-                    _subToolsets.Add(subToolset.Key, subToolset.Value.DeepClone());
-                }
-            }
-
-            if (that._propertySearchPathsTable is not null)
-            {
-                _propertySearchPathsTable =
-                    new Dictionary<string, ProjectImportPathMatch>(
-                        that._propertySearchPathsTable.Count,
-                        StringComparer.OrdinalIgnoreCase);
-                foreach (KeyValuePair<string, ProjectImportPathMatch> searchPath in
-                         that._propertySearchPathsTable)
-                {
-                    _propertySearchPathsTable.Add(
-                        searchPath.Key,
-                        searchPath.Value.DeepClone());
-                }
-            }
-
-            if (that.MSBuildExtensionsPathSearchPathsTable is not null)
-            {
-                MSBuildExtensionsPathSearchPathsTable =
-                    new Dictionary<MSBuildExtensionsPathReferenceKind, IList<string>>(
-                        that.MSBuildExtensionsPathSearchPathsTable.Count);
-                foreach (KeyValuePair<MSBuildExtensionsPathReferenceKind, IList<string>> searchPath in
-                         that.MSBuildExtensionsPathSearchPathsTable)
-                {
-                    MSBuildExtensionsPathSearchPathsTable.Add(
-                        searchPath.Key,
-                        new List<string>(searchPath.Value));
-                }
-            }
-
-            _defaultSubToolsetVersionLazy =
-                new Lazy<string>(ComputeDefaultSubToolsetVersion);
-        }
-
         /// <summary>
         /// Helper for inspecting internal task registries that might or might not be initialized at this point.
         /// </summary>
@@ -376,24 +318,6 @@ namespace Microsoft.Build.Evaluation
         {
             visitor(_defaultTaskRegistry);
             visitor(_overrideTaskRegistry);
-        }
-
-        internal Toolset DeepClone() => new(this);
-
-        private static PropertyDictionary<ProjectPropertyInstance> CloneProperties(
-            PropertyDictionary<ProjectPropertyInstance> properties)
-        {
-            var clone =
-                new PropertyDictionary<ProjectPropertyInstance>(properties?.Count ?? 0);
-            if (properties is not null)
-            {
-                foreach (ProjectPropertyInstance property in properties)
-                {
-                    clone.Set(property.DeepClone());
-                }
-            }
-
-            return clone;
         }
 
         /// <summary>

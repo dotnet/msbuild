@@ -751,8 +751,7 @@ namespace Microsoft.Build.Execution
             ProjectInstance that,
             bool isImmutable,
             RequestedProjectState filter = null,
-            bool cloneAllState = false,
-            bool cloneToolset = true)
+            bool cloneAllState = false)
         {
             Assumed.True(filter == null || isImmutable, "The result of a filtered ProjectInstance clone must be immutable.");
 
@@ -774,12 +773,8 @@ namespace Microsoft.Build.Execution
                     _properties.Set(property.DeepClone(_isImmutable));
                 }
 
-                Dictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance>
-                    itemDefinitionClones = null;
                 if (cloneAllState)
                 {
-                    itemDefinitionClones =
-                        new Dictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance>();
                     var itemDefinitions =
                         new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(
                             that._itemDefinitions is null
@@ -791,10 +786,7 @@ namespace Microsoft.Build.Execution
                         foreach (ProjectItemDefinitionInstance itemDefinition in
                                  (IEnumerable<ProjectItemDefinitionInstance>)that._itemDefinitions)
                         {
-                            ProjectItemDefinitionInstance clone =
-                                itemDefinition.DeepClone();
-                            itemDefinitionClones.Add(itemDefinition, clone);
-                            itemDefinitions.Add(clone);
+                            itemDefinitions.Add(itemDefinition);
                         }
                     }
 
@@ -812,7 +804,7 @@ namespace Microsoft.Build.Execution
                 {
                     _items.Add(
                         cloneAllState
-                            ? item.DeepClone(this, itemDefinitionClones)
+                            ? item.DeepCloneAllState(this)
                             : item.DeepClone(this));
                 }
 
@@ -884,9 +876,7 @@ namespace Microsoft.Build.Execution
                             StringComparer.OrdinalIgnoreCase);
                 this.Toolset =
                     cloneAllState
-                        ? cloneToolset
-                            ? that.Toolset?.DeepClone()
-                            : null
+                        ? null
                         : that.Toolset;
                 this.TaskRegistry =
                     cloneAllState
@@ -2359,17 +2349,14 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <remarks>
         /// Evaluated item elements are not copied, and immutable target instances are shared.
-        /// When <paramref name="cloneToolset"/> is <see langword="false"/>, the copy must be
-        /// rebound with <see cref="TryReinitializeSnapshotMaterialization"/> before use.
+        /// The copy is detached from its toolset and must be rebound with
+        /// <see cref="TryReinitializeSnapshotMaterialization"/> before use.
         /// </remarks>
-        internal ProjectInstance DeepCopyAllState(
-            bool isImmutable,
-            bool cloneToolset = true) =>
+        internal ProjectInstance DeepCopyAllState(bool isImmutable) =>
             new(
                 this,
                 isImmutable,
-                cloneAllState: true,
-                cloneToolset: cloneToolset);
+                cloneAllState: true);
 
         /// <summary>
         /// Build default target/s with loggers of the project collection.

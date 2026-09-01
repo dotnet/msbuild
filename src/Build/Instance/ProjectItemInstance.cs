@@ -153,13 +153,13 @@ namespace Microsoft.Build.Execution
         }
 
         private ProjectItemInstance(
-            ProjectItemInstance that,
-            ProjectInstance newProject,
-            IReadOnlyDictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance> itemDefinitionClones)
+            ProjectInstance project,
+            string itemType,
+            TaskItem taskItem)
         {
-            _project = newProject;
-            _itemType = that._itemType;
-            _taskItem = that._taskItem.DeepClone(newProject.IsImmutable, itemDefinitionClones);
+            _project = project;
+            _itemType = itemType;
+            _taskItem = taskItem;
         }
 
         /// <summary>
@@ -708,11 +708,12 @@ namespace Microsoft.Build.Execution
             return new ProjectItemInstance(this, newProject);
         }
 
-        internal ProjectItemInstance DeepClone(
-            ProjectInstance newProject,
-            IReadOnlyDictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance> itemDefinitionClones)
+        internal ProjectItemInstance DeepCloneAllState(ProjectInstance newProject)
         {
-            return new ProjectItemInstance(this, newProject, itemDefinitionClones);
+            return new ProjectItemInstance(
+                newProject,
+                _itemType,
+                _taskItem.DeepCloneAllState(newProject.IsImmutable));
         }
 
         /// <summary>
@@ -917,8 +918,9 @@ namespace Microsoft.Build.Execution
             private TaskItem(
                 TaskItem source,
                 bool isImmutable,
-                IReadOnlyDictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance> itemDefinitionClones)
+                bool cloneAllState)
             {
+                Assumed.True(cloneAllState);
                 _includeEscaped = source._includeEscaped;
                 _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
                 _directMetadata = source._directMetadata;
@@ -929,20 +931,7 @@ namespace Microsoft.Build.Execution
 
                 if (source._itemDefinitions is not null)
                 {
-                    _itemDefinitions =
-                        new List<ProjectItemDefinitionInstance>(source._itemDefinitions.Count);
-                    foreach (ProjectItemDefinitionInstance itemDefinition in source._itemDefinitions)
-                    {
-                        if (!itemDefinitionClones.TryGetValue(
-                                itemDefinition,
-                                out ProjectItemDefinitionInstance clone))
-                        {
-                            throw new InvalidOperationException(
-                                $"Item definition '{itemDefinition.ItemType}' is not owned by the project instance being cloned.");
-                        }
-
-                        _itemDefinitions.Add(clone);
-                    }
+                    _itemDefinitions = new List<ProjectItemDefinitionInstance>(source._itemDefinitions);
                 }
             }
 
@@ -2134,10 +2123,8 @@ namespace Microsoft.Build.Execution
                 return clone;
             }
 
-            internal TaskItem DeepClone(
-                bool isImmutable,
-                IReadOnlyDictionary<ProjectItemDefinitionInstance, ProjectItemDefinitionInstance> itemDefinitionClones) =>
-                new(this, isImmutable, itemDefinitionClones);
+            internal TaskItem DeepCloneAllState(bool isImmutable) =>
+                new(this, isImmutable, cloneAllState: true);
 
             /// <summary>
             /// Helper to get the value of a built-in metadatum with
