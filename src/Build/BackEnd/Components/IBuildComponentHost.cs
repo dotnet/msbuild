@@ -154,7 +154,7 @@ namespace Microsoft.Build.BackEnd
         TelemetryCollector,
 
         /// <summary>
-        /// The cache of serialized project instance snapshots.
+        /// The cache of in-memory project instance snapshot templates.
         /// </summary>
         ProjectInstanceSnapshotCache,
     }

@@ -2354,6 +2354,14 @@ namespace Microsoft.Build.Execution
             return new ProjectInstance(this, isImmutable);
         }
 
+        /// <summary>
+        /// Creates a snapshot-oriented copy of the evaluated project state.
+        /// </summary>
+        /// <remarks>
+        /// Evaluated item elements are not copied, and immutable target instances are shared.
+        /// When <paramref name="cloneToolset"/> is <see langword="false"/>, the copy must be
+        /// rebound with <see cref="TryReinitializeSnapshotMaterialization"/> before use.
+        /// </remarks>
         internal ProjectInstance DeepCopyAllState(
             bool isImmutable,
             bool cloneToolset = true) =>
@@ -2645,6 +2653,12 @@ namespace Microsoft.Build.Execution
             _hostServices = hostServices;
         }
 
+        /// <summary>
+        /// Detaches build-specific state from a newly created snapshot template before publication.
+        /// </summary>
+        /// <remarks>
+        /// This mutates the instance and must only be called on a private, unpublished copy.
+        /// </remarks>
         internal void PrepareForSnapshotTemplate()
         {
             ProjectRootElementCache = null;
@@ -2653,6 +2667,13 @@ namespace Microsoft.Build.Execution
             _taskRegistry?.RebindForBuild(_toolset, projectRootElementCache: null);
         }
 
+        /// <summary>
+        /// Rebinds a materialized snapshot copy to the current build.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> if the snapshot toolset is available; otherwise,
+        /// <see langword="false"/>.
+        /// </returns>
         internal bool TryReinitializeSnapshotMaterialization(
             BuildParameters buildParameters,
             int evaluationId,

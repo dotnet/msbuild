@@ -200,6 +200,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectItemGroupTaskItemInstance(ProjectItemGroupTaskItemInstance that)
         {
+            // All fields are immutable
             _itemType = that._itemType;
             _include = that._include;
             _exclude = that._exclude;
@@ -210,24 +211,7 @@ namespace Microsoft.Build.Execution
             _removeMetadata = that._removeMetadata;
             _keepDuplicates = that._keepDuplicates;
             _condition = that._condition;
-            _location = that._location;
-            _includeLocation = that._includeLocation;
-            _excludeLocation = that._excludeLocation;
-            _removeLocation = that._removeLocation;
-            _matchOnMetadataLocation = that._matchOnMetadataLocation;
-            _matchOnMetadataOptionsLocation = that._matchOnMetadataOptionsLocation;
-            _keepMetadataLocation = that._keepMetadataLocation;
-            _removeMetadataLocation = that._removeMetadataLocation;
-            _keepDuplicatesLocation = that._keepDuplicatesLocation;
-            _conditionLocation = that._conditionLocation;
-            if (that._metadata is not null)
-            {
-                _metadata = new List<ProjectItemGroupTaskMetadataInstance>(that._metadata.Count);
-                foreach (ProjectItemGroupTaskMetadataInstance metadata in that._metadata)
-                {
-                    _metadata.Add(metadata.DeepClone());
-                }
-            }
+            _metadata = that._metadata;
         }
 
         /// <summary>

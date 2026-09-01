@@ -578,6 +578,7 @@ namespace Microsoft.Build.BackEnd
                     BuildEventContext.InvalidTargetId,
                     BuildEventContext.InvalidTaskId);
 
+                // Snapshot copies do not retain evaluated item elements, so recording requests must bypass the cache.
                 ProjectInstanceSnapshotCache snapshotCache =
                     projectLoadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements)
                         ? null

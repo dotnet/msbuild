@@ -132,16 +132,6 @@ namespace Microsoft.Build.Execution
             get { return _itemTypeLocation; }
         }
 
-        internal ProjectTaskOutputItemInstance DeepClone() =>
-            new ProjectTaskOutputItemInstance(
-                _itemType,
-                _taskParameter,
-                _condition,
-                _location,
-                _itemTypeLocation,
-                _taskParameterLocation,
-                _conditionLocation);
-
         void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)

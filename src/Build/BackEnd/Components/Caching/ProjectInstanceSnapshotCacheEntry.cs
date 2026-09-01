@@ -22,7 +22,7 @@ internal interface IProjectInstanceSnapshotValidationData
 }
 
 /// <summary>
-/// Placeholder validation data used only with a validator that never accepts a snapshot.
+/// Placeholder validation data that carries no validation inputs.
 /// </summary>
 internal sealed class EmptyProjectInstanceSnapshotValidationData : IProjectInstanceSnapshotValidationData
 {

@@ -354,31 +354,6 @@ namespace Microsoft.Build.Execution
             _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
         }
 
-        internal ProjectTaskInstance DeepClone()
-        {
-            CopyOnWriteDictionary<(string, ElementLocation)> parameters = _parameters.Clone();
-
-            var outputs = new List<ProjectTaskInstanceChild>(_outputs.Count);
-            foreach (ProjectTaskInstanceChild output in _outputs)
-            {
-                outputs.Add(ProjectTaskInstanceChildCloner.DeepClone(output));
-            }
-
-            return new ProjectTaskInstance(
-                _name,
-                _condition,
-                _continueOnError,
-                _msbuildRuntime,
-                _msbuildArchitecture,
-                parameters,
-                outputs,
-                _location,
-                _conditionLocation,
-                _continueOnErrorLocation,
-                _msbuildRuntimeLocation,
-                _msbuildArchitectureLocation);
-        }
-
         void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)

@@ -11,9 +11,12 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Execution;
 
 /// <summary>
-/// An immutable template for creating independent mutable copies of an evaluated
-/// <see cref="ProjectInstance"/>.
+/// An immutable template for creating mutable copies of an evaluated <see cref="ProjectInstance"/>.
 /// </summary>
+/// <remarks>
+/// Mutable project state is copied for each materialization. Immutable
+/// <see cref="ProjectTargetInstance"/> objects are shared with the source project.
+/// </remarks>
 internal sealed class ProjectInstanceSnapshot
 {
     private readonly ProjectInstance _template;
@@ -31,11 +34,11 @@ internal sealed class ProjectInstanceSnapshot
     }
 
     /// <summary>
-    /// Gets a serialized-size proxy for the memory retained by this snapshot.
+    /// Gets an approximate size used to bound the snapshot cache.
     /// </summary>
     /// <remarks>
-    /// This preserves bounded-cache behavior while the immutable-template experiment measures
-    /// actual process memory. It is not an exact managed-object retained-size calculation.
+    /// On .NET this is the number of bytes allocated while creating the template. On .NET Framework
+    /// it is a count-based heuristic. It is not an exact managed-object retained-size calculation.
     /// </remarks>
     internal long EstimatedRetainedSizeBytes => _estimatedRetainedSizeBytes;
 
