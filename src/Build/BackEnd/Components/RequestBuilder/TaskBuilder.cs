@@ -865,7 +865,11 @@ namespace Microsoft.Build.BackEnd
                 if (_componentHost.BuildParameters.MultiThreadedStrict
                     && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)
                     && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope strictModeScope
-                    && strictModeScope.VerifyAndReportProcessState(taskLoggingContext, _taskNode.Name, _targetChildInstance.Location))
+                    && strictModeScope.VerifyAndReportProcessState(
+                        taskLoggingContext,
+                        _taskNode.Name,
+                        _targetChildInstance.Location,
+                        convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue))
                 {
                     taskResult = false;
                 }

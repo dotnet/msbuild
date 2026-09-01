@@ -1214,9 +1214,20 @@ namespace Microsoft.Build.Execution
             {
                 // Restore the process current directory first, and outside any code that can throw: if this is
                 // skipped, the process stays pinned to the sentinel directory for its whole remaining lifetime,
-                // which in the MSBuild Server and Visual Studio outlives this build by a long way.
-                _multiThreadedStrictModeScope?.Exit();
-                _multiThreadedStrictModeScope = null;
+                // which in the MSBuild Server and Visual Studio outlives this build by a long way. An exception
+                // here must not skip the rest of shutdown either, or the BuildManager is left unusable.
+                try
+                {
+                    _multiThreadedStrictModeScope?.Exit();
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                }
+                finally
+                {
+                    _multiThreadedStrictModeScope = null;
+                    _buildParameters!.MultiThreadedStrict = false;
+                }
 
                 try
                 {

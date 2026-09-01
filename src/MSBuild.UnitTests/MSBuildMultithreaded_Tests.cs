@@ -283,14 +283,46 @@ namespace Microsoft.Build.Engine.UnitTests
             success.ShouldBeTrue(output);
         }
 
-        private string RunStrictModeProbe(string behavior, string msbuildArgs, out bool success, bool useRelativeProjectPath = false)
+        /// <summary>
+        /// A task that declares ContinueOnError has its errors reported as warnings, and strict mode must follow
+        /// that contract - otherwise the log claims "Build succeeded" next to an error count.
+        /// </summary>
+        [Fact]
+        public void StrictMode_HonorsContinueOnError()
+        {
+            string output = RunStrictModeProbe(
+                "WriteRelativeFile",
+                "/m /nodereuse:false /mt:strict",
+                out bool success,
+                continueOnError: true);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("MSB4287");
+            output.ShouldContain("0 Error(s)");
+        }
+
+        /// <summary>
+        /// The environment variable accepts "true" as well as "1", matching the other opt-in traits.
+        /// </summary>
+        [Fact]
+        public void StrictMode_EnvironmentVariableAcceptsTrue()
+        {
+            _env.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", "true");
+
+            string output = RunStrictModeProbe("WriteRelativeFile", "/m /nodereuse:false /mt", out bool success);
+
+            success.ShouldBeFalse(output);
+            output.ShouldContain("MSB4287");
+        }
+
+        private string RunStrictModeProbe(string behavior, string msbuildArgs, out bool success, bool useRelativeProjectPath = false, bool continueOnError = false)
         {
             string project = $"""
                 <Project>
                     <UsingTask TaskName="StrictModeProbeTask" AssemblyFile="{typeof(StrictModeProbeTask).Assembly.Location}" />
 
                     <Target Name="Build">
-                        <StrictModeProbeTask Behavior="{behavior}" />
+                        <StrictModeProbeTask Behavior="{behavior}" ContinueOnError="{continueOnError.ToString().ToLowerInvariant()}" />
                     </Target>
                 </Project>
                 """;

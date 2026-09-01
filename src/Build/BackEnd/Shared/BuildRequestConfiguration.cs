@@ -532,8 +532,12 @@ namespace Microsoft.Build.BackEnd
             {
                 // Strict mode pins the process current directory to a sentinel directory for the whole build so
                 // that unresolved relative paths fail deterministically. Resetting it here would silently undo
-                // that. Outside strict mode the legacy reset is preserved exactly as before.
-                if (componentHost.BuildParameters.SaveOperatingEnvironment && !componentHost.BuildParameters.MultiThreadedStrict)
+                // that, including for a strict build running concurrently in the same process, so the installed
+                // scope is honored regardless of which build is loading the project. Outside strict mode the
+                // legacy reset is preserved exactly as before.
+                if (componentHost.BuildParameters.SaveOperatingEnvironment
+                    && !componentHost.BuildParameters.MultiThreadedStrict
+                    && MultiThreadedStrictModeScope.ActiveScope is null)
                 {
                     try
                     {
