@@ -249,7 +249,7 @@ public sealed class ProjectInstanceSnapshot_Tests
     }
 
     [Fact]
-    public void Materialize_OwnsIndependentCompleteObjectGraph()
+    public void Materialize_OwnsIndependentMutableStateAndSharesImmutableTargets()
     {
         using var collection = new ProjectCollection();
         using var projectFromString = new ProjectRootElementFromString(ProjectContents, collection);
@@ -262,40 +262,8 @@ public sealed class ProjectInstanceSnapshot_Tests
         first.Targets.ShouldNotBeSameAs(second.Targets);
         ProjectTargetInstance firstTarget = first.Targets["Build"];
         ProjectTargetInstance secondTarget = second.Targets["Build"];
-        firstTarget.ShouldNotBeSameAs(secondTarget);
-        firstTarget.Children.Count.ShouldBe(secondTarget.Children.Count);
-        for (int index = 0; index < firstTarget.Children.Count; index++)
-        {
-            firstTarget.Children[index].ShouldNotBeSameAs(secondTarget.Children[index]);
-        }
-
-        ProjectTaskInstance firstTask =
-            firstTarget.Children.OfType<ProjectTaskInstance>().Single(
-                task => task.Name == "CreateProperty");
-        ProjectTaskInstance secondTask =
-            secondTarget.Children.OfType<ProjectTaskInstance>().Single(
-                task => task.Name == "CreateProperty");
-        firstTask.ParametersForBuild.ShouldNotBeSameAs(secondTask.ParametersForBuild);
-        firstTask.Outputs.Single().ShouldNotBeSameAs(secondTask.Outputs.Single());
-
-        firstTarget.OnErrorChildren.Single()
-            .ShouldNotBeSameAs(secondTarget.OnErrorChildren.Single());
-
-        ProjectPropertyGroupTaskInstance firstPropertyGroup =
-            firstTarget.Children.OfType<ProjectPropertyGroupTaskInstance>().Single();
-        ProjectPropertyGroupTaskInstance secondPropertyGroup =
-            secondTarget.Children.OfType<ProjectPropertyGroupTaskInstance>().Single();
-        firstPropertyGroup.Properties.Single()
-            .ShouldNotBeSameAs(secondPropertyGroup.Properties.Single());
-
-        ProjectItemGroupTaskInstance firstItemGroup =
-            firstTarget.Children.OfType<ProjectItemGroupTaskInstance>().Single();
-        ProjectItemGroupTaskInstance secondItemGroup =
-            secondTarget.Children.OfType<ProjectItemGroupTaskInstance>().Single();
-        firstItemGroup.Items.Single()
-            .ShouldNotBeSameAs(secondItemGroup.Items.Single());
-        firstItemGroup.Items.Single().Metadata.Single()
-            .ShouldNotBeSameAs(secondItemGroup.Items.Single().Metadata.Single());
+        firstTarget.ShouldBeSameAs(secondTarget);
+        firstTarget.ShouldBeSameAs(source.Targets["Build"]);
 
         first.ItemDefinitions.ShouldNotBeSameAs(second.ItemDefinitions);
         first.ItemDefinitions["Reference"]

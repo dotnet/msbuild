@@ -905,7 +905,7 @@ namespace Microsoft.Build.Execution
                     {
                         foreach (ProjectTargetInstance target in that._targets.Values)
                         {
-                            _actualTargets.Add(target.DeepClone());
+                            _actualTargets.Add(target);
                         }
                     }
 
