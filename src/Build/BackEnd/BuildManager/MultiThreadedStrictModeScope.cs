@@ -77,27 +77,20 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private readonly HashSet<string> _reportedEntries = new(FileUtilities.PathComparer);
 
+        /// <summary>
+        /// Directories the process has already been caught in, so that one stray call does not fail every task
+        /// running concurrently with it while a second, different offender still gets reported.
+        /// </summary>
+        private readonly HashSet<string> _reportedCurrentDirectories = new(FileUtilities.PathComparer);
+
         private readonly string _sentinelDirectory;
         private readonly string _directoryToRestore;
-
-        /// <summary>
-        /// Last observed write time of the sentinel directory, in ticks. Adding or removing an entry moves it, so
-        /// comparing against it lets the common "nothing was written" case skip enumerating the directory.
-        /// </summary>
-        private long _lastObservedWriteTimeUtcTicks;
-
-        /// <summary>
-        /// Set once the current-directory violation has been reported. A single stray call would otherwise fail
-        /// every task that happens to be running concurrently with it.
-        /// </summary>
-        private int _currentDirectoryViolationReported;
 
         private MultiThreadedStrictModeScope(string sentinelDirectory, string directoryToRestore, string markerFileName)
         {
             _sentinelDirectory = sentinelDirectory;
             _directoryToRestore = directoryToRestore;
             _reportedEntries.Add(markerFileName);
-            _lastObservedWriteTimeUtcTicks = GetWriteTimeUtcTicks(sentinelDirectory);
         }
 
         /// <summary>
@@ -179,14 +172,26 @@ namespace Microsoft.Build.Execution
                     "MultiThreadedStrictModeCouldNotBeEnabled",
                     sentinelDirectory,
                     failureReason);
+
+                return null;
             }
-            else
+
+            try
             {
                 loggingService?.LogComment(
                     BuildEventContext.Invalid,
                     MessageImportance.Low,
                     "MultiThreadedStrictModeEnabled",
                     scope.SentinelDirectory);
+            }
+            catch
+            {
+                // Synchronous logging runs logger code inline, and a logger that throws here would leave the
+                // caller without the scope it needs to restore the process current directory. Uninstall before
+                // letting the exception through - a stranded scope would pin the directory for the process
+                // lifetime and suppress the legacy per-project reset for every later build.
+                scope.Exit();
+                throw;
             }
 
             return scope;
@@ -295,18 +300,22 @@ namespace Microsoft.Build.Execution
             if (!FileUtilities.PathsEqual(currentDirectory, _sentinelDirectory))
             {
                 // Put the process back where it belongs so the rest of the build keeps the protection it asked
-                // for, but only while this scope is still the owner - otherwise this would fight with Exit().
+                // for, but only while this scope is still the owner - otherwise this would fight with Exit(), and
+                // a directory that Exit() legitimately restored must not be reported against an innocent task.
                 lock (s_stateLock)
                 {
                     if (ReferenceEquals(Volatile.Read(ref s_activeScope), this))
                     {
                         NativeMethodsShared.SetCurrentDirectory(_sentinelDirectory);
-                    }
-                }
 
-                if (Interlocked.Exchange(ref _currentDirectoryViolationReported, 1) == 0)
-                {
-                    unexpectedCurrentDirectory = currentDirectory;
+                        lock (_reportedEntriesLock)
+                        {
+                            if (_reportedCurrentDirectories.Add(currentDirectory))
+                            {
+                                unexpectedCurrentDirectory = currentDirectory;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -321,11 +330,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private string? TakeUnreportedSentinelDirectoryEntries()
         {
-            // Fast path: adding or removing a directory entry moves the directory's write time, so an unchanged
-            // write time means nothing was written. This is one lock-free stat call for the overwhelmingly common
-            // clean case, and it keeps the cost flat after a violation instead of re-enumerating on every task.
-            long writeTimeUtcTicks = GetWriteTimeUtcTicks(_sentinelDirectory);
-            if (writeTimeUtcTicks == Interlocked.Read(ref _lastObservedWriteTimeUtcTicks))
+            // Fast path: one lock-free enumeration that stops at the first entry. Running clean is the
+            // overwhelmingly common case, so the lock is only taken once something is actually wrong. The
+            // directory's write time is deliberately not used as a cheaper gate: file systems update it lazily,
+            // so a stray write can land inside the previously observed tick and never be reported at all.
+            if (!HasAnyEntry(_sentinelDirectory))
             {
                 return null;
             }
@@ -352,11 +361,6 @@ namespace Microsoft.Build.Execution
                         {
                             entries.Add(name);
                         }
-                    }
-
-                    if (!truncated)
-                    {
-                        Interlocked.Exchange(ref _lastObservedWriteTimeUtcTicks, writeTimeUtcTicks);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -423,22 +427,6 @@ namespace Microsoft.Build.Execution
             return new MultiThreadedStrictModeScope(TryGetCurrentDirectory() ?? sentinelDirectory, directoryToRestore, markerFileName);
         }
 
-        /// <summary>
-        /// Returns the write time of a directory in ticks, or 0 when it cannot be read. Adding or removing an
-        /// entry updates it, which is what makes it usable as a cheap "did anything change" probe.
-        /// </summary>
-        private static long GetWriteTimeUtcTicks(string directory)
-        {
-            try
-            {
-                return Directory.GetLastWriteTimeUtc(directory).Ticks;
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                return 0;
-            }
-        }
-
         private static bool IsCurrentDirectory(string directory)
         {
             string? currentDirectory = TryGetCurrentDirectory();
@@ -461,6 +449,23 @@ namespace Microsoft.Build.Execution
 
 
 
+
+        private static bool HasAnyEntry(string directory)
+        {
+            try
+            {
+                foreach (string unused in Directory.EnumerateFileSystemEntries(directory))
+                {
+                    return true;
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Treat an unreadable sentinel as clean rather than failing the build it is meant to diagnose.
+            }
+
+            return false;
+        }
 
         private static void TryDeleteFile(string file)
         {

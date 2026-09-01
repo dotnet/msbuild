@@ -862,6 +862,8 @@ namespace Microsoft.Build.BackEnd
                 // surfaces deterministically instead of as load-dependent flakiness in some later build.
                 // Gated on this build's own parameters: another BuildManager in the same process may have opted
                 // in without this one doing so, and cancellation produces enough noise on its own.
+                bool strictModeViolationReported = false;
+
                 if (_componentHost.BuildParameters.MultiThreadedStrict
                     && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)
                     && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope strictModeScope
@@ -871,6 +873,7 @@ namespace Microsoft.Build.BackEnd
                         _targetChildInstance.Location,
                         convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue))
                 {
+                    strictModeViolationReported = true;
                     taskResult = false;
                 }
 
@@ -1000,6 +1003,7 @@ namespace Microsoft.Build.BackEnd
                 if (taskReturned // if the task returned
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
+                    && !strictModeViolationReported // and it wasn't the engine that failed it for a strict-mode violation
                     && (be is TaskHost th ? th.BuildRequestsSucceeded : false)
                     && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)) // and it wasn't cancelled
                 {

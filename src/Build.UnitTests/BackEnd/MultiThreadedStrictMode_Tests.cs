@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
@@ -131,9 +133,79 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Moving the process current directory corrupts every project building concurrently, so it must be
-        /// reported and repaired - and reported only once, however many tasks observe it.
+        /// Detection has to be deterministic to be worth anything: the whole point of the mode is to remove
+        /// load-dependent flakiness, so a stray write must be reported on the very next verification, every time.
         /// </summary>
+        [Fact]
+        public void UnresolvedPathWriteIsDetectedEveryTime()
+        {
+            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+
+            try
+            {
+                scope.ShouldNotBeNull();
+
+                for (int i = 0; i < 50; i++)
+                {
+                    string name = $"stray{i}.txt";
+                    File.WriteAllText(name, "probe");
+
+                    scope!.DetectViolations().UnresolvedPathWrites.ShouldBe(name, $"iteration {i}");
+                }
+            }
+            finally
+            {
+                scope?.Exit();
+            }
+        }
+
+        /// <summary>
+        /// More stray entries than fit in one diagnostic must be truncated, not dropped: the remainder has to
+        /// show up in later verifications.
+        /// </summary>
+        [Fact]
+        public void UnresolvedPathWritesAreTruncatedButNotDropped()
+        {
+            const int StrayCount = 25;
+
+            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+
+            try
+            {
+                scope.ShouldNotBeNull();
+
+                for (int i = 0; i < StrayCount; i++)
+                {
+                    File.WriteAllText($"stray{i:D2}.txt", "probe");
+                }
+
+                HashSet<string> reported = new(StringComparer.Ordinal);
+
+                // Every verification reports at most ten names, so the whole set needs three of them.
+                for (int i = 0; i < 3; i++)
+                {
+                    string? batch = scope!.DetectViolations().UnresolvedPathWrites;
+                    batch.ShouldNotBeNull();
+
+                    foreach (string name in batch!.Split([", "], StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        if (name != "...")
+                        {
+                            reported.Add(name).ShouldBeTrue($"{name} was reported twice");
+                        }
+                    }
+                }
+
+                reported.Count.ShouldBe(StrayCount);
+                scope!.DetectViolations().Any.ShouldBeFalse();
+            }
+            finally
+            {
+                scope?.Exit();
+            }
+        }
+
+
         [Fact]
         public void CurrentDirectoryChangeIsDetectedOnceAndRepaired()
         {
