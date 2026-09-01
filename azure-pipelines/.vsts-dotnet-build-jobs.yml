@@ -41,16 +41,6 @@ jobs:
 
   - template: /eng/common/templates-official/steps/enable-internal-sources.yml
 
-
-  - task: NuGetCommand@2
-    displayName: Restore internal tools
-    inputs:
-      command: restore
-      feedsToUse: config
-      restoreSolution: 'eng\common\internal\Tools.csproj'
-      nugetConfigPath: 'eng\common\internal\NuGet.config'
-      restoreDirectory: '$(Build.SourcesDirectory)\.packages'
-
   - task: MicroBuildSigningPlugin@4
     displayName: Install MicroBuild plugin
     inputs:
@@ -92,12 +82,8 @@ jobs:
               /p:GenerateSbom=true
               /p:SuppressFinalPackageVersion=${{ parameters.isExperimental }}
               /p:IsExperimental=${{ parameters.isExperimental }}
-
     displayName: Build
     condition: succeeded()
-
-  # Required by Microsoft policy
-  - template: /eng/common/templates-official/steps/generate-sbom.yml@self
 
   # Publish OptProf configuration files
   - task: 1ES.PublishArtifactsDrop@1
@@ -140,7 +126,7 @@ jobs:
       ArtifactName: MicroBuildOutputs
       ArtifactType: Container
     displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   - task: 1ES.PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
