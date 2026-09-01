@@ -581,31 +581,31 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     }
                     else if (member is IPropertySymbol property)
                     {
-                        if (property.GetMethod is not null && seen.Add(property.GetMethod))
+                        if (property.GetMethod is { IsImplicitlyDeclared: false } getMethod && seen.Add(getMethod))
                         {
-                            yield return property.GetMethod;
+                            yield return getMethod;
                         }
 
-                        if (property.SetMethod is not null && seen.Add(property.SetMethod))
+                        if (property.SetMethod is { IsImplicitlyDeclared: false } setMethod && seen.Add(setMethod))
                         {
-                            yield return property.SetMethod;
+                            yield return setMethod;
                         }
                     }
                     else if (member is IEventSymbol @event)
                     {
-                        if (@event.AddMethod is not null && seen.Add(@event.AddMethod))
+                        if (@event.AddMethod is { IsImplicitlyDeclared: false } addMethod && seen.Add(addMethod))
                         {
-                            yield return @event.AddMethod;
+                            yield return addMethod;
                         }
 
-                        if (@event.RemoveMethod is not null && seen.Add(@event.RemoveMethod))
+                        if (@event.RemoveMethod is { IsImplicitlyDeclared: false } removeMethod && seen.Add(removeMethod))
                         {
-                            yield return @event.RemoveMethod;
+                            yield return removeMethod;
                         }
 
-                        if (@event.RaiseMethod is not null && seen.Add(@event.RaiseMethod))
+                        if (@event.RaiseMethod is { IsImplicitlyDeclared: false } raiseMethod && seen.Add(raiseMethod))
                         {
-                            yield return @event.RaiseMethod;
+                            yield return raiseMethod;
                         }
                     }
                 }
