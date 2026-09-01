@@ -85,7 +85,7 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | Phase | Trigger | Key Actions |
 |---|---|---|
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
-| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), identify retired branches, `VisualStudio.ChannelName` |
+| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), **audit all `vs*` branches for retirement**, `VisualStudio.ChannelName` |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
 | **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Public API promotion, OptProf bootstrap (usually a no-op), M2/QB approval only if behind schedule, babysit the VS insertion into VS `main` before insiders snap |
@@ -107,6 +107,23 @@ Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) 
 **Phase 2 — what moves vs. what stays.** When rotating `main` to the next channel, retarget **only** the subscriptions whose **target branch is `main`** (`dotnet/dotnet @ main`, `dotnet/fsharp @ main`). **Never** retarget a subscription that targets a VMR servicing/release branch (`dotnet/dotnet @ release/*`) — that includes the SDK band paired with the new `vs{{THIS_RELEASE_VERSION}}` branch and any `.NET-next` preview band (`release/*-preview*`). Those stay on `VS {{THIS_RELEASE_VERSION}}` so the new release branch owns their downstream flow; moving them steals it. (This bit the 18.9 release: the band and preview subs were moved and had to be reverted.)
 
 **Phase 2 — VMR backflow rotation (easy to miss).** Backflow (`dotnet/dotnet → msbuild`, source-enabled) must rotate too **when the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band** (skip for a VS-only release): repoint the `→ main` backflow to the **next** SDK band channel (`.NET <NEXT_BAND> SDK`, the channel `dotnet/dotnet @ main` publishes to), and **add** a backflow from the **outgoing** band channel into the new `vs{{THIS_RELEASE_VERSION}}` branch (mirror the prior release branch's backflow, e.g. `vs18.0 ← .NET 10.0.1xx SDK`). See checklist steps 2.2b / 2.3f / 2.3g.
+
+## Branch retirement (Phase 1.3)
+
+Each release retires the `vs*` branches that have fallen out of support. **This is an audit of every live branch, not a check of one candidate.** The rule of thumb (`vs{{THIS_RELEASE_VERSION}} - 3`) identifies only the *newest* candidate; nothing in the process ever revisits older branches, so a single missed retirement persists forever and the backlog grows every month.
+
+**The authoritative source is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions).** It maps each SDK feature band to its VS version and support end date, which decides most branches outright. Open it every release — it is cheap and it is the whole answer for SDK-paired branches.
+
+🛑 **Maestro is not a lifecycle source.** A `.NET X.Y.Zxx SDK` channel — including `... SDK Release` variants — persists long after the band dies. Reasoning "the channel still exists, so the band is supported" is invalid and is exactly how `vs18.6` (band 10.0.3xx, EOL Aug 2026) survived the 18.11 audit.
+
+Apply the **combined rule**: a branch paired with both an SDK band and a VS version retires only when *both* lifecycles agree. Two mechanical red flags find most of the backlog:
+
+| Signal | Meaning |
+|---|---|
+| Branch's `VS X.Y` channel has **no outbound subscription** | Nothing consumes it — the branch feeds nothing. Compare a live one: `vs18.0 → dotnet/dotnet release/10.0.1xx`. |
+| Default channel exists for a **branch that isn't in the repo** | Pure orphan — delete the mapping. |
+
+Worked example from 18.11: `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) so it is **kept despite being the oldest branch**; `vs18.6` (10.0.3xx, EOL Aug 2026) retires; `vs18.4` and `vs18.5` were orphaned default channels for deleted branches.
 
 ## Executing a Phase
 
