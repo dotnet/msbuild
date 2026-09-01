@@ -66,13 +66,25 @@ namespace Microsoft.Build.Execution
         private static MultiThreadedStrictModeScope? s_activeScope;
 
         /// <summary>
-        /// Names already reported out of the sentinel directory. Stray files are deliberately left on disk for
-        /// inspection, so they must not be reported again by every subsequent task.
+        /// Guards the reported-entry bookkeeping.
         /// </summary>
-        private readonly HashSet<string> _reportedEntries = new(StringComparer.Ordinal);
+        private readonly object _reportedEntriesLock = new();
+
+        /// <summary>
+        /// Names already reported out of the sentinel directory, so that they are not reported again by every
+        /// subsequent task. Seeded with strict mode's own marker file, which must never be mistaken for a stray
+        /// write if deleting it did not take effect immediately.
+        /// </summary>
+        private readonly HashSet<string> _reportedEntries = new(FileUtilities.PathComparer);
 
         private readonly string _sentinelDirectory;
         private readonly string _directoryToRestore;
+
+        /// <summary>
+        /// Last observed write time of the sentinel directory, in ticks. Adding or removing an entry moves it, so
+        /// comparing against it lets the common "nothing was written" case skip enumerating the directory.
+        /// </summary>
+        private long _lastObservedWriteTimeUtcTicks;
 
         /// <summary>
         /// Set once the current-directory violation has been reported. A single stray call would otherwise fail
@@ -80,10 +92,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private int _currentDirectoryViolationReported;
 
-        private MultiThreadedStrictModeScope(string sentinelDirectory, string directoryToRestore)
+        private MultiThreadedStrictModeScope(string sentinelDirectory, string directoryToRestore, string markerFileName)
         {
             _sentinelDirectory = sentinelDirectory;
             _directoryToRestore = directoryToRestore;
+            _reportedEntries.Add(markerFileName);
+            _lastObservedWriteTimeUtcTicks = GetWriteTimeUtcTicks(sentinelDirectory);
         }
 
         /// <summary>
@@ -205,25 +219,29 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Verifies that the process-wide state strict mode protects is still intact and logs an error for every
-        /// violation found.
+        /// Verifies that the process-wide state strict mode protects is still intact and logs a diagnostic for
+        /// every violation found.
         /// </summary>
         /// <param name="taskLoggingContext">Logging context of the task that just finished running.</param>
         /// <param name="taskName">Name of the task that just finished running.</param>
         /// <param name="taskLocation">Location of the task element, so the diagnostic is clickable.</param>
+        /// <param name="convertErrorsToWarnings">
+        /// Whether the task declared <c>ContinueOnError="true"</c>, in which case its errors are reported as
+        /// warnings. Honoring it keeps the log self-consistent: MSBuild must never print "Build succeeded"
+        /// alongside an error count.
+        /// </param>
         /// <returns><see langword="true"/> when a violation was reported, in which case the task must be failed.</returns>
         /// <remarks>
         /// Tasks run concurrently in multi-threaded mode, so the task that observes the violation is not
         /// necessarily the task that caused it. The diagnostics say so explicitly.
         /// </remarks>
-        internal bool VerifyAndReportProcessState(TaskLoggingContext taskLoggingContext, string taskName, ElementLocation taskLocation)
+        internal bool VerifyAndReportProcessState(TaskLoggingContext taskLoggingContext, string taskName, ElementLocation taskLocation, bool convertErrorsToWarnings)
         {
             Violations violations = DetectViolations();
 
             if (violations.UnexpectedCurrentDirectory is not null)
             {
-                taskLoggingContext.LogError(
-                    new BuildEventFileInfo(taskLocation),
+                Report(
                     "MultiThreadedStrictModeCurrentDirectoryChanged",
                     taskName,
                     violations.UnexpectedCurrentDirectory,
@@ -232,8 +250,7 @@ namespace Microsoft.Build.Execution
 
             if (violations.UnresolvedPathWrites is not null)
             {
-                taskLoggingContext.LogError(
-                    new BuildEventFileInfo(taskLocation),
+                Report(
                     "MultiThreadedStrictModeUnresolvedPathWrite",
                     taskName,
                     violations.UnresolvedPathWrites,
@@ -241,6 +258,19 @@ namespace Microsoft.Build.Execution
             }
 
             return violations.Any;
+
+            void Report(string messageResourceName, params object[] messageArgs)
+            {
+                if (convertErrorsToWarnings)
+                {
+                    taskLoggingContext.LogWarning(null, new BuildEventFileInfo(taskLocation), messageResourceName, messageArgs);
+                    taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                }
+                else
+                {
+                    taskLoggingContext.LogError(new BuildEventFileInfo(taskLocation), messageResourceName, messageArgs);
+                }
+            }
         }
 
         /// <summary>
@@ -285,15 +315,17 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Returns a display list of the sentinel directory entries that have not been reported yet, or
-        /// <see langword="null"/> when there are none. Entries are left on disk so that the file a task wrote can
-        /// still be inspected after the build fails.
+        /// <see langword="null"/> when there are none. Entries are not deleted, so that a stray file remains
+        /// visible for the rest of the build; the sentinel directory itself is removed together with MSBuild's
+        /// temporary folder when the process exits.
         /// </summary>
         private string? TakeUnreportedSentinelDirectoryEntries()
         {
-            // Fast path: one lock-free directory enumeration that stops at the first entry. Running clean is the
-            // overwhelmingly common case, and serializing every task completion would suppress the very
-            // concurrency this mode exists to exercise.
-            if (!HasAnyEntry(_sentinelDirectory))
+            // Fast path: adding or removing a directory entry moves the directory's write time, so an unchanged
+            // write time means nothing was written. This is one lock-free stat call for the overwhelmingly common
+            // clean case, and it keeps the cost flat after a violation instead of re-enumerating on every task.
+            long writeTimeUtcTicks = GetWriteTimeUtcTicks(_sentinelDirectory);
+            if (writeTimeUtcTicks == Interlocked.Read(ref _lastObservedWriteTimeUtcTicks))
             {
                 return null;
             }
@@ -301,7 +333,7 @@ namespace Microsoft.Build.Execution
             List<string> entries = new();
             bool truncated = false;
 
-            lock (_reportedEntries)
+            lock (_reportedEntriesLock)
             {
                 try
                 {
@@ -320,6 +352,11 @@ namespace Microsoft.Build.Execution
                         {
                             entries.Add(name);
                         }
+                    }
+
+                    if (!truncated)
+                    {
+                        Interlocked.Exchange(ref _lastObservedWriteTimeUtcTicks, writeTimeUtcTicks);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -383,7 +420,23 @@ namespace Microsoft.Build.Execution
             }
 
             // Adopt whatever the process actually landed on as the canonical sentinel path.
-            return new MultiThreadedStrictModeScope(TryGetCurrentDirectory() ?? sentinelDirectory, directoryToRestore);
+            return new MultiThreadedStrictModeScope(TryGetCurrentDirectory() ?? sentinelDirectory, directoryToRestore, markerFileName);
+        }
+
+        /// <summary>
+        /// Returns the write time of a directory in ticks, or 0 when it cannot be read. Adding or removing an
+        /// entry updates it, which is what makes it usable as a cheap "did anything change" probe.
+        /// </summary>
+        private static long GetWriteTimeUtcTicks(string directory)
+        {
+            try
+            {
+                return Directory.GetLastWriteTimeUtc(directory).Ticks;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                return 0;
+            }
         }
 
         private static bool IsCurrentDirectory(string directory)
@@ -405,22 +458,9 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private static bool HasAnyEntry(string directory)
-        {
-            try
-            {
-                foreach (string unused in Directory.EnumerateFileSystemEntries(directory))
-                {
-                    return true;
-                }
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                // Treat an unreadable sentinel as clean rather than failing the build it is meant to diagnose.
-            }
 
-            return false;
-        }
+
+
 
         private static void TryDeleteFile(string file)
         {
