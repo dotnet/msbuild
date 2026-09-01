@@ -1218,8 +1218,9 @@ public sealed partial class TerminalLogger : INodeLogger
             if (index > 0)
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
-                if (!projectFileName.IsEmpty &&
-                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
+                if (hasProject &&
+                    !projectFileName.IsEmpty &&
+                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)))
                 {
                     ReadOnlyMemory<char> outputPath = message.AsMemory().Slice(index + 4);
                     project!.OutputPath = outputPath;
@@ -1238,15 +1239,11 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
                 {
-                    // ensure we only log the preview message once for the entire build.
-                    if (!_loggedPreviewMessage)
-                    {
-                        // The SDK will log the high-pri "not-a-warning" message NETSDK1057
-                        // when it's a preview version up to MaxCPUCount times, but that's
-                        // an implementation detail--the user cares about at most one.
-                        RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, message, DoubleIndentation));
-                        _loggedPreviewMessage = true;
-                    }
+                    // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                    // when it's a preview version up to MaxCPUCount times, but that's
+                    // an implementation detail--the user cares about at most one.
+                    RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, message, DoubleIndentation));
+                    _loggedPreviewMessage = true;
                     return;
                 }
             }
@@ -1637,20 +1634,20 @@ public sealed partial class TerminalLogger : INodeLogger
     private string FormatWarningMessage(BuildWarningEventArgs e, string? message, string indent) => FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
-                message,
+                message: message,
                 code: AnsiCodes.Colorize(CreateLink(GenerateLinkForWarning(e), e.Code), TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent,
+                indent: indent,
                 terminalWidth: Terminal.Width);
 
     private string FormatInformationalMessage(BuildMessageEventArgs e, string? message) => FormatEventMessage(
                 category: null,
                 subcategory: e.Subcategory,
-                message,
+                message: message,
                 code: CreateLink(GenerateLinkForMessage(e), e.Code),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
@@ -1670,14 +1667,14 @@ public sealed partial class TerminalLogger : INodeLogger
     private string FormatSimpleMessageWithoutFileData(BuildMessageEventArgs e, string? message, string indent) => FormatEventMessage(
                 category: AnsiCodes.Colorize("info", TerminalColor.Default),
                 subcategory: null,
-                message,
+                message: message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Default),
                 file: null,
                 lineNumber: 0,
                 endLineNumber: 0,
                 columnNumber: 0,
                 endColumnNumber: 0,
-                indent,
+                indent: indent,
                 terminalWidth: Terminal.Width,
                 requireFileAndLinePortion: false,
                 prependIndentation: true);
@@ -1685,14 +1682,14 @@ public sealed partial class TerminalLogger : INodeLogger
     private string FormatErrorMessage(BuildErrorEventArgs e, string? message, string indent, bool requireFileAndLinePortion = true) => FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
-                message,
+                message: message,
                 code: AnsiCodes.Colorize(CreateLink(GenerateLinkForError(e), e.Code), TerminalColor.Red),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent,
+                indent: indent,
                 terminalWidth: Terminal.Width,
                 requireFileAndLinePortion: requireFileAndLinePortion);
 
