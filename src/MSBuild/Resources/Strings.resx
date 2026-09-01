@@ -627,7 +627,7 @@
     </comment>
   </data>
   <data name="HelpMessage_49_MultiThreadedSwitch" xml:space="preserve">
-    <value>  -multithreaded[:true|false]
+    <value>  -multithreaded[:true|false|strict]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -638,6 +638,12 @@
                      In case of multi-threaded mode on
                      and MSBUILDFORCEALLTASKSOUTOFPROC=1
                      maxCpuCount cannot be greater than 256.
+                     Use "strict" to additionally run the build from an empty
+                     sentinel current directory, so that any task resolving a
+                     relative path against the process current directory fails
+                     immediately instead of intermittently. This is a
+                     diagnostic aid for migrating tasks to multi-threaded mode
+                     and is not intended for production builds.
                      (Short form: -mt)
     </value>
   </data>
@@ -1496,7 +1502,7 @@
     </comment>
   </data>
   <data name="InvalidMultiThreadedValue" xml:space="preserve">
-    <value>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</value>
+    <value>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. It must be one of "true", "false" or "strict". {0}</value>
     <comment>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

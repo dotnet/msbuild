@@ -856,6 +856,16 @@ namespace Microsoft.Build.BackEnd
                     taskException = ex;
                 }
 
+                // Multi-threaded strict mode: a task that moved the process current directory, or that wrote
+                // through a relative path it never resolved, has corrupted state shared by every project building
+                // in this process. Report it against the task that just ran and fail that task, so the defect
+                // surfaces deterministically instead of as load-dependent flakiness in some later build.
+                if (MultiThreadedStrictModeScope.IsActive
+                    && MultiThreadedStrictModeScope.VerifyAndReportProcessState(taskLoggingContext, _taskNode.Name, _targetChildInstance.Location))
+                {
+                    taskResult = false;
+                }
+
                 if (taskException == null)
                 {
                     taskReturned = true;
