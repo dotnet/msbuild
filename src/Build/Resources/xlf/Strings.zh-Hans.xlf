@@ -654,15 +654,25 @@
         <target state="translated">已生成元项目“{0}”。</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>Another build in this process has already enabled it.</source>
+        <target state="new">Another build in this process has already enabled it.</target>
+        <note>This is substituted into MSB4286 as the reason strict mode could not be enabled.</note>
+      </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCouldNotBeEnabled">
-        <source>MSB4286: Multi-threaded strict mode could not be enabled because the sentinel directory "{0}" could not be created or entered. {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</source>
-        <target state="new">MSB4286: Multi-threaded strict mode could not be enabled because the sentinel directory "{0}" could not be created or entered. {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</target>
-        <note>{StrBegin="MSB4286: "}{0} is the full path of the sentinel directory. {1} is the message of the underlying I/O exception.</note>
+        <source>MSB4286: Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</source>
+        <target state="new">MSB4286: Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the full path of the sentinel directory. {1} is a sentence describing why it could not be enabled.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
         <source>MSB4287: Multi-threaded strict mode detected that the process current directory was changed to "{1}" while the "{0}" task was running. In multi-threaded mode all projects building in this process share the current directory, so changing it breaks relative path resolution for every other project. Resolve paths through the task's TaskEnvironment instead of changing the current directory. The current directory has been reset to "{2}". Because tasks run concurrently, "{0}" may not be the task that changed it.</source>
         <target state="new">MSB4287: Multi-threaded strict mode detected that the process current directory was changed to "{1}" while the "{0}" task was running. In multi-threaded mode all projects building in this process share the current directory, so changing it breaks relative path resolution for every other project. Resolve paths through the task's TaskEnvironment instead of changing the current directory. The current directory has been reset to "{2}". Because tasks run concurrently, "{0}" may not be the task that changed it.</target>
         <note>{StrBegin="MSB4287: "}{0} is the name of the task that was running. {1} is the full path of the unexpected current directory. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryNotChanged">
+        <source>The process current directory could not be changed and is still "{0}".</source>
+        <target state="new">The process current directory could not be changed and is still "{0}".</target>
+        <note>This is substituted into MSB4286 as the reason strict mode could not be enabled. {0} is the full path of the unchanged current directory.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeEnabled">
         <source>Multi-threaded strict mode is enabled. The build runs with the process current directory set to the empty sentinel directory "{0}", so any relative path that is not resolved against the project directory will fail.</source>

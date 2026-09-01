@@ -860,8 +860,12 @@ namespace Microsoft.Build.BackEnd
                 // through a relative path it never resolved, has corrupted state shared by every project building
                 // in this process. Report it against the task that just ran and fail that task, so the defect
                 // surfaces deterministically instead of as load-dependent flakiness in some later build.
-                if (MultiThreadedStrictModeScope.IsActive
-                    && MultiThreadedStrictModeScope.VerifyAndReportProcessState(taskLoggingContext, _taskNode.Name, _targetChildInstance.Location))
+                // Gated on this build's own parameters: another BuildManager in the same process may have opted
+                // in without this one doing so, and cancellation produces enough noise on its own.
+                if (_componentHost.BuildParameters.MultiThreadedStrict
+                    && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)
+                    && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope strictModeScope
+                    && strictModeScope.VerifyAndReportProcessState(taskLoggingContext, _taskNode.Name, _targetChildInstance.Location))
                 {
                     taskResult = false;
                 }
