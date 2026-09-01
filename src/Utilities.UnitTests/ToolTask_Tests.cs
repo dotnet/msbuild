@@ -301,8 +301,14 @@ namespace Microsoft.Build.UnitTests
         public void StandardEncodingNamesDefaultToOem()
         {
             using MyTool t = new MyTool();
-            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
-            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.WebName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.WebName);
+
+            t.StandardOutputEncodingName = t.StandardOutputEncodingName;
+            t.StandardErrorEncodingName = t.StandardErrorEncodingName;
+
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.WebName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.WebName);
         }
 
         /// <summary>
@@ -319,8 +325,14 @@ namespace Microsoft.Build.UnitTests
             t.StandardOutputEncodingName = ansiValue;
             t.StandardErrorEncodingName = ansiValue;
 
-            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
-            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.WebName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.WebName);
+
+            t.StandardOutputEncodingName = t.StandardOutputEncodingName;
+            t.StandardErrorEncodingName = t.StandardErrorEncodingName;
+
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.WebName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.WebName);
         }
 
         /// <summary>
@@ -334,8 +346,69 @@ namespace Microsoft.Build.UnitTests
             t.StandardOutputEncodingName = "utf-8";
             t.StandardErrorEncodingName = "utf-8";
 
-            t.StandardOutputEncodingName.ShouldBe(Encoding.UTF8.EncodingName);
-            t.StandardErrorEncodingName.ShouldBe(Encoding.UTF8.EncodingName);
+            t.StandardOutputEncodingName.ShouldBe(Encoding.UTF8.WebName);
+            t.StandardErrorEncodingName.ShouldBe(Encoding.UTF8.WebName);
+        }
+
+        /// <summary>
+        /// Verifies that the selected ANSI encoding is used to decode bytes from both redirected streams.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void StandardEncodingNamesDecodeAnsiBytes(bool redirectToStandardError)
+        {
+            Encoding ansiEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
+            Encoding oemEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            byte[] differentlyDecodedBytes = FindDifferentlyDecodedBytes(ansiEncoding, oemEncoding);
+
+            if (differentlyDecodedBytes is null)
+            {
+                Assert.Skip($"ANSI code page {ansiEncoding.CodePage} and OEM code page {oemEncoding.CodePage} have no distinct single-byte decoding to exercise.");
+            }
+
+            string expected = $"ansi-output:{ansiEncoding.GetString(differentlyDecodedBytes)}:decoded";
+            byte[] outputBytes =
+            [
+                .. Encoding.ASCII.GetBytes("ansi-output:"),
+                .. differentlyDecodedBytes,
+                .. Encoding.ASCII.GetBytes($":decoded{Environment.NewLine}"),
+            ];
+
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            TransientTestFile output = testEnvironment.CreateFile(".txt");
+            File.WriteAllBytes(output.Path, outputBytes);
+
+            using MyTool t = new MyTool();
+            MockEngine engine = new MockEngine(_output);
+            t.BuildEngine = engine;
+            t.UseCommandProcessor = true;
+            t.EchoOff = true;
+            t.StandardOutputEncodingName = EncodingUtilities.UseAnsiEncoding;
+            t.StandardErrorEncodingName = EncodingUtilities.UseAnsiEncoding;
+            t.MockCommandLineCommands = $"type \"{output.Path}\"{(redirectToStandardError ? " 1>&2" : string.Empty)}";
+
+            t.Execute().ShouldBeTrue();
+            Assert.Contains(expected, engine.Log, StringComparison.Ordinal);
+        }
+
+        private static byte[] FindDifferentlyDecodedBytes(Encoding first, Encoding second)
+        {
+            for (int value = 0x80; value <= byte.MaxValue; value++)
+            {
+                byte[] candidate = [(byte)value];
+                string firstValue = first.GetString(candidate);
+                string secondValue = second.GetString(candidate);
+
+                if (!string.Equals(firstValue, secondValue, StringComparison.OrdinalIgnoreCase)
+                    && firstValue.IndexOf('\uFFFD') < 0
+                    && secondValue.IndexOf('\uFFFD') < 0)
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

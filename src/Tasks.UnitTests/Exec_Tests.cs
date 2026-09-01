@@ -855,9 +855,10 @@ namespace Microsoft.Build.UnitTests
 
             exec.StandardErrorEncodingName = "US-ASCII";
             Assert.Contains("US-ASCII", exec.StdErrEncoding);
+            Assert.Equal(Encoding.ASCII.WebName, exec.StandardErrorEncodingName);
 
             exec.StdOutEncoding = "US-ASCII";
-            Assert.Contains("US-ASCII", exec.StandardOutputEncodingName);
+            Assert.Equal(Encoding.ASCII.WebName, exec.StandardOutputEncodingName);
         }
 
         [Fact]

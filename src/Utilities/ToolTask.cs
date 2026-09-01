@@ -217,10 +217,11 @@ namespace Microsoft.Build.Utilities
         /// Optionally specifies the encoding used to read the tool's captured standard output stream.
         /// Set to the special value "ansi" to use the current system ANSI code page (GetACP), which some native
         /// tools (e.g., MSVC link.exe/cl.exe) use for their output. When not set, the current system OEM code page is used.
+        /// The getter returns the effective encoding's web name, which should be compared case-insensitively.
         /// </summary>
         public virtual string StandardOutputEncodingName
         {
-            get => StandardOutputEncoding.EncodingName;
+            get => StandardOutputEncoding.WebName;
             set => _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
         }
 
@@ -228,10 +229,11 @@ namespace Microsoft.Build.Utilities
         /// Optionally specifies the encoding used to read the tool's captured standard error stream.
         /// Set to the special value "ansi" to use the current system ANSI code page (GetACP), which some native
         /// tools (e.g., MSVC link.exe/cl.exe) use for their output. When not set, the current system OEM code page is used.
+        /// The getter returns the effective encoding's web name, which should be compared case-insensitively.
         /// </summary>
         public virtual string StandardErrorEncodingName
         {
-            get => StandardErrorEncoding.EncodingName;
+            get => StandardErrorEncoding.WebName;
             set => _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
         }
 

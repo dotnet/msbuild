@@ -135,14 +135,14 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc />
         public override string StandardOutputEncodingName
         {
-            get => StandardOutputEncoding.EncodingName;
+            get => StandardOutputEncoding.WebName;
             set => _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
         }
 
         /// <inheritdoc />
         public override string StandardErrorEncodingName
         {
-            get => StandardErrorEncoding.EncodingName;
+            get => StandardErrorEncoding.WebName;
             set => _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
         }
 
