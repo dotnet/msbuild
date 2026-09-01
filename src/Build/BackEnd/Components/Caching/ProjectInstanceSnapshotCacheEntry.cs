@@ -9,7 +9,9 @@ using Microsoft.Build.Execution;
 namespace Microsoft.Build.BackEnd;
 
 /// <summary>
-/// Immutable validation data retained with a project instance snapshot.
+/// Immutable validation data retained with a project instance snapshot. Implementations must capture
+/// the evaluation inputs not represented by <see cref="ProjectInstanceSnapshotCacheKey"/> that their
+/// paired <see cref="IProjectInstanceSnapshotValidator"/> requires.
 /// </summary>
 internal interface IProjectInstanceSnapshotValidationData
 {
@@ -20,7 +22,7 @@ internal interface IProjectInstanceSnapshotValidationData
 }
 
 /// <summary>
-/// Placeholder validation data used until the production sidecar is implemented.
+/// Placeholder validation data used only with a validator that never accepts a snapshot.
 /// </summary>
 internal sealed class EmptyProjectInstanceSnapshotValidationData : IProjectInstanceSnapshotValidationData
 {

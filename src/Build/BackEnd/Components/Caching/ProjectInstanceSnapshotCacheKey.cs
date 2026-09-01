@@ -13,8 +13,13 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.BackEnd;
 
 /// <summary>
-/// Identifies a distinct project evaluation for snapshot lookup.
+/// Identifies project evaluation request configuration for snapshot lookup.
 /// </summary>
+/// <remarks>
+/// Key equality does not establish that a snapshot may be reused. Project and import contents,
+/// file enumeration, relevant environment values, and SDK and toolset resolution state must be
+/// verified separately by <see cref="IProjectInstanceSnapshotValidator"/>.
+/// </remarks>
 internal sealed class ProjectInstanceSnapshotCacheKey : IEquatable<ProjectInstanceSnapshotCacheKey>
 {
     private readonly string _projectFullPath;

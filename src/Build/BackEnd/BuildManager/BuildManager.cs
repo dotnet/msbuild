@@ -682,27 +682,6 @@ namespace Microsoft.Build.Execution
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
-                if (_buildParameters.ProjectInstanceSnapshotCache is ProjectInstanceSnapshotCache statusSnapshotCache)
-                {
-                    ProjectInstanceSnapshotCacheStatistics statistics =
-                        statusSnapshotCache.GetStatistics();
-                    loggingService.LogComment(
-                        BuildEventContext.Invalid,
-                        MessageImportance.Low,
-                        "ProjectInstanceSnapshotCacheStatus",
-                        statistics.BuildsServed,
-                        statistics.Count,
-                        statistics.CurrentSizeBytes,
-                        statistics.MaximumSizeBytes,
-                        statistics.StoredEntries,
-                        statistics.CacheHits,
-                        statistics.CacheMisses,
-                        statistics.ValidationRejections,
-                        statistics.MaterializedEntries,
-                        statistics.EvictedEntries,
-                        statistics.OversizedRejections);
-                }
-
                 // If the coordinator is enabled, request a node grant and cap MaxNodeCount.
                 // This is done after logging initialization so that waiting/grant messages
                 // are visible in the terminal logger.
@@ -1253,6 +1232,27 @@ namespace Microsoft.Build.Execution
                             (_overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId)))
                         {
                             _overallBuildSuccess = false;
+                        }
+
+                        if (_buildParameters?.ProjectInstanceSnapshotCache is ProjectInstanceSnapshotCache statusSnapshotCache)
+                        {
+                            ProjectInstanceSnapshotCacheStatistics statistics =
+                                statusSnapshotCache.GetStatistics();
+                            loggingService.LogComment(
+                                BuildEventContext.Invalid,
+                                MessageImportance.Low,
+                                "ProjectInstanceSnapshotCacheStatus",
+                                statistics.BuildsServed,
+                                statistics.Count,
+                                statistics.CurrentSizeBytes,
+                                statistics.MaximumSizeBytes,
+                                statistics.StoredEntries,
+                                statistics.CacheHits,
+                                statistics.CacheMisses,
+                                statistics.ValidationRejections,
+                                statistics.MaterializedEntries,
+                                statistics.EvictedEntries,
+                                statistics.OversizedRejections);
                         }
 
                         loggingService.LogBuildFinished(_overallBuildSuccess);

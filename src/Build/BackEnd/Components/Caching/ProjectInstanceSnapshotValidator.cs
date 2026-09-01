@@ -28,6 +28,14 @@ internal enum ProjectInstanceSnapshotValidationResult
 /// </summary>
 internal interface IProjectInstanceSnapshotValidator
 {
+    /// <summary>
+    /// Determines whether the snapshot may be reused for the specified evaluation request.
+    /// </summary>
+    /// <remarks>
+    /// Implementations must fail closed and return <see cref="ProjectInstanceSnapshotValidationResult.Invalid"/>
+    /// when project or import contents, file enumeration, relevant environment values, SDK and toolset
+    /// resolution state, or any other evaluation input not represented by the key cannot be verified.
+    /// </remarks>
     ProjectInstanceSnapshotValidationResult Validate(
         ProjectInstanceSnapshotCacheKey key,
         ProjectInstanceSnapshotCacheEntry entry);

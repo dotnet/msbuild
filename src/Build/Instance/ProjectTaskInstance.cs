@@ -356,12 +356,7 @@ namespace Microsoft.Build.Execution
 
         internal ProjectTaskInstance DeepClone()
         {
-            var parameters =
-                new CopyOnWriteDictionary<(string, ElementLocation)>(StringComparer.OrdinalIgnoreCase);
-            foreach (KeyValuePair<string, (string, ElementLocation)> parameter in _parameters)
-            {
-                parameters[parameter.Key] = parameter.Value;
-            }
+            CopyOnWriteDictionary<(string, ElementLocation)> parameters = _parameters.Clone();
 
             var outputs = new List<ProjectTaskInstanceChild>(_outputs.Count);
             foreach (ProjectTaskInstanceChild output in _outputs)

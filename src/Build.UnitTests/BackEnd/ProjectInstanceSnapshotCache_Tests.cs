@@ -455,6 +455,66 @@ public sealed class ProjectInstanceSnapshotCache_Tests
     }
 
     [Fact]
+    public void DistinctGlobalPropertiesDoNotShareSnapshotEntries()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        TransientTestFile project = env.CreateFile(
+            "project.proj",
+            "<Project><PropertyGroup><Value>$(Configuration)</Value></PropertyGroup></Project>");
+        var cache = new ProjectInstanceSnapshotCache
+        {
+            Validator = new AcceptingTestValidator(),
+        };
+        var parameters = new BuildParameters
+        {
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters);
+
+        BuildRequestConfiguration debug = CreateFileConfiguration(
+            project.Path,
+            parameters,
+            new Dictionary<string, string?>
+            {
+                ["Configuration"] = "Debug",
+            });
+        debug.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+
+        BuildRequestConfiguration release = CreateFileConfiguration(
+            project.Path,
+            parameters,
+            new Dictionary<string, string?>
+            {
+                ["Configuration"] = "Release",
+            });
+        release.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 2, nodeId: 1);
+
+        debug.Project.GetPropertyValue("Value").ShouldBe("Debug");
+        release.Project.GetPropertyValue("Value").ShouldBe("Release");
+        cache.CacheHits.ShouldBe(0);
+        cache.CacheMisses.ShouldBe(2);
+        cache.MaterializedEntries.ShouldBe(0);
+        cache.StoredEntries.ShouldBe(2);
+        cache.Count.ShouldBe(2);
+
+        BuildRequestConfiguration repeatedDebug = CreateFileConfiguration(
+            project.Path,
+            parameters,
+            new Dictionary<string, string?>
+            {
+                ["Configuration"] = "Debug",
+            });
+        repeatedDebug.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 3, nodeId: 1);
+
+        repeatedDebug.Project.GetPropertyValue("Value").ShouldBe("Debug");
+        cache.CacheHits.ShouldBe(1);
+        cache.CacheMisses.ShouldBe(2);
+        cache.MaterializedEntries.ShouldBe(1);
+        cache.StoredEntries.ShouldBe(2);
+        cache.Count.ShouldBe(2);
+    }
+
+    [Fact]
     public void ValidatorFailureFallsBackToReevaluation()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -694,6 +754,38 @@ public sealed class ProjectInstanceSnapshotCache_Tests
     }
 
     [Fact]
+    public void EndBuildLogsCurrentSnapshotCacheStatistics()
+    {
+        try
+        {
+            Traits.ProjectInstanceSnapshotCacheEnabledOverride = true;
+            var logger = new MockLogger(verbosity: LoggerVerbosity.Diagnostic);
+            using var buildManager = new BuildManager();
+            buildManager.BeginBuild(new BuildParameters
+            {
+                Loggers = [logger],
+            });
+
+            ProjectInstanceSnapshotCache cache = ((IBuildComponentHost)buildManager)
+                .BuildParameters
+                .ProjectInstanceSnapshotCache;
+            cache.NotifyCacheLookup(false);
+            cache.AddOrReplace(EmptyKey("Status.csproj"), CreateEntry("status")).ShouldBeTrue();
+
+            logger.FullLog.ShouldNotContain("Project instance snapshot cache:");
+
+            buildManager.EndBuild();
+
+            logger.FullLog.ShouldContain("Project instance snapshot cache: build 1, 1 entries");
+            logger.FullLog.ShouldContain(", 1 stores, 0 hits, 1 misses,");
+        }
+        finally
+        {
+            Traits.ProjectInstanceSnapshotCacheEnabledOverride = null;
+        }
+    }
+
+    [Fact]
     public void BeginBuildHonorsInProcessFeatureOverride()
     {
         const string VariableName = "MSBUILDENABLEPROJECTINSTANCESNAPSHOTCACHE";
@@ -807,11 +899,12 @@ public sealed class ProjectInstanceSnapshotCache_Tests
 
     private static BuildRequestConfiguration CreateFileConfiguration(
         string projectPath,
-        BuildParameters parameters)
+        BuildParameters parameters,
+        IDictionary<string, string?>? globalProperties = null)
     {
         var requestData = new BuildRequestData(
             projectPath,
-            new Dictionary<string, string?>(),
+            globalProperties ?? new Dictionary<string, string?>(),
             toolsVersion: null,
             [],
             hostServices: null,
