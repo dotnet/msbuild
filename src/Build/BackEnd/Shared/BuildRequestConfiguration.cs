@@ -530,11 +530,10 @@ namespace Microsoft.Build.BackEnd
 
             InitializeProject(componentHost.BuildParameters, () =>
             {
-                // In multi-threaded mode the process current directory is shared by every project building in this
-                // process, and each request carries its own virtualized directory in its TaskEnvironment instead.
-                // Resetting the process-wide value here would race with concurrently building projects, so the
-                // legacy operating-environment reset only applies to the single-project-at-a-time node model.
-                if (componentHost.BuildParameters.SaveOperatingEnvironment && !componentHost.BuildParameters.MultiThreaded)
+                // Strict mode pins the process current directory to a sentinel directory for the whole build so
+                // that unresolved relative paths fail deterministically. Resetting it here would silently undo
+                // that. Outside strict mode the legacy reset is preserved exactly as before.
+                if (componentHost.BuildParameters.SaveOperatingEnvironment && !componentHost.BuildParameters.MultiThreadedStrict)
                 {
                     try
                     {

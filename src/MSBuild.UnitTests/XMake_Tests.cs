@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -3460,24 +3460,38 @@ EndGlobal
         }
 
         [Theory]
-        // Strict mode is meaningless without multi-threaded mode, so the environment variable
-        // must not enable it on its own.
+        // Strict mode is meaningless without multi-threaded mode, so the environment variable must not enable it
+        // on its own. For a multi-threaded build it is authoritative: the parser rewrites a bare -mt into -mt:true,
+        // so treating -mt:true as an opt-out would silently defeat the environment variable.
         [InlineData(new string[0], false)]
         [InlineData(new[] { "/mt:false" }, false)]
         [InlineData(new[] { "/mt" }, true)]
+        [InlineData(new[] { "/mt:true" }, true)]
+        [InlineData(new[] { "/mt:strict" }, true)]
         public void MultiThreadedStrictEnvironmentVariableOnlyAppliesToMultiThreadedBuilds(string[] arguments, bool expectedStrict)
         {
-            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
-            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
-            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
-            testEnvironment.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", "1");
+            try
+            {
+                using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+                testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+                testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+                testEnvironment.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", "1");
 
-            CommandLineSwitches switches = new CommandLineSwitches();
-            CommandLineParser parser = new CommandLineParser();
-            parser.GatherCommandLineSwitches(arguments, switches);
+                // Traits caches the environment unless the process has already been detected as a test host,
+                // which depends on initialization order, so refresh it explicitly.
+                Traits.UpdateFromEnvironment();
 
-            switches.HaveErrors().ShouldBeFalse();
-            MSBuildApp.IsMultiThreadedStrictEnabled(switches).ShouldBe(expectedStrict);
+                CommandLineSwitches switches = new CommandLineSwitches();
+                CommandLineParser parser = new CommandLineParser();
+                parser.GatherCommandLineSwitches(arguments, switches);
+
+                switches.HaveErrors().ShouldBeFalse();
+                MSBuildApp.IsMultiThreadedStrictEnabled(switches).ShouldBe(expectedStrict);
+            }
+            finally
+            {
+                Traits.UpdateFromEnvironment();
+            }
         }
 
         [Fact]

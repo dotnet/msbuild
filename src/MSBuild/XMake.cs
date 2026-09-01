@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -2796,6 +2796,9 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
+            // MSBUILDMULTITHREADEDSTRICT is authoritative for any multi-threaded build, in the same way
+            // MSBUILDFORCEMULTITHREADED is. The command line cannot opt back out of it because the parser rewrites
+            // a bare -mt into -mt:true, so "-mt means not strict" would silently defeat the environment variable.
             if (Traits.Instance.MultiThreadedStrict)
             {
                 return true;
@@ -2809,6 +2812,9 @@ namespace Microsoft.Build.CommandLine
         /// Parses the value of the -multiThreaded / -mt switch, which accepts <c>true</c>, <c>false</c> or
         /// <c>strict</c>. <c>strict</c> implies <c>true</c>.
         /// </summary>
+        /// <remarks>
+        /// A bare <c>-mt</c> never reaches here: <see cref="CommandLineParser"/> rewrites it to <c>-mt:true</c>.
+        /// </remarks>
         private static (bool Enabled, bool Strict) ProcessMultiThreadedSwitch(string[] parameters)
         {
             if (parameters.Length == 0)

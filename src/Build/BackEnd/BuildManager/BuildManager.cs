@@ -758,9 +758,12 @@ namespace Microsoft.Build.Execution
 
                 // Enter strict mode last: everything above (loggers in particular) still resolves paths against
                 // the directory the build was launched from, and only project execution should see the sentinel.
-                if (_buildParameters.MultiThreaded && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict))
+                // MSBUILDMULTITHREADEDSTRICT=1 is equivalent to -mt:strict for hosts that build through the API.
+                _buildParameters.MultiThreadedStrict = _buildParameters.MultiThreaded
+                    && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict);
+
+                if (_buildParameters.MultiThreadedStrict)
                 {
-                    _buildParameters.MultiThreadedStrict = true;
                     _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.TryEnter(loggingService);
                 }
 

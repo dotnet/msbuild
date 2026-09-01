@@ -1358,8 +1358,16 @@
     <comment>{0} is the full path of the sentinel directory.</comment>
   </data>
   <data name="MultiThreadedStrictModeCouldNotBeEnabled" xml:space="preserve">
-    <value>MSB4286: Multi-threaded strict mode could not be enabled because the sentinel directory "{0}" could not be created or entered. {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</value>
-    <comment>{StrBegin="MSB4286: "}{0} is the full path of the sentinel directory. {1} is the message of the underlying I/O exception.</comment>
+    <value>MSB4286: Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</value>
+    <comment>{StrBegin="MSB4286: "}{0} is the full path of the sentinel directory. {1} is a sentence describing why it could not be enabled.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeAlreadyActive" xml:space="preserve">
+    <value>Another build in this process has already enabled it.</value>
+    <comment>This is substituted into MSB4286 as the reason strict mode could not be enabled.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeCurrentDirectoryNotChanged" xml:space="preserve">
+    <value>The process current directory could not be changed and is still "{0}".</value>
+    <comment>This is substituted into MSB4286 as the reason strict mode could not be enabled. {0} is the full path of the unchanged current directory.</comment>
   </data>
   <data name="MultiThreadedStrictModeCurrentDirectoryChanged" xml:space="preserve">
     <value>MSB4287: Multi-threaded strict mode detected that the process current directory was changed to "{1}" while the "{0}" task was running. In multi-threaded mode all projects building in this process share the current directory, so changing it breaks relative path resolution for every other project. Resolve paths through the task's TaskEnvironment instead of changing the current directory. The current directory has been reset to "{2}". Because tasks run concurrently, "{0}" may not be the task that changed it.</value>
