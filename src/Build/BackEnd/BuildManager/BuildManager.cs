@@ -268,6 +268,12 @@ namespace Microsoft.Build.Execution
 
         private CoordinatorClient? _coordinatorClient;
 
+        /// <summary>
+        /// The installed multi-threaded strict mode scope, or <see langword="null"/> when strict mode is not active
+        /// for the build in progress.
+        /// </summary>
+        private MultiThreadedStrictModeScope? _multiThreadedStrictModeScope;
+
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
 #if DEBUG
@@ -750,6 +756,14 @@ namespace Microsoft.Build.Execution
                     _workQueue = new ActionBlock<Action>(action => ProcessWorkQueue(action));
                 }
 
+                // Enter strict mode last: everything above (loggers in particular) still resolves paths against
+                // the directory the build was launched from, and only project execution should see the sentinel.
+                if (_buildParameters.MultiThreaded && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict))
+                {
+                    _buildParameters.MultiThreadedStrict = true;
+                    _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.TryEnter(loggingService);
+                }
+
                 _buildManagerState = BuildManagerState.Building;
 
                 _noActiveSubmissionsEvent!.Set();
@@ -1196,6 +1210,11 @@ namespace Microsoft.Build.Execution
                 try
                 {
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
+
+                    // Restore the process current directory before the build-finished event, so that anything
+                    // logging or writing during shutdown sees the directory the build was launched from.
+                    _multiThreadedStrictModeScope?.Exit();
+                    _multiThreadedStrictModeScope = null;
 
                     if (loggingService != null)
                     {

@@ -1182,6 +1182,7 @@ namespace Microsoft.Build.UnitTests
 #endif
                                         1,
                                         false,
+                                        false,
                                         true,
                                         new StringWriter(),
                                         new StringWriter(),

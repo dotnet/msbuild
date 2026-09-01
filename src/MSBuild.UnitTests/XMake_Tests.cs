@@ -3432,6 +3432,71 @@ EndGlobal
             exception.Message.ShouldContain("MSB1072");
         }
 
+        [Theory]
+        // Switch arguments, expected multi-threaded, expected strict.
+        [InlineData(new[] { "/mt:strict" }, true, true)]
+        [InlineData(new[] { "/multithreaded:STRICT" }, true, true)]
+        [InlineData(new[] { "/mt" }, true, false)]
+        [InlineData(new[] { "/mt:true" }, true, false)]
+        [InlineData(new[] { "/mt:false" }, false, false)]
+        // Only the last occurrence wins, matching the rest of the -mt switch handling.
+        [InlineData(new[] { "/mt:strict", "/mt:true" }, true, false)]
+        [InlineData(new[] { "/mt:true", "/mt:strict" }, true, true)]
+        [InlineData(new[] { "/mt:strict", "/mt:false" }, false, false)]
+        public void MultiThreadedStrictSwitchIsParsed(string[] arguments, bool expectedMultiThreaded, bool expectedStrict)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(arguments, switches);
+
+            switches.HaveErrors().ShouldBeFalse();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBe(expectedMultiThreaded);
+            MSBuildApp.IsMultiThreadedStrictEnabled(switches).ShouldBe(expectedStrict);
+        }
+
+        [Theory]
+        // Strict mode is meaningless without multi-threaded mode, so the environment variable
+        // must not enable it on its own.
+        [InlineData(new string[0], false)]
+        [InlineData(new[] { "/mt:false" }, false)]
+        [InlineData(new[] { "/mt" }, true)]
+        public void MultiThreadedStrictEnvironmentVariableOnlyAppliesToMultiThreadedBuilds(string[] arguments, bool expectedStrict)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", "1");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(arguments, switches);
+
+            switches.HaveErrors().ShouldBeFalse();
+            MSBuildApp.IsMultiThreadedStrictEnabled(switches).ShouldBe(expectedStrict);
+        }
+
+        [Fact]
+        public void MultiThreadedStrictSwitchRejectsInvalidValue()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(["/mt:strictly"], switches);
+
+            CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
+                () => MSBuildApp.IsMultiThreadedStrictEnabled(switches));
+            exception.Message.ShouldContain("MSB1072");
+        }
+
         [Fact]
         public void MSBuildForceMultiThreadedEnvironmentVariableUnsetDoesNotEnableMultiThreadedMode()
         {
