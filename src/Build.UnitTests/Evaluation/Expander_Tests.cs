@@ -5635,7 +5635,7 @@ $(
             Directory.CreateDirectory(Path.Combine(projectDir.Path, "sub"));
             File.WriteAllText(Path.Combine(projectDir.Path, "sub", "marker.txt"), "x");
 
-            // FileExists applies no separator normalization in either mode, so both must agree.
+            // FileExistsNoThrow normalizes separators internally, so both non-mt and -mt must agree.
             env.SetCurrentDirectory(projectDir.Path);
             string expected = IntrinsicFunctions.FileExists(@"sub\marker.txt").ToString();
 
