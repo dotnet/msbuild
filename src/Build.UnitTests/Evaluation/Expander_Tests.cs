@@ -5810,17 +5810,30 @@ $(
         }
 
         [Fact]
-        public void MakeRelative_RelativeBasePath_ResolvesFromThreadWorkingDirectory()
+        public void RegisterBuildCheck_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
+            File.WriteAllText(Path.Combine(correctDir.Path, "check.dll"), string.Empty);
 
-            string target = Path.Combine(correctDir.Path, "marker.txt");
-            string result = ExpandWithThreadWorkingDirectory(env,
-                $"$([MSBuild]::MakeRelative('obj', '{target}'))", correctDir.Path, wrongDir.Path);
+            var logger = new MockLogger();
+            ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            loggingService.RegisterLogger(logger);
+            var loggingContext = new MockLoggingContext(
+                loggingService,
+                new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
 
-            result.ShouldBe(Path.Combine("..", "marker.txt"));
+            env.WithTransientTestState(new TransientThreadWorkingDirectory(correctDir.Path));
+            env.SetCurrentDirectory(wrongDir.Path);
+
+            string result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                    new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default, loggingContext)
+                .ExpandIntoStringLeaveEscaped("$([MSBuild]::RegisterBuildCheck('check.dll'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            result.ShouldBe(bool.TrueString);
+            var acquisition = logger.AllBuildEvents.ShouldHaveSingleItem().ShouldBeOfType<BuildCheckAcquisitionEventArgs>();
+            acquisition.AcquisitionPath.ShouldBe(Path.Combine(correctDir.Path, "check.dll"));
         }
 
         [Fact]

@@ -343,7 +343,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>relative path (can be the full path)</returns>
         public static string MakeRelative(string basePath, string path)
         {
-            string result = FileUtilities.MakeRelative(ResolveAgainstThreadWorkingDirectory(basePath), path);
+            string result = FileUtilities.MakeRelative(basePath, path);
 
             return result;
         }
@@ -759,7 +759,7 @@ namespace Microsoft.Build.Evaluation
 
         public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
-            pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
+            pathToAssembly = FileUtilities.GetFullPathNoThrow(ResolveAgainstThreadWorkingDirectory(pathToAssembly));
             if (FileSystems.Default.FileExists(pathToAssembly))
             {
                 loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
