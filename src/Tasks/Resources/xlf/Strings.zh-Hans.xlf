@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
@@ -2674,42 +2674,42 @@
       </trans-unit>
       <trans-unit id="TarDirectory.Comment">
         <source>Creating tar archive from directory "{0}" to "{1}".</source>
-        <target state="new">Creating tar archive from directory "{0}" to "{1}".</target>
+        <target state="translated">正在将目录 "{0}" 中的内容创建为 tar 存档到 "{1}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
         <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
-        <target state="new">MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB4321: 未能打包目录 "{0}"，因为它不存在或无法访问。</target>
         <note>{StrBegin="MSB4321: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
         <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
-        <target state="new">MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4325: 未能将目录 "{0}" 打包为文件 "{1}"，因为存档已过期，并且请求了增量生成。</target>
         <note>{StrBegin="MSB4325: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailed">
         <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="new">MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</target>
+        <target state="translated">MSB4323: 未能将目录 "{0}" 打包为文件 "{1}"。{2} {3}</target>
         <note>{StrBegin="MSB4323: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFileExists">
         <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
-        <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <target state="translated">MSB4322: 未能创建压缩文件 "{0}"，因为它已经存在。 请删除或重命名该文件，然后重试。</target>
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidCompression">
         <source>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</source>
-        <target state="new">MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</target>
+        <target state="translated">MSB4327: 压缩值 "{0}" 无效。请指定 "None"、"GZip" 或 "ZStandard" 中的一个。</target>
         <note>{StrBegin="MSB4327: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
         <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
-        <target state="new">MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</target>
+        <target state="translated">MSB4324: DeterministicTimestamp 值 "{0}" 无效。请指定 RFC 3339 日期时间，例如 "2024-01-01T00:00:00Z"，或指定自 Unix 纪元以来的整数秒数。</target>
         <note>{StrBegin="MSB4324: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidFormat">
         <source>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</source>
-        <target state="new">MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</target>
+        <target state="translated">MSB4326: 格式值 "{0}" 无效。请指定 "Pax"、"Ustar"、"V7" 或 "Gnu" 中的一个。</target>
         <note>{StrBegin="MSB4326: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
@@ -2819,67 +2819,67 @@
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfEntryType">
         <source>Did not untar entry "{0}" because its entry type "{1}" is not supported.</source>
-        <target state="new">Did not untar entry "{0}" because its entry type "{1}" is not supported.</target>
+        <target state="translated">由于条目类型 "{1}" 不受支持，因此未解压条目 "{0}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFileMatch">
         <source>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
-        <target state="new">Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <target state="translated">未从文件 "{0}" 解压到文件 "{1}"，因为 "{2}" 参数在项目中设置为 "{3}"，而两个文件的大小及时间戳一致。</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFilter">
         <source>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">未解压缩文件 "{0}"，因为它与包含筛选器不匹配，或者它与排除筛选器匹配。</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</source>
-        <target state="new">MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</target>
+        <target state="translated">MSB4331: 未能解压缩到目录 "{0}"，因为无法创建它。{1}</target>
         <note>{StrBegin="MSB4331: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotExtractFile">
         <source>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</source>
-        <target state="new">MSB4336: Failed to untar file "{0}" to "{1}".  {2}</target>
+        <target state="translated">MSB4336: 未能将文件 "{0}" 解压到 "{1}"。{2}</target>
         <note>{StrBegin="MSB4336: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotMakeFileWriteable">
         <source>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="new">MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</target>
+        <target state="translated">MSB4335: 未能解压文件 "{0}"，因为目标文件 "{1}" 是只读文件，无法设为可写。{2} {3}</target>
         <note>{StrBegin="MSB4335: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotOpenFile">
         <source>MSB4333: Failed to open tar file "{0}".  {1}</source>
-        <target state="new">MSB4333: Failed to open tar file "{0}".  {1}</target>
+        <target state="translated">MSB4333: 未能打开 tar 文件 "{0}"。{1}</target>
         <note>{StrBegin="MSB4333: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorExtractingResultsInFilesOutsideDestination">
         <source>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</source>
-        <target state="new">MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <target state="translated">MSB4334: 未能将文件 "{0}" 解压到 "{1}"，因为它位于目标目录外。</target>
         <note>{StrBegin="MSB4334: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFileDoesNotExist">
         <source>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</source>
-        <target state="new">MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</target>
+        <target state="translated">MSB4332: 未能解压缩文件 "{0}"，因为该文件不存在或无法访问。</target>
         <note>{StrBegin="MSB4332: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternInvalidPath">
         <source>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB4337: 未能分析模式 "{0}"，因为它包含无效的路径字符。</target>
         <note>{StrBegin="MSB4337: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternPropertyReferences">
         <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB4338: 未能分析模式 "{0}"，因为它包含不受支持的属性引用。</target>
         <note>{StrBegin="MSB4338: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFailIfNotIncremental">
         <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
-        <target state="new">MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4339: 未能将文件 "{0}" 解压到 "{1}"，因为目标已过期，并且请求了增量生成。</target>
         <note>{StrBegin="MSB4339: "}</note>
       </trans-unit>
       <trans-unit id="Untar.FileComment">
         <source>Untarring file "{0}" to "{1}".</source>
-        <target state="new">Untarring file "{0}" to "{1}".</target>
+        <target state="translated">正在将文件 "{0}" 解压到 "{1}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
@@ -3114,7 +3114,7 @@
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputDtdProhibited">
         <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <target state="translated">MSB3733: XML 输入包含 DTD。出于安全原因，默认禁止使用 DTD。请移除 DTD，或通过在“{1}”任务中将“{0}”设置为 "false" 来抑制以忽略 DTD。</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
@@ -3134,7 +3134,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.TransformDtdProhibited">
         <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
-        <target state="new">MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</target>
+        <target state="translated">MSB3703: 无法执行转换，因为 XML 输入 "{0}" 包含 DTD。出于安全原因，默认禁止使用 DTD。请移除 DTD；如果你信任输入，请在“{2}”任务中将“{1}”设置为 "false" 以忽略 DTD。</target>
         <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3169,7 +3169,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadDtdProhibited">
         <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <target state="translated">MSB3704: 无法加载指定的 Xslt，因为它包含 DTD。出于安全原因，默认禁止使用 DTD。请移除 DTD；如果你信任输入，请在“{1}”任务中将“{0}”设置为 "false" 以忽略 DTD。</target>
         <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">

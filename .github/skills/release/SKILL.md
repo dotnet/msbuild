@@ -36,20 +36,23 @@ Before starting any phase, ensure you have these values (the user must provide t
 
 | Input | Example | How to determine |
 |---|---|---|
-| `PREVIOUS_RELEASE_VERSION` | `18.9` | Previous entry in the merge-flow chain |
+| `PREVIOUS_RELEASE_VERSION` | `18.9` | Previous release branch version: the highest `vs*` version lower than `THIS_RELEASE_VERSION` (list candidates with `git branch -r --list 'origin/vs*'`). |
+| `PREVIOUS_RELEASE_EXACT_VERSION` | `18.9.6` | The version the previous release actually shipped as. From the previous release's tracking issue, or `git tag --list 'v18.9.*'`. Used by Phase 5.3a. |
 | `THIS_RELEASE_VERSION` | `18.10` | Current `VersionPrefix` in `eng/Versions.props` (drop `.0`) |
 | `NEXT_VERSION` | `18.11` | User-provided — not computable from current version |
 | `BRANCH_SNAP_DATE` | `YYYY-MM-DD` | From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) — when MSBuild branches `vs*` from main, insertion targets VS `main` |
 | `INSIDERS_SNAP_DATE` | `YYYY-MM-DD` | From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) — when VS snaps `main` → `rel/insiders`; final-branded bits must be in VS `main` before this |
 | `STABLE_SNAP_DATE` | `YYYY-MM-DD` | From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) — when VS promotes `rel/insiders` → `rel/stable` |
 | `VS_SHIP_DATE` | `YYYY-MM-DD` | When VS ships publicly (GA) — triggers post-release tasks |
-| `PACKAGE_VALIDATION_BASELINE_VERSION` | `18.9.0-preview-26330-01` | See [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](#how-to-determine-package_validation_baseline_version) below — non-trivial: most "obvious" picks are wrong. |
+| `PACKAGE_VALIDATION_BASELINE_VERSION` | `18.10.0-1.26378.2` | See [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](#how-to-determine-package_validation_baseline_version) below — non-trivial: most "obvious" picks are wrong. |
 
 > Version examples above track the current cycle (`eng/Versions.props` `VersionPrefix` is `18.10.0`). Dates are intentionally shown as a format only — always read the real ones from the VS-Dates wiki.
 
 ### How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`
 
-**The value is the latest `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` MSBuild package that is both:**
+**The value is the latest `{{THIS_RELEASE_VERSION}}.0-<label>.<shortDate>.<rev>` MSBuild package that is both:**
+
+_`<label>` is `PreReleaseVersionLabel` from `eng/Versions.props` (currently `1`), so the versions look like `18.11.0-1.26426.2`. Do **not** assume the legacy `-preview-NNNNN-NN` shape — MSBuild no longer produces it._
 
 1. **Published on the public [dotnet-tools feed](https://dev.azure.com/dnceng/public/_artifacts/feed/dotnet-tools)** — this is the feed the official build publishes to and that ApiCompat restores baselines from. If the version isn't here, ApiCompat fails with `NU1102`.
 2. **Produced from a commit reachable from `vs{{THIS_RELEASE_VERSION}}`** — i.e. a commit on `vs{{THIS_RELEASE_VERSION}}`, or the `main` commit `vs{{THIS_RELEASE_VERSION}}` was branched from.
@@ -59,13 +62,15 @@ Before starting any phase, ensure you have these values (the user must provide t
 | Wrong pick | Why it fails |
 |---|---|
 | ❌ The release-versioned `{{THIS_RELEASE_VERSION}}.X` package that ships in VS / on nuget.org | Since [#14277](https://github.com/dotnet/msbuild/pull/14277) release branches build and insert **prerelease** versions, exactly like `main`; the release-versioned variants are produced by NuGetRepack at manual publish time. They never exist on the public CI feed, so ApiCompat cannot restore them. |
-| ❌ Blindly the most recent `{{THIS_RELEASE_VERSION}}.0-preview-*` on `dotnet-tools` | After `vs{{THIS_RELEASE_VERSION}}` branches, `main` keeps producing `{{THIS_RELEASE_VERSION}}.0-preview-*` until **this** main-bump PR merges — so the most recent feed entries may be `{{NEXT_VERSION}}`-content builds wearing `{{THIS_RELEASE_VERSION}}` branding. Picking one drifts the API baseline forward and silently hides real compat breaks. |
+| ❌ Blindly the most recent `{{THIS_RELEASE_VERSION}}.0-*` on `dotnet-tools` | After `vs{{THIS_RELEASE_VERSION}}` branches, `main` keeps producing `{{THIS_RELEASE_VERSION}}.0-*` until **this** main-bump PR merges — so the most recent feed entries may be `{{NEXT_VERSION}}`-content builds wearing `{{THIS_RELEASE_VERSION}}` branding. Picking one drifts the API baseline forward and silently hides real compat breaks. |
+
+**Timing caveat:** the branch-point build publishes to `dotnet-tools` asynchronously. If you branch and bump on the same day, the script may report the correct candidate as `[NOT on feed]` — wait for publication and re-run rather than substituting an older build.
 
 **Procedure:** run the helper — it does the whole resolution mechanically (requires `az login` with devdiv access):
 
 ```
 pwsh ./scripts/Get-PackageValidationBaseline.ps1 -ThisReleaseVersion {{THIS_RELEASE_VERSION}}
-# -> prints e.g. 18.9.0-preview-26330-01
+# -> prints e.g. 18.11.0-1.26426.2
 ```
 
 It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, finds the matching successful build in [pipeline 9434](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), derives the package version from the OfficialBuildId, and verifies it on the dotnet-tools feed. If it fails, read the script's own `.DESCRIPTION` header for the manual equivalent rather than reproducing it here.
@@ -80,11 +85,11 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | Phase | Trigger | Key Actions |
 |---|---|---|
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
-| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), merge-flow config, `VisualStudio.ChannelName` |
+| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), identify retired branches, `VisualStudio.ChannelName` |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
 | **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Public API promotion, OptProf bootstrap (usually a no-op), M2/QB approval only if behind schedule, babysit the VS insertion into VS `main` before insiders snap |
-| **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | nuget.org publish, docs, GitHub release, cleanup |
+| **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | Resolve the exact shipped version (SDK-coupled? SDK wins over VS `rel/stable`), nuget.org publish, docs, GitHub release, Change Waves Learn sync, retro |
 
 ## DARC Batching
 
@@ -97,7 +102,7 @@ DARC write commands push to the [maestro-configuration](https://dev.azure.com/dn
 
 Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) don't need these flags.
 
-**Non-interactive (`-q`).** `darc add-default-channel` / `add-subscription` prompt `y/n` when the target branch does not exist yet (e.g. pre-creating the `vs{{NEXT_VERSION}}` mapping in Phase 1.2c, or adding the new `vs{{THIS_RELEASE_VERSION}}` backflow in Phase 2). Console input is redirected in an agent session, so the prompt **fails the command** — always pass `-q` for these "branch doesn't exist yet" writes.
+**Non-interactive (`-q`).** `darc add-default-channel` / `add-subscription` prompt `y/n` when the target branch does not exist yet (e.g. pre-creating the `vs{{NEXT_VERSION}}` mapping in Phase 1.2c, or adding the new `vs{{THIS_RELEASE_VERSION}}` backflow in Phase 2). `darc delete-subscriptions` always prompts for confirmation. Console input is redirected in an agent session, so the prompt **fails or hangs the command** — always pass `-q` for these writes. Note the verb is `delete-subscriptions` (plural); `delete-subscription` does not exist.
 
 **Phase 2 — what moves vs. what stays.** When rotating `main` to the next channel, retarget **only** the subscriptions whose **target branch is `main`** (`dotnet/dotnet @ main`, `dotnet/fsharp @ main`). **Never** retarget a subscription that targets a VMR servicing/release branch (`dotnet/dotnet @ release/*`) — that includes the SDK band paired with the new `vs{{THIS_RELEASE_VERSION}}` branch and any `.NET-next` preview band (`release/*-preview*`). Those stay on `VS {{THIS_RELEASE_VERSION}}` so the new release branch owns their downstream flow; moving them steals it. (This bit the 18.9 release: the band and preview subs were moved and had to be reverted.)
 
@@ -113,7 +118,7 @@ When asked to execute a specific phase:
 4. For DARC commands: batch writes into one configuration PR per phase
 5. Record all output URLs in the tracking issue's artifact table
 6. Mark checkboxes as completed in the tracking issue
-7. In **Phase 5**: if `documentation/wiki/ChangeWaves.md` is changed for this release, update the public Learn page at `https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio` (or track the required update with an explicit issue/link in the release artifacts).
+7. In **Phase 4** (step 4.7): if `documentation/wiki/ChangeWaves.md` is changed for this release, update the public Learn page at https://learn.microsoft.com/visualstudio/msbuild/change-waves. Sync the Change Waves Learn page from `documentation/wiki/ChangeWaves.md` on the `vsXX.Y` branch that is live in VS Insiders / the latest preview SDK. PR goes to `MicrosoftDocs/visualstudio-docs-pr` (`docs/msbuild/change-waves.md`); example: https://github.com/MicrosoftDocs/visualstudio-docs-pr/pull/15662.
 
 ## Key Files
 
@@ -121,10 +126,9 @@ When asked to execute a specific phase:
 |---|---|
 | [`documentation/release-checklist.md`](../../../documentation/release-checklist.md) | **Operational checklist** — the source of truth |
 | [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, public API, major version steps |
-| [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc whose release-cycle updates may require a Learn page sync |
-| [MSBuild Change Waves Learn page](https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio) | Public docs target to update/track during Phase 5 docs work |
+| [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc for the Learn page sync — always sync the `vsXX.Y` (Insiders/preview-SDK) copy, not `main` |
+| [MSBuild Change Waves Learn page](https://learn.microsoft.com/visualstudio/msbuild/change-waves) | Public docs target to [`MicrosoftDocs/visualstudio-docs-pr`](https://github.com/MicrosoftDocs/visualstudio-docs-pr) (`docs/msbuild/change-waves.md`) |
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
-| [`.config/git-merge-flow-config.jsonc`](../../../.config/git-merge-flow-config.jsonc) | Branch merge chain — update each release |
 | [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `AutoInsertTargetBranch` mappings |
 | [`azure-pipelines/vs-insertion-experimental.yml`](../../../azure-pipelines/vs-insertion-experimental.yml) | Experimental insertion — `TargetBranch` parameter values |
 | [`scripts/Get-PackageValidationBaseline.ps1`](../../../scripts/Get-PackageValidationBaseline.ps1) | Phase 3.2 — resolves `PackageValidationBaselineVersion` deterministically (merge-base → pipeline 9434 → dotnet-tools feed) |
@@ -142,7 +146,7 @@ After completing all phases, verify:
 4. VS insertion PR merged
 5. Packages published to nuget.org
 6. GitHub release created with tag `v{{THIS_RELEASE_EXACT_VERSION}}`
-7. If `documentation/wiki/ChangeWaves.md` is changed, the corresponding Learn page update at `https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio` is completed or explicitly tracked
+7. The Learn page https://learn.microsoft.com/visualstudio/msbuild/change-waves lists exactly the waves present in `vsXX.Y` (the version in VS Insiders / the latest released preview SDK), or the sync is explicitly tracked
 
 ## Error Recovery
 

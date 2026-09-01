@@ -39,6 +39,8 @@ Change wave checks around features will be removed in the release that accompani
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
 - [Out-of-proc communication uses larger read-ahead buffers and pre-buffers TaskHost packet bodies to reduce pipe reads.](https://github.com/dotnet/msbuild/pull/14505)
 - [Restore no longer discards a ProjectRootElementCache that reloads changed files from disk, so the build that follows an implicit restore does not re-parse the import closure.](https://github.com/dotnet/msbuild/pull/14558)
+- [Use optimized MSBuild file specification matching and enumeration](https://github.com/dotnet/msbuild/pull/14663). Regex-backed file globs use culture-invariant case folding; set `MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS=1` to preserve legacy current-culture folding without disabling other Wave 18.11 features.
+- [Isolated (`-graph -isolate`) builds fail deterministically with MSB4252 on a cross-project reference to a target that is not declared via `ProjectReferenceTargets`, instead of passing if the referenced project happened to build on that node previously.](https://github.com/dotnet/msbuild/pull/14280)
 
 ### 18.10
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
