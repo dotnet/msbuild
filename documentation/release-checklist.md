@@ -84,17 +84,9 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
 - [ ] **1.3** **Audit _every_ live `vs*` branch for retirement.** Record the list here — Phase 2.3e uses it to clean up their DARC subscriptions. \
   ⚠️ **This is a full audit, not a single-candidate check.** Do **not** just evaluate `vs{{THIS_RELEASE_VERSION}} - 3`. Retirement is missed far more often than it is done wrongly, and every miss is permanent: nothing else in this process ever revisits an older branch, so stale branches accumulate indefinitely and keep consuming Arcade/OptProf maintenance. Enumerate the full list and judge each one. \
   - [ ] **1.3a** Enumerate current state (both commands, plus the repo's real branches): \
-  `darc get-default-channels --source-repo msbuild` \
-  `darc get-subscriptions --source-repo dotnet/msbuild` \
-  `git branch -r --list 'origin/vs*'`
-  - [ ] **1.3b** For **each** `vs*` default channel, apply the rules below and classify it keep / retire. Two red flags that almost always mean "retire", and are worth checking first because they are mechanical:
-    - **No outbound subscription** — nothing consumes that branch's `VS X.Y` channel, so the branch feeds nothing. (A live branch looks like `vs18.0 → dotnet/dotnet release/10.0.1xx`.)
-    - **Default channel for a branch that does not exist** in `dotnet/msbuild` — a pure orphan; delete the mapping.
-  - [ ] **1.3c** Record the verdict for every branch in the table below, including the ones you keep and why. This is what makes the next release's audit cheap.
-
-  | Branch | Paired SDK band | Band EOL | VS supported? | Verdict |
-  |---|---|---|---|---|
-  | | | | | |
+  `darc get-default-channels --source-repo https://github.com/dotnet/msbuild` \
+  `darc get-subscriptions --source-repo https://github.com/dotnet/msbuild` \
+  `git fetch upstream && git branch -r --list 'upstream/vs*'`
 
   How to identify a retired branch:
     - **The combined rule:** a branch paired with both an SDK band and a VS version is retired **only when both lifecycles agree it is out of support**. If only one side says retired but the other is still supported, **keep the branch** — the still-supported lifecycle must keep receiving fixes.
@@ -103,6 +95,15 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
     - **VS lifecycle** — rule of thumb: the VS support window covers the current release plus two preceding versions, so `vs{{THIS_RELEASE_VERSION}} - 3` is the **newest** retirement candidate — never the only one. Confirm against the SDK table above, which carries the VS pairing; the [VS Servicing Information wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/27212/Visual-Studio-Servicing-Information) is **retired and now 404s**, redirecting to https://aka.ms/vsdates, and the VS-Dates page only lists the *active* train (`main` / `rel/stable` / `rel/oobstable`) — it cannot enumerate accumulated backlog.
     - **VS-only branches** (not paired with any active SDK band) are retired purely on the VS lifecycle.
     - **Worked example (18.11).** `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) → **keep**, despite being the oldest branch. `vs18.6` pairs with 10.0.3xx (EOL Aug 2026) and VS 18.6 is outside the window → **retire**. `vs18.4` (10.0.2xx, EOL May 2026) and `vs18.5` (VS-only) had default channels for branches already deleted from the repo → **retire the mappings**.
+
+  - [ ] **1.3b** For **each** `vs*` default channel, apply the rules above and classify it as **keep** or **retire**. Two red flags that almost always mean "retire", and are worth checking first because they are mechanical:
+    - **No outbound subscription** — nothing consumes that branch's `VS X.Y` channel, so the branch feeds nothing. (A live branch looks like `vs18.0 → dotnet/dotnet release/10.0.1xx`.)
+    - **Default channel for a branch that does not exist** in `dotnet/msbuild` — a pure orphan; delete the mapping.
+  - [ ] **1.3c** Record the verdict for every branch in the table below, including the ones you keep and why. This is what makes the next release's audit cheap.
+
+  | Branch | Paired SDK band | Band EOL | VS supported? | Verdict |
+  |---|---|---|---|---|
+  | | | | | |
 
 ---
 

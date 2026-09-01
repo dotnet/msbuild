@@ -114,7 +114,7 @@ Each release retires the `vs*` branches that have fallen out of support. **This 
 
 **The authoritative source is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions).** It maps each SDK feature band to its VS version and support end date, which decides most branches outright. Open it every release — it is cheap and it is the whole answer for SDK-paired branches.
 
-🛑 **Maestro is not a lifecycle source.** A `.NET X.Y.Zxx SDK` channel — including `... SDK Release` variants — persists long after the band dies. Reasoning "the channel still exists, so the band is supported" is invalid and is exactly how `vs18.6` (band 10.0.3xx, EOL Aug 2026) survived the 18.11 audit.
+🛑 **Maestro is not a lifecycle source.** A `.NET X.Y.Zxx SDK` channel — including `... SDK Release` variants — persists long after the band dies. Reasoning "the channel still exists, so the band is supported" is invalid and is exactly how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release and had to be retired afterwards.
 
 Apply the **combined rule**: a branch paired with both an SDK band and a VS version retires only when *both* lifecycles agree. Two mechanical red flags find most of the backlog:
 
