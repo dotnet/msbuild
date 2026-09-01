@@ -1358,24 +1358,24 @@
     <comment>{0} is the full path of the sentinel directory.</comment>
   </data>
   <data name="MultiThreadedStrictModeCouldNotBeEnabled" xml:space="preserve">
-    <value>MSB4286: Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</value>
-    <comment>{StrBegin="MSB4286: "}{0} is the full path of the sentinel directory. {1} is a sentence describing why it could not be enabled.</comment>
+    <value>Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</value>
+    <comment>{0} is the full path of the sentinel directory. {1} is a sentence describing why it could not be enabled.</comment>
   </data>
   <data name="MultiThreadedStrictModeAlreadyActive" xml:space="preserve">
     <value>Another build in this process has already enabled it.</value>
-    <comment>This is substituted into MSB4286 as the reason strict mode could not be enabled.</comment>
+    <comment>This is substituted into the MultiThreadedStrictModeCouldNotBeEnabled message as the reason strict mode could not be enabled.</comment>
   </data>
   <data name="MultiThreadedStrictModeCurrentDirectoryNotChanged" xml:space="preserve">
     <value>The process current directory could not be changed and is still "{0}".</value>
-    <comment>This is substituted into MSB4286 as the reason strict mode could not be enabled. {0} is the full path of the unchanged current directory.</comment>
+    <comment>This is substituted into the MultiThreadedStrictModeCouldNotBeEnabled message as the reason strict mode could not be enabled. {0} is the full path of the unchanged current directory.</comment>
   </data>
   <data name="MultiThreadedStrictModeCurrentDirectoryChanged" xml:space="preserve">
-    <value>MSB4287: Multi-threaded strict mode detected that the process current directory was changed to "{1}" while the "{0}" task was running. In multi-threaded mode all projects building in this process share the current directory, so changing it breaks relative path resolution for every other project. Resolve paths through the task's TaskEnvironment instead of changing the current directory. The current directory has been reset to "{2}". Because tasks run concurrently, "{0}" may not be the task that changed it.</value>
-    <comment>{StrBegin="MSB4287: "}{0} is the name of the task that was running. {1} is the full path of the unexpected current directory. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
+    <value>MSB4286: Multi-threaded strict mode detected that the process current directory was changed to "{1}" while the "{0}" task was running. In multi-threaded mode all projects building in this process share the current directory, so changing it breaks relative path resolution for every other project. Resolve paths through the task's TaskEnvironment instead of changing the current directory. The current directory has been reset to "{2}". Because tasks run concurrently, "{0}" may not be the task that changed it.</value>
+    <comment>{StrBegin="MSB4286: "}{0} is the name of the task that was running. {1} is the full path of the unexpected current directory. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
   </data>
   <data name="MultiThreadedStrictModeUnresolvedPathWrite" xml:space="preserve">
-    <value>MSB4288: Multi-threaded strict mode detected that "{1}" was created in the sentinel current directory "{2}" while the "{0}" task was running. A relative path was resolved against the process current directory instead of the project directory, which produces a different location for every project in a multi-threaded build. Make the path absolute through the task's TaskEnvironment. Because tasks run concurrently, "{0}" may not be the task that created it.</value>
-    <comment>{StrBegin="MSB4288: "}{0} is the name of the task that was running. {1} is a comma-separated list of file and directory names. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
+    <value>MSB4287: Multi-threaded strict mode detected that "{1}" was created in the sentinel current directory "{2}" while the "{0}" task was running. A relative path was resolved against the process current directory instead of the project directory, which produces a different location for every project in a multi-threaded build. Make the path absolute through the task's TaskEnvironment. Because tasks run concurrently, "{0}" may not be the task that created it.</value>
+    <comment>{StrBegin="MSB4287: "}{0} is the name of the task that was running. {1} is a comma-separated list of file and directory names. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
   </data>
   <data name="CouldNotLoadSdkResolver" xml:space="preserve">
     <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>

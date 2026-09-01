@@ -56,7 +56,7 @@ namespace Microsoft.Build.Framework
         /// -multiThreaded:strict / -mt:strict on the command line. Only takes effect when the build
         /// actually runs multi-threaded. See <see href="https://github.com/dotnet/msbuild/issues/14794"/>.
         /// </summary>
-        public readonly bool MultiThreadedStrict = Environment.GetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT") == "1";
+        public readonly bool MultiThreadedStrict = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMULTITHREADEDSTRICT");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern

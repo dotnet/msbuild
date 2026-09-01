@@ -257,17 +257,24 @@ Strict mode converts that probabilistic failure into a deterministic one. It is 
 
 Strict mode only applies when the build actually runs multithreaded; it is ignored otherwise.
 
-When enabled, the engine sets the process current directory to an empty sentinel directory named `MSBuild-MT-Strict-Sentinel-CWD` (under MSBuild's temporary folder) for the duration of the build, and restores the original directory when the build finishes. The consequences are:
+When enabled, the engine sets the process current directory to an empty sentinel directory named `MSBuild-MT-Strict-Sentinel-CWD` (under MSBuild's temporary folder) for the duration of the build, and restores the original directory when the build ends (`BuildManager.EndBuild`). Because the CLI resolves the project path against the current directory, strict mode also makes the entry project path and the output results cache path absolute before the build starts. The consequences are:
 
 * **Reads through an unresolved relative path fail immediately**, on the first run and on every machine, with a stack trace that points at the offending call, instead of accidentally succeeding against the launch directory.
-* **Writes through an unresolved relative path land in the sentinel directory**, where the engine detects them after each task and reports `MSB4288` against the task that was running, failing that task. The stray files are deliberately left in place so they can be inspected after the build fails.
-* **A task that changes the process current directory** - which corrupts path resolution for every project concurrently building in the process - is reported as `MSB4287`, the task is failed, and the current directory is reset so the rest of the build keeps its protection.
+* **Writes through an unresolved relative path land in the sentinel directory**, where the engine detects them after each task and reports `MSB4287` against the task that was running, failing that task. The stray files are deliberately left in place so they can be inspected after the build fails.
+* **A task that changes the process current directory** - which corrupts path resolution for every project concurrently building in the process - is reported as `MSB4286`, the task is failed, and the current directory is reset so the rest of the build keeps its protection.
 
-Because tasks execute concurrently, the task named in `MSB4287`/`MSB4288` is the task that was running when the violation was observed, which is not necessarily the task that caused it. Both diagnostics say so.
+Because tasks execute concurrently, the task named in `MSB4286`/`MSB4287` is the task that was running when the violation was observed, which is not necessarily the task that caused it. Both diagnostics say so. Each violation is reported once, so a single stray call does not fail every task that happens to be running.
+
+If strict mode cannot be installed - for example because another build in the same process already owns the current directory - the engine logs a high-importance message and builds normally. A diagnostic aid must never fail the build it is diagnosing, so this is deliberately not a warning.
 
 Strict mode also suppresses the legacy per-project reset of the process current directory in `BuildRequestConfiguration.LoadProjectIntoConfiguration`, which would otherwise move the process back to the startup directory before every project evaluation and hide exactly the defects strict mode exists to find. Outside strict mode that reset is unchanged.
 
-Known gaps: strict mode covers task execution. Evaluation still reads the process current directory in a few places (in-memory `ProjectRootElement` directories, some glob and item-transform paths), so an unresolved path there changes behavior under strict mode rather than producing a targeted diagnostic.
+Known gaps:
+
+* Strict mode covers task execution. Evaluation still reads the process current directory in a few places (in-memory `ProjectRootElement` directories, some glob and item-transform paths), so an unresolved path there changes behavior under strict mode rather than producing a targeted diagnostic.
+* Verification runs after each task, so a task that moves the current directory and moves it back, or that creates and deletes a file, is not detected - while a task that happens to run concurrently with a real offender may be the one that is failed.
+* Tasks that run in sidecar TaskHost processes have their own process current directory, which strict mode does not touch. Only in-process (`[MSBuildMultiThreadableTask]`) execution is covered, which is the execution mode the migration is moving tasks into.
+* `MSBUILDMULTITHREADEDSTRICT` is inherited by child processes, so a nested MSBuild launched from an `Exec` runs strict too. Set `MSBUILDMULTITHREADEDSTRICT=0` for the child to opt it out.
 
 Strict mode is the verification step of the migration and complements `Microsoft.Build.TaskAuthoring.Analyzer` as the authoring step: the analyzer catches what it can see, strict mode catches what it cannot. It is not intended to be enabled for production builds.
 
