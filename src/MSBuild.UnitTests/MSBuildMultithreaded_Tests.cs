@@ -299,6 +299,10 @@ namespace Microsoft.Build.Engine.UnitTests
             success.ShouldBeTrue(output);
             output.ShouldContain("MSB4287");
             output.ShouldContain("0 Error(s)");
+
+            // The engine failed the task, so the "task returned false but did not log an error" diagnostic must
+            // not also fire - the task returned true.
+            output.ShouldNotContain("MSB4181");
         }
 
         /// <summary>
