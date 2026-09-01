@@ -71,9 +71,9 @@ namespace Microsoft.Build.Execution
         private readonly object _reportedEntriesLock = new();
 
         /// <summary>
-        /// Names already reported out of the sentinel directory, so that they are not reported again by every
-        /// subsequent task. Seeded with strict mode's own marker file, which must never be mistaken for a stray
-        /// write if deleting it did not take effect immediately.
+        /// Names of sentinel entries that were reported but could not be removed, so that a locked file is not
+        /// re-reported by every subsequent task. Seeded with strict mode's own marker file, which must never be
+        /// mistaken for a stray write if deleting it did not take effect immediately.
         /// </summary>
         private readonly HashSet<string> _reportedEntries = new(FileUtilities.PathComparer);
 
@@ -324,9 +324,9 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Returns a display list of the sentinel directory entries that have not been reported yet, or
-        /// <see langword="null"/> when there are none. Entries are not deleted, so that a stray file remains
-        /// visible for the rest of the build; the sentinel directory itself is removed together with MSBuild's
-        /// temporary folder when the process exits.
+        /// <see langword="null"/> when there are none. Reported entries are removed: the sentinel has to stay
+        /// empty, or a stray file written by one task would satisfy another task's unresolved read and hide the
+        /// second defect behind the first. The entry name in the diagnostic is what identifies the offender.
         /// </summary>
         private string? TakeUnreportedSentinelDirectoryEntries()
         {
@@ -357,9 +357,16 @@ namespace Microsoft.Build.Execution
 
                         string name = Path.GetFileName(entry);
 
+                        // _reportedEntries only guards against an entry that could not be removed, so that a
+                        // locked file is not re-reported by every subsequent task for the rest of the build.
                         if (_reportedEntries.Add(name))
                         {
                             entries.Add(name);
+                        }
+
+                        if (TryDelete(entry))
+                        {
+                            _reportedEntries.Remove(name);
                         }
                     }
                 }
@@ -465,6 +472,27 @@ namespace Microsoft.Build.Execution
             }
 
             return false;
+        }
+
+        private static bool TryDelete(string entry)
+        {
+            try
+            {
+                if (Directory.Exists(entry))
+                {
+                    Directory.Delete(entry, recursive: true);
+                }
+                else
+                {
+                    File.Delete(entry);
+                }
+
+                return true;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                return false;
+            }
         }
 
         private static void TryDeleteFile(string file)
