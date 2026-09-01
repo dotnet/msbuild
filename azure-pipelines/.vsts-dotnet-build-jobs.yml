@@ -9,6 +9,9 @@ parameters:
 - name: signTypeParameter
   type: string
   default: 'test'
+- name: enableOptProf
+  type: boolean
+  default: false
 
 jobs:
 - job: Windows_NT
@@ -61,6 +64,7 @@ jobs:
       AccessToken: '$(System.AccessToken)'
       feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
     displayName: 'Install OptProf Plugin'
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   # Required by MicroBuildBuildVSBootstrapper
   - task: MicroBuildSwixPlugin@4
@@ -104,7 +108,7 @@ jobs:
       toLowerCase: false
       usePat: true
     displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   # Build VS bootstrapper
   # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
@@ -115,7 +119,7 @@ jobs:
       manifests: $(VisualStudio.SetupManifestList)
       outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
     displayName: 'OptProf - Build VS bootstrapper'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   # Publish run settings
   - task: PowerShell@2
@@ -127,7 +131,7 @@ jobs:
                 /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
                 /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
     displayName: 'OptProf - Build IBC training settings'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   # Publish bootstrapper info
   - task: 1ES.PublishBuildArtifacts@1
@@ -136,7 +140,8 @@ jobs:
       ArtifactName: MicroBuildOutputs
       ArtifactType: Container
     displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-    condition: succeeded()
+    # Only produced when the OptProf bootstrapper runs; skip when OptProf collection is disabled.
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   - task: 1ES.PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
@@ -205,7 +210,7 @@ jobs:
     displayName: Tag build as ready for optimization training
     inputs:
       tags: 'ready-for-training'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
     displayName: Execute cleanup tasks

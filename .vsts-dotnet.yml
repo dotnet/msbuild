@@ -13,6 +13,12 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
+- name: enableOptProf
+  displayName: Enable OptProf data collection for this build
+  # vs16.11 is in servicing and no longer collects fresh OptProf data: the VS
+  # bootstrapper build (required only for OptProf collection) is disabled by default.
+  type: boolean
+  default: false
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
@@ -77,6 +83,7 @@ extends:
           isExperimental: false
           enableComponentGovernance: true
           signTypeParameter: ${{ parameters.signTypeParameter }}
+          enableOptProf: ${{ parameters.enableOptProf }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
