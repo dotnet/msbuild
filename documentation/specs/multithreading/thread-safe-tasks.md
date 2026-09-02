@@ -108,6 +108,45 @@ For tasks to be eligible for multithreaded execution using this approach, they m
 public class MyTask : Task {...}
 ```
 
+### Registered task objects
+
+Tasks can use `IBuildEngine4.RegisterTaskObject` to cache an object for later task invocations. The caches are local to the process that executes the task; they are not a build-wide distributed cache. Build-lifetime objects additionally belong to a build component host.
+
+| Execution path | Registered-object visibility |
+| --- | --- |
+| Multiprocess worker node | Private to that worker process. Other worker nodes cannot retrieve the object. |
+| Multithreaded, in-process task | Shared with in-process tasks on every thread node in the process. |
+| Multithreaded, sidecar TaskHost | Private to that TaskHost process. Tasks routed to the same sidecar can share Build-lifetime objects during the build. Those objects are disposed at build completion even if the sidecar remains resident. |
+
+`RegisteredTaskObjectLifetime.AppDomain` uses a static store in the AppDomain that hosts MSBuild. It can outlive a build, but it does not make an object visible in another worker or TaskHost process. Do not use this lifetime for project- or build-specific state.
+
+The registry makes individual register, get, and unregister operations thread-safe. It does not make a registered object thread-safe, and it does not make a sequence of registry calls atomic. In particular:
+
+* An object visible to in-process tasks can be accessed concurrently from different thread nodes. Protect mutable state with suitable synchronization or register an inherently thread-safe object.
+* Registration is first-writer-wins. Registering an equal key and lifetime does not replace the existing object, and MSBuild does not take ownership of the rejected object.
+* A get-then-register sequence can race. Use synchronization shared by all producers, or design initialization so that losing candidates are detected and disposed safely.
+* Unregistration can race with other consumers. Do not unregister an object while another task can still use it.
+
+Keys also have a wider collision scope in multithreaded mode. For task-private state, prefer a private identity key:
+
+```csharp
+private static readonly object s_cacheKey = new();
+```
+
+Cooperating tasks that intentionally share an object should use a dedicated immutable key type whose equality includes the producer identity, cache purpose, version, and any inputs that affect the cached value. Avoid short or generic string keys that can collide with unrelated tasks loaded into the same process.
+
+#### Registered-task-object migration checklist
+
+Before adding `[MSBuildMultiThreadableTask]` to a task that uses registered task objects:
+
+1. Inventory every register, get, and unregister operation, including calls in shared helpers.
+2. Confirm that correctness does not depend on another invocation using the same process or sidecar. A cache miss must remain valid behavior.
+3. Replace collision-prone keys with private identity keys or deliberately namespaced value keys.
+4. Make every shared registered object safe for concurrent use.
+5. Synchronize compound cache operations, especially initialization and teardown.
+6. Verify ownership of objects that lose a registration race and dispose them when necessary.
+7. Test the task in normal multiprocess mode, in multithreaded in-process mode, and through the sidecar TaskHost path.
+
 ## TaskEnvironment API
 
 The `TaskEnvironment` provides thread-safe alternatives to APIs that use global process state, enabling tasks to execute safely in a multithreaded environment.

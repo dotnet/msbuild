@@ -15,6 +15,7 @@ Categories of threading issues with .NET API usage in thread-safe tasks to be aw
 1. **Process Culture Modification and Usage**, which can affect data formatting.
 1. **Assembly Loading**
 1. **Static Fields**
+1. **Registered Task Objects**
 
 ### Best Practices
 
@@ -24,6 +25,7 @@ Instead of the problematic APIs listed below, thread-safe tasks should:
 1. **Always use absolute paths** when still using some standard .NET file system APIs.
 1. **Explicitly configure external processes** using `TaskEnvironment`.
 1. **Never modify process culture**: Avoid modifying culture defaults.
+1. **Treat registered task objects as shared state within their component host or AppDomain** and make them thread-safe.
 
 ## Detailed API Reference
 
@@ -119,6 +121,16 @@ The following tables list specific .NET APIs and their threading safety classifi
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
 | Static fields | WARNING | Shared across threads, can cause race conditions | Avoid |
+
+### Microsoft.Build.Framework.IBuildEngine4 registered task objects
+
+| API | Level | Short Reason | Recommendation |
+|-----|-------|--------------|-------|
+| `RegisterTaskObject` | WARNING | The registry is shared across in-process thread nodes; registration races do not replace the first object | Use a collision-resistant key and synchronize initialization |
+| `GetRegisteredTaskObject` | WARNING | The returned object can be accessed concurrently by tasks on other thread nodes | Return a thread-safe object or synchronize all access |
+| `UnregisterTaskObject` | WARNING | Removal can race with other consumers of the shared object | Unregister only after coordinating with all consumers |
+
+The registry remains process-local. Tasks routed to different worker or TaskHost processes do not share objects, so tasks must handle cache misses and must not use the registry for required cross-invocation communication. See [Registered task objects](thread-safe-tasks.md#registered-task-objects) for the execution-path matrix and migration checklist.
 
 ### Assembly Loading (System.Reflection.Assembly class, System.Activator class)
 Tasks that load assemblies dynamically in the task host may cause version conflicts. Version conflicts in task assemblies will cause build failures (previously these might have been sporadic). Both dynamically loaded dependencies and static dependencies can cause issues.
