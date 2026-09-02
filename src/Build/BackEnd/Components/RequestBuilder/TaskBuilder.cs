@@ -1084,11 +1084,16 @@ namespace Microsoft.Build.BackEnd
 
             var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
 
+            // A relative path in a project file means "relative to that project", never "relative to wherever the
+            // process happens to be". Anchoring these on the project directory is required for correctness in
+            // multithreaded mode, where the process current directory is not the project directory.
+            string projectDirectory = _buildRequestEntry.ProjectRootDirectory;
+
             var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, FileUtilities.PathComparer);
 
             foreach (var projectReferenceItem in projectReferenceItems)
             {
-                declaredProjects.Add(FileUtilities.NormalizePath(projectReferenceItem.EvaluatedInclude));
+                declaredProjects.Add(NormalizeProjectPath(projectReferenceItem.EvaluatedInclude, projectDirectory));
             }
 
             // allow a project to msbuild itself
@@ -1098,7 +1103,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (var msbuildProject in msbuildTask.Projects)
             {
-                var normalizedMSBuildProject = FileUtilities.NormalizePath(msbuildProject.ItemSpec);
+                var normalizedMSBuildProject = NormalizeProjectPath(msbuildProject.ItemSpec, projectDirectory);
 
                 if (
                     !(declaredProjects.Contains(normalizedMSBuildProject)
@@ -1111,6 +1116,15 @@ namespace Microsoft.Build.BackEnd
 
             return undeclaredProjects;
         }
+
+        /// <summary>
+        /// Resolves a project path the way MSBuild resolves it when it actually builds it: relative paths are
+        /// anchored on the referencing project's directory, not on the process current directory.
+        /// </summary>
+        private static string NormalizeProjectPath(string path, string projectDirectory)
+            => System.IO.Path.IsPathRooted(path)
+                ? FileUtilities.NormalizePath(path)
+                : FileUtilities.NormalizePath(projectDirectory, path);
 
         /// <summary>
         /// Gathers task outputs in two ways:

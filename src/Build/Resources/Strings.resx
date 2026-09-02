@@ -1374,7 +1374,7 @@
     <comment>{StrBegin="MSB4286: "}{0} is the name of the task that was running. {1} is the full path of the unexpected current directory. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
   </data>
   <data name="MultiThreadedStrictModeUnresolvedPathWrite" xml:space="preserve">
-    <value>MSB4287: Multi-threaded strict mode detected that "{1}" was created in the sentinel current directory "{2}" while the "{0}" task was running. A relative path was resolved against the process current directory instead of the project directory, which produces a different location for every project in a multi-threaded build. Make the path absolute through the task's TaskEnvironment. Because tasks run concurrently, "{0}" may not be the task that created it.</value>
+    <value>MSB4287: Multi-threaded strict mode detected that "{1}" was created in the sentinel current directory "{2}" while the "{0}" task was running. A relative path was resolved against the process current directory instead of the project directory, which produces a different location for every project in a multi-threaded build. Make the path absolute through the task's TaskEnvironment. The entry is reported once and removed. Because tasks, loggers and the host all share this process, the writer may be a concurrently running task, a logger, or host code rather than "{0}".</value>
     <comment>{StrBegin="MSB4287: "}{0} is the name of the task that was running. {1} is a comma-separated list of file and directory names. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
   </data>
   <data name="CouldNotLoadSdkResolver" xml:space="preserve">
