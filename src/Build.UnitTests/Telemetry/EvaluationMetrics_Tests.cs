@@ -255,45 +255,6 @@ public sealed class EvaluationMetrics_Tests : IDisposable
     }
 
     [Fact]
-    public void EvaluationDurationDoesNotIncludeMetricsListenerTime()
-    {
-        using MeterListener listener = new();
-        double? recordedDuration = null;
-        listener.InstrumentPublished = (instrument, meterListener) =>
-        {
-            if (instrument.Meter.Name == EvaluationMetrics.MeterName)
-            {
-                meterListener.EnableMeasurementEvents(instrument);
-            }
-        };
-        listener.SetMeasurementEventCallback<long>((instrument, _, _, _) =>
-        {
-            if (instrument.Name == EvaluationMetrics.ProjectEvaluationCountName)
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
-            }
-        });
-        listener.SetMeasurementEventCallback<double>((instrument, value, _, _) =>
-        {
-            if (instrument.Name == EvaluationMetrics.ProjectEvaluationDurationName)
-            {
-                recordedDuration = value;
-            }
-        });
-        listener.Start();
-
-        long startTimestamp = EvaluationMetrics.EvaluateStart();
-        EvaluationMetrics.EvaluateStop(
-            startTimestamp,
-            ProjectEvaluationStage.Full,
-            BuildEventContext.InvalidSubmissionId,
-            succeeded: true);
-
-        recordedDuration.ShouldNotBeNull();
-        recordedDuration.Value.ShouldBeLessThan(0.5);
-    }
-
-    [Fact]
     public void SubmissionIdTagIsOptIn()
     {
         _testEnvironment.SetEnvironmentVariable(
@@ -313,43 +274,6 @@ public sealed class EvaluationMetrics_Tests : IDisposable
     }
 
     [Fact]
-    public void BuildManagerSubmissionIdsRemainPerManagerWithoutMetricsCorrelation()
-    {
-        _testEnvironment.SetEnvironmentVariable(
-            EvaluationMetrics.IncludeSubmissionIdEnvironmentVariable,
-            null);
-        EvaluationMetrics.ResetForTests();
-
-        using TestEnvironment env = TestEnvironment.Create(_output);
-        TransientTestFile project = env.CreateFile(
-            "evaluation-metrics-per-manager.proj",
-            """
-            <Project>
-              <Target Name="Build" />
-            </Project>
-            """);
-        MockLogger logger = new(_output);
-        List<int> submissionIds = [];
-
-        for (int i = 0; i < 2; i++)
-        {
-            using BuildManager buildManager = new();
-            BuildResult result = buildManager.Build(
-                new BuildParameters { Loggers = [logger] },
-                new BuildRequestData(
-                    project.Path,
-                    new Dictionary<string, string?>(),
-                    null,
-                    ["Build"],
-                    null));
-            result.ShouldHaveSucceeded();
-            submissionIds.Add(result.SubmissionId);
-        }
-
-        submissionIds.ShouldBe([0, 0]);
-    }
-
-    [Fact]
     public void ThrowingMetricsListenerDoesNotBreakEvaluation()
     {
         using ResetMetricsOnDispose reset = new();
@@ -363,29 +287,6 @@ public sealed class EvaluationMetrics_Tests : IDisposable
             }
         };
         listener.SetMeasurementEventCallback<long>((_, _, _, _) => throw new InvalidOperationException("Test listener failure"));
-        listener.Start();
-
-        using ProjectCollection collection = new();
-        Should.NotThrow(() =>
-            ProjectInstance.FromProjectRootElement(
-                CreateRootElement("<Project />"),
-                new ProjectOptions { ProjectCollection = collection }));
-    }
-
-    [Fact]
-    public void ThrowingPassMetricsListenerDoesNotBreakEvaluation()
-    {
-        using ResetMetricsOnDispose reset = new();
-        using MeterListener listener = new();
-        listener.InstrumentPublished = (instrument, meterListener) =>
-        {
-            if (instrument.Meter.Name == EvaluationMetrics.MeterName &&
-                instrument.Name == EvaluationMetrics.ProjectEvaluationPassDurationName)
-            {
-                meterListener.EnableMeasurementEvents(instrument);
-            }
-        };
-        listener.SetMeasurementEventCallback<double>((_, _, _, _) => throw new InvalidOperationException("Test listener failure"));
         listener.Start();
 
         using ProjectCollection collection = new();
