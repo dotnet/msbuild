@@ -340,9 +340,19 @@ Note that implementing `IMultiThreadableTask` on the base is safe and does not c
 
 ### Engine-Owned Shared State: `RegisterTaskObject`
 
-`IBuildEngine4` registered task objects are shared across in-process thread nodes under MT. Their use is a **review signal, not a warning**.
+The guidance about `static` fields has a less obvious sibling: `IBuildEngine4.GetRegisteredTaskObject` / `RegisterTaskObject`. Under MT, in-process thread nodes share this engine-owned state. Tasks in different worker or TaskHost processes do not.
 
-Check that the object supports concurrent access, keys cannot collide, and a non-atomic get/register sequence is safe when two tasks race. Also confirm that correctness does not depend on two invocations sharing a cache, because tasks in different worker or TaskHost processes do not.
+Using these APIs is a **review signal, not a warning**. Check object thread safety, key collisions, and whether correctness depends on two task invocations sharing a cache.
+
+The get/register sequence is not atomic. Two tasks can both miss and create an object; registration keeps the first object and rejects the second. Whether that matters depends on what is cached:
+
+| Cached computation | Review result |
+|---|---|
+| Pure and deterministic for the key | Safe if the losing object needs no cleanup, or the task cleans it up |
+| Deduplication is the point, such as logging once per build | Unsafe because both tasks can perform the side effect |
+| A failure | Check that the key includes every input that affects the result; otherwise do not cache it |
+
+Real examples from dotnet/arcade: `LocateDotNet` was safe because its computation was pure. `SingleError` was not safe because its purpose was to emit exactly one error per build, so its annotation was removed.
 
 ### Tasks Instantiated Directly by Other Tasks
 
@@ -538,6 +548,7 @@ Assertions: Execute() return value, [Output] exact string, error message content
     - No direct `Environment.Get/SetEnvironmentVariable` (route through `TaskEnvironment`)
     - No `static` mutable fields seeded from process state; replace with `ConcurrentDictionary` keyed on inputs
     - Every `RegisterTaskObject` use reviewed for object thread safety, key collisions, registration races, and process-local visibility
+    - No cached *failures* whose key omits inputs that affect the result
     - No `Console.*`, `Environment.Exit`, `Process.Kill`, `FailFast`
 - [ ] ToolTask overrides audited (`GenerateFullPathToTool`, `SkipTaskExecution`, `ValidateParameters`); `ProcessStartInfo.FileName` is absolute, tool *arguments* stay relative
 - [ ] No nested tasks created via `new …Task()` without explicit `TaskEnvironment` propagation

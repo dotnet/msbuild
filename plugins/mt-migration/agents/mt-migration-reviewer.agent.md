@@ -60,7 +60,7 @@ For every leaf, classify against this list. Every match is a finding (BLOCKING u
 | `Console.*` (Write, WriteLine, In, Out, Error) | Shared in MT mode | Use `Log.*` |
 | `Environment.Exit`, `FailFast`, `Process.Kill`, `ThreadPool.SetMin/MaxThreads` | Process-fatal | Return false / throw / let engine handle |
 | `static` field initialized from process state (`s_x = Directory.GetCurrentDirectory()`, `s_y = Environment.GetEnvironmentVariable(...)`) | Captures first caller's environment forever | Replace with `ConcurrentDictionary` keyed on inputs |
-| `IBuildEngine4` registered task objects | Shared across in-process thread nodes, but not across processes | Review object thread safety, key collisions, registration races, and whether process-local visibility is acceptable. Report only an actual unsafe use. |
+| `IBuildEngine4.GetRegisteredTaskObject` / `RegisterTaskObject` | Shared across in-process thread nodes but not across processes; get/register is non-atomic and registration keeps the first object | Review object thread safety, key collisions, process-local visibility, losing-object cleanup, and whether a race duplicates a side effect or reuses a failure with the wrong inputs. Report only an actual unsafe use. |
 | `Assembly.Load*`, `Activator.CreateInstance*` | Version conflicts | Audit; usually requires explicit binding policy |
 | Any API that throws with the input path in the message | Sin 2 leakage | Caller must catch and sanitize, or pass `OriginalValue` |
 | `new SomeOtherTask()` followed by `.Execute()` | Nested task — bypasses TaskFactory injection | Parent must propagate `TaskEnvironment` before calling `Execute()` |
