@@ -1479,10 +1479,8 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         }
 
         /// <summary>
-        /// Re-entrant requests for the same configuration share the same target results. A target entry can reach the
-        /// Completed state without ever executing - for instance when its condition evaluated false against this
-        /// request's own isolated lookup - and the request can then block long enough for the other request to actually
-        /// run that target. The skip must not overwrite the real result.
+        /// Re-entrant requests for the same configuration share target results. Another request can run a target after
+        /// this request's last result check but before it publishes a skipped result. The skip must not overwrite it.
         /// Regression test for "MSB0001: Internal MSBuild Error: Items already exist for target ...".
         /// </summary>
         [Fact]
@@ -1491,7 +1489,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             string projectContents = @"
   <Target Name='Build' DependsOnTargets='Victim' />
   <Target Name='Victim' Condition=""'$(RunVictim)' == 'true'"" />
-  <Target Name='BeforeVictim' BeforeTargets='Victim' />
+  <Target Name='AfterVictim' AfterTargets='Victim' />
 ";
 
             ProjectInstance project = CreateTestProject(projectContents, string.Empty, "Build");
@@ -1502,37 +1500,45 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             (string name, TargetBuiltReason reason)[] target = [("Build", TargetBuiltReason.None)];
             BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), configCache[1], CreateStubTaskEnvironment());
 
-            // Pretend another request for this same configuration is in the middle of building BeforeVictim. That makes
-            // us block while pushing Victim's before-targets, which happens *after* Victim's condition was evaluated.
+            // Block while pushing Victim's after-targets, before its condition is evaluated.
             const int OtherRequestId = 12345;
-            entry.RequestConfiguration.ActivelyBuildingTargets["BeforeVictim"] = OtherRequestId;
+            entry.RequestConfiguration.ActivelyBuildingTargets["AfterVictim"] = OtherRequestId;
+            bool blocked = false;
 
             _blockOnTargetInProgress = (blockingRequestId, blockingTarget, partialBuildResult) =>
             {
-                // While we are blocked, the other request finishes BeforeVictim and goes on to actually build Victim,
-                // storing a real result into the BuildResult that both requests share.
+                blocked = true;
                 entry.RequestConfiguration.ActivelyBuildingTargets.Remove(blockingTarget);
-                resultsCache.GetResultsForConfiguration(entry.Request.ConfigurationId)
-                    .AddResultsForTarget("Victim", BuildResultUtilities.GetEmptySucceedingTargetResult());
+                BuildResult sharedResult = resultsCache.GetResultsForConfiguration(entry.Request.ConfigurationId);
+                sharedResult.AddResultsForTarget(blockingTarget, BuildResultUtilities.GetEmptySucceedingTargetResult());
+                sharedResult.AddResultsForTarget("Victim", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 return Task.CompletedTask;
             };
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
 
+            blocked.ShouldBeTrue();
             result["Build"].ResultCode.ShouldBe(TargetResultCode.Success);
 
             // The result produced by the other request wins over our skip.
             resultsCache.GetResultForRequest(entry.Request)["Victim"].ResultCode.ShouldBe(TargetResultCode.Success);
         }
 
-        [Fact]
-        public void FailedTargetFromReentrantRequestStopsDependentTarget()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FailedTargetPreservedFromReentrantRequestUsesCurrentRequestFailureSemantics(bool callTargetContinueOnError)
         {
-            string projectContents = @"
+            string projectContents = callTargetContinueOnError
+                ? @"
+  <Target Name='Build'><CallTarget Targets='Mid' ContinueOnError='true' /></Target>
+  <Target Name='Mid' AfterTargets='Build' />
+  <Target Name='Victim' AfterTargets='Mid' Condition=""'$(RunVictim)' == 'true'"" />
+  <Target Name='AfterVictim' AfterTargets='Victim' />"
+                : @"
   <Target Name='Build' DependsOnTargets='Victim' />
   <Target Name='Victim' Condition=""'$(RunVictim)' == 'true'"" />
-  <Target Name='BeforeVictim' BeforeTargets='Victim' />
-";
+  <Target Name='BeforeVictim' BeforeTargets='Victim' />";
 
             ProjectInstance project = CreateTestProject(projectContents, string.Empty, "Build");
             TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
@@ -1543,20 +1549,33 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), configCache[1], CreateStubTaskEnvironment());
 
             const int OtherRequestId = 12345;
-            entry.RequestConfiguration.ActivelyBuildingTargets["BeforeVictim"] = OtherRequestId;
+            string blockingTarget = callTargetContinueOnError ? "AfterVictim" : "BeforeVictim";
+            entry.RequestConfiguration.ActivelyBuildingTargets[blockingTarget] = OtherRequestId;
+            bool blocked = false;
 
             _blockOnTargetInProgress = (blockingRequestId, blockingTarget, partialBuildResult) =>
             {
+                blocked = true;
                 entry.RequestConfiguration.ActivelyBuildingTargets.Remove(blockingTarget);
-                resultsCache.GetResultsForConfiguration(entry.Request.ConfigurationId)
-                    .AddResultsForTarget("Victim", BuildResultUtilities.GetEmptyFailingTargetResult());
+                BuildResult sharedResult = resultsCache.GetResultsForConfiguration(entry.Request.ConfigurationId);
+                if (callTargetContinueOnError)
+                {
+                    sharedResult.AddResultsForTarget(blockingTarget, BuildResultUtilities.GetEmptySucceedingTargetResult());
+                }
+
+                sharedResult.AddResultsForTarget("Victim", BuildResultUtilities.GetEmptyFailingTargetResult());
                 return Task.CompletedTask;
             };
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
 
-            result["Build"].ResultCode.ShouldBe(TargetResultCode.Failure);
-            resultsCache.GetResultForRequest(entry.Request)["Victim"].ResultCode.ShouldBe(TargetResultCode.Failure);
+            blocked.ShouldBeTrue();
+            result.OverallResult.ShouldBe(callTargetContinueOnError ? BuildResultCode.Success : BuildResultCode.Failure);
+            result["Build"].ResultCode.ShouldBe(callTargetContinueOnError ? TargetResultCode.Success : TargetResultCode.Failure);
+
+            TargetResult victimResult = resultsCache.GetResultsForConfiguration(entry.Request.ConfigurationId).ResultsByTarget["Victim"];
+            victimResult.ResultCode.ShouldBe(TargetResultCode.Failure);
+            victimResult.TargetFailureDoesntCauseBuildFailure.ShouldBeFalse();
         }
 
         #region IRequestBuilderCallback Members

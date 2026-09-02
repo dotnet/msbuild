@@ -90,6 +90,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _legacyCallTargetContinueOnError;
 
+        private HashSet<string> _legacyCallTargetFailuresToIgnore;
+
         /// <summary>
         /// Flag indicating whether telemetry is requested.
         /// </summary>
@@ -119,9 +121,9 @@ namespace Microsoft.Build.BackEnd
             _requestBuilderCallback = callback;
             _projectLoggingContext = loggingContext;
             _cancellationToken = cancellationToken;
+            _legacyCallTargetFailuresToIgnore = null;
 
-            // Clone the base lookup so that if we are re-entered by another request while this one in blocked, we don't have visibility to
-            // their state, and they have no visibility into ours.
+            // Give legacy CallTarget a private scope stack over the configuration's shared lookup contents.
             _baseLookup = baseLookup.Clone();
 
             _targetsToBuild = new ConcurrentStack<TargetEntry>();
@@ -189,8 +191,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Gather up outputs for the requested targets and return those.  All of our information should be in the base lookup now.
-            ComputeAfterTargetFailures(targetNames);
-            BuildResult resultsToReport = new BuildResult(_buildResult, targetNames.Select(target => target.name).ToArray());
+            ComputeAfterTargetFailures(targetNames, _legacyCallTargetFailuresToIgnore);
+            BuildResult resultsToReport = new BuildResult(_buildResult, targetNames.Select(target => target.name).ToArray(), _legacyCallTargetFailuresToIgnore);
 
             // Return after-build project state if requested.
             if (_requestEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild))
@@ -529,13 +531,20 @@ namespace Microsoft.Build.BackEnd
                         // This target is no longer actively building.
                         _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
 
-                        // Re-entrant requests for the same configuration share this BuildResult's target results. An entry can
-                        // reach Completed without ever executing - for instance when its condition evaluated to false against
-                        // this request's isolated lookup - and we may have been blocked since then, giving another request the
-                        // chance to actually run the target. In that case the real result wins; overwriting it with our skip
-                        // would both lose data and trip the assert in AddResultsForTarget.
+                        // Another request can publish a real result after our last result check but before we publish a
+                        // skipped result. The real result wins; overwriting it would lose data and trip the assert.
                         TargetResult resultForDependencyProcessing =
                             _buildResult.AddResultsForTargetOrPreserveExistingNonSkippedResult(currentTargetEntry.Name, targetResult);
+
+                        if (_legacyCallTargetContinueOnError &&
+                            !ReferenceEquals(resultForDependencyProcessing, targetResult) &&
+                            resultForDependencyProcessing.ResultCode == TargetResultCode.Failure)
+                        {
+                            // Deliberately limit this to a locally skipped result losing publication. Extending it to an
+                            // already-visible failure would change the existing PushTargets and CheckSkipTarget behavior.
+                            (_legacyCallTargetFailuresToIgnore ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase))
+                                .Add(currentTargetEntry.Name);
+                        }
 
                         TargetEntry topEntry = _targetsToBuild.Pop();
                         if (topEntry.StopProcessingOnCompletion)
@@ -791,7 +800,9 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
-        private void ComputeAfterTargetFailures((string name, TargetBuiltReason reason)[] targetNames)
+        private void ComputeAfterTargetFailures(
+            (string name, TargetBuiltReason reason)[] targetNames,
+            HashSet<string> legacyCallTargetFailuresToIgnore)
         {
             foreach ((string name, TargetBuiltReason reason) targetName in targetNames)
             {
@@ -813,7 +824,9 @@ namespace Microsoft.Build.BackEnd
                         foreach (TargetSpecification afterTarget in targetsWhichRunAfter)
                         {
                             _buildResult.ResultsByTarget.TryGetValue(afterTarget.TargetName, out TargetResult result);
-                            if (result?.ResultCode == TargetResultCode.Failure && !result.TargetFailureDoesntCauseBuildFailure)
+                            if (result?.ResultCode == TargetResultCode.Failure &&
+                                !result.TargetFailureDoesntCauseBuildFailure &&
+                                !(legacyCallTargetFailuresToIgnore?.Contains(afterTarget.TargetName) ?? false))
                             {
                                 // Mark the target as having an after target failed, and break the loop to move to the next target.
                                 targetBuildResult.AfterTargetsHaveFailed = true;

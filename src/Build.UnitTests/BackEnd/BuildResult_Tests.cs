@@ -114,6 +114,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void FilteredResultCanIgnoreUnrequestedLegacyCallTargetFailure()
+        {
+            BuildResult sharedResult = new BuildResult(CreateNewBuildRequest(1, Array.Empty<string>()));
+            TargetResult failure = BuildResultUtilities.GetEmptyFailingTargetResult();
+            sharedResult.AddResultsForTarget("Called", failure);
+            sharedResult.AddResultsForTarget("Build", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            var failuresToIgnore = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "CALLED" };
+
+            new BuildResult(sharedResult, ["Build"], failuresToIgnore).OverallResult.ShouldBe(BuildResultCode.Success);
+            new BuildResult(sharedResult, ["Called"], failuresToIgnore).OverallResult.ShouldBe(BuildResultCode.Failure);
+            sharedResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            failure.TargetFailureDoesntCauseBuildFailure.ShouldBeFalse();
+        }
+
+        [Fact]
         public void TestPacketType()
         {
             BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
