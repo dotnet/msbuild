@@ -43,6 +43,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void Dispose()
         {
             _env.Dispose();
+
+            // The resolved wave is cached in a static, so it has to be dropped along with the environment variable.
+            ChangeWaves.ResetStateForTests();
         }
 
         /// <summary>
@@ -320,6 +323,62 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// <c>TaskHostTask</c> is also reached without multithreading, through an explicitly requested
+        /// <c>TaskHostFactory</c>. That route swallowed extended warnings before, so the corrected routing has to be
+        /// visible there too.
+        /// </summary>
+        [Fact]
+        public void ExtendedWarning_FromExplicitTaskHostFactory_ReachesParentLogger()
+        {
+            var logger = new MockLogger(_output);
+
+            BuildResult result = BuildExtendedEventsUnderTaskHostFactory("ExtendedEventsTaskHostFactory.proj", logger);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "ExtendedEventsTestTask");
+            logger.Warnings.ShouldHaveSingleItem().ShouldBeOfType<ExtendedBuildWarningEventArgs>().Code.ShouldBe("TEST0003");
+        }
+
+        /// <summary>
+        /// Opting out of Wave18_12 restores the previous behavior: the events the old switch did not enumerate are
+        /// dropped again.
+        /// </summary>
+        [Fact]
+        public void ExtendedWarning_FromExplicitTaskHostFactory_IsDroppedWhenWaveDisabled()
+        {
+            DisableWave18_12();
+            var logger = new MockLogger(_output);
+
+            BuildResult result = BuildExtendedEventsUnderTaskHostFactory("ExtendedEventsTaskHostFactoryWaveDisabled.proj", logger);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "ExtendedEventsTestTask");
+            logger.Warnings.ShouldBeEmpty();
+        }
+
+        /// <summary>
+        /// The reason the opt-out exists: a warning that used to be swallowed fails a build running /warnAsError, so
+        /// a build that succeeded before this change can now fail. Disabling the wave has to bring it back.
+        /// </summary>
+        [Theory]
+        [InlineData(false, BuildResultCode.Failure)]
+        [InlineData(true, BuildResultCode.Success)]
+        public void ExtendedWarning_FromExplicitTaskHostFactory_FailsWarnAsErrorBuildUnlessWaveDisabled(bool disableWave, BuildResultCode expected)
+        {
+            if (disableWave)
+            {
+                DisableWave18_12();
+            }
+
+            var logger = new MockLogger(_output);
+
+            BuildResult result = BuildExtendedEventsUnderTaskHostFactory(
+                $"ExtendedEventsTaskHostFactoryWarnAsError_{disableWave}.proj", logger, warnAsError: true);
+
+            result.OverallResult.ShouldBe(expected);
+        }
+
+        /// <summary>
         /// Telemetry raised by a task through <see cref="IBuildEngine5.LogTelemetry"/> must survive the TaskHost
         /// round-trip. A task can only ever supply an event name and a property bag, so forwarding those two values
         /// reproduces exactly what the same task would have produced in-process.
@@ -463,6 +522,53 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// </summary>
         private BuildResult BuildSingleTaskProject(string taskName, string projectFileName, bool multiThreaded = true, params ILogger[] loggers)
             => BuildProject(projectFileName, CreateTestProject(taskName), multiThreaded, loggers);
+
+        /// <summary>
+        /// Builds <see cref="ExtendedEventsTestTask"/> through an explicitly requested <c>TaskHostFactory</c>: the
+        /// pre-existing, non-multithreaded route into <c>TaskHostTask</c> that Wave18_12 gates.
+        /// </summary>
+        private BuildResult BuildExtendedEventsUnderTaskHostFactory(string projectFileName, MockLogger logger, bool warnAsError = false)
+        {
+            string projectFile = Path.Combine(_testProjectsDir, projectFileName);
+            File.WriteAllText(projectFile, $@"
+<Project>
+    <UsingTask TaskName=""ExtendedEventsTestTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" TaskFactory=""TaskHostFactory"" />
+
+    <Target Name=""TestTarget"">
+        <ExtendedEventsTestTask />
+    </Target>
+</Project>");
+
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = false,
+                Loggers = [logger],
+                DisableInProcNode = false,
+                EnableNodeReuse = false,
+
+                // An empty set means "treat every warning as an error".
+                WarningsAsErrors = warnAsError ? new HashSet<string>() : null
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                ["TestTarget"],
+                null);
+
+            return BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+        }
+
+        /// <summary>
+        /// Opts out of Wave18_12 for the remainder of the test. <see cref="Dispose"/> restores the cached state.
+        /// </summary>
+        private void DisableWave18_12()
+        {
+            ChangeWaves.ResetStateForTests();
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_12.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+        }
     }
 
     /// <summary>

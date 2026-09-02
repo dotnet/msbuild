@@ -666,6 +666,19 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleLoggedMessage(LogMessagePacket logMessagePacket)
         {
+            // Before Wave18_12 the switch below enumerated only these five event kinds and had no default case,
+            // so every other kind - extended events, critical messages, telemetry - was dropped without a trace.
+            // Surfacing them can fail a build running /warnAsError, so disabling the wave restores that behavior.
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                && logMessagePacket.EventType is not (LoggingEventType.BuildErrorEvent
+                    or LoggingEventType.BuildWarningEvent
+                    or LoggingEventType.TaskCommandLineEvent
+                    or LoggingEventType.BuildMessageEvent
+                    or LoggingEventType.CustomEvent))
+            {
+                return;
+            }
+
             switch (logMessagePacket.EventType)
             {
                 case LoggingEventType.BuildErrorEvent:
