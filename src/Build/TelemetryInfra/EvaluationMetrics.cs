@@ -32,16 +32,16 @@ internal static class EvaluationMetrics
     /// <summary>The pass measured by the pass-duration instrument.</summary>
     internal const string PassTagName = "msbuild.project.evaluation.pass";
 
-    /// <summary>Whether evaluation belongs to a build submission.</summary>
+    /// <summary>Distinguishes requested-build evaluation from hidden or preflight evaluation.</summary>
     internal const string OriginTagName = "msbuild.project.evaluation.origin";
 
     /// <summary>Whether evaluation completed successfully.</summary>
     internal const string SucceededTagName = "msbuild.project.evaluation.succeeded";
 
-    /// <summary>Origin value for evaluation within a build submission.</summary>
+    /// <summary>Marks evaluation performed for an active build request.</summary>
     internal const string BuildSubmissionOrigin = "build_submission";
 
-    /// <summary>Origin value for evaluation outside a build submission.</summary>
+    /// <summary>Marks object-model, graph, reevaluation, or discovery work outside a build request.</summary>
     internal const string OutsideBuildSubmissionOrigin = "outside_build_submission";
 
     /// <summary>Disables Metrics after an instrumentation failure so evaluation can continue safely.</summary>
