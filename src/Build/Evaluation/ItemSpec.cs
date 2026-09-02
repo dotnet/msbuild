@@ -575,7 +575,21 @@ namespace Microsoft.Build.Evaluation
                 options == MatchOnMetadataOptions.CaseInsensitive || FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase :
                 StringComparer.Ordinal;
             _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
-            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>)(p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
+            if (options == MatchOnMetadataOptions.PathLike)
+            {
+                // In multithreaded (-mt) mode each project gets its own thread-local working directory while the
+                // process current directory is shared, so relative metadata must be rooted against the former or it
+                // resolves under an unrelated project and comparisons silently stop matching.
+                string baseDirectory = FileUtilities.CurrentThreadWorkingDirectory is { Length: > 0 } threadWorkingDirectory
+                    ? threadWorkingDirectory
+                    : Environment.CurrentDirectory;
+                _normalize = p => FileUtilities.NormalizePathForComparisonNoThrow(p, baseDirectory);
+            }
+            else
+            {
+                _normalize = p => p;
+            }
+
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
