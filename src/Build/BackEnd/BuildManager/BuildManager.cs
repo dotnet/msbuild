@@ -182,7 +182,9 @@ namespace Microsoft.Build.Execution
         private int _nextBuildSubmissionId;
 
         /// <summary>
-        /// The next process-wide build submission id used when Metrics correlation is enabled.
+        /// BuildManager submission ids normally restart per instance, but a process-local Metrics listener can
+        /// observe multiple managers, such as priming and measured builds. Correlation mode uses this process-wide
+        /// counter to avoid id collisions.
         /// </summary>
         private static int s_nextCorrelatedBuildSubmissionId;
 
