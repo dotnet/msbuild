@@ -555,7 +555,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Atomically publishes a skipped result while preserving any existing non-skipped result. Non-skipped results
-        /// use the same replacement and collision behavior as <see cref="AddResultsForTarget"/>.
+        /// use the same replacement and collision behavior as <see cref="AddResultsForTarget(string, TargetResult)"/>.
         /// </summary>
         /// <returns>The result stored for the target.</returns>
         internal TargetResult AddResultsForTargetOrPreserveExistingNonSkippedResult(string target, TargetResult result)
