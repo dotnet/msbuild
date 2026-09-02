@@ -14,19 +14,37 @@ namespace Microsoft.Build.TelemetryInfra;
 
 internal static class EvaluationMetrics
 {
+    /// <summary>The process-wide MSBuild meter.</summary>
     internal const string MeterName = "Microsoft.Build";
+
+    /// <summary>Counter incremented once per evaluation.</summary>
     internal const string ProjectEvaluationCountName = "msbuild.project.evaluations";
+
+    /// <summary>Elapsed seconds for one evaluation.</summary>
     internal const string ProjectEvaluationDurationName = "msbuild.project.evaluation.duration";
+
+    /// <summary>Elapsed seconds for one evaluation pass.</summary>
     internal const string ProjectEvaluationPassDurationName = "msbuild.project.evaluation.pass.duration";
 
+    /// <summary>The requested evaluation stopping stage.</summary>
     internal const string StageTagName = "msbuild.project.evaluation.stage";
+
+    /// <summary>The pass measured by the pass-duration instrument.</summary>
     internal const string PassTagName = "msbuild.project.evaluation.pass";
+
+    /// <summary>Whether evaluation belongs to a build submission.</summary>
     internal const string OriginTagName = "msbuild.project.evaluation.origin";
+
+    /// <summary>Whether evaluation completed successfully.</summary>
     internal const string SucceededTagName = "msbuild.project.evaluation.succeeded";
 
+    /// <summary>Origin value for evaluation within a build submission.</summary>
     internal const string BuildSubmissionOrigin = "build_submission";
+
+    /// <summary>Origin value for evaluation outside a build submission.</summary>
     internal const string OutsideBuildSubmissionOrigin = "outside_build_submission";
 
+    /// <summary>Disables Metrics after an instrumentation failure so evaluation can continue safely.</summary>
     private static int s_disabled;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
