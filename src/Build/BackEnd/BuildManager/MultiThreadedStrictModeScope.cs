@@ -358,11 +358,13 @@ namespace Microsoft.Build.Execution
                         string name = Path.GetFileName(entry);
 
                         // _reportedEntries only guards against an entry that could not be removed, so that a
-                        // locked file is not re-reported by every subsequent task for the rest of the build.
-                        if (_reportedEntries.Add(name))
+                        // locked file is neither re-reported nor re-deleted by every subsequent task.
+                        if (!_reportedEntries.Add(name))
                         {
-                            entries.Add(name);
+                            continue;
                         }
+
+                        entries.Add(name);
 
                         if (TryDelete(entry))
                         {

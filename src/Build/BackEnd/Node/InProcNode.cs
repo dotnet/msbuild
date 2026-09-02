@@ -342,8 +342,15 @@ namespace Microsoft.Build.BackEnd
 
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                // Restore the original current directory.
-                NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
+                // In multi-threaded mode the process current directory is not per-node state: every thread node
+                // shares it, the per-request value lives in the request's TaskEnvironment, and the snapshot taken
+                // at node configuration time may itself be a directory the build owner is about to leave. A node
+                // that shuts down late would otherwise write that stale value back over the owner's restore.
+                if (!_componentHost.BuildParameters.MultiThreaded)
+                {
+                    // Restore the original current directory.
+                    NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
+                }
 
                 // Restore the original environment.
                 CommunicationsUtilities.SetEnvironment(_savedEnvironment);
