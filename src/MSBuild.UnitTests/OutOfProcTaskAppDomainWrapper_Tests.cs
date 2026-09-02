@@ -1,7 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Shared;
@@ -45,5 +47,36 @@ namespace Microsoft.Build.UnitTests
             result.ExceptionMessage.ShouldBe("TaskInstantiationFailureError");
             result.TaskException.ShouldNotBeNull();
         }
+
+#if NET
+        [Fact]
+        public void ConvertTaskParameterValueBindsSerializedValues()
+        {
+            OutOfProcTaskAppDomainWrapperBase.ConvertTaskParameterValue("Deep", typeof(TestMode))
+                .ShouldBe(TestMode.Deep);
+
+            OutOfProcTaskAppDomainWrapperBase.ConvertTaskParameterValue(
+                    new[] { "Shallow", "Deep" },
+                    typeof(TestMode[]))
+                .ShouldBeOfType<TestMode[]>()
+                .ShouldBe([TestMode.Shallow, TestMode.Deep]);
+
+            string firstPath = Path.GetFullPath("first.txt");
+            string secondPath = Path.GetFullPath("second.txt");
+            FileInfo[] files = OutOfProcTaskAppDomainWrapperBase.ConvertTaskParameterValue(
+                    new[] { firstPath, secondPath },
+                    typeof(FileInfo[]))
+                .ShouldBeOfType<FileInfo[]>();
+
+            files[0].FullName.ShouldBe(firstPath);
+            files[1].FullName.ShouldBe(secondPath);
+        }
+
+        private enum TestMode
+        {
+            Shallow,
+            Deep,
+        }
+#endif
     }
 }

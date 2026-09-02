@@ -1,0 +1,25 @@
+<Project>
+  <PropertyGroup>
+    <ExampleTaskPath>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', '..', '..', '..', '$(LatestDotNetCoreForMSBuild)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask
+    TaskName="ExampleTask"
+    AssemblyFile="$(ExampleTaskPath)"
+    TaskFactory="TaskHostFactory"
+    Runtime="NET" />
+
+  <Target Name="TestParameterBinding">
+    <Error Condition="'$(LatestDotNetCoreForMSBuild)' == ''" Text="The LatestDotNetCoreForMSBuild property must be supplied." />
+    <ExampleTask
+      mode="Deep"
+      Modes="Shallow;Deep"
+      DestinationFile="single.txt"
+      DestinationFiles="first.txt;second.txt" />
+  </Target>
+
+  <Target Name="TestModeBinding">
+    <Error Condition="'$(LatestDotNetCoreForMSBuild)' == ''" Text="The LatestDotNetCoreForMSBuild property must be supplied." />
+    <ExampleTask Mode="Deep" />
+  </Target>
+</Project>

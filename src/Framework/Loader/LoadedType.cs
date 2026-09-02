@@ -2,8 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if !NETSTANDARD2_0
+using System.Collections.Immutable;
+#endif
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
+#if !NETSTANDARD2_0
+using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
+using System.Reflection.PortableExecutable;
+#endif
 #if NET
 using System.Runtime.CompilerServices;
 #endif
@@ -109,6 +119,7 @@ namespace Microsoft.Build.Shared
                 PropertyAssemblyQualifiedNames = new string[props.Length];
             }
 
+            using var propertySignatureReader = loadedViaMetadataLoadContext ? new PropertySignatureReader() : null;
             for (int i = 0; i < props.Length; i++)
             {
                 bool outputAttribute = false;
@@ -133,38 +144,62 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
-                // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
-                Type? pt = null;
+                Type propertyType;
+                Type propertyElementType;
                 try
                 {
-                    pt = props[i].PropertyType;
-                    if (pt.IsArray)
-                    {
-                        pt = pt.GetElementType();
-                    }
+                    propertyType = props[i].PropertyType;
+                    propertyElementType = propertyType.IsArray ? propertyType.GetElementType()! : propertyType;
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    // Skip properties that can't be loaded
+                    Properties[i] = CreateUnresolvedProperty(props[i], outputAttribute, requiredAttribute, propertySignatureReader);
+                    if (PropertyAssemblyQualifiedNames is not null)
+                    {
+                        PropertyAssemblyQualifiedNames[i] = string.Empty;
+                    }
+
                     continue;
                 }
 
                 bool isAssignableToITask = false;
                 try
                 {
-                    isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
+                    isAssignableToITask = iTaskItemType.IsAssignableFrom(propertyElementType);
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
                     // Can't determine assignability, default to false
                 }
 
-                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
-                if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
+                try
+                {
+                    Properties[i] = new ReflectableTaskPropertyInfo(
+                        props[i],
+                        propertyType,
+                        outputAttribute,
+                        requiredAttribute,
+                        isAssignableToITask,
+                        loadedViaMetadataLoadContext
+                            ? GetParameterTypeForExpansion(propertyType, propertyElementType)
+                            : null);
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    Properties[i] = CreateUnresolvedProperty(props[i], outputAttribute, requiredAttribute, propertySignatureReader);
+                    if (PropertyAssemblyQualifiedNames is not null)
+                    {
+                        PropertyAssemblyQualifiedNames[i] = string.Empty;
+                    }
+
+                    continue;
+                }
+
+                if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames is not null)
                 {
                     try
                     {
-                        PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
+                        PropertyAssemblyQualifiedNames[i] = propertyType.AssemblyQualifiedName ?? string.Empty;
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -173,6 +208,247 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
+
+        private static ReflectableTaskPropertyInfo CreateUnresolvedProperty(
+            PropertyInfo propertyInfo,
+            bool output,
+            bool required,
+            PropertySignatureReader? propertySignatureReader) =>
+            new(
+                propertyInfo,
+                output,
+                required,
+                propertySignatureReader?.TryRead(propertyInfo));
+
+        private sealed class PropertySignatureReader : IDisposable
+        {
+#if NETSTANDARD2_0
+            internal Type? TryRead(PropertyInfo propertyInfo) => null;
+
+            public void Dispose()
+            {
+            }
+#else
+            private readonly Dictionary<string, PEReader> _readers = new(FileUtilities.PathComparer);
+
+            internal Type? TryRead(PropertyInfo propertyInfo)
+            {
+                try
+                {
+                    string? assemblyPath = propertyInfo.DeclaringType?.Assembly.Location;
+                    if (assemblyPath is null || assemblyPath.Length == 0 || !File.Exists(assemblyPath))
+                    {
+                        return null;
+                    }
+
+                    if (!_readers.TryGetValue(assemblyPath, out PEReader? peReader))
+                    {
+                        FileStream stream = File.OpenRead(assemblyPath);
+                        try
+                        {
+                            peReader = new PEReader(stream);
+                        }
+                        catch
+                        {
+                            stream.Dispose();
+                            throw;
+                        }
+
+                        if (!peReader.HasMetadata)
+                        {
+                            peReader.Dispose();
+                            return null;
+                        }
+
+                        _readers.Add(assemblyPath, peReader);
+                    }
+
+                    return ReadParameterTypeForExpansion(propertyInfo, peReader.GetMetadataReader());
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    return null;
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (PEReader reader in _readers.Values)
+                {
+                    reader.Dispose();
+                }
+            }
+#endif
+        }
+
+#if !NETSTANDARD2_0
+        private static Type? ReadParameterTypeForExpansion(PropertyInfo propertyInfo, MetadataReader metadataReader)
+        {
+            EntityHandle handle = MetadataTokens.EntityHandle(propertyInfo.MetadataToken);
+            if (handle.Kind != HandleKind.PropertyDefinition)
+            {
+                return null;
+            }
+
+            PropertyDefinition propertyDefinition = metadataReader.GetPropertyDefinition((PropertyDefinitionHandle)handle);
+            if (metadataReader.GetBlobReader(propertyDefinition.Signature).Length > MaximumPropertySignatureLength)
+            {
+                return null;
+            }
+
+            Type parameterType = propertyDefinition.DecodeSignature(s_parameterTypeSignatureProvider, genericContext: null).ReturnType;
+            return parameterType == UnsupportedParameterType ? null : parameterType;
+        }
+#endif
+
+        private static Type? GetParameterTypeForExpansion(Type propertyType, Type propertyElementType)
+        {
+            bool isArray = propertyType.IsArray;
+            if (isArray && (propertyType.GetArrayRank() != 1 || propertyElementType.IsArray))
+            {
+                return null;
+            }
+
+            Type? scalarType;
+            string? elementTypeName = propertyElementType.FullName;
+            if (elementTypeName == typeof(AbsolutePath).FullName)
+            {
+                scalarType = typeof(AbsolutePath);
+            }
+            else if (elementTypeName == typeof(FileInfo).FullName)
+            {
+                scalarType = typeof(FileInfo);
+            }
+            else if (elementTypeName == typeof(DirectoryInfo).FullName)
+            {
+                scalarType = typeof(DirectoryInfo);
+            }
+            else if (propertyElementType.IsValueType || elementTypeName == typeof(string).FullName)
+            {
+                scalarType = typeof(string);
+            }
+            else
+            {
+                return null;
+            }
+
+            if (!isArray)
+            {
+                return scalarType;
+            }
+
+            return GetArrayExpansionType(scalarType);
+        }
+
+        private static Type? GetArrayExpansionType(Type scalarType)
+        {
+            if (scalarType == typeof(string))
+            {
+                return typeof(string[]);
+            }
+
+            if (scalarType == typeof(AbsolutePath))
+            {
+                return typeof(AbsolutePath[]);
+            }
+
+            if (scalarType == typeof(FileInfo))
+            {
+                return typeof(FileInfo[]);
+            }
+
+            return scalarType == typeof(DirectoryInfo) ? typeof(DirectoryInfo[]) : null;
+        }
+
+#if !NETSTANDARD2_0
+        private const int MaximumPropertySignatureLength = 256;
+
+        private static readonly Type UnsupportedParameterType = typeof(void);
+
+        private static readonly ParameterTypeSignatureProvider s_parameterTypeSignatureProvider = new();
+
+        private sealed class ParameterTypeSignatureProvider : ISignatureTypeProvider<Type, object?>
+        {
+            public Type GetArrayType(Type elementType, ArrayShape shape) => UnsupportedParameterType;
+
+            public Type GetByReferenceType(Type elementType) => UnsupportedParameterType;
+
+            public Type GetFunctionPointerType(MethodSignature<Type> signature) => UnsupportedParameterType;
+
+            public Type GetGenericInstantiation(Type genericType, ImmutableArray<Type> typeArguments) => UnsupportedParameterType;
+
+            public Type GetGenericMethodParameter(object? genericContext, int index) => UnsupportedParameterType;
+
+            public Type GetGenericTypeParameter(object? genericContext, int index) => UnsupportedParameterType;
+
+            public Type GetModifiedType(Type modifier, Type unmodifiedType, bool isRequired) => unmodifiedType;
+
+            public Type GetPinnedType(Type elementType) => elementType;
+
+            public Type GetPointerType(Type elementType) => UnsupportedParameterType;
+
+            public Type GetPrimitiveType(PrimitiveTypeCode typeCode) =>
+                typeCode is PrimitiveTypeCode.Object or PrimitiveTypeCode.TypedReference or PrimitiveTypeCode.Void
+                    ? UnsupportedParameterType
+                    : typeof(string);
+
+            public Type GetSZArrayType(Type elementType) =>
+                GetArrayExpansionType(elementType) ?? UnsupportedParameterType;
+
+            public Type GetTypeFromDefinition(
+                MetadataReader reader,
+                TypeDefinitionHandle handle,
+                byte rawTypeKind)
+            {
+                TypeDefinition definition = reader.GetTypeDefinition(handle);
+                return GetNamedType(reader, definition.Namespace, definition.Name, rawTypeKind);
+            }
+
+            public Type GetTypeFromReference(
+                MetadataReader reader,
+                TypeReferenceHandle handle,
+                byte rawTypeKind)
+            {
+                TypeReference reference = reader.GetTypeReference(handle);
+                return GetNamedType(reader, reference.Namespace, reference.Name, rawTypeKind);
+            }
+
+            public Type GetTypeFromSpecification(
+                MetadataReader reader,
+                object? genericContext,
+                TypeSpecificationHandle handle,
+                byte rawTypeKind) => UnsupportedParameterType;
+
+            private static Type GetNamedType(
+                MetadataReader reader,
+                StringHandle namespaceHandle,
+                StringHandle nameHandle,
+                byte rawTypeKind)
+            {
+                if (reader.StringComparer.Equals(namespaceHandle, typeof(AbsolutePath).Namespace!)
+                    && reader.StringComparer.Equals(nameHandle, nameof(AbsolutePath)))
+                {
+                    return typeof(AbsolutePath);
+                }
+
+                if (reader.StringComparer.Equals(namespaceHandle, typeof(FileInfo).Namespace!)
+                    && reader.StringComparer.Equals(nameHandle, nameof(FileInfo)))
+                {
+                    return typeof(FileInfo);
+                }
+
+                if (reader.StringComparer.Equals(namespaceHandle, typeof(DirectoryInfo).Namespace!)
+                    && reader.StringComparer.Equals(nameHandle, nameof(DirectoryInfo)))
+                {
+                    return typeof(DirectoryInfo);
+                }
+
+                return rawTypeKind == (byte)SignatureTypeKind.ValueType
+                    ? typeof(string)
+                    : UnsupportedParameterType;
+            }
+        }
+#endif
 
         #endregion
 

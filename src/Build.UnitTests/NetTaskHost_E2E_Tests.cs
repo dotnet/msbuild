@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -134,6 +135,53 @@ namespace Microsoft.Build.Engine.UnitTests
             // Both tasks actually ran and produced a correct archive round trip.
             output.ShouldContain("TAR_ROUND_TRIP_OK", customMessage: output);
             File.Exists(Path.Combine(workDir, "extracted", "hello.txt")).ShouldBeTrue();
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_BindsParametersWhoseTypesAreUnavailableInWorkerRuntime()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestParameterBinding.proj");
+            string netCoreSdkRoot = Path.Combine(coreDirectory, "sdk", RunnerUtilities.BootstrapSdkVersion);
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{testProjectPath}\" -t:TestParameterBinding -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -p:NetCoreSdkRoot=\"{netCoreSdkRoot}\"",
+                out bool success,
+                outputHelper: _output);
+
+            success.ShouldBeTrue(customMessage: output);
+            string projectDirectory = Path.GetDirectoryName(testProjectPath)!;
+            output.ShouldContain(
+                $"PARAMETER_BINDING_OK Mode=Deep Modes=Shallow,Deep DestinationFile={Path.Combine(projectDirectory, "single.txt")} DestinationFiles={Path.Combine(projectDirectory, "first.txt")},{Path.Combine(projectDirectory, "second.txt")}",
+                customMessage: output);
+            output.ShouldNotContain("NullReferenceException", customMessage: output);
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_DoesNotDeferParametersToOlderHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string fakeSdkRoot = Path.Combine(env.CreateFolder().Path, "10.0.100");
+            Directory.CreateDirectory(fakeSdkRoot);
+            File.Copy(
+                typeof(NodeProviderOutOfProcTaskHost).Assembly.Location,
+                Path.Combine(fakeSdkRoot, Constants.MSBuildAssemblyName));
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestParameterBinding.proj");
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{testProjectPath}\" -t:TestModeBinding -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -p:NetCoreSdkRoot=\"{fakeSdkRoot}\"",
+                out bool success,
+                outputHelper: _output);
+
+            success.ShouldBeFalse(customMessage: output);
+            output.ShouldContain("MSB4069", customMessage: output);
+            output.ShouldContain("\"Mode\" parameter", customMessage: output);
+            output.ShouldNotContain("MSB4026", customMessage: output);
+            output.ShouldNotContain("NullReferenceException", customMessage: output);
         }
 
         [WindowsFullFrameworkOnlyFact] // Verifies that when using the app host, DOTNET_ROOT is properly set for child processes to find the runtime.

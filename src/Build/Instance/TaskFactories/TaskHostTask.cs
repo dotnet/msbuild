@@ -157,6 +157,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly TaskEnvironment _taskEnvironment;
 
+        internal bool IsNetTaskHost =>
+            string.Equals(_taskHostParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase);
+
+        internal bool SupportsParameterConversion =>
+            IsNetTaskHost && NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(_taskHostParameters);
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -363,7 +369,10 @@ namespace Microsoft.Build.BackEnd
                             nodeReuse: effectiveNodeReuse,
                             taskHostParameters: _taskHostParameters);
 
-                        _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId);
+                        _taskHostNodeKey = new TaskHostNodeKey(
+                            _requiredContext,
+                            _scheduledNodeId,
+                            SupportsParameterConversion);
                         _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
                             _taskHostNodeKey,
                             this,

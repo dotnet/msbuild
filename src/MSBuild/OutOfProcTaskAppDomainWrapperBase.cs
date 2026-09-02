@@ -384,7 +384,11 @@ namespace Microsoft.Build.CommandLine
                 try
                 {
                     PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
-                    paramInfo.SetValue(wrappedTask, param.Value?.WrappedParameter, null);
+                    object parameterValue = param.Value?.WrappedParameter;
+#if NET
+                    parameterValue = ConvertTaskParameterValue(parameterValue, paramInfo.PropertyType);
+#endif
+                    paramInfo.SetValue(wrappedTask, parameterValue, null);
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
@@ -451,6 +455,32 @@ namespace Microsoft.Build.CommandLine
 
             return new OutOfProcTaskHostTaskResult(success ? TaskCompleteType.Success : TaskCompleteType.Failure, finalParameterValues);
         }
+
+#if NET
+        internal static object ConvertTaskParameterValue(object value, Type targetType)
+        {
+            if (value is null || targetType.IsInstanceOfType(value))
+            {
+                return value;
+            }
+
+            if (targetType.IsArray && value is Array sourceArray)
+            {
+                Type elementType = targetType.GetElementType();
+                Array convertedArray = Array.CreateInstanceFromArrayType(targetType, sourceArray.Length);
+                for (int i = 0; i < sourceArray.Length; i++)
+                {
+                    convertedArray.SetValue(ConvertTaskParameterValue(sourceArray.GetValue(i), elementType), i);
+                }
+
+                return convertedArray;
+            }
+
+            return value is string stringValue
+                ? ValueTypeParser.Parse(stringValue, targetType)
+                : value;
+        }
+#endif
 
         /// <summary>
         /// Logs errors from TaskLoader

@@ -687,7 +687,9 @@ namespace Microsoft.Build.BackEnd
                     ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "UnsupportedTaskParameterTypeError",
-                        parameter.PropertyType.FullName,
+                        parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true }
+                            ? "<unresolved>"
+                            : parameter.PropertyType.FullName,
                         parameter.Name,
                         _taskName);
                 }
@@ -1422,6 +1424,28 @@ namespace Microsoft.Build.BackEnd
                 {
                     EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
+                    if (parameterType is null)
+                    {
+                        ReflectableTaskPropertyInfo reflectableParameter = parameter as ReflectableTaskPropertyInfo;
+                        if (reflectableParameter?.ParameterTypeForExpansion is Type parameterTypeForExpansion
+                            && TaskInstance is TaskHostTask taskHostTask
+                            && taskHostTask.SupportsParameterConversion)
+                        {
+                            parameterType = parameterTypeForExpansion;
+                        }
+                        else
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(
+                                parameterLocation,
+                                "UnsupportedTaskParameterTypeError",
+                                reflectableParameter is { IsTypeUnresolved: true }
+                                    ? "<unresolved>"
+                                    : parameter.PropertyType.FullName,
+                                parameter.Name,
+                                _taskName);
+                        }
+                    }
+
                     // try to set the parameter
                     if (TaskParameterTypeVerifier.IsValidScalarInputParameter(parameterType))
                     {
@@ -1508,6 +1532,11 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         private static Type ResolveTaskParameterType(LoadedType loadedType, TaskPropertyInfo parameter, int indexOfParameter)
         {
+            if (parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true })
+            {
+                return null;
+            }
+
             if (!loadedType.LoadedViaMetadataLoadContext)
             {
                 return parameter.PropertyType;
@@ -1528,10 +1557,29 @@ namespace Microsoft.Build.BackEnd
         [RequiresUnreferencedCode("Resolves the task parameter type from its assembly-qualified name by reflection, which is incompatible with trimming.")]
         private static Type ResolveTaskParameterTypeByName(LoadedType loadedType, TaskPropertyInfo parameter, int indexOfParameter)
         {
+            ReflectableTaskPropertyInfo reflectableParameter = parameter as ReflectableTaskPropertyInfo;
+            if (reflectableParameter?.TryGetResolvedParameterType(out Type cachedParameterType) == true)
+            {
+                return cachedParameterType;
+            }
+
             string assemblyQualifiedName =
                 (indexOfParameter != -1 ? loadedType.PropertyAssemblyQualifiedNames?[indexOfParameter] : null)
                 ?? parameter.PropertyType.AssemblyQualifiedName;
-            return Type.GetType(assemblyQualifiedName);
+            Type parameterType = null;
+            if (!string.IsNullOrEmpty(assemblyQualifiedName))
+            {
+                try
+                {
+                    parameterType = Type.GetType(assemblyQualifiedName);
+                }
+                catch (Exception e) when (e is ArgumentException or TypeLoadException or FileNotFoundException or FileLoadException or BadImageFormatException)
+                {
+                }
+            }
+
+            reflectableParameter?.CacheResolvedParameterType(parameterType);
+            return parameterType;
         }
 
         /// <summary>

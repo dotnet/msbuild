@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Threading;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
@@ -30,7 +32,11 @@ namespace Microsoft.Build.BackEnd
     /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
     /// its own task host, so the node ID is used to distinguish them.
     /// </param>
-    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
+    /// <param name="SupportsParameterConversion">Whether the selected task host can convert serialized parameter values.</param>
+    internal readonly record struct TaskHostNodeKey(
+        HandshakeOptions HandshakeOptions,
+        int NodeId,
+        bool SupportsParameterConversion = false);
 
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
@@ -77,6 +83,13 @@ namespace Microsoft.Build.BackEnd
         /// Store the path for the 64-bit MSBuild so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToArm64Clr4;
+
+        private const string ParameterConversionTypeName = "OutOfProcTaskAppDomainWrapperBase";
+
+        private const string ParameterConversionMethodName = "ConvertTaskParameterValue";
+
+        private static readonly ConcurrentDictionary<string, bool> s_parameterConversionSupport =
+            new(FileUtilities.PathComparer);
 
         /// <summary>
         /// Name for MSBuild.exe
@@ -552,6 +565,67 @@ namespace Microsoft.Build.BackEnd
                 {
                     throw new InvalidProjectFileException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NETHostVersion_Failed", sdkVersion, MinimumSdkVersion));
                 }
+            }
+        }
+
+        internal static bool SupportsTaskParameterConversion(in TaskHostParameters taskHostParameters)
+        {
+            if (taskHostParameters.MSBuildAssemblyPath is null)
+            {
+                return true;
+            }
+
+            try
+            {
+                string msbuildPath = Path.GetFullPath(
+                    Path.Combine(taskHostParameters.MSBuildAssemblyPath, Constants.MSBuildAssemblyName));
+                return s_parameterConversionSupport.GetOrAdd(msbuildPath, HasTaskParameterConversion);
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                return false;
+            }
+        }
+
+        private static bool HasTaskParameterConversion(string msbuildPath)
+        {
+            try
+            {
+                using FileStream stream = File.OpenRead(msbuildPath);
+                using var peReader = new PEReader(stream);
+                if (!peReader.HasMetadata)
+                {
+                    return false;
+                }
+
+                MetadataReader reader = peReader.GetMetadataReader();
+                foreach (TypeDefinitionHandle typeHandle in reader.TypeDefinitions)
+                {
+                    TypeDefinition type = reader.GetTypeDefinition(typeHandle);
+                    if (!reader.StringComparer.Equals(type.Namespace, "Microsoft.Build.CommandLine")
+                        || !reader.StringComparer.Equals(type.Name, ParameterConversionTypeName))
+                    {
+                        continue;
+                    }
+
+                    foreach (MethodDefinitionHandle methodHandle in type.GetMethods())
+                    {
+                        if (reader.StringComparer.Equals(
+                                reader.GetMethodDefinition(methodHandle).Name,
+                                ParameterConversionMethodName))
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                return false;
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                return false;
             }
         }
 
