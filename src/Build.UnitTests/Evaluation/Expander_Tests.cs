@@ -5560,6 +5560,18 @@ $(
             return expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
         }
 
+        /// <summary>
+        /// Helper: set the process current directory and return it as the OS reports it. On macOS the test
+        /// temp folder is reached through a symlink (/var -> /private/var), and only the reported form matches
+        /// what resolution against the process current directory produces, so tests that compare -mt output
+        /// against non-mt output must build both sides from this rather than from the TestEnvironment path.
+        /// </summary>
+        private static string SetCurrentDirectoryCanonical(TestEnvironment env, string path)
+        {
+            env.SetCurrentDirectory(path);
+            return Directory.GetCurrentDirectory();
+        }
+
         // =====================================================================
         // Category A: -mt mode tests for default-allowed File methods
         // =====================================================================
@@ -5598,13 +5610,13 @@ $(
             var wrongDir = env.CreateFolder(createFolder: true);
 
             // Baseline: non-mt mode, where the process current directory is the project directory.
-            env.SetCurrentDirectory(projectDir.Path);
+            string projectDirPath = SetCurrentDirectoryCanonical(env, projectDir.Path);
             string expected = IntrinsicFunctions.NormalizePath(@"\tmp\file.txt");
 
             // -mt mode must agree: on Unix a backslash is an ordinary filename character, so resolution
             // must not normalize separators or it would silently point at a different file.
             string result = ExpandWithThreadWorkingDirectory(env,
-                @"$([MSBuild]::NormalizePath('\tmp\file.txt'))", projectDir.Path, wrongDir.Path);
+                @"$([MSBuild]::NormalizePath('\tmp\file.txt'))", projectDirPath, wrongDir.Path);
 
             result.ShouldBe(expected);
         }
@@ -5616,11 +5628,11 @@ $(
             var projectDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
-            env.SetCurrentDirectory(projectDir.Path);
+            string projectDirPath = SetCurrentDirectoryCanonical(env, projectDir.Path);
             string expected = IntrinsicFunctions.NormalizePath(@"obj\..\file.txt");
 
             string result = ExpandWithThreadWorkingDirectory(env,
-                @"$([MSBuild]::NormalizePath('obj\..\file.txt'))", projectDir.Path, wrongDir.Path);
+                @"$([MSBuild]::NormalizePath('obj\..\file.txt'))", projectDirPath, wrongDir.Path);
 
             result.ShouldBe(expected);
         }
@@ -5678,12 +5690,12 @@ $(
         {
             using var env = TestEnvironment.Create(_output);
             var processDir = env.CreateFolder(createFolder: true);
-            env.SetCurrentDirectory(processDir.Path);
+            string processDirPath = SetCurrentDirectoryCanonical(env, processDir.Path);
 
             string result = ExpandWithThreadWorkingDirectory(env,
                 "$([MSBuild]::NormalizePath('obj', 'file.txt'))", null);
 
-            result.ShouldBe(Path.Combine(processDir.Path, "obj", "file.txt"));
+            result.ShouldBe(Path.Combine(processDirPath, "obj", "file.txt"));
         }
 
         [Fact]
