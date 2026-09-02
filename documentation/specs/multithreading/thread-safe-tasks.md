@@ -116,7 +116,7 @@ Using the API is safe when the task accounts for this sharing. Before adding `[M
 
 * registered objects support concurrent access;
 * keys cannot collide with unrelated tasks;
-* a `GetRegisteredTaskObject` followed by `RegisterTaskObject` is safe if multiple tasks perform it at once; and
+* if multiple tasks race to register equal keys, only one object is retained and the task disposes any unretained object that needs cleanup; and
 * correctness does not require two task invocations to use the same cache.
 
 ## TaskEnvironment API

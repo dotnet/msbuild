@@ -344,7 +344,7 @@ The guidance about `static` fields has a less obvious sibling: `IBuildEngine4.Ge
 
 Using these APIs is a **review signal, not a warning**. Check object thread safety, key collisions, and whether correctness depends on two task invocations sharing a cache.
 
-The get/register sequence is not atomic. Two tasks can both miss and create an object; registration keeps the first object and rejects the second. Whether that matters depends on what is cached:
+The get/register sequence is not atomic. Two tasks can both miss and create an object. Only one equal-key object is retained; `RegisterTaskObject` returns no result, and MSBuild does not dispose an unretained object. Whether that matters depends on what is cached:
 
 | Cached computation | Review result |
 |---|---|

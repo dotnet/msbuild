@@ -128,7 +128,7 @@ The following tables list specific .NET APIs and their threading safety classifi
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-| `RegisterTaskObject` | REVIEW | The cache is shared across in-process thread nodes | Check key uniqueness and concurrent registration |
+| `RegisterTaskObject` | REVIEW | Equal-key registrations do not replace the retained object | Check registration races and cleanup of unretained objects |
 | `GetRegisteredTaskObject` | REVIEW | The object can be used by concurrent tasks | Check that concurrent access is safe |
 | `UnregisterTaskObject` | REVIEW | Other tasks can be using the object | Check that removal is coordinated |
 

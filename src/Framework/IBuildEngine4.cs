@@ -60,6 +60,10 @@ namespace Microsoft.Build.Framework
         /// processes, including TaskHost processes, do not share registered objects.
         /// </para>
         /// <para>
+        /// If an object is already registered under an equal key, this call does not replace it.
+        /// MSBuild does not dispose an object that is not retained by the registration.
+        /// </para>
+        /// <para>
         /// The thread on which the object is disposed may be arbitrary - however it is guaranteed not to
         /// be disposed while the task is executing, even if <paramref name="allowEarlyCollection"/> is set
         /// to true.
