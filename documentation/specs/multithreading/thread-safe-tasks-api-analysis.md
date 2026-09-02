@@ -25,11 +25,13 @@ Instead of the problematic APIs listed below, thread-safe tasks should:
 1. **Always use absolute paths** when still using some standard .NET file system APIs.
 1. **Explicitly configure external processes** using `TaskEnvironment`.
 1. **Never modify process culture**: Avoid modifying culture defaults.
-1. **Treat registered task objects as shared state within their component host or AppDomain** and make them thread-safe.
+1. **Review registered task objects for safe concurrent access.**
 
 ## Detailed API Reference
 
 The following tables list specific .NET APIs and their threading safety classification:
+
+`REVIEW` means the use needs a closer look; it does not mean the use is unsafe.
 
 ### System.IO.Path Class
 
@@ -126,11 +128,11 @@ The following tables list specific .NET APIs and their threading safety classifi
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-| `RegisterTaskObject` | WARNING | The registry is shared across in-process thread nodes; registration races do not replace the first object | Use a collision-resistant key and synchronize initialization |
-| `GetRegisteredTaskObject` | WARNING | The returned object can be accessed concurrently by tasks on other thread nodes | Return a thread-safe object or synchronize all access |
-| `UnregisterTaskObject` | WARNING | Removal can race with other consumers of the shared object | Unregister only after coordinating with all consumers |
+| `RegisterTaskObject` | REVIEW | The cache is shared across in-process thread nodes | Check key uniqueness and concurrent registration |
+| `GetRegisteredTaskObject` | REVIEW | The object can be used by concurrent tasks | Check that concurrent access is safe |
+| `UnregisterTaskObject` | REVIEW | Other tasks can be using the object | Check that removal is coordinated |
 
-The registry remains process-local. Tasks routed to different worker or TaskHost processes do not share objects, so tasks must handle cache misses and must not use the registry for required cross-invocation communication. See [Registered task objects](thread-safe-tasks.md#registered-task-objects) for the execution-path matrix and migration checklist.
+These APIs are not inherently unsafe. They require review because sharing changes in multithreaded mode. Tasks in different processes do not share the cache.
 
 ### Assembly Loading (System.Reflection.Assembly class, System.Activator class)
 Tasks that load assemblies dynamically in the task host may cause version conflicts. Version conflicts in task assemblies will cause build failures (previously these might have been sporadic). Both dynamically loaded dependencies and static dependencies can cause issues.

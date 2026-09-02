@@ -32,11 +32,8 @@ namespace Microsoft.Build.Framework
     /// share data between task invocations.
     /// </summary>
     /// <remarks>
-    /// A registered-task-object store cannot be shared across processes. Build-lifetime objects
-    /// belong to the build component host, while AppDomain-lifetime objects are shared within the
-    /// AppDomain that hosts MSBuild. Worker processes in a multiprocess build therefore have
-    /// independent stores. In a multithreaded build, in-process tasks share a component host and
-    /// its store across thread nodes, while tasks routed to a TaskHost use stores in that TaskHost.
+    /// In-process tasks share registered objects across thread nodes in multithreaded builds.
+    /// Tasks running in different processes do not share registered objects.
     /// </remarks>
     public interface IBuildEngine4 : IBuildEngine3
     {
@@ -58,23 +55,9 @@ namespace Microsoft.Build.Framework
         /// manage limited process memory resources.
         /// </para>
         /// <para>
-        /// A registered object cannot be retrieved from another process. Worker processes in a
-        /// multiprocess build have independent stores, so registered objects are not a cross-node
-        /// communication mechanism. In a multithreaded build, in-process tasks share the build
-        /// component host and its store across thread nodes. Tasks routed to a TaskHost use stores
-        /// in the TaskHost process.
-        /// </para>
-        /// <para>
-        /// Store operations are thread-safe, but registered objects are not made thread-safe.
-        /// An object shared by in-process tasks in a multithreaded build may be accessed
-        /// concurrently and must provide any required synchronization. Compound operations,
-        /// such as retrieving an object and then registering one when none exists, are not atomic.
-        /// </para>
-        /// <para>
-        /// A registration does not replace an object already registered with an equal key and
-        /// the same lifetime. Keys are shared by all tasks using the same process-local store.
-        /// Use a private, unique key for task-private state, or a deliberately coordinated key
-        /// for state that is intended to be shared.
+        /// In multithreaded builds, in-process tasks share registered objects across thread nodes.
+        /// The registered object must be safe for concurrent use. Tasks running in different
+        /// processes, including TaskHost processes, do not share registered objects.
         /// </para>
         /// <para>
         /// The thread on which the object is disposed may be arbitrary - however it is guaranteed not to
@@ -98,10 +81,6 @@ namespace Microsoft.Build.Framework
         /// The registered object, or null if there is no object registered under that key or the object
         /// has been discarded through early collection.
         /// </returns>
-        /// <remarks>
-        /// The lookup cannot retrieve an object from another process or build component host. See
-        /// <see cref="RegisterTaskObject"/> for store scope and concurrency considerations.
-        /// </remarks>
         object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
 
         /// <summary>
@@ -113,10 +92,6 @@ namespace Microsoft.Build.Framework
         /// The registered object, or null if there is no object registered under that key or the object
         /// has been discarded through early collection.
         /// </returns>
-        /// <remarks>
-        /// The operation cannot unregister an object from another process or build component host. See
-        /// <see cref="RegisterTaskObject"/> for store scope and concurrency considerations.
-        /// </remarks>
         object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
     }
 }

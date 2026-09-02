@@ -17,8 +17,7 @@ namespace Microsoft.Build.Framework
     /// Tasks using this attribute must satisfy strict requirements:
     /// - Must not modify global process state (environment variables, working directory, etc.)
     /// - Must not depend on global process state, including relative path resolution
-    /// - Must ensure objects obtained from the IBuildEngine4 registered-task-object store are
-    ///   safe for concurrent access, because in-process thread nodes share that store
+    /// - Must safely handle registered task objects shared across thread nodes
     /// 
     /// MSBuild detects this attribute by its namespace and name only, ignoring the defining assembly.
     /// This allows customers to define the attribute in their own assemblies alongside their tasks.

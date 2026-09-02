@@ -240,17 +240,9 @@ Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment
 
 ### Registered task objects
 
-The `IBuildEngine4.RegisterTaskObject`, `GetRegisteredTaskObject`, and `UnregisterTaskObject` methods operate on caches in the process that executes the task. Build-lifetime objects belong to the build component host, and AppDomain-lifetime objects use a static cache in the AppDomain that hosts MSBuild. Neither cache is transferred between processes.
+In multithreaded builds, in-process thread nodes share the `IBuildEngine4` registered-task-object cache. The cache operations are thread-safe, but the registered objects are not made thread-safe. Tasks in worker or TaskHost processes use separate caches.
 
-This produces different visibility in the two parallel execution modes:
-
-* In a multiprocess build, every worker node has a separate cache. A task cannot retrieve an object that was registered on another worker node.
-* In a multithreaded build, all in-process thread nodes use the same component host and therefore the same cache. An object registered by an in-process task is visible to in-process tasks on other thread nodes.
-* A task routed to a sidecar TaskHost uses that TaskHost process's private cache. Its objects are not visible to in-process tasks or to tasks in other TaskHost processes. Build-lifetime objects can be shared by tasks assigned to the same sidecar during the build, then are disposed at build completion even when the sidecar process remains resident. An explicitly transient TaskHost loses its cache when it exits.
-
-Sharing the in-process cache across thread nodes is intentional: it allows caches to be more effective when projects execute concurrently in one process. The cache operations are thread-safe, but the cached objects are not made thread-safe. A task marked with `[MSBuildMultiThreadableTask]` must assume that another in-process task can access the same object concurrently.
-
-Task authors must not use registered task objects as a required cross-invocation communication channel because routing does not guarantee that two invocations execute in the same process. See [Thread-Safe Tasks](thread-safe-tasks.md#registered-task-objects) for the migration checklist, key guidance, and initialization requirements.
+See [Thread-Safe Tasks](thread-safe-tasks.md#registered-task-objects) for migration guidance.
 
 ## Tasks transition
 
