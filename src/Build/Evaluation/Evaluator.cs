@@ -767,6 +767,8 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
+                long itemsPassStartTimestamp;
+                long itemsPassEndTimestamp;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
                     // comment next line to turn off lazy Evaluation
@@ -774,7 +776,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Pass3: evaluate project items
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
-                    evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
+                    itemsPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
 
                     SynthesizeImportedProjectItems();
 
@@ -787,10 +789,16 @@ namespace Microsoft.Build.Evaluation
                             EvaluateItemGroupElement(itemGroup, lazyEvaluator);
                         }
                     }
+
+                    itemsPassEndTimestamp = EvaluationMetrics.EvaluatePassEnd(itemsPassStartTimestamp);
                 }
 
+                long lazyItemsPassStartTimestamp;
+                long lazyItemsPassEndTimestamp;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.LazyItems))
                 {
+                    lazyItemsPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
+
                     // Tell the lazy evaluator to compute the items and add them to _data
                     foreach (var itemData in lazyEvaluator.GetAllItemsDeferred())
                     {
@@ -812,11 +820,18 @@ namespace Microsoft.Build.Evaluation
 
                     // lazy evaluator can be collected now, the rest of evaluation does not need it anymore
                     lazyEvaluator = null;
+                    lazyItemsPassEndTimestamp = EvaluationMetrics.EvaluatePassEnd(lazyItemsPassStartTimestamp);
                 }
 
                 SynthesizeItemGlobItems();
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
-                EvaluationMetrics.EvaluatePass3Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
+                EvaluationMetrics.EvaluatePass3Stop(
+                    itemsPassStartTimestamp,
+                    itemsPassEndTimestamp,
+                    lazyItemsPassStartTimestamp,
+                    lazyItemsPassEndTimestamp,
+                    _evaluationStage,
+                    _submissionId);
 
                 if (_evaluationStage <= ProjectEvaluationStage.Items)
                 {

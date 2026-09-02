@@ -121,8 +121,17 @@ internal static class EvaluationMetrics
     internal static void EvaluatePass2Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.ItemDefinitionGroups, stage, submissionId);
 
-    internal static void EvaluatePass3Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
-        EvaluatePassStop(startTimestamp, EvaluationPass.Items, stage, submissionId);
+    internal static void EvaluatePass3Stop(
+        long itemsStartTimestamp,
+        long itemsEndTimestamp,
+        long lazyItemsStartTimestamp,
+        long lazyItemsEndTimestamp,
+        ProjectEvaluationStage stage,
+        int submissionId)
+    {
+        EvaluatePassStop(itemsStartTimestamp, itemsEndTimestamp, EvaluationPass.Items, stage, submissionId);
+        EvaluatePassStop(lazyItemsStartTimestamp, lazyItemsEndTimestamp, EvaluationPass.LazyItems, stage, submissionId);
+    }
 
     internal static void EvaluatePass4Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.UsingTasks, stage, submissionId);
@@ -141,6 +150,25 @@ internal static class EvaluationMetrics
         try
         {
             return Instruments.ProjectEvaluationPassDuration.Enabled ? Stopwatch.GetTimestamp() : 0;
+        }
+        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+        {
+            Disable(ex);
+            return 0;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static long EvaluatePassEnd(long startTimestamp)
+    {
+        if (startTimestamp == 0 || Volatile.Read(ref s_disabled) != 0)
+        {
+            return 0;
+        }
+
+        try
+        {
+            return Stopwatch.GetTimestamp();
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
         {
@@ -176,6 +204,7 @@ internal static class EvaluationMetrics
         EvaluationPass.Properties => "properties",
         EvaluationPass.ItemDefinitionGroups => "item_definitions",
         EvaluationPass.Items => "items",
+        EvaluationPass.LazyItems => "lazy_items",
         EvaluationPass.UsingTasks => "using_tasks",
         EvaluationPass.Targets => "targets",
         _ => "unknown",
@@ -201,20 +230,58 @@ internal static class EvaluationMetrics
                 return;
             }
 
-            TagList tags = default;
-            tags.Add(StageTagName, GetStageName(stage));
-            tags.Add(PassTagName, GetPassName(pass));
-            tags.Add(
-                OriginTagName,
-                submissionId != BuildEventContext.InvalidSubmissionId ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
-
-            double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
-            Instruments.ProjectEvaluationPassDuration.Record(elapsedSeconds, in tags);
+            RecordPassDuration(startTimestamp, endTimestamp, pass, stage, submissionId);
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
         {
             Disable(ex);
         }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void EvaluatePassStop(
+        long startTimestamp,
+        long endTimestamp,
+        EvaluationPass pass,
+        ProjectEvaluationStage stage,
+        int submissionId)
+    {
+        if (startTimestamp == 0 || endTimestamp == 0 || Volatile.Read(ref s_disabled) != 0)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!Instruments.ProjectEvaluationPassDuration.Enabled)
+            {
+                return;
+            }
+
+            RecordPassDuration(startTimestamp, endTimestamp, pass, stage, submissionId);
+        }
+        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+        {
+            Disable(ex);
+        }
+    }
+
+    private static void RecordPassDuration(
+        long startTimestamp,
+        long endTimestamp,
+        EvaluationPass pass,
+        ProjectEvaluationStage stage,
+        int submissionId)
+    {
+        TagList tags = default;
+        tags.Add(StageTagName, GetStageName(stage));
+        tags.Add(PassTagName, GetPassName(pass));
+        tags.Add(
+            OriginTagName,
+            submissionId != BuildEventContext.InvalidSubmissionId ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
+
+        double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
+        Instruments.ProjectEvaluationPassDuration.Record(elapsedSeconds, in tags);
     }
 
     private static class Instruments

@@ -76,7 +76,7 @@ public sealed class EvaluationMetrics_Tests
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
 
-        string[] expectedPasses = GetExpectedPasses(stage);
+        string[] expectedMetricPasses = GetExpectedMetricPasses(stage);
         List<string> metricPasses = [];
         foreach (MetricMeasurement measurement in collector.Measurements)
         {
@@ -109,9 +109,8 @@ public sealed class EvaluationMetrics_Tests
             }
         }
 
-        metricPasses.ShouldBe(expectedPasses);
-        eventSourcePasses.ShouldBe(expectedPasses);
-        metricPasses.ShouldBe(eventSourcePasses);
+        metricPasses.ShouldBe(expectedMetricPasses);
+        eventSourcePasses.ShouldBe(GetExpectedEventSourcePasses(stage));
     }
 
     [Fact]
@@ -202,7 +201,17 @@ public sealed class EvaluationMetrics_Tests
                 new ProjectOptions { ProjectCollection = collection }));
     }
 
-    private static string[] GetExpectedPasses(ProjectEvaluationStage stage) => stage switch
+    private static string[] GetExpectedMetricPasses(ProjectEvaluationStage stage) => stage switch
+    {
+        ProjectEvaluationStage.Properties => ["initial_properties", "properties"],
+        ProjectEvaluationStage.ItemDefinitions => ["initial_properties", "properties", "item_definitions"],
+        ProjectEvaluationStage.Items => ["initial_properties", "properties", "item_definitions", "items", "lazy_items"],
+        ProjectEvaluationStage.UsingTasks => ["initial_properties", "properties", "item_definitions", "items", "lazy_items", "using_tasks"],
+        ProjectEvaluationStage.Full => ["initial_properties", "properties", "item_definitions", "items", "lazy_items", "using_tasks", "targets"],
+        _ => [],
+    };
+
+    private static string[] GetExpectedEventSourcePasses(ProjectEvaluationStage stage) => stage switch
     {
         ProjectEvaluationStage.Properties => ["initial_properties", "properties"],
         ProjectEvaluationStage.ItemDefinitions => ["initial_properties", "properties", "item_definitions"],
