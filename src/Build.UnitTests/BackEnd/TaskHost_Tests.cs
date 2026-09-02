@@ -255,7 +255,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var warning = _customLogger.LastWarning.ShouldBeOfType<ExtendedBuildWarningEventArgs>();
             warning.ExtendedType.ShouldBe(error.ExtendedType);
             warning.ExtendedData.ShouldBe(error.ExtendedData);
-            warning.ExtendedMetadata.ShouldBe(error.ExtendedMetadata);
+            // Assert the contents rather than the dictionary instance: preserving the payload is the requirement,
+            // and the implementation is free to copy the metadata for safety or serialization.
+            warning.ExtendedMetadata.ShouldNotBeNull();
+            warning.ExtendedMetadata.ShouldHaveSingleItem().ShouldBe(new KeyValuePair<string, string>("m1", "v1"));
             AssertBaseFieldsMatch(error, warning);
         }
 
