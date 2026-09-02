@@ -180,7 +180,7 @@ public sealed class EvaluationMetrics_Tests : IDisposable
     }
 
     [Fact]
-    public void EvaluationMetricsDistinguishBuildSubmissions()
+    public void EvaluationMetricsPreservePerManagerBuildSubmissionIds()
     {
         using MetricCollector collector = new();
         using TestEnvironment env = TestEnvironment.Create(_output);
@@ -220,12 +220,9 @@ public sealed class EvaluationMetrics_Tests : IDisposable
                 measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
                 measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin))
             .Select(measurement => measurement.Tags[EvaluationMetrics.SubmissionIdTagName].ShouldBeOfType<int>())
-            .Distinct()
             .ToArray();
 
-        submissionIds.Length.ShouldBe(2);
-        submissionIds.ShouldAllBe(submissionId => submissionId >= 0);
-        submissionIds[1].ShouldBeGreaterThan(submissionIds[0]);
+        submissionIds.ShouldBe([0, 0]);
     }
 
     [Fact]

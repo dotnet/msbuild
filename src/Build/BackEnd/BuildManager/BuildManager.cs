@@ -36,7 +36,6 @@ using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using CoordinatorConstants = Microsoft.Build.Framework.Coordinator.Constants;
 using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
@@ -180,13 +179,6 @@ namespace Microsoft.Build.Execution
         /// The next build submission id.
         /// </summary>
         private int _nextBuildSubmissionId;
-
-        /// <summary>
-        /// BuildManager submission ids normally restart per instance, but a process-local Metrics listener can
-        /// observe multiple managers, such as priming and measured builds. Correlation mode uses this process-wide
-        /// counter to avoid id collisions.
-        /// </summary>
-        private static int s_nextCorrelatedBuildSubmissionId;
 
         /// <summary>
         /// The last BuildParameters used for building.
@@ -2479,9 +2471,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private int GetNextSubmissionId()
         {
-            return EvaluationMetrics.IsSubmissionIdEnabled
-                ? Interlocked.Increment(ref s_nextCorrelatedBuildSubmissionId) - 1
-                : _nextBuildSubmissionId++;
+            return _nextBuildSubmissionId++;
         }
 
         /// <summary>

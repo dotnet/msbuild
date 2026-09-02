@@ -32,8 +32,6 @@ internal static class EvaluationMetrics
     private static int s_disabled;
     private static int s_includeSubmissionId = -1;
 
-    internal static bool IsSubmissionIdEnabled => IncludeSubmissionId();
-
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static long EvaluateStart()
     {
