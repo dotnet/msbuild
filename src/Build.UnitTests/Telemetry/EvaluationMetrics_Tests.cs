@@ -33,15 +33,25 @@ public sealed class EvaluationMetricsTestCollection
 }
 
 [Collection(EvaluationMetricsTestCollection.CollectionName)]
-public sealed class EvaluationMetrics_Tests
+public sealed class EvaluationMetrics_Tests : IDisposable
 {
     private readonly ITestOutputHelper _output;
+    private readonly TestEnvironment _testEnvironment;
 
     public EvaluationMetrics_Tests(ITestOutputHelper output)
     {
         _output = output;
+        _testEnvironment = TestEnvironment.Create(output);
+        _testEnvironment.SetEnvironmentVariable(
+            EvaluationMetrics.IncludeSubmissionIdEnvironmentVariable,
+            "1");
         EvaluationMetrics.ResetForTests();
-        EvaluationMetrics.IncludeSubmissionIdOverrideForTests = true;
+    }
+
+    public void Dispose()
+    {
+        _testEnvironment.Dispose();
+        EvaluationMetrics.ResetForTests();
     }
 
     [Theory]
@@ -286,63 +296,57 @@ public sealed class EvaluationMetrics_Tests
     [Fact]
     public void SubmissionIdTagIsOptIn()
     {
-        EvaluationMetrics.IncludeSubmissionIdOverrideForTests = false;
-        try
-        {
-            using MetricCollector collector = new();
-            using ProjectCollection collection = new();
+        _testEnvironment.SetEnvironmentVariable(
+            EvaluationMetrics.IncludeSubmissionIdEnvironmentVariable,
+            null);
+        EvaluationMetrics.ResetForTests();
 
-            _ = ProjectInstance.FromProjectRootElement(
-                CreateRootElement("<Project />"),
-                new ProjectOptions { ProjectCollection = collection });
+        using MetricCollector collector = new();
+        using ProjectCollection collection = new();
 
-            collector.Measurements.ShouldAllBe(measurement =>
-                !measurement.Tags.ContainsKey(EvaluationMetrics.SubmissionIdTagName));
-        }
-        finally
-        {
-            EvaluationMetrics.IncludeSubmissionIdOverrideForTests = true;
-        }
+        _ = ProjectInstance.FromProjectRootElement(
+            CreateRootElement("<Project />"),
+            new ProjectOptions { ProjectCollection = collection });
+
+        collector.Measurements.ShouldAllBe(measurement =>
+            !measurement.Tags.ContainsKey(EvaluationMetrics.SubmissionIdTagName));
     }
 
     [Fact]
     public void BuildManagerSubmissionIdsRemainPerManagerWithoutMetricsCorrelation()
     {
-        EvaluationMetrics.IncludeSubmissionIdOverrideForTests = false;
-        try
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-            TransientTestFile project = env.CreateFile(
-                "evaluation-metrics-per-manager.proj",
-                """
-                <Project>
-                  <Target Name="Build" />
-                </Project>
-                """);
-            MockLogger logger = new(_output);
-            List<int> submissionIds = [];
+        _testEnvironment.SetEnvironmentVariable(
+            EvaluationMetrics.IncludeSubmissionIdEnvironmentVariable,
+            null);
+        EvaluationMetrics.ResetForTests();
 
-            for (int i = 0; i < 2; i++)
-            {
-                using BuildManager buildManager = new();
-                BuildResult result = buildManager.Build(
-                    new BuildParameters { Loggers = [logger] },
-                    new BuildRequestData(
-                        project.Path,
-                        new Dictionary<string, string?>(),
-                        null,
-                        ["Build"],
-                        null));
-                result.ShouldHaveSucceeded();
-                submissionIds.Add(result.SubmissionId);
-            }
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFile project = env.CreateFile(
+            "evaluation-metrics-per-manager.proj",
+            """
+            <Project>
+              <Target Name="Build" />
+            </Project>
+            """);
+        MockLogger logger = new(_output);
+        List<int> submissionIds = [];
 
-            submissionIds.ShouldBe([0, 0]);
-        }
-        finally
+        for (int i = 0; i < 2; i++)
         {
-            EvaluationMetrics.IncludeSubmissionIdOverrideForTests = true;
+            using BuildManager buildManager = new();
+            BuildResult result = buildManager.Build(
+                new BuildParameters { Loggers = [logger] },
+                new BuildRequestData(
+                    project.Path,
+                    new Dictionary<string, string?>(),
+                    null,
+                    ["Build"],
+                    null));
+            result.ShouldHaveSucceeded();
+            submissionIds.Add(result.SubmissionId);
         }
+
+        submissionIds.ShouldBe([0, 0]);
     }
 
     [Fact]

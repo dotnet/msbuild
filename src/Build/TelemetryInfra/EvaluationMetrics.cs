@@ -31,7 +31,6 @@ internal static class EvaluationMetrics
 
     private static int s_disabled;
     private static int s_includeSubmissionId = -1;
-    internal static bool? IncludeSubmissionIdOverrideForTests;
 
     internal static bool IsSubmissionIdEnabled => IncludeSubmissionId();
 
@@ -145,7 +144,6 @@ internal static class EvaluationMetrics
     {
         Volatile.Write(ref s_disabled, 0);
         Volatile.Write(ref s_includeSubmissionId, -1);
-        IncludeSubmissionIdOverrideForTests = null;
     }
 
     private static void Disable(Exception ex)
@@ -217,11 +215,6 @@ internal static class EvaluationMetrics
 
     private static bool IncludeSubmissionId()
     {
-        if (IncludeSubmissionIdOverrideForTests.HasValue)
-        {
-            return IncludeSubmissionIdOverrideForTests.Value;
-        }
-
         int includeSubmissionId = Volatile.Read(ref s_includeSubmissionId);
         if (includeSubmissionId < 0)
         {
