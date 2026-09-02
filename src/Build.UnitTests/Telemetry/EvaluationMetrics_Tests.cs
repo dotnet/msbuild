@@ -15,6 +15,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -96,14 +97,14 @@ public sealed class EvaluationMetrics_Tests
         List<string> eventSourcePasses = [];
         foreach (EventWrittenEventArgs eventData in eventSourceListener.GetEvents())
         {
-            string? pass = eventData.EventId switch
+            string? pass = eventData.EventName switch
             {
-                14 => "initial_properties",
-                16 => "properties",
-                18 => "item_definitions",
-                20 => "items",
-                22 => "using_tasks",
-                24 => "targets",
+                nameof(MSBuildEventSource.EvaluatePass0Stop) => "initial_properties",
+                nameof(MSBuildEventSource.EvaluatePass1Stop) => "properties",
+                nameof(MSBuildEventSource.EvaluatePass2Stop) => "item_definitions",
+                nameof(MSBuildEventSource.EvaluatePass3Stop) => "items",
+                nameof(MSBuildEventSource.EvaluatePass4Stop) => "using_tasks",
+                nameof(MSBuildEventSource.EvaluatePass5Stop) => "targets",
                 _ => null,
             };
 
