@@ -714,8 +714,8 @@ namespace Microsoft.Build.Evaluation
 
                 Assumed.NotEqual(_data.EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-                EvaluationMetrics.EvaluatePass0Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass0Stop(projectFile);
+                EvaluationMetrics.EvaluatePass0Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
 
                 // Pass1: evaluate properties, load imports, and gather everything else
                 MSBuildEventSource.Log.EvaluatePass1Start(projectFile);
@@ -734,8 +734,8 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
-                EvaluationMetrics.EvaluatePass1Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
+                EvaluationMetrics.EvaluatePass1Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
 
                 if (_evaluationStage <= ProjectEvaluationStage.Properties)
                 {
@@ -757,8 +757,8 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                EvaluationMetrics.EvaluatePass2Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass2Stop(projectFile);
+                EvaluationMetrics.EvaluatePass2Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
 
                 if (_evaluationStage <= ProjectEvaluationStage.ItemDefinitions)
                 {
@@ -815,8 +815,8 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 SynthesizeItemGlobItems();
-                EvaluationMetrics.EvaluatePass3Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
+                EvaluationMetrics.EvaluatePass3Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
 
                 if (_evaluationStage <= ProjectEvaluationStage.Items)
                 {
@@ -839,8 +839,8 @@ namespace Microsoft.Build.Evaluation
                         _evaluationContext.FileSystem);
                 }
 
-                EvaluationMetrics.EvaluatePass4Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
+                EvaluationMetrics.EvaluatePass4Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
 
                 if (_evaluationStage <= ProjectEvaluationStage.UsingTasks)
                 {
@@ -925,8 +925,8 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     _data.FinishEvaluation();
-                    EvaluationMetrics.EvaluatePass5Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                     MSBuildEventSource.Log.EvaluatePass5Stop(projectFile);
+                    EvaluationMetrics.EvaluatePass5Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 }
             }
 
