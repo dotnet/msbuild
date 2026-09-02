@@ -36,6 +36,7 @@ using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using CoordinatorConstants = Microsoft.Build.Framework.Coordinator.Constants;
 using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;

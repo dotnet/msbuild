@@ -23,14 +23,11 @@ internal static class EvaluationMetrics
     internal const string PassTagName = "msbuild.project.evaluation.pass";
     internal const string OriginTagName = "msbuild.project.evaluation.origin";
     internal const string SucceededTagName = "msbuild.project.evaluation.succeeded";
-    internal const string SubmissionIdTagName = "msbuild.build.submission.id";
-    internal const string IncludeSubmissionIdEnvironmentVariable = "MSBUILD_EVALUATION_METRICS_INCLUDE_SUBMISSION_ID";
 
     internal const string BuildSubmissionOrigin = "build_submission";
     internal const string OutsideBuildSubmissionOrigin = "outside_build_submission";
 
     private static int s_disabled;
-    private static int s_includeSubmissionId = -1;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static long EvaluateStart()
@@ -78,10 +75,6 @@ internal static class EvaluationMetrics
             tags.Add(
                 OriginTagName,
                 submissionId != BuildEventContext.InvalidSubmissionId ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
-            if (IncludeSubmissionId())
-            {
-                tags.Add(SubmissionIdTagName, submissionId);
-            }
             tags.Add(SucceededTagName, succeeded);
 
             if (countEnabled)
@@ -141,7 +134,6 @@ internal static class EvaluationMetrics
     internal static void ResetForTests()
     {
         Volatile.Write(ref s_disabled, 0);
-        Volatile.Write(ref s_includeSubmissionId, -1);
     }
 
     private static void Disable(Exception ex)
@@ -197,10 +189,6 @@ internal static class EvaluationMetrics
             tags.Add(
                 OriginTagName,
                 submissionId != BuildEventContext.InvalidSubmissionId ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
-            if (IncludeSubmissionId())
-            {
-                tags.Add(SubmissionIdTagName, submissionId);
-            }
 
             double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
             Instruments.ProjectEvaluationPassDuration.Record(elapsedSeconds, in tags);
@@ -209,20 +197,6 @@ internal static class EvaluationMetrics
         {
             Disable(ex);
         }
-    }
-
-    private static bool IncludeSubmissionId()
-    {
-        int includeSubmissionId = Volatile.Read(ref s_includeSubmissionId);
-        if (includeSubmissionId < 0)
-        {
-            includeSubmissionId = string.Equals(
-                Environment.GetEnvironmentVariable(IncludeSubmissionIdEnvironmentVariable),
-                "1",
-                StringComparison.Ordinal) ? 1 : 0;
-            Volatile.Write(ref s_includeSubmissionId, includeSubmissionId);
-        }
-        return includeSubmissionId != 0;
     }
 
     private static class Instruments
