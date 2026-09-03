@@ -15,7 +15,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
-| [BC0301](#bc0301---building-from-downloads-folder) | None | Project | 9.0.300 | Building from Downloads folder. |
+| [BC0301](#bc0301---building-from-downloads-folder) | Error | Project | 9.0.300 | Building from Downloads folder. |
 | [BC0302](#bc0302---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
 
 Notes: 

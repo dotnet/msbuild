@@ -60,8 +60,8 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Environment.ExpandEnvironmentVariables()` | Use `TaskEnvironment.GetEnvironmentVariable()` per variable |
 | `Environment.GetFolderPath()` | Use `TaskEnvironment.GetEnvironmentVariable()` |
 | `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath()` |
-| `Path.GetTempPath()` | `TaskEnvironment.GetEnvironmentVariable("TMP")` |
-| `Path.GetTempFileName()` | `TaskEnvironment.GetEnvironmentVariable("TMP")` |
+| `Path.GetTempPath()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
+| `Path.GetTempFileName()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 
@@ -105,6 +105,38 @@ These APIs may cause version conflicts or other issues in a shared task host.
 | `Activator.CreateInstance(string, string)` | May cause version conflicts |
 | `Activator.CreateInstanceFrom` | May cause version conflicts |
 | `AppDomain.Load`, `CreateInstance`, `CreateInstanceFrom` | May cause version conflicts |
+
+### MSBuildTask0005 — Transitive Unsafe API Usage
+
+MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class — or inside a helper explicitly opted in with `[MSBuildMultiThreadableTaskAnalyzed]` (see [Analysis Scope](#analysis-scope)). MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from every task's members, so an unsafe API reached through a shared helper is still reported.
+
+The diagnostic is reported **at the unsafe call site** — inside the helper — and names the task entry point plus the full call chain in the message:
+
+```
+ProcessService.cs(23,9): warning MSBuildTask0005: 'CreateSourceArtifact.Execute' transitively calls
+unsafe API 'Process.Kill(bool)' via: CreateSourceArtifact.Execute → CreateSourceArtifact.ExecuteAsync
+→ ProcessService.RunProcessAsync → Process.Kill(bool)
+```
+
+The task entry point is also attached as an additional location, so editors can navigate from the helper to the task that reaches it.
+
+**Suppressing a reviewed call.** Because the diagnostic is reported at the call site, the standard Roslyn suppression mechanisms work exactly where the reviewed code lives — either `#pragma warning disable`:
+
+```csharp
+#pragma warning disable MSBuildTask0005 // Only kills processes this task started; entireProcessTree walks descendants.
+try { process.Kill(entireProcessTree: true); } catch { }
+#pragma warning restore MSBuildTask0005
+```
+
+or `[SuppressMessage]` on the containing member, which records the review next to the code:
+
+```csharp
+[SuppressMessage("MSBuild.TaskAuthoring", "MSBuildTask0005",
+    Justification = "Only kills processes this task started; entireProcessTree walks descendants, not the MSBuild host.")]
+private static void KillProcessTree(Process process) => process.Kill(entireProcessTree: true);
+```
+
+Each unsafe call site is reported once per task type, so suppressing one reviewed call does **not** hide other transitive violations reachable from the same task — including other calls to the same API. Suppressing on the task's `Execute` method has no effect; scope the suppression to the call site instead.
 
 ### MSBuildTask0006 — Prefer Typed Path Parameters
 
@@ -417,9 +449,9 @@ Missing and unrecognized values use the safe `multithreadable_only` default.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
-The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
+The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis and reports at the unsafe call site, but it offers no code fixes and only fires for helpers actually reachable from a task. Adding this attribute to a helper class gives you diagnostics and code fixes in the helper's source regardless of whether a task reaches it.
 
-**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles and code fixes) on unsafe APIs within those helpers.
+**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles) on unsafe APIs within those helpers. Note that the MSBuildTask0002/0003 code fixes reference a `TaskEnvironment` member, so they are only offered in a helper that declares one — see [Code Fixes](#code-fixes).
 
 ### Severity Levels
 
@@ -449,7 +481,11 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0007: `new AbsolutePath(Item.GetMetadata("FullPath"))` | → Retype `Item` to ``ITaskItem<AbsolutePath>`` and replace with `Item.Value` |
 | MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
 
-The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
+The MSBuildTask0003 fixer anchors on the **call the analyzer flagged** (the one whose parameter takes the path) and wraps that call's own path argument. This matters when the flagged call is nested inside another call — `new StreamWriter(File.Create(OutputPath))` becomes `new StreamWriter(File.Create(TaskEnvironment.GetAbsolutePath(OutputPath)))`, not a wrap around the `Stream` the outer constructor receives. Within that call it wraps the first **unwrapped** path parameter rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument, and for `Directory.GetFiles(dir, searchPattern)` it leaves the search pattern alone.
+
+Both the MSBuildTask0002 and MSBuildTask0003 fixers reference the instance `TaskEnvironment` member, so no fix is offered where that reference would not compile: where `this` is unavailable — a static method, static local function, or static lambda (CS0120), or an instance field or property initializer (CS0236) — or where the task type simply has no `TaskEnvironment` member (CS0103), which the default `all` scope allows since it analyzes every `ITask`. Making the enclosing member non-static, moving the initializer into `Execute()`, or implementing `IMultiThreadableTask` re-enables the fix.
+
+When bulk-applying with `dotnet format analyzers`, note that the tool derives the batch from the *first* reported diagnostic: if that occurrence is one of the ones above where no fix is offered, it logs `Unable to fix MSBuildTask0003…` and applies nothing. Resolve or suppress that first occurrence by hand, then re-run.
 
 The MSBuildTask0006/MSBuildTask0007 fixer is conservative by design: it only offers a fix when every reference to the property — across all partial declarations of the task type, in the current document — can be safely rewritten as part of the same change, so the resulting code keeps compiling after the property type is updated. If the property is referenced from another file (a partial class spread across documents) in a way this single-document fix can't rewrite, no fix is offered.
 
@@ -544,11 +580,10 @@ public class CopyFiles : Task, IMultiThreadableTask
 
 ## Tests
 
-193 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
+Unit tests for all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppressions live in `src/TaskAnalyzer.Tests`. Run them from the repository root:
 
 ```
-cd src/TaskAnalyzer.Tests
-dotnet test
+.\build.cmd -test -projects src\TaskAnalyzer.Tests\TaskAnalyzer.Tests.csproj -c Debug
 ```
 
 ## Architecture

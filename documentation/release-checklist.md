@@ -35,7 +35,7 @@ Fill in these values before starting. Version increments are irregular — they 
 | `{{INSIDERS_SNAP_DATE}}` | Date VS snaps `main` → `rel/insiders`. Final-branded MSBuild must be in VS `main` **before** this date. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{STABLE_SNAP_DATE}}` | Date VS snaps `rel/insiders` → `rel/stable`. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{VS_SHIP_DATE}}` | Date VS ships publicly (GA). Post-GA tasks (nuget.org, docs) happen after this. | |
-| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` MSBuild build reachable from `vs{{THIS_RELEASE_VERSION}}`. Used as the ApiCompat baseline for the bumped `main`. **How to determine it:** see the [release skill](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version). | |
+| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest `{{THIS_RELEASE_VERSION}}.0-<label>.<shortDate>.<rev>` MSBuild build reachable from `vs{{THIS_RELEASE_VERSION}}` (`<label>` is `PreReleaseVersionLabel` from `eng/Versions.props`, currently `1` — e.g. `18.11.0-1.26426.2`). Used as the ApiCompat baseline for the bumped `main`. **How to determine it:** see the [release skill](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version). | |
 
 **Derived values** (do not edit — computed from inputs):
 - Release branch: `vs{{THIS_RELEASE_VERSION}}`
@@ -81,12 +81,39 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
   - [ ] **1.2c** Pre-create default channel mapping for the **next** release branch (**last command — omit `--no-pr` to create the PR**). The `vs{{NEXT_VERSION}}` branch does not exist yet, so pass `-q` (non-interactive) to skip the "branch doesn't exist" prompt — otherwise the command blocks/aborts: \
   `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch vs{{NEXT_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} -q`
   - [ ] **1.2d** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE1_DARC_PR}}
-- [ ] **1.3** **Identify predecessor branches that will no longer be supported.** Record the list here — Phase 2.3e uses it to clean up their DARC subscriptions. \
+- [ ] **1.3** **Audit _every_ live `vs*` branch for retirement.** Record the list here — Phase 2.3e uses it to clean up their DARC subscriptions. \
+  ⚠️ **This is a full audit, not a single-candidate check.** Do **not** just evaluate `vs{{THIS_RELEASE_VERSION}} - 3`. Retirement is missed far more often than it is done wrongly, and every miss is permanent: nothing else in this process ever revisits an older branch, so stale branches accumulate indefinitely and keep consuming Arcade/OptProf maintenance. Enumerate the full list and judge each one. \
+  - [ ] **1.3a** Enumerate current state (both commands, plus the repo's real branches): \
+  `darc get-default-channels --source-repo https://github.com/dotnet/msbuild` \
+  `darc get-subscriptions --source-repo https://github.com/dotnet/msbuild` \
+  `git fetch upstream && git branch -r --list 'upstream/vs*'`
+
   How to identify a retired branch:
     - **The combined rule:** a branch paired with both an SDK band and a VS version is retired **only when both lifecycles agree it is out of support**. If only one side says retired but the other is still supported, **keep the branch** — the still-supported lifecycle must keep receiving fixes.
-    - **SDK lifecycle** — for branches paired with an SDK band, check https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#lifecycle. If the paired SDK band is past its support end date, the branch is SDK-retired.
-    - **VS lifecycle** — check the [VS Servicing Information wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/27212/Visual-Studio-Servicing-Information). Rule of thumb: the VS support window covers the current release plus two preceding versions, so the first candidate for VS-retirement is `vs{{THIS_RELEASE_VERSION}} - 3` — **always confirm on the wiki**, since servicing exceptions can extend specific versions beyond the rule of thumb.
+    - **SDK lifecycle.** The band ↔ VS version ↔ EOL mapping is the [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions). It states which VS version each SDK band pairs with and when that band's support ends. \
+    🛑 **Never infer lifecycle from Maestro.** The existence of a `.NET X.Y.Zxx SDK` channel — including `... SDK Release` channels — says nothing about support status; channels for long-dead bands persist indefinitely. Using channel existence as a proxy is how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release.
+    - **VS lifecycle — a separate source; the SDK table does not answer it.** Use [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs). \
+    **VS 2026 and later: 2 years per annual release** — one year of monthly feature updates, then one security-only year on the LTSC. Only the **LTSC baseline version** gets the second year; an ordinary monthly release falls out of support as soon as the next monthly ships. Each year exactly one `vs18.x` becomes the LTSC and must be kept ~2 years while its neighbours retire quickly — read the LTSC table on that page (`2026-LTSC` ends **November 9, 2027**). Rule of thumb for the non-LTSC ones: the window is the current release plus two preceding, so `vs{{THIS_RELEASE_VERSION}} - 3` is the **newest** candidate — never the only one. \
+    **Long-lived VS versions — hardcoded, do not re-derive each release:**
+
+      | Visual Studio | MSBuild branch | Supported until |
+      |---|---|---|
+      | Visual Studio 2022 | `vs17.14` | January 2032 |
+      | Visual Studio 2019 | `vs16.11` | April 2029 |
+      | Visual Studio 2017 | `vs15.9` | April 2027 |
+
+    - ⚠️ **A VS LTSC can expire *before* the SDK band that shipped with it** — `2026-LTSC` ends Nov 2027 while .NET 10 (LTS) runs to Nov 2028. The SDK side is therefore often what keeps a branch alive; that is why `vs18.0` stays despite being the oldest branch. Always check both directions.
     - **VS-only branches** (not paired with any active SDK band) are retired purely on the VS lifecycle.
+    - **Worked example (18.11).** `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) → **keep**, despite being the oldest branch. `vs18.6` pairs with 10.0.3xx (EOL Aug 2026) and VS 18.6 is outside the window → **retire**. `vs18.4` (10.0.2xx, EOL May 2026) and `vs18.5` (VS-only) had default channels for branches already deleted from the repo → **retire the mappings**.
+
+  - [ ] **1.3b** For **each** `vs*` default channel, apply the rules above and classify it as **keep** or **retire**. Two red flags that almost always mean "retire", and are worth checking first because they are mechanical:
+    - **No outbound subscription** — nothing consumes that branch's `VS X.Y` channel, so the branch feeds nothing. (A live branch looks like `vs18.0 → dotnet/dotnet release/10.0.1xx`.)
+    - **Default channel for a branch that does not exist** in `dotnet/msbuild` — a pure orphan; delete the mapping.
+  - [ ] **1.3c** Record the verdict for every branch in the table below, including the ones you keep and why. This is what makes the next release's audit cheap.
+
+  | Branch | Paired SDK band | Band EOL | VS supported? | Verdict |
+  |---|---|---|---|---|
+  | | | | | |
 
 ---
 
@@ -124,13 +151,14 @@ _Tip: `darc add-default-channel` / `add-subscription` prompt interactively when 
   `darc add-default-channel --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3e** **Delete subscriptions for retired branches.** For each branch identified as retired in step 1.3 (apply the same combined SDK+VS rule — do **not** delete subscriptions for a branch that's retired on only one side, since fixes must keep flowing into the still-supported lifecycle), remove its inbound subscriptions and any default channel associations.
   List them: `darc get-subscriptions --target-repo https://github.com/dotnet/msbuild --target-branch <retired_branch>` \
-  Delete each: `darc delete-subscription --id <subscription_id> --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
+  Delete each: `darc delete-subscriptions --id <subscription_id> -q --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr` \
+  _(Note the plural verb: `delete-subscription` does not exist. `-q` skips the confirmation prompt, which would otherwise hang in a non-interactive session.)_
   - [ ] **2.3f** **(VMR backflow — skip for a VS-only release, or if 2.2b found the channel unchanged.)** Repoint the `→ main` backflow (ID from 2.2b) to the **next** SDK band channel so the bumped `main` pulls next-version VMR dependencies: \
   `darc update-subscription --id <main_backflow_id> --channel ".NET <NEXT_BAND> SDK" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3g** **(VMR backflow — skip for a VS-only release.)** Add a backflow from the **outgoing** SDK band into the new release branch so that band keeps flowing into `vs{{THIS_RELEASE_VERSION}}` (mirrors the previous release branch's backflow: source-enabled, source dir `msbuild`, everyDay, Standard merge, excluded assets `*`; the branch is brand-new so pass `-q`): \
   `darc add-subscription --channel ".NET <OUTGOING_BAND> SDK" --source-repo https://github.com/dotnet/dotnet --target-repo https://github.com/dotnet/msbuild --target-branch vs{{THIS_RELEASE_VERSION}} --update-frequency everyDay --source-enabled --source-directory msbuild --excluded-assets '*' --standard-automerge --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr -q`
   - [ ] **2.3h** **Arcade fix-up (run 2.4 first if you haven't).** _If the Arcade subscription from 2.4 below is missing or pointed at the wrong channel, include the fix-up here with `--no-pr` before creating the PR._
-  - [ ] **2.3i** **Create the PR** — re-run the final write command without `--no-pr` to open the PR on the configuration branch.
+  - [ ] **2.3i** **Create the PR** — omit `--no-pr` on the *last* write command of the batch so it both applies its change and opens the PR. (Do **not** re-run an already-applied command without `--no-pr`; that would duplicate the change.)
   - [ ] **2.3j** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE2_DARC_PR}}
 
 Verifications (**parallel** — read-only, no ordering dependency):
