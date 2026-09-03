@@ -11,12 +11,23 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)' and '$(EnableEvaluationObservationDetours)' == 'true'">
+    <DefineConstants>$(DefineConstants);EVALUATION_OBSERVATION_DETOURS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <BenchmarkDotNetPackageVersion>0.16.0-preview.1</BenchmarkDotNetPackageVersion>
+    <BenchmarkDotNetPackageVersion Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)' and '$(EnableEvaluationObservationDetours)' == 'true'">0.13.12</BenchmarkDotNetPackageVersion>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" VersionOverride="0.16.0-preview.1" />
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" VersionOverride="0.16.0-preview.1" />
+    <PackageReference Include="BenchmarkDotNet" VersionOverride="$(BenchmarkDotNetPackageVersion)" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" VersionOverride="$(BenchmarkDotNetPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <!-- Keep this override aligned with eng\dependabot\Directory.Packages.props while CPM is disabled for this project. -->
+    <PackageReference Include="Microsoft.BuildXL.Processes" VersionOverride="0.1.0-20260612.4" Condition="'$(FeatureReportFileAccesses)' == 'true' and '$(EnableEvaluationObservationDetours)' == 'true'" PrivateAssets="all" />
     <!-- Fix transitive dependency from BenchmarkDotNet that conflicts with Microsoft.VisualStudio.OpenTelemetry.ClientExtensions. -->
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" VersionOverride="8.0.0" />
   </ItemGroup>
@@ -27,4 +38,11 @@
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
+
+  <Target
+    Name="ValidateEvaluationObservationDetoursPlatform"
+    BeforeTargets="PrepareForBuild"
+    Condition="'$(EnableEvaluationObservationDetours)' == 'true' and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(Platform)' != 'x64'">
+    <Error Text="The evaluation-observation Detours harness must be built with Platform=x64." />
+  </Target>
 </Project>

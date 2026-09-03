@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 
 namespace MSBuild.Benchmarks;
 
@@ -11,25 +12,52 @@ internal static class EvaluationObservationBenchmarkProcess
     private const int HostTimeoutMilliseconds = 120_000;
 
     internal static EvaluationObservationBenchmarkResult Run(
-        bool observationEnabled,
+        EvaluationObservationBenchmarkMode mode,
         EvaluationObservationBenchmarkScenario scenario,
         string projectPath,
-        int iterations)
+        IReadOnlyList<string> comparisonRoots,
+        int iterations,
+        IReadOnlyDictionary<string, string>? globalProperties = null,
+        string? measurementRoot = null,
+        bool includeNativeOnlyPaths = false)
     {
         string assemblyPath = typeof(EvaluationObservationBenchmarkProcess).Assembly.Location;
+        measurementRoot ??= Path.GetDirectoryName(projectPath)!;
         string executable;
         string arguments;
 
 #if NETFRAMEWORK
         executable = Path.ChangeExtension(assemblyPath, ".exe");
-        arguments = CreateHostArguments(projectPath, iterations, observationEnabled, scenario);
+        arguments = CreateHostArguments(
+            projectPath,
+            iterations,
+            mode,
+            scenario,
+            measurementRoot,
+            globalProperties);
 #else
         executable = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") ?? "dotnet";
         arguments = string.Concat(
             Quote(assemblyPath),
             " ",
-            CreateHostArguments(projectPath, iterations, observationEnabled, scenario));
+            CreateHostArguments(
+                projectPath,
+                iterations,
+                mode,
+                scenario,
+                measurementRoot,
+                globalProperties));
 #endif
+
+        if ((mode & EvaluationObservationBenchmarkMode.Detours) != 0)
+        {
+            return EvaluationObservationDetoursRunner.Run(
+                executable,
+                arguments,
+                comparisonRoots,
+                measurementRoot,
+                includeNativeOnlyPaths);
+        }
 
         ProcessStartInfo startInfo = new(executable, arguments)
         {
@@ -65,22 +93,34 @@ internal static class EvaluationObservationBenchmarkProcess
     private static string CreateHostArguments(
         string projectPath,
         int iterations,
-        bool observationEnabled,
-        EvaluationObservationBenchmarkScenario scenario)
+        EvaluationObservationBenchmarkMode mode,
+        EvaluationObservationBenchmarkScenario scenario,
+        string measurementRoot,
+        IReadOnlyDictionary<string, string>? globalProperties)
     {
-        return string.Join(
-            " ",
-            "--evaluation-observation-host",
-            "--project",
-            Quote(projectPath),
-            "--iterations",
-            iterations.ToString(CultureInfo.InvariantCulture),
-            "--observation-enabled",
-            observationEnabled.ToString(CultureInfo.InvariantCulture),
-            "--scenario",
-            scenario.ToString());
+        StringBuilder arguments = new();
+        arguments.Append("--evaluation-observation-host --project ");
+        arguments.Append(Quote(projectPath));
+        arguments.Append(" --iterations ");
+        arguments.Append(iterations.ToString(CultureInfo.InvariantCulture));
+        arguments.Append(" --mode ");
+        arguments.Append(mode);
+        arguments.Append(" --scenario ");
+        arguments.Append(scenario);
+        arguments.Append(" --measurement-root ");
+        arguments.Append(Quote(measurementRoot));
+
+        if (globalProperties is not null)
+        {
+            foreach (KeyValuePair<string, string> property in globalProperties)
+            {
+                arguments.Append(" --global-property ");
+                arguments.Append(Quote(string.Concat(property.Key, "=", property.Value)));
+            }
+        }
+
+        return arguments.ToString();
     }
 
-    private static string Quote(string value) =>
-        string.Concat("\"", value.Replace("\"", "\\\""), "\"");
+    internal static string Quote(string value) => string.Concat("\"", value.Replace("\"", "\\\""), "\"");
 }

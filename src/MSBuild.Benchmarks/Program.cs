@@ -11,9 +11,20 @@ using static MSBuild.Benchmarks.Extensions;
 
 var argList = new List<string>(args);
 
+if (EvaluationObservationDetoursHost.TryRun(argList, out int detoursHostExitCode))
+{
+    Environment.Exit(detoursHostExitCode);
+    return detoursHostExitCode;
+}
+
 if (EvaluationObservationBenchmarkHost.TryRun(argList, out int hostExitCode))
 {
     return hostExitCode;
+}
+
+if (EvaluationObservationBuildXLProjectComparison.TryRun(argList, out int comparisonExitCode))
+{
+    return comparisonExitCode;
 }
 
 ParseAndRemoveBooleanParameter(argList, "--collect-etw", out bool collectEtw);
@@ -73,7 +84,9 @@ static IConfig GetConfig(
     // DllGatherer redirects every project reference to one output directory. The Tasks project also builds
     // netstandard2.0 reference-only Framework and Utilities assemblies for RoslynCodeTaskFactory, which can
     // overwrite the current-TFM implementations and cause the generated benchmark executable to fail loading them.
+#if !NETFRAMEWORK || !EVALUATION_OBSERVATION_DETOURS
     overrides = overrides.WithMsBuildArguments("/p:SkipNetstandardRefAssembliesForBenchmarks=true");
+#endif
 
     config = config.AddJob(overrides.AsMutator());
 

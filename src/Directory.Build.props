@@ -6,6 +6,8 @@
       <LangVersion>latest</LangVersion>
       <Nullable>enable</Nullable>
       <DiscoverEditorConfigFiles>true</DiscoverEditorConfigFiles>
+      <MSBuildProjectExtensionsPath
+        Condition="'$(MSBuildProjectName)' == 'MSBuild.Benchmarks' and '$(EnableEvaluationObservationDetours)' == 'true'">$(ArtifactsObjDir)MSBuild.Benchmarks.Detours\$(Platform)\</MSBuildProjectExtensionsPath>
   </PropertyGroup>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(ShouldUseIBCOptimization)' == 'true'" />

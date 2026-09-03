@@ -9,7 +9,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace MSBuild.Benchmarks;
 
-public class EvaluationObservationBenchmark
+public partial class EvaluationObservationBenchmark
 {
     private const int TypicalFileCount = 200;
     private const int GlobHeavyFileCount = 2_000;
@@ -27,7 +27,7 @@ public class EvaluationObservationBenchmark
     private string _projectPath = null!;
     private string? _previousSdkPath;
     private string? _previousEnvironmentInput;
-    private readonly Dictionary<bool, Aggregate> _aggregates = [];
+    private readonly Dictionary<EvaluationObservationBenchmarkMode, Aggregate> _aggregates = new();
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -36,9 +36,11 @@ public class EvaluationObservationBenchmark
         string sourceDirectory = Path.Combine(_root, "src");
         Directory.CreateDirectory(sourceDirectory);
 
-        int fileCount = Scenario == EvaluationObservationBenchmarkScenario.GlobHeavy
-            ? GlobHeavyFileCount
-            : TypicalFileCount;
+        int fileCount = Scenario == EvaluationObservationBenchmarkScenario.Typical
+            ? TypicalFileCount
+            : Scenario == EvaluationObservationBenchmarkScenario.GlobHeavy
+                ? GlobHeavyFileCount
+                : TypicalFileCount;
 
         for (int i = 0; i < fileCount; i++)
         {
@@ -93,7 +95,6 @@ public class EvaluationObservationBenchmark
                 project.AppendLine("    <Registry>$([MSBuild]::GetRegistryValue('HKEY_CURRENT_USER\\Software\\MSBuildObservationMissing', 'Value', 'fallback'))</Registry>");
             }
         }
-
         project.AppendLine("  </PropertyGroup>");
         project.AppendLine("  <ItemDefinitionGroup>");
         project.AppendLine("    <Ordered><Inherited>definition</Inherited><Override>default</Override></Ordered>");
@@ -109,13 +110,11 @@ public class EvaluationObservationBenchmark
             project.AppendLine("    <Input Include=\"settings.txt\" />");
             project.AppendLine("    <MetadataValue Include=\"@(Input->'%(ModifiedTime)')\" />");
         }
-
         project.AppendLine("  </ItemGroup>");
         if (Scenario == EvaluationObservationBenchmarkScenario.AmbientAndSdk)
         {
             project.AppendLine("  <UsingTask TaskName=\"ObservedTask\" AssemblyFile=\"observed-task.dll\" />");
         }
-
         project.AppendLine("</Project>");
 
         _projectPath = Path.Combine(_root, "benchmark.proj");
@@ -125,14 +124,9 @@ public class EvaluationObservationBenchmark
     [GlobalCleanup]
     public void GlobalCleanup()
     {
-        if (_aggregates.TryGetValue(false, out Aggregate? disabled))
+        foreach (KeyValuePair<EvaluationObservationBenchmarkMode, Aggregate> entry in _aggregates)
         {
-            Console.WriteLine(disabled.Format(observationEnabled: false, Scenario));
-        }
-
-        if (_aggregates.TryGetValue(true, out Aggregate? enabled))
-        {
-            Console.WriteLine(enabled.Format(observationEnabled: true, Scenario));
+            Console.WriteLine(entry.Value.Format(entry.Key, Scenario));
         }
 
         Environment.SetEnvironmentVariable("MSBuildSDKsPath", _previousSdkPath);
@@ -156,23 +150,21 @@ public class EvaluationObservationBenchmark
     }
 
     [Benchmark(Baseline = true)]
-    public long Disabled() => Run(observationEnabled: false);
+    public long Baseline() => Run(EvaluationObservationBenchmarkMode.Baseline);
 
-    [Benchmark]
-    public long Enabled() => Run(observationEnabled: true);
-
-    private long Run(bool observationEnabled)
+    private long Run(EvaluationObservationBenchmarkMode mode)
     {
         EvaluationObservationBenchmarkResult result = EvaluationObservationBenchmarkProcess.Run(
-            observationEnabled,
+            mode,
             Scenario,
             _projectPath,
+            [_root],
             EvaluationsPerProcess);
 
-        if (!_aggregates.TryGetValue(observationEnabled, out Aggregate? aggregate))
+        if (!_aggregates.TryGetValue(mode, out Aggregate? aggregate))
         {
             aggregate = new Aggregate();
-            _aggregates.Add(observationEnabled, aggregate);
+            _aggregates.Add(mode, aggregate);
         }
 
         aggregate.Add(result);
@@ -188,8 +180,26 @@ public class EvaluationObservationBenchmark
         private double _meanEvaluationTicks;
         private double _evaluationTicksM2;
         private long _allocatedManagedBytes;
+        private long _retainedManagedBytes;
+        private long _privateBytes;
+        private long _peakWorkingSetBytes;
         private long _nativeReports;
-        private long _nativeObservations;
+        private long _nativePathProbes;
+        private long _nativeEnumerations;
+        private long _nativeMetadataReads;
+        private long _nativeFileReads;
+        private long _nativeSemanticObservations;
+        private long _nativeUniquePaths;
+        private long _semanticComparisons;
+        private long _semanticImports;
+        private long _semanticProperties;
+        private long _semanticItems;
+        private long _semanticMetadata;
+        private long _detoursAccesses;
+        private long _detoursUniquePaths;
+        private long _nativeDetoursOverlap;
+        private long _nativeOnlyPaths;
+        private long _detoursOnlyPaths;
 
         internal void Add(EvaluationObservationBenchmarkResult result)
         {
@@ -203,18 +213,36 @@ public class EvaluationObservationBenchmark
             _evaluationTicksM2 += delta * (result.EvaluationTicks - _meanEvaluationTicks);
 
             _allocatedManagedBytes += result.AllocatedManagedBytes;
+            _retainedManagedBytes += result.RetainedManagedBytes;
+            _privateBytes += result.PrivateBytes;
+            _peakWorkingSetBytes += result.PeakWorkingSetBytes;
             _nativeReports += result.NativeReports;
-            _nativeObservations += result.NativeObservations;
+            _nativePathProbes += result.NativePathProbes;
+            _nativeEnumerations += result.NativeEnumerations;
+            _nativeMetadataReads += result.NativeMetadataReads;
+            _nativeFileReads += result.NativeFileReads;
+            _nativeSemanticObservations += result.NativeSemanticObservations;
+            _nativeUniquePaths += result.NativeUniquePaths;
+            _semanticComparisons += result.SemanticComparisons;
+            _semanticImports += result.SemanticImports;
+            _semanticProperties += result.SemanticProperties;
+            _semanticItems += result.SemanticItems;
+            _semanticMetadata += result.SemanticMetadata;
+            _detoursAccesses += result.DetoursAccesses;
+            _detoursUniquePaths += result.DetoursUniquePaths;
+            _nativeDetoursOverlap += result.NativeDetoursOverlap;
+            _nativeOnlyPaths += result.NativeOnlyPaths;
+            _detoursOnlyPaths += result.DetoursOnlyPaths;
         }
 
         internal string Format(
-            bool observationEnabled,
+            EvaluationObservationBenchmarkMode mode,
             EvaluationObservationBenchmarkScenario scenario)
         {
             return string.Join(
                 "|",
                 "EVALUATION_OBSERVATION_SUMMARY",
-                $"ObservationEnabled={observationEnabled}",
+                $"Mode={mode}",
                 $"Scenario={scenario}",
                 Pair("Samples", _samples),
                 Pair("EvaluationTicks", Average(_evaluationTicks)),
@@ -223,8 +251,26 @@ public class EvaluationObservationBenchmark
                 Pair("EvaluationMinMilliseconds", ToMilliseconds(_minimumEvaluationTicks)),
                 Pair("EvaluationMaxMilliseconds", ToMilliseconds(_maximumEvaluationTicks)),
                 Pair("AllocatedManagedBytes", Average(_allocatedManagedBytes)),
+                Pair("RetainedManagedBytes", Average(_retainedManagedBytes)),
+                Pair("PrivateBytes", Average(_privateBytes)),
+                Pair("PeakWorkingSetBytes", Average(_peakWorkingSetBytes)),
                 Pair("NativeReports", Average(_nativeReports)),
-                Pair("NativeObservations", Average(_nativeObservations)));
+                Pair("NativePathProbes", Average(_nativePathProbes)),
+                Pair("NativeEnumerations", Average(_nativeEnumerations)),
+                Pair("NativeMetadataReads", Average(_nativeMetadataReads)),
+                Pair("NativeFileReads", Average(_nativeFileReads)),
+                Pair("NativeSemanticObservations", Average(_nativeSemanticObservations)),
+                Pair("NativeUniquePaths", Average(_nativeUniquePaths)),
+                Pair("SemanticComparisons", Average(_semanticComparisons)),
+                Pair("SemanticImports", Average(_semanticImports)),
+                Pair("SemanticProperties", Average(_semanticProperties)),
+                Pair("SemanticItems", Average(_semanticItems)),
+                Pair("SemanticMetadata", Average(_semanticMetadata)),
+                Pair("DetoursAccesses", Average(_detoursAccesses)),
+                Pair("DetoursUniquePaths", Average(_detoursUniquePaths)),
+                Pair("NativeDetoursOverlap", Average(_nativeDetoursOverlap)),
+                Pair("NativeOnlyPaths", Average(_nativeOnlyPaths)),
+                Pair("DetoursOnlyPaths", Average(_detoursOnlyPaths)));
         }
 
         private long Average(long value) => _samples == 0 ? 0 : value / _samples;
