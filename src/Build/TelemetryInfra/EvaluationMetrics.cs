@@ -47,7 +47,6 @@ internal static class EvaluationMetrics
     /// <summary>Disables Metrics after an instrumentation failure so evaluation can continue safely.</summary>
     private static int s_disabled;
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     internal static long EvaluateStart()
     {
         if (Volatile.Read(ref s_disabled) != 0)
@@ -57,7 +56,7 @@ internal static class EvaluationMetrics
 
         try
         {
-            return Instruments.ProjectEvaluationDuration.Enabled ? Stopwatch.GetTimestamp() : 0;
+            return EvaluateStartCore();
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
         {
@@ -66,7 +65,11 @@ internal static class EvaluationMetrics
         }
     }
 
+    // Keep Metrics type resolution inside EvaluateStart's catch boundary.
     [MethodImpl(MethodImplOptions.NoInlining)]
+    private static long EvaluateStartCore() =>
+        Instruments.ProjectEvaluationDuration.Enabled ? Stopwatch.GetTimestamp() : 0;
+
     internal static void EvaluateStop(
         long startTimestamp,
         ProjectEvaluationStage stage,
@@ -80,35 +83,46 @@ internal static class EvaluationMetrics
 
         try
         {
-            long endTimestamp = startTimestamp != 0 ? Stopwatch.GetTimestamp() : 0;
-            bool countEnabled = Instruments.ProjectEvaluationCount.Enabled;
-            bool durationEnabled = startTimestamp != 0 && Instruments.ProjectEvaluationDuration.Enabled;
-            if (!countEnabled && !durationEnabled)
-            {
-                return;
-            }
-
-            TagList tags = default;
-            tags.Add(StageTagName, GetStageName(stage));
-            tags.Add(
-                OriginTagName,
-                submissionId != BuildEventContext.InvalidSubmissionId ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
-            tags.Add(SucceededTagName, succeeded);
-
-            if (countEnabled)
-            {
-                Instruments.ProjectEvaluationCount.Add(1, in tags);
-            }
-
-            if (durationEnabled)
-            {
-                double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
-                Instruments.ProjectEvaluationDuration.Record(elapsedSeconds, in tags);
-            }
+            EvaluateStopCore(startTimestamp, stage, submissionId, succeeded);
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
         {
             Disable(ex);
+        }
+    }
+
+    // Keep Metrics type resolution inside EvaluateStop's catch boundary.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void EvaluateStopCore(
+        long startTimestamp,
+        ProjectEvaluationStage stage,
+        int submissionId,
+        bool succeeded)
+    {
+        long endTimestamp = startTimestamp != 0 ? Stopwatch.GetTimestamp() : 0;
+        bool countEnabled = Instruments.ProjectEvaluationCount.Enabled;
+        bool durationEnabled = startTimestamp != 0 && Instruments.ProjectEvaluationDuration.Enabled;
+        if (!countEnabled && !durationEnabled)
+        {
+            return;
+        }
+
+        TagList tags = default;
+        tags.Add(StageTagName, GetStageName(stage));
+        tags.Add(
+            OriginTagName,
+            submissionId != BuildEventContext.InvalidSubmissionId ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
+        tags.Add(SucceededTagName, succeeded);
+
+        if (countEnabled)
+        {
+            Instruments.ProjectEvaluationCount.Add(1, in tags);
+        }
+
+        if (durationEnabled)
+        {
+            double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
+            Instruments.ProjectEvaluationDuration.Record(elapsedSeconds, in tags);
         }
     }
 
@@ -139,7 +153,6 @@ internal static class EvaluationMetrics
     internal static void EvaluatePass5Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.Targets, stage, submissionId);
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     internal static long EvaluatePassStart()
     {
         if (Volatile.Read(ref s_disabled) != 0)
@@ -149,7 +162,7 @@ internal static class EvaluationMetrics
 
         try
         {
-            return Instruments.ProjectEvaluationPassDuration.Enabled ? Stopwatch.GetTimestamp() : 0;
+            return EvaluatePassStartCore();
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
         {
@@ -157,6 +170,11 @@ internal static class EvaluationMetrics
             return 0;
         }
     }
+
+    // Keep Metrics type resolution inside EvaluatePassStart's catch boundary.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static long EvaluatePassStartCore() =>
+        Instruments.ProjectEvaluationPassDuration.Enabled ? Stopwatch.GetTimestamp() : 0;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static long EvaluatePassEnd(long startTimestamp)
@@ -210,7 +228,6 @@ internal static class EvaluationMetrics
         _ => "unknown",
     };
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     private static void EvaluatePassStop(
         long startTimestamp,
         EvaluationPass pass,
@@ -225,12 +242,7 @@ internal static class EvaluationMetrics
         try
         {
             long endTimestamp = Stopwatch.GetTimestamp();
-            if (!Instruments.ProjectEvaluationPassDuration.Enabled)
-            {
-                return;
-            }
-
-            RecordPassDuration(startTimestamp, endTimestamp, pass, stage, submissionId);
+            EvaluatePassStopCore(startTimestamp, endTimestamp, pass, stage, submissionId);
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
         {
@@ -238,7 +250,6 @@ internal static class EvaluationMetrics
         }
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     private static void EvaluatePassStop(
         long startTimestamp,
         long endTimestamp,
@@ -253,17 +264,29 @@ internal static class EvaluationMetrics
 
         try
         {
-            if (!Instruments.ProjectEvaluationPassDuration.Enabled)
-            {
-                return;
-            }
-
-            RecordPassDuration(startTimestamp, endTimestamp, pass, stage, submissionId);
+            EvaluatePassStopCore(startTimestamp, endTimestamp, pass, stage, submissionId);
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
         {
             Disable(ex);
         }
+    }
+
+    // Keep Metrics type resolution inside EvaluatePassStop's catch boundary.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void EvaluatePassStopCore(
+        long startTimestamp,
+        long endTimestamp,
+        EvaluationPass pass,
+        ProjectEvaluationStage stage,
+        int submissionId)
+    {
+        if (!Instruments.ProjectEvaluationPassDuration.Enabled)
+        {
+            return;
+        }
+
+        RecordPassDuration(startTimestamp, endTimestamp, pass, stage, submissionId);
     }
 
     private static void RecordPassDuration(

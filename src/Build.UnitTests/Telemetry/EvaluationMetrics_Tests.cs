@@ -20,6 +20,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 
@@ -199,6 +200,41 @@ public sealed class EvaluationMetrics_Tests
             ProjectInstance.FromProjectRootElement(
                 CreateRootElement("<Project />"),
                 new ProjectOptions { ProjectCollection = collection }));
+    }
+
+    [WindowsFullFrameworkOnlyFact]
+    public void MissingDiagnosticSourceDoesNotBreakEvaluation()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFolder isolatedMSBuild = env.CreateFolder(createFolder: true);
+        string bootstrapDirectory = Path.GetDirectoryName(RunnerUtilities.BootstrapMSBuildExecutablePath).ShouldNotBeNull();
+        string diagnosticSourceFileName = "System.Diagnostics.DiagnosticSource.dll";
+
+        File.Exists(Path.Combine(bootstrapDirectory, diagnosticSourceFileName)).ShouldBeTrue();
+        foreach (string file in Directory.EnumerateFiles(bootstrapDirectory))
+        {
+            if (!string.Equals(Path.GetFileName(file), diagnosticSourceFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                File.Copy(file, Path.Combine(isolatedMSBuild.Path, Path.GetFileName(file)));
+            }
+        }
+
+        TransientTestFile project = env.CreateFile(
+            isolatedMSBuild,
+            "evaluation-metrics.proj",
+            """
+            <Project>
+              <Target Name="Build" />
+            </Project>
+            """);
+
+        string output = RunnerUtilities.ExecMSBuild(
+            Path.Combine(isolatedMSBuild.Path, "MSBuild.exe"),
+            $"\"{project.Path}\" -nologo -v:q -m:1 -nr:false",
+            out bool success,
+            outputHelper: _output);
+
+        success.ShouldBeTrue(output);
     }
 
     private static string[] GetExpectedMetricPasses(ProjectEvaluationStage stage) => stage switch
