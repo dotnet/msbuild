@@ -6,9 +6,15 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnostics.Windows;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using MSBuild.Benchmarks;
 using static MSBuild.Benchmarks.Extensions;
 
 var argList = new List<string>(args);
+
+if (EvaluationObservationBenchmarkHost.TryRun(argList, out int hostExitCode))
+{
+    return hostExitCode;
+}
 
 ParseAndRemoveBooleanParameter(argList, "--collect-etw", out bool collectEtw);
 ParseAndRemoveBooleanParameter(argList, "--disable-ngen", out bool disableNGen);
