@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -502,7 +503,12 @@ namespace Microsoft.Build.Evaluation
             }
 #endif
 
-            return taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation);
+            bool exists = taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation);
+            EvaluationObservationSession.Current?.RecordProbe(
+                taskHostLocation,
+                EvaluationPathKind.File,
+                exists);
+            return exists;
         }
 
         /// <summary>
@@ -720,12 +726,34 @@ namespace Microsoft.Build.Evaluation
 
         public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
 
-        public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
+        public static bool RegisterBuildCheck(
+            string projectPath,
+            string pathToAssembly,
+            IFileSystem fileSystem,
+            LoggingContext loggingContext)
         {
             pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
-            if (FileSystems.Default.FileExists(pathToAssembly))
+            bool exists = FileUtilities.FileExistsNoThrow(pathToAssembly, fileSystem);
+            if (exists)
             {
+                EvaluationObservationSession observationSession = EvaluationObservationSession.Current;
+                if (observationSession is not null)
+                {
+                    try
+                    {
+                        _ = fileSystem.ReadFileAllBytes(pathToAssembly);
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        observationSession.MarkReason(EvaluationObservationReason.ObservationIncomplete);
+                    }
+                }
+
                 loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
+                EvaluationObservationSession.Current?.RecordSideEffect(
+                    "RegisterBuildCheck",
+                    pathToAssembly,
+                    projectPath);
 
                 return true;
             }

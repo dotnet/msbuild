@@ -15,6 +15,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -431,6 +432,7 @@ namespace Microsoft.Build.Execution
                     architecture == string.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
+            bool isOverride = ConversionUtilities.ValidBooleanTrue(overrideUsingTask);
             taskRegistry.RegisterTask(
                 taskName,
                 AssemblyLoadInfo.Create(assemblyName, assemblyFile),
@@ -439,7 +441,16 @@ namespace Microsoft.Build.Execution
                 parameterGroupAndTaskElementRecord,
                 loggingContext,
                 projectUsingTaskXml,
-                ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
+                isOverride);
+
+            EvaluationObservationSession.Current?.RecordTaskRegistration(
+                taskName,
+                taskFactory,
+                assemblyFile,
+                assemblyName,
+                runtime,
+                architecture,
+                isOverride);
         }
 
         /// <summary>

@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 #endif
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -748,10 +749,26 @@ internal partial class Expander<P, I>
                 }
                 catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                 {
+                    EvaluationObservationSession.Current?.RecordExternalInput(
+                        EvaluationExternalInputKind.Registry,
+                        "RegistryPropertyExpression",
+                        registryExpression,
+                        string.Concat("<failed:", ex.GetType().FullName, ">"));
+                    EvaluationObservationSession.Current?.RecordOperationFailure(
+                        EvaluationObservationCategory.Registry,
+                        "RegistryPropertyExpression",
+                        path: null,
+                        provider: null,
+                        ex);
                     ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "InvalidRegistryPropertyExpression", $"$({registryExpression})", ex.Message);
                 }
             }
 
+            EvaluationObservationSession.Current?.RecordExternalInput(
+                EvaluationExternalInputKind.Registry,
+                "RegistryPropertyExpression",
+                registryExpression,
+                result);
             return result;
         }
     }

@@ -1971,6 +1971,10 @@ namespace Microsoft.Build.Evaluation
                 // passed a relative path, the caller assumes we will prepend the current directory.
                 projectFile = FileUtilities.NormalizePath(projectFile);
 
+                EvaluationProjectSourceLoadCapture sourceLoadCapture =
+                    EvaluationObservationSession.IsEnabled
+                        ? new EvaluationProjectSourceLoadCapture()
+                        : null;
                 try
                 {
                     Xml = ProjectRootElement.OpenProjectOrSolution(
@@ -1978,10 +1982,17 @@ namespace Microsoft.Build.Evaluation
                         globalProperties,
                         toolsVersion,
                         ProjectCollection.ProjectRootElementCache,
-                        true /*Explicitly loaded*/);
+                        true /*Explicitly loaded*/,
+                        sourceLoadCapture);
                 }
                 catch (InvalidProjectFileException ex)
                 {
+                    EvaluationObservationSession.ReportProjectLoadFailure(
+                        s_buildEventContext.EvaluationId,
+                        projectFile,
+                        ProjectEvaluationStage.Full,
+                        evaluationContext?.Policy ?? EvaluationContext.SharingPolicy.Isolated,
+                        sourceLoadCapture);
                     LoggingService.LogInvalidProjectFileError(s_buildEventContext, ex);
                     throw;
                 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -50,7 +51,24 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (var item in list)
                     {
-                        if (item == null || !(state.LoadedProjectsCache?.TryGet(item) != null || FileUtilities.FileOrDirectoryExistsNoThrow(item, state.FileSystem)))
+                        if (item == null)
+                        {
+                            return false;
+                        }
+
+                        if (state.LoadedProjectsCache?.TryGet(item) is not null)
+                        {
+                            EvaluationObservationSession.Current?.RecordProbe(
+                                item,
+                                EvaluationPathKind.FileOrDirectory,
+                                exists: true,
+                                provider: state.LoadedProjectsCache.GetType().AssemblyQualifiedName);
+                            EvaluationObservationSession.Current?.MarkReason(
+                                EvaluationObservationReason.UnversionedProjectRootElementCache);
+                            continue;
+                        }
+
+                        if (!FileUtilities.FileOrDirectoryExistsNoThrow(item, state.FileSystem))
                         {
                             return false;
                         }

@@ -20,6 +20,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
@@ -323,7 +324,31 @@ namespace Microsoft.Build.Execution
             };
 
             BuildEventContext buildEventContext = new BuildEventContext(buildParameters.NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
+            EvaluationProjectSourceLoadCapture sourceLoadCapture =
+                EvaluationObservationSession.IsEnabled
+                    ? new EvaluationProjectSourceLoadCapture()
+                    : null;
+            ProjectRootElement xml;
+            try
+            {
+                xml = ProjectRootElement.OpenProjectOrSolution(
+                    projectFile,
+                    globalProperties,
+                    toolsVersion,
+                    buildParameters.ProjectRootElementCache,
+                    true /*Explicitly Loaded*/,
+                    sourceLoadCapture);
+            }
+            catch (InvalidProjectFileException)
+            {
+                EvaluationObservationSession.ReportProjectLoadFailure(
+                    buildEventContext.EvaluationId,
+                    projectFile,
+                    evaluationStage,
+                    evaluationContext?.Policy ?? EvaluationContext.SharingPolicy.Isolated,
+                    sourceLoadCapture);
+                throw;
+            }
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext,
                 projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory, evaluationStage: evaluationStage);
@@ -659,7 +684,31 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ArgumentNullException.ThrowIfNull(buildParameters);
 
-            ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, false /*Not explicitly loaded*/);
+            EvaluationProjectSourceLoadCapture sourceLoadCapture =
+                EvaluationObservationSession.IsEnabled
+                    ? new EvaluationProjectSourceLoadCapture()
+                    : null;
+            ProjectRootElement xml;
+            try
+            {
+                xml = ProjectRootElement.OpenProjectOrSolution(
+                    projectFile,
+                    globalProperties,
+                    toolsVersion,
+                    buildParameters.ProjectRootElementCache,
+                    false /*Not explicitly loaded*/,
+                    sourceLoadCapture);
+            }
+            catch (InvalidProjectFileException)
+            {
+                EvaluationObservationSession.ReportProjectLoadFailure(
+                    buildEventContext.EvaluationId,
+                    projectFile,
+                    ProjectEvaluationStage.Full,
+                    EvaluationContext.SharingPolicy.Isolated,
+                    sourceLoadCapture);
+                throw;
+            }
 
             Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId, projectLoadSettings);
         }

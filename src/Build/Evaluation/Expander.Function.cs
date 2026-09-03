@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Evaluation.Expander;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -357,6 +358,52 @@ internal partial class Expander<P, I>
             return false;
         }
 
+        private string GetObservationPathBaseDirectory(object[] args)
+        {
+            EvaluationObservationSession session = EvaluationObservationSession.Current;
+            if (session is null ||
+                args is not { Length: > 0 } ||
+                args[0] is not string path ||
+                string.IsNullOrEmpty(path) ||
+                FileUtilities.IsPathFullyQualifiedNoThrow(path))
+            {
+                return null;
+            }
+
+            bool hasPathInput =
+                _receiverType == typeof(System.IO.File) ||
+                _receiverType == typeof(System.IO.Directory) ||
+                (_receiverType == typeof(System.IO.Path) &&
+                    (string.Equals(_methodMethodName, "Exists", StringComparison.OrdinalIgnoreCase) ||
+                     (string.Equals(_methodMethodName, nameof(System.IO.Path.GetFullPath), StringComparison.OrdinalIgnoreCase) &&
+                      args.Length == 1))) ||
+                (_receiverType == typeof(IntrinsicFunctions) &&
+                    (string.Equals(_methodMethodName, "FileExists", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(_methodMethodName, "DirectoryExists", StringComparison.OrdinalIgnoreCase)));
+            if (!hasPathInput)
+            {
+                return null;
+            }
+
+            if (_receiverType == typeof(System.IO.Path) &&
+                string.Equals(_methodMethodName, nameof(System.IO.Path.GetFullPath), StringComparison.OrdinalIgnoreCase) &&
+                args.Length == 1 &&
+                !string.IsNullOrEmpty(FileUtilities.CurrentThreadWorkingDirectory))
+            {
+                return FileUtilities.CurrentThreadWorkingDirectory;
+            }
+
+            try
+            {
+                return System.IO.Directory.GetCurrentDirectory();
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                session.MarkReason(EvaluationObservationReason.ObservationIncomplete);
+                return null;
+            }
+        }
+
         /// <summary>
         /// Execute the function on the given instance.
         /// </summary>
@@ -368,6 +415,9 @@ internal partial class Expander<P, I>
         {
             object functionResult = String.Empty;
             object[] args = null;
+            object[] observationArguments = null;
+            object[] usageArguments = null;
+            string observationPathBaseDirectory = null;
 
             try
             {
@@ -429,27 +479,38 @@ internal partial class Expander<P, I>
                         }
 
                         args[n] = EscapingUtilities.UnescapeAll(argumentValue);
+                    }
+                    else
+                    {
+                        args[n] = argument;
+                    }
+                }
 
-                        // In -mt mode, resolve relative path arguments for File/Directory methods
-                        // against the thread-local working directory instead of the process-global
-                        // Environment.CurrentDirectory which may point to a different project's directory.
-                        // In multiprocess mode, CurrentThreadWorkingDirectory is null and
-                        // MakeFullPathFromThreadWorkingDirectory returns null — this is a no-op.
-                        // This must happen AFTER UnescapeAll so that the working directory path
-                        // (a real filesystem path) is not corrupted by MSBuild unescape processing.
-                        if ((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory))
-                            && IsFileOrDirectoryPathArgument(_methodMethodName, n))
+                if (EvaluationObservationSession.Current is not null)
+                {
+                    usageArguments = (object[])args.Clone();
+                }
+
+                // In -mt mode, resolve relative path arguments for File/Directory methods
+                // against the thread-local working directory instead of the process-global
+                // Environment.CurrentDirectory which may point to a different project's directory.
+                // In multiprocess mode, CurrentThreadWorkingDirectory is null and
+                // MakeFullPathFromThreadWorkingDirectory returns null — this is a no-op.
+                // This must happen AFTER UnescapeAll so that the working directory path
+                // (a real filesystem path) is not corrupted by MSBuild unescape processing.
+                if (_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory))
+                {
+                    for (int n = 0; n < args.Length; n++)
+                    {
+                        if (args[n] is string pathArgument &&
+                            IsFileOrDirectoryPathArgument(_methodMethodName, n))
                         {
-                            AbsolutePath? resolved = FileUtilities.MakeFullPathFromThreadWorkingDirectory((string)args[n]);
+                            AbsolutePath? resolved = FileUtilities.MakeFullPathFromThreadWorkingDirectory(pathArgument);
                             if (resolved.HasValue)
                             {
                                 args[n] = (string)resolved.GetValueOrDefault();
                             }
                         }
-                    }
-                    else
-                    {
-                        args[n] = argument;
                     }
                 }
 
@@ -486,8 +547,15 @@ internal partial class Expander<P, I>
                         string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
                         args = [args[0], startingDirectory];
+                        if (usageArguments is not null)
+                        {
+                            usageArguments = [usageArguments[0], startingDirectory];
+                        }
                     }
                 }
+
+                observationArguments = args;
+                observationPathBaseDirectory = GetObservationPathBaseDirectory(args);
 
                 // If we've been asked to construct an instance, then we
                 // need to locate an appropriate constructor and invoke it
@@ -495,7 +563,13 @@ internal partial class Expander<P, I>
                 {
                     if (!WellKnownFunctions.TryExecuteWellKnownConstructorNoThrow(_receiverType, out functionResult, args))
                     {
-                        functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
+                        functionResult = LateBindExecute(
+                            null /* no previous exception */,
+                            BindingFlags.Public | BindingFlags.Instance,
+                            null /* no instance for a constructor */,
+                            args,
+                            ref observationArguments,
+                            true /* is constructor */);
                     }
                 }
                 else
@@ -511,13 +585,37 @@ internal partial class Expander<P, I>
                         if (!wellKnownFunctionSuccess)
                         {
                             // Some well-known functions need evaluated value from properties.
-                            wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteWellKnownFunctionWithPropertiesParam(_methodMethodName, _receiverType, _loggingContext, properties, out functionResult, objectInstance, args);
+                            wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteWellKnownFunctionWithPropertiesParam(
+                                _methodMethodName,
+                                _receiverType,
+                                _fileSystem,
+                                _loggingContext,
+                                properties,
+                                out functionResult,
+                                objectInstance,
+                                args);
                         }
                     }
                     // we need to preserve the same behavior on exceptions as the actual binder
                     catch (Exception ex)
                     {
                         string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _methodMethodName, args);
+                        EvaluationObservationSession.Current?.RecordPropertyFunction(
+                            _receiverType,
+                            _methodMethodName,
+                            objectInstance,
+                            args,
+                            result: null,
+                            succeeded: false,
+                            pathBaseDirectory: observationPathBaseDirectory,
+                            usageArguments: usageArguments);
+                        EvaluationObservationSession.Current?.RecordPropertyFunctionFailure(
+                            _receiverType,
+                            _methodMethodName,
+                            objectInstance,
+                            observationArguments ?? args,
+                            observationPathBaseDirectory,
+                            ex);
                         if (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
                         {
                             return partiallyEvaluated;
@@ -551,10 +649,25 @@ internal partial class Expander<P, I>
                         {
                             // The standard binder failed, so do our best to coerce types into the arguments for the function
                             // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true.
-                            functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
+                            functionResult = LateBindExecute(
+                                ex,
+                                _bindingFlags,
+                                objectInstance,
+                                args,
+                                ref observationArguments,
+                                false /* is not constructor */);
                         }
                     }
                 }
+
+                EvaluationObservationSession.Current?.RecordPropertyFunction(
+                    _receiverType,
+                    _methodMethodName,
+                    objectInstance,
+                    observationArguments,
+                    functionResult,
+                    pathBaseDirectory: observationPathBaseDirectory,
+                    usageArguments: usageArguments);
 
                 // If the result of the function call is a string, then we need to escape the result
                 // so that we maintain the "engine contains escaped data" state.
@@ -587,6 +700,22 @@ internal partial class Expander<P, I>
             // Exceptions coming from the actual function called are wrapped in a TargetInvocationException
             catch (TargetInvocationException ex)
             {
+                EvaluationObservationSession.Current?.RecordPropertyFunction(
+                    _receiverType,
+                    _methodMethodName,
+                    objectInstance,
+                    observationArguments ?? args,
+                    result: null,
+                    succeeded: false,
+                    pathBaseDirectory: observationPathBaseDirectory,
+                    usageArguments: usageArguments);
+                EvaluationObservationSession.Current?.RecordPropertyFunctionFailure(
+                    _receiverType,
+                    _methodMethodName,
+                    objectInstance,
+                    observationArguments ?? args,
+                    observationPathBaseDirectory,
+                    ex.InnerException ?? ex);
                 // We ended up with something other than a function expression
                 string partiallyEvaluated = GenerateStringOfMethodExecuted(_expression, objectInstance, _methodMethodName, args);
                 if (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
@@ -601,6 +730,22 @@ internal partial class Expander<P, I>
             // Any other exception was thrown by trying to call it
             catch (Exception ex) when (!ExceptionHandling.NotExpectedFunctionException(ex))
             {
+                EvaluationObservationSession.Current?.RecordPropertyFunction(
+                    _receiverType,
+                    _methodMethodName,
+                    objectInstance,
+                    observationArguments ?? args,
+                    result: null,
+                    succeeded: false,
+                    pathBaseDirectory: observationPathBaseDirectory,
+                    usageArguments: usageArguments);
+                EvaluationObservationSession.Current?.RecordPropertyFunctionFailure(
+                    _receiverType,
+                    _methodMethodName,
+                    objectInstance,
+                    observationArguments ?? args,
+                    observationPathBaseDirectory,
+                    ex);
                 // If there's a :: in the expression, they were probably trying for a static function
                 // invocation. Give them some more relevant info in that case
                 if (s_invariantCompareInfo.IndexOf(_expression, "::", CompareOptions.OrdinalIgnoreCase) > -1)
@@ -1241,7 +1386,13 @@ internal partial class Expander<P, I>
             Justification = "The only RDC method reachable here is Enum.GetValues(Type), which is unreachable via property functions; see comment above.")]
         [UnconditionalSuppressMessage("Trimming", "IL2080:UnrecognizedReflectionPattern",
             Justification = "_bindingFlags is masked to AllowedBindingFlags at construction, so it never carries BindingFlags.NonPublic; GetMethods(_bindingFlags) therefore binds only public methods of the property-function allowlist receiver, whose public members are preserved for trimming.")]
-        private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
+        private object LateBindExecute(
+            Exception ex,
+            BindingFlags bindingFlags,
+            object objectInstance /* null unless instance method */,
+            object[] args,
+            ref object[] observationArguments,
+            bool isConstructor)
         {
             // First let's try for a method where all arguments are strings..
             Type[] types = new Type[_arguments.Length];
@@ -1310,6 +1461,7 @@ internal partial class Expander<P, I>
                             // We have a complete match
                             memberInfo = member;
                             args = coercedArguments;
+                            observationArguments = coercedArguments;
                             break;
                         }
                     }

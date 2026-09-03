@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -194,6 +195,9 @@ namespace Microsoft.Build.Internal
             var filespecHasNoWildCards = !FilespecHasWildcards(filespecEscaped);
             var filespecMatchesLazyWildcard = FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards);
             var excludeSpecsAreEmpty = excludeSpecsEscaped?.Any() != true;
+            List<string>? effectiveExcludes = null;
+            bool driveEnumerating = false;
+            string? globFailure = null;
 
             // Return original value if:
             //      FileSpec matches lazyloading regex or
@@ -213,7 +217,7 @@ namespace Microsoft.Build.Internal
                 // Unescape before handing it to the filesystem.
                 var directoryUnescaped = EscapingUtilities.UnescapeAll(directoryEscaped);
                 var filespecUnescaped = EscapingUtilities.UnescapeAll(filespecEscaped);
-                var excludeSpecsUnescaped = excludeSpecsEscaped?.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
+                effectiveExcludes = excludeSpecsEscaped?.Where(IsValidExclude).Select(i => EscapingUtilities.UnescapeAll(i)).ToList();
 
                 // Extract file spec information
                 FileMatcher.Default.GetFileSpecInfo(filespecUnescaped, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
@@ -222,9 +226,9 @@ namespace Microsoft.Build.Internal
                 bool logDriveEnumeratingWildcard = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
 
                 // Process exclude specs (if provided) and check if any of them contain a drive-enumerating wildcard
-                if (excludeSpecsUnescaped != null)
+                if (effectiveExcludes != null)
                 {
-                    foreach (string excludeSpec in excludeSpecsUnescaped)
+                    foreach (string excludeSpec in effectiveExcludes)
                     {
                         FileMatcher.Default.GetFileSpecInfo(excludeSpec, out directoryPart, out wildcardPart, out filenamePart, out needsRecursion, out isLegalFileSpec);
                         bool logDriveEnumeratingWildcardFromExludeSpec = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
@@ -236,6 +240,7 @@ namespace Microsoft.Build.Internal
                         logDriveEnumeratingWildcard |= logDriveEnumeratingWildcardFromExludeSpec;
                     }
                 }
+                driveEnumerating = logDriveEnumeratingWildcard;
 
                 // Determines whether Exclude filespec or passed in file spec should be
                 // used in drive enumeration warning or exception.
@@ -294,6 +299,17 @@ namespace Microsoft.Build.Internal
 
                 if (logDriveEnumeratingWildcard && Traits.Instance.ThrowOnDriveEnumeratingWildcard)
                 {
+                    EvaluationObservationSession.Current?.RecordGlob(
+                        importLocation is not null ? "Import" : "Item",
+                        directoryUnescaped,
+                        filespecUnescaped,
+                        effectiveExcludes,
+                        [],
+                        resultsEscaped: returnEscaped,
+                        wasLazy: false,
+                        driveEnumerating: true,
+                        failure: "DriveEnumeratingWildcardRejected");
+
                     switch (loggingMechanism)
                     {
                         // Logging mechanism received from ItemGroupIntrinsicTask.
@@ -341,7 +357,10 @@ namespace Microsoft.Build.Internal
                     // as a relative path, we will get back a bunch of relative paths.
                     // If the filespec started out as an absolute path, we will get
                     // back a bunch of absolute paths
-                    (fileList, _, _, string? globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                    using (EvaluationObservationSession.SuppressDirectoryEnumerations())
+                    {
+                        (fileList, _, _, globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, effectiveExcludes);
+                    }
 
                     // log globing failure with the present logging mechanism, skip if there is no logging mechanism
                     if (globFailure != null && loggingMechanism != null)
@@ -387,6 +406,20 @@ namespace Microsoft.Build.Internal
                         }
                     }
                 }
+            }
+
+            if (!filespecHasNoWildCards || !excludeSpecsAreEmpty)
+            {
+                EvaluationObservationSession.Current?.RecordGlob(
+                    importLocation is not null ? "Import" : "Item",
+                    EscapingUtilities.UnescapeAll(directoryEscaped),
+                    EscapingUtilities.UnescapeAll(filespecEscaped),
+                    effectiveExcludes,
+                    fileList,
+                    returnEscaped,
+                    filespecMatchesLazyWildcard,
+                    driveEnumerating,
+                    globFailure);
             }
 
             return fileList;
@@ -605,7 +638,29 @@ namespace Microsoft.Build.Internal
 
             public bool DirectoryExists(string directory)
             {
-                return existenceCache.Value.GetOrAdd(directory, directory => FileSystems.Default.DirectoryExists(directory));
+                return existenceCache.Value.GetOrAdd(
+                    directory,
+                    static path => FileSystems.Default.DirectoryExists(path));
+            }
+
+            public bool DirectoryExists(string directory, out bool cacheHit)
+            {
+                ConcurrentDictionary<string, bool> cache = existenceCache.Value;
+                if (cache.TryGetValue(directory, out bool result))
+                {
+                    cacheHit = true;
+                    return result;
+                }
+
+                bool probedResult = FileSystems.Default.DirectoryExists(directory);
+                if (cache.TryAdd(directory, probedResult))
+                {
+                    cacheHit = false;
+                    return probedResult;
+                }
+
+                cacheHit = true;
+                return cache[directory];
             }
         }
     }

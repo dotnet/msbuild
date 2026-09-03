@@ -15,6 +15,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -411,7 +412,22 @@ namespace Microsoft.Build.Evaluation
 
                 if (!string.IsNullOrEmpty(parseConfigDirectory))
                 {
-                    string configPath = FileUtilities.GetPathOfFileAbove(ParserIgnoreConfiguration.ConfigFileName, parseConfigDirectory);
+                    string configPath;
+                    if (EvaluationObservationSession.IsEnabled)
+                    {
+                        configPath = FileUtilities.GetPathOfFileAbove(
+                            ParserIgnoreConfiguration.ConfigFileName,
+                            parseConfigDirectory,
+                            out string[] parseConfigCandidates);
+                        config.RecordUpwardSearch(parseConfigDirectory, parseConfigCandidates, configPath);
+                    }
+                    else
+                    {
+                        configPath = FileUtilities.GetPathOfFileAbove(
+                            ParserIgnoreConfiguration.ConfigFileName,
+                            parseConfigDirectory);
+                    }
+
                     if (!string.IsNullOrEmpty(configPath) && !config.ContainsLoadedFile(configPath))
                     {
                         config = ParserIgnoreConfiguration.Merge(config, ParserIgnoreConfiguration.LoadFromFile(configPath));

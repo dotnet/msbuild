@@ -416,10 +416,18 @@ internal static class ItemSpecModifiers
             switch (modifier)
             {
                 case ItemSpecModifierKind.FullPath:
-                    return cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec);
+                    return Observe(
+                        itemSpec,
+                        modifier,
+                        currentDirectory,
+                        cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
 
                 case ItemSpecModifierKind.RootDir:
-                    return ComputeRootDir(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
+                    return Observe(
+                        itemSpec,
+                        modifier,
+                        currentDirectory,
+                        ComputeRootDir(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec)));
 
                 case ItemSpecModifierKind.Filename:
                     return ComputeFilename(itemSpec);
@@ -428,10 +436,14 @@ internal static class ItemSpecModifiers
                     return ComputeExtension(itemSpec);
 
                 case ItemSpecModifierKind.RelativeDir:
-                    return ComputeRelativeDir(itemSpec);
+                    return Observe(itemSpec, modifier, currentDirectory, ComputeRelativeDir(itemSpec));
 
                 case ItemSpecModifierKind.Directory:
-                    return ComputeDirectory(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
+                    return Observe(
+                        itemSpec,
+                        modifier,
+                        currentDirectory,
+                        ComputeDirectory(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec)));
 
                 case ItemSpecModifierKind.RecursiveDir:
                     return string.Empty;
@@ -493,6 +505,26 @@ internal static class ItemSpecModifiers
         }
 
         return Assumed.Unreachable<string>($"\"{modifier}\" is not a valid item-spec modifier.");
+    }
+
+    private static string Observe(
+        string itemSpec,
+        ItemSpecModifierKind modifier,
+        string? currentDirectory,
+        string value)
+    {
+        IEvaluationInputObserver? observer = EvaluationInputObserver.Current;
+        if (observer is null)
+        {
+            return value;
+        }
+
+        observer.RecordItemMetadata(
+            itemSpec,
+            modifier.ToString(),
+            currentDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? string.Empty,
+            value);
+        return value;
     }
 
     private static string ComputeFullPath(string? currentDirectory, string itemSpec)
@@ -598,26 +630,129 @@ internal static class ItemSpecModifiers
     }
 
     private static string ComputeModifiedTime(string itemSpec)
-        => TryGetFileInfo(itemSpec, out FileInfo? info)
-            ? info.LastWriteTime.ToString(FileUtilities.FileTimeFormat)
-            : string.Empty;
+    {
+        if (TryGetFileInfo(
+                itemSpec,
+                out FileInfo? info,
+                out FileInfo? probedFileInfo) &&
+            info is not null)
+        {
+            string value = info.LastWriteTime.ToString(FileUtilities.FileTimeFormat);
+            return ObserveFileTime(
+                itemSpec,
+                ItemSpecModifierKind.ModifiedTime,
+                probedFileInfo,
+                value);
+        }
+
+        return ObserveFileTime(
+            itemSpec,
+            ItemSpecModifierKind.ModifiedTime,
+            probedFileInfo,
+            value: string.Empty);
+    }
 
     private static string ComputeCreatedTime(string itemSpec)
-        => TryGetFileInfo(itemSpec, out FileInfo? info)
-            ? info.CreationTime.ToString(FileUtilities.FileTimeFormat)
-            : string.Empty;
+    {
+        if (TryGetFileInfo(
+                itemSpec,
+                out FileInfo? info,
+                out FileInfo? probedFileInfo) &&
+            info is not null)
+        {
+            string value = info.CreationTime.ToString(FileUtilities.FileTimeFormat);
+            return ObserveFileTime(
+                itemSpec,
+                ItemSpecModifierKind.CreatedTime,
+                probedFileInfo,
+                value);
+        }
+
+        return ObserveFileTime(
+            itemSpec,
+            ItemSpecModifierKind.CreatedTime,
+            probedFileInfo,
+            value: string.Empty);
+    }
 
     private static string ComputeAccessedTime(string itemSpec)
-        => TryGetFileInfo(itemSpec, out FileInfo? info)
-            ? info.LastAccessTime.ToString(FileUtilities.FileTimeFormat)
-            : string.Empty;
+    {
+        if (TryGetFileInfo(
+                itemSpec,
+                out FileInfo? info,
+                out FileInfo? probedFileInfo) &&
+            info is not null)
+        {
+            string value = info.LastAccessTime.ToString(FileUtilities.FileTimeFormat);
+            return ObserveFileTime(
+                itemSpec,
+                ItemSpecModifierKind.AccessedTime,
+                probedFileInfo,
+                value);
+        }
 
-    private static bool TryGetFileInfo(string itemSpec, [NotNullWhen(true)] out FileInfo? result)
+        return ObserveFileTime(
+            itemSpec,
+            ItemSpecModifierKind.AccessedTime,
+            probedFileInfo,
+            value: string.Empty);
+    }
+
+    private static string ObserveFileTime(
+        string itemSpec,
+        ItemSpecModifierKind modifier,
+        FileInfo? probedFileInfo,
+        string value)
+    {
+        IEvaluationInputObserver? observer = EvaluationInputObserver.Current;
+        if (observer is null)
+        {
+            return value;
+        }
+
+        string unescapedItemSpec = EscapingUtilities.UnescapeAll(itemSpec);
+        string observedPath;
+        try
+        {
+            observedPath = probedFileInfo?.FullName ?? unescapedItemSpec;
+        }
+        catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+        {
+            observer.RecordAmbiguousPathProbe(unescapedItemSpec, EvaluationPathProbeKind.File);
+            observedPath = unescapedItemSpec;
+            probedFileInfo = null;
+        }
+
+        string baseDirectory = string.Empty;
+        if (probedFileInfo is not null &&
+            !FileUtilities.IsPathFullyQualifiedNoThrow(unescapedItemSpec))
+        {
+            try
+            {
+                baseDirectory = System.IO.Directory.GetCurrentDirectory();
+            }
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+            {
+            }
+        }
+
+        observer.RecordItemMetadata(
+            observedPath,
+            modifier.ToString(),
+            baseDirectory,
+            value: value);
+        return value;
+    }
+
+    private static bool TryGetFileInfo(
+        string itemSpec,
+        [NotNullWhen(true)] out FileInfo? result,
+        out FileInfo? probedFileInfo)
     {
         // About to go out to the file system.  This means data is leaving the engine, so need to unescape first.
         string unescapedItemSpec = EscapingUtilities.UnescapeAll(itemSpec);
 
-        result = FileUtilities.GetFileInfoNoThrow(unescapedItemSpec);
+        result = FileUtilities.GetFileInfoNoThrow(unescapedItemSpec, out probedFileInfo);
         return result is not null;
     }
 

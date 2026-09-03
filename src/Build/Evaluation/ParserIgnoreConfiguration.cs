@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -22,6 +23,38 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal sealed class ParserIgnoreConfiguration : ITranslatable
     {
+        internal readonly struct Observation
+        {
+            internal Observation(string kind, string request, string? result, Exception? exception)
+            {
+                Kind = kind;
+                Request = request;
+                Result = result;
+                ExceptionType = exception?.GetType().FullName;
+                HResult = exception?.HResult ?? 0;
+                Message = GetExceptionMessage(exception);
+            }
+
+            internal string Kind { get; }
+            internal string Request { get; }
+            internal string? Result { get; }
+            internal string? ExceptionType { get; }
+            internal int HResult { get; }
+            internal string? Message { get; }
+
+            private static string? GetExceptionMessage(Exception? exception)
+            {
+                try
+                {
+                    return exception?.Message;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    return null;
+                }
+            }
+        }
+
         internal const string ConfigFileName = "Directory.Parse.config";
         internal const string EnvironmentVariableName = "MSBUILD_PARSE_CONFIG";
 
@@ -51,6 +84,7 @@ namespace Microsoft.Build.Evaluation
         private Dictionary<string, HashSet<string>> _allowedAttributes;
         private Dictionary<string, HashSet<string>> _allowedChildren;
         private HashSet<string> _loadedConfigFiles;
+        private List<Observation>? _observations;
         private readonly ConcurrentDictionary<string, int> _skippedItems = new(StringComparer.OrdinalIgnoreCase);
 
         private ParserIgnoreConfiguration()
@@ -67,6 +101,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         internal IReadOnlyCollection<string> LoadedConfigFiles => _loadedConfigFiles;
+        internal IReadOnlyList<Observation> Observations => _observations ?? [];
 
         internal static ParserIgnoreConfiguration Empty { get; } = new ParserIgnoreConfiguration();
 
@@ -181,6 +216,8 @@ namespace Microsoft.Build.Evaluation
             UnionEntries(merged._allowedChildren, right._allowedChildren);
             merged._loadedConfigFiles.UnionWith(left._loadedConfigFiles);
             merged._loadedConfigFiles.UnionWith(right._loadedConfigFiles);
+            MergeObservations(merged, left);
+            MergeObservations(merged, right);
             MergeSkippedItems(merged._skippedItems, left._skippedItems);
             MergeSkippedItems(merged._skippedItems, right._skippedItems);
 
@@ -199,6 +236,7 @@ namespace Microsoft.Build.Evaluation
             var config = new ParserIgnoreConfiguration();
 
             string? envValue = Environment.GetEnvironmentVariable(EnvironmentVariableName);
+            config.RecordObservation("Environment", EnvironmentVariableName, envValue);
             if (!string.IsNullOrEmpty(envValue))
             {
                 string[] paths = envValue.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
@@ -283,7 +321,9 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            if (!FileSystems.Default.FileExists(fullPath) || !_loadedConfigFiles.Add(fullPath))
+            bool exists = FileSystems.Default.FileExists(fullPath);
+            RecordObservation("FileProbe", fullPath, exists.ToString());
+            if (!exists || !_loadedConfigFiles.Add(fullPath))
             {
                 return;
             }
@@ -294,7 +334,7 @@ namespace Microsoft.Build.Evaluation
             {
                 var settings = new System.Xml.XmlReaderSettings { DtdProcessing = System.Xml.DtdProcessing.Prohibit };
                 var doc = new System.Xml.XmlDocument();
-                using (var stream = File.OpenRead(fullPath))
+                using (Stream stream = OpenConfigStream(fullPath))
                 using (var reader = System.Xml.XmlReader.Create(stream, settings))
                 {
                     doc.Load(reader);
@@ -303,9 +343,11 @@ namespace Microsoft.Build.Evaluation
                 System.Xml.XmlElement? root = doc.DocumentElement;
                 if (root is null || !root.Name.Equals("ParseConfig", StringComparison.OrdinalIgnoreCase))
                 {
+                    RecordObservation("ParseOutcome", fullPath, "ParsedUnexpectedRoot");
                     return;
                 }
 
+                RecordObservation("ParseOutcome", fullPath, "ParsedParseConfig");
                 foreach (System.Xml.XmlNode child in root.ChildNodes)
                 {
                     if (child.NodeType != System.Xml.XmlNodeType.Element)
@@ -347,9 +389,79 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
             }
-            catch
+            catch (System.Xml.XmlException ex)
             {
-                // If the file can't be parsed as XML, silently skip it
+                RecordObservation(
+                    "ParseOutcome",
+                    fullPath,
+                    string.Concat("MalformedXml:", ex.GetType().FullName));
+            }
+            catch (Exception ex)
+            {
+                RecordObservation("LoadFailure", fullPath, ex.GetType().FullName, ex);
+            }
+        }
+
+        private Stream OpenConfigStream(string fullPath)
+        {
+            if (!EvaluationObservationSession.IsEnabled)
+            {
+                return File.OpenRead(fullPath);
+            }
+
+            byte[] content = File.ReadAllBytes(fullPath);
+            RecordObservation(
+                "RawContentHash",
+                fullPath,
+                EvaluationObservationSession.ComputeBytesHash(content));
+            return new MemoryStream(content, writable: false);
+        }
+
+        internal void RecordUpwardSearch(
+            string startDirectory,
+            IReadOnlyList<string> candidates,
+            string? selectedPath)
+        {
+            if (!EvaluationObservationSession.IsEnabled)
+            {
+                return;
+            }
+
+            RecordObservation("UpwardSearchStart", startDirectory, selectedPath);
+            foreach (string candidate in candidates)
+            {
+                bool isSelected = !string.IsNullOrEmpty(selectedPath) &&
+                    FileUtilities.PathsEqual(candidate, selectedPath!);
+                RecordObservation(
+                    "UpwardSearchCandidate",
+                    candidate,
+                    isSelected.ToString());
+                if (isSelected)
+                {
+                    break;
+                }
+            }
+        }
+
+        private void RecordObservation(
+            string kind,
+            string request,
+            string? result,
+            Exception? exception = null)
+        {
+            if (EvaluationObservationSession.IsEnabled)
+            {
+                (_observations ??= []).Add(new Observation(kind, request, result, exception));
+            }
+        }
+
+        private static void MergeObservations(
+            ParserIgnoreConfiguration destination,
+            ParserIgnoreConfiguration source)
+        {
+            if (source._observations is not null)
+            {
+                (destination._observations ??= []).AddRange(source._observations);
             }
         }
 

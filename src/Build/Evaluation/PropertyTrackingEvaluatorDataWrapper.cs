@@ -33,6 +33,7 @@ namespace Microsoft.Build.Evaluation
         private readonly IEvaluatorData<P, I, M, D> _wrapped;
         private readonly HashSet<string> _overwrittenEnvironmentVariables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly EvaluationLoggingContext _evaluationLoggingContext;
+        private readonly EvaluationObservationSession? _observationSession;
         private readonly PropertyTrackingSetting _settings;
 
         /// <summary>
@@ -41,13 +42,19 @@ namespace Microsoft.Build.Evaluation
         /// <param name="dataToWrap">The underlying <see cref="IEvaluatorData{P,I,M,D}"/> to wrap for property tracking.</param>
         /// <param name="evaluationLoggingContext">The <see cref="EvaluationLoggingContext"/> used to log relevant events.</param>
         /// <param name="settingValue">Property tracking setting value</param>
-        public PropertyTrackingEvaluatorDataWrapper(IEvaluatorData<P, I, M, D> dataToWrap, EvaluationLoggingContext evaluationLoggingContext, int settingValue)
+        /// <param name="observationSession">Optional native evaluation observation session.</param>
+        public PropertyTrackingEvaluatorDataWrapper(
+            IEvaluatorData<P, I, M, D> dataToWrap,
+            EvaluationLoggingContext evaluationLoggingContext,
+            int settingValue,
+            EvaluationObservationSession? observationSession)
         {
             Assumed.NotNull(dataToWrap);
             Assumed.NotNull(evaluationLoggingContext);
 
             _wrapped = dataToWrap;
             _evaluationLoggingContext = evaluationLoggingContext;
+            _observationSession = observationSession;
             _settings = (PropertyTrackingSetting)settingValue;
         }
 
@@ -66,7 +73,12 @@ namespace Microsoft.Build.Evaluation
                 this.TrackPropertyRead(name, prop);
             }
 
-            return prop;
+            if (_observationSession is not null)
+            {
+                ObservePropertyRead(_observationSession, name, prop);
+            }
+
+            return prop!;
         }
 
         /// <summary>
@@ -76,12 +88,60 @@ namespace Microsoft.Build.Evaluation
         public P GetProperty(string name, int startIndex, int endIndex)
         {
             P prop = _wrapped.GetProperty(name, startIndex, endIndex);
-            if (IsPropertyReadTrackingRequested)
+            bool trackPropertyRead = IsPropertyReadTrackingRequested;
+            EvaluationObservationSession? observationSession = _observationSession;
+            bool observePropertyRead = observationSession is not null;
+            bool isImportedEnvironmentProperty =
+                observePropertyRead && IsImportedEnvironmentProperty(prop);
+            PropertyDictionary<ProjectPropertyInstance>? importedEnvironment =
+                observePropertyRead && prop is null
+                    ? _wrapped.EnvironmentVariablePropertiesDictionary
+                    : null;
+            PropertyDictionary<ProjectPropertyInstance>? sdkEnvironment =
+                observePropertyRead && prop is not null && !isImportedEnvironmentProperty
+                    ? _wrapped.SdkResolvedEnvironmentVariablePropertiesDictionary
+                    : null;
+            if (trackPropertyRead ||
+                (prop is null && importedEnvironment is not null) ||
+                isImportedEnvironmentProperty ||
+                sdkEnvironment is not null)
             {
-                this.TrackPropertyRead(name.Substring(startIndex, endIndex - startIndex + 1), prop);
+                string propertyName = name.Substring(startIndex, endIndex - startIndex + 1);
+                if (trackPropertyRead)
+                {
+                    this.TrackPropertyRead(propertyName, prop!);
+                }
+
+                if (observationSession is not null)
+                {
+                    if (prop is null && importedEnvironment is not null)
+                    {
+                        observationSession.RecordEnvironment(
+                            propertyName,
+                            EvaluationEnvironmentSource.MissingImported,
+                            present: false,
+                            value: null);
+                    }
+                    else if (isImportedEnvironmentProperty)
+                    {
+                        observationSession.RecordEnvironment(
+                            propertyName,
+                            EvaluationEnvironmentSource.Imported,
+                            present: true,
+                            prop!.EvaluatedValue);
+                    }
+                    else if (sdkEnvironment?.Contains(propertyName) == true)
+                    {
+                        observationSession.RecordEnvironment(
+                            propertyName,
+                            EvaluationEnvironmentSource.SdkInjected,
+                            present: true,
+                            prop!.EvaluatedValue);
+                    }
+                }
             }
 
-            return prop;
+            return prop!;
         }
 
         /// <summary>
@@ -191,6 +251,51 @@ namespace Microsoft.Build.Evaluation
             || PropertyTrackingUtils.IsPropertyTrackingEnabled(_settings, PropertyTrackingSetting.UninitializedPropertyRead);
 
         private bool IsEnvironmentVariableReadTrackingRequested => PropertyTrackingUtils.IsPropertyTrackingEnabled(_settings, PropertyTrackingSetting.EnvironmentVariableRead);
+
+        private void ObservePropertyRead(
+            EvaluationObservationSession observationSession,
+            string name,
+            P property)
+        {
+            if (property is null)
+            {
+                if (_wrapped.EnvironmentVariablePropertiesDictionary is not null)
+                {
+                    observationSession.RecordEnvironment(
+                        name,
+                        EvaluationEnvironmentSource.MissingImported,
+                        present: false,
+                        value: null);
+                }
+
+                return;
+            }
+
+            if (IsImportedEnvironmentProperty(property))
+            {
+                observationSession.RecordEnvironment(
+                    name,
+                    EvaluationEnvironmentSource.Imported,
+                    present: true,
+                    property.EvaluatedValue);
+                return;
+            }
+
+            if (_wrapped.SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
+            {
+                observationSession.RecordEnvironment(
+                    name,
+                    EvaluationEnvironmentSource.SdkInjected,
+                    present: true,
+                    property.EvaluatedValue);
+            }
+        }
+
+        private static bool IsImportedEnvironmentProperty(P property)
+        {
+            return property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance ||
+                (property is ProjectProperty projectProperty && projectProperty.IsEnvironmentProperty);
+        }
 
         /// <summary>
         /// Logic containing what to do when a property is read.

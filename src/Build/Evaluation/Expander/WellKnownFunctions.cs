@@ -938,8 +938,15 @@ namespace Microsoft.Build.Evaluation.Expander
             return false;
         }
 
-        internal static bool TryExecuteWellKnownFunctionWithPropertiesParam<T>(string methodName, Type receiverType, LoggingContext loggingContext,
-                                                                            IPropertyProvider<T> properties, out object? returnVal, object objectInstance, object[] args)
+        internal static bool TryExecuteWellKnownFunctionWithPropertiesParam<T>(
+            string methodName,
+            Type receiverType,
+            IFileSystem fileSystem,
+            LoggingContext loggingContext,
+            IPropertyProvider<T> properties,
+            out object? returnVal,
+            object objectInstance,
+            object[] args)
             where T : class, IProperty
         {
             returnVal = null;
@@ -952,7 +959,11 @@ namespace Microsoft.Build.Evaluation.Expander
                     Assumed.NotNull(loggingContext, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
                     if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                     {
-                        returnVal = IntrinsicFunctions.RegisterBuildCheck(projectPath, arg0, loggingContext);
+                        returnVal = IntrinsicFunctions.RegisterBuildCheck(
+                            projectPath,
+                            arg0,
+                            fileSystem,
+                            loggingContext);
                         return true;
                     }
                 }
