@@ -980,7 +980,20 @@ namespace Microsoft.Build.Logging
                     WriteDeduplicatedString(itemData.EvaluatedInclude);
                     if (writeMetadata)
                     {
-                        Write(itemData.EnumerateMetadata());
+                        if (item is ProjectItem projectItem)
+                        {
+                            foreach (ProjectMetadata metadata in projectItem.Metadata)
+                            {
+                                nameValueListBuffer.Add(new KeyValuePair<string, string>(metadata.Name, projectItem.GetMetadataValue(metadata.Name)));
+                            }
+
+                            WriteNameValueList();
+                            nameValueListBuffer.Clear();
+                        }
+                        else
+                        {
+                            Write(itemData.EnumerateMetadata());
+                        }
                     }
                     else
                     {

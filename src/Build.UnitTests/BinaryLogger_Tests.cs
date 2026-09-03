@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -653,9 +654,29 @@ namespace Microsoft.Build.UnitTests
                 colorSet: null,
                 colorReset: null);
             var replay = new BinaryLogReplayEventSource();
+            List<DictionaryEntry> initialItems = [];
+            replay.AnyEventRaised += (_, args) =>
+            {
+                if (args is ProjectEvaluationFinishedEventArgs evaluationFinished)
+                {
+                    initialItems.AddRange(evaluationFinished.Items.Cast<DictionaryEntry>());
+                }
+            };
             replayLogger.Initialize(replay);
             replay.Replay(_logFile);
             replayLogger.Shutdown();
+
+            ITaskItem initialAaa = initialItems
+                .Where(item => (string)item.Key == "AAA")
+                .Select(item => (ITaskItem)item.Value)
+                .First(item => item.ItemSpec == "test1.txt");
+            initialAaa.GetMetadata("TargetPath").ShouldBe("test1.txt");
+
+            ITaskItem initialBbb = initialItems
+                .Where(item => (string)item.Key == "BBB")
+                .Select(item => (ITaskItem)item.Value)
+                .First(item => item.ItemSpec == "test2.txt");
+            initialBbb.GetMetadata("TargetPath").ShouldBe("test2.txt");
 
             replayedLog.ToString().ShouldContain("TargetPath=test3.txt");
             replayedLog.ToString().ShouldContain("TargetPath=test4.txt");
