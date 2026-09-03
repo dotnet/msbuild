@@ -1,3 +1,4 @@
 is_global = true
+global_level = 100
 
 msbuild_task_analyzer.scope = all

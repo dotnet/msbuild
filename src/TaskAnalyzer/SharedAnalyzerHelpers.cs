@@ -32,10 +32,114 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             if (optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out var scopeValue))
             {
-                return string.Equals(scopeValue, ScopeAll, StringComparison.OrdinalIgnoreCase);
+                return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
             }
 
             return false;
+        }
+
+        internal static bool IsMultiThreadableOptIn(
+            INamedTypeSymbol type,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType,
+            out bool hasAnalyzedAttribute)
+        {
+            bool hasMultiThreadableAttribute = false;
+            hasAnalyzedAttribute = false;
+
+            foreach (AttributeData attribute in type.GetAttributes())
+            {
+                if (multiThreadableTaskAttributeType is not null &&
+                    SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, multiThreadableTaskAttributeType))
+                {
+                    hasMultiThreadableAttribute = true;
+                }
+
+                if (analyzedAttributeType is not null &&
+                    SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, analyzedAttributeType))
+                {
+                    hasAnalyzedAttribute = true;
+                }
+            }
+
+            return (iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType)) ||
+                hasMultiThreadableAttribute ||
+                hasAnalyzedAttribute;
+        }
+
+        internal static ImmutableHashSet<INamedTypeSymbol> FindMultiThreadableTaskBaseTypes(
+            Compilation compilation,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType)
+        {
+            var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+            AddMultiThreadableTaskBaseTypes(
+                compilation.GlobalNamespace,
+                builder,
+                iTaskType,
+                iMultiThreadableTaskType,
+                multiThreadableTaskAttributeType,
+                analyzedAttributeType);
+            return builder.ToImmutable();
+        }
+
+        private static void AddMultiThreadableTaskBaseTypes(
+            INamespaceOrTypeSymbol container,
+            ImmutableHashSet<INamedTypeSymbol>.Builder result,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType)
+        {
+            foreach (ISymbol member in container.GetMembers())
+            {
+                if (member is INamespaceSymbol childNamespace)
+                {
+                    AddMultiThreadableTaskBaseTypes(
+                        childNamespace,
+                        result,
+                        iTaskType,
+                        iMultiThreadableTaskType,
+                        multiThreadableTaskAttributeType,
+                        analyzedAttributeType);
+                    continue;
+                }
+
+                if (member is not INamedTypeSymbol type)
+                {
+                    continue;
+                }
+
+                if (ImplementsInterface(type, iTaskType) &&
+                    IsMultiThreadableOptIn(
+                        type,
+                        iMultiThreadableTaskType,
+                        multiThreadableTaskAttributeType,
+                        analyzedAttributeType,
+                        out bool hasAnalyzedAttribute) &&
+                    (!type.IsAbstract ||
+                     hasAnalyzedAttribute ||
+                     (iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType))))
+                {
+                    for (INamedTypeSymbol? baseType = type.BaseType;
+                         baseType is not null && baseType.SpecialType != SpecialType.System_Object;
+                         baseType = baseType.BaseType)
+                    {
+                        result.Add(baseType.OriginalDefinition);
+                    }
+                }
+
+                AddMultiThreadableTaskBaseTypes(
+                    type,
+                    result,
+                    iTaskType,
+                    iMultiThreadableTaskType,
+                    multiThreadableTaskAttributeType,
+                    analyzedAttributeType);
+            }
         }
 
         /// <summary>
