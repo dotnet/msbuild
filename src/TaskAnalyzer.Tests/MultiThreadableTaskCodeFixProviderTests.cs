@@ -489,11 +489,11 @@ public class MultiThreadableTaskCodeFixProviderTests
     [Fact]
     public async Task Fix_TaskWithoutTaskEnvironmentMember_NoFixOffered()
     {
-        // Under the default scope every ITask is analyzed, including plain tasks that have no
-        // TaskEnvironment member to reference (CS0103).
         await CreateNoFixTest(
             """
             using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public string InputPath { get; set; }

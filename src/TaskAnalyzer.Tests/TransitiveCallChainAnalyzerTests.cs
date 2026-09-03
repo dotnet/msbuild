@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -417,11 +420,11 @@ public class TransitiveCallChainAnalyzerTests
                 using System;
                 public static class Helper
                 {
-                    public static void Run() => Environment.GetEnvironmentVariable("KEY");
+                    public static void Run() => {|#0:Environment.GetEnvironmentVariable("KEY")|};
                 }
                 public class PlainTask : Microsoft.Build.Utilities.Task
                 {
-                    public override bool {|#0:Execute|}()
+                    public override bool {|#1:Execute|}()
                     {
                         Helper.Run();
                         return true;
@@ -436,7 +439,9 @@ public class TransitiveCallChainAnalyzerTests
             msbuild_task_analyzer.scope = all
             """));
         test.ExpectedDiagnostics.Add(
-            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Warning).WithLocation(0));
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Warning)
+                .WithLocation(0)
+                .WithLocation(1));
 
         await test.RunAsync();
     }
