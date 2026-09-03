@@ -138,16 +138,16 @@ internal static class TestHelpers
     public static MetadataReference[] GetCoreReferences() => s_coreReferences;
 
     /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer in explicit all-task migration mode.
+    /// Runs the MultiThreadableTaskAnalyzer with the shipping default scope.
     /// </summary>
     public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source) =>
-        GetDiagnosticsWithScopeAsync(source, SharedAnalyzerHelpers.ScopeAll);
+        GetDiagnosticsWithDefaultScopeAsync(source);
 
     /// <summary>
-    /// Runs both the direct and transitive analyzers in explicit all-task migration mode.
+    /// Runs both the direct and transitive analyzers with the shipping default scope.
     /// </summary>
     public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(string source) =>
-        GetAllDiagnosticsWithScopeAsync(source, SharedAnalyzerHelpers.ScopeAll);
+        GetAllDiagnosticsWithDefaultScopeAsync(source);
 
     /// <summary>
     /// Runs compiler diagnostics together with analyzers and suppressors and returns

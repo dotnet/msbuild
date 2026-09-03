@@ -27,13 +27,15 @@ public class TransitiveCallChainAnalyzerTests
     {
         var source = $$"""
             {{usingDirective}}
+            using Microsoft.Build.Framework;
             public class TestHelper
             {
                 public static void DoWork() { {{helperBody}} }
             }
 
-            public class MyTask : Microsoft.Build.Utilities.Task
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     TestHelper.DoWork();
@@ -187,6 +189,7 @@ public class TransitiveCallChainAnalyzerTests
         var diags = await GetAllDiagnosticsAsync("""
             using System;
             using System.IO;
+            using Microsoft.Build.Framework;
             public class UnsafeHelper
             {
                 public static void DoStuff()
@@ -197,8 +200,9 @@ public class TransitiveCallChainAnalyzerTests
                 }
             }
 
-            public class MyTask : Microsoft.Build.Utilities.Task
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     UnsafeHelper.DoStuff();
