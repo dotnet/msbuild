@@ -389,7 +389,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public string GetMetadataValue(string name)
         {
-            return _taskItem.GetMetadata(name);
+            return _taskItem.GetMetadata(name, _itemType);
         }
 
         /// <summary>
@@ -456,7 +456,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            return _taskItem.GetMetadataEscaped(name);
+            return _taskItem.GetMetadataEscaped(name, _itemType);
         }
 
         /// <summary>
@@ -491,7 +491,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         string ITaskItem2.GetMetadataValueEscaped(string name)
         {
-            return _taskItem.GetMetadataEscaped(name);
+            return _taskItem.GetMetadataEscaped(name, _itemType);
         }
 
         /// <summary>
@@ -525,7 +525,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         void ITaskItem.CopyMetadataTo(ITaskItem destinationItem)
         {
-            _taskItem.CopyMetadataTo(destinationItem);
+            _taskItem.CopyMetadataTo(destinationItem, addOriginalItemSpec: true, itemType: _itemType);
         }
 
         /// <summary>
@@ -564,7 +564,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         string IMetadataTable.GetEscapedValue(string name)
         {
-            return _taskItem.GetMetadataEscaped(name);
+            return _taskItem.GetMetadataEscaped(name, _itemType);
         }
 
         /// <summary>
@@ -588,7 +588,7 @@ namespace Microsoft.Build.Execution
         {
             if (itemType == null || String.Equals(itemType, _itemType, StringComparison.OrdinalIgnoreCase))
             {
-                string value = _taskItem.GetMetadataEscaped(name);
+                string value = _taskItem.GetMetadataEscaped(name, _itemType);
 
                 if (value.Length > 0 || HasMetadata(name))
                 {
@@ -880,7 +880,7 @@ namespace Microsoft.Build.Execution
             /// Parameters are cloned.
             /// </summary>
             internal TaskItem(ProjectItemInstance item)
-                : this(item._taskItem, false /* no original itemspec */)
+                : this(item._taskItem, false /* no original itemspec */, item._itemType)
             {
             }
 
@@ -888,11 +888,11 @@ namespace Microsoft.Build.Execution
             /// Creates an instance of this class given the backing item.
             /// Does not copy immutability, since there is no connection with the original.
             /// </summary>
-            private TaskItem(TaskItem source, bool addOriginalItemSpec)
+            private TaskItem(TaskItem source, bool addOriginalItemSpec, string itemType = null)
             {
                 _includeEscaped = source._includeEscaped;
                 _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
-                source.CopyMetadataTo(this, addOriginalItemSpec);
+                source.CopyMetadataTo(this, addOriginalItemSpec, itemType);
                 _cachedModifiers = source._cachedModifiers;
                 _definingFileEscaped = source._definingFileEscaped;
             }
@@ -1408,12 +1408,17 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadata(string metadataName)
             {
+                return GetMetadata(metadataName, itemType: null);
+            }
+
+            internal string GetMetadata(string metadataName, string itemType)
+            {
                 if (_directMetadata is ImmutableProjectMetadataCollectionConverter metadataFromCache)
                 {
                     return metadataFromCache.GetExtendedPropertyValue(metadataName);
                 }
 
-                return EscapingUtilities.UnescapeAll(GetMetadataEscaped(metadataName));
+                return EscapingUtilities.UnescapeAll(GetMetadataEscaped(metadataName, itemType));
             }
 
             /// <summary>
@@ -1421,6 +1426,11 @@ namespace Microsoft.Build.Execution
             /// If metadata is not defined, returns empty string.
             /// </summary>
             public string GetMetadataEscaped(string metadataName)
+            {
+                return GetMetadataEscaped(metadataName, itemType: null);
+            }
+
+            internal string GetMetadataEscaped(string metadataName, string itemType)
             {
                 if (string.IsNullOrEmpty(metadataName))
                 {
@@ -1436,7 +1446,7 @@ namespace Microsoft.Build.Execution
 
                 if (escapedValue != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(escapedValue))
                 {
-                    Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
+                    Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(itemType, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
                     return expander.ExpandIntoStringLeaveEscaped(escapedValue, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
@@ -1513,6 +1523,11 @@ namespace Microsoft.Build.Execution
             /// </param>
             public void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec)
             {
+                CopyMetadataTo(destinationItem, addOriginalItemSpec, itemType: null);
+            }
+
+            internal void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec, string itemType)
+            {
                 ArgumentNullException.ThrowIfNull(destinationItem);
 
                 string originalItemSpec = null;
@@ -1550,7 +1565,7 @@ namespace Microsoft.Build.Execution
                 {
                     // OK, most likely the destination item was a Microsoft.Build.Utilities.TaskItem.
                     // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
-                    BulkImportMetadata(destinationItemAsTaskItem2, destinationItemAsMetadataContainer, destinationAsTaskItem);
+                    BulkImportMetadata(destinationItemAsTaskItem2, destinationItemAsMetadataContainer, destinationAsTaskItem, itemType);
                 }
                 else
                 {
@@ -1561,7 +1576,7 @@ namespace Microsoft.Build.Execution
                         if (String.IsNullOrEmpty(destinationValue))
                         {
                             // Utilities.TaskItem's don't know about item definition metadata. So merge that into the values.
-                            destinationItem.SetMetadata(metadatum.Key, GetMetadataEscaped(metadatum.Key));
+                            destinationItem.SetMetadata(metadatum.Key, GetMetadataEscaped(metadatum.Key, itemType));
                         }
                     }
                 }
@@ -1577,7 +1592,7 @@ namespace Microsoft.Build.Execution
             }
 
             // PERF: Keep this method extracted to avoid unconditionally allocating a closure object
-            private void BulkImportMetadata(ITaskItem2 destinationItem, IMetadataContainer destinationItemAsMetadataContainer, TaskItem destinationAsTaskItem)
+            private void BulkImportMetadata(ITaskItem2 destinationItem, IMetadataContainer destinationItemAsMetadataContainer, TaskItem destinationAsTaskItem, string itemType)
             {
                 if (!HasCustomMetadata)
                 {
@@ -1599,7 +1614,7 @@ namespace Microsoft.Build.Execution
                 if (HasAnyExpandableExpressions())
                 {
                     metadataToImport = metadataToImport
-                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, GetMetadataEscaped(metadatum.Key)));
+                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, GetMetadataEscaped(metadatum.Key, itemType)));
                 }
 
                 // Special case TaskItem since we can skip repeating any key validations.

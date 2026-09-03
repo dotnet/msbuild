@@ -611,6 +611,56 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
         }
 
+        [Fact]
+        public void ItemDefinitionBuiltInMetadataIsExpandedInBinaryLog()
+        {
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = $"LogFile={_logFile}"
+            };
+
+            const string project = """
+                <Project DefaultTargets="Build">
+                  <ItemDefinitionGroup>
+                    <AAA>
+                      <TargetPath>%(Filename)%(Extension)</TargetPath>
+                    </AAA>
+                    <BBB>
+                      <TargetPath>%(BBB.Filename)%(BBB.Extension)</TargetPath>
+                    </BBB>
+                  </ItemDefinitionGroup>
+                  <ItemGroup>
+                    <AAA Include="test1.txt" />
+                    <BBB Include="test2.txt" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <ItemGroup>
+                      <AAA Include="test3.txt" />
+                      <BBB Include="test4.txt" />
+                    </ItemGroup>
+                    <Error Condition="'@(AAA->'%(TargetPath)')' != 'test1.txt;test3.txt'" Text="Unexpected AAA TargetPath" />
+                    <Error Condition="'@(BBB->'%(TargetPath)')' != 'test2.txt;test4.txt'" Text="Unexpected BBB TargetPath" />
+                  </Target>
+                </Project>
+                """;
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
+
+            var replayedLog = new StringBuilder();
+            var replayLogger = new ParallelConsoleLogger(
+                LoggerVerbosity.Diagnostic,
+                text => replayedLog.Append(text),
+                colorSet: null,
+                colorReset: null);
+            var replay = new BinaryLogReplayEventSource();
+            replayLogger.Initialize(replay);
+            replay.Replay(_logFile);
+            replayLogger.Shutdown();
+
+            replayedLog.ToString().ShouldContain("TargetPath=test3.txt");
+            replayedLog.ToString().ShouldContain("TargetPath=test4.txt");
+        }
+
         /// <summary>
         /// Regression test for dotnet/dotnet#5433 — ClearCacheDirectory must not destroy the
         /// ProjectImports archive before it is embedded in the binlog.
