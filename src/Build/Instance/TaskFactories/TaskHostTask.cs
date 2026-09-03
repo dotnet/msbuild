@@ -666,23 +666,57 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleLoggedMessage(LogMessagePacket logMessagePacket)
         {
+            // Before Wave18_12 the switch below enumerated only these five event kinds and had no default case,
+            // so every other kind - extended events, critical messages, telemetry - was dropped without a trace.
+            // Surfacing them can fail a build running /warnAsError, so disabling the wave restores that behavior.
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                && logMessagePacket.EventType is not (LoggingEventType.BuildErrorEvent
+                    or LoggingEventType.BuildWarningEvent
+                    or LoggingEventType.TaskCommandLineEvent
+                    or LoggingEventType.BuildMessageEvent
+                    or LoggingEventType.CustomEvent))
+            {
+                return;
+            }
+
             switch (logMessagePacket.EventType)
             {
                 case LoggingEventType.BuildErrorEvent:
+                case LoggingEventType.ExtendedBuildErrorEvent:
                     this.BuildEngine.LogErrorEvent((BuildErrorEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.BuildWarningEvent:
+                case LoggingEventType.ExtendedBuildWarningEvent:
                     this.BuildEngine.LogWarningEvent((BuildWarningEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.TaskCommandLineEvent:
                 case LoggingEventType.BuildMessageEvent:
+                case LoggingEventType.CriticalBuildMessage:
+                case LoggingEventType.ExtendedBuildMessageEvent:
+                case LoggingEventType.ExtendedCriticalBuildMessageEvent:
                     this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
+                case LoggingEventType.Telemetry:
+                    // A task can only ever produce telemetry through IBuildEngine5.LogTelemetry(name, properties),
+                    // so forwarding those two values reproduces exactly what an in-proc task would have logged.
+                    if (_buildEngine is IBuildEngine5 engine5)
+                    {
+                        TelemetryEventArgs telemetryEvent = (TelemetryEventArgs)logMessagePacket.NodeBuildEvent.Value.Value;
+                        engine5.LogTelemetry(telemetryEvent.EventName, telemetryEvent.Properties);
+                    }
+
+                    break;
                 case LoggingEventType.CustomEvent:
+                case LoggingEventType.ExtendedCustomEvent:
+                default:
                     BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent.Value.Value;
 
                     // "Custom events" in terms of the communications infrastructure can also be, e.g. custom error events,
                     // in which case they need to be dealt with in the same way as their base type of event.
+                    // The same dispatch also covers every event kind without an explicit case above: the task host can
+                    // only ever send what it was handed through LogErrorEvent, LogWarningEvent, LogMessageEvent or
+                    // LogCustomEvent, all of which are strongly typed, so matching on those base types is exhaustive.
+                    // Without this fallback any event type that is not enumerated above is dropped without a trace.
                     if (buildEvent is BuildErrorEventArgs buildErrorEventArgs)
                     {
                         this.BuildEngine.LogErrorEvent(buildErrorEventArgs);
