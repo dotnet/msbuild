@@ -210,6 +210,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Diagnostics.DiagnosticSource.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Formats.Nrbf.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.IO.Pipelines.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenArchitecture=all
