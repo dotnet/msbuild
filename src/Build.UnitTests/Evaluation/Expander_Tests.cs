@@ -5439,11 +5439,14 @@ $(
                     loggingService,
                     new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
                 var dummyAssemblyFile = env.CreateFile(env.CreateFolder(), "test.dll");
+                var fileSystem = new Helpers.LoggingFileSystem();
 
-                var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default, loggingContext)
+                var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), fileSystem, loggingContext)
                     .ExpandIntoStringLeaveEscaped($"$([MSBuild]::RegisterBuildCheck({dummyAssemblyFile.Path}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
                 result.ShouldBe(Boolean.TrueString);
+                fileSystem.ExistenceChecks[dummyAssemblyFile.Path].ShouldBe(1);
+                fileSystem.FileSystemCalls.ShouldBe(1);
                 _ = logger.AllBuildEvents.Select(be => be.ShouldBeOfType<BuildCheckAcquisitionEventArgs>());
                 logger.AllBuildEvents.Count.ShouldBe(1);
             }

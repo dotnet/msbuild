@@ -23,7 +23,7 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
             FullPath = path;
         }
 
-        public override int Version => throw new NotImplementedException();
+        public override int Version => 7;
 
         public override bool HasUnsavedChanges => throw new NotImplementedException();
 
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 
         public override ElementLocation ProjectFileLocation => throw new NotImplementedException();
 
-        public override Encoding Encoding => throw new NotImplementedException();
+        public override Encoding Encoding => Encoding.UTF8;
 
         public override string RawXml => throw new NotImplementedException();
 

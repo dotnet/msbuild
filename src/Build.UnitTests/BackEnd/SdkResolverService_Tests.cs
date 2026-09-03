@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
@@ -554,6 +555,250 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             resolver.ResolvedCalls.First().Key.ShouldBe("foo");
             resolver.ResolvedCalls.Count.ShouldBe(1);
+        }
+
+        [Fact]
+        public void CachingResolverObservationTracksRequestAndCacheLifetime()
+        {
+            const int SubmissionId = 42;
+            var sdk = new SdkReference("foo", "1.0.0", "0.9.0");
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    "path",
+                    "1.0.0",
+                    Enumerable.Empty<string>()));
+            var service = new CachingSdkResolverService();
+            service.InitializeForTests(null, [resolver]);
+            EvaluationObservationSession firstSession = EvaluationObservationSession.CreateForTests();
+
+            using (firstSession.Enter())
+            {
+                service.ResolveSdk(
+                    SubmissionId,
+                    sdk,
+                    _loggingContext,
+                    new MockElementLocation("first.proj"),
+                    "first.sln",
+                    "first.proj",
+                    interactive: false,
+                    isRunningInVisualStudio: false,
+                    failOnUnresolvedSdk: true);
+                service.ResolveSdk(
+                    SubmissionId,
+                    new SdkReference("FOO", "1.0.0", "0.9.0"),
+                    _loggingContext,
+                    new MockElementLocation("second.proj"),
+                    "second.sln",
+                    "second.proj",
+                    interactive: true,
+                    isRunningInVisualStudio: true,
+                    failOnUnresolvedSdk: false);
+            }
+
+            EvaluationObservationReport firstReport = firstSession.Complete(evaluationSucceeded: true);
+            firstReport.SdkResolutions.Count.ShouldBe(2);
+            EvaluationSdkResolutionObservation[] observations = firstReport.SdkResolutions.ToArray();
+            EvaluationSdkResolutionObservation miss = observations[0];
+            EvaluationSdkResolutionObservation hit = observations[1];
+            miss.FromCache.ShouldBeFalse();
+            hit.FromCache.ShouldBeTrue();
+            miss.ProjectPath.ShouldBe("first.proj");
+            miss.SolutionPath.ShouldBe("first.sln");
+            miss.Interactive.ShouldBeFalse();
+            miss.IsRunningInVisualStudio.ShouldBeFalse();
+            miss.FailOnUnresolvedSdk.ShouldBeTrue();
+            miss.ReferenceLocationFile.ShouldBe("first.proj");
+            hit.ProjectPath.ShouldBe("second.proj");
+            hit.SolutionPath.ShouldBe("second.sln");
+            hit.Interactive.ShouldBeTrue();
+            hit.IsRunningInVisualStudio.ShouldBeTrue();
+            hit.FailOnUnresolvedSdk.ShouldBeFalse();
+            hit.ReferenceLocationFile.ShouldBe("second.proj");
+            miss.CacheIdentity.CacheEnabled.ShouldBeTrue();
+            miss.CacheIdentity.OwnerType.ShouldBe(typeof(CachingSdkResolverService).FullName);
+            miss.CacheIdentity.ScopeKind.ShouldBe("Submission");
+            miss.CacheIdentity.ScopeId.ShouldBe(SubmissionId);
+            miss.CacheIdentity.KeyComparer.ShouldBe("MSBuildNameIgnoreCase");
+            miss.CacheIdentity.Epoch.ShouldBe(hit.CacheIdentity.Epoch);
+            miss.CacheIdentity.EntryId.ShouldBe(hit.CacheIdentity.EntryId);
+            service.IsCacheEntryCurrent(miss.CacheIdentity).ShouldBeTrue();
+            service.IsCacheEntryCurrent(hit.CacheIdentity).ShouldBeTrue();
+
+            service.ClearCache(SubmissionId);
+
+            service.IsCacheEntryCurrent(miss.CacheIdentity).ShouldBeFalse();
+            service.IsCacheEntryCurrent(hit.CacheIdentity).ShouldBeFalse();
+            EvaluationObservationSession secondSession = EvaluationObservationSession.CreateForTests();
+            using (secondSession.Enter())
+            {
+                service.ResolveSdk(
+                    SubmissionId,
+                    sdk,
+                    _loggingContext,
+                    new MockElementLocation("third.proj"),
+                    "third.sln",
+                    "third.proj",
+                    interactive: false,
+                    isRunningInVisualStudio: false,
+                    failOnUnresolvedSdk: true);
+            }
+
+            EvaluationSdkResolutionObservation afterClear =
+                secondSession.Complete(evaluationSucceeded: true).SdkResolutions.ShouldHaveSingleItem();
+            afterClear.FromCache.ShouldBeFalse();
+            afterClear.CacheIdentity.OwnerId.ShouldBe(miss.CacheIdentity.OwnerId);
+            afterClear.CacheIdentity.Epoch.ShouldNotBe(miss.CacheIdentity.Epoch);
+            afterClear.CacheIdentity.EntryId.ShouldNotBe(miss.CacheIdentity.EntryId);
+            service.IsCacheEntryCurrent(afterClear.CacheIdentity).ShouldBeTrue();
+            resolver.ResolvedCalls["foo"].ShouldBe(2);
+
+            service.ClearCaches();
+
+            service.IsCacheEntryCurrent(afterClear.CacheIdentity).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void UncachedSdkObservationHasNoReusableLifetime()
+        {
+            var sdk = new SdkReference("foo", "1.0.0", null);
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    "path",
+                    "1.0.0",
+                    Enumerable.Empty<string>()));
+            var service = new CachingSdkResolverService
+            {
+                TestOnlyDisableCache = true,
+            };
+            service.InitializeForTests(null, [resolver]);
+            EvaluationObservationSession session = EvaluationObservationSession.CreateForTests();
+            using (session.Enter())
+            {
+                service.ResolveSdk(
+                    submissionId: 1,
+                    sdk,
+                    _loggingContext,
+                    new MockElementLocation("project.proj"),
+                    solutionPath: null,
+                    projectPath: "project.proj",
+                    interactive: false,
+                    isRunningInVisualStudio: false,
+                    failOnUnresolvedSdk: true);
+            }
+
+            EvaluationObservationReport report = session.Complete(evaluationSucceeded: true);
+
+            SdkResolverCacheIdentity identity =
+                report.SdkResolutions.ShouldHaveSingleItem().CacheIdentity;
+            identity.CacheEnabled.ShouldBeFalse();
+            service.IsCacheEntryCurrent(identity).ShouldBeFalse();
+            (report.Reasons & EvaluationObservationReason.SdkResolutionWithoutCacheLifetime)
+                .ShouldBe(EvaluationObservationReason.SdkResolutionWithoutCacheLifetime);
+            report.Categories.ShouldContain(observation =>
+                observation.Category == EvaluationObservationCategory.SdkResolution &&
+                observation.State == EvaluationObservationCategoryState.Incomplete);
+        }
+
+        [Fact]
+        public void OutOfProcResolverObservationExpiresOnShutdown()
+        {
+            const int SubmissionId = 43;
+            var sdk = new SdkReference("foo", "1.0.0", null);
+            var result = new SdkResultImpl(
+                sdk,
+                "path",
+                "1.0.0",
+                Enumerable.Empty<string>());
+            int packetsSent = 0;
+            OutOfProcNodeSdkResolverService service = null;
+            service = new OutOfProcNodeSdkResolverService(
+                _ =>
+                {
+                    packetsSent++;
+                    service.PacketReceived(0, result);
+                });
+            EvaluationObservationSession session = EvaluationObservationSession.CreateForTests();
+            using (session.Enter())
+            {
+                service.ResolveSdk(
+                    SubmissionId,
+                    sdk,
+                    _loggingContext,
+                    new MockElementLocation("first.proj"),
+                    "solution.sln",
+                    "first.proj",
+                    interactive: false,
+                    isRunningInVisualStudio: false,
+                    failOnUnresolvedSdk: true);
+                service.ResolveSdk(
+                    SubmissionId,
+                    new SdkReference("FOO", "1.0.0", null),
+                    _loggingContext,
+                    new MockElementLocation("second.proj"),
+                    "solution.sln",
+                    "second.proj",
+                    interactive: false,
+                    isRunningInVisualStudio: false,
+                    failOnUnresolvedSdk: true);
+            }
+
+            EvaluationSdkResolutionObservation[] observations =
+                session.Complete(evaluationSucceeded: true).SdkResolutions.ToArray();
+            observations.Length.ShouldBe(2);
+            observations[0].FromCache.ShouldBeFalse();
+            observations[1].FromCache.ShouldBeTrue();
+            observations[0].CacheIdentity.ScopeKind.ShouldBe("NodeBuild");
+            observations[0].CacheIdentity.EntryId.ShouldBe(observations[1].CacheIdentity.EntryId);
+            packetsSent.ShouldBe(1);
+            service.IsCacheEntryCurrent(observations[0].CacheIdentity).ShouldBeTrue();
+            service.IsCacheEntryCurrent(observations[1].CacheIdentity).ShouldBeTrue();
+
+            service.ShutdownComponent();
+
+            service.IsCacheEntryCurrent(observations[0].CacheIdentity).ShouldBeFalse();
+            service.IsCacheEntryCurrent(observations[1].CacheIdentity).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void MainNodeResolverDelegatesCacheValidation()
+        {
+            const int SubmissionId = 44;
+            var sdk = new SdkReference("foo", "1.0.0", null);
+            var resolver = new SdkUtilities.ConfigurableMockSdkResolver(
+                new SdkResultImpl(
+                    sdk,
+                    "path",
+                    "1.0.0",
+                    Enumerable.Empty<string>()));
+            var service = new MainNodeSdkResolverService();
+            service.InitializeForTests(resolvers: [resolver]);
+            EvaluationObservationSession session = EvaluationObservationSession.CreateForTests();
+            using (session.Enter())
+            {
+                service.ResolveSdk(
+                    SubmissionId,
+                    sdk,
+                    _loggingContext,
+                    new MockElementLocation("project.proj"),
+                    "solution.sln",
+                    "project.proj",
+                    interactive: false,
+                    isRunningInVisualStudio: false,
+                    failOnUnresolvedSdk: true);
+            }
+
+            SdkResolverCacheIdentity identity =
+                session.Complete(evaluationSucceeded: true)
+                    .SdkResolutions
+                    .ShouldHaveSingleItem()
+                    .CacheIdentity;
+            service.IsCacheEntryCurrent(identity).ShouldBeTrue();
+
+            service.ClearCache(SubmissionId);
+
+            service.IsCacheEntryCurrent(identity).ShouldBeFalse();
         }
 
         private void CreateMockSdkResultPropertiesAndItems(out Dictionary<string, string> propertiesToAdd, out Dictionary<string, SdkResultItem> itemsToAdd)
