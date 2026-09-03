@@ -10,6 +10,46 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
+    internal readonly struct SdkResolverCacheIdentity
+    {
+        internal SdkResolverCacheIdentity(
+            string ownerType,
+            long ownerId,
+            string scopeKind,
+            int scopeId,
+            long epoch,
+            long entryId,
+            string key,
+            string keyComparer,
+            bool cacheEnabled)
+        {
+            OwnerType = ownerType;
+            OwnerId = ownerId;
+            ScopeKind = scopeKind;
+            ScopeId = scopeId;
+            Epoch = epoch;
+            EntryId = entryId;
+            Key = key;
+            KeyComparer = keyComparer;
+            CacheEnabled = cacheEnabled;
+        }
+
+        internal string OwnerType { get; }
+        internal long OwnerId { get; }
+        internal string ScopeKind { get; }
+        internal int ScopeId { get; }
+        internal long Epoch { get; }
+        internal long EntryId { get; }
+        internal string Key { get; }
+        internal string KeyComparer { get; }
+        internal bool CacheEnabled { get; }
+    }
+
+    internal interface ISdkResolverCacheValidator
+    {
+        bool IsCacheEntryCurrent(SdkResolverCacheIdentity cacheIdentity);
+    }
+
     /// <summary>
     /// An interface for services which resolve SDKs.
     /// </summary>

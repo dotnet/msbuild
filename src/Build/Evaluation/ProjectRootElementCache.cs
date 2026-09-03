@@ -139,6 +139,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private bool _autoReloadFromDisk;
 
+        internal bool AutoReloadFromDisk => _autoReloadFromDisk;
+
         /// <summary>
         /// Locking object for this shared cache
         /// </summary>

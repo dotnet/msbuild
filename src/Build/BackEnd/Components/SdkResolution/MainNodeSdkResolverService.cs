@@ -24,7 +24,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// Since this object is a registered <see cref="IBuildComponent"/>, it is a singleton for the main process.  To get an instance of it, you
     /// must have access to an <see cref="IBuildComponentHost"/> and call <see cref="IBuildComponentHost.GetComponent"/> and pass <see cref="BuildComponentType.SdkResolverService"/>.
     /// </summary>
-    internal sealed class MainNodeSdkResolverService : HostedSdkResolverServiceBase
+    internal sealed class MainNodeSdkResolverService : HostedSdkResolverServiceBase, ISdkResolverCacheValidator
     {
         private readonly ISdkResolverService _cachedSdkResolver = new CachingSdkResolverService();
 
@@ -54,6 +54,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             _cachedSdkResolver.ClearCaches();
         }
+
+        public bool IsCacheEntryCurrent(SdkResolverCacheIdentity cacheIdentity) =>
+            ((ISdkResolverCacheValidator)_cachedSdkResolver).IsCacheEntryCurrent(cacheIdentity);
 
         /// <inheritdoc cref="INodePacketHandler.PacketReceived"/>
         public override void PacketReceived(int node, INodePacket packet)
