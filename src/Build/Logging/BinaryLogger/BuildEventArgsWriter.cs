@@ -210,6 +210,7 @@ namespace Microsoft.Build.Logging
                 case TargetStartedEventArgs targetStarted: return Write(targetStarted);
                 case TargetFinishedEventArgs targetFinished: return Write(targetFinished);
                 case BuildErrorEventArgs buildError: return Write(buildError);
+                case AssemblyConflictWarningEventArgs assemblyConflictWarning: return Write(assemblyConflictWarning);
                 case BuildWarningEventArgs buildWarning: return Write(buildWarning);
                 case ProjectStartedEventArgs projectStarted: return Write(projectStarted);
                 case ProjectFinishedEventArgs projectFinished: return Write(projectFinished);
@@ -543,6 +544,7 @@ namespace Microsoft.Build.Logging
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
                 case MSBuildServerLifecycleEventArgs serverLifecycle: return Write(serverLifecycle);
                 case AssemblyResolutionSearchTraceEventArgs assemblyResolutionSearchTrace: return Write(assemblyResolutionSearchTrace);
+                case AssemblyConflictDependencyDetailsMessageEventArgs assemblyConflictDependencyDetails: return Write(assemblyConflictDependencyDetails);
 
                 default: // actual BuildMessageEventArgs
                     WriteMessageFields(e, writeImportance: true);
@@ -631,6 +633,77 @@ namespace Microsoft.Build.Logging
             }
 
             return BinaryLogRecordKind.AssemblyResolutionSearchTrace;
+        }
+
+        private BinaryLogRecordKind Write(AssemblyConflictDependencyDetailsMessageEventArgs e)
+        {
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
+            WriteAssemblyConflictReferenceDetails(e.Victor);
+            WriteAssemblyConflictReferenceDetails(e.Victim);
+            WriteAssemblyConflictMessageFormats(e.MessageFormats!, includeWarningFormats: false);
+
+            return BinaryLogRecordKind.AssemblyConflictDependencyDetails;
+        }
+
+        private BinaryLogRecordKind Write(AssemblyConflictWarningEventArgs e)
+        {
+            // Write the eight diagnostic fields that the generic BuildWarningEventArgs writer uses.
+            // Do not write Message or Arguments because the reader reconstructs the message from the structured fields.
+            WriteBuildEventArgsFields(e, writeMessage: false);
+            WriteDeduplicatedString(e.Subcategory);
+            WriteDeduplicatedString(e.Code);
+            WriteDeduplicatedString(e.File);
+            WriteDeduplicatedString(e.ProjectFile);
+            Write(e.LineNumber);
+            Write(e.ColumnNumber);
+            Write(e.EndLineNumber);
+            Write(e.EndColumnNumber);
+
+            WriteDeduplicatedString(e.SimpleAssemblyName);
+            Write((int)e.LossReason);
+            WriteAssemblyConflictReferenceDetails(e.Victor);
+            WriteAssemblyConflictReferenceDetails(e.Victim);
+            WriteAssemblyConflictMessageFormats(e.MessageFormats!, includeWarningFormats: true);
+
+            return BinaryLogRecordKind.AssemblyConflictWarning;
+        }
+
+        private void WriteAssemblyConflictReferenceDetails(AssemblyConflictReferenceDetails details)
+        {
+            WriteDeduplicatedString(details.FusionName);
+            WriteDeduplicatedString(details.FullPath);
+            Write(details.IsPrimary);
+            Write(details.IsResolved);
+            WriteDeduplicatedString(details.UnresolvedPrimaryItemSpec);
+
+            Write(details.Dependees.Count);
+            for (int i = 0; i < details.Dependees.Count; i++)
+            {
+                AssemblyConflictDependee dependee = details.Dependees[i];
+                WriteDeduplicatedString(dependee.DependeeFullPath);
+                Write(dependee.SourceItemSpecs.Count);
+                for (int j = 0; j < dependee.SourceItemSpecs.Count; j++)
+                {
+                    WriteDeduplicatedString(dependee.SourceItemSpecs[j]);
+                }
+            }
+        }
+
+        private void WriteAssemblyConflictMessageFormats(AssemblyConflictMessageFormats formats, bool includeWarningFormats)
+        {
+            WriteDeduplicatedString(formats.ReferenceDependsOn);
+            WriteDeduplicatedString(formats.UnifiedReferenceDependsOn);
+            WriteDeduplicatedString(formats.UnresolvedPrimaryItemSpec);
+            WriteDeduplicatedString(formats.PrimarySourceItemsForReference);
+
+            if (includeWarningFormats)
+            {
+                WriteDeduplicatedString(formats.ConflictFound);
+                WriteDeduplicatedString(formats.ConflictHigherVersionChosen);
+                WriteDeduplicatedString(formats.ConflictPrimaryChosen);
+                WriteDeduplicatedString(formats.ConflictUnsolvable);
+                WriteDeduplicatedString(formats.FoundConflicts);
+            }
         }
 
         private BinaryLogRecordKind Write(CriticalBuildMessageEventArgs e)

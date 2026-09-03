@@ -552,7 +552,7 @@ namespace Microsoft.Build.BackEnd
                     taskFinished = true;
                     break;
                 case NodePacketType.LogMessage:
-                    HandleLoggedMessage(packet as LogMessagePacket);
+                    HandleLoggedMessage(BuildEngine, packet as LogMessagePacket);
                     break;
                 case NodePacketType.TaskHostIsRunningMultipleNodesRequest:
                     HandleIsRunningMultipleNodesRequest(packet as TaskHostIsRunningMultipleNodesRequest);
@@ -664,46 +664,28 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Handle logged messages from the task host.
         /// </summary>
-        private void HandleLoggedMessage(LogMessagePacket logMessagePacket)
+        internal static void HandleLoggedMessage(IBuildEngine buildEngine, LogMessagePacket logMessagePacket)
         {
-            switch (logMessagePacket.EventType)
+            BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent.Value.Value;
+            switch (buildEvent)
             {
-                case LoggingEventType.BuildErrorEvent:
-                    this.BuildEngine.LogErrorEvent((BuildErrorEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
+                case BuildErrorEventArgs error:
+                    buildEngine.LogErrorEvent(error);
                     break;
-                case LoggingEventType.BuildWarningEvent:
-                    this.BuildEngine.LogWarningEvent((BuildWarningEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
+                case BuildWarningEventArgs warning:
+                    buildEngine.LogWarningEvent(warning);
                     break;
-                case LoggingEventType.TaskCommandLineEvent:
-                case LoggingEventType.BuildMessageEvent:
-                    this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
+                case BuildMessageEventArgs message:
+                    buildEngine.LogMessageEvent(message);
                     break;
-                case LoggingEventType.CustomEvent:
-                    BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent.Value.Value;
-
-                    // "Custom events" in terms of the communications infrastructure can also be, e.g. custom error events,
-                    // in which case they need to be dealt with in the same way as their base type of event.
-                    if (buildEvent is BuildErrorEventArgs buildErrorEventArgs)
-                    {
-                        this.BuildEngine.LogErrorEvent(buildErrorEventArgs);
-                    }
-                    else if (buildEvent is BuildWarningEventArgs buildWarningEventArgs)
-                    {
-                        this.BuildEngine.LogWarningEvent(buildWarningEventArgs);
-                    }
-                    else if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
-                    {
-                        this.BuildEngine.LogMessageEvent(buildMessageEventArgs);
-                    }
-                    else if (buildEvent is CustomBuildEventArgs customBuildEventArgs)
-                    {
-                        this.BuildEngine.LogCustomEvent(customBuildEventArgs);
-                    }
-                    else
-                    {
-                        InternalError.Throw("Unknown event args type.");
-                    }
-
+                case CustomBuildEventArgs custom:
+                    buildEngine.LogCustomEvent(custom);
+                    break;
+                case TelemetryEventArgs telemetry when buildEngine is IBuildEngine5 buildEngine5:
+                    buildEngine5.LogTelemetry(telemetry.EventName, telemetry.Properties);
+                    break;
+                default:
+                    InternalError.Throw("Unknown event args type.");
                     break;
             }
         }

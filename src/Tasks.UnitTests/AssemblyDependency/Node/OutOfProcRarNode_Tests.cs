@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -112,6 +114,66 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, engine.Warnings);
             Assert.Equal(0, engine.Errors);
             _ = Assert.Single(rar.ResolvedFiles);
+        }
+
+        [Fact]
+        public void DispatchesStructuredConflictEvents()
+        {
+            MockEngine engine = new(output);
+            ResolveAssemblyReference rar = new()
+            {
+                BuildEngine = engine,
+            };
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0",
+                "/libs/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0",
+                "/libs/v2/D.dll",
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+            var formats = new AssemblyConflictMessageFormats(
+                "There was a conflict between \"{0}\" and \"{1}\".",
+                "Choosing \"{0}\" because it has a higher version.",
+                "\"{0}\" was chosen because it was primary and \"{1}\" was not.",
+                "MSB3243: No way to resolve conflict between \"{0}\" and \"{1}\". Choosing \"{0}\" arbitrarily.",
+                "References which depend on \"{0}\" [{1}].",
+                "References which depend on or have been unified to \"{0}\" [{1}].",
+                "Unresolved primary reference with an item include of \"{0}\".",
+                "Project file item includes which caused reference \"{0}\".",
+                "Found conflicts between different versions of \"{0}\" that could not be resolved.\n{1}");
+            var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
+                victor,
+                victim,
+                formats,
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+            var warningEvent = new AssemblyConflictWarningEventArgs(
+                "D",
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                formats,
+                "MSB3277",
+                "project.proj",
+                1,
+                2,
+                "MSBuild.ResolveAssemblyReference.FoundConflicts",
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
+
+            OutOfProcRarClient.DispatchBuildEvent(rar, detailsEvent);
+            OutOfProcRarClient.DispatchBuildEvent(rar, warningEvent);
+
+            engine.MessageEvents.ShouldHaveSingleItem().ShouldBeOfType<AssemblyConflictDependencyDetailsMessageEventArgs>();
+            engine.WarningEvents.ShouldHaveSingleItem().ShouldBeOfType<AssemblyConflictWarningEventArgs>();
         }
     }
 }
