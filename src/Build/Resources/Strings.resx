@@ -1938,6 +1938,24 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path
     </comment>
   </data>
+  <data name="ProjectInstanceSnapshotCacheStatus" xml:space="preserve">
+    <value>Project instance snapshot cache: build {0}, {1} entries, {2}/{3} retained bytes, {4} stores, {5} hits, {6} misses, {7} rejections, {8} materializations, {9} evictions, {10} oversized rejections.</value>
+    <comment>
+      LOCALIZATION: {0} through {10} are non-negative integer counts.
+    </comment>
+  </data>
+  <data name="ProjectInstanceSnapshotCacheReuseFailed" xml:space="preserve">
+    <value>Project instance snapshot cache could not reuse project "{0}": {1}</value>
+    <comment>
+      LOCALIZATION: {0} is a project file path. {1} is an exception message.
+    </comment>
+  </data>
+  <data name="ProjectInstanceSnapshotCacheStoreFailed" xml:space="preserve">
+    <value>Project instance snapshot cache could not store project "{0}": {1}</value>
+    <comment>
+      LOCALIZATION: {0} is a project file path. {1} is an exception message.
+    </comment>
+  </data>
   <data name="SkippedConstraintsOnRequest" xml:space="preserve">
     <value>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</value>
     <comment>

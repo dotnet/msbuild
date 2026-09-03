@@ -569,23 +569,126 @@ namespace Microsoft.Build.BackEnd
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
 
-                return new ProjectInstance(
+                var buildEventContext = new BuildEventContext(
+                    submissionId,
+                    nodeId,
+                    BuildEventContext.InvalidEvaluationId,
+                    BuildEventContext.InvalidProjectInstanceId,
+                    BuildEventContext.InvalidProjectContextId,
+                    BuildEventContext.InvalidTargetId,
+                    BuildEventContext.InvalidTaskId);
+
+                // Snapshot copies do not retain evaluated item elements, so recording requests must bypass the cache.
+                ProjectInstanceSnapshotCache snapshotCache =
+                    projectLoadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements)
+                        ? null
+                        : componentHost.BuildParameters.ProjectInstanceSnapshotCache;
+                ProjectInstanceSnapshotCacheKey snapshotKey = null;
+                if (snapshotCache is not null)
+                {
+                    try
+                    {
+                        Toolset requestToolset =
+                            componentHost.BuildParameters.GetToolset(ToolsVersion);
+                        string requestSubToolsetVersion =
+                            requestToolset?.GenerateSubToolsetVersionUsingVisualStudioVersion(
+                                globalProperties,
+                                visualStudioVersionFromSolution: 0);
+                        snapshotKey = new ProjectInstanceSnapshotCacheKey(
+                            ProjectFullPath,
+                            ToolsVersion,
+                            ExplicitToolsVersionSpecified,
+                            requestSubToolsetVersion,
+                            projectLoadSettings,
+                            globalProperties);
+
+                        bool cacheHit = snapshotCache.TryGet(
+                            snapshotKey,
+                            out ProjectInstanceSnapshotCacheEntry cachedEntry);
+                        snapshotCache.NotifyCacheLookup(cacheHit);
+                        if (cacheHit)
+                        {
+                            try
+                            {
+                                if (snapshotCache.Validator.Validate(snapshotKey, cachedEntry) ==
+                                    ProjectInstanceSnapshotValidationResult.Valid)
+                                {
+                                    long materializationStarted = Stopwatch.GetTimestamp();
+                                    ProjectInstance materialized = cachedEntry.Snapshot.Materialize(
+                                        componentHost.BuildParameters,
+                                        BuildEventContext.InvalidEvaluationId,
+                                        componentHost.LoggingService,
+                                        buildEventContext);
+                                    snapshotCache.NotifyMaterialized(
+                                        Stopwatch.GetTimestamp() - materializationStarted);
+                                    return materialized;
+                                }
+
+                                snapshotCache.NotifyValidationRejected();
+                            }
+                            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                            {
+                                snapshotCache.NotifyValidationRejected();
+                                componentHost.LoggingService.LogComment(
+                                    buildEventContext,
+                                    MessageImportance.Low,
+                                    "ProjectInstanceSnapshotCacheReuseFailed",
+                                    ProjectFullPath,
+                                    ex.Message);
+                            }
+
+                            snapshotCache.Remove(snapshotKey);
+                        }
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        snapshotKey = null;
+                        componentHost.LoggingService.LogComment(
+                            buildEventContext,
+                            MessageImportance.Low,
+                            "ProjectInstanceSnapshotCacheReuseFailed",
+                            ProjectFullPath,
+                            ex.Message);
+                    }
+                }
+
+                ProjectInstance project = new ProjectInstance(
                     ProjectFullPath,
                     globalProperties,
                     toolsVersionOverride,
                     componentHost.BuildParameters,
                     componentHost.LoggingService,
-                    new BuildEventContext(
-                        submissionId,
-                        nodeId,
-                        BuildEventContext.InvalidEvaluationId,
-                        BuildEventContext.InvalidProjectInstanceId,
-                        BuildEventContext.InvalidProjectContextId,
-                        BuildEventContext.InvalidTargetId,
-                        BuildEventContext.InvalidTaskId),
+                    buildEventContext,
                     sdkResolverService,
                     submissionId,
                     projectLoadSettings);
+
+                if (snapshotCache is not null && snapshotKey is not null)
+                {
+                    try
+                    {
+                        long snapshotCreationStarted = Stopwatch.GetTimestamp();
+                        ProjectInstanceSnapshot snapshot =
+                            ProjectInstanceSnapshot.Create(project);
+                        snapshotCache.NotifySnapshotCreated(
+                            Stopwatch.GetTimestamp() - snapshotCreationStarted);
+                        var entry = new ProjectInstanceSnapshotCacheEntry(
+                            snapshot,
+                            EmptyProjectInstanceSnapshotValidationData.Instance);
+                        snapshotCache.AddOrReplace(snapshotKey, entry);
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        componentHost.LoggingService.LogComment(
+                            buildEventContext,
+                            MessageImportance.Low,
+                            "ProjectInstanceSnapshotCacheStoreFailed",
+                            ProjectFullPath,
+                            ex.Message);
+                    }
+                }
+
+                return project;
             });
         }
 

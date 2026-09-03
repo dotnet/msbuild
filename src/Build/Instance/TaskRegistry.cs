@@ -182,6 +182,65 @@ namespace Microsoft.Build.Execution
         {
         }
 
+        private TaskRegistry(
+            TaskRegistry that,
+            Toolset toolset,
+            ProjectRootElementCacheBase projectRootElementCache)
+        {
+            _toolset = toolset;
+            RootElementCache = projectRootElementCache;
+            _nextRegistrationOrderId = that._nextRegistrationOrderId;
+            var recordClones =
+                new Dictionary<RegisteredTaskRecord, RegisteredTaskRecord>();
+
+            if (that._taskRegistrations is not null)
+            {
+                _taskRegistrations =
+                    CreateRegisteredTaskDictionary(that._taskRegistrations.Count);
+                foreach (KeyValuePair<RegisteredTaskIdentity, List<RegisteredTaskRecord>> registration in
+                         that._taskRegistrations)
+                {
+                    var records =
+                        new List<RegisteredTaskRecord>(registration.Value.Count);
+                    foreach (RegisteredTaskRecord record in registration.Value)
+                    {
+                        records.Add(CloneRecord(record, recordClones));
+                    }
+
+                    _taskRegistrations.Add(registration.Key.DeepClone(), records);
+                }
+            }
+
+            foreach (KeyValuePair<string, List<RegisteredTaskRecord>> overriddenTask in that._overriddenTasks)
+            {
+                var records =
+                    new List<RegisteredTaskRecord>(overriddenTask.Value.Count);
+                foreach (RegisteredTaskRecord record in overriddenTask.Value)
+                {
+                    records.Add(CloneRecord(record, recordClones));
+                }
+
+                _overriddenTasks.Add(overriddenTask.Key, records);
+            }
+
+#if DEBUG
+            _isInitialized = that._isInitialized;
+#endif
+        }
+
+        private static RegisteredTaskRecord CloneRecord(
+            RegisteredTaskRecord record,
+            Dictionary<RegisteredTaskRecord, RegisteredTaskRecord> clones)
+        {
+            if (!clones.TryGetValue(record, out RegisteredTaskRecord clone))
+            {
+                clone = record.DeepClone();
+                clones.Add(record, clone);
+            }
+
+            return clone;
+        }
+
         /// <summary>
         /// Creates a task registry that defers to the specified toolset's registry for those tasks it cannot resolve.
         /// UNDONE: (Logging.) We can't pass the base task registry from the Toolset because we can't call GetTaskRegistry
@@ -234,6 +293,19 @@ namespace Microsoft.Build.Execution
         }
 
         internal bool IsLoaded => RootElementCache != null;
+
+        internal TaskRegistry CloneForBuild(
+            Toolset toolset,
+            ProjectRootElementCacheBase projectRootElementCache) =>
+            new(this, toolset, projectRootElementCache);
+
+        internal void RebindForBuild(
+            Toolset toolset,
+            ProjectRootElementCacheBase projectRootElementCache)
+        {
+            _toolset = toolset;
+            RootElementCache = projectRootElementCache;
+        }
 
         /// <summary>
         /// Evaluate the usingtask and add the result into the data passed in
@@ -803,6 +875,9 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public TaskHostParameters TaskIdentityParameters => _taskIdentityParameters;
 
+            internal RegisteredTaskIdentity DeepClone() =>
+                new(_name, _taskIdentityParameters);
+
             /// <summary>
             /// Comparer used to figure out whether two RegisteredTaskIdentities are equal or not.
             /// </summary>
@@ -1177,6 +1252,18 @@ namespace Microsoft.Build.Execution
             private RegisteredTaskRecord()
             {
             }
+
+            internal RegisteredTaskRecord DeepClone() =>
+                new(
+                    _registeredName,
+                    AssemblyLoadInfo.Create(
+                        _taskFactoryAssemblyLoadInfo.AssemblyName,
+                        _taskFactoryAssemblyLoadInfo.AssemblyFile),
+                    _taskFactory,
+                    _taskFactoryParameters,
+                    _parameterGroupAndTaskBody.DeepClone(),
+                    _registrationOrderId,
+                    _definingFileFullPath);
 
             /// <summary>
             /// Evaluates whether the current task is assumed to be defined within the user code - as opposed
@@ -1644,6 +1731,37 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public ParameterGroupAndTaskElementRecord()
                 {
+                }
+
+                internal ParameterGroupAndTaskElementRecord DeepClone()
+                {
+                    var clone = new ParameterGroupAndTaskElementRecord
+                    {
+                        _inlineTaskXmlBody = _inlineTaskXmlBody,
+                        _taskBodyEvaluated = _taskBodyEvaluated,
+                    };
+
+                    if (_usingTaskParameters is not null)
+                    {
+                        clone._usingTaskParameters =
+                            new Dictionary<string, TaskPropertyInfo>(
+                                _usingTaskParameters.Count,
+                                StringComparer.OrdinalIgnoreCase);
+                        foreach (KeyValuePair<string, TaskPropertyInfo> parameter in
+                                 _usingTaskParameters)
+                        {
+                            TaskPropertyInfo value = parameter.Value;
+                            clone._usingTaskParameters.Add(
+                                parameter.Key,
+                                new TaskPropertyInfo(
+                                    value.Name,
+                                    value.PropertyType,
+                                    value.Output,
+                                    value.Required));
+                        }
+                    }
+
+                    return clone;
                 }
 
                 /// <summary>

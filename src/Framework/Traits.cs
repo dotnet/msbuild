@@ -183,6 +183,22 @@ namespace Microsoft.Build.Framework
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
 
         /// <summary>
+        /// Name of the opt-in environment variable for project instance snapshot caching.
+        /// </summary>
+        public const string EnableProjectInstanceSnapshotCacheEnvVarName = "MSBUILDENABLEPROJECTINSTANCESNAPSHOTCACHE";
+
+        /// <summary>
+        /// Enables the experimental project instance snapshot cache.
+        /// </summary>
+        private readonly bool _enableProjectInstanceSnapshotCache =
+            EnvironmentUtilities.IsValueOneOrTrue(EnableProjectInstanceSnapshotCacheEnvVarName);
+
+        internal static bool? ProjectInstanceSnapshotCacheEnabledOverride { get; set; }
+
+        public bool EnableProjectInstanceSnapshotCache =>
+            ProjectInstanceSnapshotCacheEnabledOverride ?? _enableProjectInstanceSnapshotCache;
+
+        /// <summary>
         /// Name of environment variable for logging arguments (e.g., -bl, -check).
         /// </summary>
         public const string MSBuildLoggingArgsEnvVarName = "MSBUILD_LOGGING_ARGS";

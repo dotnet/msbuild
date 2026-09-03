@@ -918,6 +918,27 @@
         <target state="translated">'{0}' 파일을 추가하는 동안 예외가 발생했습니다. 예외: '{1}'</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectInstanceSnapshotCacheReuseFailed">
+        <source>Project instance snapshot cache could not reuse project "{0}": {1}</source>
+        <target state="new">Project instance snapshot cache could not reuse project "{0}": {1}</target>
+        <note>
+      LOCALIZATION: {0} is a project file path. {1} is an exception message.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectInstanceSnapshotCacheStatus">
+        <source>Project instance snapshot cache: build {0}, {1} entries, {2}/{3} retained bytes, {4} stores, {5} hits, {6} misses, {7} rejections, {8} materializations, {9} evictions, {10} oversized rejections.</source>
+        <target state="new">Project instance snapshot cache: build {0}, {1} entries, {2}/{3} retained bytes, {4} stores, {5} hits, {6} misses, {7} rejections, {8} materializations, {9} evictions, {10} oversized rejections.</target>
+        <note>
+      LOCALIZATION: {0} through {10} are non-negative integer counts.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectInstanceSnapshotCacheStoreFailed">
+        <source>Project instance snapshot cache could not store project "{0}": {1}</source>
+        <target state="new">Project instance snapshot cache could not store project "{0}": {1}</target>
+        <note>
+      LOCALIZATION: {0} is a project file path. {1} is an exception message.
+    </note>
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
