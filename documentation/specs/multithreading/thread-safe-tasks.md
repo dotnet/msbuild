@@ -117,7 +117,7 @@ Using the API is safe when the task accounts for this sharing. Before adding `[M
 * registered objects support concurrent access;
 * keys cannot collide with unrelated tasks;
 * if multiple tasks race to register equal keys, only one object is retained and the task disposes any unretained object that needs cleanup; and
-* correctness does not require two task invocations to use the same cache.
+* correctness does not require two task invocations to use the same cache so the task is functional both in multithreaded and multiprocess modes.
 
 ## TaskEnvironment API
 
