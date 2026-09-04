@@ -1,3 +1,5 @@
 {
-  "auto_upgrade": true
+  "auto_upgrade": {
+    "cron": "23 5 1 * *"
+  }
 }

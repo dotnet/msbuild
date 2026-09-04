@@ -27,15 +27,14 @@
 # Or use the gh-aw CLI directly:
 # ./gh-aw compile --validate --verbose
 #
-# The workflow is generated when auto_upgrade is enabled in aw.json (true or object form).
-# When auto_upgrade is an object without a cron, the fuzzy weekly schedule is used.
-# The weekly schedule is deterministically scattered based on the repository slug.
+# The workflow is generated when auto_upgrade.cron is set in aw.json.
+# The schedule is pinned to the custom cron expression configured in aw.json.
 #
 name: Agentic Auto-Upgrade
 
 on:
   schedule:
-    - cron: "38 4 * * 0"  # Weekly (auto-upgrade)
+    - cron: "23 5 1 * *"  # Custom schedule (auto-upgrade)
   workflow_dispatch:
 
 permissions:
