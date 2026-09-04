@@ -64,6 +64,10 @@ jobs:
     demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
   timeoutInMinutes: 120
   steps:
+  # The definition defaults to a shallow (depth 1) fetch, but
+  # check-documentation-only-change.yml diffs HEAD against HEAD~1, so fetch the parent too.
+  - checkout: self
+    fetchDepth: 2
   - template: check-documentation-only-change.yml
   - task: BatchScript@1
     displayName: Build (quarantined tests only)
@@ -115,6 +119,10 @@ jobs:
     demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
   timeoutInMinutes: 120
   steps:
+  # The definition defaults to a shallow (depth 1) fetch, but
+  # check-documentation-only-change.yml diffs HEAD against HEAD~1, so fetch the parent too.
+  - checkout: self
+    fetchDepth: 2
   - template: check-documentation-only-change.yml
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
@@ -156,6 +164,10 @@ jobs:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120
   steps:
+  # The definition defaults to a shallow (depth 1) fetch, but
+  # check-documentation-only-change.yml diffs HEAD against HEAD~1, so fetch the parent too.
+  - checkout: self
+    fetchDepth: 2
   - template: check-documentation-only-change.yml
   - bash: . 'build.sh' --ci --test --stage2Argument '/p:RunQuarantinedTests=true'
     displayName: Build (quarantined tests only)
