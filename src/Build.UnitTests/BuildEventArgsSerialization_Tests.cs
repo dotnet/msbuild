@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,8 @@ using System.Runtime.Serialization;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -19,6 +22,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
+using EngineTaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using UtilitiesTaskItem = Microsoft.Build.Utilities.TaskItem;
 
 #nullable disable
 
@@ -969,6 +974,162 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void TaskParameterSerializationReusesSharedBackingMetadata()
+        {
+            ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata
+                .Add("Metadata", "value%253b");
+            var first = new UtilitiesTaskItem("ItemSpec1");
+            var second = new UtilitiesTaskItem("ItemSpec2");
+            ((IMetadataContainer)first).ImportMetadata(metadata);
+            ((IMetadataContainer)second).ImportMetadata(metadata);
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(1);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterSerializationCachesEmptyMetadataAndFallsBackForTaskItemData()
+        {
+            var first = new UtilitiesTaskItem("ItemSpec1");
+            var second = new UtilitiesTaskItem("ItemSpec2");
+            var taskItemData = new TaskItemData(
+                "ItemSpec3",
+                new Dictionary<string, string>
+                {
+                    ["Metadata"] = "value%253b",
+                });
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second, taskItemData },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(0);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterSerializationReusesItemDefinitionMetadata()
+        {
+            var project = new Project();
+            var definition = new ProjectItemDefinition(project, "MyItem");
+            definition.SetMetadataValue("Metadata", "value%253b");
+            var itemDefinitions = new List<ProjectItemDefinitionInstance>
+            {
+                new ProjectItemDefinitionInstance(definition),
+            };
+            var first = new EngineTaskItem(
+                "ItemSpec1",
+                "ItemSpec1",
+                directMetadata: null,
+                itemDefinitions,
+                projectDirectory: null,
+                immutable: false,
+                definingFileEscaped: "project.proj");
+            var second = new EngineTaskItem(
+                "ItemSpec2",
+                "ItemSpec2",
+                directMetadata: null,
+                itemDefinitions,
+                projectDirectory: null,
+                immutable: false,
+                definingFileEscaped: "project.proj");
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(1);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterBackingMetadataFastPathPreservesSerializedBytes()
+        {
+            ImmutableDictionary<string, string> backingMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                .Add("Metadata", "value%253b");
+            var optimizedFirst = new UtilitiesTaskItem("ItemSpec1");
+            var optimizedSecond = new UtilitiesTaskItem("ItemSpec2");
+            ((IMetadataContainer)optimizedFirst).ImportMetadata(backingMetadata);
+            ((IMetadataContainer)optimizedSecond).ImportMetadata(backingMetadata);
+
+            byte[] optimizedBytes = SerializeTaskParameter([optimizedFirst, optimizedSecond]);
+            byte[] fallbackBytes = SerializeTaskParameter(
+                [
+                    new FallbackTaskItem("ItemSpec1", "Metadata", "value%3b"),
+                    new FallbackTaskItem("ItemSpec2", "Metadata", "value%3b"),
+                ]);
+
+            optimizedBytes.ShouldBe(fallbackBytes);
+
+            static byte[] SerializeTaskParameter(ITaskItem[] items)
+            {
+                var args = new TaskParameterEventArgs(
+                    TaskParameterMessageKind.TaskOutput,
+                    "ParameterName",
+                    "PropertyName",
+                    "ItemName",
+                    items,
+                    logItemMetadata: true,
+                    DateTime.MinValue);
+                var stream = new MemoryStream();
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(writer).Write(args);
+                }
+                return stream.ToArray();
+            }
+        }
+
+        [Fact]
         public void RoundtripProjectEvaluationStartedEventArgs()
         {
             var projectFile = @"C:\foo\bar.proj";
@@ -1057,6 +1218,46 @@ namespace Microsoft.Build.UnitTests
 
             /// <inheritdoc />
             public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata() => _metadata;
+        }
+
+        private sealed class FallbackTaskItem : ITaskItem
+        {
+            private readonly Dictionary<string, string> _metadata;
+
+            internal FallbackTaskItem(string itemSpec, string metadataName, string metadataValue)
+            {
+                ItemSpec = itemSpec;
+                _metadata = new Dictionary<string, string>
+                {
+                    [metadataName] = metadataValue,
+                };
+            }
+
+            public string ItemSpec { get; set; }
+
+            public ICollection MetadataNames => _metadata.Keys;
+
+            public int MetadataCount => _metadata.Count;
+
+            public string GetMetadata(string metadataName)
+                => _metadata.TryGetValue(metadataName, out string value) ? value : string.Empty;
+
+            public void SetMetadata(string metadataName, string metadataValue)
+                => _metadata[metadataName] = metadataValue;
+
+            public void RemoveMetadata(string metadataName)
+                => _metadata.Remove(metadataName);
+
+            public void CopyMetadataTo(ITaskItem destinationItem)
+            {
+                foreach (KeyValuePair<string, string> metadata in _metadata)
+                {
+                    destinationItem.SetMetadata(metadata.Key, metadata.Value);
+                }
+            }
+
+            public IDictionary CloneCustomMetadata()
+                => new Dictionary<string, string>(_metadata);
         }
 
         [Fact]
