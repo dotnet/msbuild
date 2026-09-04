@@ -943,6 +943,11 @@
         <target state="translated">MSB4283: 無法執行 "{0}" 工作，因為執行工作需要透過反映載入工作組件和類型，而此修剪或原生 AOT 主機不支援這項作業。請使用以 JIT 為基礎的 MSBuild 來建置，以便執行工作。</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
       </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="new">File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">目前只支援使用 MSBuild 的 x64 變體來報告檔案存取。</target>

@@ -138,7 +138,7 @@ The scheduler is already capable of juggling multiple projects, and there's alre
 
 The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, CLI or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode creating all the thread nodes in the entry process for simplicity--in final production these will be in an [MSBuild Server process](#msbuild-server-integration).
 
-In the current implementation, enabling multithreaded mode implies that all worker nodes are in-proc. Out-of-proc worker-node topologies for multithreaded execution remain future work.
+In the current implementation, enabling multithreaded mode implies that all worker nodes are in-proc. Out-of-proc worker-node topologies for multithreaded execution remain future work. Because `/reportfileaccesses` requires detoured out-of-proc worker processes and attributes accesses to the single project executing on each node, it cannot be combined with multithreaded mode.
 
 ```mermaid
 sequenceDiagram

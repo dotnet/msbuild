@@ -943,6 +943,11 @@
         <target state="translated">MSB4283: "{0}" 작업을 실행하려면 반영을 통해 작업 어셈블리와 형식을 로드해야 하므로 실행할 수 없습니다. 이는 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서는 지원되지 않습니다. 작업을 실행하려면 JIT 기반 MSBuild로 빌드하세요.</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
       </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="new">File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">파일 액세스 보고는 현재 x64 버전의 MSBuild를 사용하는 경우에만 지원됩니다.</target>

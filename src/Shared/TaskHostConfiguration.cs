@@ -118,6 +118,8 @@ namespace Microsoft.Build.BackEnd
 
         private ICollection<string> _warningsAsMessages;
 
+        private bool _reportFileAccesses;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
@@ -143,6 +145,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsAsErrors">A collection of warning codes to be treated as errors.</param>
         /// <param name="warningsNotAsErrors">A collection of warning codes not to be treated as errors.</param>
         /// <param name="warningsAsMessages">A collection of warning codes to be treated as messages.</param>
+        /// <param name="reportFileAccesses">Whether file accesses reported through the task engine services should be collected.</param>
 #else
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
@@ -167,6 +170,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsAsErrors">A collection of warning codes to be treated as errors.</param>
         /// <param name="warningsNotAsErrors">A collection of warning codes not to be treated as errors.</param>
         /// <param name="warningsAsMessages">A collection of warning codes to be treated as messages.</param>
+        /// <param name="reportFileAccesses">Whether file accesses reported through the task engine services should be collected.</param>
 #endif
         public TaskHostConfiguration(
             int nodeId,
@@ -191,7 +195,8 @@ namespace Microsoft.Build.BackEnd
             Dictionary<string, string> globalParameters,
             ICollection<string> warningsAsErrors,
             ICollection<string> warningsNotAsErrors,
-            ICollection<string> warningsAsMessages)
+            ICollection<string> warningsAsMessages,
+            bool reportFileAccesses = false)
         {
             Assumed.NotNullOrEmpty(taskName);
             Assumed.NotNullOrEmpty(taskLocation);
@@ -227,6 +232,7 @@ namespace Microsoft.Build.BackEnd
             _warningsAsErrors = warningsAsErrors;
             _warningsNotAsErrors = warningsNotAsErrors;
             _warningsAsMessages = warningsAsMessages;
+            _reportFileAccesses = reportFileAccesses;
 
             if (taskParameters != null)
             {
@@ -511,6 +517,15 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Gets whether file accesses reported by the task should be collected.
+        /// </summary>
+        public bool ReportFileAccesses
+        {
+            [DebuggerStepThrough]
+            get => _reportFileAccesses;
+        }
+
+        /// <summary>
         /// Translates the packet to/from binary form.
         /// </summary>
         /// <param name="translator">The translator to use.</param>
@@ -575,6 +590,13 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+
+            // CLR4 task hosts use version 0 and are always launched from the same MSBuild installation.
+            // Versioned .NET task hosts negotiate version 6 before this field is written.
+            if (translator.NegotiatedPacketVersion is 0 or >= NodePacketTypeExtensions.FileAccessReportingConfigurationMinVersion)
+            {
+                translator.Translate(ref _reportFileAccesses);
+            }
         }
 
         /// <summary>
