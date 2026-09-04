@@ -969,6 +969,65 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripAssemblyResolutionSearchTraceEventArgs()
+        {
+            var args = CreateAssemblyResolutionSearchEvent();
+
+            Roundtrip(
+                args,
+                e => e.RequestedAssemblyName,
+                e => e.TargetProcessorArchitecture,
+                e => e.Importance.ToString(),
+                e => e.Message,
+                e => string.Join("|", e.SearchAttempts.Select(
+                    attempt => $"{attempt.SearchPath};{attempt.ParentAssembly};{attempt.FileNameAttempted};{attempt.AssemblyName};{attempt.Result};{attempt.ProcessorArchitecture};{attempt.IsAssemblyFoldersExSearch}")));
+        }
+
+        private static AssemblyResolutionSearchTraceEventArgs CreateAssemblyResolutionSearchEvent()
+            => new(
+                "Requested, Version=1.0.0.0",
+                "MSIL",
+                [
+                    new AssemblyResolutionSearchAttempt(
+                        "first.dll",
+                        "first-path",
+                        parentAssembly: null,
+                        assemblyName: null,
+                        AssemblyResolutionSearchResult.FileNotFound,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: true),
+                    new AssemblyResolutionSearchAttempt(
+                        "second.dll",
+                        "second-path",
+                        "parent.dll",
+                        "Found, Version=2.0.0.0",
+                        AssemblyResolutionSearchResult.FusionNamesDidNotMatch,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: false),
+                    new AssemblyResolutionSearchAttempt(
+                        "third.dll",
+                        "second-path",
+                        "parent.dll",
+                        "Requested, Version=1.0.0.0",
+                        AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch,
+                        "AMD64",
+                        logAssemblyFoldersEx: false),
+                ],
+                new AssemblyResolutionSearchTraceMessageFormats(
+                    "Search {0}",
+                    "Search {0} from {1}",
+                    "Searched AssemblyFoldersEx",
+                    "Missing {0}",
+                    "Found {1} at {0}, expected {2}",
+                    "No identity {0}",
+                    "Not in GAC {0}",
+                    "Not a file {0}",
+                    "Architecture {1} at {0}, expected {2}"),
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+
+        [Fact]
         public void RoundtripProjectEvaluationStartedEventArgs()
         {
             var projectFile = @"C:\foo\bar.proj";
