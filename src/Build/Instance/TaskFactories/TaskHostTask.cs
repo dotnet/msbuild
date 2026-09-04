@@ -157,11 +157,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly TaskEnvironment _taskEnvironment;
 
+        private readonly bool? _supportsParameterConversion;
+
         internal bool IsNetTaskHost =>
             string.Equals(_taskHostParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase);
 
-        internal bool SupportsParameterConversion =>
-            IsNetTaskHost && NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(_taskHostParameters);
+        internal bool? SupportsParameterConversion => _supportsParameterConversion;
 
         /// <summary>
         /// Constructor.
@@ -196,6 +197,9 @@ namespace Microsoft.Build.BackEnd
             _hostServices = hostServices;
             _projectFile = projectFile;
             _taskHostParameters = taskHostParameters;
+            _supportsParameterConversion = IsNetTaskHost
+                ? NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(_taskHostParameters)
+                : false;
             _useSidecarTaskHost = useSidecarTaskHost;
             _taskEnvironment = taskEnvironment;
 

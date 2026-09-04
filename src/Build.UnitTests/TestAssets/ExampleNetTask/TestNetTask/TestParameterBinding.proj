@@ -15,11 +15,15 @@
       mode="Deep"
       Modes="Shallow;Deep"
       DestinationFile="single.txt"
-      DestinationFiles="first.txt;second.txt" />
+      DestinationFiles="first.txt;second.txt">
+      <Output TaskParameter="OutputDate" PropertyName="OutputDate" />
+      <Output TaskParameter="OutputDates" ItemName="OutputDates" />
+    </ExampleTask>
+    <Message Text="PARAMETER_OUTPUTS_OK Date=$(OutputDate) Dates=@(OutputDates)" Importance="High" />
   </Target>
 
   <Target Name="TestModeBinding">
     <Error Condition="'$(LatestDotNetCoreForMSBuild)' == ''" Text="The LatestDotNetCoreForMSBuild property must be supplied." />
-    <ExampleTask Mode="Deep" />
+    <ExampleTask Mode="$(Mode)" Importance="$(Importance)" />
   </Target>
 </Project>

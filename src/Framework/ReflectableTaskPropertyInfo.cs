@@ -96,7 +96,7 @@ namespace Microsoft.Build.Execution
             bool output,
             bool required,
             Type parameterTypeForExpansion = null)
-            : base(propertyInfo.Name, typeof(object), output, required)
+            : base(propertyInfo.Name, parameterTypeForExpansion ?? typeof(object), output, required)
         {
             _propertyInfo = propertyInfo;
             IsTypeUnresolved = true;

@@ -405,20 +405,23 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 dotnetHostPath: null,
                 msBuildAssemblyPath: bootstrapSdkPath);
 
-            NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(currentHost).ShouldBeTrue();
+            NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(currentHost).ShouldBe(true);
 
             using TestEnvironment env = TestEnvironment.Create(_output);
             string oldHostPath = env.CreateFolder().Path;
-            File.Copy(
-                typeof(NodeProviderOutOfProcTaskHost).Assembly.Location,
-                Path.Combine(oldHostPath, Constants.MSBuildAssemblyName));
+            string oldHostAssemblyPath = Path.Combine(oldHostPath, Constants.MSBuildAssemblyName);
+            File.WriteAllText(oldHostAssemblyPath, string.Empty);
             var oldHost = new TaskHostParameters(
                 XMakeAttributes.MSBuildRuntimeValues.net,
                 XMakeAttributes.GetCurrentMSBuildArchitecture(),
                 dotnetHostPath: null,
                 msBuildAssemblyPath: oldHostPath);
 
-            NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(oldHost).ShouldBeFalse();
+            NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(oldHost).ShouldBeNull();
+
+            File.Copy(typeof(NodeProviderOutOfProcTaskHost).Assembly.Location, oldHostAssemblyPath, overwrite: true);
+
+            NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(oldHost).ShouldBe(false);
         }
     }
 }

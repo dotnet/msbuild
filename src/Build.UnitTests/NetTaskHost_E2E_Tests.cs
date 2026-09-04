@@ -157,11 +157,14 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldContain(
                 $"PARAMETER_BINDING_OK Mode=Deep Modes=Shallow,Deep DestinationFile={Path.Combine(projectDirectory, "single.txt")} DestinationFiles={Path.Combine(projectDirectory, "first.txt")},{Path.Combine(projectDirectory, "second.txt")}",
                 customMessage: output);
+            output.ShouldContain("PARAMETER_OUTPUTS_OK Date=09/04/2026 Dates=09/04/2026;09/05/2026", customMessage: output);
             output.ShouldNotContain("NullReferenceException", customMessage: output);
         }
 
-        [WindowsFullFrameworkOnlyFact]
-        public void NetTaskHost_DoesNotDeferParametersToOlderHost()
+        [WindowsFullFrameworkOnlyTheory]
+        [InlineData("Mode=Deep", "Mode", "NetTask.ExampleTask+CopyMode")]
+        [InlineData("Importance=High", "Importance", "Microsoft.Build.Framework.MessageImportance")]
+        public void NetTaskHost_DoesNotDeferParametersToOlderHost(string property, string parameter, string parameterType)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
@@ -173,13 +176,14 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestParameterBinding.proj");
             string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"\"{testProjectPath}\" -t:TestModeBinding -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -p:NetCoreSdkRoot=\"{fakeSdkRoot}\"",
+                $"\"{testProjectPath}\" -t:TestModeBinding -v:n -p:{property} -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -p:NetCoreSdkRoot=\"{fakeSdkRoot}\"",
                 out bool success,
                 outputHelper: _output);
 
             success.ShouldBeFalse(customMessage: output);
             output.ShouldContain("MSB4069", customMessage: output);
-            output.ShouldContain("\"Mode\" parameter", customMessage: output);
+            output.ShouldContain($"\"{parameter}\" parameter", customMessage: output);
+            output.ShouldContain(parameterType, customMessage: output);
             output.ShouldNotContain("MSB4026", customMessage: output);
             output.ShouldNotContain("NullReferenceException", customMessage: output);
         }

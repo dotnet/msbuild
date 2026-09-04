@@ -23,9 +23,18 @@ namespace NetTask
 
         public CopyMode[]? Modes { get; set; }
 
+#if NET
+        [Output]
+        public DateOnly OutputDate { get; set; } = new(2026, 9, 4);
+        [Output]
+        public DateOnly[] OutputDates { get; set; } = [new(2026, 9, 4), new(2026, 9, 5)];
+#endif
+
         public FileInfo? DestinationFile { get; set; }
 
         public FileInfo[]? DestinationFiles { get; set; }
+
+        public MessageImportance Importance { get; set; }
 
         public override bool Execute()
         {

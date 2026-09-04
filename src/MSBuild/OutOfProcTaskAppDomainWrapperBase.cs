@@ -381,15 +381,26 @@ namespace Microsoft.Build.CommandLine
 
             foreach (KeyValuePair<string, TaskParameter> param in taskParams)
             {
+                PropertyInfo paramInfo = null;
                 try
                 {
-                    PropertyInfo paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
+                    paramInfo = wrappedTask.GetType().GetProperty(param.Key, BindingFlags.Instance | BindingFlags.Public);
                     object parameterValue = param.Value?.WrappedParameter;
 #if NET
                     parameterValue = ConvertTaskParameterValue(parameterValue, paramInfo.PropertyType);
 #endif
                     paramInfo.SetValue(wrappedTask, parameterValue, null);
                 }
+#if NET
+                catch (TaskParameterConversionException e)
+                {
+                    return new OutOfProcTaskHostTaskResult(
+                        TaskCompleteType.CrashedDuringInitialization,
+                        e.InnerException,
+                        "InvalidTaskParameterValueError",
+                        [e.Value, param.Key, paramInfo.PropertyType.FullName, taskName]);
+                }
+#endif
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
                     return new OutOfProcTaskHostTaskResult(
@@ -476,9 +487,25 @@ namespace Microsoft.Build.CommandLine
                 return convertedArray;
             }
 
-            return value is string stringValue
-                ? ValueTypeParser.Parse(stringValue, targetType)
-                : value;
+            if (value is not string stringValue)
+            {
+                return value;
+            }
+
+            try
+            {
+                return ValueTypeParser.Parse(stringValue, targetType);
+            }
+            catch (ArgumentException e)
+            {
+                throw new TaskParameterConversionException(stringValue, e);
+            }
+        }
+
+        private sealed class TaskParameterConversionException(string value, Exception innerException)
+            : Exception(null, innerException)
+        {
+            internal string Value { get; } = value;
         }
 #endif
 

@@ -970,6 +970,25 @@ namespace Microsoft.Build.BackEnd
             return InternalSetTaskParameter(parameter, ConvertStringToParameterValue(expandedParameterValue, parameterType));
         }
 
+        private void VerifyTaskHostSupportsParameterConversion(TaskPropertyInfo parameter, Type parameterType, ElementLocation parameterLocation)
+        {
+            bool requiresHostConversion = TaskParameter.RequiresHostConversion(parameterType)
+                || (parameter is ReflectableTaskPropertyInfo reflectableParameter
+                    && (reflectableParameter.IsTypeUnresolved
+                        || (reflectableParameter.TryGetResolvedParameterType(out Type resolvedParameterType) && resolvedParameterType is null)));
+
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                TaskInstance is not TaskHostTask { IsNetTaskHost: true, SupportsParameterConversion: false }
+                    || !requiresHostConversion,
+                parameterLocation,
+                "UnsupportedTaskParameterTypeError",
+                parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true }
+                    ? "<unresolved>"
+                    : parameter.PropertyType.FullName,
+                parameter.Name,
+                _taskName);
+        }
+
         /// <summary>
         /// Converts a single string value to an instance of <paramref name="targetType"/>, applying the same
         /// conversions for both scalar parameters and the elements of array parameters.
@@ -1428,8 +1447,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         ReflectableTaskPropertyInfo reflectableParameter = parameter as ReflectableTaskPropertyInfo;
                         if (reflectableParameter?.ParameterTypeForExpansion is Type parameterTypeForExpansion
-                            && TaskInstance is TaskHostTask taskHostTask
-                            && taskHostTask.SupportsParameterConversion)
+                            && TaskInstance is TaskHostTask { IsNetTaskHost: true })
                         {
                             parameterType = parameterTypeForExpansion;
                         }
@@ -1651,6 +1669,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
+                        VerifyTaskHostSupportsParameterConversion(parameter, parameterType, parameterLocation);
                         success = SetValueParameter(parameter, parameterType, expandedParameterValue);
                         taskParameterSet = true;
                     }
@@ -1745,6 +1764,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // If the task parameter is not a ITaskItem[], then we need to convert
                 // all the TaskItem's in our arraylist to the appropriate datatype.
+                VerifyTaskHostSupportsParameterConversion(parameter, parameterType, parameterLocation);
                 success = SetParameterArray(parameter, parameterType, finalTaskItems, parameterLocation);
                 taskParameterSet = true;
             }

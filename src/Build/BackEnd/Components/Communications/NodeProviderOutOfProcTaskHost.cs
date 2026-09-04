@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd
     internal readonly record struct TaskHostNodeKey(
         HandshakeOptions HandshakeOptions,
         int NodeId,
-        bool SupportsParameterConversion = false);
+        bool? SupportsParameterConversion = false);
 
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
@@ -568,7 +568,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        internal static bool SupportsTaskParameterConversion(in TaskHostParameters taskHostParameters)
+        internal static bool? SupportsTaskParameterConversion(in TaskHostParameters taskHostParameters)
         {
             if (taskHostParameters.MSBuildAssemblyPath is null)
             {
@@ -579,15 +579,26 @@ namespace Microsoft.Build.BackEnd
             {
                 string msbuildPath = Path.GetFullPath(
                     Path.Combine(taskHostParameters.MSBuildAssemblyPath, Constants.MSBuildAssemblyName));
-                return s_parameterConversionSupport.GetOrAdd(msbuildPath, HasTaskParameterConversion);
+                if (s_parameterConversionSupport.TryGetValue(msbuildPath, out bool supportsParameterConversion))
+                {
+                    return supportsParameterConversion;
+                }
+
+                bool? result = HasTaskParameterConversion(msbuildPath);
+                if (result is bool supported)
+                {
+                    s_parameterConversionSupport.TryAdd(msbuildPath, supported);
+                }
+
+                return result;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                return false;
+                return null;
             }
         }
 
-        private static bool HasTaskParameterConversion(string msbuildPath)
+        private static bool? HasTaskParameterConversion(string msbuildPath)
         {
             try
             {
@@ -595,7 +606,7 @@ namespace Microsoft.Build.BackEnd
                 using var peReader = new PEReader(stream);
                 if (!peReader.HasMetadata)
                 {
-                    return false;
+                    return null;
                 }
 
                 MetadataReader reader = peReader.GetMetadataReader();
@@ -625,7 +636,7 @@ namespace Microsoft.Build.BackEnd
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                return false;
+                return null;
             }
         }
 
