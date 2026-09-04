@@ -2046,9 +2046,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableTask_AnalyzesContributingNonTaskBase()
+    public async Task Scope_Default_MultiThreadableTask_ReportsOnlyDirectDiagnosticsForContributingNonTaskBase()
     {
-        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
             using System;
             using System.IO;
             using Microsoft.Build.Framework;
@@ -2069,6 +2069,7 @@ public class MultiThreadableTaskAnalyzerTests
 
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
         diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
     }
 
     [Fact]

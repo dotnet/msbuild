@@ -66,16 +66,24 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
+            var multiThreadableTaskBaseTypes = FindMultiThreadableTaskBaseTypes(
+                compilationContext.Compilation,
+                iTaskType,
+                iMultiThreadableTaskType,
+                multiThreadableTaskAttributeType,
+                analyzedAttributeType);
 
             // Thread-safe collections for building the graph across concurrent operation callbacks
             var callGraph = new ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>>(SymbolEqualityComparer.Default);
             var directViolations = new ConcurrentDictionary<ISymbol, ConcurrentBag<ViolationInfo>>(SymbolEqualityComparer.Default);
+            var directlyAnalyzedTypeCache = new ConcurrentDictionary<INamedTypeSymbol, bool>(SymbolEqualityComparer.Default);
 
             // Phase 1: Scan ALL operations in the compilation to build call graph + record violations
             compilationContext.RegisterOperationAction(opCtx =>
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
-                    taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType);
+                    taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType,
+                    analyzedAttributeType, multiThreadableTaskBaseTypes, directlyAnalyzedTypeCache);
             },
             OperationKind.Invocation,
             OperationKind.ObjectCreation,
@@ -104,7 +112,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
-            INamedTypeSymbol iTaskType)
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? analyzedAttributeType,
+            ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskBaseTypes,
+            ConcurrentDictionary<INamedTypeSymbol, bool> directlyAnalyzedTypeCache)
         {
             var containingSymbol = context.ContainingSymbol;
             if (containingSymbol is not IMethodSymbol containingMethod)
@@ -115,9 +126,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Normalize to OriginalDefinition for generic methods
             var callerKey = containingMethod.OriginalDefinition;
 
-            // Check if this method is inside a task type
             var containingType = containingMethod.ContainingType;
-            bool isInsideTask = containingType is not null && ImplementsInterface(containingType, iTaskType);
+            bool isDirectlyAnalyzed = false;
+            if (containingType is not null)
+            {
+                INamedTypeSymbol containingTypeKey = containingType.OriginalDefinition;
+                if (!directlyAnalyzedTypeCache.TryGetValue(containingTypeKey, out isDirectlyAnalyzed))
+                {
+                    isDirectlyAnalyzed =
+                        ImplementsInterface(containingType, iTaskType) ||
+                        multiThreadableTaskBaseTypes.Contains(containingTypeKey) ||
+                        HasAttribute(containingType, analyzedAttributeType);
+                    directlyAnalyzedTypeCache.TryAdd(containingTypeKey, isDirectlyAnalyzed);
+                }
+            }
 
             ISymbol? referencedSymbol = null;
             ImmutableArray<IArgumentOperation> arguments = default;
@@ -168,9 +190,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            // Only record violations for NON-task methods
-            // Task methods get direct analysis from MultiThreadableTaskAnalyzer
-            if (isInsideTask)
+            // Keep call graph edges, but let MultiThreadableTaskAnalyzer own diagnostics for these types.
+            if (isDirectlyAnalyzed)
             {
                 return;
             }
@@ -238,7 +259,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             // Find all task types in the compilation
             var taskTypes = new List<INamedTypeSymbol>();
-            FindTaskTypes(context.Compilation.GlobalNamespace, iTaskType, taskTypes);
+            FindTaskTypes(context.Compilation.Assembly.GlobalNamespace, iTaskType, taskTypes);
 
             if (taskTypes.Count == 0)
             {
@@ -415,6 +436,24 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 BannedApiDefinitions.ApiCategory.PotentialIssue => true,
                 _ => false,
             };
+        }
+
+        private static bool HasAttribute(INamedTypeSymbol type, INamedTypeSymbol? attributeType)
+        {
+            if (attributeType is null)
+            {
+                return false;
+            }
+
+            foreach (AttributeData attribute in type.GetAttributes())
+            {
+                if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, attributeType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

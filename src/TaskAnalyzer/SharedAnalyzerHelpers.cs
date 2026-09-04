@@ -77,7 +77,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             AddMultiThreadableTaskBaseTypes(
-                compilation.GlobalNamespace,
+                compilation.Assembly.GlobalNamespace,
                 builder,
                 iTaskType,
                 iMultiThreadableTaskType,
