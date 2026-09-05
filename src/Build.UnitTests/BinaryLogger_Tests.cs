@@ -74,10 +74,12 @@ namespace Microsoft.Build.UnitTests
         </Project>";
 
         private readonly TestEnvironment _env;
+        private readonly ITestOutputHelper _output;
         private string _logFile;
 
         public BinaryLoggerTests(ITestOutputHelper output)
         {
+            _output = output;
             _env = TestEnvironment.Create(output);
 
             // this is needed to ensure the binary logger does not pollute the environment
@@ -437,30 +439,67 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
         {
+            // Pin the process current directory to a stable, isolated transient folder so
+            // both the WriteLinesToFile task (which resolves the relative file path against
+            // the process CWD) and the binary logger's file-existence/embed code observe
+            // the same directory. Historically this test has been flaky (#9412, #13762)
+            // because relative ItemSpecs on the EmbedInBinlog item were resolved against
+            // a different CWD on the binary logger's background embedding thread.
+            TransientTestFolder workingFolder = _env.CreateFolder(createFolder: true);
+            _env.SetCurrentDirectory(workingFolder.Path);
+
+            const string OutputFileName = "testtaskoutputfile.txt";
+            string expectedOutputFilePath = Path.Combine(workingFolder.Path, OutputFileName);
+
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
                 Parameters = $"LogFile={_logFile}",
                 CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
             };
-            var testProject = @"
+
+            // Capture every event the binary logger sees so we can include it in the
+            // failure message if the assertion below fires intermittently.
+            var mockLogger = new MockLogger(_output);
+
+            var testProject = $@"
 <Project>
     <Target Name=""Build"">
-        <WriteLinesToFile File=""testtaskoutputfile.txt"" Lines=""abc;def;ghi""/>
-        <CreateItem Include=""testtaskoutputfile.txt"">
+        <WriteLinesToFile File=""{OutputFileName}"" Lines=""abc;def;ghi""/>
+        <CreateItem Include=""{OutputFileName}"">
             <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
         </CreateItem>
     </Target>
 </Project>";
-            ObjectModelHelpers.BuildProjectExpectSuccess(testProject, binaryLogger);
+            ObjectModelHelpers.BuildProjectExpectSuccess(testProject, binaryLogger, mockLogger);
+
+            // Sanity-check the output file produced by WriteLinesToFile actually exists
+            // on disk after the build. If it does not, the diagnostic information will
+            // make the failure mode obvious instead of just reporting an empty zip.
+            bool outputFileExists = File.Exists(expectedOutputFilePath);
+
             var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 
+            // Snapshot the zip entries up-front so the assertion message can describe
+            // every entry (FullName + Length), not just whichever one tripped Shouldly.
+            var entries = zipArchive.Entries
+                .Select(e => $"  Name='{e.Name}' FullName='{e.FullName}' Length={e.Length}")
+                .ToList();
+
+            string diagnostics =
+                $"Working directory: {workingFolder.Path}{Environment.NewLine}" +
+                $"Process CWD at assert time: {Directory.GetCurrentDirectory()}{Environment.NewLine}" +
+                $"Expected output file: {expectedOutputFilePath} (Exists={outputFileExists}){Environment.NewLine}" +
+                $"Binlog path: {_logFile}{Environment.NewLine}" +
+                $"ProjectImports.zip path: {projectImportsZipPath}{Environment.NewLine}" +
+                $"Embedded files ({entries.Count}):{Environment.NewLine}{string.Join(Environment.NewLine, entries)}{Environment.NewLine}" +
+                $"=== Build log ==={Environment.NewLine}{mockLogger.FullLog}";
+
             // Can't just compare `Name` because `ZipArchive` does not handle unix directory separators well
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
-            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
-                $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+            zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith(OutputFileName), diagnostics);
         }
 
         [Fact]
