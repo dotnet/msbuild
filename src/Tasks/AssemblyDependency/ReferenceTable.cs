@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Threading;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -426,6 +427,11 @@ namespace Microsoft.Build.Tasks
         /// assembly version conflicts within an externally resolved graph.
         /// </remarks>
         internal bool FindDependenciesOfExternallyResolvedReferences { get; set; }
+
+        /// <summary>
+        /// Token used to observe cancellation requests so that closure computation can exit responsively.
+        /// </summary>
+        internal CancellationToken CancellationToken { get; set; } = CancellationToken.None;
 
         /// <summary>
         /// Adds a reference to the table.
@@ -1684,6 +1690,8 @@ namespace Microsoft.Build.Tasks
                 int dependencyIterations = 0;
                 do
                 {
+                    CancellationToken.ThrowIfCancellationRequested();
+
                     // Resolve all references.
                     ResolveAssemblyFilenames();
 
@@ -1726,6 +1734,8 @@ namespace Microsoft.Build.Tasks
 
             foreach (Reference reference in References.Values)
             {
+                CancellationToken.ThrowIfCancellationRequested();
+
                 // If the reference is resolved, but dependencies haven't been found,
                 // then find dependencies.
                 if (reference.IsResolved && !reference.DependenciesFound)
@@ -1821,6 +1831,8 @@ namespace Microsoft.Build.Tasks
         {
             foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
+                CancellationToken.ThrowIfCancellationRequested();
+
                 Reference reference = assembly.Value;
 
                 // Has this reference been resolved to a file name?
