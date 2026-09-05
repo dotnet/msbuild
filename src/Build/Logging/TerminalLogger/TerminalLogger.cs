@@ -1196,11 +1196,27 @@ public sealed partial class TerminalLogger : INodeLogger
     private void MessageRaised(object sender, BuildMessageEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
+        string? message = e.Message;
+
         if (buildEventContext is null)
         {
+            if (Verbosity > LoggerVerbosity.Normal && message is not null && e.Importance == MessageImportance.High)
+            {
+                RenderImmediateMessage(message);
+            }
+
             return;
         }
-        string? message = e.Message;
+
+        if (buildEventContext == BuildEventContext.Invalid && IsCoordinatorMessage(e))
+        {
+            if (Verbosity > LoggerVerbosity.Quiet && message is not null && e.Importance == MessageImportance.High)
+            {
+                RenderImmediateMessage(message);
+            }
+
+            return;
+        }
 
         if (message is not null && e.Importance == MessageImportance.High)
         {
@@ -1417,6 +1433,14 @@ public sealed partial class TerminalLogger : INodeLogger
 #else
         message is not null && _authProviderMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
+
+    /// <summary>
+    /// Detects build coordinator diagnostics logged with <see cref="BuildEventContext.Invalid"/>.
+    /// </summary>
+    /// <param name="e">Raised message event.</param>
+    /// <returns>true if the event is a recognized coordinator diagnostic.</returns>
+    private static bool IsCoordinatorMessage(BuildMessageEventArgs e) =>
+        e is IExtendedBuildEventArgs { ExtendedType: Microsoft.Build.Framework.Coordinator.Constants.WaitingForNodesEventType };
 
 
     private static bool IsImmediateWarning(string code) => code == "MSB3026";

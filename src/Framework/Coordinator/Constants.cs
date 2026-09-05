@@ -33,4 +33,10 @@ internal static class Constants
     ///  Name of environment variable used to flow an active coordinator grant token to child processes.
     /// </summary>
     public const string GrantIdEnvVarName = "MSBUILDCOORDINATORGRANTID";
+  
+    /// <summary>
+    ///  <see cref="Microsoft.Build.Framework.IExtendedBuildEventArgs.ExtendedType"/> used to mark the coordinator's
+    ///  "waiting for nodes" diagnostic
+    /// </summary>
+    public const string WaitingForNodesEventType = "CoordinatorWaitingForNodes";
 }
