@@ -67,7 +67,7 @@ See: [MSBuild Test Task](https://github.com/microsoft/MSBuildSdks/pull/473)
 
 ### MSBuild Task Functionality
 
-- The core of this implemenation is an MSBuild task that interfaces with `vstest.console.exe`.
+- The core of this implementation is an MSBuild task that interfaces with `vstest.console.exe`.
 - This task will accept arguments as properties and pass them directly into the command line test runner.
 
 ### Using The Default Implementation
