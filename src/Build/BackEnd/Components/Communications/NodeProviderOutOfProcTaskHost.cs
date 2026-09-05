@@ -30,7 +30,10 @@ namespace Microsoft.Build.BackEnd
     /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
     /// its own task host, so the node ID is used to distinguish them.
     /// </param>
-    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
+    /// <param name="ForwardConsoleOutput">
+    /// Whether the task host forwards console output. Hosts with different forwarding behavior must not share a connection.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId, bool ForwardConsoleOutput = false);
 
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
@@ -115,6 +118,15 @@ namespace Microsoft.Build.BackEnd
         /// When Task B finishes, handler B is popped and Task A's handler is restored.
         /// </summary>
         private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
+
+        /// <summary>
+        /// Communication node IDs explicitly enabled for console forwarding.
+        /// </summary>
+        private HashSet<int> _consoleForwardingNodeIds;
+
+        private readonly LockType _consoleForwardingLock = new();
+
+        private bool _isShutDown;
 
         /// <summary>
         /// Keeps track of the set of node IDs for which we have not yet received shutdown notification.
@@ -246,8 +258,10 @@ namespace Microsoft.Build.BackEnd
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
+            _consoleForwardingNodeIds = [];
             _activeNodes = [];
             _nextNodeId = 0;
+            _isShutDown = false;
 
             _noNodesActiveEvent = new ManualResetEvent(true);
             _localPacketFactory = new NodePacketFactory();
@@ -255,6 +269,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, this);
 
             // Register callback request packet types so we can deserialize them when
             // they arrive from TaskHost processes. These are forwarded to the current
@@ -269,6 +284,22 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
+            lock (_consoleForwardingLock)
+            {
+                _isShutDown = true;
+                _consoleForwardingNodeIds.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Prevents packets from task hosts belonging to the completed build from reaching a later build's console.
+        /// </summary>
+        internal void ClearPerBuildState()
+        {
+            lock (_consoleForwardingLock)
+            {
+                _consoleForwardingNodeIds.Clear();
+            }
         }
 
         #endregion
@@ -342,6 +373,30 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
+            if (packet is ServerNodeConsoleWrite consoleWrite)
+            {
+                lock (_consoleForwardingLock)
+                {
+                    if (!_isShutDown && _consoleForwardingNodeIds.Contains(node))
+                    {
+                        switch (consoleWrite.OutputType)
+                        {
+                            case ConsoleOutput.Standard:
+                                Console.Out.Write(consoleWrite.Text);
+                                break;
+                            case ConsoleOutput.Error:
+                                Console.Error.Write(consoleWrite.Text);
+                                break;
+                            default:
+                                InternalError.Throw($"Unexpected console output type {consoleWrite.OutputType}");
+                                break;
+                        }
+                    }
+                }
+
+                return;
+            }
+
             if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack))
             {
                 lock (handlerStack)
@@ -669,6 +724,19 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Configure the node.
+                lock (_consoleForwardingLock)
+                {
+                    if (!_isShutDown &&
+                        nodeKey.ForwardConsoleOutput &&
+                        nodeKey.NodeId == NodeManager.FirstMultiThreadedNodeId &&
+                        context.NegotiatedPacketVersion >= NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion &&
+                        wasNewlyCreated)
+                    {
+                        _consoleForwardingNodeIds.Add(context.NodeId);
+                        context.SendData(new TaskHostConsoleConfiguration());
+                    }
+                }
+
                 context.SendData(configuration);
                 return true;
             }
@@ -883,6 +951,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
+            lock (_consoleForwardingLock)
+            {
+                _consoleForwardingNodeIds.Remove(nodeId);
+            }
+
             // Remove from nodeKey-based lookup if we have it
             if (_nodeIdToNodeKey.TryRemove(nodeId, out TaskHostNodeKey nodeKey))
             {
