@@ -19,7 +19,7 @@ Use a **fast, scoped** `dotnet test` loop while iterating, and the **full `build
 
 ## Repo-specific knobs to know about
 
-These are configured in `Directory.Build.props` (repo root), `src/Directory.Build.targets`, and `src/Shared/UnitTests/xunit.runner.json`. They apply to both `dotnet test` and `build.cmd -test` unless noted otherwise:
+These are configured in `Directory.Build.props` (repo root), `src/Directory.Build.targets`, and `src/UnitTests.Shared/TestAssets/xunit.runner.json`. They apply to both `dotnet test` and `build.cmd -test` unless noted otherwise:
 
 - **Multi-targeting**: test projects target .NETFramework and .NETCoreApp on Windows (.NETCoreApp only on Linux/macOS). `dotnet test` runs the suite **once per TFM**.
 - **Single-threaded by default**: `xunit.runner.json` sets `maxParallelThreads: 1` and `parallelizeTestCollections: false`. Many tests mutate process-global state (env vars, cwd, SDK resolvers), so this is intentional.
@@ -116,7 +116,6 @@ Match the source area you changed to its `*.UnitTests` project:
 | `src/Utilities/**` | `src/Utilities.UnitTests/Microsoft.Build.Utilities.UnitTests.csproj` |
 | `src/MSBuild/**` (CLI) | `src/MSBuild.UnitTests/Microsoft.Build.CommandLine.UnitTests.csproj` |
 | `src/Build/BuildCheck/**` | `src/BuildCheck.UnitTests/Microsoft.Build.BuildCheck.UnitTests.csproj` |
-| `src/Shared/**` | Run the consumers above (Build, Tasks, Utilities) — shared code is linked into all of them. |
 
 ## Quick reference
 
@@ -132,6 +131,6 @@ Match the source area you changed to its `*.UnitTests` project:
 ## See also
 
 - `.github/instructions/tests.instructions.md` — test authoring conventions (xUnit v3, Shouldly, `TestEnvironment`, `MockLogger`).
-- `src/Shared/UnitTests/xunit.runner.json` — repo-wide xUnit settings.
+- `src/UnitTests.Shared/TestAssets/xunit.runner.json` — repo-wide xUnit settings.
 - `src/Directory.Build.targets` — `XunitOptions`, auto trait filters, coverage wiring.
 - `documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md`

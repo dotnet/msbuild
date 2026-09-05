@@ -21,11 +21,11 @@ In a presence of multiple processes we need interprocess communication.
 
 ### Messages (de)serialization
 
-Communication messages should deriver from [`ITranslatable`](https://github.com/dotnet/msbuild/blob/main/src/Shared/ITranslatable.cs) - it dictates the both direction of serialization via single method - [`void Translate(ITranslator translate)`](https://github.com/dotnet/msbuild/blob/main/src/Shared/ITranslatable.cs#L16)
+Communication messages should derive from [`ITranslatable`](https://github.com/dotnet/msbuild/blob/main/src/Framework/ITranslatable.cs) - it dictates both directions of serialization via a single method - [`void Translate(ITranslator translator)`](https://github.com/dotnet/msbuild/blob/main/src/Framework/ITranslatable.cs)
 
-Majority of translations use custom binary serialization, there is though backfall to [`TranslateDoteNet`](https://github.com/dotnet/msbuild/blob/main/src/Shared/ITranslator.cs#L257) method that uses `BinaryFormatter`.
+Most translations use custom binary serialization, with a fallback to [`TranslateDotNet`](https://github.com/dotnet/msbuild/blob/main/src/Framework/ITranslator.cs), which uses `BinaryFormatter`.
 
-Event args use different type of serialization - a `CreateFromStream` and `WriteToStream` methods are discovered via reflection and used to serialize type (with few exceptions explicitly translated within [`LogMessagePacketBase`](https://github.com/dotnet/msbuild/blob/main/src/Shared/LogMessagePacketBase.cs)).
+Event args use a different serialization mechanism: `CreateFromStream` and `WriteToStream` methods are discovered via reflection, with a few exceptions explicitly translated within [`LogMessagePacketBase`](https://github.com/dotnet/msbuild/blob/main/src/Framework/BackEnd/LogMessagePacketBase.cs).
 
 ### Transport
 
@@ -68,5 +68,4 @@ Once a `project instance` is assigned to a worker node - it is locked to that no
 Scheduler can (opt-in) dump a graph of dependencies from last build into a text file and then use it in the next build (with option of [various scheduling algorithms](https://github.com/dotnet/msbuild/blob/7cfb36cb90d1c9cc34bc4e0910d0c9ef42ee47b6/src/Build/BackEnd/Components/Scheduler/Scheduler.cs#L833))
 
 Another mode of building is `graph build` - where project is build only once all its dependencies are resolved (so the build graph needs to be known and unchanged upfront).
-
 

@@ -1,0 +1,322 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using Microsoft.Build.Framework;
+
+namespace Microsoft.Build.Shared;
+
+/// <summary>
+///  This class contains methods that are useful for error checking and validation.
+/// </summary>
+internal abstract class ErrorUtilitiesImpl<TResourceProvider>
+    where TResourceProvider : struct, IStringResourceProvider
+{
+    /// <summary>
+    /// Throws InternalErrorException.
+    /// Indicates the code path followed should not have been possible.
+    /// This is only for situations that would mean that there is a bug in MSBuild itself.
+    /// </summary>
+    internal static void ThrowIfTypeDoesNotImplementToString(object param)
+    {
+#if DEBUG
+        // Check it has a real implementation of ToString()
+        if (String.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal))
+        {
+            InternalError.Throw($"This type does not implement ToString() properly {param.GetType().FullName!}");
+        }
+#endif
+    }
+
+    /// <summary>
+    /// Helper to throw an InternalErrorException when a lock on the specified object is not already held.
+    /// This should be used ONLY if this would indicate a bug in MSBuild rather than
+    /// anything caused by user action.
+    /// </summary>
+    /// <param name="locker">The object that should already have been used as a lock.</param>
+    internal static void VerifyThrowInternalLockHeld(object locker)
+    {
+        Assumed.True(Monitor.IsEntered(locker), "Lock should already have been taken");
+    }
+
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalRooted(string)"/>
+    internal static void VerifyThrowInternalRooted(string value)
+        => FrameworkErrorUtilities.VerifyThrowInternalRooted(value);
+
+    /// <summary>
+    /// Throws an InvalidOperationException with the specified resource string
+    /// </summary>
+    /// <param name="resourceName">Resource to use in the exception</param>
+    /// <param name="args">Formatting args.</param>
+    [DoesNotReturn]
+    internal static void ThrowInvalidOperation(string resourceName, params object?[] args)
+    {
+        throw new InvalidOperationException(ResourceUtilitiesImpl<TResourceProvider>.FormatResourceStringStripCodeAndKeyword(resourceName, args));
+    }
+
+    /// <summary>
+    /// Throws an InvalidOperationException if the given condition is false.
+    /// </summary>
+    internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+        if (!condition)
+        {
+            ThrowInvalidOperation(resourceName);
+        }
+    }
+
+    /// <summary>
+    /// Overload for one string format argument.
+    /// </summary>
+    internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+        // PERF NOTE: check the condition here instead of pushing it into
+        // the ThrowInvalidOperation() method, because that method always
+        // allocates memory for its variable array of arguments
+        if (!condition)
+        {
+            ThrowInvalidOperation(resourceName, arg0);
+        }
+    }
+
+    /// <summary>
+    /// Overload for two string format arguments.
+    /// </summary>
+    internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+        // PERF NOTE: check the condition here instead of pushing it into
+        // the ThrowInvalidOperation() method, because that method always
+        // allocates memory for its variable array of arguments
+        if (!condition)
+        {
+            ThrowInvalidOperation(resourceName, arg0, arg1);
+        }
+    }
+
+    /// <summary>
+    /// Overload for three string format arguments.
+    /// </summary>
+    internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1, object arg2)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+        // PERF NOTE: check the condition here instead of pushing it into
+        // the ThrowInvalidOperation() method, because that method always
+        // allocates memory for its variable array of arguments
+        if (!condition)
+        {
+            ThrowInvalidOperation(resourceName, arg0, arg1, arg2);
+        }
+    }
+
+    /// <summary>
+    /// Overload for four string format arguments.
+    /// </summary>
+    internal static void VerifyThrowInvalidOperation([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1, object arg2, object arg3)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+
+        // PERF NOTE: check the condition here instead of pushing it into
+        // the ThrowInvalidOperation() method, because that method always
+        // allocates memory for its variable array of arguments
+        if (!condition)
+        {
+            ThrowInvalidOperation(resourceName, arg0, arg1, arg2, arg3);
+        }
+    }
+
+    /// <summary>
+    /// Throws an ArgumentException that can include an inner exception.
+    ///
+    /// PERF WARNING: calling a method that takes a variable number of arguments
+    /// is expensive, because memory is allocated for the array of arguments -- do
+    /// not call this method repeatedly in performance-critical scenarios
+    /// </summary>
+    [DoesNotReturn]
+    internal static void ThrowArgument(string resourceName, params object?[] args)
+    {
+        ThrowArgument(null, resourceName, args);
+    }
+
+    /// <summary>
+    /// Throws an ArgumentException that can include an inner exception.
+    ///
+    /// PERF WARNING: calling a method that takes a variable number of arguments
+    /// is expensive, because memory is allocated for the array of arguments -- do
+    /// not call this method repeatedly in performance-critical scenarios
+    /// </summary>
+    /// <remarks>
+    /// This method is thread-safe.
+    /// </remarks>
+    /// <param name="innerException">Can be null.</param>
+    /// <param name="resourceName"></param>
+    /// <param name="args"></param>
+    [DoesNotReturn]
+    internal static void ThrowArgument(Exception? innerException, string resourceName, params object?[] args)
+    {
+        throw new ArgumentException(ResourceUtilitiesImpl<TResourceProvider>.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
+    }
+
+    /// <summary>
+    /// Throws an ArgumentException if the given condition is false.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, string resourceName)
+    {
+        VerifyThrowArgument(condition, null, resourceName);
+    }
+
+    /// <summary>
+    /// Overload for one string format argument.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0)
+    {
+        VerifyThrowArgument(condition, null, resourceName, arg0);
+    }
+
+    /// <summary>
+    /// Overload for two string format arguments.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1)
+    {
+        VerifyThrowArgument(condition, null, resourceName, arg0, arg1);
+    }
+
+    /// <summary>
+    /// Overload for three string format arguments.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1, object arg2)
+    {
+        VerifyThrowArgument(condition, null, resourceName, arg0, arg1, arg2);
+    }
+
+    /// <summary>
+    /// Overload for four string format arguments.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0, object arg1, object arg2, object arg3)
+    {
+        VerifyThrowArgument(condition, null, resourceName, arg0, arg1, arg2, arg3);
+    }
+
+    /// <summary>
+    /// Throws an ArgumentException that includes an inner exception, if
+    /// the given condition is false.
+    /// </summary>
+    /// <param name="condition"></param>
+    /// <param name="innerException">Can be null.</param>
+    /// <param name="resourceName"></param>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+        if (!condition)
+        {
+            ThrowArgument(innerException, resourceName);
+        }
+    }
+
+    /// <summary>
+    /// Overload for one string format argument.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+
+        if (!condition)
+        {
+            ThrowArgument(innerException, resourceName, arg0);
+        }
+    }
+
+    /// <summary>
+    /// Overload for two string format arguments.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0, object arg1)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+
+        if (!condition)
+        {
+            ThrowArgument(innerException, resourceName, arg0, arg1);
+        }
+    }
+
+    /// <summary>
+    /// Overload for three string format arguments.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0, object arg1, object arg2)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+
+        if (!condition)
+        {
+            ThrowArgument(innerException, resourceName, arg0, arg1, arg2);
+        }
+    }
+
+    /// <summary>
+    /// Overload for four string format arguments.
+    /// </summary>
+    internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0, object arg1, object arg2, object arg3)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+
+        if (!condition)
+        {
+            ThrowArgument(innerException, resourceName, arg0, arg1, arg2, arg3);
+        }
+    }
+
+    /// <summary>
+    /// Throws an argument out of range exception.
+    /// </summary>
+    [DoesNotReturn]
+    internal static void ThrowArgumentOutOfRange(string? parameterName)
+    {
+        throw new ArgumentOutOfRangeException(parameterName);
+    }
+
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull{T}(IReadOnlyCollection{T}, string)"/>
+    internal static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
+
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentInvalidPath(string, string)"/>
+    internal static void VerifyThrowArgumentInvalidPath([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentInvalidPath(parameter, parameterName);
+
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(string, string)"/>
+    internal static void VerifyThrowArgumentLengthIfNotNull(string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
+
+    /// <summary>
+    /// Throws an ArgumentNullException if the given parameter is null.
+    /// </summary>
+    internal static void VerifyThrowArgumentNull([NotNull] object? parameter, string? parameterName, string resourceName)
+    {
+        ResourceUtilitiesImpl<TResourceProvider>.VerifyResourceStringExists(resourceName);
+        if (parameter is null)
+        {
+            ThrowArgumentNull(parameterName, resourceName);
+        }
+    }
+
+    [DoesNotReturn]
+    private static void ThrowArgumentNull(string? parameterName, string resourceName)
+    {
+        // Most ArgumentNullException overloads append its own rather clunky multi-line message. So use the one overload that doesn't.
+        throw new ArgumentNullException(ResourceUtilitiesImpl<TResourceProvider>.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
+    }
+
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyCollectionCopyToArguments{T}(ICollection{T}, int, int, string, string)"/>
+    internal static void VerifyCollectionCopyToArguments<T>(
+        [NotNull] ICollection<T>? collection,
+        int index,
+        int requiredCapacity,
+        [CallerArgumentExpression(nameof(collection))] string? collectionParamName = null,
+        [CallerArgumentExpression(nameof(index))] string? indexParamName = null)
+        => FrameworkErrorUtilities.VerifyCollectionCopyToArguments(collection, index, requiredCapacity, collectionParamName, indexParamName);
+}

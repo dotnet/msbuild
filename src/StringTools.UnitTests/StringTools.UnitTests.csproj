@@ -20,11 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Shared\UnitTests\App.config">
+    <None Include="..\UnitTests.Shared\TestAssets\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
+    <None Include="..\UnitTests.Shared\TestAssets\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

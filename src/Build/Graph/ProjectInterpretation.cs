@@ -465,7 +465,7 @@ namespace Microsoft.Build.Graph
             }
 
             if (PropertyParser.GetTableWithEscaping(
-                null,
+                default(NullTaskLogger),
                 null,
                 null,
                 propertyNameAndValuesString.Split(PropertySeparator, StringSplitOptions.RemoveEmptyEntries),

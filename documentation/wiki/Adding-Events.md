@@ -18,7 +18,7 @@ This guide outlines the steps to ensure the BinaryLogger can work with your new 
 5. **Modify [BuildEventArgsWriter.cs](../../src/Build/Logging/BinaryLogger/BuildEventArgsWriter.cs)**
    - Add a new case in `WriteCore`
    - Document the change above the method
-6. **Update [LogMessagePacketBase.cs](../../src/Shared/LogMessagePacketBase.cs)**
+6. **Update [LogMessagePacketBase.cs](../../src/Framework/BackEnd/LogMessagePacketBase.cs)**
    - Add to `LoggingEventType`
    - Add case in `GetBuildEventArgFromId` and `GetLoggingEventId`
 7. **Create a new test file**

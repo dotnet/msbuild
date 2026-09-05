@@ -208,7 +208,7 @@ either isolated behind honest RUC or only used by an opt-in overload.
 | Where | Split |
 | --- | --- |
 | `ProjectCollection` ctors (`src/Build/Definition/`) | master ctor split into a **private trim-safe core** (builds the collection, registers ordinary loggers) + a thin **`[RequiresUnreferencedCode]` public wrapper** that registers forwarding loggers. Overloads that pass no forwarding loggers (and `GlobalProjectCollection`) chain to the core and are honestly non-RUC. Cleared **5× IL2026** with no public-API change. |
-| `TypeLoader.Create<TInterface>()` (`src/Shared/`) | factory stores the interface *as data* and does the `GetInterface` match inside the already-`[RequiresUnreferencedCode]` load path → retired an **IL2070** (and the per-filter `Func` delegate) |
+| `TypeLoader.Create<TInterface>()` (`src/Framework/Loader/`) | factory stores the interface *as data* and does the `GetInterface` match inside the already-`[RequiresUnreferencedCode]` load path → retired an **IL2070** (and the per-filter `Func` delegate) |
 | SDK resolution | the in-box `DefaultSdkResolver` is a **reflection-free** directory probe tried **first**; only plugin resolvers reflect, and they are gated (S2). The reflection-free path is the default. |
 
 **When:** a method mixes a trim-safe majority with a reflective minority. Separate them so only the

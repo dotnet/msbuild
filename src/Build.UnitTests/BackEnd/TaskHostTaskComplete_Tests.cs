@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Framework;
@@ -28,20 +29,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestConstructors()
         {
 #if FEATURE_REPORTFILEACCESSES
-            var fileAccessData = new List<FileAccessData>()
+            var fileAccessData = new List<TaskHostFileAccessData>()
             {
-                new FileAccessData(
-                    ReportedFileOperation.CreateFile,
-                    RequestedAccess.Read,
+                new TaskHostFileAccessData(
+                    (int)ReportedFileOperation.CreateFile,
+                    (int)RequestedAccess.Read,
                     processId: 123,
                     id: 1,
                     correlationId: 0,
                     error: 0,
-                    DesiredAccess.GENERIC_READ,
-                    FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
-                    "foo",
-                    null,
-                    true),
+                    desiredAccess: (uint)DesiredAccess.GENERIC_READ,
+                    flagsAndAttributes: (uint)FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
+                    path: "foo",
+                    processArgs: null,
+                    isAnAugmentedFileAccess: true,
+                    enumeratePattern: null,
+                    openedFileOrDirectoryAttributes: 0),
             };
 #endif
 
@@ -91,6 +94,70 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                 null);
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        [Fact]
+        public void FileAccessTransportPreservesWireFormat()
+        {
+            var fileAccessData = new FileAccessData(
+                ReportedFileOperation.CreateFile,
+                RequestedAccess.Read,
+                processId: 123,
+                id: 1,
+                correlationId: 2,
+                error: 3,
+                DesiredAccess.GENERIC_READ,
+                FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
+                path: "foo",
+                processArgs: "bar",
+                isAnAugmentedFileAccess: true,
+                enumeratePattern: "*.cs",
+                openedFileOrDirectoryAttributes: FlagsAndAttributes.FILE_ATTRIBUTE_ARCHIVE);
+
+            using var fileAccessStream = new MemoryStream();
+            ITranslator fileAccessTranslator = BinaryTranslator.GetWriteTranslator(fileAccessStream);
+            ((ITranslatable)fileAccessData).Translate(fileAccessTranslator);
+
+            var transport = new TaskHostFileAccessData(
+                (int)fileAccessData.Operation,
+                (int)fileAccessData.RequestedAccess,
+                fileAccessData.ProcessId,
+                fileAccessData.Id,
+                fileAccessData.CorrelationId,
+                fileAccessData.Error,
+                (uint)fileAccessData.DesiredAccess,
+                (uint)fileAccessData.FlagsAndAttributes,
+                fileAccessData.Path,
+                fileAccessData.ProcessArgs,
+                fileAccessData.IsAnAugmentedFileAccess,
+                fileAccessData.EnumeratePattern,
+                (uint)fileAccessData.OpenedFileOrDirectoryAttributes);
+
+            using var transportStream = new MemoryStream();
+            ITranslator transportTranslator = BinaryTranslator.GetWriteTranslator(transportStream);
+            transport.Translate(transportTranslator);
+
+            transportStream.ToArray().ShouldBe(fileAccessStream.ToArray());
+
+            transportStream.Position = 0;
+            TaskHostFileAccessData roundTripped = default;
+            roundTripped.Translate(BinaryTranslator.GetReadTranslator(transportStream, InterningBinaryReader.PoolingBuffer));
+
+            roundTripped.Operation.ShouldBe((int)fileAccessData.Operation);
+            roundTripped.RequestedAccess.ShouldBe((int)fileAccessData.RequestedAccess);
+            roundTripped.ProcessId.ShouldBe(fileAccessData.ProcessId);
+            roundTripped.Id.ShouldBe(fileAccessData.Id);
+            roundTripped.CorrelationId.ShouldBe(fileAccessData.CorrelationId);
+            roundTripped.Error.ShouldBe(fileAccessData.Error);
+            roundTripped.DesiredAccess.ShouldBe((uint)fileAccessData.DesiredAccess);
+            roundTripped.FlagsAndAttributes.ShouldBe((uint)fileAccessData.FlagsAndAttributes);
+            roundTripped.Path.ShouldBe(fileAccessData.Path);
+            roundTripped.ProcessArgs.ShouldBe(fileAccessData.ProcessArgs);
+            roundTripped.IsAnAugmentedFileAccess.ShouldBe(fileAccessData.IsAnAugmentedFileAccess);
+            roundTripped.EnumeratePattern.ShouldBe(fileAccessData.EnumeratePattern);
+            roundTripped.OpenedFileOrDirectoryAttributes.ShouldBe((uint)fileAccessData.OpenedFileOrDirectoryAttributes);
+        }
+#endif
 
         /// <summary>
         /// Test invalid constructor permutations.

@@ -29,12 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\RegistryDelegates.cs">
-      <Link>RegistryDelegates.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\RegistryHelper.cs">
-      <Link>RegistryHelper.cs</Link>
-    </Compile>
 
     <EmbeddedResource Include="..\MSBuild\MSBuild\Microsoft.Build.Core.xsd">
       <Link>Microsoft.Build.Core.xsd</Link>
@@ -52,11 +46,11 @@
       </SubType>
     </EmbeddedResource>
     
-    <None Include="..\Shared\UnitTests\App.config">
+    <None Include="..\UnitTests.Shared\TestAssets\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
+    <None Include="..\UnitTests.Shared\TestAssets\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

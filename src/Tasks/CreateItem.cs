@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Parse the global properties into a hashtable.
-            if (!PropertyParser.GetTable(Log, "AdditionalMetadata", AdditionalMetadata, out Dictionary<string, string> metadataTable))
+            if (!PropertyParser.GetTable(new TaskLoggingHelperAdapter(Log), "AdditionalMetadata", AdditionalMetadata, out Dictionary<string, string> metadataTable))
             {
                 return false;
             }

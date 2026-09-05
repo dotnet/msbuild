@@ -16,7 +16,7 @@
     <!-- Suppression in needed to build ExampleTaskX86 that targets x86 architecture. -->
     <NoWarn>$(NoWarn);MSB3270;CS0436</NoWarn>
 
-    <AppConfig>..\Shared\UnitTests\App.config</AppConfig>
+    <AppConfig>..\UnitTests.Shared\TestAssets\App.config</AppConfig>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -63,25 +63,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
-      <Link>XmakeAttributes_Tests.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
-      <Link>AssemblyNameEx_Tests.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
-      <Link>TaskParameter_Tests.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
-    <None Include="..\Shared\UnitTests\App.config">
+    <None Include="..\UnitTests.Shared\TestAssets\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
+    <None Include="..\UnitTests.Shared\TestAssets\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 

@@ -25,6 +25,65 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class IntrinsicTask_Tests
     {
         [Fact]
+        public void IntrinsicMSBuildLoggingResolvesPrimaryAndSharedResources()
+        {
+            var task = new Microsoft.Build.BackEnd.MSBuild();
+
+            task.Log.FormatResourceString("MSBuild.NotBuildingInParallel").ShouldNotBeNullOrEmpty();
+            task.Log.FormatResourceString("TaskResourceNotFound", "Missing", "MSBuild").ShouldNotBeNullOrEmpty();
+            Should.Throw<ArgumentException>(() => task.Log.FormatResourceString("MissingResource"));
+        }
+
+        [Fact]
+        public void IntrinsicMSBuildLoggingPreservesDiagnosticBehavior()
+        {
+            var engine = new MockEngine
+            {
+                MinimumMessageImportance = MessageImportance.High
+            };
+            var task = new Microsoft.Build.BackEnd.MSBuild
+            {
+                BuildEngine = engine
+            };
+
+            task.Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", "missing.proj");
+            task.Log.LogWarningWithCodeFromResources(
+                subcategoryResourceName: null,
+                file: "referenced.proj",
+                lineNumber: 0,
+                columnNumber: 0,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                messageResourceName: "MSBuild.CannotRebaseOutputItemPath",
+                messageArgs: ["item", "bad path"]);
+            task.Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NotBuildingInParallel");
+            task.Log.LogMessageFromText("source.cs(1,2): error XX1234: canonical error", MessageImportance.Low);
+
+            engine.ErrorEvents[0].Code.ShouldBe("MSB3202");
+            engine.ErrorEvents[0].Message.ShouldNotContain("MSB3202");
+            engine.WarningEvents[0].Code.ShouldBe("MSB3203");
+            engine.WarningEvents[0].File.ShouldBe("referenced.proj");
+            engine.Messages.ShouldBe(0);
+            engine.ErrorEvents[1].Code.ShouldBe("XX1234");
+            engine.ErrorEvents[1].File.ShouldBe("source.cs");
+
+            var warnAsErrorEngine = new MockEngine
+            {
+                TreatWarningsAsErrors = true
+            };
+            task.BuildEngine = warnAsErrorEngine;
+
+            bool wasError = task.Log.LogMessageFromText(
+                "source.cs(3,4): warning XX5678: promoted warning",
+                MessageImportance.Low);
+
+            wasError.ShouldBeFalse();
+            warnAsErrorEngine.Warnings.ShouldBe(0);
+            warnAsErrorEngine.ErrorEvents.Single().Code.ShouldBe("XX5678");
+            warnAsErrorEngine.ErrorEvents.Single().File.ShouldBe("source.cs");
+        }
+
+        [Fact]
         public void PropertyGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
