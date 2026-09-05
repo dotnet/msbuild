@@ -69,6 +69,9 @@ namespace Microsoft.Build.Construction
         /// The set of properties which identify the configuration and platform to build a project with
         /// </summary>
         private const string SolutionConfigurationAndPlatformProperties = "Configuration=$(Configuration); Platform=$(Platform)";
+        internal const string SolutionGraphBuildEntryPointProperty = "_MSBuildSolutionGraphBuildEntryPoint";
+        private const string SuppressSolutionGraphBuildTraversalProperty = "_MSBuildSuppressSolutionGraphBuildTraversal";
+        private const string NotSolutionGraphBuildEntryPointCondition = $"'$({SuppressSolutionGraphBuildTraversalProperty})' != 'true'";
 
         /// <summary>
         /// The Special Target name which when <see cref="_batchProjectTargets"/> is enabled, all P2P references will just execute this target.
@@ -142,6 +145,11 @@ namespace Microsoft.Build.Construction
         private readonly ILoggingService _loggingService;
 
         /// <summary>
+        /// The project collection used for evaluation generated projects.
+        /// </summary>
+        private readonly ProjectCollection _projectCollection;
+
+        /// <summary>
         /// The list of targets specified to use.
         /// </summary>
         private readonly IReadOnlyCollection<string> _targetNames = new Collection<string>();
@@ -177,7 +185,8 @@ namespace Microsoft.Build.Construction
             ILoggingService loggingService,
             IReadOnlyCollection<string> targetNames,
             ISdkResolverService sdkResolverService,
-            int submissionId)
+            int submissionId,
+            ProjectCollection projectCollection)
         {
             _solutionFile = solution;
             _globalProperties = globalProperties ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -192,6 +201,8 @@ namespace Microsoft.Build.Construction
             {
                 _targetNames = targetNames.Select(i => i.Split([':'], 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
             }
+
+            _projectCollection = projectCollection ?? new ProjectCollection();
         }
 
         /// <summary>
@@ -226,7 +237,34 @@ namespace Microsoft.Build.Construction
                 loggingService,
                 targetNames,
                 sdkResolverService,
-                submissionId);
+                submissionId,
+                projectCollection: null);
+
+            return projectGenerator.Generate().ToProjectInstances();
+        }
+
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
+        internal static SolutionProjectGenerationResult GenerateForGraph(
+            SolutionFile solution,
+            IDictionary<string, string> globalProperties,
+            ProjectCollection projectCollection,
+            SolutionProjectGenerationContext context)
+        {
+            ArgumentNullException.ThrowIfNull(solution);
+            ArgumentNullException.ThrowIfNull(projectCollection);
+            ArgumentNullException.ThrowIfNull(context.LoggingService);
+            ArgumentNullException.ThrowIfNull(context.TargetNames);
+
+            var projectGenerator = new SolutionProjectGenerator(
+                solution,
+                globalProperties,
+                context.ToolsVersionOverride,
+                context.BuildEventContext,
+                context.LoggingService,
+                context.TargetNames,
+                context.SdkResolverService,
+                context.SubmissionId,
+                projectCollection);
 
             return projectGenerator.Generate();
         }
@@ -739,7 +777,7 @@ namespace Microsoft.Build.Construction
         /// about the solution is the private variable "solutionFile"
         /// </summary>
         [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
-        private ProjectInstance[] Generate()
+        private SolutionProjectGenerationResult Generate()
         {
             // The Version is not available in the new parser.
             if (!_solutionFile.UseNewParser)
@@ -767,7 +805,7 @@ namespace Microsoft.Build.Construction
         /// referenced in the solution.
         /// </summary>
         [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
-        private ProjectInstance[] CreateSolutionProject(string wrapperProjectToolsVersion, bool explicitToolsVersionSpecified)
+        private SolutionProjectGenerationResult CreateSolutionProject(string wrapperProjectToolsVersion, bool explicitToolsVersionSpecified)
         {
             AddFakeReleaseSolutionConfigurationIfNecessary();
 
@@ -795,17 +833,16 @@ namespace Microsoft.Build.Construction
             }
 
             // Create the list of our generated projects.
-            var projectInstances = new List<ProjectInstance>(projectsInOrder.Count + 1);
+            var metaprojects = new List<ProjectInstance>(projectsInOrder.Count);
 
             // Create the project instance for the traversal project.
             ProjectInstance traversalInstance = CreateTraversalInstance(wrapperProjectToolsVersion, explicitToolsVersionSpecified, projectsInOrder);
 
             // Compute the solution configuration which will be used for this build.  We will use it later.
             _selectedSolutionConfiguration = String.Format(CultureInfo.InvariantCulture, "{0}|{1}", traversalInstance.GetProperty("Configuration").EvaluatedValue, traversalInstance.GetProperty("Platform").EvaluatedValue);
-            projectInstances.Add(traversalInstance);
 
             // Now evaluate all of the projects in the solution and handle them appropriately.
-            EvaluateAndAddProjects(projectsInOrder, projectInstances, traversalInstance, _selectedSolutionConfiguration);
+            EvaluateAndAddProjects(projectsInOrder, metaprojects, traversalInstance, _selectedSolutionConfiguration);
 
             if (_batchProjectTargets)
             {
@@ -827,18 +864,21 @@ namespace Microsoft.Build.Construction
 
             // Special environment variable to allow people to see the in-memory MSBuild project generated
             // to represent the SLN.
-            foreach (ProjectInstance instance in projectInstances)
+            
+            EmitMetaproject(traversalInstance.ToProjectRootElement(), traversalInstance.FullPath);
+
+            foreach (ProjectInstance metaproject in metaprojects)
             {
-                EmitMetaproject(instance.ToProjectRootElement(), instance.FullPath);
+                EmitMetaproject(metaproject.ToProjectRootElement(), metaproject.FullPath);
             }
 
-            return projectInstances.ToArray();
+            return new SolutionProjectGenerationResult(traversalInstance, metaprojects);
         }
 
         /// <summary>
         /// Examine each project in the solution, add references and targets for it, and create metaprojects if necessary.
         /// </summary>
-        private void EvaluateAndAddProjects(List<ProjectInSolution> projectsInOrder, List<ProjectInstance> projectInstances, ProjectInstance traversalInstance, string selectedSolutionConfiguration)
+        private void EvaluateAndAddProjects(List<ProjectInSolution> projectsInOrder, List<ProjectInstance> metaprojects, ProjectInstance traversalInstance, string selectedSolutionConfiguration)
         {
             // Now add all of the per-project items, targets and metaprojects.
             foreach (ProjectInSolution project in projectsInOrder)
@@ -874,7 +914,7 @@ namespace Microsoft.Build.Construction
                 if (!canBuildDirectly)
                 {
                     ProjectInstance metaproject = CreateMetaproject(traversalInstance, project, projectConfiguration);
-                    projectInstances.Add(metaproject);
+                    metaprojects.Add(metaproject);
                 }
             }
 
@@ -922,6 +962,14 @@ namespace Microsoft.Build.Construction
 
             // Add solution related macros
             AddGlobalProperties(traversalProject);
+
+            if (_globalProperties.TryGetValue(SolutionGraphBuildEntryPointProperty, out string graphBuildEntryPoint)
+                && FileUtilities.PathComparer.Equals(graphBuildEntryPoint, traversalProject.FullPath))
+            {
+                ProjectPropertyGroupElement graphBuildProperties = traversalProject.CreatePropertyGroupElement();
+                traversalProject.AppendChild(graphBuildProperties);
+                graphBuildProperties.AddProperty(SuppressSolutionGraphBuildTraversalProperty, "true");
+            }
 
             // Add a property group for each solution configuration, each with one XML property containing the
             // project configurations in this solution configuration.
@@ -1045,7 +1093,7 @@ namespace Microsoft.Build.Construction
                 explicitToolsVersionSpecified ? wrapperProjectToolsVersion : null,
                 _loggingService,
                 _solutionFile.VisualStudioVersion,
-                new ProjectCollection(),
+                _projectCollection,
                 _sdkResolverService,
                 _submissionId);
 
@@ -1427,7 +1475,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddProjectBuildTask(ProjectInstance traversalProject, ProjectConfigurationInSolution projectConfiguration, ProjectTargetInstance target, string targetToBuild, string sourceItems, string condition, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", condition, String.Empty);
+            string combinedCondition = string.IsNullOrEmpty(condition) ? NotSolutionGraphBuildEntryPointCondition : $"({condition}) and {NotSolutionGraphBuildEntryPointCondition}";
+            ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", sourceItems);
             if (targetToBuild != null)
             {
@@ -1458,7 +1507,9 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddMetaprojectBuildTask(ProjectInSolution project, ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'"), String.Empty);
+            string projectMatchCondition = Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'");
+            string combinedCondition = $"({projectMatchCondition}) and {NotSolutionGraphBuildEntryPointCondition}";
+            ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", "@(ProjectReference)");
 
             if (targetToBuild != null)
@@ -2061,7 +2112,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddReferencesBuildTask(ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", String.Empty, String.Empty);
+            ProjectTaskInstance task = target.AddTask("MSBuild", NotSolutionGraphBuildEntryPointCondition, String.Empty);
             if (String.Equals(targetToBuild, "Clean", StringComparison.OrdinalIgnoreCase))
             {
                 task.SetParameter("Projects", "@(ProjectReference->Reverse())");

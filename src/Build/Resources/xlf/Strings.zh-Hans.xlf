@@ -734,6 +734,11 @@
         <target state="translated">创建项目时不支持部分评估(“{0}”评估阶段)。使用 ProjectInstance 执行部分评估，或使用“完全评估”阶段创建项目。</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
+      <trans-unit id="OM_ProjectGraphTargetNotGenerated">
+        <source>Method GetTargetLists cannot request target "{0}" because that target was not specified when the target-bound graph was constructed. Recreate the graph and include the target in ProjectGraphBuildOptions.Targets.</source>
+        <target state="new">Method GetTargetLists cannot request target "{0}" because that target was not specified when the target-bound graph was constructed. Recreate the graph and include the target in ProjectGraphBuildOptions.Targets.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">无法使用包含 null 或空目标名称的集合调用方法 {0}。</target>
