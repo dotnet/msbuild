@@ -52,4 +52,9 @@ internal static class TelemetryConstants
     /// Name of the property for crash/failure activity.
     /// </summary>
     public const string Crash = "Crash";
+
+    /// <summary>
+    /// Name of the release-promotion telemetry canary event.
+    /// </summary>
+    public const string ReleaseCanary = "ReleaseCanary";
 }
