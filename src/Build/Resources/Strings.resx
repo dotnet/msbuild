@@ -2305,6 +2305,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheck_BC0302_MessageFmt" xml:space="preserve">
     <value>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</value>
   </data>
+  <data name="BuildCheck_BC0303_Title" xml:space="preserve">
+    <value>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0303_MessageFmt" xml:space="preserve">
+    <value>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
     <value>A property that is accessed should be declared first.</value>
   </data>
