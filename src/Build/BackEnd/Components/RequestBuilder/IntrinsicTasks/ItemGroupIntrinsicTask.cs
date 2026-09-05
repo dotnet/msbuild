@@ -426,7 +426,10 @@ namespace Microsoft.Build.BackEnd
 
             // Split Include on any semicolons, and take each split in turn
             var includeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedInclude);
-            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(Project, originalItem.ItemType);
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(Project, originalItem.ItemType)
+            {
+                SourceLocation = originalItem.Location,
+            };
 
             // EngineFileUtilities.GetFileListEscaped api invocation evaluates excludes by default.
             // If the code process any expression like "@(x)", we need to handle excludes explicitly using EvaluateExcludePaths().
@@ -473,7 +476,9 @@ namespace Microsoft.Build.BackEnd
                             null,
                             null,
                             originalItem.Location.File,
-                            useItemDefinitionsWithoutModification: false));
+                            useItemDefinitionsWithoutModification: false,
+                            originalItem.Location.Line,
+                            originalItem.Location.Column));
                     }
                 }
             }
