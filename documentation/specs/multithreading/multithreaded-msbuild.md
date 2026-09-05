@@ -238,6 +238,12 @@ The `MSBuildMultiThreadableTaskAttribute` is **non-inheritable** (`Inherited = f
 
 Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior. If task implements `IMultiThreadableTask`, `TaskEnvironment` should be backed by `MultiProcessTaskEnvironmentDriver.Instance`, which acts as a fallback for explicit instantiation and task host scenarios.
 
+### Registered task objects
+
+In multithreaded builds, in-process thread nodes share the `IBuildEngine4` registered-task-object cache. The cache operations are thread-safe, but the registered objects are not made thread-safe. Tasks in worker or TaskHost processes use separate caches.
+
+See [Thread-Safe Tasks](thread-safe-tasks.md#registered-task-objects) for migration guidance.
+
 ## Tasks transition
 
 In the initial phase of development of multithreaded execution mode, all tasks will run in sidecar taskhosts. Over time, we will update tasks that are maintained by us and our partners (such as MSBuild, SDK, and NuGet) to add the `MSBuildMultiThreadableTaskAttribute` and ensure thread-safety. As these tasks are marked with the attribute, their execution would be moved into the entry process. Customers' tasks would be executed in the sidecar taskhosts unless they add the attribute to their task classes.
