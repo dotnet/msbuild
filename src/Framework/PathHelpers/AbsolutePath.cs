@@ -42,7 +42,7 @@ namespace Microsoft.Build.Framework
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
         /// </summary>
         /// <param name="path">The absolute path string.</param>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, contains only whitespace, or is not a rooted path.</exception>
         public AbsolutePath(string path)
         {
             ValidatePath(path);
@@ -78,13 +78,14 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Validates that the specified file system path is non-empty and rooted.
+        /// Validates that the specified file system path is non-empty, contains a non-whitespace character, and is rooted.
         /// </summary>
-        /// <param name="path">The file system path to validate. Must not be null, empty, or a relative path.</param>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
+        /// <param name="path">The file system path to validate. Must not be null, empty, whitespace-only, or a relative path.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, whitespace-only, or not a rooted path.</exception>
         private static void ValidatePath(string path)
         {
             ArgumentException.ThrowIfNullOrEmpty(path);
+            ThrowIfWhitespaceOnly(path);
 
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
             // in .NET Framework it's provided by package and in .NET it's built-in
@@ -101,10 +102,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or contains only whitespace.</exception>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
             ArgumentException.ThrowIfNullOrEmpty(path);
+            ThrowIfWhitespaceOnly(path);
 
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
@@ -120,6 +122,14 @@ namespace Microsoft.Build.Framework
 
             Value = combined;
             OriginalValue = path;
+        }
+
+        private static void ThrowIfWhitespaceOnly(string path)
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10) && string.IsNullOrWhiteSpace(path))
+            {
+                throw new WhitespaceOnlyPathException(nameof(path));
+            }
         }
 
 #if NETFRAMEWORK || NET
