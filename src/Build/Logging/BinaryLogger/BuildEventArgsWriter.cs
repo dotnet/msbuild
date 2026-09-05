@@ -4,9 +4,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+#if FEATURE_APPDOMAIN
+using System.Runtime.Remoting;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -78,6 +83,16 @@ namespace Microsoft.Build.Logging
         /// Hashtable used for deduplicating name-value lists. Same as strings.
         /// </summary>
         private readonly Dictionary<HashKey, int> nameValueListHashes = new Dictionary<HashKey, int>();
+
+        /// <summary>
+        /// Avoid repeatedly enumerating and hashing metadata dictionaries shared through copy-on-write item clones.
+        /// </summary>
+        private readonly ConditionalWeakTable<ImmutableDictionary<string, string>, StrongBox<int>> metadataRecordIds =
+            new ConditionalWeakTable<ImmutableDictionary<string, string>, StrongBox<int>>();
+
+#if DEBUG
+        internal int MetadataReferenceCacheHits { get; private set; }
+#endif
 
         /// <summary>
         /// Index 0 is null, Index 1 is the empty string.
@@ -1142,25 +1157,61 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
-            // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
-            // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
-            // CopyOnWriteDictionary doesn't implement it properly.
-            foreach (var kvp in item.EnumerateMetadata())
+            ImmutableDictionary<string, string> backingMetadata = null;
+            IMetadataContainer metadataContainer = item as IMetadataContainer;
+            if (metadataContainer != null
+#if FEATURE_APPDOMAIN
+                && !RemotingServices.IsTransparentProxy(item)
+#endif
+                )
             {
-                nameValueListBuffer.Add(kvp);
+                SerializableMetadata serializableMetadata = metadataContainer.BackingMetadata;
+                if (serializableMetadata.HasValue)
+                {
+                    backingMetadata = serializableMetadata.Dictionary;
+                    if (backingMetadata.Count == 0)
+                    {
+                        Write((byte)0);
+                        return;
+                    }
+
+                    if (metadataRecordIds.TryGetValue(backingMetadata, out StrongBox<int> cachedRecord))
+                    {
+#if DEBUG
+                        MetadataReferenceCacheHits++;
+#endif
+                        Write(cachedRecord.Value);
+                        return;
+                    }
+
+                    foreach (KeyValuePair<string, string> kvp in backingMetadata)
+                    {
+                        nameValueListBuffer.Add(new KeyValuePair<string, string>(
+                            kvp.Key,
+                            EscapingUtilities.UnescapeAll(kvp.Value)));
+                    }
+                }
             }
 
-            // Don't sort metadata because we want the binary log to be fully roundtrippable
-            // and we need to preserve the original order.
-            // if (nameValueListBuffer.Count > 1)
-            // {
-            //    nameValueListBuffer.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
-            // }
+            if (backingMetadata == null)
+            {
+                // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
+                // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
+                // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
+                // CopyOnWriteDictionary doesn't implement it properly.
+                foreach (var kvp in item.EnumerateMetadata())
+                {
+                    nameValueListBuffer.Add(kvp);
+                }
+            }
 
-            WriteNameValueList();
-
+            int metadataRecordId = WriteNameValueList();
             nameValueListBuffer.Clear();
+
+            if (backingMetadata != null)
+            {
+                metadataRecordIds.Add(backingMetadata, new StrongBox<int>(metadataRecordId));
+            }
         }
 
         private void WriteProperties(IEnumerable properties)
@@ -1214,12 +1265,12 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void WriteNameValueList()
+        private int WriteNameValueList()
         {
             if (nameValueListBuffer.Count == 0)
             {
                 Write((byte)0);
-                return;
+                return 0;
             }
 
             HashKey hash = HashAllStrings(nameValueListBuffer);
@@ -1234,6 +1285,7 @@ namespace Microsoft.Build.Logging
             }
 
             Write(recordId);
+            return recordId;
         }
 
         /// <summary>
