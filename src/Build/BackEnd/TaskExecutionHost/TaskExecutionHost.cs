@@ -687,7 +687,9 @@ namespace Microsoft.Build.BackEnd
                     ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "UnsupportedTaskParameterTypeError",
-                        parameter.PropertyType.FullName,
+                        parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true }
+                            ? "<unresolved>"
+                            : parameter.PropertyType.FullName,
                         parameter.Name,
                         _taskName);
                 }
@@ -966,6 +968,25 @@ namespace Microsoft.Build.BackEnd
         private bool SetValueParameter(TaskPropertyInfo parameter, Type parameterType, string expandedParameterValue)
         {
             return InternalSetTaskParameter(parameter, ConvertStringToParameterValue(expandedParameterValue, parameterType));
+        }
+
+        private void VerifyTaskHostSupportsParameterConversion(TaskPropertyInfo parameter, Type parameterType, ElementLocation parameterLocation)
+        {
+            bool requiresHostConversion = TaskParameter.RequiresHostConversion(parameterType)
+                || (parameter is ReflectableTaskPropertyInfo reflectableParameter
+                    && (reflectableParameter.IsTypeUnresolved
+                        || (reflectableParameter.TryGetResolvedParameterType(out Type resolvedParameterType) && resolvedParameterType is null)));
+
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                TaskInstance is not TaskHostTask { IsNetTaskHost: true, SupportsParameterConversion: false }
+                    || !requiresHostConversion,
+                parameterLocation,
+                "UnsupportedTaskParameterTypeError",
+                parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true }
+                    ? "<unresolved>"
+                    : parameter.PropertyType.FullName,
+                parameter.Name,
+                _taskName);
         }
 
         /// <summary>
@@ -1422,6 +1443,27 @@ namespace Microsoft.Build.BackEnd
                 {
                     EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
+                    if (parameterType is null)
+                    {
+                        ReflectableTaskPropertyInfo reflectableParameter = parameter as ReflectableTaskPropertyInfo;
+                        if (reflectableParameter?.ParameterTypeForExpansion is Type parameterTypeForExpansion
+                            && TaskInstance is TaskHostTask { IsNetTaskHost: true })
+                        {
+                            parameterType = parameterTypeForExpansion;
+                        }
+                        else
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(
+                                parameterLocation,
+                                "UnsupportedTaskParameterTypeError",
+                                reflectableParameter is { IsTypeUnresolved: true }
+                                    ? "<unresolved>"
+                                    : parameter.PropertyType.FullName,
+                                parameter.Name,
+                                _taskName);
+                        }
+                    }
+
                     // try to set the parameter
                     if (TaskParameterTypeVerifier.IsValidScalarInputParameter(parameterType))
                     {
@@ -1508,6 +1550,11 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         private static Type ResolveTaskParameterType(LoadedType loadedType, TaskPropertyInfo parameter, int indexOfParameter)
         {
+            if (parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true })
+            {
+                return null;
+            }
+
             if (!loadedType.LoadedViaMetadataLoadContext)
             {
                 return parameter.PropertyType;
@@ -1528,10 +1575,29 @@ namespace Microsoft.Build.BackEnd
         [RequiresUnreferencedCode("Resolves the task parameter type from its assembly-qualified name by reflection, which is incompatible with trimming.")]
         private static Type ResolveTaskParameterTypeByName(LoadedType loadedType, TaskPropertyInfo parameter, int indexOfParameter)
         {
+            ReflectableTaskPropertyInfo reflectableParameter = parameter as ReflectableTaskPropertyInfo;
+            if (reflectableParameter?.TryGetResolvedParameterType(out Type cachedParameterType) == true)
+            {
+                return cachedParameterType;
+            }
+
             string assemblyQualifiedName =
                 (indexOfParameter != -1 ? loadedType.PropertyAssemblyQualifiedNames?[indexOfParameter] : null)
                 ?? parameter.PropertyType.AssemblyQualifiedName;
-            return Type.GetType(assemblyQualifiedName);
+            Type parameterType = null;
+            if (!string.IsNullOrEmpty(assemblyQualifiedName))
+            {
+                try
+                {
+                    parameterType = Type.GetType(assemblyQualifiedName);
+                }
+                catch (Exception e) when (e is ArgumentException or TypeLoadException or FileNotFoundException or FileLoadException or BadImageFormatException)
+                {
+                }
+            }
+
+            reflectableParameter?.CacheResolvedParameterType(parameterType);
+            return parameterType;
         }
 
         /// <summary>
@@ -1603,6 +1669,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
+                        VerifyTaskHostSupportsParameterConversion(parameter, parameterType, parameterLocation);
                         success = SetValueParameter(parameter, parameterType, expandedParameterValue);
                         taskParameterSet = true;
                     }
@@ -1697,6 +1764,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // If the task parameter is not a ITaskItem[], then we need to convert
                 // all the TaskItem's in our arraylist to the appropriate datatype.
+                VerifyTaskHostSupportsParameterConversion(parameter, parameterType, parameterLocation);
                 success = SetParameterArray(parameter, parameterType, finalTaskItems, parameterLocation);
                 taskParameterSet = true;
             }

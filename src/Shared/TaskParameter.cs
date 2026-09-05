@@ -196,6 +196,14 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal static bool RequiresHostConversion(Type parameterType)
+        {
+            Type elementType = parameterType.IsArray ? parameterType.GetElementType() : parameterType;
+            return elementType.IsEnum
+                || TaskItemTypeDetector.IsSupportedPathType(elementType)
+                || (elementType.IsValueType && Type.GetTypeCode(elementType) == TypeCode.Object);
+        }
+
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>

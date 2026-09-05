@@ -45,6 +45,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
+        public void TaskHostNodeKey_Equality_DifferentParameterConversionCapability_AreNotEqual()
+        {
+            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, SupportsParameterConversion: false);
+            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, SupportsParameterConversion: true);
+
+            key1.ShouldNotBe(key2);
+        }
+
+        [Fact]
         public void TaskHostNodeKey_CanBeUsedAsDictionaryKey()
         {
             var dict = new System.Collections.Generic.Dictionary<TaskHostNodeKey, string>();

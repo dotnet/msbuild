@@ -27,6 +27,10 @@ namespace Microsoft.Build.Execution
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         private Type _taskType;
 
+        private Type _resolvedParameterType;
+
+        private volatile bool _resolvedParameterTypeInitialized;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ReflectableTaskPropertyInfo"/> class.
         /// </summary>
@@ -40,6 +44,11 @@ namespace Microsoft.Build.Execution
         {
             ArgumentNullException.ThrowIfNull(taskType);
             _taskType = taskType;
+            if (taskPropertyInfo is ReflectableTaskPropertyInfo reflectableTaskPropertyInfo)
+            {
+                IsTypeUnresolved = reflectableTaskPropertyInfo.IsTypeUnresolved;
+                ParameterTypeForExpansion = reflectableTaskPropertyInfo.ParameterTypeForExpansion;
+            }
         }
 
         /// <summary>
@@ -57,19 +66,63 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Initializes a new <see cref="ReflectableTaskPropertyInfo"/> with three precomputed parameters. This is specifically
+        /// Initializes a new <see cref="ReflectableTaskPropertyInfo"/> with precomputed parameters. This is specifically
         /// used with MetadataLoadContext, as these parameters cannot be computed for the property type passed in directly but
         /// rather the relevant base type.
         /// </summary>
-        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, bool isAssignableToITaskItemType)
+        internal ReflectableTaskPropertyInfo(
+            PropertyInfo propertyInfo,
+            Type propertyType,
+            bool output,
+            bool required,
+            bool isAssignableToITaskItemType,
+            Type parameterTypeForExpansion)
             : base(
             propertyInfo.Name,
-            propertyInfo.PropertyType,
+            propertyType,
             output,
             required)
         {
             _propertyInfo = propertyInfo;
             IsAssignableToITask = isAssignableToITaskItemType;
+            ParameterTypeForExpansion = parameterTypeForExpansion;
+        }
+
+        /// <summary>
+        /// Initializes a placeholder for a property whose type could not be inspected.
+        /// </summary>
+        internal ReflectableTaskPropertyInfo(
+            PropertyInfo propertyInfo,
+            bool output,
+            bool required,
+            Type parameterTypeForExpansion = null)
+            : base(propertyInfo.Name, parameterTypeForExpansion ?? typeof(object), output, required)
+        {
+            _propertyInfo = propertyInfo;
+            IsTypeUnresolved = true;
+            ParameterTypeForExpansion = parameterTypeForExpansion;
+        }
+
+        internal bool IsTypeUnresolved { get; }
+
+        internal Type ParameterTypeForExpansion { get; }
+
+        internal bool TryGetResolvedParameterType(out Type parameterType)
+        {
+            if (_resolvedParameterTypeInitialized)
+            {
+                parameterType = _resolvedParameterType;
+                return true;
+            }
+
+            parameterType = null;
+            return false;
+        }
+
+        internal void CacheResolvedParameterType(Type parameterType)
+        {
+            _resolvedParameterType = parameterType;
+            _resolvedParameterTypeInitialized = true;
         }
 
         /// <summary>
