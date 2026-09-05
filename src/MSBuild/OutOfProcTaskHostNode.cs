@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -154,6 +154,12 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private ManualResetEvent _taskCancelledEvent;
 
+        /// <summary>
+        /// Signalled when the current build cancelled a task. FOR UNIT TESTING ONLY: a cancellation
+        /// from one build must not still be signalled when the node is reset for the next.
+        /// </summary>
+        internal ManualResetEvent TaskCancelledEvent => _taskCancelledEvent;
+
         /// This is the wrapper for the user task to be executed.
         /// We are providing a wrapper to create a possibility of executing the task in a separate AppDomain
         /// </summary>
@@ -178,14 +184,16 @@ namespace Microsoft.Build.CommandLine
         private bool _updateEnvironmentAndLog;
 
         /// <summary>
-        /// setting this to true means we're running a long-lived sidecar node.
+        /// Whether this task host was launched with node reuse, so it does not exit at the end of a
+        /// build. Whether it then stays connected to its launcher as a sidecar, or disconnects into
+        /// the machine-wide pool, is what <see cref="NodeBuildComplete.PrepareForReuse"/> says.
         /// </summary>
         private bool _nodeReuse;
 
         /// <summary>
         /// The task object cache.
         /// </summary>
-        private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
+        private RegisteredTaskObjectCacheBase _registeredTaskObjectCache = new();
 
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
@@ -1329,17 +1337,88 @@ namespace Microsoft.Build.CommandLine
             // the next build performs a fresh apply rather than trusting state left over from this build.
             _lastAppliedConfigEnvironment = null;
 
-            // Sidecar TaskHost will persist after the build is done.
+            // A task host launched with node reuse is either owned by the process that launched it,
+            // staying connected and resetting in place between builds so it can never outlive its
+            // owner, or pooled, disconnecting into the machine-wide set any process may claim.
+            // PrepareForReuse is how the owner says which: it exists to keep a task out of the
+            // owner's process (owned), or because the owner cannot run the task itself, being a
+            // different runtime or architecture (pooled, and useful to every process that needs it).
+            //
+            // Nothing is sent back. The owner already knows this node is idle: it cannot have
+            // completed the build while a task was still outstanding, which is the invariant
+            // asserted above. It also does not need to be told when the reset below has finished,
+            // because the reset is ordered behind NodeBuildComplete on the same pipe and runs on
+            // the packet-processing thread, so the next build's TaskHostConfiguration cannot
+            // overtake it.
+            if (_nodeReuse && buildComplete.PrepareForReuse && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            {
+                PrepareForNextBuild();
+                return;
+            }
+
             if (_nodeReuse)
             {
+                // Either a pooled task host, or opted out of ChangeWaves.Wave18_11: disconnect and
+                // go back to listening, rejoining the machine-wide pool. An older owner never sets
+                // PrepareForReuse for a task host it launched with node reuse, so it lands here too
+                // and behaves exactly as it always has.
                 _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+                _shutdownEvent.Set();
+                return;
             }
-            else
-            {
-                // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
-                _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
-            }
+
+            // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
+            _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
+        }
+
+        /// <summary>
+        /// Disposes build-scoped state so this sidecar can serve the next build of its owner
+        /// without being torn down and relaunched.
+        /// </summary>
+        /// <remarks>
+        /// A TaskHost used to serve exactly one build: <see cref="XMake"/> constructed a fresh node
+        /// per build, so build state was reset by construction and no field could be missed. A
+        /// sidecar keeps its connection across builds and tearing the node down would tear that
+        /// connection down with it, so it resets in place instead. Every field added to this class
+        /// therefore has to be classified: build-scoped fields must be reset here, or their values
+        /// leak into the next, unrelated build served by this same process.
+        /// </remarks>
+        internal void PrepareForNextBuild()
+        {
+            // Only state that the next build will not re-establish for itself belongs here.
+            // Per-task state -- the configuration, the warning sets, the environment flags, the task
+            // wrapper and its completion packet -- is assigned unconditionally from each incoming
+            // TaskHostConfiguration before it is ever read, so clearing it here would be dead code
+            // and clearing _taskCompletePacket could discard a result that has not been sent yet.
+
+            // Defensive, and matches HandleShutdown: a task blocked on a callback would never
+            // unblock once the parent stops answering for this build. No-op when nothing is pending.
+            FailAllPendingCallbackRequests("TaskHost resetting for the next build.");
+
+            // Build-lifetime objects registered by tasks. Nothing else disposes these while the node
+            // stays alive; a node that exited at the end of a build did it in HandleShutdown.
+            _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
+
+            // A cancellation that arrived as the build was ending would otherwise still be signalled
+            // and would spin the next build's wait loop.
+            _taskCancelledEvent.Reset();
+
+            // Set by tasks through IBuildEngine and never re-established per task, so it would leak
+            // into the next build.
+            AllowFailureWithoutError = false;
+
+            // A task may have changed either of these, and the next build must not inherit them.
+            NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+
+            try
+            {
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                CommunicationsUtilities.Trace($"Failed to restore the sidecar TaskHost environment: {ex}");
+            }
         }
 
         /// <summary>
@@ -1419,6 +1498,16 @@ namespace Microsoft.Build.CommandLine
                     break;
 
                 case LinkStatus.Inactive:
+                    if (_nodeReuse)
+                    {
+                        // A sidecar has no owner other than the process it is connected to, so a
+                        // lost connection means it can never be reached again. Exit instead of
+                        // lingering as an orphan that nothing can shut down.
+                        _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
+                        FailAllPendingCallbackRequests("Sidecar TaskHost lost its connection to its owner.");
+                        _shutdownEvent.Set();
+                    }
+
                     break;
 
                 default:

@@ -69,6 +69,12 @@ namespace Microsoft.Build.BackEnd
         private readonly ConcurrentDictionary<string, byte /*void*/> _processesToIgnore = new();
 
         /// <summary>
+        /// Stops skipping the processes this provider failed to connect to, so the next build
+        /// retries them instead of starting new nodes.
+        /// </summary>
+        private protected void ClearProcessesToIgnore() => _processesToIgnore.Clear();
+
+        /// <summary>
         /// Delegate used to tell the node provider that a context has been created.
         /// </summary>
         /// <param name="context">The created node context.</param>
@@ -440,11 +446,22 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, nodeLaunchData.Handshake.HandshakeOptions);
+                HandshakeOptions handshakeOptions = nodeLaunchData.Handshake.HandshakeOptions;
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions));
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
         }
+
+        /// <summary>
+        /// Whether a node launched with these handshake options stays connected to this process after
+        /// one of its builds completes, so that this process can use it again for the next one. Such
+        /// a node resets in place rather than disconnecting, and more packets follow on its
+        /// connection afterwards.
+        /// False by default: a node disconnects at the end of a build and, if reusable, waits on its
+        /// pipe for some other process to claim it.
+        /// </summary>
+        protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions) => false;
 
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
@@ -1053,9 +1070,11 @@ namespace Microsoft.Build.BackEnd
                 INodePacketFactory factory,
                 NodeContextTerminateDelegate terminateDelegate,
                 byte negotiatedVersion,
-                HandshakeOptions handshakeOptions = HandshakeOptions.None)
+                HandshakeOptions handshakeOptions = HandshakeOptions.None,
+                bool connectionPersistsAcrossBuilds = false)
             {
                 _nodeId = nodeId;
+                _connectionPersistsAcrossBuilds = connectionPersistsAcrossBuilds;
                 _process = process;
                 _pipeStream = nodePipe;
 #if !FEATURE_APM
@@ -1094,6 +1113,19 @@ namespace Microsoft.Build.BackEnd
             /// Id of node.
             /// </summary>
             public int NodeId => _nodeId;
+
+            /// <summary>
+            /// Whether this node stays connected after a build completes, so that its owner can use
+            /// it again for the next one, instead of disconnecting into the pool of nodes that any
+            /// process may claim.
+            /// </summary>
+            private readonly bool _connectionPersistsAcrossBuilds;
+
+            /// <summary>
+            /// Whether this node stays connected after a build completes. Its owner uses this to
+            /// tell the nodes that will disconnect from the ones it must retire itself.
+            /// </summary>
+            public bool ConnectionPersistsAcrossBuilds => _connectionPersistsAcrossBuilds;
 
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
@@ -1330,7 +1362,11 @@ namespace Microsoft.Build.BackEnd
                         // disposed); otherwise the thread loops back to WaitOne() and blocks forever, leaking the
                         // thread and the NodeContext it captures. In a long-lived host like Visual Studio these
                         // leaked threads accumulate across builds.
-                        if (packet is NodeBuildComplete)
+                        //
+                        // A node that stays connected is the exception: its owner sends it more packets after this
+                        // one, so the drain thread has to keep running.
+                        if (packet is NodeBuildComplete buildComplete &&
+                            !(_connectionPersistsAcrossBuilds && buildComplete.PrepareForReuse))
                         {
                             if (IsExitPacket(packet))
                             {

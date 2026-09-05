@@ -155,6 +155,8 @@ Each task gets a `TaskExecutionContext` stored in `_taskContexts` (ConcurrentDic
 
 The TaskHost process can execute multiple tasks, both sequentially and concurrently. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal. When a task calls `BuildProjectFile`, the TaskHost blocks (incrementing `_blockedTaskCount`, then decrementing `_activeTaskCount`), allowing the scheduler to dispatch a nested task to the same process while the outer task is blocked waiting for the callback response.
 
+A **sidecar** is a TaskHost that matches its launcher's runtime and architecture and is used for routing of non-multithreadable tasks in `-mt` execution and under `MSBUILDFORCEALLTASKSOUTOFPROC`. Under Change Wave 18.11 a sidecar shares the lifetime of its launcher; opting out of the wave makes it disconnect and idle after each build, as every TaskHost did before.
+
 ### Event Loop Cycle
 
 ```mermaid
@@ -162,6 +164,7 @@ stateDiagram-v2
     [*] --> Idle: Process starts, endpoint connects
     Idle --> Running: TaskHostConfiguration packet arrives
     Running --> Idle: CompleteTask() sends result, clears config
+    Idle --> Idle: NodeBuildComplete (connected sidecar) -- PrepareForNextBuild() resets in place
     Idle --> Shutdown: NodeBuildComplete or connection loss
     Running --> Shutdown: _taskCancelledEvent during idle transition
     Shutdown --> [*]: HandleShutdown() exits
@@ -181,14 +184,34 @@ Each new `TaskHostConfiguration` carries a full environment snapshot, task param
 
 **Persists across tasks (within a single build):**
 - `s_mismatchedEnvironmentValues` (static) -- environment variable fixups for bitness differences, computed once per process
-- `_registeredTaskObjectCache` -- task object cache with `Build` lifetime scope, disposed at end of each build (in `HandleShutdown()`), recreated fresh on the next `Run()` call
+- `_registeredTaskObjectCache` -- task object cache with `Build` lifetime scope. A TaskHost whose current `Run()` call ends disposes it in `HandleShutdown()`; the next `Run()` call creates a fresh one. A sidecar stays connected across builds, so it disposes the `Build`-scoped objects in `PrepareForNextBuild()` and keeps the cache instance itself.
 - `_pendingCallbackRequests` / `_nextCallbackRequestId` -- callback tracking (should be empty between tasks)
 
 ### Shutdown vs. Reuse
 
 When the owning worker node sends `NodeBuildComplete`, `HandleNodeBuildComplete()` decides whether to exit or stay alive:
 
-- **Sidecar TaskHost** (`_nodeReuse = true`): Always sets `BuildCompleteReuse`. The sidecar process persists across builds, re-entering the `Run()` outer loop to accept new connections.
-- **Regular TaskHost** (`_nodeReuse = false`): Sets `BuildCompleteReuse` only if `buildComplete.PrepareForReuse` is true **and** `Traits.Instance.EscapeHatches.ReuseTaskHostNodes` is enabled. Otherwise sets `BuildComplete` and the process exits. This avoids holding assembly locks on custom task DLLs between builds.
+**Sidecar** TaskHosts (`_nodeReuse = true`, `buildComplete.PrepareForReuse = true`, Change Wave 18.11 active) keep their named-pipe connection to their launcher and reset in place via `PrepareForNextBuild()`.
 
-There is **no idle timeout**. The `WaitAny()` call has no timeout parameter -- the TaskHost waits indefinitely until it receives a shutdown signal or the connection drops.
+A TaskHost launched without node reuse normally sets `BuildComplete` and exits. For compatibility, it honors `buildComplete.PrepareForReuse` only when `Traits.Instance.EscapeHatches.ReuseTaskHostNodes` is enabled. This avoids holding assembly locks on custom task DLLs between builds.
+
+A sidecar sends nothing back to report the reset. Its owner already knows the node is idle -- a build cannot complete while one of its tasks is still outstanding, which `HandleNodeBuildComplete()` asserts on receipt -- and it does not need to be told when the reset has finished, because the reset is ordered behind `NodeBuildComplete` on the same pipe and runs on the packet-processing thread, so the next build's `TaskHostConfiguration` cannot overtake it. The owner therefore retires the still-connected sidecar from its active set locally at the point it sends `NodeBuildComplete`.
+
+Because a sidecar stays connected, its owner exiting -- normally, via `dotnet build-server shutdown`, or by crashing -- breaks the pipe, and the `LinkStatus.Failed` handler terminates it. Reaping a sidecar therefore requires no shutdown cascade and no process enumeration: it is reachable through the connection it already holds. A sidecar has no idle timeout; it waits indefinitely on its owner's connection.
+
+#### Lifetime change
+
+Before [#14584](https://github.com/dotnet/msbuild/pull/14584), sidecar TaskHosts disconnected at the end of every build and awaited a new connection from any compatible process. They now stay connected to their launchers:
+
+| configuration | before | after |
+|---|---|---|
+| `-mt` routing of a non-multithreadable task | disconnects and idles after build | **sidecar stays connected to launcher** |
+| `MSBUILDFORCEALLTASKSOUTOFPROC` | disconnects and idles after build | **sidecar stays connected to launcher** |
+
+TaskHosts required for a different runtime or architecture are unchanged. Reusable ones continue to disconnect so another compatible process can claim them. CLR2 TaskHosts are never node-reused, and TaskHosts created by an explicit `TaskFactory="TaskHostFactory"` request are deliberately launched without node reuse; both exit at the end of the build. Keeping reusable cross-runtime or cross-architecture TaskHosts connected would cost one idle process per worker node for a task that only ever runs in one of them at a time: with ten projects of which one needs an `Architecture="x86"` TaskHost, under `-m:4` and reordered so the scheduler places it on a different worker each build, staying connected left three idle TaskHosts (~153 MB) where disconnecting leaves one (~51 MB).
+
+A sidecar runs the same runtime and architecture as its launcher, so sharing across processes is less helpful. Its launcher identifies it with `NodeBuildComplete.PrepareForReuse`; nothing new goes on the wire, and an older launcher never sets that flag for a TaskHost it launched with node reuse, so no protocol version change is needed in either direction.
+
+A sidecar is therefore never shared across launcher processes. Reuse within one launcher's lifetime -- including consecutive command-line invocations handled by the same MSBuild server or any long-lived `BuildManager` -- is unchanged, which is where it pays off.
+
+When the TaskHost binary comes from an older SDK, it keeps the old behaviour because the decision is made in the child: it disconnects at the end of each build and relists, so the launching process reuses it across builds but it also outlives that process. Mixed old-SDK and new-SDK TaskHosts behave independently.

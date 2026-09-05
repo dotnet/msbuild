@@ -40,6 +40,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
+- [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)
 - [Out-of-proc communication uses larger read-ahead buffers and pre-buffers TaskHost packet bodies to reduce pipe reads.](https://github.com/dotnet/msbuild/pull/14505)
 - [Restore no longer discards a ProjectRootElementCache that reloads changed files from disk, so the build that follows an implicit restore does not re-parse the import closure.](https://github.com/dotnet/msbuild/pull/14558)
 - [Use optimized MSBuild file specification matching and enumeration](https://github.com/dotnet/msbuild/pull/14663). Regex-backed file globs use culture-invariant case folding; set `MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS=1` to preserve legacy current-culture folding without disabling other Wave 18.11 features.
