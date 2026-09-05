@@ -3,6 +3,9 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
 using Shouldly;
 using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
@@ -253,12 +256,14 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task EnvironmentGetEnvVar_InRegularTask_ProducesDiagnostic()
+    public async Task EnvironmentGetEnvVar_InMultiThreadableTask_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
-            public class MyTask : Microsoft.Build.Utilities.Task
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     var val = Environment.GetEnvironmentVariable("PATH");
@@ -674,12 +679,14 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task FileApi_InRegularTask_ProducesDiagnostic()
+    public async Task FileApi_InMultiThreadableTask_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
-            public class MyTask : Microsoft.Build.Utilities.Task
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     File.Exists("foo.txt");
@@ -1082,9 +1089,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task MSBuildTask0002_FiredForRegularTask()
+    public async Task MSBuildTask0002_FiresForRegularTaskInAllScope()
     {
-        var diags = await GetDiagnosticsAsync("""
+        var diags = await GetDiagnosticsWithScopeAsync("""
             using System;
             using System.IO;
             using System.Diagnostics;
@@ -1099,16 +1106,15 @@ public class MultiThreadableTaskAnalyzerTests
                     return true;
                 }
             }
-            """);
+            """, SharedAnalyzerHelpers.ScopeAll);
 
-        // MSBuildTask0002 now fires for all ITask implementations
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     [Fact]
-    public async Task MSBuildTask0003_FiredForRegularTask()
+    public async Task MSBuildTask0003_FiresForRegularTaskInAllScope()
     {
-        var diags = await GetDiagnosticsAsync("""
+        var diags = await GetDiagnosticsWithScopeAsync("""
             using System.IO;
             public class RegularTask : Microsoft.Build.Utilities.Task
             {
@@ -1119,7 +1125,7 @@ public class MultiThreadableTaskAnalyzerTests
                     return true;
                 }
             }
-            """);
+            """, SharedAnalyzerHelpers.ScopeAll);
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
@@ -1129,8 +1135,10 @@ public class MultiThreadableTaskAnalyzerTests
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Xml.Linq;
-            public class MyTask : Microsoft.Build.Utilities.Task
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     var doc = new XDocument();
@@ -1148,8 +1156,10 @@ public class MultiThreadableTaskAnalyzerTests
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Xml;
-            public class MyTask : Microsoft.Build.Utilities.Task
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     using var reader = XmlReader.Create("input.xml");
@@ -1166,8 +1176,10 @@ public class MultiThreadableTaskAnalyzerTests
     {
         var diags = await GetDiagnosticsAsync("""
             using System.IO.Compression;
-            public class MyTask : Microsoft.Build.Utilities.Task
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     using var archive = ZipFile.OpenRead("archive.zip");
@@ -1761,9 +1773,8 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Task_WithoutMultiThreadableAttribute_GetsAllRules()
+    public async Task Task_WithoutMultiThreadableOptIn_DoesNotGetScopedRulesByDefault()
     {
-        // All rules now fire on all ITask implementations
         var diags = await GetDiagnosticsAsync("""
             using System;
             using System.IO;
@@ -1778,8 +1789,8 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     [Fact]
@@ -1869,6 +1880,282 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
     // Scope option tests
     // ═══════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task Scope_Default_PlainTask_DoesNotGetEnvironmentOrPathDiagnostics()
+    {
+        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using System.IO;
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var value = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Scope_Default_MultiThreadableTask_GetsEnvironmentAndPathDiagnostics()
+    {
+        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    var value = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_All_PlainTask_GetsEnvironmentAndPathDiagnostics()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            using System.IO;
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var value = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            """, SharedAnalyzerHelpers.ScopeAll);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_GlobalConfig_All_AnalyzesPlainTask()
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        var value = {|#0:Environment.GetEnvironmentVariable("KEY")|};
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", """
+            is_global = true
+            msbuild_task_analyzer.scope = all
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Warning).WithLocation(0));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task Scope_EditorConfig_All_DoesNotSetCompilationWideScope()
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        var value = Environment.GetEnvironmentVariable("KEY");
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            msbuild_task_analyzer.scope = all
+            """));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task Scope_UnrecognizedValue_PreservesAllScope()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var value = Environment.GetEnvironmentVariable("KEY");
+                    return true;
+                }
+            }
+            """, "unrecognized");
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_MultiThreadableDerivedTask_AnalyzesUnsafeBaseTaskMethod()
+    {
+        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public abstract class MyBaseTask : Microsoft.Build.Utilities.Task
+            {
+                protected bool UsesProcessState()
+                {
+                    _ = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            public class MyMtTask : MyBaseTask, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute() => UsesProcessState();
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_MultiThreadableTask_ReportsOnlyDirectDiagnosticsForContributingNonTaskBase()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public abstract class Base
+            {
+                public IBuildEngine BuildEngine { get; set; } = new BuildEngineStub();
+                public bool Execute()
+                {
+                    _ = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            public sealed class MtTask : Base, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Scope_Default_IneffectiveAttribute_DoesNotAnalyzeUnrelatedBase()
+    {
+        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public abstract class Base
+            {
+                protected void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            [MSBuildMultiThreadableTask]
+            public sealed class NotATask : Base
+            {
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Scope_Default_IneffectiveAttributeOnAbstractTask_DoesNotAnalyzeBase()
+    {
+        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public abstract class BaseTask : Microsoft.Build.Utilities.Task
+            {
+                protected bool Run()
+                {
+                    _ = Environment.GetEnvironmentVariable("KEY");
+                    return true;
+                }
+            }
+            [MSBuildMultiThreadableTask]
+            public abstract class AbstractTask : BaseTask
+            {
+            }
+            public sealed class ConcreteTask : AbstractTask
+            {
+                public override bool Execute() => Run();
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Scope_Default_MultiThreadableAttribute_OptsTaskIn()
+    {
+        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MtTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var value = Environment.GetEnvironmentVariable("KEY");
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_AnalyzedAttribute_OptsHelperIn()
+    {
+        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTaskAnalyzed]
+            public class MtHelper
+            {
+                public void Execute()
+                {
+                    var value = Environment.GetEnvironmentVariable("KEY");
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+    }
 
     [Fact]
     public async Task Scope_MultithreadableOnly_PlainTask_NoDiagnostic()

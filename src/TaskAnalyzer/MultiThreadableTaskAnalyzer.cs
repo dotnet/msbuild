@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
@@ -16,9 +15,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// <summary>
     /// Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
     /// 
-    /// Scope (controlled by .editorconfig option "msbuild_task_analyzer.scope"):
-    /// - "all" (default): All rules fire on ALL ITask implementations
-    /// - "multithreadable_only": MSBuildTask0002, 0003 fire only on IMultiThreadableTask or [MSBuildMultiThreadableTask]
+    /// Scope (controlled by global analyzer option "msbuild_task_analyzer.scope"):
+    /// - "multithreadable_only" (default): MSBuildTask0002 and 0003 fire only on IMultiThreadableTask or [MSBuildMultiThreadableTask]
+    /// - "all": Enables MSBuildTask0002 and 0003 for all ITask implementations during migration
     ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
     /// 
     /// Per review feedback from @rainersigwald:
@@ -29,8 +28,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     public sealed class MultiThreadableTaskAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
-        /// The .editorconfig key controlling analysis scope.
-        /// Values: "all" (default) | "multithreadable_only"
+        /// The global analyzer configuration key controlling analysis scope.
+        /// Values: "multithreadable_only" (default) | "all"
         /// </summary>
         internal const string ScopeOptionKey = SharedAnalyzerHelpers.ScopeOptionKey;
         internal const string ScopeAll = SharedAnalyzerHelpers.ScopeAll;
@@ -55,7 +54,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Read scope option from .editorconfig: "all" (default) or "multithreadable_only"
+            // Read scope option: "multithreadable_only" (default) or "all"
             bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
 
             var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
@@ -65,6 +64,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
             var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
             var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
+            var multiThreadableTaskBaseTypes = FindMultiThreadableTaskBaseTypes(
+                compilationContext.Compilation,
+                iTaskType,
+                iMultiThreadableTaskType,
+                multiThreadableTaskAttributeType,
+                analyzedAttributeType);
 
             // Build symbol lookup for banned APIs
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
@@ -79,23 +84,22 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Determine what kind of task this is
                 bool isTask = ImplementsInterface(namedType, iTaskType);
-                bool isMultiThreadableTask = iMultiThreadableTaskType is not null && ImplementsInterface(namedType, iMultiThreadableTaskType);
+                bool hasMultiThreadableOptIn = IsMultiThreadableOptIn(
+                    namedType,
+                    iMultiThreadableTaskType,
+                    multiThreadableTaskAttributeType,
+                    analyzedAttributeType,
+                    out bool hasAnalyzedAttribute);
+                bool contributesToMultiThreadableTask =
+                    multiThreadableTaskBaseTypes.Contains(namedType.OriginalDefinition);
 
-                // Helper classes can opt-in via [MSBuildMultiThreadableTaskAnalyzed] attribute
-                bool hasAnalyzedAttribute = analyzedAttributeType is not null &&
-                    namedType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType));
-
-                // Tasks marked with [MSBuildMultiThreadableTask] should be analyzed as multithreadable
-                bool hasMultiThreadableAttribute = multiThreadableTaskAttributeType is not null &&
-                    namedType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType));
-
-                if (!isTask && !hasAnalyzedAttribute)
+                if (!isTask && !hasAnalyzedAttribute && !contributesToMultiThreadableTask)
                 {
                     return;
                 }
 
-                // Helper classes with the attribute or tasks with [MSBuildMultiThreadableTask] are treated as IMultiThreadableTask
-                bool analyzeAsMultiThreadable = isMultiThreadableTask || hasAnalyzedAttribute || hasMultiThreadableAttribute;
+                // Base classes contribute code to opted-in tasks even though the opt-in is declared on a derived type.
+                bool analyzeAsMultiThreadable = hasMultiThreadableOptIn || contributesToMultiThreadableTask;
 
                 // When scope is "multithreadable_only", only analyze MSBuildTask0002/0003 for multithreadable tasks
                 bool reportEnvironmentRules = analyzeAllTasks || analyzeAsMultiThreadable;
@@ -229,6 +233,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 BannedApiDefinitions.ApiCategory.CriticalError => DiagnosticDescriptors.CriticalError,
                 BannedApiDefinitions.ApiCategory.TaskEnvironment => DiagnosticDescriptors.TaskEnvironmentRequired,
+                BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute => DiagnosticDescriptors.FilePathRequiresAbsolute,
                 BannedApiDefinitions.ApiCategory.PotentialIssue => DiagnosticDescriptors.PotentialIssue,
                 _ => DiagnosticDescriptors.TaskEnvironmentRequired,
             };

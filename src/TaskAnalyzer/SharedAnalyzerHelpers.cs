@@ -17,8 +17,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     internal static class SharedAnalyzerHelpers
     {
         /// <summary>
-        /// The .editorconfig key controlling analysis scope.
-        /// Values: "all" (default) | "multithreadable_only"
+        /// The global analyzer configuration key controlling analysis scope.
+        /// Values: "multithreadable_only" (default) | "all"
         /// </summary>
         internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
         internal const string ScopeAll = "all";
@@ -26,18 +26,122 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>
         /// Reads the scope option from the analyzer config options provider.
-        /// Returns true if all tasks should be analyzed; false if only multithreadable tasks.
+        /// Returns true only when all-task migration analysis is explicitly enabled.
         /// </summary>
         internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
         {
-            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
-                optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
+            if (optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out var scopeValue))
             {
                 return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
             }
 
-            return true; // default: analyze all tasks
+            return false;
         }
+
+        internal static bool IsMultiThreadableOptIn(
+            INamedTypeSymbol type,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType,
+            out bool hasAnalyzedAttribute)
+        {
+            bool hasMultiThreadableAttribute = false;
+            hasAnalyzedAttribute = false;
+
+            foreach (AttributeData attribute in type.GetAttributes())
+            {
+                if (multiThreadableTaskAttributeType is not null &&
+                    SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, multiThreadableTaskAttributeType))
+                {
+                    hasMultiThreadableAttribute = true;
+                }
+
+                if (analyzedAttributeType is not null &&
+                    SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, analyzedAttributeType))
+                {
+                    hasAnalyzedAttribute = true;
+                }
+            }
+
+            return (iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType)) ||
+                hasMultiThreadableAttribute ||
+                hasAnalyzedAttribute;
+        }
+
+        internal static ImmutableHashSet<INamedTypeSymbol> FindMultiThreadableTaskBaseTypes(
+            Compilation compilation,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType)
+        {
+            var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+            AddMultiThreadableTaskBaseTypes(
+                compilation.Assembly.GlobalNamespace,
+                builder,
+                iTaskType,
+                iMultiThreadableTaskType,
+                multiThreadableTaskAttributeType,
+                analyzedAttributeType);
+            return builder.ToImmutable();
+        }
+
+        private static void AddMultiThreadableTaskBaseTypes(
+            INamespaceOrTypeSymbol container,
+            ImmutableHashSet<INamedTypeSymbol>.Builder result,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType)
+        {
+            foreach (ISymbol member in container.GetMembers())
+            {
+                if (member is INamespaceSymbol childNamespace)
+                {
+                    AddMultiThreadableTaskBaseTypes(
+                        childNamespace,
+                        result,
+                        iTaskType,
+                        iMultiThreadableTaskType,
+                        multiThreadableTaskAttributeType,
+                        analyzedAttributeType);
+                    continue;
+                }
+
+                if (member is not INamedTypeSymbol type)
+                {
+                    continue;
+                }
+
+                if (ImplementsInterface(type, iTaskType) &&
+                    IsMultiThreadableOptIn(
+                        type,
+                        iMultiThreadableTaskType,
+                        multiThreadableTaskAttributeType,
+                        analyzedAttributeType,
+                        out bool hasAnalyzedAttribute) &&
+                    (!type.IsAbstract ||
+                     hasAnalyzedAttribute ||
+                     (iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType))))
+                {
+                    for (INamedTypeSymbol? baseType = type.BaseType;
+                         baseType is not null && baseType.SpecialType != SpecialType.System_Object;
+                         baseType = baseType.BaseType)
+                    {
+                        result.Add(baseType.OriginalDefinition);
+                    }
+                }
+
+                AddMultiThreadableTaskBaseTypes(
+                    type,
+                    result,
+                    iTaskType,
+                    iMultiThreadableTaskType,
+                    multiThreadableTaskAttributeType,
+                    analyzedAttributeType);
+            }
+        }
+
         /// <summary>
         /// Represents a resolved banned API entry for O(1) lookup during analysis.
         /// </summary>

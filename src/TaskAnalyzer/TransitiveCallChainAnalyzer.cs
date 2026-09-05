@@ -52,7 +52,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Read scope option from .editorconfig
+            // Read global analyzer scope option.
             bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
 
             var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
@@ -66,16 +66,24 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
+            var multiThreadableTaskBaseTypes = FindMultiThreadableTaskBaseTypes(
+                compilationContext.Compilation,
+                iTaskType,
+                iMultiThreadableTaskType,
+                multiThreadableTaskAttributeType,
+                analyzedAttributeType);
 
             // Thread-safe collections for building the graph across concurrent operation callbacks
             var callGraph = new ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>>(SymbolEqualityComparer.Default);
             var directViolations = new ConcurrentDictionary<ISymbol, ConcurrentBag<ViolationInfo>>(SymbolEqualityComparer.Default);
+            var directlyAnalyzedTypeCache = new ConcurrentDictionary<INamedTypeSymbol, bool>(SymbolEqualityComparer.Default);
 
             // Phase 1: Scan ALL operations in the compilation to build call graph + record violations
             compilationContext.RegisterOperationAction(opCtx =>
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
-                    taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType);
+                    taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType,
+                    analyzedAttributeType, multiThreadableTaskBaseTypes, directlyAnalyzedTypeCache);
             },
             OperationKind.Invocation,
             OperationKind.ObjectCreation,
@@ -104,7 +112,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
-            INamedTypeSymbol iTaskType)
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? analyzedAttributeType,
+            ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskBaseTypes,
+            ConcurrentDictionary<INamedTypeSymbol, bool> directlyAnalyzedTypeCache)
         {
             var containingSymbol = context.ContainingSymbol;
             if (containingSymbol is not IMethodSymbol containingMethod)
@@ -115,9 +126,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Normalize to OriginalDefinition for generic methods
             var callerKey = containingMethod.OriginalDefinition;
 
-            // Check if this method is inside a task type
             var containingType = containingMethod.ContainingType;
-            bool isInsideTask = containingType is not null && ImplementsInterface(containingType, iTaskType);
+            bool isDirectlyAnalyzed = false;
+            if (containingType is not null)
+            {
+                INamedTypeSymbol containingTypeKey = containingType.OriginalDefinition;
+                if (!directlyAnalyzedTypeCache.TryGetValue(containingTypeKey, out isDirectlyAnalyzed))
+                {
+                    isDirectlyAnalyzed =
+                        ImplementsInterface(containingType, iTaskType) ||
+                        multiThreadableTaskBaseTypes.Contains(containingTypeKey) ||
+                        HasAttribute(containingType, analyzedAttributeType);
+                    directlyAnalyzedTypeCache.TryAdd(containingTypeKey, isDirectlyAnalyzed);
+                }
+            }
 
             ISymbol? referencedSymbol = null;
             ImmutableArray<IArgumentOperation> arguments = default;
@@ -168,9 +190,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            // Only record violations for NON-task methods
-            // Task methods get direct analysis from MultiThreadableTaskAnalyzer
-            if (isInsideTask)
+            // Keep call graph edges, but let MultiThreadableTaskAnalyzer own diagnostics for these types.
+            if (isDirectlyAnalyzed)
             {
                 return;
             }
@@ -179,7 +200,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
                 var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
-                var violation = new ViolationInfo(entry.Category.ToString(), displayName, entry.Message, context.Operation.Syntax.GetLocation());
+                var violation = new ViolationInfo(entry.Category, displayName, entry.Message, context.Operation.Syntax.GetLocation());
                 directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                 return;
             }
@@ -194,7 +215,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     string message = referencedSymbol.Name.StartsWith("Read", StringComparison.Ordinal)
                         ? "may cause deadlocks in automated builds"
                         : "interferes with build logging; use Log.LogMessage instead";
-                    var violation = new ViolationInfo("CriticalError", displayName, message, context.Operation.Syntax.GetLocation());
+                    var violation = new ViolationInfo(BannedApiDefinitions.ApiCategory.CriticalError, displayName, message, context.Operation.Syntax.GetLocation());
                     directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                     return;
                 }
@@ -209,7 +230,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     if (HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
                     {
                         var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
-                        var violation = new ViolationInfo("FilePathRequiresAbsolute", displayName,
+                        var violation = new ViolationInfo(BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute, displayName,
                             "may resolve relative paths against the process working directory", context.Operation.Syntax.GetLocation());
                         directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                     }
@@ -238,42 +259,73 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             // Find all task types in the compilation
             var taskTypes = new List<INamedTypeSymbol>();
-            FindTaskTypes(context.Compilation.GlobalNamespace, iTaskType, taskTypes);
+            FindTaskTypes(context.Compilation.Assembly.GlobalNamespace, iTaskType, taskTypes);
 
             if (taskTypes.Count == 0)
             {
                 return;
             }
 
-            // When scope is "multithreadable_only", filter to only multithreadable tasks
-            if (!analyzeAllTasks)
+            IMethodSymbol? iTaskExecuteMethod = null;
+            foreach (ISymbol member in iTaskType.GetMembers("Execute"))
             {
-                taskTypes = taskTypes.Where(t =>
-                    (iMultiThreadableTaskType is not null && t.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, iMultiThreadableTaskType))) ||
-                    (multiThreadableTaskAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType))) ||
-                    (analyzedAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType)))).ToList();
-
-                if (taskTypes.Count == 0)
+                if (member is IMethodSymbol method && method.Parameters.Length == 0)
                 {
-                    return;
+                    iTaskExecuteMethod = method;
+                    break;
                 }
             }
 
+            var reportedByTaskImplementation =
+                new Dictionary<ISymbol, HashSet<(string ApiDisplayName, Location Location)>>(SymbolEqualityComparer.Default);
+
             foreach (var taskType in taskTypes)
             {
-                // Track reported violations per task type to avoid flooding with duplicates.
+                bool reportScopedViolations = analyzeAllTasks ||
+                    IsMultiThreadableOptIn(
+                        taskType,
+                        iMultiThreadableTaskType,
+                        multiThreadableTaskAttributeType,
+                        analyzedAttributeType,
+                        out _);
+
+                var executeImplementation = iTaskExecuteMethod is null
+                    ? null
+                    : FindEffectiveInterfaceImplementation(taskType, iTaskExecuteMethod);
+                ISymbol taskImplementationKey = executeImplementation is null
+                    ? taskType.OriginalDefinition
+                    : executeImplementation.OriginalDefinition;
+                if (!reportedByTaskImplementation.TryGetValue(taskImplementationKey, out var reportedViolations))
+                {
+                    reportedViolations = new HashSet<(string ApiDisplayName, Location Location)>();
+                    reportedByTaskImplementation.Add(taskImplementationKey, reportedViolations);
+                }
+
+                // Track reported violations per effective task implementation to avoid flooding with duplicates.
                 // Key: the location the diagnostic is reported at plus the target banned API display name.
                 // Keeping the location in the key means a suppression on one reviewed call does not hide a
                 // second, unreviewed call to the same API. Only the shortest chain per location is reported.
-                var reportedPerTaskType = new HashSet<(string ApiDisplayName, Location Location)>();
+                var taskMethods = new List<IMethodSymbol>();
+                var taskMethodKeys = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
 
-                foreach (var member in taskType.GetMembers())
+                foreach (ISymbol member in taskType.GetMembers())
                 {
-                    if (member is not IMethodSymbol method || method.IsImplicitlyDeclared)
+                    if (member is IMethodSymbol method &&
+                        !method.IsImplicitlyDeclared &&
+                        taskMethodKeys.Add(method.OriginalDefinition))
                     {
-                        continue;
+                        taskMethods.Add(method);
                     }
+                }
 
+                if (executeImplementation is not null &&
+                    taskMethodKeys.Add(executeImplementation.OriginalDefinition))
+                {
+                    taskMethods.Add(executeImplementation);
+                }
+
+                foreach (IMethodSymbol method in taskMethods)
+                {
                     // BFS from this method through the call graph
                     var visited = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
                     var queue = new Queue<(ISymbol current, List<string> chain)>();
@@ -306,7 +358,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             foreach (var v in violations)
                             {
-                                ReportTransitiveViolation(context, method, v, chain, reportedPerTaskType);
+                                if (reportScopedViolations || AppliesToRegularTasks(v))
+                                {
+                                    ReportTransitiveViolation(context, method, v, chain, reportedViolations);
+                                }
                             }
                         }
 
@@ -335,8 +390,74 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
         }
 
+        private static IMethodSymbol? FindEffectiveInterfaceImplementation(
+            INamedTypeSymbol type,
+            IMethodSymbol interfaceMethod)
+        {
+            var implementation = type.FindImplementationForInterfaceMember(interfaceMethod) as IMethodSymbol;
+            if (implementation is null || !implementation.IsAbstract)
+            {
+                return implementation;
+            }
+
+            for (INamedTypeSymbol? currentType = type;
+                 currentType is not null && currentType.SpecialType != SpecialType.System_Object;
+                 currentType = currentType.BaseType)
+            {
+                foreach (ISymbol member in currentType.GetMembers())
+                {
+                    if (member is not IMethodSymbol method || method.IsAbstract)
+                    {
+                        continue;
+                    }
+
+                    for (IMethodSymbol? overriddenMethod = method.OverriddenMethod;
+                         overriddenMethod is not null;
+                         overriddenMethod = overriddenMethod.OverriddenMethod)
+                    {
+                        if (SymbolEqualityComparer.Default.Equals(
+                            overriddenMethod.OriginalDefinition,
+                            implementation.OriginalDefinition))
+                        {
+                            return method;
+                        }
+                    }
+                }
+            }
+
+            return implementation;
+        }
+
+        private static bool AppliesToRegularTasks(ViolationInfo violation)
+        {
+            return violation.Category switch
+            {
+                BannedApiDefinitions.ApiCategory.CriticalError or
+                BannedApiDefinitions.ApiCategory.PotentialIssue => true,
+                _ => false,
+            };
+        }
+
+        private static bool HasAttribute(INamedTypeSymbol type, INamedTypeSymbol? attributeType)
+        {
+            if (attributeType is null)
+            {
+                return false;
+            }
+
+            foreach (AttributeData attribute in type.GetAttributes())
+            {
+                if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, attributeType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
-        /// Reports a transitive violation with deduplication per task type.
+        /// Reports a transitive violation with deduplication per effective task implementation.
         /// Only the first (shortest) chain reaching each unsafe call site is reported.
         /// </summary>
         /// <remarks>
@@ -350,7 +471,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             IMethodSymbol taskMethod,
             ViolationInfo violation,
             List<string> chain,
-            HashSet<(string ApiDisplayName, Location Location)> reportedPerTaskType)
+            HashSet<(string ApiDisplayName, Location Location)> reportedPerTaskImplementation)
         {
             var taskMethodLocation = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
 
@@ -362,7 +483,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // on the call site means a suppression on one reviewed call does not hide a second, unreviewed
             // call to the same API; keying on the *effective* location means the fallback above does not
             // collapse violations that land on different task members.
-            if (!reportedPerTaskType.Add((violation.ApiDisplayName, location)))
+            if (!reportedPerTaskImplementation.Add((violation.ApiDisplayName, location)))
             {
                 return;
             }
@@ -444,7 +565,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         internal readonly struct ViolationInfo
         {
-            public string Category { get; }
+            public BannedApiDefinitions.ApiCategory Category { get; }
             public string ApiDisplayName { get; }
             public string Message { get; }
 
@@ -454,7 +575,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             /// </summary>
             public Location Location { get; }
 
-            public ViolationInfo(string category, string apiDisplayName, string message, Location location)
+            public ViolationInfo(
+                BannedApiDefinitions.ApiCategory category,
+                string apiDisplayName,
+                string message,
+                Location location)
             {
                 Category = category;
                 ApiDisplayName = apiDisplayName;

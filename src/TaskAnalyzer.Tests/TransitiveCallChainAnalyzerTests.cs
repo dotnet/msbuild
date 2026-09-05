@@ -6,7 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Testing;
 using Shouldly;
 using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
@@ -28,13 +30,15 @@ public class TransitiveCallChainAnalyzerTests
     {
         var source = $$"""
             {{usingDirective}}
+            using Microsoft.Build.Framework;
             public class TestHelper
             {
                 public static void DoWork() { {{helperBody}} }
             }
 
-            public class MyTask : Microsoft.Build.Utilities.Task
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     TestHelper.DoWork();
@@ -188,6 +192,7 @@ public class TransitiveCallChainAnalyzerTests
         var diags = await GetAllDiagnosticsAsync("""
             using System;
             using System.IO;
+            using Microsoft.Build.Framework;
             public class UnsafeHelper
             {
                 public static void DoStuff()
@@ -198,8 +203,9 @@ public class TransitiveCallChainAnalyzerTests
                 }
             }
 
-            public class MyTask : Microsoft.Build.Utilities.Task
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
+                public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
                     UnsafeHelper.DoStuff();
@@ -243,6 +249,201 @@ public class TransitiveCallChainAnalyzerTests
         msg.ShouldContain("→");
         msg.ShouldContain("A.Step1");
         msg.ShouldContain("B.Step2");
+    }
+
+    [Fact]
+    public async Task Scope_Default_PlainTask_DoesNotGetTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Scope_Default_PlainTask_GetsAlwaysApplicableTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            public static class Helper
+            {
+                public static void Run() => Environment.Exit(1);
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_PlainTask_GetsPotentialIssueTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System.Reflection;
+            public static class Helper
+            {
+                public static void Run() => Assembly.LoadFrom("helper.dll");
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_MultiThreadableTask_GetsTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_MultiThreadableAttribute_OptsTaskIntoTransitiveAnalysis()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            [MSBuildMultiThreadableTask]
+            public class MtTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_AnalyzedAttribute_OptsTaskIntoTransitiveAnalysis()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            [MSBuildMultiThreadableTaskAnalyzed]
+            public class MtTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_All_PlainTask_GetsTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithScopeAsync("""
+            using System;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """, SharedAnalyzerHelpers.ScopeAll);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_GlobalConfig_All_AnalyzesPlainTaskTransitively()
+    {
+        var test = new CSharpAnalyzerTest<TransitiveCallChainAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public static class Helper
+                {
+                    public static void Run() => {|#0:Environment.GetEnvironmentVariable("KEY")|};
+                }
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool {|#1:Execute|}()
+                    {
+                        Helper.Run();
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", """
+            is_global = true
+            msbuild_task_analyzer.scope = all
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Warning)
+                .WithLocation(0)
+                .WithLocation(1));
+
+        await test.RunAsync();
     }
 
     [Fact]
@@ -429,5 +630,137 @@ public class TransitiveCallChainAnalyzerTests
         var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
         transitive.Length.ShouldBe(2);
         transitive.Select(d => d.Location.SourceSpan).Distinct().Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Scope_Default_PlainTask_DoesNotGetFilePathTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System.IO;
+            public static class Helper
+            {
+                public static bool Run() => File.Exists("relative.txt");
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => Helper.Run();
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Scope_All_PlainTask_GetsFilePathTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithScopeAsync("""
+            using System.IO;
+            public static class Helper
+            {
+                public static bool Run() => File.Exists("relative.txt");
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => Helper.Run();
+            }
+            """, SharedAnalyzerHelpers.ScopeAll);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_MixedTaskTypes_GateAppliesPerTaskType()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run()
+                {
+                    Environment.Exit(1);
+                    Environment.GetEnvironmentVariable("KEY");
+                }
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.Count(d => d.GetMessage().Contains("PlainTask")).ShouldBe(1);
+        transitive.Count(d => d.GetMessage().Contains("MtTask")).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Scope_Default_MultiThreadableTaskWithInheritedExecute_GetsTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public abstract class BaseTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            [MSBuildMultiThreadableTask]
+            public sealed class MtTask : BaseTask
+            {
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_MultiThreadableTasksSharingInheritedExecute_ReportOnce()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public abstract class BaseTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            [MSBuildMultiThreadableTask]
+            public sealed class FirstTask : BaseTask
+            {
+            }
+            [MSBuildMultiThreadableTask]
+            public sealed class SecondTask : BaseTask
+            {
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
     }
 }
