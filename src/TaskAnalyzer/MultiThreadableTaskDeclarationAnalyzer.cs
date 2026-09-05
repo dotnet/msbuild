@@ -46,10 +46,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             INamedTypeSymbol? taskEnvironmentType =
                 context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
-            INamedTypeSymbol? attributeType =
-                context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
 
-            if (taskType is null || multiThreadableTaskType is null || taskEnvironmentType is null || attributeType is null)
+            if (taskType is null || multiThreadableTaskType is null || taskEnvironmentType is null)
             {
                 return;
             }
@@ -59,8 +57,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     symbolContext,
                     taskType,
                     multiThreadableTaskType,
-                    taskEnvironmentType,
-                    attributeType),
+                    taskEnvironmentType),
                 SymbolKind.NamedType);
         }
 
@@ -68,8 +65,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             SymbolAnalysisContext context,
             INamedTypeSymbol taskType,
             INamedTypeSymbol multiThreadableTaskType,
-            INamedTypeSymbol taskEnvironmentType,
-            INamedTypeSymbol attributeType)
+            INamedTypeSymbol taskEnvironmentType)
         {
             var type = (INamedTypeSymbol)context.Symbol;
 
@@ -78,7 +74,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            bool hasAttribute = HasMultiThreadableTaskAttribute(type, attributeType);
+            bool hasAttribute = SharedAnalyzerHelpers.HasMultiThreadableTaskAttribute(type);
 
             if (!SharedAnalyzerHelpers.ImplementsInterface(type, taskType))
             {
@@ -147,20 +143,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             foreach (INamedTypeSymbol declaredInterface in type.Interfaces)
             {
                 if (SymbolEqualityComparer.Default.Equals(declaredInterface, multiThreadableTaskType))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool HasMultiThreadableTaskAttribute(INamedTypeSymbol type, INamedTypeSymbol attributeType)
-        {
-            // Matches TaskRouter, which reads the attribute with inherit: false.
-            foreach (AttributeData attribute in type.GetAttributes())
-            {
-                if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, attributeType))
                 {
                     return true;
                 }

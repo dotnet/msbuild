@@ -16,3 +16,4 @@ MSBuildTask0011 | MSBuild.TaskAuthoring | Info | Prefer constructor injection fo
 MSBuildTask0012 | MSBuild.TaskAuthoring | Warning | TaskEnvironment property is never assigned by MSBuild because the task does not implement IMultiThreadableTask
 MSBuildTask0013 | MSBuild.TaskAuthoring | Info | Task declares IMultiThreadableTask but is not marked with [MSBuildMultiThreadableTask] (disabled by default)
 MSBuildTask0014 | MSBuild.TaskAuthoring | Warning | [MSBuildMultiThreadableTask] applied to a type MSBuild never routes as a task -- not an ITask, or an abstract task whose attribute no subclass inherits -- where it has no effect
+MSBuildTask0015 | MSBuild.TaskAuthoring | Warning | Concrete task type does not declare multithreading support; reports only when opted into with `msbuild_task_analyzer.scope = require_multithreadable` or an explicit severity (code fix available)

@@ -46,7 +46,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             public WellKnownTaskTypes(
                 INamedTypeSymbol iTask,
-                INamedTypeSymbol multiThreadableTaskAttribute,
                 INamedTypeSymbol? absolutePath,
                 INamedTypeSymbol? taskEnvironment,
                 INamedTypeSymbol? iTaskItem,
@@ -55,7 +54,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 INamedTypeSymbol? directoryInfo)
             {
                 ITask = iTask;
-                MultiThreadableTaskAttribute = multiThreadableTaskAttribute;
                 AbsolutePath = absolutePath;
                 TaskEnvironment = taskEnvironment;
                 ITaskItem = iTaskItem;
@@ -65,7 +63,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             public INamedTypeSymbol ITask { get; }
-            public INamedTypeSymbol MultiThreadableTaskAttribute { get; }
             public INamedTypeSymbol? AbsolutePath { get; }
             public INamedTypeSymbol? TaskEnvironment { get; }
             public INamedTypeSymbol? ITaskItem { get; }
@@ -89,7 +86,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             var iTaskType = types.ITask;
-            var multiThreadableTaskAttributeType = types.MultiThreadableTaskAttribute;
             var absolutePathType = types.AbsolutePath;
             var taskEnvironmentType = types.TaskEnvironment;
             var iTaskItemType = types.ITaskItem;
@@ -102,7 +98,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var namedType = (INamedTypeSymbol)symbolStartContext.Symbol;
 
                 // Only multithreadable tasks (ITask + directly-applied [MSBuildMultiThreadableTask]) are analyzed.
-                if (!IsMultiThreadableTaskType(namedType, iTaskType, multiThreadableTaskAttributeType))
+                if (!IsMultiThreadableTaskType(namedType, iTaskType))
                 {
                     return;
                 }
@@ -270,16 +266,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // The task must additionally opt into multithreaded support by applying the
             // [MSBuildMultiThreadableTask] attribute. Implementing IMultiThreadableTask is not sufficient: the
             // attribute is Inherited = false, so a task that merely derives from a base class implementing the
-            // interface has not itself opted into multithreaded support.
-            var multiThreadableTaskAttributeType = compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
-            if (multiThreadableTaskAttributeType is null)
-            {
-                return false;
-            }
-
+            // interface has not itself opted into multithreaded support. The attribute is matched by name rather
+            // than resolved as a symbol, mirroring the engine -- see SharedAnalyzerHelpers.HasMultiThreadableTaskAttribute.
             types = new WellKnownTaskTypes(
                 iTaskType,
-                multiThreadableTaskAttributeType,
                 compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName),
                 compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName),
                 compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName),
@@ -297,12 +287,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// </summary>
         private static bool IsMultiThreadableTaskType(
             INamedTypeSymbol namedType,
-            INamedTypeSymbol iTaskType,
-            INamedTypeSymbol multiThreadableTaskAttributeType)
+            INamedTypeSymbol iTaskType)
         {
             return ImplementsInterface(namedType, iTaskType) &&
-                namedType.GetAttributes().Any(
-                    attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, multiThreadableTaskAttributeType));
+                SharedAnalyzerHelpers.HasMultiThreadableTaskAttribute(namedType);
         }
 
         /// <summary>

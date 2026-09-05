@@ -18,26 +18,46 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     {
         /// <summary>
         /// The .editorconfig key controlling analysis scope.
-        /// Values: "all" (default) | "multithreadable_only"
+        /// Values: "all" (default) | "multithreadable_only" | "require_multithreadable"
         /// </summary>
         internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
         internal const string ScopeAll = "all";
         internal const string ScopeMultiThreadableOnly = "multithreadable_only";
 
         /// <summary>
+        /// Analyze every task type, and additionally require each concrete task type to declare
+        /// multithreading support (MSBuildTask0015). Repositories that have finished migrating their
+        /// tasks set this so a newly added task cannot silently regress the migration.
+        /// </summary>
+        internal const string ScopeRequireMultiThreadable = "require_multithreadable";
+
+        /// <summary>
         /// Reads the scope option from the analyzer config options provider.
         /// Returns true if all tasks should be analyzed; false if only multithreadable tasks.
         /// </summary>
-        internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
+        internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider) =>
+            !string.Equals(ReadScopeOption(optionsProvider), ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Returns true when the scope option requires every concrete task type to declare multithreading support.
+        /// </summary>
+        internal static bool ReadRequireMultiThreadableOption(AnalyzerConfigOptionsProvider optionsProvider) =>
+            string.Equals(ReadScopeOption(optionsProvider), ScopeRequireMultiThreadable, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Reads the raw scope option value, or null when it is not configured.
+        /// </summary>
+        private static string? ReadScopeOption(AnalyzerConfigOptionsProvider optionsProvider)
         {
             if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
                 optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
             {
-                return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
+                return scopeValue;
             }
 
-            return true; // default: analyze all tasks
+            return null;
         }
+
         /// <summary>
         /// Represents a resolved banned API entry for O(1) lookup during analysis.
         /// </summary>
@@ -381,6 +401,39 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             foreach (var iface in type.AllInterfaces)
             {
                 if (SymbolEqualityComparer.Default.Equals(iface, interfaceType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true when the type directly carries <c>Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute</c>.
+        /// <para>
+        /// The attribute is matched by namespace and name rather than by symbol identity, because that is what
+        /// the engine does: <c>TaskRouter.HasMultiThreadableTaskAttribute</c> compares
+        /// <c>attr.GetType().FullName</c> and ignores the defining assembly so that a task can be marked with a
+        /// copy of the attribute declared in its own assembly -- the shim a repository uses to stay buildable
+        /// against an MSBuild that predates the attribute. Symbol identity would disagree with routing for
+        /// exactly those tasks, and <see cref="Compilation.GetTypeByMetadataName"/> returns null outright once
+        /// the shim and Microsoft.Build.Framework both contribute the name, which is the normal state during
+        /// such a migration.
+        /// </para>
+        /// <para>
+        /// <see cref="ISymbol.GetAttributes"/> returns only directly applied attributes, matching the
+        /// attribute's <c>Inherited = false</c> semantics and TaskRouter's <c>inherit: false</c> lookup.
+        /// </para>
+        /// </summary>
+        internal static bool HasMultiThreadableTaskAttribute(INamedTypeSymbol type)
+        {
+            foreach (AttributeData attribute in type.GetAttributes())
+            {
+                INamedTypeSymbol? attributeClass = attribute.AttributeClass;
+                if (attributeClass is not null &&
+                    string.Equals(attributeClass.Name, WellKnownTypeNames.MultiThreadableTaskAttributeName, StringComparison.Ordinal) &&
+                    string.Equals(attributeClass.ContainingNamespace?.ToDisplayString(), WellKnownTypeNames.FrameworkNamespace, StringComparison.Ordinal))
                 {
                     return true;
                 }
