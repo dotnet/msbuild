@@ -629,6 +629,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 var metadata = item switch
                 {
+                    ITaskItem taskItem => taskItem.EnumerateMetadataForLogging(),
                     IMetadataContainer metadataContainer => metadataContainer.EnumerateMetadata(),
                     IItem<ProjectMetadata> iitem => iitem.Metadata?.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue)),
                     _ => null
