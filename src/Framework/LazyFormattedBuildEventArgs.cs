@@ -101,6 +101,22 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// Formats the message without replacing the stored arguments.
+        /// </summary>
+        internal string? FormatMessageWithoutMutation()
+        {
+            object? argsOrMessage = argumentsOrFormattedMessage;
+            if (argsOrMessage is string formattedMessage)
+            {
+                return formattedMessage;
+            }
+
+            return argsOrMessage is object[] { Length: > 0 } arguments && base.Message is not null
+                ? FormatString(base.Message, arguments)
+                : base.Message;
+        }
+
+        /// <summary>
         /// Serializes to a stream through a binary writer.
         /// </summary>
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into.</param>

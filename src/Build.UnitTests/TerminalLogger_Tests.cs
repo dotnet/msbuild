@@ -570,6 +570,92 @@ namespace Microsoft.Build.UnitTests
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
+        [Theory]
+        [InlineData(false, LoggerVerbosity.Normal, MessageImportance.Low)]
+        [InlineData(true, LoggerVerbosity.Normal, MessageImportance.Low)]
+        [InlineData(true, LoggerVerbosity.Quiet, MessageImportance.High)]
+        public void MessageRaised_DoesNotFormatFilteredMessages(bool useRemoteNode, LoggerVerbosity verbosity, MessageImportance importance)
+        {
+            _remoteTerminalLogger.Verbosity = verbosity;
+            var message = new BuildMessageEventArgs("Message {0}", null, null, importance, DateTime.UtcNow, "argument")
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+
+            MockBuildEventSink eventSource = useRemoteNode ? _remoteNodeEventSource : _centralNodeEventSource;
+            eventSource.InvokeMessageRaised(message);
+
+            message.RawArguments.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void TerminalLogger_DoesNotMutateRenderedEvents()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Diagnostic;
+            object[] messageArguments = ["argument"];
+            object[] warningArguments = ["argument"];
+            object[] errorArguments = ["argument"];
+            var message = new BuildMessageEventArgs("Message {0}", null, null, MessageImportance.High, DateTime.UtcNow, messageArguments)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+            var warning = new BuildWarningEventArgs("", "TESTWARNING", "", 0, 0, 0, 0, "Warning {0}", "keyword", "sender", DateTime.UtcNow, warningArguments)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+            var error = new BuildErrorEventArgs("", "TESTERROR", "", 0, 0, 0, 0, "Error {0}", "keyword", "sender", DateTime.UtcNow, errorArguments)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(message);
+                _centralNodeEventSource.InvokeWarningRaised(warning);
+                _centralNodeEventSource.InvokeErrorRaised(error);
+
+                message.RawArguments.ShouldBeSameAs(messageArguments);
+                warning.RawArguments.ShouldBeSameAs(warningArguments);
+                error.RawArguments.ShouldBeSameAs(errorArguments);
+            });
+
+            string output = _outputWriter.ToString();
+            output.ShouldContain("Message argument");
+            output.ShouldContain("Warning argument");
+            output.ShouldContain("Error argument");
+        }
+
+        [Theory]
+        [InlineData("TLTESTPASSED", LoggerVerbosity.Normal)]
+        [InlineData("TLTESTSKIPPED", LoggerVerbosity.Normal)]
+        [InlineData("TLTESTFINISH", LoggerVerbosity.Normal)]
+        [InlineData("TLTESTOUTPUT", LoggerVerbosity.Quiet)]
+        [InlineData("TLTESTOUTPUT", LoggerVerbosity.Normal)]
+        public void MessageRaised_DoesNotMutateStructuredTestMessages(string extendedType, LoggerVerbosity verbosity)
+        {
+            _terminallogger.Verbosity = verbosity;
+            object[] arguments = ["argument"];
+            var message = new ExtendedBuildMessageEventArgs(extendedType, "Message {0}", null, null, MessageImportance.High, DateTime.UtcNow, arguments)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+                ExtendedMetadata = new Dictionary<string, string?>
+                {
+                    ["displayName"] = "testName",
+                    ["localizedResult"] = "result",
+                    ["total"] = "1",
+                    ["passed"] = "1",
+                    ["skipped"] = "0",
+                    ["failed"] = "0",
+                },
+            };
+
+            InvokeLoggerCallbacksForTestProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(message);
+                message.RawArguments.ShouldBeSameAs(arguments);
+            });
+        }
+
         [Fact]
         public Task PrintRestore_Failed()
         {
