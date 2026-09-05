@@ -268,6 +268,12 @@ namespace Microsoft.Build.Execution
 
         private CoordinatorClient? _coordinatorClient;
 
+        /// <summary>
+        /// The installed multi-threaded strict mode scope, or <see langword="null"/> when strict mode is not active
+        /// for the build in progress.
+        /// </summary>
+        private MultiThreadedStrictModeScope? _multiThreadedStrictModeScope;
+
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
 #if DEBUG
@@ -750,6 +756,27 @@ namespace Microsoft.Build.Execution
                     _workQueue = new ActionBlock<Action>(action => ProcessWorkQueue(action));
                 }
 
+                // Enter strict mode last: everything above (loggers in particular) still resolves paths against
+                // the directory the build was launched from, and only project execution should see the sentinel.
+                // MSBUILDMULTITHREADEDSTRICT=1 is equivalent to -mt:strict for hosts that build through the API.
+                if (_buildParameters.MultiThreaded
+                    && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict))
+                {
+                    // The output cache is serialized during EndBuild, while the process is still in the sentinel
+                    // directory, so a host that supplied a relative path has to be resolved here - the CLI does
+                    // the same for the entry project. Input caches were already read by InitializeCaches above.
+                    if (_buildParameters.UsesOutputCache())
+                    {
+                        _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(_buildParameters.OutputResultsCacheFile);
+                    }
+
+                    _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.TryEnter(loggingService);
+                }
+
+                // The flag drives per-task verification and the suppression of the legacy per-project current
+                // directory reset, so it must reflect what actually happened, not what was asked for.
+                _buildParameters.MultiThreadedStrict = _multiThreadedStrictModeScope is not null;
+
                 _buildManagerState = BuildManagerState.Building;
 
                 _noActiveSubmissionsEvent!.Set();
@@ -1193,6 +1220,23 @@ namespace Microsoft.Build.Execution
             }
             finally
             {
+                // Restore the process current directory first, and outside any code that can throw: if this is
+                // skipped, the process stays pinned to the sentinel directory for its whole remaining lifetime,
+                // which in the MSBuild Server and Visual Studio outlives this build by a long way. An exception
+                // here must not skip the rest of shutdown either, or the BuildManager is left unusable.
+                try
+                {
+                    _multiThreadedStrictModeScope?.Exit();
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                }
+                finally
+                {
+                    _multiThreadedStrictModeScope = null;
+                    _buildParameters!.MultiThreadedStrict = false;
+                }
+
                 try
                 {
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;

@@ -856,6 +856,27 @@ namespace Microsoft.Build.BackEnd
                     taskException = ex;
                 }
 
+                // Multi-threaded strict mode: a task that moved the process current directory, or that wrote
+                // through a relative path it never resolved, has corrupted state shared by every project building
+                // in this process. Report it against the task that just ran and fail that task, so the defect
+                // surfaces deterministically instead of as load-dependent flakiness in some later build.
+                // Gated on this build's own parameters: another BuildManager in the same process may have opted
+                // in without this one doing so, and cancellation produces enough noise on its own.
+                bool strictModeViolationReported = false;
+
+                if (_componentHost.BuildParameters.MultiThreadedStrict
+                    && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)
+                    && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope strictModeScope
+                    && strictModeScope.VerifyAndReportProcessState(
+                        taskLoggingContext,
+                        _taskNode.Name,
+                        _targetChildInstance.Location,
+                        convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue))
+                {
+                    strictModeViolationReported = true;
+                    taskResult = false;
+                }
+
                 if (taskException == null)
                 {
                     taskReturned = true;
@@ -982,6 +1003,7 @@ namespace Microsoft.Build.BackEnd
                 if (taskReturned // if the task returned
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
+                    && !strictModeViolationReported // and it wasn't the engine that failed it for a strict-mode violation
                     && (be is TaskHost th ? th.BuildRequestsSucceeded : false)
                     && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)) // and it wasn't cancelled
                 {
@@ -1062,11 +1084,16 @@ namespace Microsoft.Build.BackEnd
 
             var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
 
+            // A relative path in a project file means "relative to that project", never "relative to wherever the
+            // process happens to be". Anchoring these on the project directory is required for correctness in
+            // multithreaded mode, where the process current directory is not the project directory.
+            string projectDirectory = _buildRequestEntry.ProjectRootDirectory;
+
             var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, FileUtilities.PathComparer);
 
             foreach (var projectReferenceItem in projectReferenceItems)
             {
-                declaredProjects.Add(FileUtilities.NormalizePath(projectReferenceItem.EvaluatedInclude));
+                declaredProjects.Add(NormalizeProjectPath(projectReferenceItem.EvaluatedInclude, projectDirectory));
             }
 
             // allow a project to msbuild itself
@@ -1076,7 +1103,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (var msbuildProject in msbuildTask.Projects)
             {
-                var normalizedMSBuildProject = FileUtilities.NormalizePath(msbuildProject.ItemSpec);
+                var normalizedMSBuildProject = NormalizeProjectPath(msbuildProject.ItemSpec, projectDirectory);
 
                 if (
                     !(declaredProjects.Contains(normalizedMSBuildProject)
@@ -1089,6 +1116,15 @@ namespace Microsoft.Build.BackEnd
 
             return undeclaredProjects;
         }
+
+        /// <summary>
+        /// Resolves a project path the way MSBuild resolves it when it actually builds it: relative paths are
+        /// anchored on the referencing project's directory, not on the process current directory.
+        /// </summary>
+        private static string NormalizeProjectPath(string path, string projectDirectory)
+            => System.IO.Path.IsPathRooted(path)
+                ? FileUtilities.NormalizePath(path)
+                : FileUtilities.NormalizePath(projectDirectory, path);
 
         /// <summary>
         /// Gathers task outputs in two ways:

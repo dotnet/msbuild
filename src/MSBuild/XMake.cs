@@ -909,6 +909,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
+                bool multiThreadedStrict = false;
                 bool enableNodeReuse = true;
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
@@ -969,6 +970,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref cpuCount,
                                             ref multiThreaded,
+                                            ref multiThreadedStrict,
                                             ref enableNodeReuse,
                                             ref preprocessWriter,
                                             ref targetsWriter,
@@ -1119,6 +1121,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                     cpuCount,
                                     multiThreaded,
+                                    multiThreadedStrict,
                                     enableNodeReuse,
                                     preprocessWriter,
                                     targetsWriter,
@@ -1579,6 +1582,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             int cpuCount,
             bool multiThreaded,
+            bool multiThreadedStrict,
             bool enableNodeReuse,
             TextWriter preprocessWriter,
             TextWriter targetsWriter,
@@ -1608,6 +1612,19 @@ namespace Microsoft.Build.CommandLine
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
+            }
+
+            if (multiThreadedStrict)
+            {
+                // Strict mode moves the process current directory to a sentinel directory for the duration of the
+                // build, so every path the engine would otherwise resolve against it has to be made absolute here,
+                // while the process is still sitting in the directory the user launched from.
+                projectFile = FileUtilities.NormalizePath(projectFile);
+
+                if (!string.IsNullOrWhiteSpace(outputResultsCache))
+                {
+                    outputResultsCache = FileUtilities.NormalizePath(outputResultsCache);
+                }
             }
 
             bool success = true;
@@ -1789,6 +1806,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
                     parameters.MaxNodeCount = cpuCount;
                     parameters.MultiThreaded = multiThreaded;
+                    parameters.MultiThreadedStrict = multiThreadedStrict;
                     parameters.Loggers = projectCollection.Loggers;
                     parameters.ForwardingLoggers = remoteLoggerRecords;
                     parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
@@ -2421,6 +2439,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref int cpuCount,
             ref bool multiThreaded,
+            ref bool multiThreadedStrict,
             ref bool enableNodeReuse,
             ref TextWriter preprocessWriter,
             ref TextWriter targetsWriter,
@@ -2580,6 +2599,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref cpuCount,
                                                            ref multiThreaded,
+                                                           ref multiThreadedStrict,
                                                            ref enableNodeReuse,
                                                            ref preprocessWriter,
                                                            ref targetsWriter,
@@ -2648,6 +2668,7 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out if we should use in-proc nodes for parallel build, effectively running the build multi-threaded
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
+                    multiThreadedStrict = IsMultiThreadedStrictEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
@@ -2771,13 +2792,58 @@ namespace Microsoft.Build.CommandLine
 
             if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded))
             {
-                return ProcessBooleanSwitch(
-                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded],
-                    defaultValue: true,
-                    resourceName: "InvalidMultiThreadedValue");
+                return ProcessMultiThreadedSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded]).Enabled;
             }
 
             return Traits.Instance.EnableMultiThreaded;
+        }
+
+        /// <summary>
+        /// Determines whether the multi-threaded strict diagnostic mode is requested. Strict mode only applies to
+        /// builds that actually run multi-threaded, so it implies nothing on its own.
+        /// </summary>
+        internal static bool IsMultiThreadedStrictEnabled(CommandLineSwitches commandLineSwitches)
+        {
+            if (!IsMultiThreadedEnabled(commandLineSwitches))
+            {
+                return false;
+            }
+
+            // MSBUILDMULTITHREADEDSTRICT is authoritative for any multi-threaded build, in the same way
+            // MSBUILDFORCEMULTITHREADED is. The command line cannot opt back out of it because the parser rewrites
+            // a bare -mt into -mt:true, so "-mt means not strict" would silently defeat the environment variable.
+            if (Traits.Instance.MultiThreadedStrict)
+            {
+                return true;
+            }
+
+            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded)
+                && ProcessMultiThreadedSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded]).Strict;
+        }
+
+        /// <summary>
+        /// Parses the value of the -multiThreaded / -mt switch, which accepts <c>true</c>, <c>false</c> or
+        /// <c>strict</c>. <c>strict</c> implies <c>true</c>.
+        /// </summary>
+        /// <remarks>
+        /// A bare <c>-mt</c> never reaches here: <see cref="CommandLineParser"/> rewrites it to <c>-mt:true</c>.
+        /// </remarks>
+        private static (bool Enabled, bool Strict) ProcessMultiThreadedSwitch(string[] parameters)
+        {
+            if (parameters.Length == 0)
+            {
+                return (true, false);
+            }
+
+            // Only the last occurrence wins, matching ProcessBooleanSwitch.
+            string parameter = parameters[parameters.Length - 1];
+
+            if (string.Equals(parameter, "strict", StringComparison.OrdinalIgnoreCase))
+            {
+                return (true, true);
+            }
+
+            return (ProcessBooleanSwitch(parameters, defaultValue: true, resourceName: "InvalidMultiThreadedValue"), false);
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)

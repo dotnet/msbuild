@@ -654,6 +654,36 @@
         <target state="translated">已生成元项目“{0}”。</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>Another build in this process has already enabled it.</source>
+        <target state="new">Another build in this process has already enabled it.</target>
+        <note>This is substituted into the MultiThreadedStrictModeCouldNotBeEnabled message as the reason strict mode could not be enabled.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCouldNotBeEnabled">
+        <source>Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</source>
+        <target state="new">Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1} The build continues with the current directory unchanged, so unresolved relative paths will not be detected.</target>
+        <note>{0} is the full path of the sentinel directory. {1} is a sentence describing why it could not be enabled.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode detected that the process current directory was changed to "{1}" while the "{0}" task was running. In multi-threaded mode all projects building in this process share the current directory, so changing it breaks relative path resolution for every other project. Resolve paths through the task's TaskEnvironment instead of changing the current directory. The current directory has been reset to "{2}". Because tasks run concurrently, "{0}" may not be the task that changed it.</source>
+        <target state="new">MSB4286: Multi-threaded strict mode detected that the process current directory was changed to "{1}" while the "{0}" task was running. In multi-threaded mode all projects building in this process share the current directory, so changing it breaks relative path resolution for every other project. Resolve paths through the task's TaskEnvironment instead of changing the current directory. The current directory has been reset to "{2}". Because tasks run concurrently, "{0}" may not be the task that changed it.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the name of the task that was running. {1} is the full path of the unexpected current directory. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryNotChanged">
+        <source>The process current directory could not be changed and is still "{0}".</source>
+        <target state="new">The process current directory could not be changed and is still "{0}".</target>
+        <note>This is substituted into the MultiThreadedStrictModeCouldNotBeEnabled message as the reason strict mode could not be enabled. {0} is the full path of the unchanged current directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. The build runs with the process current directory set to the empty sentinel directory "{0}", so any relative path that is not resolved against the project directory will fail.</source>
+        <target state="new">Multi-threaded strict mode is enabled. The build runs with the process current directory set to the empty sentinel directory "{0}", so any relative path that is not resolved against the project directory will fail.</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode detected that "{1}" was created in the sentinel current directory "{2}" while the "{0}" task was running. A relative path was resolved against the process current directory instead of the project directory, which produces a different location for every project in a multi-threaded build. Make the path absolute through the task's TaskEnvironment. The entry is reported once and removed. Because tasks, loggers and the host all share this process, the writer may be a concurrently running task, a logger, or host code rather than "{0}".</source>
+        <target state="new">MSB4287: Multi-threaded strict mode detected that "{1}" was created in the sentinel current directory "{2}" while the "{0}" task was running. A relative path was resolved against the process current directory instead of the project directory, which produces a different location for every project in a multi-threaded build. Make the path absolute through the task's TaskEnvironment. The entry is reported once and removed. Because tasks, loggers and the host all share this process, the writer may be a concurrently running task, a logger, or host code rather than "{0}".</target>
+        <note>{StrBegin="MSB4287: "}{0} is the name of the task that was running. {1} is a comma-separated list of file and directory names. {2} is the full path of the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
