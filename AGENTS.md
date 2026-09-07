@@ -1,253 +1,52 @@
-# Agent Instructions
+# Working in MSBuild
 
-Instructions for GitHub Copilot and other AI coding agents working with the MSBuild repository.
+Preserve compatibility across MSBuild's SDK, Visual Studio, and third-party consumers. Measure performance-sensitive changes.
 
-## Repository Overview
+## Establish the task
 
-**MSBuild** is the Microsoft Build Engine - performance-critical infrastructure for .NET and Visual Studio builds. This repository contains the code for the MSBuild build engine, including its public C# API, its internal implementation of the MSBuild programming language, and core targets and tasks used for builds.
+1. Identify the requested outcome and authority: explanation/audit/review, local edits, or an external action. A review is read-only unless changes are requested; it does not authorize posting, merging, resolving threads, or changing CI.
+2. For a PR, establish repository, base, head, and actual diff. For repros/benchmarks, identify binaries, SDK, host, configuration, and mode. Recheck after a branch/base change.
+3. Inspect the worktree before editing. Preserve unrelated changes. Do not commit, push, or create a PR unless requested.
+4. Check claims against source/configuration at the relevant revision. Old specs, session summaries, and memory can be stale. Resolve contradictions against implementation or report them.
 
-### Key Components
-- **Microsoft.Build**: Core MSBuild engine and public API
-- **Microsoft.Build.Framework**: Framework interfaces and base types
-- **Microsoft.Build.Tasks**: Built-in MSBuild tasks
-- **Microsoft.Build.Utilities**: Utility classes for task authors
-- **MSBuild CLI**: Command-line tool for invoking builds
+## Load context progressively
 
-### Technology Stack
-- .NET 10.0 and .NET Framework 4.7.2
-- C# 14 features (especially collection expressions)
-- xUnit with Shouldly for testing
-- Multi-platform support (Windows, Linux, macOS)
+- Start with this file and the instructions matching the affected paths in [.github/instructions](.github/instructions). Read nested `AGENTS.md` files before changing their subtree.
+- Select the skill whose **description matches the task**, not every skill mentioning the same technology. Read its entry point, then only the reference needed for the current question. Do not recursively preload links.
+- Use the routing and authoring guide in [Agent context](documentation/agent-context.md) when the right workflow is unclear or when changing instructions, skills, agents, or prompts.
+- Start with a focused source lookup; expand to callers, consumers, history, or external docs when evidence requires it.
+- Discover available tools before using them. Plugin availability is session-specific; do not assume a named plugin, agent, or MCP operation is installed. Report missing capabilities and use a supported read-only alternative where possible.
 
-## General
+## Repository invariants
 
-* Performance is the top priority - minimize allocations, avoid LINQ in hot paths, use efficient algorithms.
-* Always use the latest C# features, currently C# 14, especially collection expressions (`[]` over `new Type[]`).
-* Match the style of surrounding code when making edits, but modernize aggressively for substantial changes.
+- Follow [.editorconfig](.editorconfig) and surrounding style. Use supported modern C# features, including collection expressions, without unrelated modernization.
+- New files use nullable reference types. In existing `#nullable disable` files, preserve that convention unless nullable migration is part of the task. Use `is null` / `is not null`.
+- Use `MSBuildNameIgnoreCaseComparer` for MSBuild names. Choose comparisons for other strings and paths from their actual contract, not a blanket culture/OS rule.
+- Avoid unnecessary allocations and repeated I/O on hot paths. Choose collections and APIs for the measured access pattern and supported target frameworks.
+- Preserve existing build semantics. New warnings can break `WarnAsError` builds. Use the compatibility skill to assess opt-in behavior and whether a ChangeWave is warranted; neither every bug fix nor every new diagnostic has the same policy.
+- Reuse existing helpers and resource-based diagnostics. Do not swallow failures, add broad catches, or replace a failure with a success-shaped result.
+- Tests use xUnit and Shouldly. Match the affected behavior with meaningful assertions, including the regression scenario; do not weaken isolation to make tests faster.
 
-## Code Review Instructions
+## Build and test deliberately
 
-Official builds treat all warnings as errors, so do not introduce new warnings.
+- Read [global.json](global.json), [Directory.Build.props](Directory.Build.props), and [src/Directory.Build.props](src/Directory.Build.props) for the SDK, runner, TFMs, and language configuration. Do not copy version numbers from these instructions or use an arbitrary installed SDK.
+- For a scoped build, use `dotnet msbuild <project> -v:q` with the correct SDK and restored prerequisites. For repository setup or a justified full build, use `.\build.cmd -v quiet` on Windows or `./build.sh -v quiet` on Unix.
+- Use [running-unit-tests](.github/skills/running-unit-tests/SKILL.md) before choosing test commands, and [use-bootstrap-msbuild](.github/skills/use-bootstrap-msbuild/SKILL.md) when proving behavior in locally built MSBuild.
+- Start with the smallest existing validation covering the change. Escalate for uncovered consumers, TFMs, or integration boundaries, not because every task must run a full build. Documentation-only changes need link/content checks, not a product rebuild.
+- Do not redirect MSBuild output to a file. Use a binary logger or `-flp:"v=q;LogFile=ErrorsAndWarnings.log"` when a log is needed. Diagnose the **first** relevant errors.
+- Do not manually edit generated `artifacts` or `.dotnet` contents. Do not change `global.json` or `NuGet.config` without an explicit request.
+- Run independent builds in distinct output/worktree locations. Terminate only processes positively identified as belonging to the task, by PID; never kill all processes with a shared name.
 
-### Performance Considerations
+## Finish with evidence, not repetition
 
-When reviewing pull requests:
+- A test passing is not proof that it exercises the changed code. For a regression claim, establish the failing baseline and successful fixed behavior under the same conditions when feasible.
+- Distinguish measured results, source-derived conclusions, and unverified hypotheses. A clean review or green retry is not proof that no edge cases remain.
+- Iterate for a finding, failed check, or uncovered requirement. Do not default to fixed review loops, per-dimension agent swarms, or model votes instead of evidence.
+- Keep the final handoff concise and matched to its audience. Preserve useful implementation guidance when shortening public-facing documentation.
+- Update related documentation at its authoring source, not an automation-generated mirror. Keep durable contributor-wide guidance in its owning context layer; do not append one-off session fixes or machine state to this file.
 
-* **Flag any unnecessary allocations** in hot paths
-* **Flag LINQ usage** in performance-critical code paths
-* **Check for proper use of `Span<T>`** and `ReadOnlySpan<T>` for string parsing
-* **Ensure immutable collections** use the correct type (`ImmutableArray<T>` and `FrozenDictionary<TKey, TValue>` for read-heavy, `ImmutableList<T>` for incremental building)
+## Ownership boundaries
 
-### NuGet Feed Configuration
-
-When reviewing pull requests:
-
-* **Flag any changes to NuGet.config** that add external package sources without justification
-* Package sources should use approved internal feeds when possible
-
-## Formatting
-
-* Apply code-formatting style defined in `.editorconfig`.
-* Prefer file-scoped namespace declarations and single-line using directives.
-* Insert a newline before the opening curly brace of any code block.
-* Use pattern matching and switch expressions wherever possible.
-* Use `nameof` instead of string literals when referring to member names.
-
-### Nullable Reference Types
-
-* **New files**: Always use nullable reference types (do NOT add `#nullable disable`)
-* **Existing files with `#nullable disable`**: Match the existing style; don't add nullable annotations (`?`) to types
-* **Existing files with nullable enabled**: Use proper nullable annotations
-* Always use `is null` or `is not null` instead of `== null` or `!= null`
-
-## Performance Best Practices
-
-### Range Pattern Matching
-
-```csharp
-// GOOD: Clear and efficient
-return errorNumber switch
-{
-    >= 3001 and <= 3999 => Category.Tasks,
-    >= 4001 and <= 4099 => Category.General,
-    >= 4100 and <= 4199 => Category.Evaluation,
-    _ => Category.Other
-};
-```
-
-### String Handling
-
-* Use `MSBuildNameIgnoreCaseComparer` for case-insensitive comparisons of MSBuild names; use `StringComparer.OrdinalIgnoreCase` only for non-MSBuild string comparisons
-* Use `char.ToUpperInvariant()` for single-character comparisons
-* Use `ReadOnlySpan<char>` and `Slice()` to avoid string allocations
-* Use `int.TryParse(span, out var result)` on .NET Core+ for allocation-free parsing
-
-### Inlining Hot Paths
-
-```csharp
-[MethodImpl(MethodImplOptions.AggressiveInlining)]
-private static bool IsCompilerPrefix(string value) => ...
-```
-
-### Immutable Collections
-
-**Build once, read many times** (most common in MSBuild):
-```csharp
-ImmutableArray<string> items = source.Select(x => x.Name).ToImmutableArray();
-FrozenDictionary<string, int> lookup = pairs.ToFrozenDictionary(x => x.Key, x => x.Value);
-```
-
-**Build incrementally over time**:
-```csharp
-ImmutableList<string> items = ...;  // Use when adding items one by one
-ImmutableDictionary<string, int> lookup = ...;
-```
-
-## Building
-
-NEVER pipe MSBuild output to a file. If you want a list of errors, add `-flp:"v=q;LogFile=ErrorsAndWarnings.log"` to the arguments.
-
-When considering a subset of build errors, always look at the BEGINNING of the set, not the end.
-
-## Individual projects
-
-Build individual projects with `dotnet msbuild {path/to/project.csproj} -v:q`.
-
-### Whole-repo Build Commands
-
-| Platform | Command | Timeout |
-|----------|---------|---------|
-| Windows | `.\build.cmd -v quiet` | 300+ seconds (~2-3 minutes) |
-| macOS/Linux | `./build.sh -v quiet` | 300+ seconds (~2-3 minutes) |
-
-### Bootstrap Environment Setup
-
-After building the whole repo, to use the just-built MSBuild to build things use the bootstrap environment (described in [`skills/use-bootstrap-msbuild](.github/skills/use-bootstrap-msbuild/SKILL.md)).
-
-### Build Troubleshooting
-
-* If build fails with "Could not resolve SDK", run the bootstrap environment script
-* Verify `dotnet --version` shows the preview/internal version
-* Use repository sample projects for testing, not external projects
-* Build artifacts go to `./artifacts/` directory
-
-### Running Tests
-
-**Windows:**
-```cmd
-# Full test suite (~9 minutes) - NEVER CANCEL
-.\build.cmd -test
-
-# Individual test project (recommended):
-dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
-```
-
-**macOS/Linux:**
-```bash
-# Full test suite (~9 minutes) - NEVER CANCEL
-./build.sh --test
-
-# Individual test project (recommended):
-dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
-```
-
-You can run a single unit test with `-- --filter-method "*{methodname}*"`, for example `dotnet test src/Framework.UnitTests/ -- --filter-method "*ExerciseBuildEventContext*"`.
-
-### Test Verification
-
-* **Individual Test Project**: ~10-60 seconds per project
-* **Full Test Suite**: ~9 minutes
-
-## Project Layout and Architecture
-
-### Directory Structure
-
-```
-src/
-├── Build/                    # Core MSBuild engine (Microsoft.Build)
-├── Build.UnitTests/          # Unit tests for core engine
-├── MSBuild/                  # MSBuild command-line tool
-├── Framework/                # MSBuild Framework (Microsoft.Build.Framework)
-├── Framework.UnitTests/      # Unit tests for framework
-├── Tasks/                    # Built-in MSBuild tasks (Microsoft.Build.Tasks)
-├── Tasks.UnitTests/          # Unit tests for tasks
-├── Utilities/                # MSBuild utilities (Microsoft.Build.Utilities)
-├── Utilities.UnitTests/      # Unit tests for utilities
-├── Shared/                   # Shared code across assemblies
-└── Samples/                  # Sample projects and extensions
-
-artifacts/
-├── bin/                      # Built binaries
-│   └── bootstrap/
-│       └── core/
-│           └── MSBuild.dll   # Built MSBuild executable
-├── sdk-build-env.sh          # Bootstrap script (Linux/macOS)
-├── msbuild-build-env.bat     # Bootstrap script (Windows)
-└── packages/                 # Built NuGet packages
-
-documentation/
-├── wiki/                     # Developer documentation
-├── specs/                    # Technical specifications
-└── *.md                      # Various documentation files
-```
-
-### Key Configuration Files
-
-* **`global.json`**: Pins .NET SDK version - never modify without explicit request
-* **`NuGet.config`**: Package source configuration - never modify without explicit request
-* **`.editorconfig`**: Code formatting rules
-* **`Directory.Build.props`**: Shared MSBuild properties across all projects
-* **`Directory.Packages.props`**: Centralized package version management
-* **`MSBuild.slnx`**: Main solution file
-
-## Validation Checklist
-
-Before completing any change:
-
-1. ✅ Full build completes successfully (`.\build.cmd` or `./build.sh`)
-2. ✅ Bootstrap environment activates correctly (`dotnet --version` shows preview)
-3. ✅ Sample project builds: `dotnet build src/Samples/Dependency/Dependency.csproj`
-4. ✅ Relevant unit tests pass
-5. ✅ `dotnet artifacts/bin/bootstrap/core/MSBuild.dll --help` works
-
-## Do NOT Modify
-
-* `artifacts/` directory contents - Generated during build
-* `.dotnet/` directory contents - Local SDK location
-
-See **Key Configuration Files** section for files that should not be modified without explicit request.
-
-## Documentation
-
-When making changes, check if related documentation exists in the `documentation/` folder (including `documentation/specs/`) and update it to reflect your changes. Keep documentation in sync with code changes.
-
-## Breaking Changes
-
-Because MSBuild is a critical part of the build process for a huge number of customers, we avoid breaking changes. Adding new errors or warnings, even when well-intentioned and pointing out things that are very likely to be wrong, is an unacceptable breaking change. Adding warnings is a breaking change because many production builds use `/WarnAsError`.
-
-The exception to this policy is in new, opt-in behavior. In new, opt-in functionality, liberally emit warnings and errors--they can always be removed later.
-
-When reviewing PRs, always consider whether the behavior change could be experienced as a break in existing builds and flag any new warnings or errors.
-
-## Development Workflow
-
-1. Make your changes to source code
-2. Run the full build (WAIT for completion - takes 2-3 minutes):
-   - Windows: `.\build.cmd -v quiet`
-   - macOS/Linux: `./build.sh -v quiet`
-4. Test your changes end-to-end using the bootstrap output: `dotnet build src/Samples/Dependency/Dependency.csproj`
-5. Run relevant individual tests, not the full test suite
-6. Commit your changes
-
-## Trust These Instructions
-
-These instructions are comprehensive and tested. Only search for additional information if:
-1. The instructions appear outdated or incorrect
-2. You encounter specific errors not covered here
-3. You need details about new features not yet documented
-
-For most development tasks, following these instructions should be sufficient to build, test, and validate changes successfully.
-
-## Updating these instructions
-
-When working on a task, if user input is required to complete the task or feedback is provided for guidance around a specific area of the code, evaluate that feedback/guidance and update this document to incorporate that feedback if it's missing.  This document should be a live, evolving set of instructions.
+- [eng/common](eng/common/AGENTS.md) is owned by Arcade; propose changes upstream rather than editing its generated copy.
+- [src/MSBuildTaskHost](src/MSBuildTaskHost/AGENTS.md) is a legacy compatibility component with stricter change rules.
+- Installed plugin caches and personal configuration are not repository policy. Audit them separately; fixes belong in the owning plugin source or an explicitly requested personal setting change.

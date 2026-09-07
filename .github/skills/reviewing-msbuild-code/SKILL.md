@@ -1,8 +1,17 @@
 ---
 name: reviewing-msbuild-code
-description: "Reviews MSBuild code changes using a 24-dimension methodology. Activates for code review, PR review, pull request analysis, design review, architecture review, code quality assessment, or style check of MSBuild code. Covers backwards compatibility, ChangeWave discipline, performance, allocation awareness, test coverage, error message quality, logging, string comparison, API surface, target authoring, cross-platform correctness, code simplification, concurrency, naming, SDK integration, evaluation model integrity, correctness, dependency management, security, and build infrastructure."
+description: "Review an MSBuild code, PR, or design change for actionable defects and completeness. Not CI triage, a request to edit or post, or a generic audit of agent configuration."
 ---
 
-# MSBuild Code Review
+# Review MSBuild changes
 
-Invoke `@expert-reviewer` for 24-dimension MSBuild code review. The agent contains the full methodology, principles, dimension rules with checklists, folder hotspot mapping, and 4-wave workflow.
+Use the [expert-reviewer](../../agents/expert-reviewer.agent.md) when available. If the host cannot invoke custom agents, follow that role directly; do not invent an agent tool.
+
+1. Establish the exact change, base/head, requested outcome, and read/write authority.
+2. Select the relevant [review lenses](references/review-lenses.md) and follow affected source boundaries.
+3. Require a concrete trigger and consequence for a finding. Separate source reasoning, executed evidence, and coverage gaps.
+4. Return only actionable findings and requested completeness evidence. Do not publish or repair the change unless asked.
+
+A small diff is not a reason for a multi-agent workflow. Use independent investigators only when their scopes require substantial separate context; never one agent per review dimension.
+
+Stop after the scoped review, or continue for a specific new finding, changed diff, or failed proof. A fixed number of passes and a majority vote among models are not completeness criteria.

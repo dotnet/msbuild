@@ -2,30 +2,13 @@
 applyTo: "src/Shared/**"
 ---
 
-# Shared Code Instructions
+# Linked shared code
 
-Code in `src/Shared/` is linked (compiled) into multiple MSBuild assemblies. A bug here breaks multiple assemblies simultaneously.
+- Find actual `Compile` includes and their conditions before editing a shared file. Not every file is compiled into every assembly, and some former shared utilities now live in Framework.
+- Preserve assembly/type identity, resource lookup, feature guards, and runtime-specific behavior when moving or changing linked source.
+- Scope validation to affected consumers and configurations; do not run every test project merely because the path contains `Shared`.
+- For node/task-host packets, trace read/write order and the supported peers' handshake/version behavior. An unframed translator cannot silently supply fields absent from an older packet.
+- For mutable structs, avoid translating through a cast that boxes a copy; follow the existing constrained-generic translation pattern where applicable.
+- Use the owning path/IO helper when it implements the required semantics, not as a blanket ban on `System.IO`. Check relative roots, separators, normalization, long/UNC paths, and filesystem effects for the specific operation.
 
-## Cross-Assembly Impact
-
-* Compiled into `Microsoft.Build`, `Microsoft.Build.Tasks`, `Microsoft.Build.Utilities`, and the CLI.
-* Test changes against all consuming assemblies, not just one.
-* `#if` conditional compilation is used extensively — verify behavior for all target configurations (`FEATURE_*`, `RUNTIME_TYPE_NETCORE`, etc.).
-
-## IPC Packet Stability
-
-* `NodePacketTranslator` and `ITranslatable` implementations define the wire format between MSBuild nodes.
-* Never change packet layout without versioning — old out-of-proc nodes must communicate with new in-proc nodes.
-* Serialization must handle missing fields gracefully (forward compatibility).
-* Test IPC round-trip for all modified packet types.
-
-## FileUtilities Safety
-
-* Use `FileUtilities.cs` instead of raw `System.IO.Path` calls.
-* Must handle: UNC paths, long paths (> MAX_PATH), trailing separators, relative paths, embedded `.`/`..` segments.
-* Avoid unnecessary file system calls — slow and can fail on network paths.
-
-## Cross-Platform Correctness
-
-* Handle .NET Framework vs .NET Core differences with appropriate `#if` guards.
-* Environment variable access patterns differ across platforms — use the shared helpers.
+For shared tests, also use the [test authoring instructions](tests.instructions.md). For binlog events, load the [binary-log skill](../skills/maintaining-binary-log-compatibility/SKILL.md); do not confuse it with IPC compatibility.

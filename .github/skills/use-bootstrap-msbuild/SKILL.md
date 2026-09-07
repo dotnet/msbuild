@@ -1,83 +1,41 @@
 ---
 name: use-bootstrap-msbuild
-description: Guide for testing bug reproductions against locally-built MSBuild. Use this when you have a repro project and want to verify a fix works before submitting a PR.
+description: "Prove a reproduction or fix using locally built MSBuild binaries. Use when source identity and the actual product host matter, not for ordinary source inspection or every unit-test run."
 ---
 
-# Testing Bug Reproductions with Bootstrap MSBuild
+# Reproduce with locally built MSBuild
 
-This skill guides you through testing a bug reproduction project against your locally-built MSBuild to verify a fix.
+## Establish identity first
 
-## Overview
+Identify the requested source revision, broken baseline, host/runtime, architecture, SDK, build mode, and assertion. An installed `dotnet` or a previous bootstrap is not automatically the code being reviewed.
 
-After making changes to MSBuild, you need to test them against a repro project. The "bootstrap" is a self-contained MSBuild installation built from your local changes. It includes all dependencies needed to build real projects.
+If "TaskHost" or "server" is ambiguous, use the [host map](references/host-map.md) before choosing a project or executable.
 
-## Step 1: Build MSBuild with Bootstrap
+Bootstrap layout is defined by [BootStrapMsBuild.props](../../../eng/BootStrapMsBuild.props) and [BootStrapMsBuild.targets](../../../eng/BootStrapMsBuild.targets); the SDK payload version comes from [Versions.props](../../../eng/Versions.props). Architecture can add another path component.
 
-Build MSBuild to create the bootstrap directory:
+## Workflow
 
-```powershell
-# Windows
-.\build.cmd
+1. Inspect existing outputs and their provenance. Build the relevant bootstrap when missing or stale, using the repo build entry point and its pinned prerequisites; do not rewrite SDK/feed configuration to force success.
+2. Run the reproduction through the actual bootstrap host, not a `dotnet` resolved from an unrelated `PATH`.
+3. Capture the command, working directory, product/SDK identity, exit status, assertion, and a binlog when it establishes the execution path.
+4. For a fix, execute the same scenario against baseline and candidate outputs with equivalent configuration. Keep their worktrees and output paths separate.
+5. Stop when the requested observable difference is established, or report the exact setup/runtime boundary preventing proof.
 
-# Unix/macOS
-./build.sh
-```
-
-This creates the bootstrap at `artifacts\bin\bootstrap\` with your changes.
-
-Rerun this after making any code change. If run in the default mode, there may be some errors on subsequent builds about locked files (due to MSBuild worker node processes lingering). If so, run `./artifacts/bin/bootstrap/core/dotnet build-server shutdown`.
-
-## Step 2: Run Your Repro Project
-
-### .NET Core / .NET SDK Projects
-
-Use the bootstrap `dotnet` CLI directly (preferred):
+Typical **Windows, default-architecture** entry points:
 
 ```powershell
-# Windows
-artifacts\bin\bootstrap\core\dotnet.exe build <path-to-repro.csproj>
+& .\artifacts\bin\bootstrap\core\dotnet.exe build <repro-project> -bl:<binlog>
+& .\artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe <repro-project> -bl:<binlog>
 ```
 
-```bash
-# Unix/macOS
-./artifacts/bin/bootstrap/core/dotnet build <path-to-repro.csproj>
-```
+Select the appropriate one and discover the actual layout before running it. On Unix, use the produced `dotnet` host and shell-appropriate paths. Do not assume `MSBuild.dll` sits at the bootstrap root; the Core bootstrap is an SDK layout.
 
-All of the usual command line arguments should work, including `-bl` to create binlogs.
+## Avoid false proof
 
-### .NET Framework Projects
+- Use an explicit working directory and executable in each shell invocation. Changing directory in one tool call may not affect the next.
+- After a source/base change, rebuild the affected output. File existence or a successful test from another TFM is insufficient evidence.
+- If stale servers/nodes or locked outputs interfere, identify the processes belonging to this exact task/bootstrap before stopping them by PID. Do not kill all dotnet/MSBuild processes or reset shared machine state.
+- Do not infer MT, worker, TaskHost, or server usage merely from requested flags; inspect relevant process/log evidence.
+- For a performance comparison, use the [benchmark protocol](../benchmarking-msbuild/SKILL.md). A functional repro is not a controlled timing experiment.
 
-If the problem is specific to the .NET Framework `MSBuild.exe` that is used in Visual Studio, and you're running on Windows, you can use the bootstrap MSBuild.exe directly:
-
-```powershell
-artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe <path-to-repro.csproj>
-```
-
-**Note**: The .NET Framework bootstrap output will only be complete when built on Windows using `MSBuild.exe`.
-
-### Changes not reflected
-
-1. Verify bootstrap was rebuilt: check `artifacts\bin\bootstrap\core\sdk\*\MSBuild.dll` timestamp
-2. Kill any lingering MSBuild server processes:
-   ```powershell
-   ./artifacts/bin/bootstrap/core/dotnet build-server shutdown
-   # Or use the helper function after sourcing msbuild-build-env.ps1
-   killdotnet
-   ```
-
-### Repro works with bootstrap but not with installed MSBuild
-
-Your fix is working! The repro uses your local changes while the installed MSBuild has the bug.
-
-## Quick Reference
-
-| Scenario | Command |
-|----------|---------|
-| Build bootstrap | `.\build.cmd` |
-| .NET Core repro | `artifacts\bin\bootstrap\core\dotnet.exe build <project>` |
-| .NET Framework repro | `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe <project>` |
-
-## See Also
-
-- [Bootstrap Documentation](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Bootstrap.md)
-- [Building and Debugging Guide](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
+For deeper build setup, read the relevant section of [Bootstrap documentation](../../../documentation/wiki/Bootstrap.md) or [Framework build/debug guidance](../../../documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md), checking it against current configuration.

@@ -1,80 +1,30 @@
 ---
-applyTo: "src/*.UnitTests/**/*.cs"
+applyTo: "src/*.UnitTests/**/*.cs,src/UnitTests.Shared/**/*.cs,src/Shared/UnitTests/**/*.cs"
 ---
 
-# Testing Instructions
+# Test authoring
 
-Use xUnit with Shouldly assertions. Use Shouldly assertions for all assertions in modified code, even if the file is predominantly using xUnit assertions.
+## State, output, and assertions
 
-## Capturing Output
+- Use xUnit and Shouldly; use Shouldly for assertions in modified code.
+- Capture diagnostics through `ITestOutputHelper`, usually `_output`, and pass it to `TestEnvironment.Create(_output)` and `MockLogger`. Avoid `Console.WriteLine` for test diagnostics.
+- Use a `using` declaration with [TestEnvironment](../../src/UnitTests.Shared/TestEnvironment.cs) for supported temporary files, environment variables, current directory, and other registered state. It reverts registered state, not arbitrary side effects; use explicit cleanup for unsupported resources.
+- Keep the repository's process-global-state isolation. Do not enable parallel collections or alter traits to speed up a test run.
+- Use [MockLogger](../../src/UnitTests.Shared/MockLogger.cs) for builds and the existing `MockEngine` for isolated task tests. Attach a logger when invoking builds so failures are diagnosable.
+- Assert relevant structured events or invariant/localized content, not an assumed English full message.
 
-Inject xUnit's `ITestOutputHelper` via the test class constructor and store it as `_output`. Pass it to `TestEnvironment.Create(_output)` so that test infrastructure output is captured. Use `_output.WriteLine(...)` instead of `Console.WriteLine` for diagnostic output in tests.
+## Projects and fixtures
 
-## Use `TestEnvironment` for Test Setup and Cleanup
+- Prefer raw string literals for project XML. Use `.Cleanup()` only when placeholders or the helper's normalization are needed; ordinary XML needs no namespace unless the scenario tests one.
+- Reuse [ObjectModelHelpers](../../src/UnitTests.Shared/ObjectModelHelpers.cs), [ProjectFromString](../../src/UnitTests.Shared/ProjectFromString.cs), and the scaffolding in [EngineTestEnvironment](../../src/UnitTests.Shared/EngineTestEnvironment.cs). Read their actual signatures before copying examples.
+- Use existing platform/conditional attributes rather than returning early and silently skipping assertions.
+- Reuse assembly fixtures and existing collections instead of duplicating global setup.
+- Use `[Theory]` with data appropriate to the runner. Follow established serialization patterns for custom theory data when serialization is required; not every custom value needs its own `IXunitSerializable` implementation.
+- Async tests return `Task` and await work. Do not use `async void`.
+- Locate copied test resources relative to the test output, commonly `AppContext.BaseDirectory`; do not depend on the shell's current directory.
 
-Use `TestEnvironment` (`Microsoft.Build.UnitTests.TestEnvironment`) to manage test state. Create with `using TestEnvironment env = TestEnvironment.Create(output);` — prefer a `using` declaration (no braces/indentation). `TestEnvironment` automatically reverts all registered state on dispose. Don't write manual `try`/`finally` blocks to restore state.
+## Evidence
 
-`TestEnvironment` can manage environment variables, temporary files and folders, the working directory, the system temp path, `ProjectCollection` lifetimes, test project scaffolding (`TransientTestProjectWithFiles`), process lifetimes, and test invariants.
+A regression assertion must distinguish the broken behavior from the fix, not merely "no crash" or "nonempty." For transport, concurrency, and build-mode changes, prove the relevant path ran.
 
-## Writing Project XML in Tests
-
-Prefer multiline raw string literals (`"""`) with natural indentation for inline MSBuild XML. Use the `.Cleanup()` extension method (from `Microsoft.Build.UnitTests.ObjectModelHelpers`) to replace `msbuildnamespace` and `msbuilddefaulttoolsversion` placeholders with real values. In raw strings, use normal double-quotes for XML attributes. Fall back to `@""` with backtick-to-quote replacement via `.Cleanup()` only when raw strings are not workable.
-```csharp
-string project = """
-    <Project>
-        <Target Name="Build"><Message Text="Hello" /></Target>
-    </Project>
-    """.Cleanup();
-```
-
-Do not specify `xmlns` in test XML snippets unless it is important to the functionality of the test.
-
-## Build and Task Testing Helpers
-
-Use `MockLogger` (`Microsoft.Build.UnitTests.MockLogger`) to capture and assert build output. It provides `AssertLogContains`, `AssertLogDoesntContain`, `AssertNoErrors`, `AssertNoWarnings`, and typed event collections (`Errors`, `Warnings`, `TargetStartedEvents`, etc.). Do not assume the test locale will be English--assert on invariant substrings or explicit localized resources, not full English strings. Tests that invoke builds via `ProjectCollection` or `BuildManager` must always attach a `MockLogger(_output)` so that build errors and warnings appear in the .trx test output for CI diagnostics.
-
-Use `MockEngine` (`Microsoft.Build.UnitTests.MockEngine`) as an `IBuildEngine` implementation for testing individual tasks in isolation without a full build.
-
-Use `ObjectModelHelpers.BuildProjectExpectSuccess`/`BuildProjectExpectFailure` (`Microsoft.Build.UnitTests.ObjectModelHelpers`) for quick in-memory builds that return a `MockLogger`. Use `ProjectFromString` (`Microsoft.Build.UnitTests.ProjectFromString`) — disposable, use with a `using` declaration — to create `Project` instances from XML for object model inspection.
-
-## Platform-Conditional Tests
-
-Use existing custom attributes for platform-specific tests instead of runtime `if` checks that silently skip assertions. Available attributes include `WindowsOnlyFact`, `WindowsFullFrameworkOnlyFact`, `UnixOnlyFact`, `RequiresSymbolicLinksFactAttribute`, `LongPathSupportDisabledFactAttribute`, and `SkipOnPlatform`. Use `ConditionalFact(nameof(ConditionMethod))` for custom conditions.
-
-## Assembly Fixtures and Collections
-
-Test assemblies use assembly fixtures (for example, `Microsoft.Build.UnitTests.MSBuildTestAssemblyFixture` and `Microsoft.Build.UnitTests.MSBuildTestEnvironmentFixture`). Avoid duplicating global setup in individual tests.
-
-## Data-Driven and Async Tests
-
-Use `[Theory]` with `[InlineData]` for simple inputs. Use `[MemberData]` or `TheoryData<T>` for complex objects (returning `IEnumerable<object[]>`). If the data type is custom, implement `IXunitSerializable`.
-
-```csharp
-[Theory]
-[InlineData("input1", "expected1")]
-public void TestLogic(string input, string expected) { ... }
-```
-
-For async tests, always return `async Task` (never `async void`) and `await` asynchronous operations.
-```csharp
-[Fact]
-public async Task AsyncOperation_Works() {
-    await service.DoWorkAsync();
-}
-```
-
-## Test Resources
-
-Resolve test data files via `AppContext.BaseDirectory` (for example, `Path.Combine(AppContext.BaseDirectory, "TestResources", "file.bin")`) so paths work across runners.
-
-## Assertion Helpers
-
-Use `Shouldly` extensions for `BuildResult`: `result.ShouldHaveSucceeded()` or `result.ShouldHaveFailed()`.
-Use `ObjectModelHelpers.AssertItemsMatch` (`Microsoft.Build.UnitTests.ObjectModelHelpers`) to validate items and metadata using a compact string format:
-```csharp
-ObjectModelHelpers.AssertItemsMatch(
-    "Item1 : Meta=Val; Item2", 
-    project.GetItems("MyItem"));
-```
-
-Use `ObjectModelHelpers.AssertSingleItem`, `AssertItems`, and `AssertItemHasMetadata` for item/property assertions, and `NormalizeSlashes` for cross-platform path comparisons.
+For runner commands, filtering, supported TFMs, and escalation, read [running-unit-tests](../skills/running-unit-tests/SKILL.md). Test authoring does not by itself require a test-generation plugin.
