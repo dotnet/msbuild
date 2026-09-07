@@ -220,7 +220,7 @@
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
     <Compile Include="Logging\ReusableLogger.cs" />
-    <Compile Include="TelemetryInfra\EvaluationMetrics.cs" />
+    <Compile Include="TelemetryInfra\EvaluationInstrumentation.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryCollector.cs" />
     <Compile Include="TelemetryInfra\TasksDetailsTelemetry.cs" />
