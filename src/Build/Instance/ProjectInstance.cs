@@ -1295,6 +1295,11 @@ namespace Microsoft.Build.Execution
         public IReadOnlyList<string> ImportPaths { get; private set; }
 
         /// <summary>
+        /// Inputs recorded during evaluation when <see cref="Traits.RecordEvaluationInputs"/> is set; otherwise null.
+        /// </summary>
+        internal EvaluationInputs EvaluationInputs { get; private set; }
+
+        /// <summary>
         /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.
         /// </summary>
         public IReadOnlyList<string> ImportPathsIncludingDuplicates { get; private set; }
@@ -3342,7 +3347,7 @@ namespace Microsoft.Build.Execution
 
             evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
-            Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
+            EvaluationInputs = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
                 data: this,
                 project: null,
                 xml,
