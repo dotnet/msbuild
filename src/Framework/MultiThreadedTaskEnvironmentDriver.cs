@@ -5,6 +5,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
+#if NET
+using System.Security.Principal;
+#endif
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Framework
@@ -70,6 +78,79 @@ namespace Microsoft.Build.Framework
         public AbsolutePath GetAbsolutePath(string path)
         {
             return new AbsolutePath(path, ProjectDirectory);
+        }
+
+        /// <inheritdoc/>
+        public AbsolutePath GetTempPath()
+        {
+            return GetTempPath(IsSystemProcess());
+        }
+
+        internal AbsolutePath GetTempPath(bool isSystemProcess)
+        {
+            if (!NativeMethods.IsWindows)
+            {
+                string? tempDirectory = GetEnvironmentVariable("TMPDIR");
+                AbsolutePath absoluteTempDirectory = GetAbsolutePath(
+                    string.IsNullOrEmpty(tempDirectory) ? "/tmp" : tempDirectory!);
+                return FileUtilities.EnsureTrailingSlashWithoutNormalization(
+                    absoluteTempDirectory.GetCanonicalForm());
+            }
+
+            if (isSystemProcess)
+            {
+                string systemTempDirectory = GetEnvironmentVariable("SystemTemp") ?? string.Empty;
+                if (string.IsNullOrEmpty(systemTempDirectory))
+                {
+                    systemTempDirectory = Path.Combine(GetWindowsDirectory(), "SystemTemp");
+                }
+
+                return GetCanonicalTempPath(systemTempDirectory);
+            }
+
+            string tempDirectoryWindows = GetEnvironmentVariable("TMP") ?? string.Empty;
+            if (string.IsNullOrEmpty(tempDirectoryWindows))
+            {
+                tempDirectoryWindows = GetEnvironmentVariable("TEMP") ?? string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(tempDirectoryWindows))
+            {
+                tempDirectoryWindows = GetEnvironmentVariable("USERPROFILE") ?? string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(tempDirectoryWindows))
+            {
+                tempDirectoryWindows = GetWindowsDirectory();
+            }
+
+            return GetCanonicalTempPath(tempDirectoryWindows);
+        }
+
+        private AbsolutePath GetCanonicalTempPath(string tempDirectory)
+        {
+            return FileUtilities.EnsureTrailingSlashWithoutNormalization(
+                GetAbsolutePath(tempDirectory).GetCanonicalForm());
+        }
+
+        private static string GetWindowsDirectory()
+        {
+            return Path.GetDirectoryName(Environment.SystemDirectory)!;
+        }
+
+        private static bool IsSystemProcess()
+        {
+#if NET
+            if (!OperatingSystem.IsWindows())
+            {
+                return false;
+            }
+
+            using WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            return identity.IsSystem;
+#else
+            return false;
+#endif
         }
 
         /// <inheritdoc/>

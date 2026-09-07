@@ -1238,7 +1238,10 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.Length.ShouldBe(1);
+        diags[0].Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+        diags[0].GetMessage().ShouldBe(
+            "'Path.GetTempPath()' should use TaskEnvironment alternative: use TaskEnvironment.GetTempPath() instead");
     }
 
     [Fact]
