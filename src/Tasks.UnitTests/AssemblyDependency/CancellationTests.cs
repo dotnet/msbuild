@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading;
 using Microsoft.Build.Framework;
@@ -102,12 +104,14 @@ public sealed class CancellationTests(ITestOutputHelper output)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         string directory = env.CreateFolder().Path;
-        ResolveAssemblyReference initialTask = CreateTask(directory);
+        MockEngine engine = new(_output);
+        ResolveAssemblyReference initialTask = CreateTask(directory, engine);
         Execute(initialTask).ShouldBeTrue();
         initialTask.ResolvedFiles.Length.ShouldBe(2);
+        initialTask.FilesWritten.ShouldHaveSingleItem().ItemSpec.ShouldBe(initialTask.StateFile);
         byte[] originalState = File.ReadAllBytes(initialTask.StateFile);
 
-        ResolveAssemblyReference task = CreateTask(directory);
+        ResolveAssemblyReference task = CreateTask(directory, engine);
         using ManualResetEventSlim readingFile = new();
         using ManualResetEventSlim cancellationRequested = new();
         System.Threading.Tasks.Task cancel = System.Threading.Tasks.Task.Run(() =>
@@ -139,10 +143,245 @@ public sealed class CancellationTests(ITestOutputHelper output)
         task.FilesWritten.ShouldBeEmpty();
         ((MockEngine)task.BuildEngine).Errors.ShouldBe(0);
         ((MockEngine)task.BuildEngine).Warnings.ShouldBe(0);
+
+        ResolveAssemblyReference recovered = CreateTask(directory, engine);
+        Execute(recovered).ShouldBeTrue();
+        AssertSameOutputs(initialTask, recovered);
+        File.ReadAllBytes(recovered.StateFile).ShouldBe(originalState);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void RemappingDoesNotPolluteSharedMetadata(bool cancelAfterRemapping, bool targetAlreadyReferenced)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string directory = env.CreateFolder().Path;
+        MockEngine engine = new(_output);
+        string redist = env.CreateFile(fileName: "remapping.xml", contents: """
+            <FileList Redist="TestFramework">
+              <File AssemblyName="UnusedFrameworkAssembly" Version="1.0.0.0" Culture="neutral" PublicKeyToken="null" InGAC="false" />
+              <Remap>
+                <From AssemblyName="B">
+                  <To AssemblyName="C" Version="1.0.0.0" Culture="neutral" PublicKeyToken="null" />
+                </From>
+              </Remap>
+            </FileList>
+            """).Path;
+        AssemblyNameExtension originalDependency = GetAssemblyName("B.dll");
+        AssemblyNameExtension existingTarget = GetAssemblyName("C.dll");
+        AssemblyNameExtension[] rawDependencies = targetAlreadyReferenced
+            ? [existingTarget, originalDependency]
+            : [originalDependency];
+        int primaryMetadataReads = 0;
+        GetAssemblyMetadata metadata = (
+            string path,
+            ConcurrentDictionary<string, AssemblyMetadata> cache,
+            out AssemblyNameExtension[] dependencies,
+            out string[] scatterFiles,
+            out FrameworkName? frameworkName) =>
+        {
+            if (Path.GetFileNameWithoutExtension(path) == "A")
+            {
+                primaryMetadataReads++;
+                dependencies = rawDependencies;
+            }
+            else
+            {
+                dependencies = [];
+            }
+            scatterFiles = [];
+            frameworkName = null;
+        };
+
+        ResolveAssemblyReference control = CreateTask(directory, engine);
+        control.Assemblies = [new TaskItem("A")];
+        Execute(control, getAssemblyMetadata: metadata).ShouldBeTrue();
+        control.ResolvedDependencyFiles.Select(item => Path.GetFileNameWithoutExtension(item.ItemSpec))
+            .ShouldBe(targetAlreadyReferenced ? ["B", "C"] : ["B"], ignoreOrder: true);
+
+        ResolveAssemblyReference remapped = CreateTask(directory, engine);
+        remapped.Assemblies = [new TaskItem("A")];
+        remapped.InstalledAssemblyTables = [new TaskItem(redist)];
+        remapped.StateFile = Path.Combine(directory, "remapped.cache");
+        bool cancellationRequested = false;
+        bool result = Execute(remapped, getAssemblyMetadata: metadata, getLastWriteTime: path =>
+        {
+            if (cancelAfterRemapping && Path.GetFileNameWithoutExtension(path) == "C")
+            {
+                cancellationRequested = true;
+                remapped.Cancel();
+            }
+            return GetLastWriteTime(path);
+        });
+        result.ShouldBe(!cancelAfterRemapping);
+        cancellationRequested.ShouldBe(cancelAfterRemapping);
+        if (cancelAfterRemapping)
+        {
+            AssertCanceledWithoutWritingState(remapped);
+        }
+        else
+        {
+            remapped.ResolvedDependencyFiles.ShouldHaveSingleItem().GetMetadata("FusionName").ShouldBe(existingTarget.FullName);
+        }
+
+        ResolveAssemblyReference recovered = CreateTask(directory, engine);
+        recovered.Assemblies = [new TaskItem("A")];
+        recovered.StateFile = Path.Combine(directory, "recovered.cache");
+        Execute(recovered, getAssemblyMetadata: metadata).ShouldBeTrue();
+        AssertSameOutputs(control, recovered);
+        primaryMetadataReads.ShouldBe(1, "the recovery must reuse the process-wide metadata, not reread it");
+        rawDependencies.Last().ShouldBeSameAs(originalDependency);
+        originalDependency.RemappedFromEnumerator.ShouldBeEmpty();
+        existingTarget.RemappedFromEnumerator.ShouldBeEmpty();
+        engine.Errors.ShouldBe(0);
+        engine.Warnings.ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData("timestamp")]
+    [InlineData("name")]
+    [InlineData("metadata")]
+    public void ColdCacheRecoversAfterCancellation(string cancellationPoint)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string directory = env.CreateFolder().Path;
+        MockEngine engine = new(_output);
+        ResolveAssemblyReference canceled = CreateTask(directory, engine);
+        canceled.Assemblies = [new TaskItem("A")];
+        int primaryNameReads = 0;
+        int primaryMetadataReads = 0;
+        bool requestedCancellation = false;
+
+        void CancelAt(string point, string path)
+        {
+            if (!requestedCancellation && point == cancellationPoint && Path.GetFileNameWithoutExtension(path) == "A")
+            {
+                requestedCancellation = true;
+                canceled.Cancel();
+            }
+        }
+
+        GetAssemblyName name = path =>
+        {
+            if (Path.GetFileNameWithoutExtension(path) == "A")
+            {
+                primaryNameReads++;
+            }
+            CancelAt("name", path);
+            return GetAssemblyName(path);
+        };
+        GetAssemblyMetadata metadata = (
+            string path,
+            ConcurrentDictionary<string, AssemblyMetadata> cache,
+            out AssemblyNameExtension[] dependencies,
+            out string[] scatterFiles,
+            out FrameworkName? frameworkName) =>
+        {
+            if (Path.GetFileNameWithoutExtension(path) == "A")
+            {
+                primaryMetadataReads++;
+                dependencies = [GetAssemblyName("B.dll")];
+            }
+            else
+            {
+                dependencies = [];
+            }
+            scatterFiles = [];
+            frameworkName = null;
+            CancelAt("metadata", path);
+        };
+        GetLastWriteTime timestamp = path =>
+        {
+            CancelAt("timestamp", path);
+            return GetLastWriteTime(path);
+        };
+
+        Execute(canceled, name, metadata, timestamp).ShouldBeFalse();
+        requestedCancellation.ShouldBeTrue();
+        AssertCanceledWithoutWritingState(canceled);
+
+        ResolveAssemblyReference recovered = CreateTask(directory, engine);
+        recovered.Assemblies = [new TaskItem("A")];
+        Execute(recovered, name, metadata, timestamp).ShouldBeTrue();
+        recovered.ResolvedFiles.ShouldHaveSingleItem().GetMetadata("FusionName").ShouldBe(GetAssemblyName("A.dll").FullName);
+        recovered.ResolvedDependencyFiles.ShouldHaveSingleItem().GetMetadata("FusionName").ShouldBe(GetAssemblyName("B.dll").FullName);
+        recovered.CopyLocalFiles.Length.ShouldBe(2);
+        recovered.CopyLocalFiles.ShouldAllBe(item => item.GetMetadata("CopyLocal") == "true");
+        recovered.FilesWritten.ShouldHaveSingleItem().ItemSpec.ShouldBe(recovered.StateFile);
+
+        ResolveAssemblyReference cached = CreateTask(directory, engine);
+        cached.Assemblies = [new TaskItem("A")];
+        Execute(cached, name, metadata, timestamp).ShouldBeTrue();
+        AssertSameOutputs(recovered, cached);
+        primaryNameReads.ShouldBe(1);
+        primaryMetadataReads.ShouldBe(1);
+        engine.Errors.ShouldBe(0);
+        engine.Warnings.ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AssemblyFolderCacheRecoversAfterCancellation(bool useCache)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", useCache ? null : "1");
+        TransientTestFolder folder = env.CreateFolder();
+        env.CreateFile(folder, "A.dll", string.Empty);
+        env.CreateFile(folder, "B.dll", string.Empty);
+        string config = env.CreateFile(fileName: "folders.config", contents: $$"""
+            <AssemblyFoldersConfig>
+              <AssemblyFolders>
+                <AssemblyFolder>
+                  <FrameworkVersion>v4.0</FrameworkVersion>
+                  <Path>{{folder.Path}}</Path>
+                </AssemblyFolder>
+              </AssemblyFolders>
+            </AssemblyFoldersConfig>
+            """).Path;
+        string searchPath = $"{{AssemblyFoldersFromConfig:{config},v4.0}}";
+        string cacheKey = "6f7de854-47fe-4ae2-9cfe-9b33682abd91" + searchPath;
+        MockEngine engine = new(_output);
+        ResolveAssemblyReference canceled = CreateTask(folder.Path, engine);
+        canceled.SearchPaths = [searchPath];
+        bool requestedCancellation = false;
+        Execute(canceled, getAssemblyName: path =>
+        {
+            requestedCancellation = true;
+            canceled.Cancel();
+            return GetAssemblyName(path);
+        }).ShouldBeFalse();
+        requestedCancellation.ShouldBeTrue();
+        AssertCanceledWithoutWritingState(canceled);
+        object? originalCache = engine.GetRegisteredTaskObject(cacheKey, RegisteredTaskObjectLifetime.Build);
+        if (useCache)
+        {
+            originalCache.ShouldBeOfType<AssemblyFoldersFromConfigCache>();
+        }
+        else
+        {
+            originalCache.ShouldBeNull();
+        }
+
+        ResolveAssemblyReference recovered = CreateTask(folder.Path, engine);
+        recovered.SearchPaths = [searchPath];
+        Execute(recovered).ShouldBeTrue();
+        recovered.ResolvedFiles.Length.ShouldBe(2);
+        engine.GetRegisteredTaskObject(cacheKey, RegisteredTaskObjectLifetime.Build).ShouldBeSameAs(originalCache);
+
+        ResolveAssemblyReference control = CreateTask(folder.Path);
+        control.SearchPaths = [searchPath];
+        Execute(control).ShouldBeTrue();
+        AssertSameOutputs(control, recovered);
+        engine.Errors.ShouldBe(0);
+        engine.Warnings.ShouldBe(0);
     }
 
     [Fact]
-    public void UnrelatedCancellationExceptionIsNotHandled()
+    public void UnrelatedCancellationExceptionFromAssemblyNameIsNotHandled()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         ResolveAssemblyReference task = CreateTask(env.CreateFolder().Path);
@@ -208,9 +447,9 @@ public sealed class CancellationTests(ITestOutputHelper output)
         assemblyReads.ShouldBeGreaterThan(0);
     }
 
-    private ResolveAssemblyReference CreateTask(string directory) => new()
+    private ResolveAssemblyReference CreateTask(string directory, MockEngine? engine = null) => new()
     {
-        BuildEngine = new MockEngine(_output),
+        BuildEngine = engine ?? new MockEngine(_output),
         Assemblies = [new TaskItem("A"), new TaskItem("B")],
         SearchPaths = [directory],
         AllowedAssemblyExtensions = [".dll"],
@@ -220,6 +459,32 @@ public sealed class CancellationTests(ITestOutputHelper output)
         FindSerializationAssemblies = false,
         StateFile = Path.Combine(directory, "references.cache")
     };
+
+    private static void AssertSameOutputs(ResolveAssemblyReference expected, ResolveAssemblyReference actual)
+    {
+        Snapshot(actual.ResolvedFiles).ShouldBe(Snapshot(expected.ResolvedFiles));
+        Snapshot(actual.ResolvedDependencyFiles).ShouldBe(Snapshot(expected.ResolvedDependencyFiles));
+        Snapshot(actual.CopyLocalFiles).ShouldBe(Snapshot(expected.CopyLocalFiles));
+        Snapshot(actual.RelatedFiles).ShouldBe(Snapshot(expected.RelatedFiles));
+        Snapshot(actual.SatelliteFiles).ShouldBe(Snapshot(expected.SatelliteFiles));
+        Snapshot(actual.SerializationAssemblyFiles).ShouldBe(Snapshot(expected.SerializationAssemblyFiles));
+        Snapshot(actual.ScatterFiles).ShouldBe(Snapshot(expected.ScatterFiles));
+        Snapshot(actual.SuggestedRedirects).ShouldBe(Snapshot(expected.SuggestedRedirects));
+        actual.DependsOnSystemRuntime.ShouldBe(expected.DependsOnSystemRuntime);
+        actual.DependsOnNETStandard.ShouldBe(expected.DependsOnNETStandard);
+    }
+
+    private static string[] Snapshot(ITaskItem[] items) =>
+        items.Select(item =>
+        {
+            IDictionary metadata = item.CloneCustomMetadata();
+            return item.ItemSpec + " | " + string.Join(" | ",
+                metadata.Keys.Cast<string>()
+                    .OrderBy(name => name, StringComparer.Ordinal)
+                    .Select(name => $"{name}={metadata[name]}"));
+        })
+            .OrderBy(value => value, StringComparer.Ordinal)
+            .ToArray();
 
     private static void AssertCanceledWithoutWritingState(ResolveAssemblyReference task)
     {
@@ -233,7 +498,9 @@ public sealed class CancellationTests(ITestOutputHelper output)
         new($"{Path.GetFileNameWithoutExtension(path)}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
     private static DateTime GetLastWriteTime(string path) =>
-        DateTime.FromFileTimeUtc(path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ? 1 : 0);
+        path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+            ? DateTime.FromFileTimeUtc(1)
+            : File.GetLastWriteTimeUtc(path);
 
     private static bool Execute(
         ResolveAssemblyReference task,

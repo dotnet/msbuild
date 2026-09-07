@@ -1080,35 +1080,42 @@ namespace Microsoft.Build.Tasks
 
             if (dependentAssemblies?.Length > 0)
             {
-                // Re-map immediately so that to the sytem we actually got the remapped version when reading the manifest.
+                // The cached dependency array and its names can be shared by other RAR tasks.
+                // Keep remapping changes in this task's result list.
                 for (int i = 0; i < dependentAssemblies.Length; i++)
                 {
                     _cancellationToken.ThrowIfCancellationRequested();
-                    // This will return a clone of the remapped assemblyNameExtension so its ok to party on it.
-                    AssemblyNameExtension remappedExtension = _installedAssemblies?.RemapAssemblyExtension(dependentAssemblies[i]);
+                    AssemblyNameExtension dependency = dependentAssemblies[i];
+                    AssemblyNameExtension remappedExtension = _installedAssemblies?.RemapAssemblyExtension(dependency);
                     if (remappedExtension != null)
                     {
-                        AssemblyNameExtension originalExtension = dependentAssemblies[i];
-                        AssemblyNameExtension existingExtension = dependencies.Find(x => x.Equals(remappedExtension));
-                        if (existingExtension != null)
+                        int existingIndex = dependencies.FindIndex(x => x.Equals(remappedExtension));
+                        if (existingIndex >= 0)
                         {
-                            existingExtension.AddRemappedAssemblyName(originalExtension.CloneImmutable());
+                            AssemblyNameExtension existingExtension = dependencies[existingIndex];
+                            // Clone() shares the remapping set, so make a private name and set before merging.
+                            AssemblyNameExtension mergedExtension = new(existingExtension.AssemblyName.CloneIfPossible());
+                            foreach (AssemblyNameExtension priorRemapping in existingExtension.RemappedFromEnumerator)
+                            {
+                                mergedExtension.AddRemappedAssemblyName(priorRemapping);
+                            }
+
+                            mergedExtension.AddRemappedAssemblyName(dependency.CloneImmutable());
+                            dependencies[existingIndex] = mergedExtension;
                             continue;
                         }
-                        else
-                        {
-                            dependentAssemblies[i] = remappedExtension;
-                            dependentAssemblies[i].AddRemappedAssemblyName(originalExtension.CloneImmutable());
-                        }
+
+                        remappedExtension.AddRemappedAssemblyName(dependency.CloneImmutable());
+                        dependency = remappedExtension;
                     }
 
                     // Assemblies which reference WinMD files sometimes will have references to mscorlib version 255.255.255 which is invalid. For this reason
                     // We will remove the dependency to mscorlib from the list of dependencies so it is not used for resolution or unification.
-                    bool isMscorlib = IsPseudoAssembly(dependentAssemblies[i].Name);
+                    bool isMscorlib = IsPseudoAssembly(dependency.Name);
 
-                    if (!isMscorlib || dependentAssemblies[i].Version.Major != 255)
+                    if (!isMscorlib || dependency.Version.Major != 255)
                     {
-                        dependencies.Add(dependentAssemblies[i]);
+                        dependencies.Add(dependency);
                     }
                 }
 
