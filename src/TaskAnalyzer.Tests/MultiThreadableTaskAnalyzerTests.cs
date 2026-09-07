@@ -1091,7 +1091,7 @@ public class MultiThreadableTaskAnalyzerTests
     [Fact]
     public async Task MSBuildTask0002_FiresForRegularTaskInAllScope()
     {
-        var diags = await GetDiagnosticsWithScopeAsync("""
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System;
             using System.IO;
             using System.Diagnostics;
@@ -1106,7 +1106,7 @@ public class MultiThreadableTaskAnalyzerTests
                     return true;
                 }
             }
-            """, SharedAnalyzerHelpers.ScopeAll);
+            """, enabled: true);
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
@@ -1114,7 +1114,7 @@ public class MultiThreadableTaskAnalyzerTests
     [Fact]
     public async Task MSBuildTask0003_FiresForRegularTaskInAllScope()
     {
-        var diags = await GetDiagnosticsWithScopeAsync("""
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System.IO;
             public class RegularTask : Microsoft.Build.Utilities.Task
             {
@@ -1125,7 +1125,7 @@ public class MultiThreadableTaskAnalyzerTests
                     return true;
                 }
             }
-            """, SharedAnalyzerHelpers.ScopeAll);
+            """, enabled: true);
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
@@ -1878,7 +1878,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Scope option tests
+    // MT migration option tests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
@@ -1924,9 +1924,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_All_PlainTask_GetsEnvironmentAndPathDiagnostics()
+    public async Task RunMtAnalyzersOnAllTasks_True_PlainTaskGetsEnvironmentAndPathDiagnostics()
     {
-        var diags = await GetDiagnosticsWithScopeAsync("""
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System;
             using System.IO;
             public class PlainTask : Microsoft.Build.Utilities.Task
@@ -1937,14 +1937,14 @@ public class MultiThreadableTaskAnalyzerTests
                     return File.Exists("relative.txt");
                 }
             }
-            """, SharedAnalyzerHelpers.ScopeAll);
+            """, enabled: true);
 
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
         diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
     }
 
     [Fact]
-    public async Task Scope_GlobalConfig_All_AnalyzesPlainTask()
+    public async Task RunMtAnalyzersOnAllTasks_GlobalConfigTrue_AnalyzesPlainTask()
     {
         var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
         {
@@ -1964,7 +1964,7 @@ public class MultiThreadableTaskAnalyzerTests
         test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
         test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", """
             is_global = true
-            msbuild_task_analyzer.scope = all
+            msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
             """));
         test.ExpectedDiagnostics.Add(
             new DiagnosticResult(DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Warning).WithLocation(0));
@@ -1973,7 +1973,71 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_EditorConfig_All_DoesNotSetCompilationWideScope()
+    public async Task RunMtAnalyzersOnAllTasks_EditorConfigTrue_AnalyzesPlainTask()
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        var value = {|#0:Environment.GetEnvironmentVariable("KEY")|};
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Warning).WithLocation(0));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task RunMtAnalyzersOnAllTasks_EditorConfigOverridesGlobalConfig()
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        var value = Environment.GetEnvironmentVariable("KEY");
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", """
+            is_global = true
+            msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+            """));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = false
+            """));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task RunMtAnalyzersOnAllTasks_UnrecognizedValueUsesDefault()
     {
         var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
         {
@@ -1995,28 +2059,10 @@ public class MultiThreadableTaskAnalyzerTests
             root = true
 
             [*.cs]
-            msbuild_task_analyzer.scope = all
+            msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = unrecognized
             """));
 
         await test.RunAsync();
-    }
-
-    [Fact]
-    public async Task Scope_UnrecognizedValue_PreservesAllScope()
-    {
-        var diags = await GetDiagnosticsWithScopeAsync("""
-            using System;
-            public class PlainTask : Microsoft.Build.Utilities.Task
-            {
-                public override bool Execute()
-                {
-                    var value = Environment.GetEnvironmentVariable("KEY");
-                    return true;
-                }
-            }
-            """, "unrecognized");
-
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
     }
 
     [Fact]
@@ -2158,9 +2204,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_MultithreadableOnly_PlainTask_NoDiagnostic()
+    public async Task RunMtAnalyzersOnAllTasks_False_PlainTaskHasNoDiagnostic()
     {
-        var diags = await GetDiagnosticsWithScopeAsync("""
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System;
             public class PlainTask : Microsoft.Build.Utilities.Task
             {
@@ -2170,16 +2216,15 @@ public class MultiThreadableTaskAnalyzerTests
                     return true;
                 }
             }
-            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+            """, enabled: false);
 
-        // Plain ITask should NOT get MSBuildTask0002 when scope is multithreadable_only
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
     }
 
     [Fact]
-    public async Task Scope_MultithreadableOnly_MultiThreadableTask_GetsDiagnostic()
+    public async Task RunMtAnalyzersOnAllTasks_False_MultiThreadableTaskGetsDiagnostic()
     {
-        var diags = await GetDiagnosticsWithScopeAsync("""
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System;
             using Microsoft.Build.Framework;
             public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
@@ -2191,9 +2236,8 @@ public class MultiThreadableTaskAnalyzerTests
                     return true;
                 }
             }
-            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+            """, enabled: false);
 
-        // IMultiThreadableTask SHOULD get MSBuildTask0002 even when scope is multithreadable_only
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldNotBeEmpty();
     }
 }

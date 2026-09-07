@@ -390,9 +390,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_All_PlainTask_GetsTransitiveDiagnostic()
+    public async Task RunMtAnalyzersOnAllTasks_True_PlainTaskGetsTransitiveDiagnostic()
     {
-        var diags = await GetAllDiagnosticsWithScopeAsync("""
+        var diags = await GetAllDiagnosticsWithAllTasksOptionAsync("""
             using System;
             public static class Helper
             {
@@ -406,13 +406,13 @@ public class TransitiveCallChainAnalyzerTests
                     return true;
                 }
             }
-            """, SharedAnalyzerHelpers.ScopeAll);
+            """, enabled: true);
 
         diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
     }
 
     [Fact]
-    public async Task Scope_GlobalConfig_All_AnalyzesPlainTaskTransitively()
+    public async Task RunMtAnalyzersOnAllTasks_GlobalConfigTrue_AnalyzesPlainTaskTransitively()
     {
         var test = new CSharpAnalyzerTest<TransitiveCallChainAnalyzer, DefaultVerifier>
         {
@@ -436,7 +436,83 @@ public class TransitiveCallChainAnalyzerTests
         test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
         test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", """
             is_global = true
-            msbuild_task_analyzer.scope = all
+            msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Warning)
+                .WithLocation(0)
+                .WithLocation(1));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task RunMtAnalyzersOnAllTasks_EditorConfigTrue_AnalyzesPlainTaskTransitively()
+    {
+        var test = new CSharpAnalyzerTest<TransitiveCallChainAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public static class Helper
+                {
+                    public static void Run() => {|#0:Environment.GetEnvironmentVariable("KEY")|};
+                }
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool {|#1:Execute|}()
+                    {
+                        Helper.Run();
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Warning)
+                .WithLocation(0)
+                .WithLocation(1));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task RunMtAnalyzersOnAllTasks_UsesUnsafeCallSiteEditorConfig()
+    {
+        var test = new CSharpAnalyzerTest<TransitiveCallChainAnalyzer, DefaultVerifier>
+        {
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("/Tasks/PlainTask.cs", """
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool {|#1:Execute|}()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """));
+        test.TestState.Sources.Add(("/Migration/Helper.cs", """
+            using System;
+            public static class Helper
+            {
+                public static void Run() => {|#0:Environment.GetEnvironmentVariable("KEY")|};
+            }
+            """));
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [Migration/*.cs]
+            msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
             """));
         test.ExpectedDiagnostics.Add(
             new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Warning)
@@ -653,7 +729,7 @@ public class TransitiveCallChainAnalyzerTests
     [Fact]
     public async Task Scope_All_PlainTask_GetsFilePathTransitiveDiagnostic()
     {
-        var diags = await GetAllDiagnosticsWithScopeAsync("""
+        var diags = await GetAllDiagnosticsWithAllTasksOptionAsync("""
             using System.IO;
             public static class Helper
             {
@@ -663,7 +739,7 @@ public class TransitiveCallChainAnalyzerTests
             {
                 public override bool Execute() => Helper.Run();
             }
-            """, SharedAnalyzerHelpers.ScopeAll);
+            """, enabled: true);
 
         diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
     }

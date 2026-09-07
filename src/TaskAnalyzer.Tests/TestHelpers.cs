@@ -138,13 +138,13 @@ internal static class TestHelpers
     public static MetadataReference[] GetCoreReferences() => s_coreReferences;
 
     /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer with the shipping default scope.
+    /// Runs the MultiThreadableTaskAnalyzer with the shipping default behavior.
     /// </summary>
     public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source) =>
         GetDiagnosticsWithDefaultScopeAsync(source);
 
     /// <summary>
-    /// Runs both the direct and transitive analyzers with the shipping default scope.
+    /// Runs both the direct and transitive analyzers with the shipping default behavior.
     /// </summary>
     public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(string source) =>
         GetAllDiagnosticsWithDefaultScopeAsync(source);
@@ -223,19 +223,19 @@ internal static class TestHelpers
     }
 
     /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer with a specific scope option and returns analyzer diagnostics.
+    /// Runs the MultiThreadableTaskAnalyzer with the all-task migration option and returns analyzer diagnostics.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(string source, string scope)
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithAllTasksOptionAsync(string source, bool enabled)
     {
         var compilation = CreateCompilation(source);
         var analyzer = new MultiThreadableTaskAnalyzer();
         var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), CreateAnalyzerOptions(scope));
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), CreateAnalyzerOptions(enabled));
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 
     /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer without a scope option.
+    /// Runs the MultiThreadableTaskAnalyzer without the all-task migration option.
     /// </summary>
     public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithDefaultScopeAsync(string source)
     {
@@ -247,21 +247,21 @@ internal static class TestHelpers
     }
 
     /// <summary>
-    /// Runs both the direct and transitive analyzers with a specific scope option.
+    /// Runs both the direct and transitive analyzers with the all-task migration option.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithScopeAsync(string source, string scope)
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithAllTasksOptionAsync(string source, bool enabled)
     {
         var compilation = CreateCompilation(source);
         var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
             new MultiThreadableTaskAnalyzer(),
             new TransitiveCallChainAnalyzer());
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers, CreateAnalyzerOptions(scope));
+        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers, CreateAnalyzerOptions(enabled));
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 
     /// <summary>
-    /// Runs both the direct and transitive analyzers without a scope option.
+    /// Runs both the direct and transitive analyzers without the all-task migration option.
     /// </summary>
     public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithDefaultScopeAsync(string source)
     {
@@ -273,16 +273,18 @@ internal static class TestHelpers
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 
-    private static AnalyzerOptions CreateAnalyzerOptions(string? scope = null)
+    private static AnalyzerOptions CreateAnalyzerOptions(bool? analyzeAllTasks = null)
     {
         var globalOptions = new Dictionary<string, string>
         {
             { "unrelated_analyzer_option", "true" },
         };
 
-        if (scope is not null)
+        if (analyzeAllTasks is not null)
         {
-            globalOptions.Add(SharedAnalyzerHelpers.ScopeOptionKey, scope);
+            globalOptions.Add(
+                SharedAnalyzerHelpers.AnalyzeAllTasksOptionKey,
+                analyzeAllTasks.Value.ToString());
         }
 
         return new AnalyzerOptions(
@@ -341,7 +343,7 @@ internal static class TestHelpers
 
 /// <summary>
 /// A test implementation of <see cref="AnalyzerConfigOptionsProvider"/> that returns
-/// configurable global options for testing scope and other analyzer settings.
+/// configurable global options for testing analyzer settings.
 /// </summary>
 internal sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider
 {
@@ -354,7 +356,7 @@ internal sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsP
 
     public override AnalyzerConfigOptions GlobalOptions => _globalOptions;
 
-    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => TestAnalyzerConfigOptions.Empty;
+    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => _globalOptions;
 
     public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => TestAnalyzerConfigOptions.Empty;
 

@@ -17,25 +17,25 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     internal static class SharedAnalyzerHelpers
     {
         /// <summary>
-        /// The global analyzer configuration key controlling analysis scope.
-        /// Values: "multithreadable_only" (default) | "all"
+        /// The analyzer configuration key that enables MT migration diagnostics for all tasks.
         /// </summary>
-        internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
-        internal const string ScopeAll = "all";
-        internal const string ScopeMultiThreadableOnly = "multithreadable_only";
+        internal const string AnalyzeAllTasksOptionKey = "msbuild_task_analyzer.run_mt_analyzers_on_all_tasks";
 
         /// <summary>
-        /// Reads the scope option from the analyzer config options provider.
+        /// Reads the effective option for a source tree from the analyzer config options provider.
         /// Returns true only when all-task migration analysis is explicitly enabled.
         /// </summary>
-        internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
+        internal static bool ReadAnalyzeAllTasksOption(
+            AnalyzerConfigOptionsProvider optionsProvider,
+            SyntaxTree? syntaxTree)
         {
-            if (optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out var scopeValue))
-            {
-                return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
-            }
+            AnalyzerConfigOptions options = syntaxTree is null
+                ? optionsProvider.GlobalOptions
+                : optionsProvider.GetOptions(syntaxTree);
 
-            return false;
+            return options.TryGetValue(AnalyzeAllTasksOptionKey, out string? optionValue) &&
+                bool.TryParse(optionValue, out bool enabled) &&
+                enabled;
         }
 
         internal static bool IsMultiThreadableOptIn(

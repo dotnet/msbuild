@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
@@ -15,9 +16,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// <summary>
     /// Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
     /// 
-    /// Scope (controlled by global analyzer option "msbuild_task_analyzer.scope"):
-    /// - "multithreadable_only" (default): MSBuildTask0002 and 0003 fire only on IMultiThreadableTask or [MSBuildMultiThreadableTask]
-    /// - "all": Enables MSBuildTask0002 and 0003 for all ITask implementations during migration
+    /// By default, MSBuildTask0002 and MSBuildTask0003 apply only to MT-scoped code.
+    /// The "msbuild_task_analyzer.run_mt_analyzers_on_all_tasks" option enables these rules for all tasks.
     ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
     /// 
     /// Per review feedback from @rainersigwald:
@@ -28,12 +28,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     public sealed class MultiThreadableTaskAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
-        /// The global analyzer configuration key controlling analysis scope.
-        /// Values: "multithreadable_only" (default) | "all"
+        /// The analyzer configuration key that enables MT migration diagnostics for all tasks.
         /// </summary>
-        internal const string ScopeOptionKey = SharedAnalyzerHelpers.ScopeOptionKey;
-        internal const string ScopeAll = SharedAnalyzerHelpers.ScopeAll;
-        internal const string ScopeMultiThreadableOnly = SharedAnalyzerHelpers.ScopeMultiThreadableOnly;
+        internal const string AnalyzeAllTasksOptionKey = SharedAnalyzerHelpers.AnalyzeAllTasksOptionKey;
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => DiagnosticDescriptors.All;
 
@@ -54,9 +51,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Read scope option: "multithreadable_only" (default) or "all"
-            bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
-
             var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
@@ -76,6 +70,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             // Build set of file-path types for MSBuildTask0003
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
+            var analyzeAllTasksByTree = new ConcurrentDictionary<SyntaxTree, bool>();
 
             // Use RegisterSymbolStartAction for efficient per-type scoping
             compilationContext.RegisterSymbolStartAction(symbolStartContext =>
@@ -101,12 +96,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Base classes contribute code to opted-in tasks even though the opt-in is declared on a derived type.
                 bool analyzeAsMultiThreadable = hasMultiThreadableOptIn || contributesToMultiThreadableTask;
 
-                // When scope is "multithreadable_only", only analyze MSBuildTask0002/0003 for multithreadable tasks
-                bool reportEnvironmentRules = analyzeAllTasks || analyzeAsMultiThreadable;
-
                 // Register operation-level analysis within this type
                 symbolStartContext.RegisterOperationAction(
-                    ctx => AnalyzeOperation(ctx, bannedApiLookup, filePathTypes, reportEnvironmentRules,
+                    ctx => AnalyzeOperation(ctx, bannedApiLookup, filePathTypes, analyzeAsMultiThreadable, analyzeAllTasksByTree,
                         taskEnvironmentType, absolutePathType, iTaskItemType, consoleType),
                     OperationKind.Invocation,
                     OperationKind.ObjectCreation,
@@ -121,7 +113,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             OperationAnalysisContext context,
             Dictionary<ISymbol, BannedApiEntry> bannedApiLookup,
             ImmutableHashSet<INamedTypeSymbol> filePathTypes,
-            bool reportEnvironmentRules,
+            bool analyzeAsMultiThreadable,
+            ConcurrentDictionary<SyntaxTree, bool> analyzeAllTasksByTree,
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
@@ -169,8 +162,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Check banned API lookup (handles MSBuildTask0001, 0002, 0004)
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
-                // MSBuildTask0002 (TaskEnvironment) is gated by scope setting
-                if (entry.Category == BannedApiDefinitions.ApiCategory.TaskEnvironment && !reportEnvironmentRules)
+                // MSBuildTask0002 is limited to MT-scoped code unless migration analysis is enabled.
+                if (entry.Category == BannedApiDefinitions.ApiCategory.TaskEnvironment &&
+                    !ShouldReportEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree))
                 {
                     return;
                 }
@@ -201,30 +195,49 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            // Check file path APIs (MSBuildTask0003) - gated by scope setting
-            if (reportEnvironmentRules && !arguments.IsDefaultOrEmpty)
+            // MSBuildTask0003 is limited to MT-scoped code unless migration analysis is enabled.
+            if (!arguments.IsDefaultOrEmpty && referencedSymbol is IMethodSymbol method)
             {
-                var method = referencedSymbol as IMethodSymbol;
-                if (method is not null)
+                var containingType = method.ContainingType;
+                if (containingType is not null &&
+                    filePathTypes.Contains(containingType) &&
+                    ShouldReportEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree) &&
+                    HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
                 {
-                    var containingType = method.ContainingType;
-                    if (containingType is not null && filePathTypes.Contains(containingType))
-                    {
-                        if (HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
-                        {
-                            string displayName = isConstructor
-                                ? $"new {containingType.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat)}(...)"
-                                : referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
+                    string displayName = isConstructor
+                        ? $"new {containingType.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat)}(...)"
+                        : referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
 
-                            string hint = "wrap path argument with TaskEnvironment.GetAbsolutePath()";
-                            context.ReportDiagnostic(Diagnostic.Create(
-                                DiagnosticDescriptors.FilePathRequiresAbsolute,
-                                context.Operation.Syntax.GetLocation(),
-                                displayName, hint));
-                        }
-                    }
+                    string hint = "wrap path argument with TaskEnvironment.GetAbsolutePath()";
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        DiagnosticDescriptors.FilePathRequiresAbsolute,
+                        context.Operation.Syntax.GetLocation(),
+                        displayName, hint));
                 }
             }
+        }
+
+        private static bool ShouldReportEnvironmentRules(
+            OperationAnalysisContext context,
+            bool analyzeAsMultiThreadable,
+            ConcurrentDictionary<SyntaxTree, bool> analyzeAllTasksByTree)
+        {
+            if (analyzeAsMultiThreadable)
+            {
+                return true;
+            }
+
+            SyntaxTree syntaxTree = context.Operation.Syntax.SyntaxTree;
+            if (analyzeAllTasksByTree.TryGetValue(syntaxTree, out bool analyzeAllTasks))
+            {
+                return analyzeAllTasks;
+            }
+
+            analyzeAllTasks = ReadAnalyzeAllTasksOption(
+                context.Options.AnalyzerConfigOptionsProvider,
+                syntaxTree);
+            analyzeAllTasksByTree.TryAdd(syntaxTree, analyzeAllTasks);
+            return analyzeAllTasks;
         }
 
         private static DiagnosticDescriptor GetDescriptor(BannedApiDefinitions.ApiCategory category)

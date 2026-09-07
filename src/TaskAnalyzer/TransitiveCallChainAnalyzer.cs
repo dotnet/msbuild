@@ -52,9 +52,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Read global analyzer scope option.
-            bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
-
             var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
             var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
@@ -95,7 +92,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType,
                     bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType,
-                    analyzeAllTasks, iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType);
+                    iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType);
             });
         }
 
@@ -252,7 +249,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
-            bool analyzeAllTasks,
             INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType)
@@ -278,11 +274,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var reportedByTaskImplementation =
                 new Dictionary<ISymbol, HashSet<(string ApiDisplayName, Location Location)>>(SymbolEqualityComparer.Default);
+            var analyzeAllTasksByTree = new Dictionary<SyntaxTree, bool>();
 
             foreach (var taskType in taskTypes)
             {
-                bool reportScopedViolations = analyzeAllTasks ||
-                    IsMultiThreadableOptIn(
+                bool isMultiThreadableTask = IsMultiThreadableOptIn(
                         taskType,
                         iMultiThreadableTaskType,
                         multiThreadableTaskAttributeType,
@@ -358,7 +354,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             foreach (var v in violations)
                             {
-                                if (reportScopedViolations || AppliesToRegularTasks(v))
+                                if (isMultiThreadableTask ||
+                                    AppliesToRegularTasks(v) ||
+                                    ShouldReportScopedViolation(context, v, analyzeAllTasksByTree))
                                 {
                                     ReportTransitiveViolation(context, method, v, chain, reportedViolations);
                                 }
@@ -436,6 +434,31 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 BannedApiDefinitions.ApiCategory.PotentialIssue => true,
                 _ => false,
             };
+        }
+
+        private static bool ShouldReportScopedViolation(
+            CompilationAnalysisContext context,
+            ViolationInfo violation,
+            Dictionary<SyntaxTree, bool> analyzeAllTasksByTree)
+        {
+            SyntaxTree? syntaxTree = violation.Location.SourceTree;
+            if (syntaxTree is null)
+            {
+                return ReadAnalyzeAllTasksOption(
+                    context.Options.AnalyzerConfigOptionsProvider,
+                    syntaxTree);
+            }
+
+            if (analyzeAllTasksByTree.TryGetValue(syntaxTree, out bool analyzeAllTasks))
+            {
+                return analyzeAllTasks;
+            }
+
+            analyzeAllTasks = ReadAnalyzeAllTasksOption(
+                context.Options.AnalyzerConfigOptionsProvider,
+                syntaxTree);
+            analyzeAllTasksByTree.Add(syntaxTree, analyzeAllTasks);
+            return analyzeAllTasks;
         }
 
         private static bool HasAttribute(INamedTypeSymbol type, INamedTypeSymbol? attributeType)
