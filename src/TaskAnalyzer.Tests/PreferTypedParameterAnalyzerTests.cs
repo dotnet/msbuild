@@ -39,7 +39,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.Length.ShouldBe(1);
         diags[0].GetMessage().ShouldContain("InputPath");
         diags[0].GetMessage().ShouldContain("AbsolutePath");
-        diags[0].Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
+        diags[0].Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedPathParameter);
         diags[0].GetMessage().ShouldContain("InputPath");
         diags[0].GetMessage().ShouldContain("AbsolutePath");
-        diags[0].Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
+        diags[0].Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -373,7 +373,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.Length.ShouldBe(1);
         diags[0].GetMessage().ShouldContain("int");
         diags[0].GetMessage().ShouldContain("Item");
-        diags[0].Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
+        diags[0].Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Info);
     }
 
     [Fact]

@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
@@ -29,26 +28,31 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DumpExceptionToFileShouldWriteInDebugDumpPath()
         {
-            DebugUtils.ResetDebugDumpPathInRunningTests = true;
-            var exceptionFilesBefore =
-                Directory.Exists(DebugUtils.DebugDumpPath) ? Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt") : Array.Empty<string>();
-
-            string[] exceptionFiles = null;
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder debugPath = env.CreateFolder();
+            var transientDebugPath = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath.Path);
 
             try
             {
+                FrameworkDebugUtils.SetDebugPath();
+                DebugUtils.ResetDebugDumpPathInRunningTests = true;
+                _ = DebugUtils.DebugDumpPath;
+
                 DebugUtils.DumpExceptionToFile(new Exception("hello world"));
-                exceptionFiles = Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt");
+                string[] exceptionFiles = Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt");
+                exceptionFiles.Length.ShouldBe(1);
+
+                string exceptionFile = exceptionFiles[0];
+                File.ReadAllText(exceptionFile).ShouldContain("hello world");
+                File.Delete(exceptionFile);
             }
             finally
             {
-                exceptionFilesBefore.ShouldNotBeNull();
-                exceptionFiles.ShouldNotBeNull();
-                (exceptionFiles.Length - exceptionFilesBefore.Length).ShouldBe(1);
+                transientDebugPath.Revert();
+                FrameworkDebugUtils.SetDebugPath();
 
-                var exceptionFile = exceptionFiles.Except(exceptionFilesBefore).Single();
-                File.ReadAllText(exceptionFile).ShouldContain("hello world");
-                File.Delete(exceptionFile);
+                DebugUtils.ResetDebugDumpPathInRunningTests = true;
+                _ = DebugUtils.DebugDumpPath;
             }
         }
 

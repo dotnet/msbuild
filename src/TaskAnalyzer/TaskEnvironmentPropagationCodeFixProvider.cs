@@ -17,7 +17,7 @@ using Microsoft.CodeAnalysis.Formatting;
 namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     /// <summary>
-    /// Code fixer for MSBuildTask0012: adds a <c>TaskEnvironment</c> entry to the object initializer of a
+    /// Code fixer for MSBuildTask0015: adds a <c>TaskEnvironment</c> entry to the object initializer of a
     /// task constructed inside another task, so the constructed task receives the constructing task's environment.
     /// </summary>
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(TaskEnvironmentPropagationCodeFixProvider))]

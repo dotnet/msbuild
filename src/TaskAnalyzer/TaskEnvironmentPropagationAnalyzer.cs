@@ -13,7 +13,7 @@ using static Microsoft.Build.TaskAuthoring.Analyzer.SharedAnalyzerHelpers;
 namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     /// <summary>
-    /// Roslyn analyzer that reports MSBuildTask0012: a multithreadable task constructs another
+    /// Roslyn analyzer that reports MSBuildTask0015: a multithreadable task constructs another
     /// <c>ITask</c> without handing it a <c>TaskEnvironment</c>.
     ///
     /// MSBuild only injects <c>TaskEnvironment</c> into the tasks it instantiates itself, so a task
