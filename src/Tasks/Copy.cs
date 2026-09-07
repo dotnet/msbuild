@@ -445,14 +445,19 @@ namespace Microsoft.Build.Tasks
             }
 
 #if FEATURE_WINDOWSINTEROP
-            // Unix has no equivalent check here without a stat() interop, so we keep today's
-            // behavior there rather than refusing copies we cannot prove are unsafe.
-            return NativeMethodsShared.IsWindows && HasMultipleHardLinks(path);
-#else
-            // The BCL does not expose the hard link count on Unix; a stat() interop would be needed
-            // to make this check complete there.
-            return false;
+            if (NativeMethodsShared.IsWindows)
+            {
+                return HasMultipleHardLinks(path);
+            }
 #endif
+
+            // On Unix the BCL does not expose the hard link count, but it does not need to. A
+            // destination that survived unlink() cannot be replaced with rename() either: both
+            // need write permission on the containing directory, and that is exactly what is
+            // missing whenever unlink() fails with EACCES/EPERM. Since no safe way to put a new
+            // file at this path exists, refuse rather than write into the existing one - which
+            // would change the contents of every other name sharing it.
+            return true;
         }
 
 #if FEATURE_WINDOWSINTEROP
