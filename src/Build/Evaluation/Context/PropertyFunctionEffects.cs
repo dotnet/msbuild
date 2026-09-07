@@ -23,6 +23,9 @@ internal enum PropertyFunctionEffect
     ProbePath,
     ReadFile,
     ReadDirectory,
+    ReadEnvironment,
+    /// <summary>Reads every environment variable referenced as <c>%NAME%</c> in the first argument.</summary>
+    ExpandEnvironment,
     /// <summary>Reads installed state, constant for the process, unless an argument names a directory or file to search.</summary>
     PureUnlessPathArgument,
     Volatile,
@@ -77,6 +80,7 @@ internal static class PropertyFunctionEffects
         PropertyFunctionEffect effect = effects.Members.TryGetValue(member, out PropertyFunctionEffect known) ? known : effects.Default;
         return effect switch
         {
+            PropertyFunctionEffect.ReadEnvironment or PropertyFunctionEffect.ExpandEnvironment when argumentCount != 1 => PropertyFunctionEffect.Unsupported,
             PropertyFunctionEffect.ReadDirectory when argumentCount > 2 => PropertyFunctionEffect.Unsupported, // a SearchOption argument may recurse
             _ => effect,
         };
@@ -88,6 +92,8 @@ internal static class PropertyFunctionEffects
         {
             [typeof(Environment)] = new(PropertyFunctionEffect.Unsupported, new()
             {
+                ["GetEnvironmentVariable"] = PropertyFunctionEffect.ReadEnvironment,
+                ["ExpandEnvironmentVariables"] = PropertyFunctionEffect.ExpandEnvironment,
                 ["StackTrace"] = PropertyFunctionEffect.Volatile,
                 ["TickCount"] = PropertyFunctionEffect.Volatile,
                 ["TickCount64"] = PropertyFunctionEffect.Volatile,

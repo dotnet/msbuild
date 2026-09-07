@@ -85,11 +85,13 @@ internal sealed record EvaluationInputKey(
 /// Files and directories evaluation read, probed, or enumerated, keyed by full path.
 /// Missing paths matter as much as existing ones: their appearance changes the result.
 /// </param>
+/// <param name="EnvironmentReads">Environment variables read through property functions; variables imported as properties are part of the key.</param>
 /// <param name="NonCacheable">Why the result must never be reused, or <see cref="NonCacheableReason.None"/>.</param>
 /// <param name="NonCacheableDetail">The input that made the evaluation non-cacheable, for diagnostics.</param>
 internal sealed record EvaluationInputs(
     EvaluationInputKey Key,
     IReadOnlyDictionary<string, FileDependency> Files,
+    IReadOnlyDictionary<string, string?> EnvironmentReads,
     NonCacheableReason NonCacheable,
     string? NonCacheableDetail)
 {

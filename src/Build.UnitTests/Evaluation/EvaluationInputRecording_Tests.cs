@@ -193,6 +193,27 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     }
 
     [Theory]
+    [InlineData("second")]
+    [InlineData(null)]
+    public void EnvironmentReadIsRecordedButNotRevalidated(string? currentValue)
+    {
+        _env.SetEnvironmentVariable("MSBUILD_TEST_INPUT", "first");
+        string project = CreateProject("""
+            <Project>
+              <PropertyGroup>
+                <Value>$([System.Environment]::GetEnvironmentVariable('MSBUILD_TEST_INPUT'))</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+        EvaluationInputs inputs = Evaluate(project);
+        inputs.EnvironmentReads["MSBUILD_TEST_INPUT"].ShouldBe("first");
+
+        _env.SetEnvironmentVariable("MSBUILD_TEST_INPUT", currentValue);
+
+        inputs.EnvironmentReads["MSBUILD_TEST_INPUT"].ShouldBe("first");
+    }
+
+    [Theory]
     [InlineData("$([System.DateTime]::Now)")]
     [InlineData("$([System.Guid]::NewGuid())")]
     [InlineData("$([System.DateTime]::Parse('12:34'))")]
@@ -489,6 +510,30 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         inputs.NonCacheableDetail.ShouldBe(link);
     }
 #endif
+
+    [Fact]
+    public void ExpandEnvironmentVariablesRecordsEachReferencedVariable()
+    {
+        _env.SetEnvironmentVariable("MSBUILD_TEST_EXPAND_ROOT", "first");
+        _env.SetEnvironmentVariable("MSBUILD_TEST_EXPAND_MISSING", null);
+        string project = CreateProject("""
+            <Project>
+              <PropertyGroup>
+                <Value>$([System.Environment]::ExpandEnvironmentVariables('%MSBUILD_TEST_EXPAND_ROOT%\src\%MSBUILD_TEST_EXPAND_MISSING%'))</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        EvaluationInputs inputs = Evaluate(project);
+
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        inputs.EnvironmentReads["MSBUILD_TEST_EXPAND_ROOT"].ShouldBe("first");
+        inputs.EnvironmentReads["MSBUILD_TEST_EXPAND_MISSING"].ShouldBeNull();
+
+        _env.SetEnvironmentVariable("MSBUILD_TEST_EXPAND_MISSING", "now set");
+
+        inputs.EnvironmentReads["MSBUILD_TEST_EXPAND_MISSING"].ShouldBeNull();
+    }
 
     [Fact]
     public void RecordedPathsShareOneStringAcrossEvaluations()

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.NET.StringTools;
 
 namespace Microsoft.Build.Evaluation.Context;
@@ -20,6 +21,7 @@ internal sealed class EvaluationInputRecorder
     // Guarded by its own lock: glob expansion enumerates directories in parallel, every other seam runs on the
     // evaluation thread. SDK-style projects record 150 to 250 paths, so one growth covers them.
     private readonly Dictionary<string, FileDependency> _files = new(128, FileUtilities.PathComparer);
+    private readonly Dictionary<string, string?> _environmentReads = new(CommunicationsUtilities.EnvironmentVariableComparer);
     private NonCacheableReason _nonCacheable;
     private string? _nonCacheableDetail;
     private bool _frozen;
@@ -105,6 +107,39 @@ internal sealed class EvaluationInputRecorder
         }
     }
 
+    internal void RecordEnvironmentRead(string name, string? value)
+    {
+        if (IsRecording)
+        {
+            _environmentReads[name] = value;
+        }
+    }
+
+    /// <summary>
+    /// Records every variable a <c>%NAME%</c> reference in <paramref name="text"/> resolves, which is exactly what
+    /// <c>Environment.ExpandEnvironmentVariables</c> depends on. An undefined variable is recorded as missing.
+    /// </summary>
+    private void RecordEnvironmentReferences(string text)
+    {
+        int start = text.IndexOf('%');
+        while (start >= 0)
+        {
+            int end = text.IndexOf('%', start + 1);
+            if (end < 0)
+            {
+                return;
+            }
+
+            if (end > start + 1)
+            {
+                string name = text.Substring(start + 1, end - start - 1);
+                RecordEnvironmentRead(name, Environment.GetEnvironmentVariable(name));
+            }
+
+            start = text.IndexOf('%', end + 1);
+        }
+    }
+
     /// <summary>
     /// Records what a property function read from the file system, environment, or registry, or marks the evaluation
     /// non-cacheable when the function is volatile or not classified.
@@ -139,6 +174,12 @@ internal sealed class EvaluationInputRecorder
                 break;
             case PropertyFunctionEffect.ReadDirectory when firstArgument is not null:
                 RecordPath(firstArgument);
+                break;
+            case PropertyFunctionEffect.ReadEnvironment when firstArgument is not null:
+                RecordEnvironmentRead(firstArgument, result as string);
+                break;
+            case PropertyFunctionEffect.ExpandEnvironment when firstArgument is not null:
+                RecordEnvironmentReferences(firstArgument);
                 break;
             case PropertyFunctionEffect.PureUnlessPathArgument when !HasPathArgument(arguments):
                 break;
@@ -200,6 +241,7 @@ internal sealed class EvaluationInputRecorder
         return new EvaluationInputs(
             key,
             new ReadOnlyDictionary<string, FileDependency>(_files),
+            new ReadOnlyDictionary<string, string?>(_environmentReads),
             _nonCacheable,
             _nonCacheableDetail);
     }
