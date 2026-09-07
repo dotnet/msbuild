@@ -149,6 +149,17 @@ Scalar string, primitive, enum, decimal, date/time, timespan, and GUID fallbacks
 Other fallback objects mark recording non-cacheable instead of retaining a mutable reference.
 Registry access alone no longer stops recording. These are logical requests/results, not a
 trace of each internal view probe or of resolver/toolset-internal registry accesses.
+The comparison summary prints only the registry-read count, not potentially sensitive values.
+
+To compare the recorded inputs with every path the process touched, build with
+`-p:EnableEvaluationInputDetours=true` on Windows x64 and run the comparison instead of a benchmark.
+It prints a summary line, then every touched path the recording does not explain: `DETOURS_ONLY|` for
+probes and enumerations, `DETOURS_ONLY_READ|` for content reads, and `RECORDED_ONLY|` for recorded
+paths the sandbox never saw.
+
+```
+dotnet run -c Release -f net11.0 -p:EnableEvaluationInputDetours=true -- --evaluation-input-detours --project <path> [--global-property Name=Value]
+```
 
 ## Command-Line Options
 
