@@ -37,6 +37,7 @@ Before starting any phase, ensure you have these values (the user must provide t
 | Input | Example | How to determine |
 |---|---|---|
 | `PREVIOUS_RELEASE_VERSION` | `18.9` | Previous entry in the merge-flow chain |
+| `PREVIOUS_RELEASE_EXACT_VERSION` | `18.9.6` | The version the previous release actually shipped as. From the previous release's tracking issue, or `git tag --list 'v18.9.*'`. Used by Phase 5.3a. |
 | `THIS_RELEASE_VERSION` | `18.10` | Current `VersionPrefix` in `eng/Versions.props` (drop `.0`) |
 | `NEXT_VERSION` | `18.11` | User-provided — not computable from current version |
 | `BRANCH_SNAP_DATE` | `YYYY-MM-DD` | From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) — when MSBuild branches `vs*` from main, insertion targets VS `main` |
@@ -84,7 +85,7 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
 | **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Public API promotion, OptProf bootstrap (usually a no-op), M2/QB approval only if behind schedule, babysit the VS insertion into VS `main` before insiders snap |
-| **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | nuget.org publish, docs, GitHub release, cleanup |
+| **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | Resolve the exact shipped version (SDK-coupled? SDK wins over VS `rel/stable`), nuget.org publish, docs, GitHub release, Change Waves Learn sync, retro |
 
 ## DARC Batching
 
@@ -113,7 +114,7 @@ When asked to execute a specific phase:
 4. For DARC commands: batch writes into one configuration PR per phase
 5. Record all output URLs in the tracking issue's artifact table
 6. Mark checkboxes as completed in the tracking issue
-7. In **Phase 5**: if `documentation/wiki/ChangeWaves.md` is changed for this release, update the public Learn page at `https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio` (or track the required update with an explicit issue/link in the release artifacts).
+7. In **Phase 4** (step 4.7): if `documentation/wiki/ChangeWaves.md` is changed for this release, update the public Learn page at https://learn.microsoft.com/visualstudio/msbuild/change-waves. Sync the Change Waves Learn page from `documentation/wiki/ChangeWaves.md` on the `vsXX.Y` branch that is live in VS Insiders / the latest preview SDK. PR goes to `MicrosoftDocs/visualstudio-docs-pr` (`docs/msbuild/change-waves.md`); example: https://github.com/MicrosoftDocs/visualstudio-docs-pr/pull/15662.
 
 ## Key Files
 
@@ -121,8 +122,8 @@ When asked to execute a specific phase:
 |---|---|
 | [`documentation/release-checklist.md`](../../../documentation/release-checklist.md) | **Operational checklist** — the source of truth |
 | [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, public API, major version steps |
-| [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc whose release-cycle updates may require a Learn page sync |
-| [MSBuild Change Waves Learn page](https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio) | Public docs target to update/track during Phase 5 docs work |
+| [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc for the Learn page sync — always sync the `vsXX.Y` (Insiders/preview-SDK) copy, not `main` |
+| [MSBuild Change Waves Learn page](https://learn.microsoft.com/visualstudio/msbuild/change-waves) | Public docs target to [`MicrosoftDocs/visualstudio-docs-pr`](https://github.com/MicrosoftDocs/visualstudio-docs-pr) (`docs/msbuild/change-waves.md`) |
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
 | [`.config/git-merge-flow-config.jsonc`](../../../.config/git-merge-flow-config.jsonc) | Branch merge chain — update each release |
 | [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `AutoInsertTargetBranch` mappings |
@@ -142,7 +143,7 @@ After completing all phases, verify:
 4. VS insertion PR merged
 5. Packages published to nuget.org
 6. GitHub release created with tag `v{{THIS_RELEASE_EXACT_VERSION}}`
-7. If `documentation/wiki/ChangeWaves.md` is changed, the corresponding Learn page update at `https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio` is completed or explicitly tracked
+7. The Learn page https://learn.microsoft.com/visualstudio/msbuild/change-waves lists exactly the waves present in `vsXX.Y` (the version in VS Insiders / the latest released preview SDK), or the sync is explicitly tracked
 
 ## Error Recovery
 

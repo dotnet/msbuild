@@ -624,7 +624,7 @@
   </ItemGroup>
   <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
     <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
-    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005</WarningsNotAsErrors>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005;MSBuildTask0006;MSBuildTask0007;MSBuildTask0008</WarningsNotAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Resources.Extensions" />

@@ -3569,7 +3569,10 @@ namespace Microsoft.Build.Execution
                         s_singletonInstance = null;
                     }
 
-                    TelemetryManager.Instance.Dispose();
+                    // The telemetry session is process wide and is owned by whoever initialized it (the MSBuild
+                    // entry point, or the host such as Visual Studio). A BuildManager is not its owner, so it must
+                    // not tear it down here - doing so would kill telemetry (including crash telemetry) for the
+                    // rest of the process, which still runs after the build manager is disposed.
 
                     _disposed = true;
                 }
