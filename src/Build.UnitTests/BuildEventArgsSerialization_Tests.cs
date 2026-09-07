@@ -1130,6 +1130,50 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void TaskParameterTaskItemDataDirectPathPreservesSerializedBytes()
+        {
+            var metadata = new Dictionary<string, string>
+            {
+                ["First"] = "value",
+                ["Second"] = string.Empty,
+                ["Escaped"] = "value%3b",
+            };
+            byte[] directBytes = SerializeTaskParameter(
+                [
+                    new TaskItemData("ItemSpec1", new Dictionary<string, string>(metadata)),
+                    new TaskItemData("ItemSpec2", new Dictionary<string, string>(metadata)),
+                    new TaskItemData("ItemSpec3", metadata: null),
+                ]);
+            byte[] fallbackBytes = SerializeTaskParameter(
+                [
+                    new FallbackTaskItem("ItemSpec1", new Dictionary<string, string>(metadata)),
+                    new FallbackTaskItem("ItemSpec2", new Dictionary<string, string>(metadata)),
+                    new FallbackTaskItem("ItemSpec3", new Dictionary<string, string>()),
+                ]);
+
+            directBytes.ShouldBe(fallbackBytes);
+
+            static byte[] SerializeTaskParameter(ITaskItem[] items)
+            {
+                var args = new TaskParameterEventArgs(
+                    TaskParameterMessageKind.TaskOutput,
+                    "ParameterName",
+                    "PropertyName",
+                    "ItemName",
+                    items,
+                    logItemMetadata: true,
+                    DateTime.MinValue);
+                var stream = new MemoryStream();
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(writer).Write(args);
+                }
+
+                return stream.ToArray();
+            }
+        }
+
+        [Fact]
         public void RoundtripProjectEvaluationStartedEventArgs()
         {
             var projectFile = @"C:\foo\bar.proj";
@@ -1231,6 +1275,12 @@ namespace Microsoft.Build.UnitTests
                 {
                     [metadataName] = metadataValue,
                 };
+            }
+
+            internal FallbackTaskItem(string itemSpec, Dictionary<string, string> metadata)
+            {
+                ItemSpec = itemSpec;
+                _metadata = metadata;
             }
 
             public string ItemSpec { get; set; }

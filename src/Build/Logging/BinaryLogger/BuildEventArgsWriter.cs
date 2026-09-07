@@ -1195,6 +1195,12 @@ namespace Microsoft.Build.Logging
 
             if (backingMetadata == null)
             {
+                if (item is TaskItemData taskItemData)
+                {
+                    WriteNameValueList(taskItemData.Metadata);
+                    return;
+                }
+
                 // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
                 // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
                 // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
@@ -1274,6 +1280,23 @@ namespace Microsoft.Build.Logging
             }
 
             HashKey hash = HashAllStrings(nameValueListBuffer);
+            return WriteNameValueList(hash);
+        }
+
+        private int WriteNameValueList(IEnumerable<KeyValuePair<string, string>> nameValueList)
+        {
+            HashKey hash = HashAllStrings(nameValueList);
+            if (nameValueIndexListBuffer.Count == 0)
+            {
+                Write((byte)0);
+                return 0;
+            }
+
+            return WriteNameValueList(hash);
+        }
+
+        private int WriteNameValueList(HashKey hash)
+        {
             if (!nameValueListHashes.TryGetValue(hash, out var recordId))
             {
                 recordId = nameValueRecordId;
@@ -1310,7 +1333,7 @@ namespace Microsoft.Build.Logging
             using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
             {
                 Write(nameValueIndexListBuffer.Count);
-                for (int i = 0; i < nameValueListBuffer.Count; i++)
+                for (int i = 0; i < nameValueIndexListBuffer.Count; i++)
                 {
                     var kvp = nameValueIndexListBuffer[i];
                     Write(kvp.Key);
@@ -1337,6 +1360,24 @@ namespace Microsoft.Build.Logging
             for (int i = 0; i < nameValueList.Count; i++)
             {
                 var kvp = nameValueList[i];
+                var (keyIndex, keyHash) = HashString(kvp.Key);
+                var (valueIndex, valueHash) = HashString(kvp.Value);
+                hash = hash.Add(keyHash);
+                hash = hash.Add(valueHash);
+                nameValueIndexListBuffer.Add(new KeyValuePair<int, int>(keyIndex, valueIndex));
+            }
+
+            return hash;
+        }
+
+        private HashKey HashAllStrings(IEnumerable<KeyValuePair<string, string>> nameValueList)
+        {
+            HashKey hash = new HashKey();
+
+            nameValueIndexListBuffer.Clear();
+
+            foreach (KeyValuePair<string, string> kvp in nameValueList)
+            {
                 var (keyIndex, keyHash) = HashString(kvp.Key);
                 var (valueIndex, valueHash) = HashString(kvp.Value);
                 hash = hash.Add(keyHash);
