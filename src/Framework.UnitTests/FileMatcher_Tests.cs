@@ -2681,6 +2681,90 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
+        [Fact]
+        public void SharedCacheHitReportsTraversedDirectoriesWithoutEnumerating()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            TransientTestFolder sub = _env.CreateFolder(Path.Combine(root.Path, "sub"), createFolder: true);
+            _env.CreateFile(sub, "b.cs", string.Empty);
+            TransientTestFolder empty = _env.CreateFolder(Path.Combine(root.Path, "empty"), createFolder: true);
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            new FileMatcher(FileSystems.Default, cache, cacheTraversedDirectories: true).GetFiles(root.Path, "**/*.cs").FileList.Length.ShouldBe(2);
+
+            List<string> traversed = [];
+            var reusing = new FileMatcher(new ThrowingFileSystem(), cache, directoryTraversed: traversed.Add, cacheTraversedDirectories: true);
+
+            reusing.GetFiles(root.Path, "**/*.cs").FileList.Length.ShouldBe(2);
+
+            traversed.Select(path => path.TrimEnd(Path.DirectorySeparatorChar)).ShouldBe([root.Path, sub.Path, empty.Path], ignoreOrder: true);
+        }
+
+        [Fact]
+        public void CacheHitWithoutStoredDirectoriesReportsThemByEnumeratingAgain()
+        {
+            // A cache that does not outlive the evaluation stores no directories; a hit then enumerates again through the
+            // entry cache so the recorder still sees every directory.
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            List<string> traversed = [];
+            var matcher = new FileMatcher(FileSystems.Default, cache, directoryTraversed: traversed.Add);
+
+            matcher.GetFiles(root.Path, "*.cs").FileList.Length.ShouldBe(1);
+            traversed.Clear();
+            matcher.GetFiles(root.Path, "*.cs").FileList.Length.ShouldBe(1);
+
+            traversed.Select(path => path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)).ShouldContain(root.Path);
+            cache.Keys.ShouldAllBe(key => !key.EndsWith("\0traversed", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void SharedCacheHitReportsTheMissingRootDirectory()
+        {
+            // An expansion rooted in a directory that does not exist is empty; creating the directory changes it, so the
+            // reuse must report the probed root even though nothing was enumerated.
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            string missing = Path.Combine(root.Path, "missing");
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            new FileMatcher(FileSystems.Default, cache, cacheTraversedDirectories: true).GetFiles(root.Path, "missing/**/*.cs").FileList.ShouldBeEmpty();
+
+            List<string> traversed = [];
+            var reusing = new FileMatcher(new ThrowingFileSystem(), cache, directoryTraversed: traversed.Add, cacheTraversedDirectories: true);
+
+            reusing.GetFiles(root.Path, "missing/**/*.cs").FileList.ShouldBeEmpty();
+
+            traversed.Select(path => path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)).ShouldBe([missing]);
+        }
+
+        /// <summary>Fails every operation, proving a cached expansion is reused without touching the file system.</summary>
+        private sealed class ThrowingFileSystem : IFileSystem
+        {
+            public TextReader ReadFile(string path) => throw new InvalidOperationException(path);
+
+            public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => throw new InvalidOperationException(path);
+
+            public string ReadFileAllText(string path) => throw new InvalidOperationException(path);
+
+            public byte[] ReadFileAllBytes(string path) => throw new InvalidOperationException(path);
+
+            public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => throw new InvalidOperationException(path);
+
+            public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => throw new InvalidOperationException(path);
+
+            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => throw new InvalidOperationException(path);
+
+            public FileAttributes GetAttributes(string path) => throw new InvalidOperationException(path);
+
+            public DateTime GetLastWriteTimeUtc(string path) => throw new InvalidOperationException(path);
+
+            public bool DirectoryExists(string path) => throw new InvalidOperationException(path);
+
+            public bool FileExists(string path) => throw new InvalidOperationException(path);
+
+            public bool FileOrDirectoryExists(string path) => throw new InvalidOperationException(path);
+        }
+
         private sealed class FileSystemAdapter : IFileSystem
         {
             private readonly MockFileSystem _mockFileSystem;

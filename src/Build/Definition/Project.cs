@@ -62,6 +62,11 @@ namespace Microsoft.Build.Evaluation
 
         internal bool IsLinked => implementationInternal.IsLinked;
         internal ProjectLink Link => implementation;
+
+        /// <summary>
+        /// Inputs the last evaluation recorded when MSBUILDRECORDEVALUATIONINPUTS is set; null when recording is off or the project is linked.
+        /// </summary>
+        internal Context.EvaluationInputs EvaluationInputs => (implementation as ProjectImpl)?.EvaluationInputs;
         object ILinkableObject.Link => IsLinked ? Link : null;
 
         /// <summary>
@@ -3588,6 +3593,11 @@ namespace Microsoft.Build.Evaluation
                 return new ProjectInstance(_data, DirectoryPath, FullPath, ProjectCollection.HostServices, ProjectCollection.EnvironmentProperties, settings);
             }
 
+            /// <summary>
+            /// Inputs the last evaluation recorded when MSBUILDRECORDEVALUATIONINPUTS is set, otherwise null.
+            /// </summary>
+            internal Context.EvaluationInputs EvaluationInputs { get; private set; }
+
             private void Reevaluate(
                 ILoggingService loggingServiceForEvaluation,
                 ProjectLoadSettings loadSettings,
@@ -3595,7 +3605,7 @@ namespace Microsoft.Build.Evaluation
             {
                 evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
-                Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
+                EvaluationInputs = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
                     _data,
                     Owner,
                     Xml,

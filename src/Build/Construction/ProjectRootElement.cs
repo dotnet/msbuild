@@ -640,6 +640,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenReadUtc.ToLocalTime();
 
+        /// <summary>
+        /// The UTC last write time of the file when it was read, or default when this element was not read from a file.
+        /// </summary>
+        internal DateTime LastWriteTimeWhenReadUtc => Link != null ? RootLink.LastWriteTimeWhenRead.ToUniversalTime() : _lastWriteTimeWhenReadUtc;
+
         internal DateTime? StreamTimeUtc = null;
 
         /// <summary>
@@ -2094,6 +2099,10 @@ namespace Microsoft.Build.Construction
             try
             {
                 MSBuildEventSource.Log.LoadDocumentStart(fullPath);
+
+                // Take the timestamp before reading the content, so a write that lands during the read shows up as a
+                // change after it and the element is reloaded rather than trusted.
+                FileInfo fileInfoBeforeRead = FileUtilities.GetFileInfoNoThrow(fullPath);
                 using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
                 {
                     _encoding = xtr.Encoding;
@@ -2109,7 +2118,7 @@ namespace Microsoft.Build.Construction
                     XmlDocument.FullPath = fullPath;
                 }
 
-                _lastWriteTimeWhenReadUtc = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTimeUtc;
+                _lastWriteTimeWhenReadUtc = (fileInfoBeforeRead ?? FileUtilities.GetFileInfoNoThrow(fullPath)).LastWriteTimeUtc;
                 if (StreamTimeUtc < _lastWriteTimeWhenReadUtc)
                 {
                     StreamTimeUtc = null;

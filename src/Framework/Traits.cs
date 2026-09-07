@@ -60,6 +60,11 @@ namespace Microsoft.Build.Framework
         public readonly bool UseLegacyCultureSensitiveFileGlobs = Environment.GetEnvironmentVariable("MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS") == "1";
 
         /// <summary>
+        /// Record the inputs each project evaluation consumes so an evaluation cache can validate them.
+        /// </summary>
+        public readonly bool RecordEvaluationInputs = Environment.GetEnvironmentVariable("MSBUILDRECORDEVALUATIONINPUTS") == "1";
+
+        /// <summary>
         /// Cache file existence for the entire process
         /// </summary>
         public readonly bool CacheFileExistence = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileExistence"));

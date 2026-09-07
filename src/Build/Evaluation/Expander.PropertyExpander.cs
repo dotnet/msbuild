@@ -732,6 +732,7 @@ internal partial class Expander<P, I>
                     }
 
                     object valueFromRegistry = Registry.GetValue(registryKeyName, valueName, null /* default if key or value name is not found */);
+                    _propertiesUseTracker.InputRecorder?.RecordRegistryRead(registryKeyName, valueName, valueFromRegistry);
 
                     if (valueFromRegistry != null)
                     {

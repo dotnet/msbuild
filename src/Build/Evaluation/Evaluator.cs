@@ -25,6 +25,7 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.NET.StringTools;
 using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using Constants = Microsoft.Build.Framework.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
@@ -178,6 +179,11 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationContext _evaluationContext;
 
         /// <summary>
+        /// Records the inputs this evaluation consumes; null unless <see cref="Traits.RecordEvaluationInputs"/> is set.
+        /// </summary>
+        private readonly EvaluationInputRecorder _inputRecorder;
+
+        /// <summary>
         /// The environment properties with which evaluation should take place.
         /// </summary>
         private readonly PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
@@ -267,6 +273,25 @@ namespace Microsoft.Build.Evaluation
                 _evaluationContext = evaluationContext.ContextWithFileSystem(fileSystem);
             }
 
+            // A host file system or directory cache may answer from state the recorder cannot see, so such evaluations are not reusable.
+            bool hostFileSystem = directoryCache is not null || evaluationContext.FileSystem is not CachingFileSystemWrapper;
+            _inputRecorder = CreateInputRecorder(projectRootElement, evaluationStage, hostFileSystem);
+            if (_inputRecorder is not null)
+            {
+                _evaluationContext = _evaluationContext.ContextWithFileSystem(
+                    new RecordingFileSystem(_evaluationContext.FileSystem, _inputRecorder),
+                    _inputRecorder);
+
+                // The parser skips elements and attributes the Directory.Parse.config files allow, so their content is an input too.
+                if (projectRootElementCache.ParserIgnoreConfiguration is { } parserConfiguration)
+                {
+                    foreach (string configFile in parserConfiguration.LoadedConfigFiles)
+                    {
+                        _inputRecorder.RecordPath(configFile);
+                    }
+                }
+            }
+
             // Create containers for the evaluation results
             data.InitializeForEvaluation(toolsetProvider, _evaluationContext, _evaluationLoggingContext);
 
@@ -307,6 +332,149 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
         }
 
+        private static EvaluationInputRecorder CreateInputRecorder(ProjectRootElement projectRootElement, ProjectEvaluationStage evaluationStage, bool hostFileSystem)
+        {
+            EvaluationInputRecorder recorder = EvaluationInputRecorder.CreateIfEnabled();
+            if (recorder is null)
+            {
+                return null;
+            }
+
+            if (projectRootElement.FullPath is null || projectRootElement.Link is not null)
+            {
+                recorder.MarkNonCacheable(NonCacheableReason.InMemoryProject);
+            }
+            else if (evaluationStage != ProjectEvaluationStage.Full)
+            {
+                recorder.MarkNonCacheable(NonCacheableReason.PartialEvaluation);
+            }
+            else if (hostFileSystem)
+            {
+                recorder.MarkNonCacheable(NonCacheableReason.HostFileSystem);
+            }
+            else if (Traits.Instance.CacheFileExistence || Traits.Instance.MSBuildCacheFileEnumerations)
+            {
+                // Process-wide caches answer probes and globs without touching the file system the recorder watches.
+                recorder.MarkNonCacheable(NonCacheableReason.ProcessWideCache);
+            }
+            else if (Traits.Instance.UseLazyWildCardEvaluation)
+            {
+                recorder.MarkNonCacheable(NonCacheableReason.LazyWildcards);
+            }
+            else if (FeatureSwitches.EnableAllPropertyFunctions)
+            {
+                recorder.MarkNonCacheable(NonCacheableReason.AllPropertyFunctionsEnabled);
+            }
+
+            return recorder;
+        }
+
+        private EvaluationInputKey CreateInputKey() =>
+            new(
+                _projectRootElement.FullPath,
+                FormatGlobalProperties(),
+                _data.Toolset.ToolsVersion,
+                _data.Toolset.ToolsPath,
+                _data.SubToolsetVersion,
+                ComputeToolsetFingerprint(),
+                _evaluationStage,
+                _loadSettings,
+                _interactive,
+                _maxNodeCount,
+                BuildParameters.StartupDirectory,
+                FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory(),
+                CultureInfo.CurrentCulture.Name,
+                CultureInfo.CurrentUICulture.Name,
+                ProjectCollection.DisplayVersion,
+                ChangeWaves.DisabledWave?.ToString(),
+                ComputeEnvironmentFingerprint(),
+                _projectRootElementCache.ParserIgnoreConfiguration?.ComputeFingerprint() ?? 0);
+
+        /// <summary>
+        /// Global properties sorted by name as <c>name=value</c> pairs, each ended by a NUL character that values do not contain,
+        /// so the key compares by value.
+        /// </summary>
+        private string FormatGlobalProperties()
+        {
+            var properties = new ProjectPropertyInstance[_data.GlobalPropertiesDictionary.Count];
+            int index = 0;
+            foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
+            {
+                properties[index++] = property;
+            }
+
+            Array.Sort(properties, static (left, right) => string.Compare(left.Name, right.Name, StringComparison.OrdinalIgnoreCase));
+
+            var builder = new StringBuilder();
+            foreach (ProjectPropertyInstance property in properties)
+            {
+                builder.Append(property.Name).Append('=').Append(property.EvaluatedValue).Append('\0');
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Fingerprints what the toolset adds beyond its version and path: its properties, the selected sub-toolset's properties,
+        /// the import fallback search paths, and the override tasks path. Each group carries its own salt so a property present in
+        /// two groups does not cancel out.
+        /// </summary>
+        private long ComputeToolsetFingerprint()
+        {
+            Toolset toolset = _data.Toolset;
+            long fingerprint = FowlerNollVo1aHash.ComputeHash64Fast(toolset.OverrideTasksPath ?? string.Empty);
+            foreach (ProjectPropertyInstance property in toolset.Properties.Values)
+            {
+                fingerprint ^= HashProperty(1, property);
+            }
+
+            if (_data.SubToolsetVersion is not null && toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out SubToolset subToolset))
+            {
+                foreach (ProjectPropertyInstance property in subToolset.Properties.Values)
+                {
+                    fingerprint ^= HashProperty(2, property);
+                }
+            }
+
+            if (toolset.ImportPropertySearchPathsTable is not null)
+            {
+                foreach (ProjectImportPathMatch match in toolset.ImportPropertySearchPathsTable.Values)
+                {
+                    long paths = FowlerNollVo1aHash.ComputeHash64Fast(match.PropertyName);
+                    foreach (string path in match.SearchPaths)
+                    {
+                        paths = FowlerNollVo1aHash.Combine64(paths, FowlerNollVo1aHash.ComputeHash64Fast(path));
+                    }
+
+                    fingerprint ^= FowlerNollVo1aHash.Combine64(3, paths);
+                }
+            }
+
+            return fingerprint;
+        }
+
+        /// <summary>
+        /// Fingerprints the environment variables imported as properties, so a different environment selects a different cache entry
+        /// and individual reads of those properties need no tracking. Combining with XOR keeps the result independent of enumeration order.
+        /// </summary>
+        private long ComputeEnvironmentFingerprint()
+        {
+            long fingerprint = _environmentProperties.Count;
+            foreach (ProjectPropertyInstance property in _environmentProperties)
+            {
+                fingerprint ^= HashProperty(0, property);
+            }
+
+            return fingerprint;
+        }
+
+        private static long HashProperty(long salt, ProjectPropertyInstance property) =>
+            FowlerNollVo1aHash.Combine64(
+                salt,
+                FowlerNollVo1aHash.Combine64(
+                    FowlerNollVo1aHash.ComputeHash64Fast(property.Name),
+                    FowlerNollVo1aHash.ComputeHash64Fast(property.EvaluatedValue)));
+
 
         /// <summary>
         /// Delegate passed to methods to provide basic expression evaluation
@@ -328,7 +496,7 @@ namespace Microsoft.Build.Evaluation
         /// This is a helper static method so that the caller can just do "Evaluator.Evaluate(..)" without
         /// newing one up, yet the whole class need not be static.
         /// </remarks>
-        internal static void Evaluate(
+        internal static EvaluationInputs Evaluate(
             IEvaluatorData<P, I, M, D> data,
             Project project,
             ProjectRootElement root,
@@ -371,9 +539,11 @@ namespace Microsoft.Build.Evaluation
                 buildEventContext,
                 evaluationStage);
 
+            EvaluationInputs inputs = null;
             try
             {
                 evaluator.Evaluate();
+                inputs = evaluator._inputRecorder?.Freeze(evaluator.CreateInputKey());
             }
             catch (PathTooLongException ex)
             {
@@ -403,6 +573,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
+            return inputs;
         }
 
         /// <summary>
@@ -948,6 +1119,18 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void PerformDepthFirstPass(ProjectRootElement currentProjectOrImport)
         {
+            if (_inputRecorder is not null && !currentProjectOrImport.IsEphemeral)
+            {
+                if (currentProjectOrImport.HasUnsavedChanges)
+                {
+                    _inputRecorder.MarkNonCacheable(NonCacheableReason.InMemoryProject, currentProjectOrImport.FullPath);
+                }
+                else
+                {
+                    _inputRecorder.RecordProjectSource(currentProjectOrImport.FullPath, currentProjectOrImport.LastWriteTimeWhenReadUtc);
+                }
+            }
+
             using (_evaluationProfiler.TrackFile(currentProjectOrImport.FullPath))
             {
                 // We accumulate InitialTargets from the project and each import
@@ -1691,7 +1874,9 @@ namespace Microsoft.Build.Evaluation
 
                 // If the whole fallback folder doesn't exist, short-circuit and don't
                 // bother constructing an exact file path.
-                if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
+                bool fallbackRootExists = _fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded);
+                _inputRecorder?.RecordProbe(extensionPathExpanded, ProbeKind.Directory, fallbackRootExists);
+                if (!fallbackRootExists)
                 {
                     // Set to log an error only if the change wave is enabled.
                     missingDirectoryDespiteTrueCondition = !containsWildcards;
@@ -1901,6 +2086,8 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
                 }
 
+                _inputRecorder?.RecordSdkResolution(sdkReference, sdkResult);
+
                 if (!sdkResult.Success)
                 {
                     if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk))
@@ -1979,7 +2166,9 @@ namespace Microsoft.Build.Evaluation
                     // "S:\sdk\.dotnet\sdk\10.0.100-preview.6.25315.102\Sdks\Microsoft.NET.Sdk\Sdk"
                     //                  ^5              ^4               ^3          ^2        ^1
                     string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5), Constants.DotnetProcessName);
-                    if (FileSystems.Default.FileExists(dotnetExe))
+                    bool dotnetExeExists = FileSystems.Default.FileExists(dotnetExe);
+                    _inputRecorder?.RecordProbe(dotnetExe, ProbeKind.File, dotnetExeExists);
+                    if (dotnetExeExists)
                     {
                         _data.AddSdkResolvedEnvironmentVariable(Constants.DotnetHostPathEnvVarName, dotnetExe);
                     }
@@ -2334,7 +2523,9 @@ namespace Microsoft.Build.Evaluation
                         // Perhaps the import tag has a typo in, for example.
 
                         // There's a specific message for file not existing
-                        if (!FileSystems.Default.FileExists(importFileUnescaped))
+                        bool importExists = FileSystems.Default.FileExists(importFileUnescaped);
+                        _inputRecorder?.RecordProbe(importFileUnescaped, ProbeKind.File, importExists);
+                        if (!importExists)
                         {
                             if ((_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
                             {

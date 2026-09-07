@@ -118,6 +118,7 @@ internal partial class Expander<P, I>
     {
         _fileSystem = evaluationContext.FileSystem;
         EvaluationContext = evaluationContext;
+        _propertiesUseTracker.InputRecorder = evaluationContext.InputRecorder;
     }
 
     /// <summary>
@@ -176,6 +177,7 @@ internal partial class Expander<P, I>
         : this(properties, items, metadata, fileSystem, loggingContext)
     {
         EvaluationContext = evaluationContext;
+        _propertiesUseTracker.InputRecorder = evaluationContext?.InputRecorder;
     }
 
     /// <summary>
@@ -206,6 +208,14 @@ internal partial class Expander<P, I>
     {
         get { return _propertiesUseTracker; }
         set { _propertiesUseTracker = value; }
+    }
+
+    private void RecordMetadataInputs(string expression, ExpanderOptions options)
+    {
+        if (_propertiesUseTracker.InputRecorder is { } inputRecorder && (options & ExpanderOptions.ExpandMetadata) != 0)
+        {
+            inputRecorder.RecordMetadataExpression(expression);
+        }
     }
 
     /// <summary>
@@ -253,6 +263,7 @@ internal partial class Expander<P, I>
 
         Assumed.NotNull(elementLocation);
 
+        RecordMetadataInputs(expression, options);
         string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
         result = PropertyExpander.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
         result = ItemExpander.ExpandItemVectorsIntoString(this, result, _items, options, elementLocation);
@@ -274,6 +285,7 @@ internal partial class Expander<P, I>
 
         Assumed.NotNull(elementLocation);
 
+        RecordMetadataInputs(expression, options);
         string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
         return PropertyExpander.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
     }
@@ -322,6 +334,7 @@ internal partial class Expander<P, I>
 
         Assumed.NotNull(elementLocation);
 
+        RecordMetadataInputs(expression, options);
         expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
         expression = PropertyExpander.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
         expression = FileUtilities.MaybeAdjustFilePath(expression);

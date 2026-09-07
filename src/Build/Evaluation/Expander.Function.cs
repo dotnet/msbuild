@@ -368,6 +368,7 @@ internal partial class Expander<P, I>
         {
             object functionResult = String.Empty;
             object[] args = null;
+            object[] invocationArguments = null;
 
             try
             {
@@ -495,7 +496,7 @@ internal partial class Expander<P, I>
                 {
                     if (!WellKnownFunctions.TryExecuteWellKnownConstructorNoThrow(_receiverType, out functionResult, args))
                     {
-                        functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
+                        functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */, out invocationArguments);
                     }
                 }
                 else
@@ -551,10 +552,12 @@ internal partial class Expander<P, I>
                         {
                             // The standard binder failed, so do our best to coerce types into the arguments for the function
                             // This may happen if the types need coercion, but it may also happen if the object represents a type that contains open type parameters, that is, ContainsGenericParameters returns true.
-                            functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */);
+                            functionResult = LateBindExecute(ex, _bindingFlags, objectInstance, args, false /* is not constructor */, out invocationArguments);
                         }
                     }
                 }
+
+                _propertiesUseTracker.InputRecorder?.RecordPropertyFunction(_receiverType, _methodMethodName, objectInstance is not null, args, functionResult, invocationArguments);
 
                 // If the result of the function call is a string, then we need to escape the result
                 // so that we maintain the "engine contains escaped data" state.
@@ -1241,7 +1244,7 @@ internal partial class Expander<P, I>
             Justification = "The only RDC method reachable here is Enum.GetValues(Type), which is unreachable via property functions; see comment above.")]
         [UnconditionalSuppressMessage("Trimming", "IL2080:UnrecognizedReflectionPattern",
             Justification = "_bindingFlags is masked to AllowedBindingFlags at construction, so it never carries BindingFlags.NonPublic; GetMethods(_bindingFlags) therefore binds only public methods of the property-function allowlist receiver, whose public members are preserved for trimming.")]
-        private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
+        private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor, out object[] invocationArguments)
         {
             // First let's try for a method where all arguments are strings..
             Type[] types = new Type[_arguments.Length];
@@ -1340,6 +1343,7 @@ internal partial class Expander<P, I>
                 throw new TargetInvocationException(new MissingMethodException());
             }
 
+            invocationArguments = args;
             return functionResult;
         }
     }
