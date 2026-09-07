@@ -31,6 +31,9 @@ namespace Microsoft.Build.Logging
     /// </summary>
     internal class BuildEventArgsWriter
     {
+        private const int StringReferenceCacheSize = 256; // Must remain a power of two.
+        private const int MaxCachedStringLength = 4096;
+
         private readonly Stream originalStream;
 
         /// <summary>
@@ -83,6 +86,11 @@ namespace Microsoft.Build.Logging
         /// we'll be able to use all the information we've discovered thus far.
         /// </summary>
         private readonly Dictionary<HashKey, int> stringHashes = new Dictionary<HashKey, int>();
+
+        /// <summary>
+        /// Avoid repeatedly hashing shared string instances without retaining the full string population.
+        /// </summary>
+        private readonly StringReferenceCacheEntry[] stringReferenceCache = new StringReferenceCacheEntry[StringReferenceCacheSize];
 
         /// <summary>
         /// Hashtable used for deduplicating name-value lists. Same as strings.
@@ -1461,6 +1469,18 @@ namespace Microsoft.Build.Logging
                 return (1, default);
             }
 
+            int referenceCacheIndex = -1;
+            if (text.Length <= MaxCachedStringLength)
+            {
+                int identityHash = RuntimeHelpers.GetHashCode(text);
+                referenceCacheIndex = (identityHash ^ (identityHash >> 16)) & (StringReferenceCacheSize - 1);
+                ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
+                if (ReferenceEquals(cachedEntry.Text, text))
+                {
+                    return (cachedEntry.RecordId, cachedEntry.Hash);
+                }
+            }
+
             var hash = new HashKey(text);
             if (!stringHashes.TryGetValue(hash, out var recordId))
             {
@@ -1470,6 +1490,14 @@ namespace Microsoft.Build.Logging
                 WriteStringRecord(text);
 
                 stringRecordId += 1;
+            }
+
+            if (referenceCacheIndex >= 0)
+            {
+                ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
+                cachedEntry.RecordId = recordId;
+                cachedEntry.Hash = hash;
+                cachedEntry.Text = text;
             }
 
             return (recordId, hash);
@@ -1532,6 +1560,13 @@ namespace Microsoft.Build.Logging
                 Write(extendedData.ExtendedMetadata);
                 WriteDeduplicatedString(extendedData.ExtendedData);
             }
+        }
+
+        private struct StringReferenceCacheEntry
+        {
+            internal string Text;
+            internal int RecordId;
+            internal HashKey Hash;
         }
 
         internal readonly struct HashKey : IEquatable<HashKey>

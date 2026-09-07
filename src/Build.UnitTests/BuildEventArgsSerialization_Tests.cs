@@ -1167,6 +1167,9 @@ namespace Microsoft.Build.UnitTests
             ((ITaskItem)replayedArgs.Items[0]).GetMetadata("First").ShouldBe("value");
             ((ITaskItem)replayedArgs.Items[1]).GetMetadata("First").ShouldBe("value");
             ((ITaskItem)replayedArgs.Items[2]).GetMetadata("First").ShouldBe("different");
+            ((ITaskItem)replayedArgs.Items[0]).GetMetadata("Escaped").ShouldBe("value%3b");
+            ((ITaskItem)replayedArgs.Items[1]).GetMetadata("Second").ShouldBe(string.Empty);
+            ((ITaskItem)replayedArgs.Items[2]).GetMetadata("Escaped").ShouldBe("value%3b");
             ((ITaskItem)replayedArgs.Items[3]).MetadataCount.ShouldBe(0);
             stream.Position.ShouldBe(stream.Length);
 
