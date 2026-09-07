@@ -1,7 +1,30 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+
 namespace Microsoft.Build.Evaluation.Context;
+
+/// <summary>
+/// What evaluation found at a recorded path.
+/// </summary>
+internal enum PathKind
+{
+    Missing,
+    File,
+    Directory,
+}
+
+/// <summary>
+/// What an existence probe asked about.
+/// </summary>
+internal enum ProbeKind
+{
+    File,
+    Directory,
+    FileOrDirectory,
+}
 
 /// <summary>
 /// Why an evaluation result cannot be reused from a cache.
@@ -9,9 +32,24 @@ namespace Microsoft.Build.Evaluation.Context;
 internal enum NonCacheableReason
 {
     None,
+    VolatilePropertyFunction,
+    UnclassifiedPropertyFunction,
+    AllPropertyFunctionsEnabled,
+    ItemTimestampMetadata,
+    LazyWildcards,
     InMemoryProject,
     PartialEvaluation,
+    RecorderFailure,
+    ConflictingObservation,
+    Link,
+    HostFileSystem,
+    ProcessWideCache,
 }
+
+/// <summary>
+/// State of a path as evaluation observed it. A cache validates it by comparing against a fresh stat.
+/// </summary>
+internal readonly record struct FileDependency(PathKind Kind, DateTime LastWriteTimeUtc, long Length);
 
 /// <summary>
 /// Values known before evaluation starts. Two evaluations with different keys never share a cache entry.
@@ -43,10 +81,15 @@ internal sealed record EvaluationInputKey(
 /// The inputs one evaluation consumed, frozen when the evaluation completed.
 /// </summary>
 /// <param name="Key">Values that select a cache entry.</param>
+/// <param name="Files">
+/// Files and directories evaluation read, probed, or enumerated, keyed by full path.
+/// Missing paths matter as much as existing ones: their appearance changes the result.
+/// </param>
 /// <param name="NonCacheable">Why the result must never be reused, or <see cref="NonCacheableReason.None"/>.</param>
 /// <param name="NonCacheableDetail">The input that made the evaluation non-cacheable, for diagnostics.</param>
 internal sealed record EvaluationInputs(
     EvaluationInputKey Key,
+    IReadOnlyDictionary<string, FileDependency> Files,
     NonCacheableReason NonCacheable,
     string? NonCacheableDetail)
 {

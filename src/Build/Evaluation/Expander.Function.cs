@@ -556,6 +556,8 @@ internal partial class Expander<P, I>
                     }
                 }
 
+                _propertiesUseTracker.InputRecorder?.RecordPropertyFunction(_receiverType, _methodMethodName, objectInstance is not null, args, functionResult);
+
                 // If the result of the function call is a string, then we need to escape the result
                 // so that we maintain the "engine contains escaped data" state.
                 // The exception is that the user is explicitly calling MSBuild::Unescape, MSBuild::Escape, or ConvertFromBase64

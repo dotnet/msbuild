@@ -273,7 +273,24 @@ namespace Microsoft.Build.Evaluation
                 _evaluationContext = evaluationContext.ContextWithFileSystem(fileSystem);
             }
 
-            _inputRecorder = CreateInputRecorder(projectRootElement, evaluationStage);
+            // A host file system or directory cache may answer from state the recorder cannot see, so such evaluations are not reusable.
+            bool hostFileSystem = directoryCache is not null || evaluationContext.FileSystem is not CachingFileSystemWrapper;
+            _inputRecorder = CreateInputRecorder(projectRootElement, evaluationStage, hostFileSystem);
+            if (_inputRecorder is not null)
+            {
+                _evaluationContext = _evaluationContext.ContextWithFileSystem(
+                    new RecordingFileSystem(_evaluationContext.FileSystem, _inputRecorder),
+                    _inputRecorder);
+
+                // The parser skips elements and attributes the Directory.Parse.config files allow, so their content is an input too.
+                if (projectRootElementCache.ParserIgnoreConfiguration is { } parserConfiguration)
+                {
+                    foreach (string configFile in parserConfiguration.LoadedConfigFiles)
+                    {
+                        _inputRecorder.RecordPath(configFile);
+                    }
+                }
+            }
 
             // Create containers for the evaluation results
             data.InitializeForEvaluation(toolsetProvider, _evaluationContext, _evaluationLoggingContext);
@@ -315,7 +332,7 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
         }
 
-        private static EvaluationInputRecorder CreateInputRecorder(ProjectRootElement projectRootElement, ProjectEvaluationStage evaluationStage)
+        private static EvaluationInputRecorder CreateInputRecorder(ProjectRootElement projectRootElement, ProjectEvaluationStage evaluationStage, bool hostFileSystem)
         {
             EvaluationInputRecorder recorder = EvaluationInputRecorder.CreateIfEnabled();
             if (recorder is null)
@@ -331,6 +348,24 @@ namespace Microsoft.Build.Evaluation
             {
                 recorder.MarkNonCacheable(NonCacheableReason.PartialEvaluation);
             }
+            else if (hostFileSystem)
+            {
+                recorder.MarkNonCacheable(NonCacheableReason.HostFileSystem);
+            }
+            else if (Traits.Instance.CacheFileExistence || Traits.Instance.MSBuildCacheFileEnumerations)
+            {
+                // Process-wide caches answer probes and globs without touching the file system the recorder watches.
+                recorder.MarkNonCacheable(NonCacheableReason.ProcessWideCache);
+            }
+            else if (Traits.Instance.UseLazyWildCardEvaluation)
+            {
+                recorder.MarkNonCacheable(NonCacheableReason.LazyWildcards);
+            }
+            else if (FeatureSwitches.EnableAllPropertyFunctions)
+            {
+                recorder.MarkNonCacheable(NonCacheableReason.AllPropertyFunctionsEnabled);
+            }
+
             return recorder;
         }
 
@@ -1084,6 +1119,18 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void PerformDepthFirstPass(ProjectRootElement currentProjectOrImport)
         {
+            if (_inputRecorder is not null && !currentProjectOrImport.IsEphemeral)
+            {
+                if (currentProjectOrImport.HasUnsavedChanges)
+                {
+                    _inputRecorder.MarkNonCacheable(NonCacheableReason.InMemoryProject, currentProjectOrImport.FullPath);
+                }
+                else
+                {
+                    _inputRecorder.RecordProjectSource(currentProjectOrImport.FullPath, currentProjectOrImport.LastWriteTimeWhenReadUtc);
+                }
+            }
+
             using (_evaluationProfiler.TrackFile(currentProjectOrImport.FullPath))
             {
                 // We accumulate InitialTargets from the project and each import
@@ -1827,7 +1874,9 @@ namespace Microsoft.Build.Evaluation
 
                 // If the whole fallback folder doesn't exist, short-circuit and don't
                 // bother constructing an exact file path.
-                if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
+                bool fallbackRootExists = _fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded);
+                _inputRecorder?.RecordProbe(extensionPathExpanded, ProbeKind.Directory, fallbackRootExists);
+                if (!fallbackRootExists)
                 {
                     // Set to log an error only if the change wave is enabled.
                     missingDirectoryDespiteTrueCondition = !containsWildcards;
@@ -2115,7 +2164,9 @@ namespace Microsoft.Build.Evaluation
                     // "S:\sdk\.dotnet\sdk\10.0.100-preview.6.25315.102\Sdks\Microsoft.NET.Sdk\Sdk"
                     //                  ^5              ^4               ^3          ^2        ^1
                     string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5), Constants.DotnetProcessName);
-                    if (FileSystems.Default.FileExists(dotnetExe))
+                    bool dotnetExeExists = FileSystems.Default.FileExists(dotnetExe);
+                    _inputRecorder?.RecordProbe(dotnetExe, ProbeKind.File, dotnetExeExists);
+                    if (dotnetExeExists)
                     {
                         _data.AddSdkResolvedEnvironmentVariable(Constants.DotnetHostPathEnvVarName, dotnetExe);
                     }
@@ -2470,7 +2521,9 @@ namespace Microsoft.Build.Evaluation
                         // Perhaps the import tag has a typo in, for example.
 
                         // There's a specific message for file not existing
-                        if (!FileSystems.Default.FileExists(importFileUnescaped))
+                        bool importExists = FileSystems.Default.FileExists(importFileUnescaped);
+                        _inputRecorder?.RecordProbe(importFileUnescaped, ProbeKind.File, importExists);
+                        if (!importExists)
                         {
                             if ((_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0)
                             {

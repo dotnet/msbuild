@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
@@ -22,6 +23,12 @@ namespace Microsoft.Build.Evaluation;
 internal sealed class PropertiesUseTracker
 {
     internal LoggingContext? LoggingContext { get; init; }
+
+    /// <summary>
+    /// Records the inputs property functions consume; null unless the owning evaluation records its inputs.
+    /// Travels with the tracker because the tracker already reaches every property expansion seam.
+    /// </summary>
+    internal EvaluationInputRecorder? InputRecorder { get; set; }
 
     public PropertiesUseTracker(LoggingContext? loggingContext) => LoggingContext = loggingContext;
 
