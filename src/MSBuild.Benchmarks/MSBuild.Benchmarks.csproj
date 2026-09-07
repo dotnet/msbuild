@@ -14,6 +14,8 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" VersionOverride="0.16.0-preview.1" />
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" VersionOverride="0.16.0-preview.1" />
+    <!-- Microsoft.Build references NuGet.Frameworks privately; evaluating real SDK projects needs it beside Microsoft.Build.dll. -->
+    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">

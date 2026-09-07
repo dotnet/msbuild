@@ -103,6 +103,53 @@ dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*"
 ```
 dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
 ```
+
+## Evaluation Input Recording
+
+`EvaluationInputRecordingBenchmark` measures what recording evaluation inputs
+(`MSBUILDRECORDEVALUATIONINPUTS=1`) adds to an evaluation, in an isolated and in a shared evaluation
+context. `EvaluationInputValidationBenchmark` separately measures checks of recorded files and
+directories: unchanged, and after a project file, an import, or a glob directory changed.
+Its evaluation and input capture happen outside the timed operations.
+
+Both use the same synthetic project and any restored projects listed in
+`MSBUILD_EVALUATION_INPUTS_BENCHMARK_PROJECTS` (path-separator
+delimited). SDK-style projects also need `MSBUILD_EXE_PATH`, `MSBuildSDKsPath`, and
+`DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR` pointing at the bootstrap SDK, passed to the benchmark process
+with `--envVars` as the shared fixture remarks describe. A project that is not cacheable fails setup with the
+reason.
+
+Run the observation cases or unchanged validation independently:
+
+```powershell
+.\src\MSBuild.Benchmarks\Run-Benchmarks.ps1 -Framework net11.0 -Filter '*EvaluationInputRecordingBenchmark.*'
+.\src\MSBuild.Benchmarks\Run-Benchmarks.ps1 -Framework net11.0 -Filter '*EvaluationInputValidationBenchmark.ValidateUnchanged'
+```
+
+The two classes produce separate reports. To express validation cost relative to fresh evaluation,
+compare `EvaluationInputValidationBenchmark.ValidateUnchanged` with
+`EvaluationInputRecordingBenchmark.Evaluate` for the same project and run settings.
+The stale-validation cases mutate files or directory membership; use synthetic or disposable workloads.
+
+Validation compares path existence, file/directory kind, last-write timestamp, and length.
+Glob membership is checked through the timestamps of the directories traversed.
+Environment reads, SDK results, and registry reads remain recorded but are not revalidated, and the request key
+is not compared. A successful filesystem check alone does not establish that an evaluation result
+can be reused. Incomplete/non-cacheable recording and failed filesystem checks still reject validation.
+
+Registry reads through `$(Registry:...)`, `[MSBuild]::GetRegistryValue`, and
+`[MSBuild]::GetRegistryValueFromView` are retained in `EvaluationInputs.RegistryReads`.
+Each observation contains the decoded key, value name (empty for the default value),
+returned value, and the string view tokens the intrinsic considers (not ignored non-string arguments).
+The key may be null for an accepted no-view request. Values are captured from the
+existing call, not by rereading the registry; missing values remain `null`, while an intrinsic
+that returns a supplied fallback records that fallback. Repeated reads are kept in order.
+Binary, multi-string, and character arrays are copied into immutable arrays before further expansion.
+Scalar string, primitive, enum, decimal, date/time, timespan, and GUID fallbacks are also supported.
+Other fallback objects mark recording non-cacheable instead of retaining a mutable reference.
+Registry access alone no longer stops recording. These are logical requests/results, not a
+trace of each internal view probe or of resolver/toolset-internal registry accesses.
+
 ## Command-Line Options
 
 ### Custom Options
