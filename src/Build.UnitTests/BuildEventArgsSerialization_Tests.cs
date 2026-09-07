@@ -1138,20 +1138,37 @@ namespace Microsoft.Build.UnitTests
                 ["Second"] = string.Empty,
                 ["Escaped"] = "value%3b",
             };
+            var differentMetadata = new Dictionary<string, string>(metadata)
+            {
+                ["First"] = "different",
+            };
             byte[] directBytes = SerializeTaskParameter(
                 [
                     new TaskItemData("ItemSpec1", new Dictionary<string, string>(metadata)),
                     new TaskItemData("ItemSpec2", new Dictionary<string, string>(metadata)),
-                    new TaskItemData("ItemSpec3", metadata: null),
+                    new TaskItemData("ItemSpec3", differentMetadata),
+                    new TaskItemData("ItemSpec4", metadata: null),
                 ]);
             byte[] fallbackBytes = SerializeTaskParameter(
                 [
                     new FallbackTaskItem("ItemSpec1", new Dictionary<string, string>(metadata)),
                     new FallbackTaskItem("ItemSpec2", new Dictionary<string, string>(metadata)),
-                    new FallbackTaskItem("ItemSpec3", new Dictionary<string, string>()),
+                    new FallbackTaskItem("ItemSpec3", new Dictionary<string, string>(differentMetadata)),
+                    new FallbackTaskItem("ItemSpec4", new Dictionary<string, string>()),
                 ]);
 
             directBytes.ShouldBe(fallbackBytes);
+
+            using var stream = new MemoryStream(directBytes);
+            using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+            replayedArgs.Items.Count.ShouldBe(4);
+            ((ITaskItem)replayedArgs.Items[0]).GetMetadata("First").ShouldBe("value");
+            ((ITaskItem)replayedArgs.Items[1]).GetMetadata("First").ShouldBe("value");
+            ((ITaskItem)replayedArgs.Items[2]).GetMetadata("First").ShouldBe("different");
+            ((ITaskItem)replayedArgs.Items[3]).MetadataCount.ShouldBe(0);
+            stream.Position.ShouldBe(stream.Length);
 
             static byte[] SerializeTaskParameter(ITaskItem[] items)
             {

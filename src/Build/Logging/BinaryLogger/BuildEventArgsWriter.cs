@@ -60,6 +60,11 @@ namespace Microsoft.Build.Logging
         private readonly BinaryWriter currentRecordWriter;
 
         /// <summary>
+        /// The binary writer around the nameValueListStream.
+        /// </summary>
+        private readonly BinaryWriter nameValueListWriter;
+
+        /// <summary>
         /// The binary writer we're currently using. Is pointing at the currentRecordWriter usually,
         /// but sometimes we repoint it to the originalBinaryWriter temporarily, when writing string
         /// and name-value records.
@@ -146,6 +151,7 @@ namespace Microsoft.Build.Logging
             this.currentRecordStream = new MemoryStream(65536);
 
             this.nameValueListStream = new MemoryStream(256);
+            this.nameValueListWriter = new BinaryWriter(nameValueListStream);
 
             this.originalBinaryWriter = binaryWriter;
             this.currentRecordWriter = new BinaryWriter(currentRecordStream);
@@ -1328,9 +1334,8 @@ namespace Microsoft.Build.Logging
             // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
             nameValueListStream.SetLength(0);
-            var nameValueListBw = new BinaryWriter(nameValueListStream);
 
-            using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
+            using (var _ = RedirectWritesToDifferentWriter(nameValueListWriter, binaryWriter))
             {
                 Write(nameValueIndexListBuffer.Count);
                 for (int i = 0; i < nameValueIndexListBuffer.Count; i++)
