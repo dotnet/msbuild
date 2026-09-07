@@ -2,43 +2,21 @@
 applyTo: "src/Tasks/**/*.cs"
 ---
 
-# Built-in Tasks Instructions
+# Built-in tasks
 
-Built-in tasks ship with MSBuild and cannot be independently versioned.
+- Preserve task names, parameter types, required/optional status, output semantics, and diagnostic behavior. New optional parameters should preserve existing behavior by default.
+- Follow the existing task base and logging/resource helpers. A generic "validate early" rule does not authorize new errors for previously accepted inputs.
+- Match each output's contract; an optional output need not become non-null merely because `Execute` succeeds.
+- Reuse appropriate path helpers and APIs supported on the affected TFMs. Verify overload availability and semantics before replacing a fallback or TOCTOU-sensitive sequence.
+- For ResolveAssemblyReference, use the [RAR documentation](../../documentation/wiki/ResolveAssemblyReference.md) and [core scenarios](../../documentation/specs/rar-core-scenarios.md) relevant to the changed path, not an unbounded audit.
 
-## Backwards Compatibility
+## Multithreaded execution
 
-* Gate behavioral changes behind a [ChangeWave](../../documentation/wiki/ChangeWaves.md).
-* Never remove or rename `[Output]` properties — downstream targets depend on them by name.
-* Adding new `[Required]` properties is a breaking change for existing `UsingTask` declarations.
-* New optional parameters must default to preserving existing behavior.
+- Inspect the specific task's base classes, `IMultiThreadableTask`/`TaskEnvironment` use, and `[MSBuildMultiThreadableTask]` attestation. Not every task or inherited API establishes MT safety.
+- Follow transitive calls for process current directory, environment variables, static caches, and registered task objects. State shared by threads within one process is different from state in separate workers/TaskHosts.
+- Preserve virtual task-environment semantics and fallback behavior. Confirm the actual execution mode/host in tests; passing a flag is not proof of in-process execution.
+- Use the [host map](../skills/use-bootstrap-msbuild/references/host-map.md) to distinguish modern MSBuild TaskHosts from the legacy `MSBuildTaskHost.exe` project.
+- Registered-object registry operations being thread-safe does not make the registered object safe for concurrent use. Review the object's contract and lifetime; do not automatically label all sharing a warning or demand migration.
+- Use an available MT-migration specialist for a substantial migration review, or perform the focused call-chain analysis directly. Do not require an installed plugin or infer safety from the attribute alone.
 
-## Task Authoring Patterns
-
-* Extend `Task` or `ToolTask`. Use `TaskLoggingHelper` for logging, not `Console.WriteLine`.
-* Validate inputs early in `Execute()` — fail fast with `Log.LogError` using MSBxxxx codes.
-* `[Output]` properties must be set before returning `true`.
-* All user-facing strings go in `.resx` files; use `ResourceUtilities.FormatResourceStringStripCodeAndKeyword` for formatting.
-
-## ResolveAssemblyReference (RAR)
-
-* Most complex built-in task — changes require extensive testing across framework targeting scenarios.
-* RAR performance is critical — it runs for every project and can dominate build time.
-* See [RAR docs](../../documentation/wiki/ResolveAssemblyReference.md) and [core scenarios](../../documentation/specs/rar-core-scenarios.md).
-
-## Path Handling
-
-* Use `FileUtilities` helpers — do not roll custom path manipulation.
-* Support UNC paths, long paths (> 260 chars), and cross-platform separators.
-* The `Microsoft.IO.Redist` package is referenced and backports .NET Core file APIs to .NET Framework. Check `Microsoft.IO.File`, `Microsoft.IO.Path`, `Microsoft.IO.Directory` for better overloads before writing workarounds (e.g., `Microsoft.IO.File.Move(src, dst, overwrite: true)` eliminates TOCTOU patterns around `File.Move` + `File.Replace`).
-
-## Multithreaded Task Migration
-
-* All built-in tasks implement `IMultiThreadableTask` with a default `TaskEnvironment` backed by `MultiProcessTaskEnvironmentDriver.Instance`.
-* Shared static state is a concurrency hazard in multi-process builds.
-
-## Related Documentation
-
-* [Contributing Tasks](../../documentation/wiki/Contributing-Tasks.md)
-* [Tasks](../../documentation/wiki/Tasks.md)
-* [Task Isolation](../../documentation/specs/task-isolation-and-dependencies.md)
+Use [compatibility assessment](../skills/assessing-breaking-changes/SKILL.md) for behavior changes and [diagnostic authoring](../skills/authoring-errors-and-warnings/SKILL.md) when changing user-facing messages.
