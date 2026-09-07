@@ -28,6 +28,7 @@ internal enum PropertyFunctionEffect
     ExpandEnvironment,
     /// <summary>Reads installed state, constant for the process, unless an argument names a directory or file to search.</summary>
     PureUnlessPathArgument,
+    Registry,
     Volatile,
     Unsupported,
 }
@@ -181,6 +182,8 @@ internal static class PropertyFunctionEffects
             {
                 ["FileExists"] = PropertyFunctionEffect.ProbeFile,
                 ["DirectoryExists"] = PropertyFunctionEffect.ProbeDirectory,
+                ["GetRegistryValue"] = PropertyFunctionEffect.Registry,
+                ["GetRegistryValueFromView"] = PropertyFunctionEffect.Registry,
                 ["Add"] = PropertyFunctionEffect.Pure,
                 ["Subtract"] = PropertyFunctionEffect.Pure,
                 ["Multiply"] = PropertyFunctionEffect.Pure,

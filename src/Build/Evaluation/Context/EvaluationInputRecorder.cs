@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.IO;
 using Microsoft.Build.Framework;
@@ -22,6 +23,7 @@ internal sealed class EvaluationInputRecorder
     // evaluation thread. SDK-style projects record 150 to 250 paths, so one growth covers them.
     private readonly Dictionary<string, FileDependency> _files = new(128, FileUtilities.PathComparer);
     private readonly Dictionary<string, string?> _environmentReads = new(CommunicationsUtilities.EnvironmentVariableComparer);
+    private List<RegistryRead>? _registryReads;
     private NonCacheableReason _nonCacheable;
     private string? _nonCacheableDetail;
     private bool _frozen;
@@ -115,6 +117,47 @@ internal sealed class EvaluationInputRecorder
         }
     }
 
+    internal void RecordRegistryRead(string? keyName, string? valueName, object? value, ImmutableArray<string> requestedViews = default)
+    {
+        if (!IsRecording)
+        {
+            return;
+        }
+
+        object? recordedValue;
+        switch (value)
+        {
+            case byte[] bytes:
+                recordedValue = ImmutableArray.CreateRange(bytes);
+                break;
+            case string[] strings:
+                recordedValue = ImmutableArray.CreateRange(strings);
+                break;
+            case char[] characters:
+                recordedValue = ImmutableArray.CreateRange(characters);
+                break;
+            case null or string or decimal or DateTime or DateTimeOffset or TimeSpan or Guid:
+                recordedValue = value;
+                break;
+            default:
+                Type valueType = value.GetType();
+                if (!valueType.IsPrimitive && !valueType.IsEnum)
+                {
+                    MarkNonCacheable(NonCacheableReason.UnsupportedRegistryValue, valueType.FullName);
+                    return;
+                }
+
+                recordedValue = value;
+                break;
+        }
+
+        (_registryReads ??= []).Add(new RegistryRead(
+            keyName,
+            valueName ?? string.Empty,
+            recordedValue,
+            requestedViews.IsDefault ? [] : requestedViews));
+    }
+
     /// <summary>
     /// Records every variable a <c>%NAME%</c> reference in <paramref name="text"/> resolves, which is exactly what
     /// <c>Environment.ExpandEnvironmentVariables</c> depends on. An undefined variable is recorded as missing.
@@ -144,7 +187,7 @@ internal sealed class EvaluationInputRecorder
     /// Records what a property function read from the file system, environment, or registry, or marks the evaluation
     /// non-cacheable when the function is volatile or not classified.
     /// </summary>
-    internal void RecordPropertyFunction(Type receiverType, string member, bool isInstance, object?[] arguments, object? result)
+    internal void RecordPropertyFunction(Type receiverType, string member, bool isInstance, object?[] arguments, object? result, object?[]? invocationArguments = null)
     {
         if (!IsRecording)
         {
@@ -183,6 +226,26 @@ internal sealed class EvaluationInputRecorder
                 break;
             case PropertyFunctionEffect.PureUnlessPathArgument when !HasPathArgument(arguments):
                 break;
+            case PropertyFunctionEffect.Registry:
+                object?[] registryArguments = invocationArguments ?? arguments;
+                if (registryArguments.Length >= 2
+                    && registryArguments[0] is null or string
+                    && registryArguments[1] is null or string)
+                {
+                    RecordRegistryRead(
+                        registryArguments[0] as string,
+                        registryArguments[1] as string,
+                        result,
+                        string.Equals(member, nameof(IntrinsicFunctions.GetRegistryValueFromView), StringComparison.OrdinalIgnoreCase)
+                            ? GetRequestedRegistryViews(registryArguments)
+                            : []);
+                }
+                else
+                {
+                    MarkNonCacheable(NonCacheableReason.RecorderFailure, $"{receiverType.FullName}::{member}");
+                }
+
+                break;
             case PropertyFunctionEffect.Volatile:
                 MarkNonCacheable(NonCacheableReason.VolatilePropertyFunction, $"{receiverType.FullName}::{member}");
                 break;
@@ -190,6 +253,28 @@ internal sealed class EvaluationInputRecorder
                 MarkNonCacheable(NonCacheableReason.UnclassifiedPropertyFunction, $"{receiverType.FullName}::{member}");
                 break;
         }
+    }
+
+    private static ImmutableArray<string> GetRequestedRegistryViews(object?[] arguments)
+    {
+        if (arguments.Length <= 3)
+        {
+            return [];
+        }
+
+        // A sole array argument is the params vector; with further arguments it is an ignored nested element.
+        object?[] values = arguments.Length == 4 && arguments[3] is object[] packedViews ? packedViews : arguments;
+        int start = ReferenceEquals(values, arguments) ? 3 : 0;
+        var views = ImmutableArray.CreateBuilder<string>();
+        for (int i = start; i < values.Length; i++)
+        {
+            if (values[i] is string view)
+            {
+                views.Add(view);
+            }
+        }
+
+        return views.ToImmutable();
     }
 
     /// <summary>
@@ -242,6 +327,7 @@ internal sealed class EvaluationInputRecorder
             key,
             new ReadOnlyDictionary<string, FileDependency>(_files),
             new ReadOnlyDictionary<string, string?>(_environmentReads),
+            _registryReads is null ? [] : [.. _registryReads],
             _nonCacheable,
             _nonCacheableDetail);
     }

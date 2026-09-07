@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
@@ -15,6 +17,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
+using Microsoft.Win32;
 using Shouldly;
 using Xunit;
 
@@ -309,6 +312,335 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
                 AppContext.SetSwitch(switchName, original);
             }
         }
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData("$(Registry:{0}@Value)")]
+    [InlineData("$([MSBuild]::GetRegistryValue('{0}', 'Value'))")]
+    [InlineData("$([MSBuild]::GetRegistryValueFromView('{0}', 'Value', null, RegistryView.Default, RegistryView.Registry32))")]
+    [SupportedOSPlatform("windows")]
+    public void RegistryReadsAreRecordedWithoutStoppingObservation(string expression)
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        registry.Key.SetValue("Value", "first;value%", RegistryValueKind.String);
+        _env.SetEnvironmentVariable("MSBUILD_TEST_AFTER_REGISTRY", "observed");
+        string import = _env.CreateFile(_folder, "after.props", "<Project />").Path;
+        expression = string.Format(CultureInfo.InvariantCulture, expression, registry.Key.Name);
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <First>{expression}</First>
+                <Second>{expression}</Second>
+                <After>$([System.Environment]::GetEnvironmentVariable('MSBUILD_TEST_AFTER_REGISTRY'))</After>
+              </PropertyGroup>
+              <Import Project="after.props" />
+            </Project>
+            """);
+
+        ProjectInstance recorded = EvaluateWithAndWithoutRecording(project);
+        EvaluationInputs inputs = recorded.EvaluationInputs.ShouldNotBeNull();
+
+        recorded.GetPropertyValue("First").ShouldBe("first;value%");
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        inputs.RegistryReads.Length.ShouldBe(2);
+        foreach (RegistryRead read in inputs.RegistryReads)
+        {
+            read.KeyName.ShouldBe(registry.Key.Name);
+            read.ValueName.ShouldBe("Value");
+            read.Value.ShouldBe("first;value%");
+            if (expression.Contains("GetRegistryValueFromView"))
+            {
+                read.RequestedViews.ShouldBe(["RegistryView.Default", "RegistryView.Registry32"]);
+            }
+            else
+            {
+                read.RequestedViews.ShouldBeEmpty();
+            }
+        }
+        inputs.EnvironmentReads["MSBUILD_TEST_AFTER_REGISTRY"].ShouldBe("observed");
+        inputs.Files.ContainsKey(import).ShouldBeTrue();
+
+        registry.Key.SetValue("Value", "changed", RegistryValueKind.String);
+
+        inputs.RegistryReads[0].Value.ShouldBe("first;value%");
+    }
+
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void MissingDefaultAndFallbackRegistryValuesAreRecorded()
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        registry.Key.SetValue(string.Empty, "default", RegistryValueKind.String);
+        registry.Key.SetValue("Empty", string.Empty, RegistryValueKind.String);
+        string keyName = registry.Key.Name;
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Default>$(Registry:{keyName})</Default>
+                <Empty>$(Registry:{keyName}@Empty)</Empty>
+                <Missing>$(Registry:{keyName}@Missing)</Missing>
+                <MissingFunction>$([MSBuild]::GetRegistryValue('{keyName}', 'Missing'))</MissingFunction>
+                <Fallback>$([MSBuild]::GetRegistryValue('{keyName}', 'Missing', 'fallback'))</Fallback>
+                <ViewFallback>$([MSBuild]::GetRegistryValueFromView('{keyName}\MissingKey', 'Missing', 'view fallback', RegistryView.Default))</ViewFallback>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        EvaluationInputs inputs = Evaluate(project);
+
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        inputs.RegistryReads.Length.ShouldBe(6);
+        inputs.RegistryReads[0].ValueName.ShouldBe(string.Empty);
+        inputs.RegistryReads[0].Value.ShouldBe("default");
+        inputs.RegistryReads[1].Value.ShouldBe(string.Empty);
+        inputs.RegistryReads[2].Value.ShouldBeNull();
+        inputs.RegistryReads[3].Value.ShouldBeNull();
+        inputs.RegistryReads[4].Value.ShouldBe("fallback");
+        inputs.RegistryReads[5].KeyName.ShouldBe(keyName + @"\MissingKey");
+        inputs.RegistryReads[5].Value.ShouldBe("view fallback");
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData(RegistryValueKind.DWord)]
+    [InlineData(RegistryValueKind.QWord)]
+    [InlineData(RegistryValueKind.Binary)]
+    [InlineData(RegistryValueKind.MultiString)]
+    [InlineData(RegistryValueKind.ExpandString)]
+    [SupportedOSPlatform("windows")]
+    public void RegistryObservationsPreserveReturnedValueTypes(RegistryValueKind kind)
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        _env.SetEnvironmentVariable("MSBUILD_TEST_REGISTRY_EXPANSION", "expanded");
+        object value = kind switch
+        {
+            RegistryValueKind.DWord => 123,
+            RegistryValueKind.QWord => 123456789123456789L,
+            RegistryValueKind.Binary => (byte[])[1, 2, 3],
+            RegistryValueKind.MultiString => (string[])["one;two", "three"],
+            RegistryValueKind.ExpandString => "%MSBUILD_TEST_REGISTRY_EXPANSION%",
+            _ => throw new ArgumentOutOfRangeException(nameof(kind)),
+        };
+        registry.Key.SetValue("Value", value, kind);
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Direct>$(Registry:{registry.Key.Name}@Value)</Direct>
+                <Function>$([MSBuild]::GetRegistryValue('{registry.Key.Name}', 'Value'))</Function>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        EvaluationInputs inputs = Evaluate(project);
+
+        inputs.RegistryReads.Length.ShouldBe(2);
+        foreach (RegistryRead read in inputs.RegistryReads)
+        {
+            if (value is byte[] bytes)
+            {
+                read.Value.ShouldBeOfType<ImmutableArray<byte>>().ToArray().ShouldBe(bytes);
+            }
+            else if (value is string[] strings)
+            {
+                read.Value.ShouldBeOfType<ImmutableArray<string>>().ToArray().ShouldBe(strings);
+            }
+            else
+            {
+                read.Value.ShouldBe(kind == RegistryValueKind.ExpandString ? "expanded" : value);
+            }
+        }
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+    }
+
+    [Fact]
+    public void RegistryObservationCopiesArraysAndPreservesRepeatedReads()
+    {
+        var recorder = new EvaluationInputRecorder();
+        byte[] bytes = [1, 2];
+        string[] strings = ["first", "second"];
+        recorder.RecordRegistryRead("key", "bytes", bytes);
+        recorder.RecordRegistryRead("key", "strings", strings);
+        bytes[0] = 3;
+        strings[0] = "changed";
+        recorder.RecordRegistryRead("key", "bytes", bytes);
+        EvaluationInputKey key = Evaluate(CreateProject("<Project />")).Key;
+        EvaluationInputs inputs = recorder.Freeze(key);
+        recorder.RecordRegistryRead("key", "after-freeze", "ignored");
+
+        inputs.RegistryReads.Length.ShouldBe(3);
+        inputs.RegistryReads[0].Value.ShouldBeOfType<ImmutableArray<byte>>().ToArray().ShouldBe([1, 2]);
+        inputs.RegistryReads[1].Value.ShouldBeOfType<ImmutableArray<string>>().ToArray().ShouldBe(["first", "second"]);
+        inputs.RegistryReads[2].Value.ShouldBeOfType<ImmutableArray<byte>>().ToArray().ShouldBe([3, 2]);
+    }
+
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void RegistryObservationUsesDecodedKeyAndValueNames()
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        using RegistryKey nested = registry.Key.CreateSubKey("key@part");
+        nested.SetValue("value@part", "value", RegistryValueKind.String);
+        string expressionKey = nested.Name.Replace("@", "%40");
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Value>$(Registry:{expressionKey}@value%40part)</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        RegistryRead read = Evaluate(project).RegistryReads.ShouldHaveSingleItem();
+
+        read.KeyName.ShouldBe(nested.Name);
+        read.ValueName.ShouldBe("value@part");
+        read.Value.ShouldBe("value");
+    }
+
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void RegistryObservationUsesCoercedValueName()
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        registry.Key.SetValue("123", "numbered value", RegistryValueKind.String);
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Value>$([MSBuild]::GetRegistryValue('{registry.Key.Name}', $([System.Int32]::Parse('123')), 'fallback'))</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        ProjectInstance instance = EvaluateWithAndWithoutRecording(project);
+        RegistryRead read = instance.EvaluationInputs.ShouldNotBeNull().RegistryReads.ShouldHaveSingleItem();
+
+        instance.GetPropertyValue("Value").ShouldBe("numbered value");
+        read.KeyName.ShouldBe(registry.Key.Name);
+        read.ValueName.ShouldBe("123");
+        read.Value.ShouldBe("numbered value");
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData("$([MSBuild]::GetRegistryValueFromView('{0}', 'Value', 'fallback'))", "fallback", false)]
+    [InlineData("$([MSBuild]::GetRegistryValueFromView('{0}', 'Value', null))", null, false)]
+    [InlineData("$([MSBuild]::GetRegistryValueFromView(null, null, 'fallback'))", "fallback", true)]
+    [SupportedOSPlatform("windows")]
+    public void RegistryRequestsWithoutExplicitViewsPreserveExistingBehavior(string expression, string? expected, bool nullKey)
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        registry.Key.SetValue("Value", "stored", RegistryValueKind.String);
+        expression = string.Format(CultureInfo.InvariantCulture, expression, registry.Key.Name);
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Value>{expression}</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        ProjectInstance instance = EvaluateWithAndWithoutRecording(project);
+        EvaluationInputs inputs = instance.EvaluationInputs.ShouldNotBeNull();
+        RegistryRead read = inputs.RegistryReads.ShouldHaveSingleItem();
+
+        instance.GetPropertyValue("Value").ShouldBe(expected ?? string.Empty);
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        read.KeyName.ShouldBe(nullKey ? null : registry.Key.Name);
+        read.ValueName.ShouldBe(nullKey ? string.Empty : "Value");
+        read.Value.ShouldBe(expected);
+        read.RequestedViews.ShouldBeEmpty();
+    }
+
+    [WindowsOnlyTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    [SupportedOSPlatform("windows")]
+    public void RegistryViewParamsArrayIsNotConfusedWithANestedArray(bool nested)
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        registry.Key.SetValue("Value", "stored", RegistryValueKind.String);
+        string views = "$([System.String]::Copy('RegistryView.Default;RegistryView.Registry32').Split(';'))";
+        if (nested)
+        {
+            views += ", RegistryView.Registry64";
+        }
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Value>$([MSBuild]::GetRegistryValueFromView('{registry.Key.Name}', 'Value', null, {views}))</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        ProjectInstance instance = EvaluateWithAndWithoutRecording(project);
+        EvaluationInputs inputs = instance.EvaluationInputs.ShouldNotBeNull();
+        RegistryRead read = inputs.RegistryReads.ShouldHaveSingleItem();
+
+        instance.GetPropertyValue("Value").ShouldBe("stored");
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        read.Value.ShouldBe("stored");
+        read.RequestedViews.ShouldBe(nested
+            ? ["RegistryView.Registry64"]
+            : ["RegistryView.Default", "RegistryView.Registry32"]);
+    }
+
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void IgnoredRegistryViewDoesNotInvokeToString()
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Value>$([MSBuild]::GetRegistryValueFromView('{registry.Key.Name}', 'Missing', 'fallback', $([System.UriBuilder]::new('http://:x@localhost'))))</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        ProjectInstance instance = EvaluateWithAndWithoutRecording(project);
+        EvaluationInputs inputs = instance.EvaluationInputs.ShouldNotBeNull();
+        RegistryRead read = inputs.RegistryReads.ShouldHaveSingleItem();
+
+        instance.GetPropertyValue("Value").ShouldBe("fallback");
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        read.Value.ShouldBe("fallback");
+        read.RequestedViews.ShouldBeEmpty();
+    }
+
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void RegistryFallbackIsCapturedBeforeChainedMutation()
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Value>$([MSBuild]::GetRegistryValue('{registry.Key.Name}', 'Missing', $([System.String]::Copy('ab').ToCharArray())).SetValue($([System.Char]::Parse('z')), 0))</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        ProjectInstance instance = EvaluateWithAndWithoutRecording(project);
+        RegistryRead read = instance.EvaluationInputs.ShouldNotBeNull().RegistryReads.ShouldHaveSingleItem();
+
+        read.Value.ShouldBeOfType<ImmutableArray<char>>().ToArray().ShouldBe(['a', 'b']);
+    }
+
+    [WindowsOnlyFact]
+    [SupportedOSPlatform("windows")]
+    public void UnsupportedRegistryFallbackRejectsRecordingWithoutChangingEvaluation()
+    {
+        TestRegistryKey registry = _env.WithTransientTestState(new TestRegistryKey());
+        string project = CreateProject($"""
+            <Project>
+              <PropertyGroup>
+                <Value>$([MSBuild]::GetRegistryValue('{registry.Key.Name}', 'Missing', $([System.UriBuilder]::new('https://example.invalid/path'))))</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        ProjectInstance instance = EvaluateWithAndWithoutRecording(project);
+        EvaluationInputs inputs = instance.EvaluationInputs.ShouldNotBeNull();
+
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.UnsupportedRegistryValue);
+        inputs.RegistryReads.ShouldBeEmpty();
     }
 
     [Theory]
@@ -933,6 +1265,25 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     {
         File.WriteAllText(path, contents);
         File.SetLastWriteTimeUtc(path, File.GetLastWriteTimeUtc(path).AddSeconds(2));
+    }
+
+    [SupportedOSPlatform("windows")]
+    private sealed class TestRegistryKey : TransientTestState
+    {
+        private readonly string _subKey = $@"Software\MSBuild_EvaluationInputs_{Guid.NewGuid():N}";
+
+        internal TestRegistryKey()
+        {
+            Key = Registry.CurrentUser.CreateSubKey(_subKey);
+        }
+
+        internal RegistryKey Key { get; }
+
+        public override void Revert()
+        {
+            Key.Dispose();
+            Registry.CurrentUser.DeleteSubKeyTree(_subKey, throwOnMissingSubKey: false);
+        }
     }
 
     private sealed class PassThroughFileSystem : MSBuildFileSystemBase
