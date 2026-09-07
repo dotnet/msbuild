@@ -12,7 +12,7 @@ Context: [evaluation-cache epic](https://github.com/dotnet/msbuild/issues/14234)
 
 The first design question is whether an input is expected to change during normal development.
 
-One of the scenarious we are interested in is an inner development loop.
+One of the scenarios we are interested in is an inner development loop.
 An inner loop means repeated edit/build runs in the same checkout and server, with the same configuration, target framework, other request settings, request environment, and installed tools. Under those assumptions, some generally mutable inputs are usually stable. This is not immutability: another process, a restore, or a changed build request can still change them.
 
 | Evaluation input | Expected to change between builds? | Within a fixed inner dev loop | Stored as |
