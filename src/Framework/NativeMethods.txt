@@ -48,6 +48,7 @@ GetEnvironmentStringsW
 GetErrorInfo
 GetFileAttributes
 GetFileAttributesEx
+GetFileInformationByHandle
 GetFileTime
 GetFileType
 GetFileVersion
