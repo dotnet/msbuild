@@ -69,9 +69,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     GetInvertedPathExtraction(invocation, semanticModel.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName)) is not null &&
                     GetPathToResolve(invocation.Arguments[0]).Syntax.FirstAncestorOrSelf<ArgumentSyntax>() is { } innerArgument)
                 {
-                    // The swap returns string, not AbsolutePath. Only offer it where a string is already
-                    // expected, so typed assignments and AbsolutePath member accesses keep compiling.
-                    if (invocation.Parent is IConversionOperation { Type.SpecialType: SpecialType.System_String })
+                    // The swap returns string, not AbsolutePath, and GetAbsolutePath requires a non-null
+                    // input even though extraction accepts null. Don't introduce compiler diagnostics.
+                    if (invocation.Parent is IConversionOperation { Type.SpecialType: SpecialType.System_String } &&
+                        semanticModel.GetTypeInfo(innerArgument.Expression).Nullability.FlowState != NullableFlowState.MaybeNull)
                     {
                         context.RegisterCodeFix(
                             CodeAction.Create(
@@ -108,6 +109,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var targetArg = FindPathArgument(semanticModel, node, argumentList);
             if (targetArg is null)
+            {
+                return;
+            }
+
+            // Moving inside an extraction must not introduce a nullable argument warning.
+            if (!argumentList.Arguments.Contains(targetArg) &&
+                semanticModel.GetTypeInfo(targetArg.Expression).Nullability.FlowState == NullableFlowState.MaybeNull)
             {
                 return;
             }

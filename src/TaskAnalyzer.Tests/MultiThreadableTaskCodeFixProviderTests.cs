@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
@@ -360,6 +361,60 @@ public class MultiThreadableTaskCodeFixProviderTests
                 .Replace("ROOT", "Path.GetPathRoot(environment.GetAbsolutePath(file))"),
             Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(0).WithArguments("GetDirectoryName"),
             Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(1).WithArguments("GetPathRoot")).RunAsync();
+    }
+
+    [Theory]
+    [InlineData("GetDirectoryName", false, false)]
+    [InlineData("GetDirectoryName", true, false)]
+    [InlineData("GetPathRoot", false, false)]
+    [InlineData("GetPathRoot", true, false)]
+    [InlineData("GetDirectoryName", false, true)]
+    [InlineData("GetDirectoryName", true, true)]
+    [InlineData("GetPathRoot", false, true)]
+    [InlineData("GetPathRoot", true, true)]
+    public async Task Fix_PathExtraction_NullableInput(string method, bool inverted, bool suppressInput)
+    {
+        var source = """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+                public string? TargetFile { get; set; }
+                public override bool Execute()
+                {
+                    REPLACE;
+                    return true;
+                }
+            }
+            """;
+        var input = suppressInput ? "TargetFile!" : "TargetFile";
+        var extraction = $"Path.{method}({input})!";
+        var original = inverted
+            ? "Directory.CreateDirectory({|#0:TaskEnvironment.GetAbsolutePath(" + extraction + ")|})"
+            : "{|#0:Directory.CreateDirectory(" + extraction + ")|}";
+        var diagnostic = inverted
+            ? Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(0).WithArguments(method)
+            : Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("Directory.CreateDirectory(string)", "wrap path argument with TaskEnvironment.GetAbsolutePath()");
+        var fixedStatement = suppressInput
+            ? $"Directory.CreateDirectory(Path.{method}(TaskEnvironment.GetAbsolutePath({input}))!)"
+            : original;
+        var test = CreateFixTest(source.Replace("REPLACE", original), source.Replace("REPLACE", fixedStatement), diagnostic);
+        if (!suppressInput)
+        {
+            test.FixedState.ExpectedDiagnostics.Add(diagnostic);
+        }
+
+        test.CompilerDiagnostics = CompilerDiagnostics.Warnings;
+        test.SolutionTransforms.Add((solution, projectId) =>
+        {
+            var project = solution.GetProject(projectId)!;
+            return solution.WithProjectCompilationOptions(projectId,
+                    ((CSharpCompilationOptions)project.CompilationOptions!).WithNullableContextOptions(NullableContextOptions.Enable))
+                .WithProjectParseOptions(projectId, project.ParseOptions!.WithDocumentationMode(DocumentationMode.Parse));
+        });
+        await test.RunAsync();
     }
 
     [Fact]

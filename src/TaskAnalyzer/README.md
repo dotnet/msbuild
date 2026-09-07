@@ -498,6 +498,8 @@ The MSBuildTask0003 fixer anchors on the **call the analyzer flagged** (the one 
 
 If the path argument extracts a directory or root, the fixer wraps the original input inside `Path.GetDirectoryName`/`Path.GetPathRoot`, including nested extractions, rather than wrapping their possibly empty or null result.
 
+Both extraction fixes are withheld if the original input is maybe-null under nullable analysis: extraction accepts null, but `GetAbsolutePath` does not. Validate the input first (or explicitly null-forgive it if it is known to be non-null); suppressing nullability only on the extraction's result does not establish that the input is non-null.
+
 Both the MSBuildTask0002 and MSBuildTask0003 fixers reference the instance `TaskEnvironment` member, so no fix is offered where that reference would not compile: where `this` is unavailable — a static method, static local function, or static lambda (CS0120), or an instance field or property initializer (CS0236) — or where the task type simply has no `TaskEnvironment` member (CS0103), which the default `all` scope allows since it analyzes every `ITask`. Making the enclosing member non-static, moving the initializer into `Execute()`, or implementing `IMultiThreadableTask` re-enables the fix.
 
 When bulk-applying with `dotnet format analyzers`, note that the tool derives the batch from the *first* reported diagnostic: if that occurrence is one of the ones above where no fix is offered, it logs `Unable to fix MSBuildTask0003…` and applies nothing. Resolve or suppress that first occurrence by hand, then re-run.
