@@ -2,46 +2,24 @@
 applyTo: "src/Framework/**"
 ---
 
-# MSBuild Framework Instructions
+# Framework contracts and shared implementation
 
-`Microsoft.Build.Framework` defines MSBuild's public API contracts: interfaces, base types, event args, and extensibility points. Referenced by every task and logger author.
+This assembly contains both public task/logger contracts and internal utilities, interop, and transport code. Do not assume everything in this folder is public API.
 
-## API Surface Discipline (Critical)
+## Preserve the boundary
 
-* Default to `internal`. Every `public` member is a permanent commitment.
-* New public API **must** be recorded in `PublicAPI.Unshipped.txt`.
-* Add XML doc comments to all public members.
-* Seal classes unless explicitly designed for inheritance. Prefer interfaces for extensibility.
+- Default new implementation to `internal`; public additions need compatibility rationale and XML documentation.
+- Preserve existing public signatures and third-party implementors. Do not add interface members assuming default implementations work on every supported runtime; follow the existing numbered `IBuildEngine` pattern where appropriate.
+- Inspect actual implementors, including [TaskHost](../../src/Build/BackEnd/Components/RequestBuilder/TaskHost.cs) and out-of-process hosts. `TaskExecutionHost` is not the `IBuildEngine` implementation.
+- The [project](../../src/Framework/Microsoft.Build.Framework.csproj) uses reference-assembly generation and package validation. Follow that machinery and the current baseline configuration; do not create nonexistent `PublicAPI.Unshipped.txt` files because a generic guide mentions them.
+- Check the library TFMs in [src/Directory.Build.props](../../src/Directory.Build.props). Availability on modern .NET does not establish availability on .NET Framework or the reference-only target.
 
-## Public API Compatibility
+## Implementation changes
 
-* Never remove or change signatures of existing public members — add new overloads.
-* Interface additions require default interface method implementations to avoid breaking implementors.
-* Binary compatibility matters — task assemblies compiled against older Framework versions must continue to work.
+- Preserve type/assembly identity and resource ownership when moving formerly linked code into Framework.
+- Trace actual callers before changing shared utilities; use the performance skill only for a relevant hot path.
+- For IPC, inspect the supported peer/handshake and actual translator. Missing data does not automatically become a default value in an unframed stream.
+- For event changes, use [binary-log compatibility](../skills/maintaining-binary-log-compatibility/SKILL.md) and trace forwarding separately.
+- For Windows interop or COM, load only the matching interop skill and retain platform/feature guards.
 
-## Event Args & Build Events
-
-* Event args are serialized in binary logs — adding fields requires backward-compatible serialization. See [Binary Log](../../documentation/wiki/Binary-Log.md).
-* New event types must integrate with `IEventSource`, forwarding loggers, and binary log reader/writer.
-* `MessageImportance` levels: `High` = user-critical, `Normal` = standard, `Low` = verbose.
-
-## BuildCheck Contracts
-
-* Analyzer interfaces define the contract with third-party analyzers — treat as public API.
-* See [BuildCheck Architecture](../../documentation/specs/BuildCheck/BuildCheck-Architecture.md).
-
-## Serialization Stability
-
-* Types serialized across IPC or persisted in binary logs must maintain format stability.
-* When adding fields, handle the case where the field is missing (backward compat with older writers).
-* Use `ITranslatable` for IPC serialization; follow existing patterns.
-
-## Interface Design
-
-* `IBuildEngine` versions follow a progression pattern — new task capabilities go in the next numbered interface.
-* Ensure new interfaces are implemented on `TaskExecutionHost`.
-
-## Related Documentation
-
-* [Microsoft.Build.Framework](../../documentation/wiki/Microsoft.Build.Framework.md)
-* [BuildCheck specs](../../documentation/specs/BuildCheck/BuildCheck.md)
+BuildCheck has public APIs in [Build/BuildCheck/API](../../src/Build/BuildCheck/API) and internal transport contracts here; use the [BuildCheck instructions](buildcheck.instructions.md) for that boundary.

@@ -2,43 +2,15 @@
 applyTo: "src/Build/Logging/**"
 ---
 
-# Logging Infrastructure Instructions
+# Logging
 
-Binary logger, console loggers, terminal logger, and event forwarding infrastructure.
+- Distinguish node IPC, task-host forwarding, and the persisted binlog format. They have different serialization and compatibility mechanisms.
+- Use [binary-log compatibility](../skills/maintaining-binary-log-compatibility/SKILL.md) for reader/writer changes. Preserve supported old-log reading and follow the actual record/version contract; not every old reader can read every newer log.
+- Trace event subscriptions and forwarding configuration. A central logger sees what reaches it, not automatically every event generated anywhere.
+- Check filtering in the actual logger. [BaseConsoleLogger](../../src/Build/Logging/BaseConsoleLogger.cs) maps `High` to minimal verbosity, `Normal` to normal, and `Low` to detailed; `High` is not visible at quiet verbosity by definition.
+- Preserve structured event payloads and available locations through round trips. A text message is not equivalent to preserving event type and fields.
+- For terminal output, cover redirected/non-TTY output, narrow/resized terminals, concurrency, and supported platforms when affected.
+- Use `RenderImmediateMessage`, not direct terminal writes, for messages that must appear outside the normal node-status rendering cycle, including user-intervention messages and long-delay explanations. Direct writes bypass node-display coordination and can corrupt rendered output.
+- Assess changed output or importance as a compatibility surface. Do not add logging to every internal change merely to satisfy a generic checklist.
 
-## Binary Log Format Stability
-
-* `.binlog` format must maintain backward compatibility — older readers must handle newer logs.
-* `BuildEventArgsWriter.cs`/`BuildEventArgsReader.cs` are the serialization boundary — field additions must be versioned.
-* Always write new fields at the end of existing records. Readers must handle missing fields.
-* Test round-trip: write → read → compare for all modified event types.
-
-## Terminal Logger (FancyLogger)
-
-* Must handle terminal width changes, very narrow terminals, and non-TTY output (piped to file).
-* Concurrent project builds must render without corruption.
-* ANSI escape sequences must be cross-platform compatible.
-* Use `RenderImmediateMessage` (not direct terminal writes) for any message that must appear immediately outside the normal node-status rendering cycle, like messages that require user intervention or explain long delays. Direct terminal writes bypass the node-display logic and corrupt the rendered output.
-
-## Console Logger
-
-* `ParallelConsoleLogger.cs` handles multi-project console output.
-* `MessageImportance` filtering: `High` always shows, `Normal` at normal verbosity, `Low` at detailed.
-* Never change the default output format without a [ChangeWave](../../documentation/wiki/ChangeWaves.md) — build log parsers depend on it.
-
-## Build Event Handling
-
-* Event forwarding between nodes must preserve ordering and completeness.
-* Central loggers see all events; distributed loggers see only their node's events. See [Logging Internals](../../documentation/wiki/Logging-Internals.md).
-
-## Diagnostics Completeness
-
-* Behavioral changes must produce corresponding binary log entries.
-* Error/warning events must include file, line, and column when available.
-* Prefer structured events over string messages for programmatic consumption.
-
-## Related Documentation
-
-* [Binary Log](../../documentation/wiki/Binary-Log.md)
-* [Logging Internals](../../documentation/wiki/Logging-Internals.md)
-* [Providing Binary Logs](../../documentation/wiki/Providing-Binary-Logs.md)
+Read [logging internals](../../documentation/wiki/Logging-Internals.md) or [binary logs](../../documentation/wiki/Binary-Log.md) for the relevant boundary, then confirm the source behavior.
