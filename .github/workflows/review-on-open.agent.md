@@ -1,6 +1,6 @@
 ---
 name: "Expert Code Review (on open)"
-description: "Automatically runs the expert-reviewer agent when a non-draft PR is opened."
+description: "Automatically runs the expert-reviewer agent when a non-draft PR is opened or a draft PR becomes ready for review."
 
 # Non-draft PRs still trigger this workflow, including fork PRs.
 # The `roles` setting below does not block triggering; it restricts
