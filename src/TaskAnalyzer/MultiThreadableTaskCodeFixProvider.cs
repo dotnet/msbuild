@@ -22,13 +22,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// Fixes:
     /// - MSBuildTask0002: Replaces banned APIs with TaskEnvironment equivalents
     /// - MSBuildTask0003: Wraps path arguments with TaskEnvironment.GetAbsolutePath()
+    /// - MSBuildTask0015: Resolves paths before extracting their directory or root
     /// </summary>
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MultiThreadableTaskCodeFixProvider))]
     [Shared]
     public sealed class MultiThreadableTaskCodeFixProvider : CodeFixProvider
     {
         public override ImmutableArray<string> FixableDiagnosticIds =>
-            ImmutableArray.Create(DiagnosticIds.TaskEnvironmentRequired, DiagnosticIds.FilePathRequiresAbsolute);
+            ImmutableArray.Create(DiagnosticIds.TaskEnvironmentRequired, DiagnosticIds.FilePathRequiresAbsolute, DiagnosticIds.ResolvePathBeforeExtraction);
 
         public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -61,6 +62,24 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 else if (diagnostic.Id == DiagnosticIds.TaskEnvironmentRequired)
                 {
                     RegisterTaskEnvironmentFix(context, semanticModel, node, diagnostic);
+                }
+                else if (diagnostic.Id == DiagnosticIds.ResolvePathBeforeExtraction &&
+                    node is InvocationExpressionSyntax invocationSyntax &&
+                    semanticModel.GetOperation(node) is IInvocationOperation invocation &&
+                    GetInvertedPathExtraction(invocation, semanticModel.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName)) is not null &&
+                    GetPathToResolve(invocation.Arguments[0]).Syntax.FirstAncestorOrSelf<ArgumentSyntax>() is { } innerArgument)
+                {
+                    // The swap returns string, not AbsolutePath. Only offer it where a string is already
+                    // expected, so typed assignments and AbsolutePath member accesses keep compiling.
+                    if (invocation.Parent is IConversionOperation { Type.SpecialType: SpecialType.System_String })
+                    {
+                        context.RegisterCodeFix(
+                            CodeAction.Create(
+                                title: "Resolve path before extracting its directory or root",
+                                createChangedDocument: ct => SwapPathExtractionAsync(context.Document, invocationSyntax, innerArgument, ct),
+                                equivalenceKey: "ResolvePathBeforeExtraction"),
+                            diagnostic);
+                    }
                 }
             }
         }
@@ -134,12 +153,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     }
 
                     // Skip arguments that aren't written in this call's argument list (e.g. defaulted
-                    // optional parameters, whose syntax is the call itself).
-                    if (argument.Syntax is ArgumentSyntax argumentSyntax &&
+                    // optional parameters, whose syntax is the call itself). Null-forgiving syntax can
+                    // make the operation point at the expression rather than its ArgumentSyntax.
+                    if (argument.Syntax.FirstAncestorOrSelf<ArgumentSyntax>() is { } argumentSyntax &&
                         argumentList.Arguments.Contains(argumentSyntax) &&
                         !IsWrappedSafely(argument.Value, taskEnvironmentType, absolutePathType, iTaskItemType))
                     {
-                        return argumentSyntax;
+                        return GetPathToResolve(argument).Syntax.FirstAncestorOrSelf<ArgumentSyntax>();
                     }
                 }
 
@@ -155,6 +175,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return null;
+        }
+
+        private static IArgumentOperation GetPathToResolve(IArgumentOperation argument)
+        {
+            // Resolve the original path before extracting a directory/root, including nested extractions.
+            while (argument.Value is IInvocationOperation extraction && IsPathExtraction(extraction))
+            {
+                argument = extraction.Arguments[0];
+            }
+
+            return argument;
         }
 
         /// <summary>
@@ -371,6 +402,22 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var newArgument = argument.WithExpression(wrappedExpr);
             editor.ReplaceNode(argument, newArgument);
+
+            return editor.GetChangedDocument();
+        }
+
+        private static async Task<Document> SwapPathExtractionAsync(
+            Document document, InvocationExpressionSyntax invocation, ArgumentSyntax innerArgument, CancellationToken ct)
+        {
+            var editor = await DocumentEditor.CreateAsync(document, ct).ConfigureAwait(false);
+            var outerArgument = invocation.ArgumentList.Arguments[0];
+            var resolvedArgument = outerArgument.WithExpression(innerArgument.Expression.WithoutTrivia());
+            var resolvedPath = invocation.WithArgumentList(
+                invocation.ArgumentList.WithArguments(SyntaxFactory.SingletonSeparatedList(resolvedArgument)))
+                .WithoutTrivia();
+            var replacement = outerArgument.Expression.ReplaceNode(
+                innerArgument.Expression, resolvedPath.WithTriviaFrom(innerArgument.Expression));
+            editor.ReplaceNode(invocation, replacement.WithTriviaFrom(invocation));
 
             return editor.GetChangedDocument();
         }

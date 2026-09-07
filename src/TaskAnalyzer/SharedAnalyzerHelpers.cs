@@ -174,10 +174,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     }
                 }
 
-                // Check: Path.GetDirectoryName(safe) — directory of an absolute path is absolute
-                if (invocation.TargetMethod.Name == "GetDirectoryName" &&
-                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
-                    invocation.Arguments.Length >= 1 &&
+                // Check: Path.GetDirectoryName(safe) / GetPathRoot(safe) — preserve absolute paths
+                if (IsPathExtraction(invocation) &&
                     IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
                 {
                     return true;
@@ -245,6 +243,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             return false;
         }
+
+        internal static bool IsPathExtraction(IInvocationOperation invocation) =>
+            invocation.TargetMethod.Name is "GetDirectoryName" or "GetPathRoot" &&
+            invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+            invocation.Arguments.Length == 1 &&
+            invocation.Arguments[0].Parameter?.Type.SpecialType == SpecialType.System_String;
+
+        internal static IInvocationOperation? GetInvertedPathExtraction(
+            IInvocationOperation invocation, INamedTypeSymbol? taskEnvironmentType) =>
+            invocation.TargetMethod.Name == "GetAbsolutePath" &&
+            taskEnvironmentType is not null &&
+            SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, taskEnvironmentType) &&
+            invocation.Arguments.Length == 1 &&
+            invocation.Arguments[0].Value is IInvocationOperation extraction &&
+            IsPathExtraction(extraction)
+                ? extraction
+                : null;
 
         /// <summary>
         /// Checks if a type is AbsolutePath or Nullable&lt;AbsolutePath&gt;.
