@@ -82,6 +82,93 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     }
 
     [Fact]
+    public void EditingRootProjectInvalidates()
+    {
+        string project = CreateProject("<Project />");
+        EvaluationInputs inputs = Evaluate(project);
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        Touch(project, "<Project><PropertyGroup /></Project>");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldNotBeNull().ShouldContain(project);
+    }
+
+    [Fact]
+    public void DeletingRecordedFileInvalidates()
+    {
+        string project = CreateProject("<Project />");
+        EvaluationInputs inputs = Evaluate(project);
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        File.Delete(project);
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(project);
+    }
+
+    [Fact]
+    public void ChangedLengthWithPreservedTimestampInvalidates()
+    {
+        string project = CreateProject("<Project />");
+        EvaluationInputs inputs = Evaluate(project);
+        DateTime timestamp = inputs.Files[project].LastWriteTimeUtc;
+
+        File.WriteAllText(project, "<Project><PropertyGroup /></Project>");
+        File.SetLastWriteTimeUtc(project, timestamp);
+        File.GetLastWriteTimeUtc(project).ShouldBe(timestamp);
+        new FileInfo(project).Length.ShouldNotBe(inputs.Files[project].Length);
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(project);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void FileDirectoryKindReplacementInvalidates(bool initiallyDirectory)
+    {
+        string candidate = Path.Combine(_folder.Path, "candidate");
+        if (initiallyDirectory)
+        {
+            Directory.CreateDirectory(candidate);
+        }
+        else
+        {
+            File.WriteAllText(candidate, string.Empty);
+        }
+
+        string project = CreateProject("""
+            <Project>
+              <PropertyGroup>
+                <Found Condition="Exists('candidate')">true</Found>
+              </PropertyGroup>
+            </Project>
+            """);
+        EvaluationInputs inputs = Evaluate(project);
+        inputs.Files[candidate].Kind.ShouldBe(initiallyDirectory ? PathKind.Directory : PathKind.File);
+        DateTime timestamp = inputs.Files[candidate].LastWriteTimeUtc;
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        if (initiallyDirectory)
+        {
+            Directory.Delete(candidate);
+            File.WriteAllText(candidate, string.Empty);
+            File.SetLastWriteTimeUtc(candidate, timestamp);
+        }
+        else
+        {
+            File.Delete(candidate);
+            Directory.CreateDirectory(candidate);
+            Directory.SetLastWriteTimeUtc(candidate, timestamp);
+        }
+
+        File.GetLastWriteTimeUtc(candidate).ShouldBe(timestamp);
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(candidate);
+    }
+
+    [Fact]
     public void IgnoredMissingImportIsRecordedAsMissing()
     {
         string project = CreateProject("""
@@ -95,6 +182,72 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         EvaluationInputs inputs = Evaluate(project, options);
 
         inputs.Files[Path.Combine(_folder.Path, "missing.props")].Kind.ShouldBe(PathKind.Missing);
+    }
+
+    [Fact]
+    public void CreatingProbedMissingFileInvalidates()
+    {
+        string project = CreateProject("""
+            <Project>
+              <Import Project="optional.props" Condition="Exists('optional.props')" />
+            </Project>
+            """);
+        string optional = Path.Combine(_folder.Path, "optional.props");
+        EvaluationInputs inputs = Evaluate(project);
+        inputs.Files[optional].Kind.ShouldBe(PathKind.Missing);
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        File.WriteAllText(optional, "<Project />");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(optional);
+    }
+
+    [Fact]
+    public void GlobMembershipChangeInvalidates()
+    {
+        _env.CreateFile(_folder, "a.cs", string.Empty);
+        string project = CreateProject("""
+            <Project>
+              <ItemGroup>
+                <Compile Include="**/*.cs" />
+              </ItemGroup>
+            </Project>
+            """);
+        EvaluationInputs inputs = Evaluate(project);
+        inputs.Files[_folder.Path].Kind.ShouldBe(PathKind.Directory);
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        File.WriteAllText(Path.Combine(_env.CreateFolder(createFolder: true).Path, "outside.cs"), string.Empty);
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        AddFile(_folder.Path, "b.cs");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(_folder.Path);
+    }
+
+    [Fact]
+    public void NearerFileAboveCandidateInvalidates()
+    {
+        TransientTestFolder child = _env.CreateFolder(Path.Combine(_folder.Path, "child"), createFolder: true);
+        _env.CreateFile(_folder, "Marker.props", "<Project />");
+        string project = _env.CreateFile(child, "test.proj", """
+            <Project>
+              <PropertyGroup>
+                <Marker>$([MSBuild]::GetPathOfFileAbove('Marker.props'))</Marker>
+              </PropertyGroup>
+            </Project>
+            """.Cleanup()).Path;
+        string nearer = Path.Combine(child.Path, "Marker.props");
+        EvaluationInputs inputs = Evaluate(project);
+        inputs.Files[nearer].Kind.ShouldBe(PathKind.Missing);
+        inputs.Files[Path.Combine(_folder.Path, "Marker.props")].Kind.ShouldBe(PathKind.File);
+
+        File.WriteAllText(nearer, "<Project />");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(nearer);
     }
 
     [Theory]
@@ -115,6 +268,9 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
         inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
         inputs.Files[probed].Kind.ShouldBe(PathKind.Missing);
+        Directory.CreateDirectory(probed);
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(probed);
     }
 
     [Fact]
@@ -152,6 +308,11 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         options.LoadSettings = ProjectLoadSettings.IgnoreEmptyImports;
         EvaluationInputs inputs = Evaluate(project, options);
         inputs.Files[empty].ShouldBe(new FileDependency(PathKind.File, File.GetLastWriteTimeUtc(empty), 0));
+
+        Touch(empty, "<Project />");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(empty);
     }
 
     [Fact]
@@ -194,6 +355,11 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         EvaluationInputs inputs = Evaluate(project);
         inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
         inputs.Files[version].Kind.ShouldBe(PathKind.File);
+
+        Touch(version, "2.0");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(version);
     }
 
     [Theory]
@@ -211,9 +377,12 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
             """);
         EvaluationInputs inputs = Evaluate(project);
         inputs.EnvironmentReads["MSBUILD_TEST_INPUT"].ShouldBe("first");
+        IsCurrent(inputs, out _).ShouldBeTrue();
 
         _env.SetEnvironmentVariable("MSBUILD_TEST_INPUT", currentValue);
 
+        IsCurrent(inputs, out string? reason).ShouldBeTrue();
+        reason.ShouldBeNull();
         inputs.EnvironmentReads["MSBUILD_TEST_INPUT"].ShouldBe("first");
     }
 
@@ -235,6 +404,8 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         EvaluationInputs inputs = Evaluate(project);
 
         inputs.NonCacheable.ShouldBe(NonCacheableReason.VolatilePropertyFunction);
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldNotBeNull().ShouldContain(nameof(NonCacheableReason.VolatilePropertyFunction));
     }
 
     [Theory]
@@ -364,6 +535,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         registry.Key.SetValue("Value", "changed", RegistryValueKind.String);
 
         inputs.RegistryReads[0].Value.ShouldBe("first;value%");
+        IsCurrent(inputs, out _).ShouldBeTrue();
     }
 
     [WindowsOnlyFact]
@@ -642,6 +814,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
         inputs.NonCacheable.ShouldBe(NonCacheableReason.UnsupportedRegistryValue);
         inputs.RegistryReads.ShouldBeEmpty();
+        IsCurrent(inputs, out _).ShouldBeFalse();
     }
 
     [Fact]
@@ -666,6 +839,12 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         inputs.SdkResolutions.ShouldHaveSingleItem().Reference.Name.ShouldBe("TestSdk");
         inputs.Files[sdkProps].Kind.ShouldBe(PathKind.File);
         inputs.SdkResolutions[0].Result.ShouldBe(recorded);
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        Touch(sdkProps, "<Project><PropertyGroup><FromSdk>changed</FromSdk></PropertyGroup></Project>");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(sdkProps);
     }
 
     [Theory]
@@ -783,6 +962,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
         inputs.NonCacheable.ShouldBe(NonCacheableReason.None, inputs.NonCacheableDetail);
         inputs.Files.Count.ShouldBeGreaterThan(5);
+        IsCurrent(inputs, out string? reason).ShouldBeTrue(reason);
         Evaluate(project).Files.Keys.ShouldBe(inputs.Files.Keys, ignoreOrder: true);
     }
 
@@ -825,6 +1005,12 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         secondInputs.NonCacheable.ShouldBe(NonCacheableReason.None);
         secondInputs.Files.Keys.Except(firstInputs.Files.Keys, StringComparer.OrdinalIgnoreCase).ShouldBeEmpty();
         firstInputs.Files.Keys.Except(secondInputs.Files.Keys, StringComparer.OrdinalIgnoreCase).ShouldBeEmpty();
+        IsCurrent(secondInputs, out _).ShouldBeTrue();
+
+        AddFile(_folder.Path, "Class2.cs");
+
+        IsCurrent(secondInputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(_folder.Path);
     }
 
 #if FEATURE_SYMLINK_TARGET
@@ -886,9 +1072,12 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
         inputs.EnvironmentReads["MSBUILD_TEST_EXPAND_ROOT"].ShouldBe("first");
         inputs.EnvironmentReads["MSBUILD_TEST_EXPAND_MISSING"].ShouldBeNull();
+        IsCurrent(inputs, out _).ShouldBeTrue();
 
         _env.SetEnvironmentVariable("MSBUILD_TEST_EXPAND_MISSING", "now set");
 
+        IsCurrent(inputs, out string? reason).ShouldBeTrue();
+        reason.ShouldBeNull();
         inputs.EnvironmentReads["MSBUILD_TEST_EXPAND_MISSING"].ShouldBeNull();
     }
 
@@ -937,6 +1126,12 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
         inputs.Files[Path.Combine(_folder.Path, "present.txt")].Kind.ShouldBe(PathKind.File);
         inputs.Files[missing].Kind.ShouldBe(PathKind.Missing);
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        File.WriteAllText(missing, string.Empty);
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(missing);
     }
 
     [Theory]
@@ -1150,6 +1345,12 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         with.NonCacheable.ShouldBe(NonCacheableReason.None);
         with.Files[config].Kind.ShouldBe(PathKind.File);
         with.Key.ParserConfigurationFingerprint.ShouldNotBe(without.Key.ParserConfigurationFingerprint);
+        IsCurrent(with, out _).ShouldBeTrue();
+
+        Touch(config, """<ParseConfig><IgnoreAttributes><Ignore Element="Target" Name="Bar" /></IgnoreAttributes></ParseConfig>""");
+
+        IsCurrent(with, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(config);
     }
 
     [Fact]
@@ -1283,6 +1484,9 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         return inputs;
     }
 
+    private static bool IsCurrent(EvaluationInputs inputs, out string? reason) =>
+        EvaluationInputValidator.IsFileSystemCurrent(inputs, out reason);
+
     /// <summary>
     /// Rewrites a file and moves its timestamp forward so the change is visible on file systems with coarse timestamps.
     /// </summary>
@@ -1290,6 +1494,19 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     {
         File.WriteAllText(path, contents);
         File.SetLastWriteTimeUtc(path, File.GetLastWriteTimeUtc(path).AddSeconds(2));
+    }
+
+    /// <summary>
+    /// Adds a file to a directory, which moves the directory's timestamp forward; forced on file systems with coarse timestamps.
+    /// </summary>
+    private static void AddFile(string directory, string name)
+    {
+        DateTime before = Directory.GetLastWriteTimeUtc(directory);
+        File.WriteAllText(Path.Combine(directory, name), string.Empty);
+        if (Directory.GetLastWriteTimeUtc(directory) == before)
+        {
+            Directory.SetLastWriteTimeUtc(directory, before.AddSeconds(2));
+        }
     }
 
     [SupportedOSPlatform("windows")]

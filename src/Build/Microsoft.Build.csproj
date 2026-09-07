@@ -322,6 +322,7 @@
     <Compile Include="Evaluation\Context\EvaluationContext.cs" />
     <Compile Include="Evaluation\Context\EvaluationInputRecorder.cs" />
     <Compile Include="Evaluation\Context\EvaluationInputs.cs" />
+    <Compile Include="Evaluation\Context\EvaluationInputValidator.cs" />
     <Compile Include="Evaluation\Context\PropertyFunctionEffects.cs" />
     <Compile Include="Evaluation\Context\RecordingFileSystem.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationLocationMarkdownPrettyPrinter.cs" />
