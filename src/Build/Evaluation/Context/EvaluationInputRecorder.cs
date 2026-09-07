@@ -9,6 +9,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.NET.StringTools;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Evaluation.Context;
 
@@ -23,6 +24,7 @@ internal sealed class EvaluationInputRecorder
     // evaluation thread. SDK-style projects record 150 to 250 paths, so one growth covers them.
     private readonly Dictionary<string, FileDependency> _files = new(128, FileUtilities.PathComparer);
     private readonly Dictionary<string, string?> _environmentReads = new(CommunicationsUtilities.EnvironmentVariableComparer);
+    private readonly Dictionary<SdkReference, SdkResult> _sdkResolutions = [];
     private List<RegistryRead>? _registryReads;
     private NonCacheableReason _nonCacheable;
     private string? _nonCacheableDetail;
@@ -183,6 +185,15 @@ internal sealed class EvaluationInputRecorder
         }
     }
 
+    internal void RecordSdkResolution(SdkReference reference, SdkResult result)
+    {
+        // Sdk.props and Sdk.targets resolve the same reference; one entry validates both.
+        if (IsRecording && !_sdkResolutions.ContainsKey(reference))
+        {
+            _sdkResolutions.Add(reference, result);
+        }
+    }
+
     /// <summary>
     /// Records what a property function read from the file system, environment, or registry, or marks the evaluation
     /// non-cacheable when the function is volatile or not classified.
@@ -323,10 +334,18 @@ internal sealed class EvaluationInputRecorder
     internal EvaluationInputs Freeze(EvaluationInputKey key)
     {
         _frozen = true;
+        var sdkResolutions = new SdkDependency[_sdkResolutions.Count];
+        int index = 0;
+        foreach (KeyValuePair<SdkReference, SdkResult> resolution in _sdkResolutions)
+        {
+            sdkResolutions[index++] = new SdkDependency(resolution.Key, resolution.Value);
+        }
+
         return new EvaluationInputs(
             key,
             new ReadOnlyDictionary<string, FileDependency>(_files),
             new ReadOnlyDictionary<string, string?>(_environmentReads),
+            [.. sdkResolutions],
             _registryReads is null ? [] : [.. _registryReads],
             _nonCacheable,
             _nonCacheableDetail);

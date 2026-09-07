@@ -2086,6 +2086,8 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
                 }
 
+                _inputRecorder?.RecordSdkResolution(sdkReference, sdkResult);
+
                 if (!sdkResult.Success)
                 {
                     if (_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) && !_loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk))

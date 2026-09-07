@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Microsoft.Build.Framework;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Evaluation.Context;
 
@@ -54,6 +56,11 @@ internal enum NonCacheableReason
 internal readonly record struct FileDependency(PathKind Kind, DateTime LastWriteTimeUtc, long Length);
 
 /// <summary>
+/// An SDK resolution evaluation consumed. Retained for observation; SDK result validation is outside this prototype's scope.
+/// </summary>
+internal sealed record SdkDependency(SdkReference Reference, SdkResult Result);
+
+/// <summary>
 /// A registry request and the value it returned, before MSBuild string conversion or escaping.
 /// Views are string tokens the intrinsic considers; ignored non-string arguments are not included.
 /// An empty list does not identify a winning view. A null key is retained for accepted no-view requests.
@@ -100,6 +107,7 @@ internal sealed record EvaluationInputKey(
 /// Missing paths matter as much as existing ones: their appearance changes the result.
 /// </param>
 /// <param name="EnvironmentReads">Environment variables read through property functions; variables imported as properties are part of the key.</param>
+/// <param name="SdkResolutions">SDK references resolved during evaluation and their results.</param>
 /// <param name="RegistryReads">Registry keys, value names, requested views, and returned values, in observation order.</param>
 /// <param name="NonCacheable">Why the result must never be reused, or <see cref="NonCacheableReason.None"/>.</param>
 /// <param name="NonCacheableDetail">The input that made the evaluation non-cacheable, for diagnostics.</param>
@@ -107,6 +115,7 @@ internal sealed record EvaluationInputs(
     EvaluationInputKey Key,
     IReadOnlyDictionary<string, FileDependency> Files,
     IReadOnlyDictionary<string, string?> EnvironmentReads,
+    ImmutableArray<SdkDependency> SdkResolutions,
     ImmutableArray<RegistryRead> RegistryReads,
     NonCacheableReason NonCacheable,
     string? NonCacheableDetail)

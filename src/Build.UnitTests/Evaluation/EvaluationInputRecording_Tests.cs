@@ -20,6 +20,7 @@ using Microsoft.Build.Unittest;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.UnitTests.Evaluation;
 
@@ -641,6 +642,30 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
         inputs.NonCacheable.ShouldBe(NonCacheableReason.UnsupportedRegistryValue);
         inputs.RegistryReads.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void SdkResolutionIsRecordedAndImportedFilesAreValidated()
+    {
+        TransientTestFolder sdkFolder = _env.CreateFolder(Path.Combine(_folder.Path, "sdk"), createFolder: true);
+        string sdkProps = _env.CreateFile(sdkFolder, "Sdk.props", "<Project><PropertyGroup><FromSdk>props</FromSdk></PropertyGroup></Project>").Path;
+        _env.CreateFile(sdkFolder, "Sdk.targets", "<Project />");
+        string project = CreateProject("""
+            <Project Sdk="TestSdk">
+              <PropertyGroup>
+                <A>$(FromSdk)</A>
+              </PropertyGroup>
+            </Project>
+            """);
+        var recorded = new SdkResult(new SdkReference("TestSdk", null, null), sdkFolder.Path, "1.0", warnings: null);
+        ProjectOptions options = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(recorded));
+        options.ProjectCollection = _env.CreateProjectCollection().Collection;
+
+        EvaluationInputs inputs = Evaluate(project, options);
+
+        inputs.SdkResolutions.ShouldHaveSingleItem().Reference.Name.ShouldBe("TestSdk");
+        inputs.Files[sdkProps].Kind.ShouldBe(PathKind.File);
+        inputs.SdkResolutions[0].Result.ShouldBe(recorded);
     }
 
     [Theory]
