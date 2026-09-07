@@ -171,4 +171,107 @@ public class TaskEnvironmentPropagationCodeFixProviderTests
             fixedCode: Source,
             Diag().WithLocation(0).WithArguments("InnerTask")).RunAsync();
     }
+
+    [Fact]
+    public async Task Fix_IsNotOfferedInInstanceFieldInitializer()
+    {
+        const string Source = """
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                private readonly InnerTask _inner = {|#0:new InnerTask()|};
+
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute() => _inner.Execute();
+            }
+            """;
+
+        await CreateFixTest(
+            testCode: Source,
+            fixedCode: Source,
+            Diag().WithLocation(0).WithArguments("InnerTask")).RunAsync();
+    }
+
+    [Fact]
+    public async Task Fix_IsNotOfferedInInstancePropertyInitializer()
+    {
+        const string Source = """
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                private InnerTask Inner { get; } = {|#0:new InnerTask()|};
+
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute() => Inner.Execute();
+            }
+            """;
+
+        await CreateFixTest(
+            testCode: Source,
+            fixedCode: Source,
+            Diag().WithLocation(0).WithArguments("InnerTask")).RunAsync();
+    }
+
+    [Fact]
+    public async Task Fix_IsNotOfferedInConstructorInitializer()
+    {
+        const string Source = """
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public MyTask() : this({|#0:new InnerTask()|})
+                {
+                }
+
+                private MyTask(InnerTask inner) => Inner = inner;
+
+                private InnerTask Inner { get; }
+
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute() => Inner.Execute();
+            }
+            """;
+
+        await CreateFixTest(
+            testCode: Source,
+            fixedCode: Source,
+            Diag().WithLocation(0).WithArguments("InnerTask")).RunAsync();
+    }
+
+    [Fact]
+    public async Task Fix_IsOfferedInInstancePropertyAccessorBody()
+    {
+        await CreateFixTest(
+            testCode: """
+                using Microsoft.Build.Framework;
+
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    private InnerTask Inner => {|#0:new InnerTask()|};
+
+                    public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                    public override bool Execute() => Inner.Execute();
+                }
+                """,
+            fixedCode: """
+                using Microsoft.Build.Framework;
+
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    private InnerTask Inner => new InnerTask() { TaskEnvironment = TaskEnvironment };
+
+                    public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                    public override bool Execute() => Inner.Execute();
+                }
+                """,
+            Diag().WithLocation(0).WithArguments("InnerTask")).RunAsync();
+    }
 }

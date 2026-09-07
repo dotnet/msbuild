@@ -92,7 +92,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             int position = creation.SpanStart;
             ISymbol? enclosingSymbol = semanticModel.GetEnclosingSymbol(position, cancellationToken);
-            if (enclosingSymbol is null || IsInStaticContext(enclosingSymbol))
+            if (enclosingSymbol is null || IsThisUnavailable(creation, enclosingSymbol))
             {
                 return null;
             }
@@ -133,25 +133,56 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
-        /// Determines whether instance members are unavailable at the creation site, walking out of lambdas and
-        /// local functions to the member that encloses them.
+        /// Determines whether <c>this</c> — and with it every instance member — is unavailable at the creation
+        /// site, walking out of lambdas and local functions to the member that encloses them.
         /// </summary>
-        private static bool IsInStaticContext(ISymbol enclosingSymbol)
+        private static bool IsThisUnavailable(SyntaxNode creation, ISymbol enclosingSymbol)
         {
-            for (ISymbol? symbol = enclosingSymbol; symbol is not null and not INamedTypeSymbol; symbol = symbol.ContainingSymbol)
+            // A constructor initializer runs before the instance exists, so `this` is unavailable there (CS0027).
+            // The semantic model still reports the constructor as the enclosing symbol, so this needs a syntax check.
+            for (SyntaxNode? ancestor = creation.Parent; ancestor is not null; ancestor = ancestor.Parent)
             {
-                bool isStatic = symbol switch
-                {
-                    IMethodSymbol method => method.IsStatic,
-                    IFieldSymbol field => field.IsStatic,
-                    IPropertySymbol property => property.IsStatic,
-                    IEventSymbol @event => @event.IsStatic,
-                    _ => false,
-                };
-
-                if (isStatic)
+                if (ancestor is ConstructorInitializerSyntax or PrimaryConstructorBaseTypeSyntax)
                 {
                     return true;
+                }
+
+                if (ancestor is MemberDeclarationSyntax)
+                {
+                    break;
+                }
+            }
+
+            for (ISymbol? symbol = enclosingSymbol; symbol is not null; symbol = symbol.ContainingSymbol)
+            {
+                switch (symbol)
+                {
+                    // A field, property, or event initializer cannot reference an instance member of the same
+                    // type, whether or not the initializer is itself static (CS0236). This is only reached for
+                    // an initializer: an accessor body reports the accessor method, which stops the walk below
+                    // before it can reach the containing property.
+                    case IFieldSymbol:
+                    case IPropertySymbol:
+                    case IEventSymbol:
+                        return true;
+
+                    case IMethodSymbol method:
+                        if (method.IsStatic)
+                        {
+                            return true;
+                        }
+
+                        // Keep walking only out of lambdas and local functions; any other method is itself the
+                        // member that encloses the creation site, and an instance one has `this` available.
+                        if (method.MethodKind is not (MethodKind.LambdaMethod or MethodKind.LocalFunction))
+                        {
+                            return false;
+                        }
+
+                        break;
+
+                    default:
+                        return false;
                 }
             }
 
