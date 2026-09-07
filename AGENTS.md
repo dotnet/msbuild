@@ -37,6 +37,7 @@ This is a public open-source repository. PR descriptions, issues, review comment
 
 - Start with this file and the instructions matching the affected paths in [.github/instructions](.github/instructions). Read nested `AGENTS.md` files before changing their subtree.
 - Select the skill whose **description matches the task**, not every skill mentioning the same technology. Read its entry point, then only the reference needed for the current question. Do not recursively preload links.
+- Use the routing and authoring guide in [Agent context](documentation/agent-context.md) when the right workflow is unclear or when changing instructions, skills, agents, or prompts.
 - Start with a focused source lookup; expand to callers, consumers, history, or external docs when evidence requires it.
 - Discover available tools before using them. Plugin availability is session-specific; do not assume a named plugin, agent, or MCP operation is installed. Report missing capabilities and use a supported read-only alternative where possible.
 

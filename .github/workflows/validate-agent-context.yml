@@ -1,0 +1,54 @@
+name: Validate Agent Context
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - '**/AGENTS.md'
+      - '.github/copilot-instructions.md'
+      - '.github/instructions/**'
+      - '.github/skills/**'
+      - '.github/agents/**'
+      - 'plugins/**'
+      - '.github/workflows/validate-agent-context.yml'
+      - 'documentation/agent-context*'
+      - 'documentation/agent-context/**'
+      - 'scripts/Validate-AgentContext.ps1'
+  push:
+    branches: [main]
+    paths:
+      - 'AGENTS.md'
+      - '**/AGENTS.md'
+      - '.github/copilot-instructions.md'
+      - '.github/instructions/**'
+      - '.github/skills/**'
+      - '.github/agents/**'
+      - 'plugins/**'
+      - '.github/workflows/validate-agent-context.yml'
+      - 'documentation/agent-context*'
+      - 'documentation/agent-context/**'
+      - 'scripts/Validate-AgentContext.ps1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-context-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate agent context
+        shell: pwsh
+        run: ./scripts/Validate-AgentContext.ps1
+      - name: Exercise offline health collector contracts
+        shell: pwsh
+        run: ./.github/skills/pipelines-health-check/tests/Collectors.Tests.ps1

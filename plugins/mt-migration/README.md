@@ -36,6 +36,10 @@ Distinguish contributing-source inventory from effective skill resolution and fr
 
 Aim for small skill and interactive-agent entry points; 100 lines and 6 KiB are useful authoring targets, not mandatory contribution limits. Move corrected technical material into focused references rather than deleting it to reach a size target.
 
-Use the authoring repository's available documentation and context checks.
+In the MSBuild repository, run the offline context validator from the repository root:
+
+```powershell
+pwsh -NoProfile -File scripts\Validate-AgentContext.ps1
+```
 
 Documentation changes need local-link, metadata, scope, and content checks, not a product build. Static validation does not prove every runtime scenario. Add source-backed examples for newly understood hazards; do not turn unverified anecdotes, analyzer-version assumptions, or task-specific exceptions into universal rules.
