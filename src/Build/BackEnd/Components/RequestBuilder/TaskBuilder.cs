@@ -477,6 +477,20 @@ namespace Microsoft.Build.BackEnd
                                 taskResult = await InitializeAndExecuteTask(taskLoggingContext, bucket, taskIdentityParameters, taskHost, howToExecuteTask);
                             }
 
+                            // Both execution paths have gathered outputs and cleaned up the task before returning.
+                            if (_componentHost.BuildParameters.MultiThreadedStrict
+                                && !_cancellationToken.IsCancellationRequested
+                                && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
+                                && scope.VerifyAndReportProcessState(taskLoggingContext, _taskNode.Name, _targetChildInstance.Location,
+                                    convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue))
+                            {
+                                bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                                taskResult = new WorkUnitResult(
+                                    WorkUnitResultCode.Failed,
+                                    _continueOnError == ContinueOnError.ErrorAndStop ? WorkUnitActionCode.Stop : WorkUnitActionCode.Continue,
+                                    taskResult.Exception);
+                            }
+
                             if (lookupHash != null)
                             {
                                 List<string> overrideMessages = bucket.Lookup.GetPropertyOverrideMessages(lookupHash);
@@ -672,33 +686,23 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, TaskHostParameters taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
-            IDisposable assemblyLoadsTracker = null;
-            TaskExecutionResult execution;
+            if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
+            }
+
+            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
+
             try
             {
-                if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
-                {
-                    ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
-                }
-
-                assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
                 // UNDONE: Move this and the task host.
                 taskHost.LoggingContext = taskLoggingContext;
-                execution = await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
+                return await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
             }
             finally
             {
-                try
-                {
-                    _taskExecutionHost.CleanupForBatch();
-                }
-                finally
-                {
-                    assemblyLoadsTracker?.Dispose();
-                }
+                _taskExecutionHost.CleanupForBatch();
             }
-
-            return CompleteTaskExecution(execution, taskLoggingContext, bucket);
         }
 
         /// <summary>
@@ -765,14 +769,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucket">The batching bucket</param>
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <returns>The result of running the task.</returns>
-        private async ValueTask<TaskExecutionResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
+        private async ValueTask<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
         {
             UpdateContinueOnError(bucket, taskHost);
 
             bool taskResult = false;
-            bool taskReturned = false;
-            bool needsFailureDiagnostic = false;
-            bool allowFailureWithoutError = false;
+
+            WorkUnitResultCode resultCode = WorkUnitResultCode.Success;
+            WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
 
             if (!taskExecutionHost.SetTaskParameters(_taskNode.ParametersForBuild))
             {
@@ -781,6 +785,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
+                bool taskReturned = false;
                 Exception taskException = null;
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
@@ -988,18 +993,33 @@ namespace Microsoft.Build.BackEnd
                 // that is logged as an error. MSBuild tasks are an exception because
                 // errors are not logged directly from them, but the tasks spawned by them.
                 IBuildEngine be = taskExecutionHost.TaskInstance.BuildEngine;
-                needsFailureDiagnostic = taskReturned // if the task returned
+                if (taskReturned // if the task returned
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
                     && (be is TaskHost th ? th.BuildRequestsSucceeded : false)
-                    && !_cancellationToken.IsCancellationRequested;
-                allowFailureWithoutError = needsFailureDiagnostic && be is IBuildEngine7 be7 && be7.AllowFailureWithoutError;
-
-                // Preserve ordinary task diagnostic ordering. Strict mode must wait for outputs and cleanup.
-                if (needsFailureDiagnostic && !_componentHost.BuildParameters.MultiThreadedStrict)
+                    && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)) // and it wasn't cancelled
                 {
-                    LogTaskReturnedFalse(taskLoggingContext, allowFailureWithoutError);
-                    needsFailureDiagnostic = false;
+                    // Then decide how to log MSB4181
+                    if (be is IBuildEngine7 be7 && be7.AllowFailureWithoutError)
+                    {
+                        // If it's allowed to fail without error, log as a message
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
+                    }
+                    else if (_continueOnError == ContinueOnError.WarnAndContinue)
+                    {
+                        taskLoggingContext.LogWarning(null,
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            "TaskReturnedFalseButDidNotLogError",
+                            _taskNode.Name);
+
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                    }
+                    else
+                    {
+                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                            "TaskReturnedFalseButDidNotLogError",
+                            _taskNode.Name);
+                    }
                 }
 
                 // If the task returned attempt to gather its outputs.  If gathering outputs fails set the taskResults
@@ -1008,86 +1028,43 @@ namespace Microsoft.Build.BackEnd
                 {
                     taskResult = GatherTaskOutputs(taskExecutionHost, howToExecuteTask, bucket) && taskResult;
                 }
-            }
 
-            return new TaskExecutionResult(taskResult, taskReturned, needsFailureDiagnostic, allowFailureWithoutError);
-        }
-
-        private WorkUnitResult CompleteTaskExecution(TaskExecutionResult execution, TaskLoggingContext taskLoggingContext, ItemBucket bucket)
-        {
-            bool taskResult = execution.Succeeded;
-            bool strictViolationReported = _componentHost.BuildParameters.MultiThreadedStrict
-                && !_cancellationToken.IsCancellationRequested
-                && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
-                && scope.VerifyAndReportProcessState(taskLoggingContext, _taskNode.Name, _targetChildInstance.Location,
-                    convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue);
-
-            if (strictViolationReported)
-            {
-                taskResult = false;
-                if (execution.Returned)
+                // If the taskResults are false look at ContinueOnError.  If ContinueOnError=false (default)
+                // mark the taskExecutedSuccessfully=false.  Otherwise let the task succeed but log a normal
+                // pri message that says this task is continuing because ContinueOnError=true
+                resultCode = taskResult ? WorkUnitResultCode.Success : WorkUnitResultCode.Failed;
+                actionCode = WorkUnitActionCode.Continue;
+                if (resultCode == WorkUnitResultCode.Failed)
                 {
-                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
-                }
-            }
-            else if (execution.NeedsFailureDiagnostic && !_cancellationToken.IsCancellationRequested)
-            {
-                LogTaskReturnedFalse(taskLoggingContext, execution.AllowFailureWithoutError);
-            }
-
-            WorkUnitResultCode resultCode = taskResult ? WorkUnitResultCode.Success : WorkUnitResultCode.Failed;
-            WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
-            if (resultCode == WorkUnitResultCode.Failed)
-            {
-                if (_continueOnError == ContinueOnError.ErrorAndStop)
-                {
-                    actionCode = WorkUnitActionCode.Stop;
-                }
-                else
-                {
-                    string settingString = "true";
-                    if (_taskNode.ContinueOnErrorLocation != null)
+                    if (_continueOnError == ContinueOnError.ErrorAndStop)
                     {
-                        settingString = bucket.Expander.ExpandIntoStringAndUnescape(
-                            _taskNode.ContinueOnError, ExpanderOptions.ExpandAll, _taskNode.ContinueOnErrorLocation);
+                        actionCode = WorkUnitActionCode.Stop;
                     }
+                    else
+                    {
+                        // This is the ErrorAndContinue or WarnAndContinue case...
+                        string settingString = "true";
+                        if (_taskNode.ContinueOnErrorLocation != null)
+                        {
+                            settingString = bucket.Expander.ExpandIntoStringAndUnescape(_taskNode.ContinueOnError, ExpanderOptions.ExpandAll, _taskNode.ContinueOnErrorLocation); // expand embedded item vectors after expanding properties and item metadata
+                        }
 
-                    taskLoggingContext.LogComment(
-                        MessageImportance.Normal,
-                        "TaskContinuedDueToContinueOnError",
-                        "ContinueOnError",
-                        _taskNode.Name,
-                        settingString);
+                        taskLoggingContext.LogComment(
+                            MessageImportance.Normal,
+                            "TaskContinuedDueToContinueOnError",
+                            "ContinueOnError",
+                            _taskNode.Name,
+                            settingString);
+
+                        actionCode = WorkUnitActionCode.Continue;
+                    }
                 }
             }
 
-            return new WorkUnitResult(resultCode, actionCode, null);
-        }
+            WorkUnitResult result = new WorkUnitResult(resultCode, actionCode, null);
 
-        private void LogTaskReturnedFalse(TaskLoggingContext taskLoggingContext, bool allowFailureWithoutError)
-        {
-            if (allowFailureWithoutError)
-            {
-                taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
-            }
-            else if (_continueOnError == ContinueOnError.WarnAndContinue)
-            {
-                taskLoggingContext.LogWarning(null, new BuildEventFileInfo(_targetChildInstance.Location),
-                    "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
-                taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
-            }
-            else
-            {
-                taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
-                    "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
-            }
+            return result;
         }
-
-        private readonly record struct TaskExecutionResult(
-            bool Succeeded,
-            bool Returned,
-            bool NeedsFailureDiagnostic,
-            bool AllowFailureWithoutError);
 
         private List<string> GetUndeclaredProjects(MSBuild msbuildTask)
         {
@@ -1099,16 +1076,11 @@ namespace Microsoft.Build.BackEnd
 
             var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
 
-            // A relative path in a project file means "relative to that project", never "relative to wherever the
-            // process happens to be". Anchoring these on the project directory is required for correctness in
-            // multithreaded mode, where the process current directory is not the project directory.
-            string projectDirectory = _buildRequestEntry.ProjectRootDirectory;
-
             var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, FileUtilities.PathComparer);
 
             foreach (var projectReferenceItem in projectReferenceItems)
             {
-                declaredProjects.Add(NormalizeProjectPath(projectReferenceItem.EvaluatedInclude, projectDirectory));
+                declaredProjects.Add(FileUtilities.NormalizePath(_buildRequestEntry.ProjectRootDirectory, projectReferenceItem.EvaluatedInclude));
             }
 
             // allow a project to msbuild itself
@@ -1118,7 +1090,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (var msbuildProject in msbuildTask.Projects)
             {
-                var normalizedMSBuildProject = NormalizeProjectPath(msbuildProject.ItemSpec, projectDirectory);
+                var normalizedMSBuildProject = FileUtilities.NormalizePath(_buildRequestEntry.ProjectRootDirectory, msbuildProject.ItemSpec);
 
                 if (
                     !(declaredProjects.Contains(normalizedMSBuildProject)
@@ -1131,15 +1103,6 @@ namespace Microsoft.Build.BackEnd
 
             return undeclaredProjects;
         }
-
-        /// <summary>
-        /// Resolves a project path the way MSBuild resolves it when it actually builds it: relative paths are
-        /// anchored on the referencing project's directory, not on the process current directory.
-        /// </summary>
-        private static string NormalizeProjectPath(string path, string projectDirectory)
-            => System.IO.Path.IsPathRooted(path)
-                ? FileUtilities.NormalizePath(path)
-                : FileUtilities.NormalizePath(projectDirectory, path);
 
         /// <summary>
         /// Gathers task outputs in two ways:

@@ -265,6 +265,8 @@ MSBuild checks process state after task execution, output retrieval and task-fac
 
 These diagnostics fail the task and follow `ContinueOnError`. For a CI gate, use
 `"-warnAsError:MSB4286;MSB4287"` so they cannot be downgraded to passing warnings.
+Existing task diagnostics keep their normal timing: `MSB4181` can appear alongside a strict
+diagnostic. Cancellation skips strict checks that have not run, but does not retract earlier diagnostics.
 The original process directory is restored when the build ends. Failures to enable strict
 mode, check its state, or restore the directory fail the build; they do not silently disable checks.
 

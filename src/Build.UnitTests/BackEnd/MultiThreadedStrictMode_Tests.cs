@@ -440,9 +440,39 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 """);
             MockLogger logger = new(_output);
             BuildStrictProject(project.Path, logger).ShouldHaveFailed();
-            logger.AssertLogContains(violation == "Write" ? "MSB4287" : "MSB4286");
-            logger.AssertLogDoesntContain("MSB4181");
+            string strictDiagnostic = violation == "Write" ? "MSB4287" : "MSB4286";
+            logger.Errors.Count.ShouldBe(returnFalse ? 2 : 1);
+            logger.Errors[0].Code.ShouldBe(returnFalse ? "MSB4181" : strictDiagnostic);
+            logger.Errors[logger.Errors.Count - 1].Code.ShouldBe(strictDiagnostic);
             logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictLifetimeTask))!.Succeeded.ShouldBeFalse();
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void StaOutputViolationUsesCompletedTaskResult()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var project = env.CreateFile("sta-getter.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictStaLifetimeTask" AssemblyFile="{typeof(StrictStaLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictStaLifetimeTask Violation="Write" ContinueOnError="WarnAndContinue">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictStaLifetimeTask>
+                    <Message Text="STA_RESULT:$(MSBuildLastTaskResult):$(Value)" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+            ApartmentState? observedApartment = null;
+            HostServices hostServices = new();
+            hostServices.RegisterHostObject(project.Path, "Build", nameof(StrictStaLifetimeTask),
+                new OutputCallbackHost(() => observedApartment = Thread.CurrentThread.GetApartmentState()));
+            MockLogger logger = new(_output);
+
+            BuildStrictProject(project.Path, logger, hostServices: hostServices).ShouldHaveSucceeded();
+
+            observedApartment.ShouldBe(ApartmentState.STA);
+            logger.AssertLogContains("MSB4287", "STA_RESULT:false:value");
+            logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictStaLifetimeTask))!.Succeeded.ShouldBeFalse();
         }
 
         [Theory]
@@ -539,10 +569,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.ErrorCount.ShouldBe(succeeds ? 0 : 1);
         }
 
-        [Fact]
-        public void CancellationDuringOutputGatheringSuppressesDeferredDiagnostics()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CancellationDuringOutputGatheringPreservesEarlierDiagnostics(bool strict)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", null);
             var otherDirectory = env.CreateFolder();
             var project = env.CreateFile("cancel-getter.proj", $"""
                 <Project>
@@ -554,29 +587,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   </Target>
                 </Project>
                 """);
+            using BuildManager manager = new();
             TaskBuilder? builder = null;
-            BuildManager? activeManager = null;
+            ((IBuildComponentHost)manager).RegisterFactory(BuildComponentType.TaskBuilder,
+                type => builder = (TaskBuilder)TaskBuilder.CreateComponent(type));
             bool cancellationObserved = false;
             HostServices hostServices = new();
             hostServices.RegisterHostObject(project.Path, "Build", nameof(StrictLifetimeTask), new OutputCallbackHost(() =>
             {
-                activeManager!.CancelAllSubmissions();
+                manager.CancelAllSubmissions();
                 var token = (CancellationToken)typeof(TaskBuilder)
                     .GetField("_cancellationToken", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(builder)!;
                 cancellationObserved = SpinWait.SpinUntil(() => token.IsCancellationRequested, TimeSpan.FromSeconds(10));
             }));
             MockLogger logger = new(_output);
 
-            BuildResult result = BuildStrictProject(project.Path, logger, manager =>
+            BuildParameters parameters = new()
             {
-                activeManager = manager;
-                ((IBuildComponentHost)manager).RegisterFactory(BuildComponentType.TaskBuilder,
-                    type => builder = (TaskBuilder)TaskBuilder.CreateComponent(type));
-            }, hostServices);
+                MultiThreaded = true,
+                MultiThreadedStrict = strict,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+                HostServices = hostServices,
+            };
+            BuildResult result = manager.Build(parameters,
+                new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], hostServices));
 
             cancellationObserved.ShouldBeTrue();
             result.ShouldHaveFailed();
-            logger.AssertLogDoesntContain("MSB4181");
+            logger.AssertLogContains("MSB4181");
             logger.AssertLogDoesntContain("MSB4286");
             logger.AssertLogDoesntContain("MSB4287");
         }
@@ -818,7 +858,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     }
 
     [MSBuildMultiThreadableTask]
-    public sealed class StrictLifetimeTask : Microsoft.Build.Utilities.Task
+    public class StrictLifetimeTask : Microsoft.Build.Utilities.Task
     {
         public string Violation { get; set; } = string.Empty;
         public string OtherDirectory { get; set; } = string.Empty;
@@ -860,6 +900,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             return !ReturnFalse;
         }
+    }
+
+    [RunInSTA]
+    [MSBuildMultiThreadableTask]
+    public sealed class StrictStaLifetimeTask : StrictLifetimeTask
+    {
     }
 
     internal sealed class OutputCallbackHost(Action callback) : ITaskHost
