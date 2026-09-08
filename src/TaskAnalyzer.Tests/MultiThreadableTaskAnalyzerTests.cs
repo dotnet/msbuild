@@ -589,9 +589,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Theory]
-    [InlineData("all")]
-    [InlineData("multithreadable_only")]
-    public async Task GetFullPathOfAbsolutePathValue_NoDiagnostics(string scope)
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetFullPathOfAbsolutePathValue_NoDiagnostics(bool analyzeAllTasks)
     {
         const string source = """
             using System.IO;
@@ -617,7 +617,7 @@ public class MultiThreadableTaskAnalyzerTests
             """;
 
         CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        var diags = await GetDiagnosticsWithScopeAsync(source, scope);
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync(source, analyzeAllTasks);
 
         diags.ShouldBeEmpty();
     }
@@ -636,6 +636,7 @@ public class MultiThreadableTaskAnalyzerTests
             using System.IO;
             using Microsoft.Build.Framework;
             public class OtherPath { public string Value => "relative.txt"; }
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public override bool Execute()
@@ -673,6 +674,7 @@ public class MultiThreadableTaskAnalyzerTests
         const string source = """
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public override bool Execute()

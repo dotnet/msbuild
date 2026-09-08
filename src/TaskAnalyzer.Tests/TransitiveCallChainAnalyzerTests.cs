@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Shouldly;
 using Xunit;
@@ -208,11 +207,11 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Theory]
-    [InlineData("all", "GetCanonicalForm")]
-    [InlineData("multithreadable_only", "GetCanonicalForm")]
-    [InlineData("all", "Normalize")]
-    [InlineData("multithreadable_only", "Normalize")]
-    public async Task AbsolutePathCanonicalizationPolyfill_NoDiagnostics(string scope, string methodName)
+    [InlineData(false, "GetCanonicalForm")]
+    [InlineData(true, "GetCanonicalForm")]
+    [InlineData(false, "Normalize")]
+    [InlineData(true, "Normalize")]
+    public async Task AbsolutePathCanonicalizationPolyfill_NoDiagnostics(bool analyzeAllTasks, string methodName)
     {
         var source = $$"""
             using System.IO;
@@ -242,14 +241,8 @@ public class TransitiveCallChainAnalyzerTests
             }
             """;
 
-        var compilation = CreateCompilation(source);
-        compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        var options = new AnalyzerOptions([], new TestAnalyzerConfigOptionsProvider(new()
-        {
-            [SharedAnalyzerHelpers.ScopeOptionKey] = scope
-        }));
-        var diags = await compilation.WithAnalyzers(
-            [new MultiThreadableTaskAnalyzer(), new TransitiveCallChainAnalyzer()], options).GetAnalyzerDiagnosticsAsync();
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetAllDiagnosticsWithAllTasksOptionAsync(source, analyzeAllTasks);
 
         diags.ShouldBeEmpty();
     }
@@ -274,6 +267,7 @@ public class TransitiveCallChainAnalyzerTests
                     return new AbsolutePath(Path.GetFullPath({{argument}}));
                 }
             }
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public override bool Execute()
