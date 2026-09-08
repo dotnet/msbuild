@@ -23,6 +23,10 @@ public class TransitiveCallChainAnalyzerTests
     [InlineData("using System;", "Console.WriteLine(\"test\");", "Console.WriteLine")]
     [InlineData("using System.IO;", "File.Exists(\"test.txt\");", "File.Exists")]
     [InlineData("using System;", "Environment.GetEnvironmentVariable(\"KEY\");", "GetEnvironmentVariable")]
+    [InlineData("using System.IO;", "Directory.CreateTempSubdirectory();", "Directory.CreateTempSubdirectory")]
+    [InlineData("using System.IO;", "Directory.CreateTempSubdirectory(null);", "Directory.CreateTempSubdirectory")]
+    [InlineData("using System.IO;", "Directory.CreateTempSubdirectory(prefix: \"msbuild-\");", "Directory.CreateTempSubdirectory")]
+    [InlineData("using System.CodeDom.Compiler;", "using var files = new TempFileCollection();", "TempFileCollection")]
     public async Task HelperCallingBannedApi_TransitivelyFromTask_ProducesDiagnostic(
         string usingDirective, string helperBody, string expectedApiName)
     {

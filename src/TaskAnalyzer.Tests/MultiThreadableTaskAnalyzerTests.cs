@@ -1383,6 +1383,95 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("null")]
+    [InlineData("\"\"")]
+    [InlineData("\"msbuild-\"")]
+    [InlineData("prefix: \"msbuild-\"")]
+    public async Task DirectoryCreateTempSubdirectory_InMultiThreadable_ProducesWarning(string prefixArgument)
+    {
+        string invocation = $"Directory.CreateTempSubdirectory({prefixArgument})";
+        string source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public override bool Execute()
+                {
+                    var dir = {{invocation}};
+                    return true;
+                }
+            }
+            """;
+
+        var diags = await GetDiagnosticsAsync(source);
+
+        var diagnostic = diags.ShouldHaveSingleItem();
+        diagnostic.Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+        diagnostic.GetMessage().ShouldContain("Directory.CreateTempSubdirectory");
+        diagnostic.GetMessage().ShouldContain("depends on TMP/TEMP environment variables");
+        source.Substring(diagnostic.Location.SourceSpan.Start, diagnostic.Location.SourceSpan.Length).ShouldBe(invocation);
+    }
+
+    [Fact]
+    public async Task PathGetRandomFileName_DirectAndTransitive_NoDiagnostics()
+    {
+        var diags = await GetAllDiagnosticsAsync("""
+            using System.IO;
+            public static class TempHelper
+            {
+                public static string GetName() => Path.GetRandomFileName();
+            }
+
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var direct = Path.GetRandomFileName();
+                    var transitive = TempHelper.GetName();
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("", true)]
+    [InlineData("TaskEnvironment.ProjectDirectory", false)]
+    [InlineData("TaskEnvironment.ProjectDirectory, keepFiles: true", false)]
+    public async Task TempFileCollection_OnlyDefaultConstructor_ProducesWarning(string arguments, bool expectDiagnostic)
+    {
+        var diags = await GetDiagnosticsAsync($$"""
+            using System.CodeDom.Compiler;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public override bool Execute()
+                {
+                    using var files = new TempFileCollection({{arguments}});
+                    return true;
+                }
+            }
+            """);
+
+        if (expectDiagnostic)
+        {
+            var diagnostic = diags.ShouldHaveSingleItem();
+            diagnostic.Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+            diagnostic.GetMessage().ShouldContain("TempFileCollection");
+        }
+        else
+        {
+            diags.ShouldBeEmpty();
+        }
+    }
+
     [Fact]
     public async Task EnvironmentGetFolderPath_InMultiThreadable_ProducesWarning()
     {
