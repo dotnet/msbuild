@@ -1357,13 +1357,8 @@
     <value>Multi-threaded strict mode is enabled. Process current directory: "{0}".</value>
     <comment>{0} is the full path of the sentinel directory.</comment>
   </data>
-  <data name="MultiThreadedStrictModeCouldNotBeEnabled" xml:space="preserve">
-    <value>Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1}</value>
-    <comment>{0} is the full path of the sentinel directory. {1} is a sentence describing why it could not be enabled.</comment>
-  </data>
   <data name="MultiThreadedStrictModeAlreadyActive" xml:space="preserve">
-    <value>Another build in this process has already enabled it.</value>
-    <comment>This is substituted into the MultiThreadedStrictModeCouldNotBeEnabled message as the reason strict mode could not be enabled.</comment>
+    <value>Another strict build is already active in this process. Finish it before starting a new strict build.</value>
   </data>
   <data name="MultiThreadedStrictModeCurrentDirectoryChanged" xml:space="preserve">
     <value>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code.</value>

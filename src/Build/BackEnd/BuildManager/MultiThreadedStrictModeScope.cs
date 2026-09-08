@@ -39,44 +39,19 @@ internal sealed class MultiThreadedStrictModeScope
 
     internal static MultiThreadedStrictModeScope? ActiveScope => Volatile.Read(ref s_activeScope);
 
-    internal static MultiThreadedStrictModeScope? TryEnter(ILoggingService? loggingService)
+    internal static MultiThreadedStrictModeScope Enter(ILoggingService? loggingService)
     {
-        string sentinelDirectory = SentinelDirectoryName;
-        string? failureReason = null;
-        MultiThreadedStrictModeScope? scope = null;
+        MultiThreadedStrictModeScope scope;
 
         lock (s_stateLock)
         {
-            if (s_activeScope is not null)
-            {
-                failureReason = ResourceUtilities.GetResourceString("MultiThreadedStrictModeAlreadyActive");
-            }
-            else
-            {
-                try
-                {
-                    // Capture only after taking ownership. An exiting scope may still be restoring CWD.
-                    string directoryToRestore = Directory.GetCurrentDirectory();
-                    sentinelDirectory = FileUtilities.GetTemporaryDirectory(subfolder: SentinelDirectoryName);
-                    scope = Install(sentinelDirectory, directoryToRestore);
-                    Volatile.Write(ref s_activeScope, scope);
-                }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                {
-                    failureReason = e.Message;
-                }
-            }
-        }
+            ErrorUtilities.VerifyThrowInvalidOperation(s_activeScope is null, "MultiThreadedStrictModeAlreadyActive");
 
-        if (scope is null)
-        {
-            loggingService?.LogComment(
-                BuildEventContext.Invalid,
-                MessageImportance.High,
-                "MultiThreadedStrictModeCouldNotBeEnabled",
-                sentinelDirectory,
-                failureReason);
-            return null;
+            // Capture only after taking ownership. An exiting scope may still be restoring CWD.
+            string directoryToRestore = Directory.GetCurrentDirectory();
+            string sentinelDirectory = FileUtilities.GetTemporaryDirectory(subfolder: SentinelDirectoryName);
+            scope = Install(sentinelDirectory, directoryToRestore);
+            Volatile.Write(ref s_activeScope, scope);
         }
 
         try
@@ -124,13 +99,13 @@ internal sealed class MultiThreadedStrictModeScope
 
             try
             {
-                NativeMethodsShared.SetCurrentDirectory(_directoryToRestore);
-                string? currentDirectory = TryGetCurrentDirectory();
-                if (currentDirectory is not null && FileUtilities.PathsEqual(currentDirectory, SentinelDirectory))
-                {
-                    // The host directory may have disappeared. Do not leave a reusable process in the sentinel.
-                    NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
-                }
+                Directory.SetCurrentDirectory(_directoryToRestore);
+            }
+            catch
+            {
+                // Leave the sentinel even if the host directory disappeared, but surface the restoration failure.
+                NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+                throw;
             }
             finally
             {
@@ -175,14 +150,14 @@ internal sealed class MultiThreadedStrictModeScope
     internal Violations DetectViolations()
     {
         string? unexpectedDirectory = null;
-        string? currentDirectory = TryGetCurrentDirectory();
-        if (currentDirectory is not null && !FileUtilities.PathsEqual(currentDirectory, SentinelDirectory))
+        string currentDirectory = Directory.GetCurrentDirectory();
+        if (!FileUtilities.PathsEqual(currentDirectory, SentinelDirectory))
         {
             lock (s_stateLock)
             {
                 if (ReferenceEquals(s_activeScope, this))
                 {
-                    NativeMethodsShared.SetCurrentDirectory(SentinelDirectory);
+                    Directory.SetCurrentDirectory(SentinelDirectory);
                     if (_reportedCurrentDirectories.Add(currentDirectory))
                     {
                         unexpectedDirectory = currentDirectory;
@@ -206,34 +181,27 @@ internal sealed class MultiThreadedStrictModeScope
         bool truncated = false;
         lock (_reportedEntriesLock)
         {
-            try
+            foreach (string entry in Directory.EnumerateFileSystemEntries(SentinelDirectory))
             {
-                foreach (string entry in Directory.EnumerateFileSystemEntries(SentinelDirectory))
+                if (entries.Count == MaxReportedEntries)
                 {
-                    if (entries.Count == MaxReportedEntries)
-                    {
-                        truncated = true;
-                        break;
-                    }
-
-                    string name = Path.GetFileName(entry);
-                    if (!_reportedEntries.Add(name))
-                    {
-                        continue;
-                    }
-
-                    entries.Add(name);
-                    // Remove stray outputs so they cannot satisfy later unresolved reads.
-                    // Remember undeletable entries to avoid repeatedly blaming subsequent tasks.
-                    if (TryDelete(entry))
-                    {
-                        _reportedEntries.Remove(name);
-                    }
+                    truncated = true;
+                    break;
                 }
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                // Preserve diagnostics for entries collected before enumeration failed.
+
+                string name = Path.GetFileName(entry);
+                if (!_reportedEntries.Add(name))
+                {
+                    continue;
+                }
+
+                entries.Add(name);
+                // Remove stray outputs so they cannot satisfy later unresolved reads.
+                // Remember undeletable entries to avoid repeatedly blaming subsequent tasks.
+                if (TryDelete(entry))
+                {
+                    _reportedEntries.Remove(name);
+                }
             }
         }
 
@@ -246,30 +214,11 @@ internal sealed class MultiThreadedStrictModeScope
         return truncated ? entryList + ", ..." : entryList;
     }
 
-    private static string? TryGetCurrentDirectory()
-    {
-        try
-        {
-            return Directory.GetCurrentDirectory();
-        }
-        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-        {
-            return null;
-        }
-    }
-
     private static bool HasAnyEntry(string directory)
     {
-        try
+        foreach (string unused in Directory.EnumerateFileSystemEntries(directory))
         {
-            foreach (string unused in Directory.EnumerateFileSystemEntries(directory))
-            {
-                return true;
-            }
-        }
-        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-        {
-            // An unreadable directory cannot be checked by this diagnostic.
+            return true;
         }
 
         return false;

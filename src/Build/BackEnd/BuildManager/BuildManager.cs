@@ -582,6 +582,7 @@ namespace Microsoft.Build.Execution
                 parameters.LogTaskInputs = true;
             }
 
+            ExceptionDispatchInfo? strictEntryFailure = null;
             lock (_syncLock)
             {
                 AttachDebugger();
@@ -766,28 +767,48 @@ namespace Microsoft.Build.Execution
                 // Enter strict mode last: everything above (loggers in particular) still resolves paths against
                 // the directory the build was launched from, and only project execution should see the sentinel.
                 // MSBUILDMULTITHREADEDSTRICT=1 is equivalent to -mt:strict for hosts that build through the API.
-                if (_buildParameters.MultiThreaded
-                    && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict))
+                _buildParameters.MultiThreadedStrict = _buildParameters.MultiThreaded
+                    && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict);
+                if (_buildParameters.MultiThreadedStrict)
                 {
-                    // The output cache is serialized during EndBuild, while the process is still in the sentinel
-                    // directory, so a host that supplied a relative path has to be resolved here - the CLI does
-                    // the same for the entry project. Input caches were already read by InitializeCaches above.
-                    if (_buildParameters.UsesOutputCache())
+                    try
                     {
-                        _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(_buildParameters.OutputResultsCacheFile);
+                        // EndBuild serializes output caches before restoring CWD. Resolve their paths now.
+                        if (_buildParameters.UsesOutputCache())
+                        {
+                            _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(_buildParameters.OutputResultsCacheFile);
+                        }
+
+                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter(loggingService);
                     }
-
-                    _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.TryEnter(loggingService);
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        strictEntryFailure = ExceptionDispatchInfo.Capture(e);
+                        _overallBuildSuccess = false;
+                        _buildParameters.MultiThreadedStrict = false;
+                        _buildParameters.OutputResultsCacheFile = null;
+                    }
                 }
-
-                // The flag drives per-task verification and the suppression of the legacy per-project current
-                // directory reset, so it must reflect what actually happened, not what was asked for.
-                _buildParameters.MultiThreadedStrict = _multiThreadedStrictModeScope is not null;
 
                 _buildManagerState = BuildManagerState.Building;
 
                 _noActiveSubmissionsEvent!.Set();
                 _noNodesActiveEvent!.Set();
+            }
+
+            if (strictEntryFailure is not null)
+            {
+                // Drain callbacks through normal teardown, outside _syncLock, before allowing another build.
+                try
+                {
+                    EndBuild();
+                }
+                catch (Exception cleanupFailure) when (!ExceptionHandling.IsCriticalException(cleanupFailure))
+                {
+                    throw new AggregateException(strictEntryFailure.SourceException, cleanupFailure);
+                }
+
+                strictEntryFailure.Throw();
             }
 
             ILoggingService InitializeLoggingService()
@@ -1230,10 +1251,7 @@ namespace Microsoft.Build.Execution
             }
             finally
             {
-                // Restore the process current directory first, and outside any code that can throw: if this is
-                // skipped, the process stays pinned to the sentinel directory for its whole remaining lifetime,
-                // which in the MSBuild Server and Visual Studio outlives this build by a long way. An exception
-                // here must not skip the rest of shutdown either, or the BuildManager is left unusable.
+                // Restore before logger shutdown. Defer restoration errors until the remaining cleanup completes.
                 try
                 {
                     if (_multiThreadedStrictModeScope is not null)
@@ -1247,6 +1265,12 @@ namespace Microsoft.Build.Execution
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
+                    if (!exceptionsThrownInEndBuild)
+                    {
+                        _threadException ??= ExceptionDispatchInfo.Capture(e);
+                    }
+
+                    exceptionsThrownInEndBuild = true;
                 }
                 finally
                 {

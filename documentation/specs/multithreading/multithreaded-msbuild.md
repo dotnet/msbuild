@@ -265,8 +265,8 @@ MSBuild checks process state after task execution, output retrieval and task-fac
 
 These diagnostics fail the task and follow `ContinueOnError`. For a CI gate, use
 `"-warnAsError:MSB4286;MSB4287"` so they cannot be downgraded to passing warnings.
-The original process directory is restored when the build ends. If strict mode cannot be
-enabled, MSBuild reports that it is inactive.
+The original process directory is restored when the build ends. Failures to enable strict
+mode, check its state, or restore the directory fail the build; they do not silently disable checks.
 
 For migration sign-off, also [capture a binlog and search for sentinel-path leaks](thread-safe-tasks.md#validate-a-task-migration).
 A successful build alone does not establish that the migration is correct.

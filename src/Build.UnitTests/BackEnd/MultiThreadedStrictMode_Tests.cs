@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.UnitTests.Logging;
 using Shouldly;
 using Xunit;
 
@@ -57,7 +59,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
 
             try
             {
@@ -88,12 +90,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
 
             try
             {
                 scope.ShouldNotBeNull();
-                MultiThreadedStrictModeScope.TryEnter(loggingService: null).ShouldBeNull();
+                Should.Throw<InvalidOperationException>(() => MultiThreadedStrictModeScope.Enter(loggingService: null));
+                MultiThreadedStrictModeScope.ActiveScope.ShouldBe(scope);
             }
             finally
             {
@@ -111,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void UnresolvedPathWriteIsDetectedOnceAndRemoved()
         {
-            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
 
             try
             {
@@ -142,7 +145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void UnresolvedPathWriteIsDetectedEveryTime()
         {
-            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
 
             try
             {
@@ -171,7 +174,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             const int StrayCount = 25;
 
-            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
 
             try
             {
@@ -214,7 +217,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope? scope = MultiThreadedStrictModeScope.TryEnter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
 
             try
             {
@@ -348,14 +351,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetCurrentDirectory(Directory.GetCurrentDirectory());
-            MultiThreadedStrictModeScope? first = MultiThreadedStrictModeScope.TryEnter(null);
+            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter(null);
             first.ShouldNotBeNull();
             using var firstLifetime = new ScopeLifetime(first);
             string file = Path.Combine(first.SentinelDirectory, "locked.txt");
             using FileStream lockedFile = new(file, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.Read);
             first.Exit();
 
-            MultiThreadedStrictModeScope? second = MultiThreadedStrictModeScope.TryEnter(null);
+            MultiThreadedStrictModeScope second = MultiThreadedStrictModeScope.Enter(null);
             second.ShouldNotBeNull();
             using var secondLifetime = new ScopeLifetime(second);
             second.SentinelDirectory.ShouldNotBe(first.SentinelDirectory);
@@ -370,7 +373,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetCurrentDirectory(env.CreateFolder().Path);
             string originalDirectory = Directory.GetCurrentDirectory();
-            MultiThreadedStrictModeScope? first = MultiThreadedStrictModeScope.TryEnter(null);
+            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter(null);
             first.ShouldNotBeNull();
             using var firstLifetime = new ScopeLifetime(first);
             MultiThreadedStrictModeScope? second = null;
@@ -381,7 +384,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 started.Set();
                 try
                 {
-                    second = MultiThreadedStrictModeScope.TryEnter(null);
+                    second = MultiThreadedStrictModeScope.Enter(null);
                 }
                 catch (Exception e)
                 {
@@ -611,6 +614,223 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogDoesntContain("MSB4181");
             logger.AssertLogDoesntContain("MSB4286");
             logger.AssertLogDoesntContain("MSB4287");
+        }
+
+        [Fact]
+        public void StrictSetupFailureDoesNotBecomeAnInactiveBuild()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var temp = env.CreateFolder();
+            env.SetTempPath(temp.Path);
+            Directory.Delete(temp.Path);
+            using FileStream invalidTempRoot = new(
+                temp.Path, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete,
+                1, FileOptions.DeleteOnClose);
+
+            Should.Throw<IOException>(() => MultiThreadedStrictModeScope.Enter(null));
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+        }
+
+        [Fact]
+        public void StrictVerificationFailureDoesNotLookClean()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            env.SetCurrentDirectory(originalDirectory);
+            var scope = MultiThreadedStrictModeScope.Enter(null);
+            using var lifetime = new ScopeLifetime(scope);
+            Directory.SetCurrentDirectory(originalDirectory);
+            Directory.Delete(scope.SentinelDirectory);
+
+            Should.Throw<DirectoryNotFoundException>(() => scope.DetectViolations());
+
+            // Check enumeration separately: repairing the missing sentinel already throws above.
+            MethodInfo scan = typeof(MultiThreadedStrictModeScope)
+                .GetMethod("TakeUnreportedSentinelDirectoryEntries", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            Should.Throw<TargetInvocationException>(() => scan.Invoke(scope, null))
+                .InnerException.ShouldBeOfType<DirectoryNotFoundException>();
+        }
+
+        [Fact]
+        public void FailedStrictEntryLeavesBuildManagerReusable()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var project = env.CreateFile("retry-entry.proj", """
+                <Project><Target Name="Build"><Message Text="retry succeeded" /></Target></Project>
+                """);
+            var first = MultiThreadedStrictModeScope.Enter(null);
+            using var lifetime = new ScopeLifetime(first);
+            using BuildManager manager = new();
+            string outputCache = Path.Combine(env.CreateFolder().Path, "failed-entry.cache");
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                MultiThreadedStrict = true,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [new MockLogger(_output)],
+                OutputResultsCacheFile = outputCache,
+            };
+
+            Exception? exception = Record.Exception(() => manager.BeginBuild(parameters));
+            if (exception is null)
+            {
+                manager.EndBuild();
+            }
+
+            exception.ShouldBeOfType<InvalidOperationException>();
+            File.Exists(outputCache).ShouldBeFalse();
+            first.Exit();
+            parameters.Loggers = [new MockLogger(_output)];
+            manager.Build(parameters, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+        }
+
+        [Fact]
+        public void FailedStrictEntryPreservesEntryAndShutdownExceptions()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var first = MultiThreadedStrictModeScope.Enter(null);
+            using var lifetime = new ScopeLifetime(first);
+            using BuildManager manager = new();
+            LoggerException shutdownFailure = new("logger shutdown failure");
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                MultiThreadedStrict = true,
+                Loggers =
+                [
+                    new MockLogger(_output),
+                    new LoggingService_Tests.LoggerThrowException(true, false, shutdownFailure),
+                ],
+            };
+
+            AggregateException exception = Should.Throw<AggregateException>(() => manager.BeginBuild(parameters));
+            exception.InnerExceptions.Count.ShouldBe(2);
+            exception.InnerExceptions[0].ShouldBeOfType<InvalidOperationException>();
+            exception.InnerExceptions[1].ShouldBeSameAs(shutdownFailure);
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBe(first);
+
+            first.Exit();
+            parameters.Loggers = [new MockLogger(_output)];
+            manager.BeginBuild(parameters);
+            manager.EndBuild();
+        }
+
+        [Fact]
+        public void FailedStrictEntryDrainsPendingCallbacksBeforeRetry()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var first = MultiThreadedStrictModeScope.Enter(null);
+            using var lifetime = new ScopeLifetime(first);
+            using BuildManager manager = new();
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                MultiThreadedStrict = true,
+                Loggers = [new MockLogger(_output)],
+            };
+            using ManualResetEventSlim callbackStarted = new();
+            using ManualResetEventSlim releaseCallback = new();
+            using ManualResetEventSlim returned = new();
+            LoggerException callbackFailure = new("pending callback failure");
+            Exception? entryFailure = null;
+            Thread thread = new(() =>
+            {
+                entryFailure = Record.Exception(() => manager.BeginBuild(parameters));
+                returned.Set();
+            });
+            object stateLock = typeof(MultiThreadedStrictModeScope)
+                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+            FieldInfo queueField = typeof(BuildManager).GetField("_workQueue", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            FieldInfo buildState = typeof(BuildManager).GetField("_buildManagerState", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            ActionBlock<Action>? queue = null;
+            bool draining = false;
+
+            try
+            {
+                lock (stateLock)
+                {
+                    thread.Start();
+                    SpinWait.SpinUntil(() => queueField.GetValue(manager) is not null, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                    queue = (ActionBlock<Action>)queueField.GetValue(manager)!;
+                    queue.Post(() =>
+                    {
+                        callbackStarted.Set();
+                        releaseCallback.Wait();
+                        // ProcessWorkQueue forwards failures to the same handler as logging callbacks.
+                        throw callbackFailure;
+                    }).ShouldBeTrue();
+                    callbackStarted.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                }
+
+                SpinWait.SpinUntil(
+                    () => returned.IsSet || buildState.GetValue(manager)!.ToString() == "WaitingForBuildToComplete",
+                    TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                draining = !returned.IsSet;
+            }
+            finally
+            {
+                releaseCallback.Set();
+                thread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            }
+
+            draining.ShouldBeTrue();
+            queue!.Completion.IsCompleted.ShouldBeTrue();
+            AggregateException exception = entryFailure.ShouldBeOfType<AggregateException>();
+            exception.InnerExceptions[0].ShouldBeOfType<InvalidOperationException>();
+            exception.InnerExceptions[1].ShouldBeSameAs(callbackFailure);
+
+            first.Exit();
+            parameters.Loggers = [new MockLogger(_output)];
+            manager.BeginBuild(parameters);
+            manager.EndBuild();
+        }
+
+        [Fact]
+        public void StrictLoggerFailureRestoresDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            LoggerException expected = new("strict activation logger failure");
+            MockLoggingService loggingService = new(message =>
+            {
+                message.ShouldBe("MultiThreadedStrictModeEnabled");
+                throw expected;
+            });
+
+            Should.Throw<LoggerException>(() => MultiThreadedStrictModeScope.Enter(loggingService)).ShouldBeSameAs(expected);
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+        }
+
+        [Fact]
+        public void StrictRestorationFailureStillFinishesShutdown()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetCurrentDirectory(env.CreateFolder().Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                MultiThreadedStrict = true,
+                Loggers = [logger],
+            };
+            manager.BeginBuild(parameters);
+            string sentinel = Directory.GetCurrentDirectory();
+            Directory.Delete(originalDirectory);
+
+            Should.Throw<DirectoryNotFoundException>(() => manager.EndBuild());
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
+            Directory.GetCurrentDirectory().ShouldNotBe(sentinel);
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
+
+            parameters.Loggers = [new MockLogger(_output)];
+            manager.BeginBuild(parameters);
+            manager.EndBuild();
         }
 
         private static BuildResult BuildStrictProject(

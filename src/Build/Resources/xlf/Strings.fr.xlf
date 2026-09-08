@@ -655,14 +655,9 @@
         <note />
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeAlreadyActive">
-        <source>Another build in this process has already enabled it.</source>
-        <target state="new">Another build in this process has already enabled it.</target>
-        <note>This is substituted into the MultiThreadedStrictModeCouldNotBeEnabled message as the reason strict mode could not be enabled.</note>
-      </trans-unit>
-      <trans-unit id="MultiThreadedStrictModeCouldNotBeEnabled">
-        <source>Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1}</source>
-        <target state="new">Multi-threaded strict mode could not be enabled for the sentinel directory "{0}". {1}</target>
-        <note>{0} is the full path of the sentinel directory. {1} is a sentence describing why it could not be enabled.</note>
+        <source>Another strict build is already active in this process. Finish it before starting a new strict build.</source>
+        <target state="new">Another strict build is already active in this process. Finish it before starting a new strict build.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
         <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code.</source>
