@@ -39,10 +39,8 @@ internal sealed class MultiThreadedStrictModeScope
 
     internal static MultiThreadedStrictModeScope? ActiveScope => Volatile.Read(ref s_activeScope);
 
-    internal static MultiThreadedStrictModeScope Enter(ILoggingService? loggingService)
+    internal static MultiThreadedStrictModeScope Enter()
     {
-        MultiThreadedStrictModeScope scope;
-
         lock (s_stateLock)
         {
             ErrorUtilities.VerifyThrowInvalidOperation(s_activeScope is null, "MultiThreadedStrictModeAlreadyActive");
@@ -50,41 +48,11 @@ internal sealed class MultiThreadedStrictModeScope
             // Capture only after taking ownership. An exiting scope may still be restoring CWD.
             string directoryToRestore = Directory.GetCurrentDirectory();
             string sentinelDirectory = FileUtilities.GetTemporaryDirectory(subfolder: SentinelDirectoryName);
-            scope = Install(sentinelDirectory, directoryToRestore);
-            Volatile.Write(ref s_activeScope, scope);
-        }
-
-        try
-        {
-            loggingService?.LogComment(
-                BuildEventContext.Invalid,
-                MessageImportance.Low,
-                "MultiThreadedStrictModeEnabled",
-                scope.SentinelDirectory);
-        }
-        catch
-        {
-            // A synchronous logger can throw before the caller receives the scope.
-            scope.Exit();
-            throw;
-        }
-
-        return scope;
-    }
-
-    private static MultiThreadedStrictModeScope Install(string sentinelDirectory, string directoryToRestore)
-    {
-        try
-        {
-            // Unlike NativeMethodsShared, the managed API reports failure by throwing.
             Directory.SetCurrentDirectory(sentinelDirectory);
             // Keep the actual spelling: entering a directory can resolve symlinks.
-            return new MultiThreadedStrictModeScope(Directory.GetCurrentDirectory(), directoryToRestore);
-        }
-        catch
-        {
-            NativeMethodsShared.SetCurrentDirectory(directoryToRestore);
-            throw;
+            MultiThreadedStrictModeScope scope = new(Directory.GetCurrentDirectory(), directoryToRestore);
+            Volatile.Write(ref s_activeScope, scope);
+            return scope;
         }
     }
 
@@ -100,12 +68,6 @@ internal sealed class MultiThreadedStrictModeScope
             try
             {
                 Directory.SetCurrentDirectory(_directoryToRestore);
-            }
-            catch
-            {
-                // Leave the sentinel even if the host directory disappeared, but surface the restoration failure.
-                NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
-                throw;
             }
             finally
             {

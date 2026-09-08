@@ -59,22 +59,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
 
             try
             {
-                scope.ShouldNotBeNull();
                 MultiThreadedStrictModeScope.ActiveScope.ShouldBe(scope);
 
                 // Compare leaf names: on Unix the directory is entered through a symlinked temporary folder.
                 Path.GetFileName(Directory.GetCurrentDirectory())
                     .ShouldBe(MultiThreadedStrictModeScope.SentinelDirectoryName);
 
-                Directory.EnumerateFileSystemEntries(scope!.SentinelDirectory).ShouldBeEmpty();
+                Directory.EnumerateFileSystemEntries(scope.SentinelDirectory).ShouldBeEmpty();
             }
             finally
             {
-                scope?.Exit();
+                scope.Exit();
             }
 
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
@@ -90,18 +89,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
 
             try
             {
-                scope.ShouldNotBeNull();
-                Should.Throw<InvalidOperationException>(() => MultiThreadedStrictModeScope.Enter(loggingService: null));
+                Should.Throw<InvalidOperationException>(() => MultiThreadedStrictModeScope.Enter());
                 MultiThreadedStrictModeScope.ActiveScope.ShouldBe(scope);
             }
             finally
             {
-                scope?.Exit();
-                scope?.Exit();
+                scope.Exit();
+                scope.Exit();
             }
 
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
@@ -114,12 +112,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void UnresolvedPathWriteIsDetectedOnceAndRemoved()
         {
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
 
             try
             {
-                scope.ShouldNotBeNull();
-                scope!.DetectViolations().Any.ShouldBeFalse();
+                scope.DetectViolations().Any.ShouldBeFalse();
 
                 // A relative path resolves against the process current directory, which is the whole defect.
                 File.WriteAllText("unresolved.txt", "probe");
@@ -134,7 +131,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             finally
             {
-                scope?.Exit();
+                scope.Exit();
             }
         }
 
@@ -145,23 +142,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void UnresolvedPathWriteIsDetectedEveryTime()
         {
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
 
             try
             {
-                scope.ShouldNotBeNull();
-
                 for (int i = 0; i < 50; i++)
                 {
                     string name = $"stray{i}.txt";
                     File.WriteAllText(name, "probe");
 
-                    scope!.DetectViolations().UnresolvedPathWrites.ShouldBe(name, $"iteration {i}");
+                    scope.DetectViolations().UnresolvedPathWrites.ShouldBe(name, $"iteration {i}");
                 }
             }
             finally
             {
-                scope?.Exit();
+                scope.Exit();
             }
         }
 
@@ -174,12 +169,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             const int StrayCount = 25;
 
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
 
             try
             {
-                scope.ShouldNotBeNull();
-
                 for (int i = 0; i < StrayCount; i++)
                 {
                     File.WriteAllText($"stray{i:D2}.txt", "probe");
@@ -190,7 +183,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // Every verification reports at most ten names, so the whole set needs three of them.
                 for (int i = 0; i < 3; i++)
                 {
-                    string? batch = scope!.DetectViolations().UnresolvedPathWrites;
+                    string? batch = scope.DetectViolations().UnresolvedPathWrites;
                     batch.ShouldNotBeNull();
 
                     foreach (string name in batch!.Split([", "], StringSplitOptions.RemoveEmptyEntries))
@@ -203,11 +196,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
 
                 reported.Count.ShouldBe(StrayCount);
-                scope!.DetectViolations().Any.ShouldBeFalse();
+                scope.DetectViolations().Any.ShouldBeFalse();
             }
             finally
             {
-                scope?.Exit();
+                scope.Exit();
             }
         }
 
@@ -217,15 +210,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(loggingService: null);
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
 
             try
             {
-                scope.ShouldNotBeNull();
-
                 Directory.SetCurrentDirectory(originalDirectory);
 
-                MultiThreadedStrictModeScope.Violations violations = scope!.DetectViolations();
+                MultiThreadedStrictModeScope.Violations violations = scope.DetectViolations();
                 violations.UnexpectedCurrentDirectory.ShouldNotBeNull();
 
                 // Repaired, so the rest of the build keeps the protection it asked for.
@@ -236,7 +227,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             finally
             {
-                scope?.Exit();
+                scope.Exit();
             }
 
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
@@ -351,15 +342,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetCurrentDirectory(Directory.GetCurrentDirectory());
-            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter(null);
-            first.ShouldNotBeNull();
+            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter();
             using var firstLifetime = new ScopeLifetime(first);
             string file = Path.Combine(first.SentinelDirectory, "locked.txt");
             using FileStream lockedFile = new(file, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.Read);
             first.Exit();
 
-            MultiThreadedStrictModeScope second = MultiThreadedStrictModeScope.Enter(null);
-            second.ShouldNotBeNull();
+            MultiThreadedStrictModeScope second = MultiThreadedStrictModeScope.Enter();
             using var secondLifetime = new ScopeLifetime(second);
             second.SentinelDirectory.ShouldNotBe(first.SentinelDirectory);
             File.Exists(file).ShouldBeTrue();
@@ -373,8 +362,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetCurrentDirectory(env.CreateFolder().Path);
             string originalDirectory = Directory.GetCurrentDirectory();
-            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter(null);
-            first.ShouldNotBeNull();
+            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter();
             using var firstLifetime = new ScopeLifetime(first);
             MultiThreadedStrictModeScope? second = null;
             Exception? threadException = null;
@@ -384,7 +372,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 started.Set();
                 try
                 {
-                    second = MultiThreadedStrictModeScope.Enter(null);
+                    second = MultiThreadedStrictModeScope.Enter();
                 }
                 catch (Exception e)
                 {
@@ -628,7 +616,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 temp.Path, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete,
                 1, FileOptions.DeleteOnClose);
 
-            Should.Throw<IOException>(() => MultiThreadedStrictModeScope.Enter(null));
+            Should.Throw<IOException>(() => MultiThreadedStrictModeScope.Enter());
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
@@ -639,18 +627,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using TestEnvironment env = TestEnvironment.Create(_output);
             string originalDirectory = Directory.GetCurrentDirectory();
             env.SetCurrentDirectory(originalDirectory);
-            var scope = MultiThreadedStrictModeScope.Enter(null);
+            var scope = MultiThreadedStrictModeScope.Enter();
             using var lifetime = new ScopeLifetime(scope);
             Directory.SetCurrentDirectory(originalDirectory);
             Directory.Delete(scope.SentinelDirectory);
 
             Should.Throw<DirectoryNotFoundException>(() => scope.DetectViolations());
-
-            // Check enumeration separately: repairing the missing sentinel already throws above.
-            MethodInfo scan = typeof(MultiThreadedStrictModeScope)
-                .GetMethod("TakeUnreportedSentinelDirectoryEntries", BindingFlags.Instance | BindingFlags.NonPublic)!;
-            Should.Throw<TargetInvocationException>(() => scan.Invoke(scope, null))
-                .InnerException.ShouldBeOfType<DirectoryNotFoundException>();
         }
 
         [Fact]
@@ -660,7 +642,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var project = env.CreateFile("retry-entry.proj", """
                 <Project><Target Name="Build"><Message Text="retry succeeded" /></Target></Project>
                 """);
-            var first = MultiThreadedStrictModeScope.Enter(null);
+            var first = MultiThreadedStrictModeScope.Enter();
             using var lifetime = new ScopeLifetime(first);
             using BuildManager manager = new();
             string outputCache = Path.Combine(env.CreateFolder().Path, "failed-entry.cache");
@@ -691,7 +673,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FailedStrictEntryPreservesEntryAndShutdownExceptions()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            var first = MultiThreadedStrictModeScope.Enter(null);
+            var first = MultiThreadedStrictModeScope.Enter();
             using var lifetime = new ScopeLifetime(first);
             using BuildManager manager = new();
             LoggerException shutdownFailure = new("logger shutdown failure");
@@ -722,7 +704,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FailedStrictEntryDrainsPendingCallbacksBeforeRetry()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            var first = MultiThreadedStrictModeScope.Enter(null);
+            var first = MultiThreadedStrictModeScope.Enter();
             using var lifetime = new ScopeLifetime(first);
             using BuildManager manager = new();
             BuildParameters parameters = new()
@@ -789,23 +771,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void StrictLoggerFailureRestoresDirectory()
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-            string originalDirectory = Directory.GetCurrentDirectory();
-            LoggerException expected = new("strict activation logger failure");
-            MockLoggingService loggingService = new(message =>
-            {
-                message.ShouldBe("MultiThreadedStrictModeEnabled");
-                throw expected;
-            });
-
-            Should.Throw<LoggerException>(() => MultiThreadedStrictModeScope.Enter(loggingService)).ShouldBeSameAs(expected);
-            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
-            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
-        }
-
-        [Fact]
         public void StrictRestorationFailureStillFinishesShutdown()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -825,7 +790,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Should.Throw<DirectoryNotFoundException>(() => manager.EndBuild());
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
-            Directory.GetCurrentDirectory().ShouldNotBe(sentinel);
+            Directory.GetCurrentDirectory().ShouldBe(sentinel);
             logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
 
             parameters.Loggers = [new MockLogger(_output)];

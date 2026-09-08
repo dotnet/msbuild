@@ -779,7 +779,12 @@ namespace Microsoft.Build.Execution
                             _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(_buildParameters.OutputResultsCacheFile);
                         }
 
-                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter(loggingService);
+                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter();
+                        loggingService.LogComment(
+                            BuildEventContext.Invalid,
+                            MessageImportance.Low,
+                            "MultiThreadedStrictModeEnabled",
+                            _multiThreadedStrictModeScope.SentinelDirectory);
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -1276,7 +1281,6 @@ namespace Microsoft.Build.Execution
                 {
                     _multiThreadedStrictModeScope = null;
                     _savedCurrentDirectory = null;
-                    _buildParameters!.MultiThreadedStrict = false;
                 }
 
                 try
