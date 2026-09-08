@@ -443,7 +443,7 @@ The analyzer determines what to check based on the type declaration:
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
-| Regular class outside a task or analyzed-helper inheritance hierarchy | Not analyzed |
+| Regular class outside a task inheritance hierarchy and without an analyzed-helper attribute | Not analyzed |
 | Class with `[MSBuildMultiThreadableTask]` that does not implement `ITask` | MSBuildTask0014 |
 | Abstract class with `[MSBuildMultiThreadableTask]` | MSBuildTask0014 |
 
@@ -595,7 +595,7 @@ Unit tests for all rules, safe patterns, edge cases, code fixes, and compiler di
 | `MultiThreadableTaskAnalyzer.cs` | Core analyzer — `RegisterSymbolStartAction` scopes per type, `RegisterOperationAction` checks each API call |
 | `MultiThreadableTaskCodeFixProvider.cs` | Code fixes for MSBuildTask0002 and MSBuildTask0003 |
 | `BannedApiDefinitions.cs` | ~50 banned API entries resolved via `DocumentationCommentId` for O(1) symbol lookup |
-| `SharedAnalyzerHelpers.cs` | Shared task hierarchy model, path safety analysis, banned API resolution, and interface checking helpers |
+| `SharedAnalyzerHelpers.cs` | Shared path safety analysis, banned API resolution, and interface checking helpers |
 | `DiagnosticDescriptors.cs` | Eight diagnostic descriptors in category `MSBuild.TaskAuthoring` |
 | `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0008` |
 | `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006, MSBuildTask0007, and MSBuildTask0008 — detects manual path construction, ItemSpec parsing, Path.Combine usage (first argument only), helper method wrapping, FileInfo/DirectoryInfo construction through AbsolutePath intermediaries, System.IO consumption sites (`File.*`/`Directory.*`/`FileStream`/`StreamReader`/`StreamWriter`) that bias suggestions toward `FileInfo`/`DirectoryInfo`, and relative default paths that must be initialized in `Execute()` |
@@ -604,7 +604,7 @@ Unit tests for all rules, safe patterns, edge cases, code fixes, and compiler di
 ### Performance
 
 - **O(1) banned API lookup** via `Dictionary<ISymbol, BannedApiEntry>` with `SymbolEqualityComparer`
-- **Per-type scoping in MultiThreadableTaskAnalyzer** via `RegisterSymbolStartAction` — operations outside task and analyzed-helper inheritance hierarchies are never analyzed
+- **Per-type scoping in MultiThreadableTaskAnalyzer** via `RegisterSymbolStartAction` — operations outside task classes are never analyzed
 - **Compilation-wide scan in TransitiveCallChainAnalyzer** — traces call chains across all methods to detect transitive banned API usage from task entry points
 - **No LINQ on hot paths** — `ImplementsInterface` uses explicit loop
 - **Static `AnalyzeOperation`** — no instance state captured

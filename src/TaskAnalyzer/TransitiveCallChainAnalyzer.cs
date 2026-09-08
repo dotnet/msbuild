@@ -74,7 +74,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             compilationContext.RegisterOperationAction(opCtx =>
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
-                    taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, taskTypeAnalysis);
+                    taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, taskTypeAnalysis, analyzedAttributeType);
             },
             OperationKind.Invocation,
             OperationKind.ObjectCreation,
@@ -106,7 +106,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
-            TaskTypeAnalysis taskTypeAnalysis)
+            TaskTypeAnalysis taskTypeAnalysis,
+            INamedTypeSymbol? analyzedAttributeType)
         {
             var containingSymbol = context.ContainingSymbol;
             if (containingSymbol is not IMethodSymbol containingMethod)
@@ -121,7 +122,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var containingType = containingMethod.ContainingType;
             bool isHandledByDirectAnalyzer = containingType is not null &&
                 (taskTypeAnalysis.TaskHierarchyTypes.Contains(containingType) ||
-                 taskTypeAnalysis.AnalyzedHelperHierarchyTypes.Contains(containingType));
+                 HasAttribute(containingType, analyzedAttributeType));
 
             ISymbol? referencedSymbol = null;
             ImmutableArray<IArgumentOperation> arguments = default;
@@ -239,7 +240,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var taskTypes = new List<INamedTypeSymbol>();
             foreach (INamedTypeSymbol taskType in taskTypeAnalysis.ConcreteTaskTypes)
             {
-                if (analyzeAllTasks || taskTypeAnalysis.TypesAnalyzedAsMultiThreadableTasks.Contains(taskType))
+                if (analyzeAllTasks || taskTypeAnalysis.MultiThreadableTaskHierarchyTypes.Contains(taskType))
                 {
                     taskTypes.Add(taskType);
                 }
@@ -256,12 +257,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 foreach (IMethodSymbol method in GetMethodsIncludingBaseTypes(taskType))
                 {
                     // BFS from this method through the call graph
-                    var methodKey = method.OriginalDefinition;
-                    var visited = new HashSet<ISymbol>(SymbolEqualityComparer.Default) { methodKey };
-                    var predecessors = new Dictionary<ISymbol, ISymbol>(SymbolEqualityComparer.Default);
-                    var queue = new Queue<ISymbol>();
+                    var visited = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
+                    var queue = new Queue<(ISymbol current, List<string> chain)>();
 
                     // Seed with methods called directly from this task method
+                    var methodKey = method.OriginalDefinition;
                     if (callGraph.TryGetValue(methodKey, out var directCallees))
                     {
                         // Snapshot ConcurrentBag to avoid thread-local enumeration issues
@@ -269,8 +269,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             if (visited.Add(callee))
                             {
-                                predecessors.Add(callee, methodKey);
-                                queue.Enqueue(callee);
+                                var chain = new List<string>(4)
+                                {
+                                    FormatMethodShort(method),
+                                    FormatSymbolShort(callee),
+                                };
+                                queue.Enqueue((callee, chain));
                             }
                         }
                     }
@@ -279,21 +283,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     {
                         context.CancellationToken.ThrowIfCancellationRequested();
 
-                        ISymbol current = queue.Dequeue();
+                        var (current, chain) = queue.Dequeue();
 
                         // Check if this method has direct violations (from source scan)
                         if (directViolations.TryGetValue(current, out var violations))
                         {
                             foreach (var v in violations)
                             {
-                                ReportTransitiveViolation(
-                                    context,
-                                    method,
-                                    methodKey,
-                                    current,
-                                    predecessors,
-                                    v,
-                                    reportedPerTaskType);
+                                ReportTransitiveViolation(context, method, v, chain, reportedPerTaskType);
                             }
                         }
 
@@ -307,8 +304,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                             {
                                 if (visited.Add(callee))
                                 {
-                                    predecessors.Add(callee, current);
-                                    queue.Enqueue(callee);
+                                    var newChain = new List<string>(chain) { FormatSymbolShort(callee) };
+                                    queue.Enqueue((callee, newChain));
                                 }
                             }
                         }
@@ -330,10 +327,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         private static void ReportTransitiveViolation(
             CompilationAnalysisContext context,
             IMethodSymbol taskMethod,
-            ISymbol taskMethodKey,
-            ISymbol violatingMethod,
-            Dictionary<ISymbol, ISymbol> predecessors,
             ViolationInfo violation,
+            List<string> chain,
             HashSet<(string ApiDisplayName, Location Location)> reportedPerTaskType)
         {
             var taskMethodLocation = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
@@ -351,18 +346,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            var chain = new List<string>();
-            for (ISymbol current = violatingMethod;
-                 !SymbolEqualityComparer.Default.Equals(current, taskMethodKey);
-                 current = predecessors[current])
-            {
-                chain.Add(FormatSymbolShort(current));
-            }
-
-            chain.Add(FormatMethodShort(taskMethod));
-            chain.Reverse();
-            chain.Add(violation.ApiDisplayName);
-            var chainStr = string.Join(" → ", chain);
+            var chainWithApi = new List<string>(chain) { violation.ApiDisplayName };
+            var chainStr = string.Join(" → ", chainWithApi);
 
             var additionalLocations = hasCallSite && taskMethodLocation.SourceTree is not null
                 ? ImmutableArray.Create(taskMethodLocation)

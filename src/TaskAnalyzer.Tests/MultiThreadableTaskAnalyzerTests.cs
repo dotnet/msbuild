@@ -2042,23 +2042,12 @@ public class MultiThreadableTaskAnalyzerTests
             public abstract class CommandLineTaskBase
             {
                 public IBuildEngine BuildEngine { get; set; } = new BuildEngineStub();
-
                 protected string ReadEnvironment() => Environment.GetEnvironmentVariable("KEY");
-
-                public bool Execute()
-                {
-                    ReadEnvironment();
-                    return true;
-                }
+                public bool Execute() { ReadEnvironment(); return true; }
             }
 
-            public abstract class CompilerTaskBase : CommandLineTaskBase
-            {
-            }
-
-            public abstract class ManagedCompiler : CompilerTaskBase
-            {
-            }
+            public abstract class CompilerTaskBase : CommandLineTaskBase { }
+            public abstract class ManagedCompiler : CompilerTaskBase { }
 
             public class Csc : ManagedCompiler, IMultiThreadableTask
             {

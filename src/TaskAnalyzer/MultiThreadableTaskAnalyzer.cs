@@ -84,8 +84,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var namedType = (INamedTypeSymbol)symbolStartContext.Symbol;
 
                 bool isInTaskHierarchy = taskTypeAnalysis.TaskHierarchyTypes.Contains(namedType);
-                bool isInAnalyzedHelperHierarchy = taskTypeAnalysis.AnalyzedHelperHierarchyTypes.Contains(namedType);
-                if (!isInTaskHierarchy && !isInAnalyzedHelperHierarchy)
+                bool hasAnalyzedAttribute = HasAttribute(namedType, analyzedAttributeType);
+                if (!isInTaskHierarchy && !hasAnalyzedAttribute)
                 {
                     return;
                 }
@@ -93,7 +93,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // When scope is "multithreadable_only", only analyze MSBuildTask0002/0003 for multithreadable tasks
                 bool reportEnvironmentRules = analyzeAllTasks ||
                     taskTypeAnalysis.MultiThreadableTaskHierarchyTypes.Contains(namedType) ||
-                    isInAnalyzedHelperHierarchy;
+                    hasAnalyzedAttribute;
 
                 // Register operation-level analysis within this type
                 symbolStartContext.RegisterOperationAction(

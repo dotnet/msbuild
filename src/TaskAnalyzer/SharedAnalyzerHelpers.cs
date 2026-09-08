@@ -61,21 +61,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             public ImmutableArray<INamedTypeSymbol> ConcreteTaskTypes { get; }
             public ImmutableHashSet<INamedTypeSymbol> TaskHierarchyTypes { get; }
             public ImmutableHashSet<INamedTypeSymbol> MultiThreadableTaskHierarchyTypes { get; }
-            public ImmutableHashSet<INamedTypeSymbol> TypesAnalyzedAsMultiThreadableTasks { get; }
-            public ImmutableHashSet<INamedTypeSymbol> AnalyzedHelperHierarchyTypes { get; }
 
             public TaskTypeAnalysis(
                 ImmutableArray<INamedTypeSymbol> concreteTaskTypes,
                 ImmutableHashSet<INamedTypeSymbol> taskHierarchyTypes,
-                ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskHierarchyTypes,
-                ImmutableHashSet<INamedTypeSymbol> typesAnalyzedAsMultiThreadableTasks,
-                ImmutableHashSet<INamedTypeSymbol> analyzedHelperHierarchyTypes)
+                ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskHierarchyTypes)
             {
                 ConcreteTaskTypes = concreteTaskTypes;
                 TaskHierarchyTypes = taskHierarchyTypes;
                 MultiThreadableTaskHierarchyTypes = multiThreadableTaskHierarchyTypes;
-                TypesAnalyzedAsMultiThreadableTasks = typesAnalyzedAsMultiThreadableTasks;
-                AnalyzedHelperHierarchyTypes = analyzedHelperHierarchyTypes;
             }
         }
 
@@ -94,17 +88,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var concreteTaskTypes = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
             var taskHierarchyTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             var multiThreadableTaskHierarchyTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-            var typesAnalyzedAsMultiThreadableTasks = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-            var analyzedHelperHierarchyTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
             foreach (INamedTypeSymbol type in GetSourceTypes(compilation.Assembly.GlobalNamespace))
             {
                 bool isTask = ImplementsInterface(type, iTaskType);
-                bool hasAnalyzedAttribute = HasAttribute(type, analyzedAttributeType);
                 bool isMultiThreadableTask = isTask &&
                     ((iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType)) ||
                      HasAttribute(type, multiThreadableTaskAttributeType) ||
-                     hasAnalyzedAttribute);
+                     HasAttribute(type, analyzedAttributeType));
 
                 if (isTask)
                 {
@@ -118,25 +109,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 if (isMultiThreadableTask)
                 {
-                    typesAnalyzedAsMultiThreadableTasks.Add(type);
                     AddTypeHierarchy(multiThreadableTaskHierarchyTypes, type);
-                }
-
-                if (hasAnalyzedAttribute)
-                {
-                    AddTypeHierarchy(analyzedHelperHierarchyTypes, type);
                 }
             }
 
             return new TaskTypeAnalysis(
                 concreteTaskTypes.ToImmutable(),
                 taskHierarchyTypes.ToImmutable(),
-                multiThreadableTaskHierarchyTypes.ToImmutable(),
-                typesAnalyzedAsMultiThreadableTasks.ToImmutable(),
-                analyzedHelperHierarchyTypes.ToImmutable());
+                multiThreadableTaskHierarchyTypes.ToImmutable());
         }
 
-        private static bool HasAttribute(INamedTypeSymbol type, INamedTypeSymbol? attributeType)
+        internal static bool HasAttribute(INamedTypeSymbol type, INamedTypeSymbol? attributeType)
         {
             if (attributeType is null)
             {
@@ -166,38 +149,21 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
         }
 
-        private static IEnumerable<INamedTypeSymbol> GetSourceTypes(INamespaceSymbol namespaceSymbol)
+        private static IEnumerable<INamedTypeSymbol> GetSourceTypes(INamespaceOrTypeSymbol container)
         {
-            foreach (INamespaceOrTypeSymbol member in namespaceSymbol.GetMembers())
+            foreach (ISymbol member in container.GetMembers())
             {
-                if (member is INamespaceSymbol childNamespace)
-                {
-                    foreach (INamedTypeSymbol type in GetSourceTypes(childNamespace))
-                    {
-                        yield return type;
-                    }
-                }
-                else if (member is INamedTypeSymbol type)
+                if (member is INamedTypeSymbol type)
                 {
                     yield return type;
-
-                    foreach (INamedTypeSymbol nestedType in GetNestedTypes(type))
-                    {
-                        yield return nestedType;
-                    }
                 }
-            }
-        }
 
-        private static IEnumerable<INamedTypeSymbol> GetNestedTypes(INamedTypeSymbol containingType)
-        {
-            foreach (INamedTypeSymbol nestedType in containingType.GetTypeMembers())
-            {
-                yield return nestedType;
-
-                foreach (INamedTypeSymbol descendantType in GetNestedTypes(nestedType))
+                if (member is INamespaceOrTypeSymbol child)
                 {
-                    yield return descendantType;
+                    foreach (INamedTypeSymbol descendant in GetSourceTypes(child))
+                    {
+                        yield return descendant;
+                    }
                 }
             }
         }
@@ -606,51 +572,21 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
-        /// Enumerates methods and accessors declared on <paramref name="type"/> and all of its base
+        /// Enumerates methods declared on <paramref name="type"/> and all of its base
         /// types, most-derived type first. All declarations are returned because a base implementation
         /// can still be reached through another inherited member even when a derived member overrides it.
         /// </summary>
         internal static IEnumerable<IMethodSymbol> GetMethodsIncludingBaseTypes(INamedTypeSymbol type)
         {
-            var seen = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
             for (INamedTypeSymbol? current = type;
                  current is not null && current.SpecialType != SpecialType.System_Object;
                  current = current.BaseType)
             {
                 foreach (ISymbol member in current.GetMembers())
                 {
-                    if (member is IMethodSymbol method && !method.IsImplicitlyDeclared && seen.Add(method))
+                    if (member is IMethodSymbol { IsImplicitlyDeclared: false } method)
                     {
                         yield return method;
-                    }
-                    else if (member is IPropertySymbol property)
-                    {
-                        if (property.GetMethod is { IsImplicitlyDeclared: false } getMethod && seen.Add(getMethod))
-                        {
-                            yield return getMethod;
-                        }
-
-                        if (property.SetMethod is { IsImplicitlyDeclared: false } setMethod && seen.Add(setMethod))
-                        {
-                            yield return setMethod;
-                        }
-                    }
-                    else if (member is IEventSymbol @event)
-                    {
-                        if (@event.AddMethod is { IsImplicitlyDeclared: false } addMethod && seen.Add(addMethod))
-                        {
-                            yield return addMethod;
-                        }
-
-                        if (@event.RemoveMethod is { IsImplicitlyDeclared: false } removeMethod && seen.Add(removeMethod))
-                        {
-                            yield return removeMethod;
-                        }
-
-                        if (@event.RaiseMethod is { IsImplicitlyDeclared: false } raiseMethod && seen.Add(raiseMethod))
-                        {
-                            yield return raiseMethod;
-                        }
                     }
                 }
             }
