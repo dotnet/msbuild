@@ -147,9 +147,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return false;
             }
 
-            // Resolve Path from the intrinsic string's assembly, not a source or referenced lookalike.
-            var pathType = invocation.TargetMethod.ReturnType.ContainingAssembly?.GetTypeByMetadataName("System.IO.Path");
-            return SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, pathType);
+            return IsSystemIOPath(invocation);
         }
 
         /// <summary>
@@ -222,7 +220,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Check: Path.Combine(safe, ...) — result is absolute when first arg is absolute
                 if (invocation.TargetMethod.Name == "Combine" &&
-                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    IsSystemIOPath(invocation) &&
                     invocation.Arguments.Length >= 2 &&
                     IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
                 {
@@ -238,7 +236,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
 
                 if (invocation.TargetMethod.Name == "GetFullPath" &&
-                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    IsSystemIOPath(invocation) &&
                     invocation.Arguments.Length >= 1 &&
                     IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
                 {
@@ -288,9 +286,24 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             return false;
         }
 
+        /// <summary>
+        /// True when <paramref name="invocation"/> targets the intrinsic <c>System.IO.Path</c>. The type is
+        /// resolved from the assembly that defines <see cref="string"/> rather than matched by display name,
+        /// so a source-declared or referenced <c>System.IO.Path</c> lookalike does not satisfy the check.
+        /// </summary>
+        internal static bool IsSystemIOPath(IInvocationOperation invocation)
+        {
+            INamedTypeSymbol? pathType = invocation.SemanticModel?.Compilation
+                .GetSpecialType(SpecialType.System_String).ContainingAssembly?
+                .GetTypeByMetadataName(WellKnownTypeNames.PathFullName);
+
+            return pathType is not null &&
+                SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, pathType);
+        }
+
         internal static bool IsPathExtraction(IInvocationOperation invocation) =>
             invocation.TargetMethod.Name is "GetDirectoryName" or "GetPathRoot" &&
-            invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+            IsSystemIOPath(invocation) &&
             invocation.Arguments.Length == 1 &&
             invocation.Arguments[0].Parameter?.Type.SpecialType == SpecialType.System_String;
 

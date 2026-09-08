@@ -508,6 +508,32 @@ public class MultiThreadableTaskAnalyzerTests
             .ShouldBe($"TaskEnvironment.GetAbsolutePath({expression})");
     }
 
+    [Fact]
+    public async Task InvertedPathExtraction_SystemIOPathLookalike_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            namespace System.IO
+            {
+                internal static class Path
+                {
+                    public static string GetDirectoryName(string path) => path;
+                }
+            }
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    var dir = TaskEnvironment.GetAbsolutePath(System.IO.Path.GetDirectoryName("list.xml"));
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.ResolvePathBeforeExtraction);
+    }
+
     [Theory]
     [InlineData("GetDirectoryName")]
     [InlineData("GetPathRoot")]

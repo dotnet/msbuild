@@ -202,6 +202,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
+            // MSBuildTask0015 supersedes the MSBuildTask0003 check below. The flagged call is itself a
+            // GetAbsolutePath resolution, so 0003 has nothing to add, and reporting both would produce
+            // two diagnostics — offering conflicting fixes — for a single defect.
             if (reportEnvironmentRules &&
                 context.Operation is IInvocationOperation pathInvocation &&
                 GetInvertedPathExtraction(pathInvocation, taskEnvironmentType) is { } extraction)
