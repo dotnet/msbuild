@@ -124,8 +124,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("Made it");
         }
 
-        [Fact]
-        public void CanceledTasksDoNotLogMSB4181()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CanceledTasksDoNotLogMSB4181(bool strict)
         {
             using (TestEnvironment env = TestEnvironment.Create(_testOutput))
             {
@@ -157,6 +159,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 var _parameters = new BuildParameters
                 {
+                    MultiThreaded = strict,
+                    MultiThreadedStrict = strict,
                     ShutdownInProcNodeOnBuildFinish = true,
                     Loggers = new ILogger[] { logger },
                     EnableNodeReuse = false
@@ -186,6 +190,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 logger.AssertLogContains("MSB5021");
                 // Should NOT log "exec failed without logging error"
                 logger.AssertLogDoesntContain("MSB4181");
+                logger.AssertLogDoesntContain("MSB4286");
+                logger.AssertLogDoesntContain("MSB4287");
 
                 collection.Dispose();
                 manager.Dispose();

@@ -672,23 +672,33 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, TaskHostParameters taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
-            if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
-            {
-                ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
-            }
-
-            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
-
+            IDisposable assemblyLoadsTracker = null;
+            TaskExecutionResult execution;
             try
             {
+                if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
+                }
+
+                assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
                 // UNDONE: Move this and the task host.
                 taskHost.LoggingContext = taskLoggingContext;
-                return await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
+                execution = await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
             }
             finally
             {
-                _taskExecutionHost.CleanupForBatch();
+                try
+                {
+                    _taskExecutionHost.CleanupForBatch();
+                }
+                finally
+                {
+                    assemblyLoadsTracker?.Dispose();
+                }
             }
+
+            return CompleteTaskExecution(execution, taskLoggingContext, bucket);
         }
 
         /// <summary>
@@ -755,14 +765,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucket">The batching bucket</param>
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <returns>The result of running the task.</returns>
-        private async ValueTask<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
+        private async ValueTask<TaskExecutionResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
         {
             UpdateContinueOnError(bucket, taskHost);
 
             bool taskResult = false;
-
-            WorkUnitResultCode resultCode = WorkUnitResultCode.Success;
-            WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
+            bool taskReturned = false;
+            bool needsFailureDiagnostic = false;
+            bool allowFailureWithoutError = false;
 
             if (!taskExecutionHost.SetTaskParameters(_taskNode.ParametersForBuild))
             {
@@ -771,7 +781,6 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                bool taskReturned = false;
                 Exception taskException = null;
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
@@ -854,27 +863,6 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     taskException = ex;
-                }
-
-                // Multi-threaded strict mode: a task that moved the process current directory, or that wrote
-                // through a relative path it never resolved, has corrupted state shared by every project building
-                // in this process. Report it against the task that just ran and fail that task, so the defect
-                // surfaces deterministically instead of as load-dependent flakiness in some later build.
-                // Gated on this build's own parameters: another BuildManager in the same process may have opted
-                // in without this one doing so, and cancellation produces enough noise on its own.
-                bool strictModeViolationReported = false;
-
-                if (_componentHost.BuildParameters.MultiThreadedStrict
-                    && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)
-                    && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope strictModeScope
-                    && strictModeScope.VerifyAndReportProcessState(
-                        taskLoggingContext,
-                        _taskNode.Name,
-                        _targetChildInstance.Location,
-                        convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue))
-                {
-                    strictModeViolationReported = true;
-                    taskResult = false;
                 }
 
                 if (taskException == null)
@@ -1000,34 +988,18 @@ namespace Microsoft.Build.BackEnd
                 // that is logged as an error. MSBuild tasks are an exception because
                 // errors are not logged directly from them, but the tasks spawned by them.
                 IBuildEngine be = taskExecutionHost.TaskInstance.BuildEngine;
-                if (taskReturned // if the task returned
+                needsFailureDiagnostic = taskReturned // if the task returned
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
-                    && !strictModeViolationReported // and it wasn't the engine that failed it for a strict-mode violation
                     && (be is TaskHost th ? th.BuildRequestsSucceeded : false)
-                    && !(_cancellationToken.CanBeCanceled && _cancellationToken.IsCancellationRequested)) // and it wasn't cancelled
-                {
-                    // Then decide how to log MSB4181
-                    if (be is IBuildEngine7 be7 && be7.AllowFailureWithoutError)
-                    {
-                        // If it's allowed to fail without error, log as a message
-                        taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
-                    }
-                    else if (_continueOnError == ContinueOnError.WarnAndContinue)
-                    {
-                        taskLoggingContext.LogWarning(null,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
-                            "TaskReturnedFalseButDidNotLogError",
-                            _taskNode.Name);
+                    && !_cancellationToken.IsCancellationRequested;
+                allowFailureWithoutError = needsFailureDiagnostic && be is IBuildEngine7 be7 && be7.AllowFailureWithoutError;
 
-                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
-                    }
-                    else
-                    {
-                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
-                            "TaskReturnedFalseButDidNotLogError",
-                            _taskNode.Name);
-                    }
+                // Preserve ordinary task diagnostic ordering. Strict mode must wait for outputs and cleanup.
+                if (needsFailureDiagnostic && !_componentHost.BuildParameters.MultiThreadedStrict)
+                {
+                    LogTaskReturnedFalse(taskLoggingContext, allowFailureWithoutError);
+                    needsFailureDiagnostic = false;
                 }
 
                 // If the task returned attempt to gather its outputs.  If gathering outputs fails set the taskResults
@@ -1036,43 +1008,86 @@ namespace Microsoft.Build.BackEnd
                 {
                     taskResult = GatherTaskOutputs(taskExecutionHost, howToExecuteTask, bucket) && taskResult;
                 }
+            }
 
-                // If the taskResults are false look at ContinueOnError.  If ContinueOnError=false (default)
-                // mark the taskExecutedSuccessfully=false.  Otherwise let the task succeed but log a normal
-                // pri message that says this task is continuing because ContinueOnError=true
-                resultCode = taskResult ? WorkUnitResultCode.Success : WorkUnitResultCode.Failed;
-                actionCode = WorkUnitActionCode.Continue;
-                if (resultCode == WorkUnitResultCode.Failed)
+            return new TaskExecutionResult(taskResult, taskReturned, needsFailureDiagnostic, allowFailureWithoutError);
+        }
+
+        private WorkUnitResult CompleteTaskExecution(TaskExecutionResult execution, TaskLoggingContext taskLoggingContext, ItemBucket bucket)
+        {
+            bool taskResult = execution.Succeeded;
+            bool strictViolationReported = _componentHost.BuildParameters.MultiThreadedStrict
+                && !_cancellationToken.IsCancellationRequested
+                && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
+                && scope.VerifyAndReportProcessState(taskLoggingContext, _taskNode.Name, _targetChildInstance.Location,
+                    convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue);
+
+            if (strictViolationReported)
+            {
+                taskResult = false;
+                if (execution.Returned)
                 {
-                    if (_continueOnError == ContinueOnError.ErrorAndStop)
-                    {
-                        actionCode = WorkUnitActionCode.Stop;
-                    }
-                    else
-                    {
-                        // This is the ErrorAndContinue or WarnAndContinue case...
-                        string settingString = "true";
-                        if (_taskNode.ContinueOnErrorLocation != null)
-                        {
-                            settingString = bucket.Expander.ExpandIntoStringAndUnescape(_taskNode.ContinueOnError, ExpanderOptions.ExpandAll, _taskNode.ContinueOnErrorLocation); // expand embedded item vectors after expanding properties and item metadata
-                        }
+                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                }
+            }
+            else if (execution.NeedsFailureDiagnostic && !_cancellationToken.IsCancellationRequested)
+            {
+                LogTaskReturnedFalse(taskLoggingContext, execution.AllowFailureWithoutError);
+            }
 
-                        taskLoggingContext.LogComment(
-                            MessageImportance.Normal,
-                            "TaskContinuedDueToContinueOnError",
-                            "ContinueOnError",
-                            _taskNode.Name,
-                            settingString);
-
-                        actionCode = WorkUnitActionCode.Continue;
+            WorkUnitResultCode resultCode = taskResult ? WorkUnitResultCode.Success : WorkUnitResultCode.Failed;
+            WorkUnitActionCode actionCode = WorkUnitActionCode.Continue;
+            if (resultCode == WorkUnitResultCode.Failed)
+            {
+                if (_continueOnError == ContinueOnError.ErrorAndStop)
+                {
+                    actionCode = WorkUnitActionCode.Stop;
+                }
+                else
+                {
+                    string settingString = "true";
+                    if (_taskNode.ContinueOnErrorLocation != null)
+                    {
+                        settingString = bucket.Expander.ExpandIntoStringAndUnescape(
+                            _taskNode.ContinueOnError, ExpanderOptions.ExpandAll, _taskNode.ContinueOnErrorLocation);
                     }
+
+                    taskLoggingContext.LogComment(
+                        MessageImportance.Normal,
+                        "TaskContinuedDueToContinueOnError",
+                        "ContinueOnError",
+                        _taskNode.Name,
+                        settingString);
                 }
             }
 
-            WorkUnitResult result = new WorkUnitResult(resultCode, actionCode, null);
-
-            return result;
+            return new WorkUnitResult(resultCode, actionCode, null);
         }
+
+        private void LogTaskReturnedFalse(TaskLoggingContext taskLoggingContext, bool allowFailureWithoutError)
+        {
+            if (allowFailureWithoutError)
+            {
+                taskLoggingContext.LogComment(MessageImportance.Normal, "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
+            }
+            else if (_continueOnError == ContinueOnError.WarnAndContinue)
+            {
+                taskLoggingContext.LogWarning(null, new BuildEventFileInfo(_targetChildInstance.Location),
+                    "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
+                taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+            }
+            else
+            {
+                taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                    "TaskReturnedFalseButDidNotLogError", _taskNode.Name);
+            }
+        }
+
+        private readonly record struct TaskExecutionResult(
+            bool Succeeded,
+            bool Returned,
+            bool NeedsFailureDiagnostic,
+            bool AllowFailureWithoutError);
 
         private List<string> GetUndeclaredProjects(MSBuild msbuildTask)
         {

@@ -274,6 +274,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private MultiThreadedStrictModeScope? _multiThreadedStrictModeScope;
 
+        private string? _savedCurrentDirectory;
+
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
 #if DEBUG
@@ -620,6 +622,11 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+
+                // MT nodes share the process directory, so restoration belongs to the build owner.
+                _savedCurrentDirectory = _buildParameters.MultiThreaded && _buildParameters.SaveOperatingEnvironment
+                    ? Directory.GetCurrentDirectory()
+                    : null;
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
@@ -1124,6 +1131,7 @@ namespace Microsoft.Build.Execution
             }
 
             var exceptionsThrownInEndBuild = false;
+            bool nodesStopped = false;
 
             try
             {
@@ -1153,6 +1161,8 @@ namespace Microsoft.Build.Execution
                         EmitEndBuildHangDiagnostics("WaitingForNodes", hangWatch);
                     }
                 }
+
+                nodesStopped = true;
 
                 // Wait for all of the actions in the work queue to drain.
                 // _workQueue.Completion.Wait() could throw here if there was an unhandled exception in the work queue,
@@ -1226,7 +1236,14 @@ namespace Microsoft.Build.Execution
                 // here must not skip the rest of shutdown either, or the BuildManager is left unusable.
                 try
                 {
-                    _multiThreadedStrictModeScope?.Exit();
+                    if (_multiThreadedStrictModeScope is not null)
+                    {
+                        _multiThreadedStrictModeScope.Exit();
+                    }
+                    else if (nodesStopped && _savedCurrentDirectory is not null)
+                    {
+                        NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
+                    }
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
@@ -1234,6 +1251,7 @@ namespace Microsoft.Build.Execution
                 finally
                 {
                     _multiThreadedStrictModeScope = null;
+                    _savedCurrentDirectory = null;
                     _buildParameters!.MultiThreadedStrict = false;
                 }
 
