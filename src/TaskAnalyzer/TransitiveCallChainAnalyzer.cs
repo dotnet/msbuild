@@ -201,6 +201,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Check if this is a banned API call → record as a direct violation
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
+                if (IsAbsolutePathCanonicalization(context.Operation, absolutePathType))
+                {
+                    return;
+                }
+                
                 if (IsReportedByDirectAnalyzer(context, entry.Category, directAnalysisState))
                 {
                     return;

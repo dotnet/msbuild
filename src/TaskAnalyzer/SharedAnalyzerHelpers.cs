@@ -241,6 +241,45 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
+        /// Recognizes the normalization operation used by AbsolutePath.GetCanonicalForm and its polyfills.
+        /// Unlike arbitrary strings, AbsolutePath.Value is already fully qualified.
+        /// </summary>
+        internal static bool IsAbsolutePathCanonicalization(IOperation operation, INamedTypeSymbol? absolutePathType)
+        {
+            if (absolutePathType is null ||
+                operation is not IInvocationOperation invocation ||
+                invocation.TargetMethod.Name != "GetFullPath" ||
+                invocation.TargetMethod.ReturnType.SpecialType != SpecialType.System_String ||
+                invocation.Arguments.Length != 1)
+            {
+                return false;
+            }
+
+            var argument = invocation.Arguments[0].Value;
+            while (argument is IConversionOperation { Conversion.IsIdentity: true } conversion)
+            {
+                argument = conversion.Operand;
+            }
+
+            if (argument is not IPropertyReferenceOperation
+                {
+                    Property: { Name: "Value", IsStatic: false, Type.SpecialType: SpecialType.System_String } property
+                })
+            {
+                return false;
+            }
+
+            if (!SymbolEqualityComparer.Default.Equals(property.ContainingType, absolutePathType))
+            {
+                return false;
+            }
+
+            // Resolve Path from the intrinsic string's assembly, not a source or referenced lookalike.
+            var pathType = invocation.TargetMethod.ReturnType.ContainingAssembly?.GetTypeByMetadataName("System.IO.Path");
+            return SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, pathType);
+        }
+
+        /// <summary>
         /// Recursively checks if an operation represents a safely-wrapped path.
         /// </summary>
         internal static bool IsWrappedSafely(
@@ -321,7 +360,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Check: Path.GetFullPath(safe) — safe only when input is already absolute.
                 // If input is relative, GetFullPath resolves against CWD (wrong in MT).
-                // The GetFullPath call itself is still flagged by MSBuildTask0002 regardless.
+                // Only the specific AbsolutePath.Value normalization also exempts the GetFullPath call.
+                if (IsAbsolutePathCanonicalization(invocation, absolutePathType))
+                {
+                    return true;
+                }
+
                 if (invocation.TargetMethod.Name == "GetFullPath" &&
                     invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
                     invocation.Arguments.Length >= 1 &&

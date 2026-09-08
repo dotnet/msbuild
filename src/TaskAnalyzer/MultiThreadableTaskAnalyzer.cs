@@ -150,7 +150,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Check banned API lookup (handles MSBuildTask0001, 0002, 0004)
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
-                // MSBuildTask0002 is limited to MT-scoped code unless migration analysis is enabled.
+                if (IsAbsolutePathCanonicalization(context.Operation, absolutePathType))
+                {
+                    return;
+                }
+
+                // MSBuildTask0002 (TaskEnvironment) is gated by scope setting
                 if (entry.Category == BannedApiDefinitions.ApiCategory.TaskEnvironment &&
                     !ShouldReportEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree))
                 {
