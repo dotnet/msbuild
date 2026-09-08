@@ -523,6 +523,7 @@ namespace Microsoft.Build.UnitTests
     {
         private const string MSBuildLogFiles = "MSBuild_*.txt";
         private readonly string[] _originalFiles;
+        private readonly DateTime _startTimeUtc = DateTime.UtcNow;
 
         public BuildFailureLogInvariant()
         {
@@ -574,10 +575,13 @@ namespace Microsoft.Build.UnitTests
         {
             var newFiles = GetMSBuildLogFiles();
 
-            int newFilesCount = newFiles.Length;
+            List<string> unexpectedFiles = new();
             foreach (FileInfo file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
             {
                 string contents = File.ReadAllText(file.FullName);
+
+                // Read the metadata before deleting the file, otherwise it is no longer available.
+                DateTime creationTimeUtc = file.CreationTimeUtc;
 
                 // Delete the file so we don't pollute the build machine
                 FileUtilities.DeleteNoThrow(file.FullName);
@@ -586,7 +590,6 @@ namespace Microsoft.Build.UnitTests
                 if (Regex.IsMatch(file.Name, @"MSBuild_NodeShutdown_\d+\.txt") &&
                     Regex.IsMatch(contents, @"Node shutting down with reason BuildComplete and exception:\s*"))
                 {
-                    newFilesCount--;
                     continue;
                 }
 
@@ -596,15 +599,30 @@ namespace Microsoft.Build.UnitTests
                     Regex.IsMatch(file.Name, @"MSBuild_CoordinatorTrace_PID_\d+\.txt"))
                 {
                     output.WriteLine($"{file.Name}: {contents}");
-                    newFilesCount--;
                     continue;
                 }
 
                 output.WriteLine($"Build Error File {file.Name}: {contents}");
+                unexpectedFiles.Add($"{file.Name} (pid: {GetPidDescription(file.Name)}, created: {creationTimeUtc:O})");
             }
 
-            // Assert file count is equal minus any files that were OK
-            Assert.Equal(_originalFiles.Length, newFilesCount);
+            // Compare the identities of the files rather than how many there are. Test assemblies run as concurrent
+            // processes that share the machine-wide temp folder, so a file present when this invariant was created can
+            // be deleted by an unrelated process at any time. Looking only at names which were not there before means
+            // such a deletion can neither fail this test nor cancel out a genuine crash dump.
+            unexpectedFiles.ShouldBeEmpty(
+                $"Unexpected MSBuild failure log file(s) appeared after this test started at {_startTimeUtc:O}: {string.Join("; ", unexpectedFiles)}");
+        }
+
+        /// <summary>
+        ///     Extracts the process ID embedded in an MSBuild log file name, e.g. MSBuild_pid-1234_{guid}.failure.txt,
+        ///     MSBuild_CommTrace_PID_1234.txt or MSBuild_NodeShutdown_1234.txt.
+        /// </summary>
+        private static string GetPidDescription(string fileName)
+        {
+            Match match = Regex.Match(fileName, @"(?:pid-|PID_|NodeShutdown_)(?<pid>\d+)", RegexOptions.IgnoreCase);
+
+            return match.Success ? match.Groups["pid"].Value : "unknown";
         }
     }
 
