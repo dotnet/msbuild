@@ -36,11 +36,10 @@ namespace Microsoft.Build.CommandLine
         INodePacketFactory, INodePacketHandler, IBuildEngine10
     {
         /// <summary>
-        /// Keeps a record of all environment variables that, on startup of the task host, have a different
-        /// value from those that are passed to the task host in the configuration packet for the first task.
-        /// These environments are assumed to be effectively identical, so the only difference between the
-        /// two sets of values should be any environment variables that differ between e.g. a 32-bit and a 64-bit
-        /// process.  Those are the variables that this dictionary should store.
+        /// Records architecture-specific differences between task-host startup and the first task's
+        /// environment. Ordinary variables must come from the task configuration: in multithreaded mode
+        /// they can differ from the parent process's environment without being architecture adjustments.
+        /// The legacy change-wave opt-out records all startup differences instead.
         ///
         /// - The key into the dictionary is the name of the environment variable.
         /// - The Key of the KeyValuePair is the value of the variable in the owning worker node process -- the value that we
@@ -1770,50 +1769,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void InitializeMismatchedEnvironmentTable(IDictionary<string, string> environment)
         {
-            if (s_mismatchedEnvironmentValues == null)
-            {
-                // This is the first time that we have received a TaskHostConfiguration packet, so we
-                // need to construct the mismatched environment table based on our current environment
-                // (assumed to be effectively identical to startup) and the environment we were given
-                // via the task host configuration, assumed to be effectively identical to the startup
-                // environment of the task host, given that the configuration packet is sent immediately
-                // after the node is launched.
-                s_mismatchedEnvironmentValues = new Dictionary<string, KeyValuePair<string, string>>(StringComparer.OrdinalIgnoreCase);
-
-                foreach (KeyValuePair<string, string> variable in _savedEnvironment)
-                {
-                    string oldValue = variable.Value;
-                    string newValue;
-                    if (!environment.TryGetValue(variable.Key, out newValue))
-                    {
-                        s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(null, oldValue);
-                    }
-                    else
-                    {
-                        if (!String.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
-                        {
-                            s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, oldValue);
-                        }
-                    }
-                }
-
-                foreach (KeyValuePair<string, string> variable in environment)
-                {
-                    string newValue = variable.Value;
-                    string oldValue;
-                    if (!_savedEnvironment.TryGetValue(variable.Key, out oldValue))
-                    {
-                        s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, null);
-                    }
-                    else
-                    {
-                        if (!String.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
-                        {
-                            s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, oldValue);
-                        }
-                    }
-                }
-            }
+            s_mismatchedEnvironmentValues ??= TaskHostEnvironment.CreateMismatchedEnvironmentTable(
+                environment,
+                _savedEnvironment,
+                useLegacyBehavior: !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12),
+                isWindows: NativeMethodsShared.IsWindows);
         }
 
         /// <summary>

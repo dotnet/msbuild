@@ -179,13 +179,15 @@ Without nested grants, the child process could request a new root grant while th
 Nested grants avoid this by treating child processes as participants in the parent grant:
 
 1. The root build receives a grant token in `NodeGrantMessage`.
-2. `BuildManager` records that token in the build process environment as `MSBUILDCOORDINATORGRANTID`, so task-launched child processes inherit it.
+2. `BuildManager` records that token as `MSBUILDCOORDINATORGRANTID` in the build's environment snapshot, not the parent process's global environment. In multithreaded mode, each request receives it through `TaskEnvironment`; tasks dispatched to a TaskHost receive that environment in their configuration. Task-launched child processes then inherit the token from the task's execution environment.
 3. A child process that sees the token and a server that supports `nested-grants` sends `JoinGrantMessage`.
 4. The coordinator validates that the root grant is still active.
 5. If valid, the child receives a grant capped by the root grant's node count without consuming additional global budget.
 6. Releasing a nested grant does not release global budget or invalidate the root grant token.
 
 Nested grants do not implement a scheduler within the root grant. Each nested process is capped by the root grant's node count, but the coordinator does not track combined concurrency across the root process and all nested participants. The root build is expected to coordinate its own nested work so it does not oversubscribe the resources it was granted.
+
+Starting with Change Wave 18.12, TaskHost startup reconciliation preserves ordinary task-environment variables, including the grant token, instead of treating every difference from process startup as a bitness adjustment. Opting out of that wave restores the legacy reconciliation and can reintroduce a deadlock when a task-hosted restore process loses the token.
 
 Nested grant validation happens when the nested process joins the root grant. If the root grant is released later, the coordinator rejects new joins for that grant ID, but it does not revoke nested grants that were already issued. Those nested builds continue until they release or disconnect.
 
