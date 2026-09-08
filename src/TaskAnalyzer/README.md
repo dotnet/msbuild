@@ -10,24 +10,97 @@ MSBuild is introducing multithreaded task execution via `IMultiThreadableTask`. 
 
 This analyzer catches unsafe API usage at compile time and offers code fixes to migrate to the safe `TaskEnvironment` alternatives.
 
-## Diagnostic Rules
+## Default Rules and Configuration
 
-| ID | Severity | Scope | Title |
-|---|---|---|---|
-| **MSBuildTask0001** | Error | All `ITask` implementations | API is never safe in MSBuild tasks |
-| **MSBuildTask0002** | Warning | MT tasks by default; all tasks in migration mode | API requires `TaskEnvironment` alternative |
-| **MSBuildTask0003** | Warning | MT tasks by default; all tasks in migration mode | File system API requires absolute path |
-| **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
-| **MSBuildTask0005** | Warning | Follows the applicability of the underlying MSBuildTask0001–0004 violation | Transitive unsafe API usage in task call chain |
-| **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
-| **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
-| **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
-| **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
-| **MSBuildTask0010** | Warning | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
-| **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
-| **MSBuildTask0012** | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` applied directly | MSBuild never assigns the `TaskEnvironment` property |
-| **MSBuildTask0013** | Info (off by default) | Concrete tasks declaring `IMultiThreadableTask` in their own base list | Missing `[MSBuildMultiThreadableTask]`, so the task still runs out-of-proc |
-| **MSBuildTask0014** | Warning | Classes carrying `[MSBuildMultiThreadableTask]` that are not an `ITask`, or are abstract | The attribute has no effect because MSBuild never routes that type as a task |
+The analyzer enables all rules except MSBuildTask0013 by default. A rule can be enabled but remain out of scope for a given task.
+
+By default, MT migration rules MSBuildTask0002 and MSBuildTask0003 apply only to MT-scoped code.
+
+MT-scoped code includes these types:
+
+- A task that implements `IMultiThreadableTask`.
+- A task with `[MSBuildMultiThreadableTask]` applied directly.
+- A helper with `[MSBuildMultiThreadableTaskAnalyzed]` applied directly.
+- A source base class that contributes implementation code to one of these tasks.
+
+### Default rule matrix
+
+| ID | Rule | Default state | Severity | Reported for by default |
+|---|---|---|---|---|
+| **MSBuildTask0001** | API is never safe in an MSBuild task | Enabled | Error | All task implementations and MT-scoped helpers |
+| **MSBuildTask0002** | API requires a `TaskEnvironment` alternative | Enabled | Warning | MT-scoped code only |
+| **MSBuildTask0003** | File system API requires an absolute path | Enabled | Warning | MT-scoped code only |
+| **MSBuildTask0004** | API requires review for MT execution | Enabled | Warning | All task implementations and MT-scoped helpers |
+| **MSBuildTask0005** | A task call chain reaches an unsafe API | Enabled | Warning | All tasks for transitive MSBuildTask0001 and MSBuildTask0004 violations; MT tasks for all supported transitive violations |
+| **MSBuildTask0006** | Prefer a typed path property | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
+| **MSBuildTask0007** | Prefer `ITaskItem<T>` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
+| **MSBuildTask0008** | Initialize a relative path default in `Execute()` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
+| **MSBuildTask0009** | `ITaskItem<T>` uses an unsupported type | Enabled | Warning | All task implementations that use an unsupported `ITaskItem<T>` type |
+| **MSBuildTask0010** | `ITaskItem<T>` uses culture-sensitive conversion | Enabled | Warning | All task implementations that use culture-sensitive `ITaskItem<T>` conversion |
+| **MSBuildTask0011** | Prefer `TaskEnvironment` constructor injection | Enabled | Info | Concrete `IMultiThreadableTask` implementations without constructor injection |
+| **MSBuildTask0012** | MSBuild does not assign the `TaskEnvironment` property | Enabled | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` and an unassigned `TaskEnvironment` property |
+| **MSBuildTask0013** | The task does not have `[MSBuildMultiThreadableTask]` | **Disabled** | Info | Concrete tasks that declare `IMultiThreadableTask` directly but do not have `[MSBuildMultiThreadableTask]` |
+| **MSBuildTask0014** | `[MSBuildMultiThreadableTask]` has no effect | Enabled | Warning | Non-task or abstract types with `[MSBuildMultiThreadableTask]` |
+
+### Analyze all tasks for MT migration
+
+Set the option to `true` to analyze regular tasks for MT migration:
+
+```ini
+# .globalconfig
+is_global = true
+global_level = 100
+
+msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+```
+
+You can also set the option in a matching `.editorconfig` section:
+
+```ini
+# .editorconfig
+[*.cs]
+msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+```
+
+You can enable the option for a specific directory:
+
+```ini
+# .editorconfig
+[MigrationTasks/*.cs]
+msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+```
+
+The option adds MSBuildTask0002 and MSBuildTask0003 analysis to regular tasks. It also adds related transitive MSBuildTask0005 findings.
+
+Roslyn combines settings from `.globalconfig` and `.editorconfig`. A matching `.editorconfig` value overrides the `.globalconfig` value.
+
+MSBuild discovers `.editorconfig` files automatically. Add a `.globalconfig` file through the `GlobalAnalyzerConfigFiles` MSBuild item.
+
+The source file that contains the reported unsafe operation controls the `.editorconfig` value. If the option is missing or invalid, it is `false`.
+
+### Enable, disable, or change a rule
+
+Use standard Roslyn severity configuration for each diagnostic ID. You can put these entries in `.globalconfig` or in a matching `.editorconfig` section.
+
+```ini
+# Enable MSBuildTask0013, which is disabled by default.
+dotnet_diagnostic.MSBuildTask0013.severity = suggestion
+
+# Disable a rule.
+dotnet_diagnostic.MSBuildTask0004.severity = none
+
+# Change a rule severity.
+dotnet_diagnostic.MSBuildTask0002.severity = error
+```
+
+Valid severity values include `error`, `warning`, `suggestion`, `silent`, `none`, and `default`. Remove an entry to use the analyzer default.
+
+The migration option and severity configuration have different purposes:
+
+- `msbuild_task_analyzer.run_mt_analyzers_on_all_tasks` adds regular-task analysis for MSBuildTask0002, MSBuildTask0003, and related MSBuildTask0005 findings.
+- `dotnet_diagnostic.<ID>.severity` enables, disables, or changes the severity of one rule.
+
+## Diagnostic Rule Details
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -425,34 +498,19 @@ A concrete task that MSBuild cannot construct — no public parameterless constr
 
 ## Analysis Scope
 
-By default, MT-specific warnings do not affect regular tasks. The analyzer recognizes `IMultiThreadableTask`, `[MSBuildMultiThreadableTask]`, and `[MSBuildMultiThreadableTaskAnalyzed]` as MT opt-ins.
+See [Default Rules and Configuration](#default-rules-and-configuration) for the default-state matrix and copy-ready configuration.
+
+By default, MT migration warnings do not affect regular tasks. The analyzer recognizes `IMultiThreadableTask`, `[MSBuildMultiThreadableTask]`, and `[MSBuildMultiThreadableTaskAnalyzed]` as MT opt-ins.
 
 | Type | Rules Applied |
 |---|---|
 | Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations |
-| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
-| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
-| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
+| Concrete `ITask` class with `[MSBuildMultiThreadableTask]` applied directly | MSBuildTask0001–MSBuildTask0010; MSBuildTask0011 and MSBuildTask0012 apply only when their conditions match |
+| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011; MSBuildTask0013 is available but disabled by default |
+| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` | Direct MSBuildTask0001–MSBuildTask0004 analysis; MSBuildTask0005 reports only when a task reaches the helper |
 | Regular class (no task interface or attribute) | Not analyzed |
 | Class with `[MSBuildMultiThreadableTask]` that does not implement `ITask` | MSBuildTask0014 |
 | Abstract class with `[MSBuildMultiThreadableTask]` | MSBuildTask0014 |
-
-Set the option to `true` to analyze regular tasks for MSBuildTask0002, MSBuildTask0003, and related transitive MSBuildTask0005 violations:
-
-    # .globalconfig
-    is_global = true
-    msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
-
-You can also set the option in `.editorconfig`:
-
-    [*.cs]
-    msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
-
-Roslyn combines `.globalconfig` and `.editorconfig` settings. A matching `.editorconfig` value overrides the `.globalconfig` value.
-
-MSBuild discovers `.editorconfig` files automatically. Add a `.globalconfig` file through the `GlobalAnalyzerConfigFiles` MSBuild item.
-
-The source file that contains the reported unsafe operation controls the `.editorconfig` value. Missing and invalid values use `false`.
 
 Base classes of an MT-opted-in task are analyzed as part of that task's implementation, even when the opt-in interface or attribute is declared only on the derived task.
 
@@ -464,9 +522,10 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 ### Severity Levels
 
-- **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
-- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, and MSBuildTask0010** report as **Warning**.
-- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
+- **MSBuildTask0001** has a default severity of **Error**. These APIs are never safe in an MSBuild task.
+- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, MSBuildTask0010, MSBuildTask0012, and MSBuildTask0014** have a default severity of **Warning**.
+- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** have a default severity of **Info**.
+- **MSBuildTask0013** has a severity of **Info**, but the rule is disabled by default.
 
 ## Code Fixes
 
