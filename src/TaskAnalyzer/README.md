@@ -65,6 +65,15 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 
+**Canonicalization exception:** `Path.GetFullPath(path.Value)` is accepted when `path.Value`
+is the instance property of the resolved `Microsoft.Build.Framework.AbsolutePath` type.
+This is the normalization operation used by `AbsolutePath.GetCanonicalForm()` itself:
+it canonicalizes an already fully qualified value rather than resolving a relative path
+against the process working directory. The exception applies to direct calls and
+source helpers/polyfills reached through MSBuildTask0005, and the resulting string is
+recognized as absolute by MSBuildTask0003. No helper method name is whitelisted.
+`OriginalValue`, unrelated `Value` properties, and unproven string locals are not exempt.
+
 ### MSBuildTask0003 — File Paths Must Be Absolute
 
 File system APIs that accept a path parameter will resolve relative paths against the process working directory — which is shared and unpredictable in multithreaded mode.
