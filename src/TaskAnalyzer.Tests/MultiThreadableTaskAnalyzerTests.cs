@@ -1285,7 +1285,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """;
 
-        var diags = await GetAllDiagnosticsAsync(source);
+        var diags = await GetDiagnosticsAsync(source);
 
         var diagnostic = diags.ShouldHaveSingleItem();
         diagnostic.Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
@@ -1324,7 +1324,7 @@ public class MultiThreadableTaskAnalyzerTests
     [InlineData("TaskEnvironment.ProjectDirectory, keepFiles: true", false)]
     public async Task TempFileCollection_OnlyDefaultConstructor_ProducesWarning(string arguments, bool expectDiagnostic)
     {
-        var diags = await GetAllDiagnosticsAsync($$"""
+        var diags = await GetDiagnosticsAsync($$"""
             using System.CodeDom.Compiler;
             using Microsoft.Build.Framework;
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
