@@ -32,15 +32,15 @@ body:
     attributes:
       label: Data
       description: |
-        Please include all information you've gathered about this performance issue. This includes:
-          - Timing
-          - Measurements
-          - ETW Traces
-          - Call stacks
-          - Dumps
-          - etc.
-        If possible please include text as text rather than images (so it shows up in searches).
-        If applicable please include before and after measurements.
+        Share any measurements you already have; advanced profiling is not required.
+        For comparisons, include what you know:
+        * Baseline and changed versions/configurations, with the commands used for each.
+        * The project/solution and scenario: clean build, incremental build, no-op build, restore, etc.
+        * Whether package/build caches were warm or cold and whether build servers were already running.
+        * Number of runs and end-to-end timings for each configuration (individual timings, or median and range).
+        * Any other differences between the runs or limits of the comparison.
+        Binlogs, ETW traces, call stacks and dumps are welcome if available; use the sharing guidance above.
+        Prefer text over screenshots so results are searchable.
     validations:
       required: true
   - type: textarea
@@ -51,16 +51,18 @@ body:
     attributes:
       label: Versions & Configurations
       description: |
-        In a Visual Studio developer command prompt, run `msbuild -version` and paste the output here.
-        If applicable, include the version of the tool that invokes MSBuild (Visual Studio, dotnet CLI, etc).
-        Post any other relevant configuration settings here: OS, architecture, etc.
-  - type: checkboxes
+        Include what you know; "unknown" or "not tested" is fine.
+        * The tool that invokes the build and its version (Visual Studio, dotnet CLI, etc.). Run `dotnet --info` for dotnet builds or `msbuild -version` for MSBuild.exe builds in the same environment as the affected build.
+        * OS, architecture and available CPU/memory.
+        * Relevant settings such as `-m`, `-mt`, `-graphBuild`, node reuse and MSBuild Server use, including response-file or environment overrides if known.
+  - type: dropdown
     attributes:
       label: Regression
       description: Is this a regression from a previous build/release?
       options:
-        - label: "yes"
-        - label: "no"
+        - "Not sure"
+        - "Yes"
+        - "No"
   - type: textarea
     attributes:
       label: Regression Details

@@ -85,7 +85,7 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | Phase | Trigger | Key Actions |
 |---|---|---|
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
-| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), identify retired branches, `VisualStudio.ChannelName` |
+| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), **audit all `vs*` branches for retirement**, `VisualStudio.ChannelName` |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
 | **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Public API promotion, OptProf bootstrap (usually a no-op), M2/QB approval only if behind schedule, babysit the VS insertion into VS `main` before insiders snap |
@@ -107,6 +107,40 @@ Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) 
 **Phase 2 — what moves vs. what stays.** When rotating `main` to the next channel, retarget **only** the subscriptions whose **target branch is `main`** (`dotnet/dotnet @ main`, `dotnet/fsharp @ main`). **Never** retarget a subscription that targets a VMR servicing/release branch (`dotnet/dotnet @ release/*`) — that includes the SDK band paired with the new `vs{{THIS_RELEASE_VERSION}}` branch and any `.NET-next` preview band (`release/*-preview*`). Those stay on `VS {{THIS_RELEASE_VERSION}}` so the new release branch owns their downstream flow; moving them steals it. (This bit the 18.9 release: the band and preview subs were moved and had to be reverted.)
 
 **Phase 2 — VMR backflow rotation (easy to miss).** Backflow (`dotnet/dotnet → msbuild`, source-enabled) must rotate too **when the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band** (skip for a VS-only release): repoint the `→ main` backflow to the **next** SDK band channel (`.NET <NEXT_BAND> SDK`, the channel `dotnet/dotnet @ main` publishes to), and **add** a backflow from the **outgoing** band channel into the new `vs{{THIS_RELEASE_VERSION}}` branch (mirror the prior release branch's backflow, e.g. `vs18.0 ← .NET 10.0.1xx SDK`). See checklist steps 2.2b / 2.3f / 2.3g.
+
+## Branch retirement (Phase 1.3)
+
+Each release retires the `vs*` branches that have fallen out of support. **This is an audit of every live branch, not a check of one candidate.** The rule of thumb (`vs{{THIS_RELEASE_VERSION}} - 3`) identifies only the *newest* candidate; nothing in the process ever revisits older branches, so a single missed retirement persists forever and the backlog grows every month.
+
+**Two lifecycles, two sources — you need both.** Neither one decides a branch on its own:
+
+| Lifecycle | Source |
+|---|---|
+| **SDK band** | [supported .NET versions table](https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions) — maps each feature band to its VS version and support end date |
+| **Visual Studio** | [VS Product Lifecycle and Servicing](https://learn.microsoft.com/visualstudio/releases/2026/servicing-vs) — annual releases and the LTSC table |
+
+**Long-lived VS versions — hardcoded, don't re-derive these each release.** These keep their branches alive for years:
+
+| Visual Studio | MSBuild branch | Supported until |
+|---|---|---|
+| Visual Studio 2022 | `vs17.14` | January 2032 |
+| Visual Studio 2019 | `vs16.11` | April 2029 |
+| Visual Studio 2017 | `vs15.9` | April 2027 |
+
+**VS 2026 and later use an annual model: 2 years per release** — one year of monthly feature updates, then one security-only year on the LTSC. Only the **LTSC baseline version** gets that second year; an ordinary monthly release falls out of support as soon as the next monthly ships. So each year exactly one `vs18.x` becomes the LTSC and must be kept ~2 years while its neighbours retire quickly — identify it from the LTSC table on the servicing page (`2026-LTSC` ends **November 9, 2027**).
+
+⚠️ **A VS LTSC can expire before the SDK band that shipped with it** — `2026-LTSC` ends Nov 2027, but .NET 10 (LTS) runs to Nov 2028. So the SDK side is frequently what keeps a branch alive, which is why `vs18.0` stays despite being the oldest branch.
+
+🛑 **Maestro is not a lifecycle source.** A `.NET X.Y.Zxx SDK` channel — including `... SDK Release` variants — persists long after the band dies. Reasoning "the channel still exists, so the band is supported" is invalid and is exactly how `vs18.6` (band 10.0.3xx, EOL Aug 2026) was missed during the 18.11 release and had to be retired afterwards.
+
+Apply the **combined rule**: a branch paired with both an SDK band and a VS version retires only when *both* lifecycles agree. Two mechanical red flags find most of the backlog:
+
+| Signal | Meaning |
+|---|---|
+| Branch's `VS X.Y` channel has **no outbound subscription** | Nothing consumes it — the branch feeds nothing. Compare a live one: `vs18.0 → dotnet/dotnet release/10.0.1xx`. |
+| Default channel exists for a **branch that isn't in the repo** | Pure orphan — delete the mapping. |
+
+Worked example from 18.11: `vs18.0` pairs with 10.0.1xx (EOL Nov 2028) so it is **kept despite being the oldest branch**; `vs18.6` (10.0.3xx, EOL Aug 2026) retires; `vs18.4` and `vs18.5` were orphaned default channels for deleted branches.
 
 ## Executing a Phase
 
