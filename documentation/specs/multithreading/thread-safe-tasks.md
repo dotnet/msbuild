@@ -108,6 +108,31 @@ For tasks to be eligible for multithreaded execution using this approach, they m
 public class MyTask : Task {...}
 ```
 
+## Validate a task migration
+
+Run a representative build with an MSBuild version that supports
+[strict mode](multithreaded-msbuild.md#strict-mode), and capture a binary log:
+
+```powershell
+dotnet build .\MyProject.csproj -m -mt:strict -nr:false -bl:migration-strict.binlog "-warnAsError:MSB4286;MSB4287"
+```
+
+Clean the relevant outputs or invoke the required targets so the migrated task actually
+runs. In the binlog, confirm that the expected task assembly was used and the task ran
+in-process, rather than being skipped or using a legacy copy in a TaskHost.
+
+Search the binlog for **`MSBuild-MT-Strict-Sentinel-CWD`**. The strict-mode enable message
+contains this path by design; use it to confirm the mode was active. Treat every other
+unexpected occurrence as a migration violation to investigate before sign-off. In
+particular, a sentinel path in task inputs or outputs, evaluated file paths, tool command
+lines, or file-access errors shows that process-relative state has leaked into the build.
+
+Trace each leak back to the task, its helpers, or the project expression that produced it.
+Fix the path resolution and repeat the build and search. **A successful build alone is
+not enough:** a swallowed exception or an output containing a wrong absolute path can
+leave the build green without MSB4286/MSB4287. A clean search only covers the code paths
+and logged values exercised by that build; retain the migration's unit tests and call-chain audit.
+
 ## TaskEnvironment API
 
 The `TaskEnvironment` provides thread-safe alternatives to APIs that use global process state, enabling tasks to execute safely in a multithreaded environment.

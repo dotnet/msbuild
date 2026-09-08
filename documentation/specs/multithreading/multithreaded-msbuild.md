@@ -268,6 +268,9 @@ These diagnostics fail the task and follow `ContinueOnError`. For a CI gate, use
 The original process directory is restored when the build ends. If strict mode cannot be
 enabled, MSBuild reports that it is inactive.
 
+For migration sign-off, also [capture a binlog and search for sentinel-path leaks](thread-safe-tasks.md#validate-a-task-migration).
+A successful build alone does not establish that the migration is correct.
+
 Strict mode is not complete file-access tracking. A missing-file probe or a swallowed exception
 can still leave the build green. Changes made and undone within a task can escape detection.
 Concurrent tasks, loggers and host code share the process, so the task named by a diagnostic
