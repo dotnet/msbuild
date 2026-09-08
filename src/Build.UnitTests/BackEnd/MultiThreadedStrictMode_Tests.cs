@@ -160,50 +160,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        /// <summary>
-        /// More stray entries than fit in one diagnostic must be truncated, not dropped: the remainder has to
-        /// show up in later verifications.
-        /// </summary>
         [Fact]
-        public void UnresolvedPathWritesAreTruncatedButNotDropped()
+        public void UnresolvedPathWritesAreReportedAndRemovedInOneCheck()
         {
             const int StrayCount = 25;
-
+            using TestEnvironment env = TestEnvironment.Create(_output);
             MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
+            using var lifetime = new ScopeLifetime(scope);
+            string[] expected = new string[StrayCount];
 
-            try
+            for (int i = 0; i < StrayCount; i++)
             {
-                for (int i = 0; i < StrayCount; i++)
-                {
-                    File.WriteAllText($"stray{i:D2}.txt", "probe");
-                }
-
-                HashSet<string> reported = new(StringComparer.Ordinal);
-
-                // Every verification reports at most ten names, so the whole set needs three of them.
-                for (int i = 0; i < 3; i++)
-                {
-                    string? batch = scope.DetectViolations().UnresolvedPathWrites;
-                    batch.ShouldNotBeNull();
-
-                    foreach (string name in batch!.Split([", "], StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        if (name != "...")
-                        {
-                            reported.Add(name).ShouldBeTrue($"{name} was reported twice");
-                        }
-                    }
-                }
-
-                reported.Count.ShouldBe(StrayCount);
-                scope.DetectViolations().Any.ShouldBeFalse();
+                expected[i] = $"stray{i:D2}.txt";
+                File.WriteAllText(expected[i], "probe");
             }
-            finally
-            {
-                scope.Exit();
-            }
+
+            string? reported = scope.DetectViolations().UnresolvedPathWrites;
+            reported.ShouldNotBeNull();
+            reported!.Split([", "], StringSplitOptions.None).ShouldBe(expected, ignoreOrder: true);
+            Directory.EnumerateFileSystemEntries(scope.SentinelDirectory).ShouldBeEmpty();
+            scope.DetectViolations().Any.ShouldBeFalse();
         }
-
 
         [Fact]
         public void CurrentDirectoryChangeIsDetectedOnceAndRepaired()

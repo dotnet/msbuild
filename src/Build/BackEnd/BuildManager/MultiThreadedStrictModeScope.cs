@@ -18,7 +18,6 @@ namespace Microsoft.Build.Execution;
 internal sealed class MultiThreadedStrictModeScope
 {
     internal const string SentinelDirectoryName = "MSBuild-MT-Strict-Sentinel-CWD";
-    private const int MaxReportedEntries = 10;
 
     // Serializes scope installation, restoration and directory repair. Never log under this lock.
     private static readonly object s_stateLock = new();
@@ -140,17 +139,10 @@ internal sealed class MultiThreadedStrictModeScope
         }
 
         List<string> entries = [];
-        bool truncated = false;
         lock (_reportedEntriesLock)
         {
             foreach (string entry in Directory.EnumerateFileSystemEntries(SentinelDirectory))
             {
-                if (entries.Count == MaxReportedEntries)
-                {
-                    truncated = true;
-                    break;
-                }
-
                 string name = Path.GetFileName(entry);
                 if (!_reportedEntries.Add(name))
                 {
@@ -167,13 +159,7 @@ internal sealed class MultiThreadedStrictModeScope
             }
         }
 
-        if (entries.Count == 0)
-        {
-            return null;
-        }
-
-        string entryList = string.Join(", ", entries);
-        return truncated ? entryList + ", ..." : entryList;
+        return entries.Count == 0 ? null : string.Join(", ", entries);
     }
 
     private static bool HasAnyEntry(string directory)
