@@ -576,7 +576,7 @@ namespace Microsoft.Build.UnitTests
             var newFiles = GetMSBuildLogFiles();
 
             List<string> unexpectedFiles = new();
-            foreach (FileInfo file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
+            foreach (FileInfo file in newFiles.Except(_originalFiles, StringComparer.OrdinalIgnoreCase).Select(f => new FileInfo(f)))
             {
                 string contents = File.ReadAllText(file.FullName);
 
