@@ -578,7 +578,23 @@ namespace Microsoft.Build.UnitTests
             List<string> unexpectedFiles = new();
             foreach (FileInfo file in newFiles.Except(_originalFiles, StringComparer.OrdinalIgnoreCase).Select(f => new FileInfo(f)))
             {
-                string contents = File.ReadAllText(file.FullName);
+                string contents;
+                try
+                {
+                    contents = File.ReadAllText(file.FullName);
+                }
+                catch (Exception ex) when (ex is FileNotFoundException or DirectoryNotFoundException)
+                {
+                    // A concurrently running test process globbed the same shared folder and deleted the file first.
+                    // Reporting it is that process's job, so there is nothing left for this one to classify.
+                    continue;
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    // The file is still there but cannot be read, so it cannot be recognised as benign. Fall through
+                    // and report it rather than risk dropping a crash dump.
+                    contents = $"<could not be read: {ex.Message}>";
+                }
 
                 // Read the metadata before deleting the file, otherwise it is no longer available.
                 DateTime creationTimeUtc = file.CreationTimeUtc;
