@@ -142,10 +142,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return false;
             }
 
+            if (!SymbolEqualityComparer.Default.Equals(property.ContainingType, absolutePathType))
+            {
+                return false;
+            }
+
             // Resolve Path from the intrinsic string's assembly, not a source or referenced lookalike.
             var pathType = invocation.TargetMethod.ReturnType.ContainingAssembly?.GetTypeByMetadataName("System.IO.Path");
-            return SymbolEqualityComparer.Default.Equals(property.ContainingType, absolutePathType) &&
-                SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, pathType);
+            return SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, pathType);
         }
 
         /// <summary>
