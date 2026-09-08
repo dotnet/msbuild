@@ -74,7 +74,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     foreach ((Location location, string typeName, ISymbol? target) in candidates)
                     {
                         // A task stored in a local, field, or property may receive its environment through a
-                        // later assignment anywhere in the declaring type.
+                        // later assignment anywhere in the declaring type. This is matched per symbol rather
+                        // than per assignment: the configuring code is frequently in a different method than
+                        // the creation, which no single-method flow analysis would see. A symbol that is
+                        // reassigned to a fresh task after being configured is therefore not reported again,
+                        // trading a missed diagnostic for one that would contradict a visible assignment.
                         if (target is not null && receiversWithEnvironment.ContainsKey(target))
                         {
                             continue;
@@ -99,7 +103,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             if (creation.Type is not INamedTypeSymbol createdType ||
                 !ImplementsInterface(createdType, iTaskType) ||
-                !CanReceiveTaskEnvironment(createdType, taskEnvironmentType) ||
+                !CanReceiveTaskEnvironment(createdType, taskEnvironmentType, context.Compilation, context.ContainingSymbol) ||
                 ReceivesTaskEnvironment(creation, taskEnvironmentType))
             {
                 return;
@@ -231,15 +235,30 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// Checks whether a <c>TaskEnvironment</c> can be handed to the created task at all — through a
         /// settable property or through a constructor parameter. Without either, there is nothing to suggest.
         /// </summary>
-        private static bool CanReceiveTaskEnvironment(INamedTypeSymbol createdType, INamedTypeSymbol taskEnvironmentType)
+        private static bool CanReceiveTaskEnvironment(
+            INamedTypeSymbol createdType,
+            INamedTypeSymbol taskEnvironmentType,
+            Compilation compilation,
+            ISymbol creationContext)
         {
             if (TryGetTaskEnvironmentProperty(createdType, taskEnvironmentType, out _))
             {
                 return true;
             }
 
+            // A constructor that cannot be called from the creation site is no way to hand the environment
+            // over, so reporting there would leave nothing to act on. Accessibility is relative to the
+            // creating type rather than absolute, so an internal constructor still counts from inside the
+            // same assembly, while a private one on an unrelated task does not.
+            INamedTypeSymbol? within = creationContext as INamedTypeSymbol ?? creationContext.ContainingType;
+
             foreach (IMethodSymbol constructor in createdType.InstanceConstructors)
             {
+                if (within is not null && !compilation.IsSymbolAccessibleWithin(constructor, within))
+                {
+                    continue;
+                }
+
                 foreach (IParameterSymbol parameter in constructor.Parameters)
                 {
                     if (IsTaskEnvironmentType(parameter.Type, taskEnvironmentType))

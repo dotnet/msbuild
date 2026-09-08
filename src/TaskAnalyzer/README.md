@@ -461,6 +461,8 @@ _runningExec = new Exec
 
 The environment counts as propagated when it is assigned in the object initializer, passed as a constructor argument, or assigned on the instance afterwards — including from another member of the same type, so a field configured in a helper method is recognized.
 
+That later assignment is matched per symbol rather than per assignment, because the configuring code is frequently in a different method than the creation and no single-method flow analysis would see it. A local or field that receives an environment and is then *reassigned* to a fresh task is therefore not reported again. The rule prefers a missed diagnostic over one that contradicts an assignment plainly visible in the same type.
+
 **Scope:** Types implementing `IMultiThreadableTask` or carrying `[MSBuildMultiThreadableTask]` that hold a `TaskEnvironment` of their own; a task with no environment to propagate is not reported. The created type must implement `ITask` and be able to receive an environment — through a publicly settable `TaskEnvironment` property (such as `ToolTask.TaskEnvironment`, which is `public virtual`) or a constructor parameter — so the diagnostic is always actionable.
 
 ## Analysis Scope

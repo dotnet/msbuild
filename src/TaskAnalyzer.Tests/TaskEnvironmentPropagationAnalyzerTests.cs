@@ -396,6 +396,66 @@ public class TaskEnvironmentPropagationAnalyzerTests
         diagnostics.Single().Id.ShouldBe(DiagnosticIds.PropagateTaskEnvironmentToConstructedTask);
     }
 
+    [Fact]
+    public async Task ConstructedTaskWithInaccessibleTaskEnvironmentConstructor_DoesNotProduceDiagnostic()
+    {
+        var diagnostics = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute() => new PrivateEnvironmentCtorTask().Execute();
+            }
+
+            public class PrivateEnvironmentCtorTask : Microsoft.Build.Utilities.Task
+            {
+                public PrivateEnvironmentCtorTask()
+                {
+                }
+
+                private PrivateEnvironmentCtorTask(TaskEnvironment taskEnvironment)
+                {
+                }
+
+                public override bool Execute() => true;
+            }
+            """);
+
+        diagnostics.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task ConstructedTaskWithInternalTaskEnvironmentConstructor_ProducesWarning()
+    {
+        var diagnostics = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute() => new InternalEnvironmentCtorTask().Execute();
+            }
+
+            public class InternalEnvironmentCtorTask : Microsoft.Build.Utilities.Task
+            {
+                public InternalEnvironmentCtorTask()
+                {
+                }
+
+                internal InternalEnvironmentCtorTask(TaskEnvironment taskEnvironment)
+                {
+                }
+
+                public override bool Execute() => true;
+            }
+            """);
+
+        diagnostics.Single().Id.ShouldBe(DiagnosticIds.PropagateTaskEnvironmentToConstructedTask);
+    }
+
     private static async Task<Diagnostic[]> GetDiagnosticsAsync(string source)
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
