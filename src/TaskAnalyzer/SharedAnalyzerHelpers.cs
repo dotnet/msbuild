@@ -68,6 +68,29 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 hasAnalyzedAttribute;
         }
 
+        internal static bool IsDirectlyAnalyzedType(
+            INamedTypeSymbol type,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType,
+            ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskBaseTypes,
+            out bool analyzeAsMultiThreadable)
+        {
+            bool isTask = ImplementsInterface(type, iTaskType);
+            bool hasMultiThreadableOptIn = IsMultiThreadableOptIn(
+                type,
+                iMultiThreadableTaskType,
+                multiThreadableTaskAttributeType,
+                analyzedAttributeType,
+                out bool hasAnalyzedAttribute);
+            bool contributesToMultiThreadableTask =
+                multiThreadableTaskBaseTypes.Contains(type.OriginalDefinition);
+
+            analyzeAsMultiThreadable = hasMultiThreadableOptIn || contributesToMultiThreadableTask;
+            return isTask || hasAnalyzedAttribute || contributesToMultiThreadableTask;
+        }
+
         internal static ImmutableHashSet<INamedTypeSymbol> FindMultiThreadableTaskBaseTypes(
             Compilation compilation,
             INamedTypeSymbol iTaskType,

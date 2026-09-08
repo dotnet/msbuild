@@ -183,6 +183,8 @@ These APIs may cause version conflicts or other issues in a shared task host.
 
 MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class — or inside a helper explicitly opted in with `[MSBuildMultiThreadableTaskAnalyzed]` (see [Analysis Scope](#analysis-scope)). MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from each task's members. Transitive MSBuildTask0001/0004 violations are reported for every task; transitive MSBuildTask0002/0003 violations follow the configured migration option.
 
+The call graph can pass through another task class. If an MT task reaches an MSBuildTask0002 or MSBuildTask0003 violation in a regular task class, MSBuildTask0005 reports the call chain. When direct analysis already reports that violation, MSBuildTask0005 does not report a duplicate.
+
 The diagnostic is reported **at the unsafe call site** — inside the helper — and names the task entry point plus the full call chain in the message:
 
 ```

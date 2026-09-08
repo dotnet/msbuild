@@ -73,14 +73,16 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Thread-safe collections for building the graph across concurrent operation callbacks
             var callGraph = new ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>>(SymbolEqualityComparer.Default);
             var directViolations = new ConcurrentDictionary<ISymbol, ConcurrentBag<ViolationInfo>>(SymbolEqualityComparer.Default);
-            var directlyAnalyzedTypeCache = new ConcurrentDictionary<INamedTypeSymbol, bool>(SymbolEqualityComparer.Default);
+            var directAnalysisStateCache =
+                new ConcurrentDictionary<INamedTypeSymbol, DirectAnalysisState>(SymbolEqualityComparer.Default);
 
             // Phase 1: Scan ALL operations in the compilation to build call graph + record violations
             compilationContext.RegisterOperationAction(opCtx =>
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
                     taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType,
-                    analyzedAttributeType, multiThreadableTaskBaseTypes, directlyAnalyzedTypeCache);
+                    iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType,
+                    multiThreadableTaskBaseTypes, directAnalysisStateCache);
             },
             OperationKind.Invocation,
             OperationKind.ObjectCreation,
@@ -110,9 +112,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
             INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType,
             ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskBaseTypes,
-            ConcurrentDictionary<INamedTypeSymbol, bool> directlyAnalyzedTypeCache)
+            ConcurrentDictionary<INamedTypeSymbol, DirectAnalysisState> directAnalysisStateCache)
         {
             var containingSymbol = context.ContainingSymbol;
             if (containingSymbol is not IMethodSymbol containingMethod)
@@ -124,17 +128,24 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var callerKey = containingMethod.OriginalDefinition;
 
             var containingType = containingMethod.ContainingType;
-            bool isDirectlyAnalyzed = false;
+            DirectAnalysisState directAnalysisState = default;
             if (containingType is not null)
             {
                 INamedTypeSymbol containingTypeKey = containingType.OriginalDefinition;
-                if (!directlyAnalyzedTypeCache.TryGetValue(containingTypeKey, out isDirectlyAnalyzed))
+                if (!directAnalysisStateCache.TryGetValue(containingTypeKey, out directAnalysisState))
                 {
-                    isDirectlyAnalyzed =
-                        ImplementsInterface(containingType, iTaskType) ||
-                        multiThreadableTaskBaseTypes.Contains(containingTypeKey) ||
-                        HasAttribute(containingType, analyzedAttributeType);
-                    directlyAnalyzedTypeCache.TryAdd(containingTypeKey, isDirectlyAnalyzed);
+                    bool isDirectlyAnalyzed = IsDirectlyAnalyzedType(
+                        containingType,
+                        iTaskType,
+                        iMultiThreadableTaskType,
+                        multiThreadableTaskAttributeType,
+                        analyzedAttributeType,
+                        multiThreadableTaskBaseTypes,
+                        out bool analyzeAsMultiThreadable);
+                    directAnalysisState = new DirectAnalysisState(
+                        isDirectlyAnalyzed,
+                        analyzeAsMultiThreadable);
+                    directAnalysisStateCache.TryAdd(containingTypeKey, directAnalysisState);
                 }
             }
 
@@ -187,15 +198,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            // Keep call graph edges, but let MultiThreadableTaskAnalyzer own diagnostics for these types.
-            if (isDirectlyAnalyzed)
-            {
-                return;
-            }
-
             // Check if this is a banned API call → record as a direct violation
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
+                if (IsReportedByDirectAnalyzer(context, entry.Category, directAnalysisState))
+                {
+                    return;
+                }
+
                 var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
                 var violation = new ViolationInfo(entry.Category, displayName, entry.Message, context.Operation.Syntax.GetLocation());
                 directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
@@ -208,6 +218,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var memberContainingType = referencedSymbol.ContainingType;
                 if (memberContainingType is not null && SymbolEqualityComparer.Default.Equals(memberContainingType, consoleType))
                 {
+                    if (IsReportedByDirectAnalyzer(
+                        context,
+                        BannedApiDefinitions.ApiCategory.CriticalError,
+                        directAnalysisState))
+                    {
+                        return;
+                    }
+
                     var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
                     string message = referencedSymbol.Name.StartsWith("Read", StringComparison.Ordinal)
                         ? "may cause deadlocks in automated builds"
@@ -226,6 +244,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 {
                     if (HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
                     {
+                        if (IsReportedByDirectAnalyzer(
+                            context,
+                            BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute,
+                            directAnalysisState))
+                        {
+                            return;
+                        }
+
                         var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
                         var violation = new ViolationInfo(BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute, displayName,
                             "may resolve relative paths against the process working directory", context.Operation.Syntax.GetLocation());
@@ -233,6 +259,25 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     }
                 }
             }
+        }
+
+        private static bool IsReportedByDirectAnalyzer(
+            OperationAnalysisContext context,
+            BannedApiDefinitions.ApiCategory category,
+            DirectAnalysisState directAnalysisState)
+        {
+            // A regular task can also be a helper for an MT task. Keep its scoped violations
+            // for call-chain analysis when the direct analyzer suppresses them.
+            if (!directAnalysisState.IsDirectlyAnalyzed)
+            {
+                return false;
+            }
+
+            return AppliesToRegularTasks(category) ||
+                directAnalysisState.AnalyzeAsMultiThreadable ||
+                ReadAnalyzeAllTasksOption(
+                    context.Options.AnalyzerConfigOptionsProvider,
+                    context.Operation.Syntax.SyntaxTree);
         }
 
         /// <summary>
@@ -428,7 +473,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private static bool AppliesToRegularTasks(ViolationInfo violation)
         {
-            return violation.Category switch
+            return AppliesToRegularTasks(violation.Category);
+        }
+
+        private static bool AppliesToRegularTasks(BannedApiDefinitions.ApiCategory category)
+        {
+            return category switch
             {
                 BannedApiDefinitions.ApiCategory.CriticalError or
                 BannedApiDefinitions.ApiCategory.PotentialIssue => true,
@@ -459,24 +509,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 syntaxTree);
             analyzeAllTasksByTree.Add(syntaxTree, analyzeAllTasks);
             return analyzeAllTasks;
-        }
-
-        private static bool HasAttribute(INamedTypeSymbol type, INamedTypeSymbol? attributeType)
-        {
-            if (attributeType is null)
-            {
-                return false;
-            }
-
-            foreach (AttributeData attribute in type.GetAttributes())
-            {
-                if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, attributeType))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -609,6 +641,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 Message = message;
                 Location = location;
             }
+        }
+
+        private readonly struct DirectAnalysisState
+        {
+            public DirectAnalysisState(bool isDirectlyAnalyzed, bool analyzeAsMultiThreadable)
+            {
+                IsDirectlyAnalyzed = isDirectlyAnalyzed;
+                AnalyzeAsMultiThreadable = analyzeAsMultiThreadable;
+            }
+
+            public bool IsDirectlyAnalyzed { get; }
+
+            public bool AnalyzeAsMultiThreadable { get; }
         }
     }
 }

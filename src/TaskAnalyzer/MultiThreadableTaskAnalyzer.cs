@@ -27,11 +27,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class MultiThreadableTaskAnalyzer : DiagnosticAnalyzer
     {
-        /// <summary>
-        /// The analyzer configuration key that enables MT migration diagnostics for all tasks.
-        /// </summary>
-        internal const string AnalyzeAllTasksOptionKey = SharedAnalyzerHelpers.AnalyzeAllTasksOptionKey;
-
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => DiagnosticDescriptors.All;
 
         public override void Initialize(AnalysisContext context)
@@ -77,24 +72,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 var namedType = (INamedTypeSymbol)symbolStartContext.Symbol;
 
-                // Determine what kind of task this is
-                bool isTask = ImplementsInterface(namedType, iTaskType);
-                bool hasMultiThreadableOptIn = IsMultiThreadableOptIn(
+                if (!IsDirectlyAnalyzedType(
                     namedType,
+                    iTaskType,
                     iMultiThreadableTaskType,
                     multiThreadableTaskAttributeType,
                     analyzedAttributeType,
-                    out bool hasAnalyzedAttribute);
-                bool contributesToMultiThreadableTask =
-                    multiThreadableTaskBaseTypes.Contains(namedType.OriginalDefinition);
-
-                if (!isTask && !hasAnalyzedAttribute && !contributesToMultiThreadableTask)
+                    multiThreadableTaskBaseTypes,
+                    out bool analyzeAsMultiThreadable))
                 {
                     return;
                 }
-
-                // Base classes contribute code to opted-in tasks even though the opt-in is declared on a derived type.
-                bool analyzeAsMultiThreadable = hasMultiThreadableOptIn || contributesToMultiThreadableTask;
 
                 // Register operation-level analysis within this type
                 symbolStartContext.RegisterOperationAction(
