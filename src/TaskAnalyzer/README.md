@@ -62,8 +62,14 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath()` |
 | `Path.GetTempPath()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
 | `Path.GetTempFileName()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
+| `Directory.CreateTempSubdirectory()` (with or without a prefix) | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
+| `new TempFileCollection()` | Pass an explicit task-resolved temporary directory, or suppress with a justification. |
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
+
+The temp helpers above depend on process-wide temporary-directory environment variables. Until a `TaskEnvironment` alternative is available, suppress `MSBuildTask0002` (or `MSBuildTask0005` for a call through a helper) with a justification. `Path.GetRandomFileName()` only generates a name and does not resolve a temporary directory, so it is not banned.
+
+`TempFileCollection` constructors accepting `tempDir` are not banned because they can use an explicit task-resolved directory. Passing null or empty still falls back to the global temporary directory; this conditional usage is not currently detected.
 
 ### MSBuildTask0003 — File Paths Must Be Absolute
 
