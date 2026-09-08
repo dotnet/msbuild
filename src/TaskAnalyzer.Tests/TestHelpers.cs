@@ -141,13 +141,13 @@ internal static class TestHelpers
     /// Runs the MultiThreadableTaskAnalyzer with the shipping default behavior.
     /// </summary>
     public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source) =>
-        GetDiagnosticsWithDefaultScopeAsync(source);
+        GetDiagnosticsWithDefaultConfigurationAsync(source);
 
     /// <summary>
     /// Runs both the direct and transitive analyzers with the shipping default behavior.
     /// </summary>
     public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(string source) =>
-        GetAllDiagnosticsWithDefaultScopeAsync(source);
+        GetAllDiagnosticsWithDefaultConfigurationAsync(source);
 
     /// <summary>
     /// Runs compiler diagnostics together with analyzers and suppressors and returns
@@ -237,7 +237,7 @@ internal static class TestHelpers
     /// <summary>
     /// Runs the MultiThreadableTaskAnalyzer without the all-task migration option.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithDefaultScopeAsync(string source)
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithDefaultConfigurationAsync(string source)
     {
         var compilation = CreateCompilation(source);
         var analyzer = new MultiThreadableTaskAnalyzer();
@@ -263,7 +263,7 @@ internal static class TestHelpers
     /// <summary>
     /// Runs both the direct and transitive analyzers without the all-task migration option.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithDefaultScopeAsync(string source)
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithDefaultConfigurationAsync(string source)
     {
         var compilation = CreateCompilation(source);
         var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(

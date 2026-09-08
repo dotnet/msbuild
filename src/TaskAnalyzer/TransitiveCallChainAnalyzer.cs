@@ -63,7 +63,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
-            var multiThreadableTaskBaseTypes = FindMultiThreadableTaskBaseTypes(
+            var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
                 compilationContext.Compilation,
                 iTaskType,
                 iMultiThreadableTaskType,
@@ -82,7 +82,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
                     taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType,
                     iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType,
-                    multiThreadableTaskBaseTypes, directAnalysisStateCache);
+                    contributingMultiThreadableTaskBaseTypes, directAnalysisStateCache);
             },
             OperationKind.Invocation,
             OperationKind.ObjectCreation,
@@ -115,7 +115,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType,
-            ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskBaseTypes,
+            ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
             ConcurrentDictionary<INamedTypeSymbol, DirectAnalysisState> directAnalysisStateCache)
         {
             var containingSymbol = context.ContainingSymbol;
@@ -140,7 +140,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         iMultiThreadableTaskType,
                         multiThreadableTaskAttributeType,
                         analyzedAttributeType,
-                        multiThreadableTaskBaseTypes,
+                        contributingMultiThreadableTaskBaseTypes,
                         out bool analyzeAsMultiThreadable);
                     directAnalysisState = new DirectAnalysisState(
                         isDirectlyAnalyzed,
@@ -266,7 +266,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             BannedApiDefinitions.ApiCategory category,
             DirectAnalysisState directAnalysisState)
         {
-            // A regular task can also be a helper for an MT task. Keep its scoped violations
+            // A regular task can also be a helper for an MT task. Keep its MT migration violations
             // for call-chain analysis when the direct analyzer suppresses them.
             if (!directAnalysisState.IsDirectlyAnalyzed)
             {
@@ -401,7 +401,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                             {
                                 if (isMultiThreadableTask ||
                                     AppliesToRegularTasks(v) ||
-                                    ShouldReportScopedViolation(context, v, analyzeAllTasksByTree))
+                                    ShouldReportMtMigrationViolation(context, v, analyzeAllTasksByTree))
                                 {
                                     ReportTransitiveViolation(context, method, v, chain, reportedViolations);
                                 }
@@ -486,7 +486,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             };
         }
 
-        private static bool ShouldReportScopedViolation(
+        private static bool ShouldReportMtMigrationViolation(
             CompilationAnalysisContext context,
             ViolationInfo violation,
             Dictionary<SyntaxTree, bool> analyzeAllTasksByTree)

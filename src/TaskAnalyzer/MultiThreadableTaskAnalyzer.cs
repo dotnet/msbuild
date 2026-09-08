@@ -53,7 +53,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
             var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
             var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
-            var multiThreadableTaskBaseTypes = FindMultiThreadableTaskBaseTypes(
+            var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
                 compilationContext.Compilation,
                 iTaskType,
                 iMultiThreadableTaskType,
@@ -78,7 +78,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     iMultiThreadableTaskType,
                     multiThreadableTaskAttributeType,
                     analyzedAttributeType,
-                    multiThreadableTaskBaseTypes,
+                    contributingMultiThreadableTaskBaseTypes,
                     out bool analyzeAsMultiThreadable))
                 {
                     return;

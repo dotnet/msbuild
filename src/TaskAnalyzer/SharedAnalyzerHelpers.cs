@@ -74,7 +74,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType,
-            ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskBaseTypes,
+            ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
             out bool analyzeAsMultiThreadable)
         {
             bool isTask = ImplementsInterface(type, iTaskType);
@@ -85,13 +85,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 analyzedAttributeType,
                 out bool hasAnalyzedAttribute);
             bool contributesToMultiThreadableTask =
-                multiThreadableTaskBaseTypes.Contains(type.OriginalDefinition);
+                contributingMultiThreadableTaskBaseTypes.Contains(type.OriginalDefinition);
 
             analyzeAsMultiThreadable = hasMultiThreadableOptIn || contributesToMultiThreadableTask;
             return isTask || hasAnalyzedAttribute || contributesToMultiThreadableTask;
         }
 
-        internal static ImmutableHashSet<INamedTypeSymbol> FindMultiThreadableTaskBaseTypes(
+        internal static ImmutableHashSet<INamedTypeSymbol> FindContributingMultiThreadableTaskBaseTypes(
             Compilation compilation,
             INamedTypeSymbol iTaskType,
             INamedTypeSymbol? iMultiThreadableTaskType,
@@ -99,7 +99,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? analyzedAttributeType)
         {
             var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-            AddMultiThreadableTaskBaseTypes(
+            CollectContributingMultiThreadableTaskBaseTypes(
                 compilation.Assembly.GlobalNamespace,
                 builder,
                 iTaskType,
@@ -109,7 +109,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             return builder.ToImmutable();
         }
 
-        private static void AddMultiThreadableTaskBaseTypes(
+        private static void CollectContributingMultiThreadableTaskBaseTypes(
             INamespaceOrTypeSymbol container,
             ImmutableHashSet<INamedTypeSymbol>.Builder result,
             INamedTypeSymbol iTaskType,
@@ -121,7 +121,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 if (member is INamespaceSymbol childNamespace)
                 {
-                    AddMultiThreadableTaskBaseTypes(
+                    CollectContributingMultiThreadableTaskBaseTypes(
                         childNamespace,
                         result,
                         iTaskType,
@@ -155,7 +155,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     }
                 }
 
-                AddMultiThreadableTaskBaseTypes(
+                CollectContributingMultiThreadableTaskBaseTypes(
                     type,
                     result,
                     iTaskType,

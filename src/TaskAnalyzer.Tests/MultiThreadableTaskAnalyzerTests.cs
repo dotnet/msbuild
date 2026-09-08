@@ -1089,7 +1089,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task MSBuildTask0002_FiresForRegularTaskInAllScope()
+    public async Task MSBuildTask0002_FiresForRegularTaskWhenAllTaskMigrationModeEnabled()
     {
         var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System;
@@ -1112,7 +1112,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task MSBuildTask0003_FiresForRegularTaskInAllScope()
+    public async Task MSBuildTask0003_FiresForRegularTaskWhenAllTaskMigrationModeEnabled()
     {
         var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System.IO;
@@ -1773,7 +1773,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Task_WithoutMultiThreadableOptIn_DoesNotGetScopedRulesByDefault()
+    public async Task Task_WithoutMultiThreadableOptIn_DoesNotGetMtMigrationRulesByDefault()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -1882,9 +1882,9 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task Scope_Default_PlainTask_DoesNotGetEnvironmentOrPathDiagnostics()
+    public async Task DefaultConfiguration_PlainTask_DoesNotGetEnvironmentOrPathDiagnostics()
     {
-        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using System.IO;
             public class PlainTask : Microsoft.Build.Utilities.Task
@@ -1902,9 +1902,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableTask_GetsEnvironmentAndPathDiagnostics()
+    public async Task DefaultConfiguration_MultiThreadableTask_GetsEnvironmentAndPathDiagnostics()
     {
-        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using System.IO;
             using Microsoft.Build.Framework;
@@ -2066,9 +2066,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableDerivedTask_AnalyzesUnsafeBaseTaskMethod()
+    public async Task DefaultConfiguration_MultiThreadableDerivedTask_AnalyzesUnsafeBaseTaskMethod()
     {
-        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using System.IO;
             using Microsoft.Build.Framework;
@@ -2092,9 +2092,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableTask_ReportsOnlyDirectDiagnosticsForContributingNonTaskBase()
+    public async Task DefaultConfiguration_MultiThreadableTask_ReportsOnlyDirectDiagnosticsForContributingNonTaskBase()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using System.IO;
             using Microsoft.Build.Framework;
@@ -2119,9 +2119,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_IneffectiveAttribute_DoesNotAnalyzeUnrelatedBase()
+    public async Task DefaultConfiguration_IneffectiveAttribute_DoesNotAnalyzeUnrelatedBase()
     {
-        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public abstract class Base
@@ -2138,9 +2138,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_IneffectiveAttributeOnAbstractTask_DoesNotAnalyzeBase()
+    public async Task DefaultConfiguration_IneffectiveAttributeOnAbstractTask_DoesNotAnalyzeBase()
     {
-        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public abstract class BaseTask : Microsoft.Build.Utilities.Task
@@ -2165,9 +2165,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableAttribute_OptsTaskIn()
+    public async Task DefaultConfiguration_MultiThreadableAttribute_OptsTaskIn()
     {
-        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             [MSBuildMultiThreadableTask]
@@ -2185,9 +2185,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_AnalyzedAttribute_OptsHelperIn()
+    public async Task DefaultConfiguration_AnalyzedAttribute_OptsHelperIn()
     {
-        var diags = await GetDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             [MSBuildMultiThreadableTaskAnalyzed]

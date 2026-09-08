@@ -70,6 +70,8 @@ You can enable the option for a specific directory:
 msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
 ```
 
+Include directories that contain unsafe calls, including helper files. Selecting only task declaration files does not enable transitive diagnostics in other directories.
+
 The option adds MSBuildTask0002 and MSBuildTask0003 analysis to regular tasks. It also adds related transitive MSBuildTask0005 findings.
 
 Roslyn combines settings from `.globalconfig` and `.editorconfig`. A matching `.editorconfig` value overrides the `.globalconfig` value.

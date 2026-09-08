@@ -111,9 +111,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task MultiThreadableTaskCallingPlainTask_ReportsScopedViolationTransitively()
+    public async Task MultiThreadableTaskCallingPlainTask_ReportsMtMigrationViolationTransitively()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public class HelperTask : Microsoft.Build.Utilities.Task
@@ -161,9 +161,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task DefaultMode_PlainTaskCallingPlainTask_DoesNotReportScopedViolation()
+    public async Task DefaultMode_PlainTaskCallingPlainTask_DoesNotReportMtMigrationViolation()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             public class HelperTask : Microsoft.Build.Utilities.Task
             {
@@ -326,9 +326,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_PlainTask_DoesNotGetTransitiveDiagnostic()
+    public async Task DefaultConfiguration_PlainTask_DoesNotGetTransitiveDiagnostic()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             public static class Helper
             {
@@ -348,9 +348,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_PlainTask_GetsAlwaysApplicableTransitiveDiagnostic()
+    public async Task DefaultConfiguration_PlainTask_GetsAlwaysApplicableTransitiveDiagnostic()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             public static class Helper
             {
@@ -370,9 +370,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_PlainTask_GetsPotentialIssueTransitiveDiagnostic()
+    public async Task DefaultConfiguration_PlainTask_GetsPotentialIssueTransitiveDiagnostic()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System.Reflection;
             public static class Helper
             {
@@ -392,9 +392,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableTask_GetsTransitiveDiagnostic()
+    public async Task DefaultConfiguration_MultiThreadableTask_GetsTransitiveDiagnostic()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public static class Helper
@@ -416,9 +416,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableAttribute_OptsTaskIntoTransitiveAnalysis()
+    public async Task DefaultConfiguration_MultiThreadableAttribute_OptsTaskIntoTransitiveAnalysis()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public static class Helper
@@ -440,9 +440,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_AnalyzedAttribute_OptsTaskIntoTransitiveAnalysis()
+    public async Task DefaultConfiguration_AnalyzedAttribute_OptsTaskIntoTransitiveAnalysis()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public static class Helper
@@ -783,9 +783,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_PlainTask_DoesNotGetFilePathTransitiveDiagnostic()
+    public async Task DefaultConfiguration_PlainTask_DoesNotGetFilePathTransitiveDiagnostic()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System.IO;
             public static class Helper
             {
@@ -801,7 +801,7 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_All_PlainTask_GetsFilePathTransitiveDiagnostic()
+    public async Task AllTaskMigrationMode_PlainTask_GetsFilePathTransitiveDiagnostic()
     {
         var diags = await GetAllDiagnosticsWithAllTasksOptionAsync("""
             using System.IO;
@@ -819,9 +819,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MixedTaskTypes_GateAppliesPerTaskType()
+    public async Task DefaultConfiguration_MixedTaskTypes_GateAppliesPerTaskType()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public static class Helper
@@ -857,9 +857,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableTaskWithInheritedExecute_GetsTransitiveDiagnostic()
+    public async Task DefaultConfiguration_MultiThreadableTaskWithInheritedExecute_GetsTransitiveDiagnostic()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public static class Helper
@@ -884,9 +884,9 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task Scope_Default_MultiThreadableTasksSharingInheritedExecute_ReportOnce()
+    public async Task DefaultConfiguration_MultiThreadableTasksSharingInheritedExecute_ReportOnce()
     {
-        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
             using Microsoft.Build.Framework;
             public static class Helper
