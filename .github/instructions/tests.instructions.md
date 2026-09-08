@@ -16,6 +16,7 @@ applyTo: "src/*.UnitTests/**/*.cs,src/UnitTests.Shared/**/*.cs,src/Shared/UnitTe
 ## Projects and fixtures
 
 - Prefer raw string literals for project XML. Use `.Cleanup()` only when placeholders or the helper's normalization are needed; ordinary XML needs no namespace unless the scenario tests one.
+- Never hardcode `\` as a path separator in item/metadata values within test XML; it is not a valid separator on Unix. Build such paths with `Path.Combine`, and use `NormalizeSlashes` for cross-platform path comparisons.
 - Reuse [ObjectModelHelpers](../../src/UnitTests.Shared/ObjectModelHelpers.cs), [ProjectFromString](../../src/UnitTests.Shared/ProjectFromString.cs), and the scaffolding in [EngineTestEnvironment](../../src/UnitTests.Shared/EngineTestEnvironment.cs). Read their actual signatures before copying examples.
 - Use existing platform/conditional attributes rather than returning early and silently skipping assertions.
 - Reuse assembly fixtures and existing collections instead of duplicating global setup.
