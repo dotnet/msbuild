@@ -744,26 +744,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void OldNetTaskHostRejectsRequiredEmptyConversionArray()
+        public void OldNetTaskHostAllowsRequiredEmptyNonInt32EnumArray()
         {
-            TaskPropertyInfo property = _host._UNITTESTONLY_TaskFactoryWrapper.GetProperty("EnumArrayParam");
-            MethodInfo initializeVector = typeof(TaskExecutionHost).GetMethod(
-                "InitializeTaskVectorParameter",
-                BindingFlags.Instance | BindingFlags.NonPublic)!;
-            object[] arguments =
-            [
-                property,
-                typeof(TaskBuilderTestTask.TestTaskEnum[]),
-                "@(NonExistentItem)",
-                ElementLocation.Create("foo.proj"),
-                true,
-                true,
-                false,
-            ];
+            using TestEnvironment env = TestEnvironment.Create();
+            TaskHostTask task = UseMetadataLoadedTaskHostWithoutParameterConversion(env, out LoadedType loadedType);
 
-            TargetInvocationException exception = Should.Throw<TargetInvocationException>(
-                () => initializeVector.Invoke(_host, arguments));
-            ((InvalidProjectFileException)exception.InnerException!).ErrorCode.ShouldBe("MSB4069");
+            loadedType.LoadedViaMetadataLoadContext.ShouldBeTrue();
+            loadedType.Properties
+                .Single(property => property.Name == nameof(RequiredByteEnumArrayTask.Values))
+                .ParameterTypeForExpansion
+                .ShouldBe(typeof(string[]));
+
+            var parameters = new Dictionary<string, (string, ElementLocation)>(StringComparer.OrdinalIgnoreCase)
+            {
+                [nameof(RequiredByteEnumArrayTask.Values)] = ("@(NonExistentItem)", ElementLocation.Create("foo.proj")),
+            };
+
+            _host.SetTaskParameters(parameters).ShouldBeTrue();
+            GetSetParameters(task)[nameof(RequiredByteEnumArrayTask.Values)]
+                .ShouldBeOfType<RequiredByteEnum[]>()
+                .ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void OldNetTaskHostRejectsNonEmptyNonInt32EnumArray()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            UseMetadataLoadedTaskHostWithoutParameterConversion(env, out _);
+            var parameters = new Dictionary<string, (string, ElementLocation)>(StringComparer.OrdinalIgnoreCase)
+            {
+                [nameof(RequiredByteEnumArrayTask.Values)] = (nameof(RequiredByteEnum.Value), ElementLocation.Create("foo.proj")),
+            };
+
+            InvalidProjectFileException exception =
+                Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+            exception.ErrorCode.ShouldBe("MSB4069");
+        }
+
+        [Fact]
+        public void OldNetTaskHostRejectsRequiredEmptyMultidimensionalNonInt32EnumArray()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            UseMetadataLoadedTaskHostWithoutParameterConversion(env, out _, useMatrixParameter: true);
+            var parameters = new Dictionary<string, (string, ElementLocation)>(StringComparer.OrdinalIgnoreCase)
+            {
+                [nameof(RequiredByteEnumArrayTask.Matrix)] = ("@(NonExistentItem)", ElementLocation.Create("foo.proj")),
+            };
+
+            InvalidProjectFileException exception =
+                Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+            exception.ErrorCode.ShouldBe("MSB4069");
         }
 
         [Fact]
@@ -1540,6 +1570,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             SetTaskParameter("StringArrayParam", "FOO;bar");
             ValidateOutputProperty("StringArrayOutput", "FOO;bar");
+        }
+
+        #endregion
+
+        #region Task host value type outputs
+
+        [Fact]
+        public void TaskHostValueTypeArrayPreservesNullOutputPropertySemantics()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TaskHostTask task = UseMetadataLoadedTaskHostWithoutParameterConversion(env, out _);
+            FileInfo first = new(Path.Combine(Path.GetTempPath(), "a.txt"));
+            FileInfo second = new(Path.Combine(Path.GetTempPath(), "b.txt"));
+
+            ValidateTaskHostValueTypeArrayOutputProperty(
+                task,
+                [first, null, second],
+                $"{first.FullName};{second.FullName}");
+            ValidateTaskHostValueTypeArrayOutputProperty(
+                task,
+                [null, null],
+                "initialvalue");
+            ValidateTaskHostValueTypeArrayOutputProperty(
+                task,
+                Array.Empty<FileInfo>(),
+                string.Empty);
         }
 
         #endregion
@@ -2351,10 +2407,103 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return task;
         }
 
+        private void ValidateTaskHostValueTypeArrayOutputProperty(
+            TaskHostTask task,
+            FileInfo[] output,
+            string expectedPropertyValue)
+        {
+            TaskParameter parameter = new(output);
+            ((ITranslatable)parameter).Translate(TranslationHelpers.GetWriteTranslator());
+            GetSetParameters(task)[nameof(RequiredByteEnumArrayTask.Files)] =
+                TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            _bucket.Lookup.SetProperty(ProjectPropertyInstance.Create("output", "initialvalue"));
+
+            _host.GatherTaskOutputs(
+                nameof(RequiredByteEnumArrayTask.Files),
+                ElementLocation.Create(".", 1, 1),
+                outputTargetIsItem: false,
+                "output").ShouldBeTrue();
+            _bucket.Lookup.GetProperty("output").EvaluatedValue.ShouldBe(expectedPropertyValue);
+        }
+
+        private TaskHostTask UseMetadataLoadedTaskHostWithoutParameterConversion(
+            TestEnvironment env,
+            out LoadedType loadedType,
+            bool useMatrixParameter = false)
+        {
+            loadedType = TypeLoader.Create<ITask>().Load(
+                typeof(RequiredByteEnumArrayTask).FullName,
+                AssemblyLoadInfo.Create(null, typeof(RequiredByteEnumArrayTask).Assembly.Location),
+                logWarning: (_, _) => { },
+                useTaskHost: true,
+                taskHostParamsMatchCurrentProc: false);
+            loadedType.ShouldNotBeNull();
+
+            var factory = new RequiredByteEnumArrayTaskFactory(useMatrixParameter);
+            _host._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(
+                factory,
+                loadedType,
+                nameof(RequiredByteEnumArrayTask),
+                TaskHostParameters.Empty);
+
+            return UseTaskHostWithoutParameterConversion(env);
+        }
+
         private static IDictionary<string, object> GetSetParameters(TaskHostTask task) =>
             (IDictionary<string, object>)typeof(TaskHostTask)
                 .GetField("_setParameters", BindingFlags.Instance | BindingFlags.NonPublic)!
                 .GetValue(task);
+
+        private sealed class RequiredByteEnumArrayTaskFactory : ITaskFactory
+        {
+            private readonly bool _useMatrixParameter;
+
+            public RequiredByteEnumArrayTaskFactory(bool useMatrixParameter = false)
+            {
+                _useMatrixParameter = useMatrixParameter;
+            }
+
+            public string FactoryName => nameof(RequiredByteEnumArrayTaskFactory);
+
+            public Type TaskType => typeof(RequiredByteEnumArrayTask);
+
+            public bool Initialize(
+                string taskName,
+                IDictionary<string, TaskPropertyInfo> parameterGroup,
+                string taskBody,
+                IBuildEngine taskFactoryLoggingHost) => true;
+
+            public TaskPropertyInfo[] GetTaskParameters()
+            {
+                if (_useMatrixParameter)
+                {
+                    return [CreateTaskPropertyInfo(nameof(RequiredByteEnumArrayTask.Matrix))];
+                }
+
+                return
+                [
+                    CreateTaskPropertyInfo(nameof(RequiredByteEnumArrayTask.Values)),
+                    CreateTaskPropertyInfo(nameof(RequiredByteEnumArrayTask.Files)),
+                ];
+            }
+
+            public ITask CreateTask(IBuildEngine taskFactoryLoggingHost) => new RequiredByteEnumArrayTask();
+
+            public void CleanupTask(ITask task)
+            {
+            }
+
+            private static TaskPropertyInfo CreateTaskPropertyInfo(string propertyName)
+            {
+                PropertyInfo property = typeof(RequiredByteEnumArrayTask).GetProperty(propertyName);
+                return new TaskPropertyInfo(
+                    property.Name,
+                    property.PropertyType,
+                    property.GetCustomAttributes(typeof(OutputAttribute), inherit: true).Length > 0,
+                    property.GetCustomAttributes(typeof(RequiredAttribute), inherit: true).Length > 0);
+            }
+        }
 
         /// <summary>
         /// Creates a test project.
@@ -2424,5 +2573,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Project project = projectFromString.Project;
             return project.CreateProjectInstance();
         }
+    }
+
+    public enum RequiredByteEnum : byte
+    {
+        Value,
+    }
+
+    public sealed class RequiredByteEnumArrayTask : ITask
+    {
+        [Required]
+        public RequiredByteEnum[] Values { get; set; }
+
+        [Required]
+        public RequiredByteEnum[,] Matrix { get; set; }
+
+        [Output]
+        public FileInfo[] Files { get; set; }
+
+        public IBuildEngine BuildEngine { get; set; }
+
+        public ITaskHost HostObject { get; set; }
+
+        public bool Execute() => true;
     }
 }

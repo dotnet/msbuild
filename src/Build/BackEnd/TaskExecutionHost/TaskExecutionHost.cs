@@ -1434,12 +1434,13 @@ namespace Microsoft.Build.BackEnd
                     if (TaskInstance is TaskHostTask { IsNetTaskHost: true } taskHostTask
                         && needsHostConversion)
                     {
+                        bool isEnumArray = IsEnumArray(parameterType);
                         bool supportsLegacyEnumArray = IsLegacyCompatibleEnumArray(parameterType);
                         rejectUnsupportedHostConversion =
                             !taskHostTask.SupportsParameterConversion && !supportsLegacyEnumArray;
                         Type expansionType = (parameter as ReflectableTaskPropertyInfo)?.ParameterTypeForExpansion;
                         if (expansionType is not null
-                            && (taskHostTask.SupportsParameterConversion || !supportsLegacyEnumArray))
+                            && (taskHostTask.SupportsParameterConversion || !isEnumArray))
                         {
                             parameterType = expansionType;
                         }
@@ -1594,10 +1595,13 @@ namespace Microsoft.Build.BackEnd
                 || (elementType.IsValueType && Type.GetTypeCode(elementType) == TypeCode.Object);
         }
 
-        private static bool IsLegacyCompatibleEnumArray(Type parameterType) =>
+        private static bool IsEnumArray(Type parameterType) =>
             parameterType?.IsArray == true
+            && parameterType.GetElementType()?.IsEnum == true;
+
+        private static bool IsLegacyCompatibleEnumArray(Type parameterType) =>
+            IsEnumArray(parameterType)
             && parameterType.GetElementType() is Type elementType
-            && elementType.IsEnum
             && Enum.GetUnderlyingType(elementType) == typeof(int);
 
         private static string GetTaskParameterTypeName(TaskPropertyInfo parameter) =>
@@ -1772,7 +1776,15 @@ namespace Microsoft.Build.BackEnd
             {
                 // If the task parameter is not a ITaskItem[], then we need to convert
                 // all the TaskItem's in our arraylist to the appropriate datatype.
-                VerifyTaskHostSupportsParameterConversion(rejectUnsupportedHostConversion, parameter, parameterLocation);
+                bool isRequiredEmptyEnumArray =
+                    isRequired
+                    && finalTaskItems.Count == 0
+                    && IsEnumArray(parameterType)
+                    && parameterType.GetArrayRank() == 1;
+                VerifyTaskHostSupportsParameterConversion(
+                    rejectUnsupportedHostConversion && !isRequiredEmptyEnumArray,
+                    parameter,
+                    parameterLocation);
                 success = SetParameterArray(parameter, parameterType, finalTaskItems, parameterLocation);
                 taskParameterSet = true;
             }

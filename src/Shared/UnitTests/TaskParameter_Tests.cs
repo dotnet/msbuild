@@ -275,6 +275,23 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void ValueTypeArrayPreservesNullElements()
+        {
+            FileInfo first = new(Path.Combine(Path.GetTempPath(), "a.txt"));
+            FileInfo second = new(Path.Combine(Path.GetTempPath(), "b.txt"));
+
+            VerifyValueTypeArrayRoundTrip(
+                [first, null, second],
+                [first.FullName, null, second.FullName]);
+            VerifyValueTypeArrayRoundTrip(
+                [null, null],
+                [null, null]);
+            VerifyValueTypeArrayRoundTrip(
+                Array.Empty<FileInfo>(),
+                Array.Empty<string>());
+        }
+
+        [Fact]
         public void DirectoryInfoArrayParameter()
         {
             DirectoryInfo[] value = new DirectoryInfo[]
@@ -292,6 +309,17 @@ namespace Microsoft.Build.UnitTests
             string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
             Assert.Equal(value[0].FullName, stringArray[0]);
             Assert.Equal(value[1].FullName, stringArray[1]);
+        }
+
+        private static void VerifyValueTypeArrayRoundTrip(FileInfo[] value, string[] expected)
+        {
+            TaskParameter parameter = new(value);
+
+            ((ITranslatable)parameter).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter deserialized = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            deserialized.ParameterType.ShouldBe(TaskParameterType.ValueTypeArray);
+            deserialized.WrappedParameter.ShouldBe(expected);
         }
 
         private enum TestEnumForParameter
