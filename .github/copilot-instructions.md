@@ -1,1 +1,1 @@
-../AGENTS.md
+Follow [AGENTS.md](../AGENTS.md) at the repository root. It is the canonical repository-wide guidance; load only the path instructions and task references relevant to the work.
