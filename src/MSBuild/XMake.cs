@@ -793,6 +793,7 @@ namespace Microsoft.Build.CommandLine
             {
 #if FEATURE_DEBUG_LAUNCH
                 case "1":
+                case "4" when s_isServerNode:
                     Debugger.Launch();
                     break;
                 case "3":
@@ -808,6 +809,16 @@ namespace Microsoft.Build.CommandLine
                     Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
                     Console.ReadLine();
 
+                    break;
+
+                case "5" when s_isServerNode:
+                    // The server has connected and redirected its output, but cannot read the client's stdin.
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).");
+                    Console.Out.Flush();
+                    while (!Debugger.IsAttached)
+                    {
+                        Thread.Sleep(100);
+                    }
                     break;
             }
         }
