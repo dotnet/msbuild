@@ -117,11 +117,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new BannedApi("M:System.IO.Path.GetFullPath(System.String,System.String)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetAbsolutePath instead"),
 
-                // Path.GetTempPath / GetTempFileName - depend on environment variables
+                // Temp helpers - depend on environment variables
                 new BannedApi("M:System.IO.Path.GetTempPath",
-                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; use TaskEnvironment.GetEnvironmentVariable(\"TMP\") instead"),
+                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
                 new BannedApi("M:System.IO.Path.GetTempFileName",
-                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; use TaskEnvironment.GetEnvironmentVariable(\"TMP\") instead"),
+                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
+                new BannedApi("M:System.IO.Directory.CreateTempSubdirectory(System.String)",
+                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
+                new BannedApi("M:System.CodeDom.Compiler.TempFileCollection.#ctor",
+                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; pass an explicit task-resolved temporary directory or suppress with a justification"),
 
                 // Process.Start - use TaskEnvironment.GetProcessStartInfo
                 new BannedApi("M:System.Diagnostics.Process.Start(System.String)",

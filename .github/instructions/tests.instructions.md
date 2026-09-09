@@ -77,4 +77,4 @@ ObjectModelHelpers.AssertItemsMatch(
     project.GetItems("MyItem"));
 ```
 
-Use `ObjectModelHelpers.AssertSingleItem`, `AssertItems`, and `AssertItemHasMetadata` for item/property assertions, and `NormalizeSlashes` for cross-platform path comparisons.
+Use `ObjectModelHelpers.AssertSingleItem`, `AssertItems`, and `AssertItemHasMetadata` for item/property assertions, and `NormalizeSlashes` for cross-platform path comparisons. Never hardcode `\` as a path separator in item/metadata values within test XML (it is not a valid separator on Unix); build such paths with `Path.Combine` instead.
