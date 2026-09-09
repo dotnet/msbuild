@@ -30,17 +30,26 @@ The [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?defini
 
 VS handles the progression from `main` → `rel/insiders` → `rel/stable` on its own schedule. MSBuild's responsibility is to have final-branded bits in VS `main` before `INSIDERS_SNAP_DATE`.
 
-The `AutoInsertTargetBranch` mapping in [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml) encodes which MSBuild branch maps to which VS branch.
+Inspect [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml) on the relevant MSBuild branch for the actual routing. Current main resolves the `TargetBranch` parameter into `InsertTargetBranch`, defaulting to VS `main`; older release branches may differ.
 
 ## Public API
 
-As of [#7018](https://github.com/dotnet/msbuild/pull/7018), MSBuild uses a Roslyn analyzer to ensure compatibility with assemblies compiled against older versions of MSBuild. The workflow of the analyzer is:
+Current library projects use `GenerateReferenceAssemblySource` and
+`EnablePackageValidation`, for example
+[Microsoft.Build.Framework.csproj](../src/Framework/Microsoft.Build.Framework.csproj).
+The shared reference-generation configuration is in
+[src/Directory.Build.targets](../src/Directory.Build.targets), and
+`PackageValidationBaselineVersion` is defined in
+[eng/Versions.props](../eng/Versions.props). Inspect the requested release ref
+because older branches may use different machinery.
 
-1. The analyzer keeps the `PublicAPI.Unshipped.txt` files updated.
-2. New API surface goes into `PublicAPI.Unshipped.txt`.
-3. At release time, we must manually promote the `Unshipped` public API to `Shipped`.
-
-That is a new step in our release process for each formal release (including patch releases if they change API surface).
+Review the generated reference/API surface and package-compatibility results for
+the release. There are no `PublicAPI.Unshipped.txt` or `PublicAPI.Shipped.txt`
+files in current main to promote. Do not create them from a historical checklist.
+For the next-version main bump, choose a published, release-reachable package
+baseline using [baseline provenance](../.github/skills/release/references/package-validation-baseline.md).
+Investigate compatibility failures before accepting any suppression; do not
+silence an unintended API break by moving the baseline forward.
 
 ## Major version extra update steps
 
