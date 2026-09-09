@@ -2,6 +2,19 @@
 
 Starting with MSBuild 15.3 a new binary log format is introduced, to complement the existing file and console loggers.
 
+> [!IMPORTANT]
+> This throwaway performance-experiment branch intentionally makes `/bl` consume the full
+> binary-logging event stream without creating or serializing a binary log. Paths may still
+> appear in logger metadata, but no `.binlog` or project-import archive is written.
+>
+> Compare the same workload using an unchanged build without `/bl`, an unchanged build with
+> `/bl`, and this branch with `/bl`. Keep configuration, other loggers, parallelism, server
+> reuse, and cache state constant, and measure clean, incremental, and no-op builds separately.
+> The difference between no `/bl` and no-op `/bl` estimates event creation, capture, transport,
+> and dispatch overhead. The difference between normal `/bl` and no-op `/bl` estimates all
+> downstream logger processing, including lazy payload materialization, import collection,
+> serialization, compression, and I/O; it does not isolate disk I/O alone.
+
 Goals:
  * completeness (more information than the most detailed file log)
  * build speed (doesn't slow the build down nearly as much as the diagnostic-level file log)
