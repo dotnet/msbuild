@@ -2385,6 +2385,33 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
+    public async Task DefaultConfiguration_AnalyzedAttributeOnAbstractTask_AnalyzesContributingBase()
+    {
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public abstract class BaseTask : Microsoft.Build.Utilities.Task
+            {
+                protected bool Run()
+                {
+                    _ = Environment.GetEnvironmentVariable("KEY");
+                    return true;
+                }
+            }
+            [MSBuildMultiThreadableTaskAnalyzed]
+            public abstract class AbstractTask : BaseTask
+            {
+            }
+            public sealed class ConcreteTask : AbstractTask
+            {
+                public override bool Execute() => Run();
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+    }
+
+    [Fact]
     public async Task DefaultConfiguration_MultiThreadableAttribute_OptsTaskIn()
     {
         var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""

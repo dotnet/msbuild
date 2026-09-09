@@ -514,19 +514,19 @@ A concrete task that MSBuild cannot construct — no public parameterless constr
 
 See [Default Rules and Configuration](#default-rules-and-configuration) for the default-state matrix and copy-ready configuration.
 
-By default, MT migration warnings do not affect regular tasks. The analyzer recognizes `IMultiThreadableTask`, `[MSBuildMultiThreadableTask]`, and `[MSBuildMultiThreadableTaskAnalyzed]` as MT opt-ins.
+By default, MT migration warnings do not affect regular tasks. The analyzer recognizes `[MSBuildMultiThreadableTask]` as the task routing opt-in and `[MSBuildMultiThreadableTaskAnalyzed]` as an analyzer-only opt-in.
 
 | Type | Rules Applied |
 |---|---|
 | Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations |
 | Concrete `ITask` class with `[MSBuildMultiThreadableTask]` applied directly | MSBuildTask0001–MSBuildTask0010; MSBuildTask0011 and MSBuildTask0012 apply only when their conditions match |
-| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011; MSBuildTask0013 is available but disabled by default |
+| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0011, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations; MSBuildTask0013 is available but disabled by default |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` | Direct MSBuildTask0001–MSBuildTask0004 analysis; MSBuildTask0005 reports only when a task reaches the helper |
 | Regular class (no task interface or attribute) | Not analyzed |
 | Class with `[MSBuildMultiThreadableTask]` that does not implement `ITask` | MSBuildTask0014 |
 | Abstract class with `[MSBuildMultiThreadableTask]` | MSBuildTask0014 |
 
-Base classes of an MT-opted-in task are analyzed as part of that task's implementation, even when the opt-in interface or attribute is declared only on the derived task.
+Base classes of an `ITask` with `[MSBuildMultiThreadableTask]` or `[MSBuildMultiThreadableTaskAnalyzed]` applied directly are analyzed as part of that task's implementation.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
