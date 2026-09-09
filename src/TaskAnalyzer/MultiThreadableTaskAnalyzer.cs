@@ -50,13 +50,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
             var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
-            var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
-            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
             var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
                 compilationContext.Compilation,
-                iTaskType,
-                multiThreadableTaskAttributeType,
-                analyzedAttributeType);
+                iTaskType);
 
             // Build symbol lookup for banned APIs
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
@@ -73,8 +69,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 if (!IsDirectlyAnalyzedType(
                     namedType,
                     iTaskType,
-                    multiThreadableTaskAttributeType,
-                    analyzedAttributeType,
                     contributingMultiThreadableTaskBaseTypes,
                     out bool analyzeAsMultiThreadable))
                 {

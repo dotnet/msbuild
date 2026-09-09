@@ -1941,6 +1941,64 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
+    public async Task Task_WithAliasedMultiThreadableAttribute_AnalyzedForMtMigrationRules()
+    {
+        var compilation = CreateCompilation("""
+            extern alias polyfill;
+            using System;
+            using System.IO;
+
+            [polyfill::Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    File.Exists("foo.txt");
+                    _ = Environment.GetEnvironmentVariable("PATH");
+                    return true;
+                }
+            }
+            """).AddReferences(
+                CreateAliasedAttributeReference(
+                    "polyfill",
+                    "MSBuildMultiThreadableTaskAttribute"));
+
+        var diags = await compilation
+            .WithAnalyzers([new MultiThreadableTaskAnalyzer()])
+            .GetAnalyzerDiagnosticsAsync();
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+    }
+
+    [Fact]
+    public async Task Helper_WithAliasedAnalyzedAttribute_AnalyzedForMtMigrationRules()
+    {
+        var compilation = CreateCompilation("""
+            extern alias polyfill;
+            using System;
+
+            [polyfill::Microsoft.Build.Framework.MSBuildMultiThreadableTaskAnalyzed]
+            public class Helper
+            {
+                public void Run()
+                {
+                    _ = Environment.GetEnvironmentVariable("PATH");
+                }
+            }
+            """).AddReferences(
+                CreateAliasedAttributeReference(
+                    "polyfill",
+                    "MSBuildMultiThreadableTaskAnalyzedAttribute"));
+
+        var diags = await compilation
+            .WithAnalyzers([new MultiThreadableTaskAnalyzer()])
+            .GetAnalyzerDiagnosticsAsync();
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+    }
+
+    [Fact]
     public async Task Task_WithoutMultiThreadableOptIn_DoesNotGetMtMigrationRulesByDefault()
     {
         var diags = await GetDiagnosticsAsync("""

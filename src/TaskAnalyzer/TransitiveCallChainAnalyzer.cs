@@ -52,9 +52,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
-            var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
-
             var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
@@ -64,9 +61,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
             var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
                 compilationContext.Compilation,
-                iTaskType,
-                multiThreadableTaskAttributeType,
-                analyzedAttributeType);
+                iTaskType);
 
             // Thread-safe collections for building the graph across concurrent operation callbacks
             var callGraph = new ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>>(SymbolEqualityComparer.Default);
@@ -79,7 +74,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
                     taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType,
-                    multiThreadableTaskAttributeType, analyzedAttributeType,
                     contributingMultiThreadableTaskBaseTypes, directAnalysisStateCache);
             },
             OperationKind.Invocation,
@@ -91,8 +85,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             compilationContext.RegisterCompilationEndAction(endCtx =>
             {
                 AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType,
-                    bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType,
-                    multiThreadableTaskAttributeType, analyzedAttributeType);
+                    bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType);
             });
         }
 
@@ -110,8 +103,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
             INamedTypeSymbol iTaskType,
-            INamedTypeSymbol? multiThreadableTaskAttributeType,
-            INamedTypeSymbol? analyzedAttributeType,
             ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
             ConcurrentDictionary<INamedTypeSymbol, DirectAnalysisState> directAnalysisStateCache)
         {
@@ -134,8 +125,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     bool isDirectlyAnalyzed = IsDirectlyAnalyzedType(
                         containingType,
                         iTaskType,
-                        multiThreadableTaskAttributeType,
-                        analyzedAttributeType,
                         contributingMultiThreadableTaskBaseTypes,
                         out bool analyzeAsMultiThreadable);
                     directAnalysisState = new DirectAnalysisState(
@@ -294,9 +283,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
-            INamedTypeSymbol? consoleType,
-            INamedTypeSymbol? multiThreadableTaskAttributeType,
-            INamedTypeSymbol? analyzedAttributeType)
+            INamedTypeSymbol? consoleType)
         {
             // Find all task types in the compilation
             var taskTypes = new List<INamedTypeSymbol>();
@@ -325,8 +312,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 bool isMultiThreadableTask = IsMtAnalysisOptIn(
                         taskType,
-                        multiThreadableTaskAttributeType,
-                        analyzedAttributeType,
                         out _);
 
                 var executeImplementation = iTaskExecuteMethod is null

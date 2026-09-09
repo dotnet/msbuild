@@ -137,6 +137,35 @@ internal static class TestHelpers
     /// </summary>
     public static MetadataReference[] GetCoreReferences() => s_coreReferences;
 
+    public static MetadataReference CreateAliasedAttributeReference(string alias, string attributeName)
+    {
+        var compilation = CSharpCompilation.Create(
+            "AliasedAttributes",
+            [
+                CSharpSyntaxTree.ParseText($$"""
+                    namespace Microsoft.Build.Framework
+                    {
+                        [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false)]
+                        public sealed class {{attributeName}} : System.Attribute
+                        {
+                        }
+                    }
+                    """),
+            ],
+            s_coreReferences,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        using var image = new System.IO.MemoryStream();
+        if (!compilation.Emit(image).Success)
+        {
+            throw new System.InvalidOperationException("Failed to compile the aliased attribute reference.");
+        }
+
+        return MetadataReference.CreateFromImage(
+            image.ToArray(),
+            MetadataReferenceProperties.Assembly.WithAliases([alias]));
+    }
+
     /// <summary>
     /// Runs the MultiThreadableTaskAnalyzer with the shipping default behavior.
     /// </summary>

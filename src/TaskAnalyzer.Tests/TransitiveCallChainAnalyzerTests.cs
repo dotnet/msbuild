@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Shouldly;
 using Xunit;
@@ -567,6 +568,37 @@ public class TransitiveCallChainAnalyzerTests
                 }
             }
             """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task DefaultConfiguration_AliasedMultiThreadableAttribute_OptsTaskIntoTransitiveAnalysis()
+    {
+        var compilation = CreateCompilation("""
+            extern alias polyfill;
+            using System;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            [polyfill::Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MtTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """).AddReferences(
+                CreateAliasedAttributeReference(
+                    "polyfill",
+                    "MSBuildMultiThreadableTaskAttribute"));
+
+        var diags = await compilation
+            .WithAnalyzers([new MultiThreadableTaskAnalyzer(), new TransitiveCallChainAnalyzer()])
+            .GetAnalyzerDiagnosticsAsync();
 
         diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
     }
