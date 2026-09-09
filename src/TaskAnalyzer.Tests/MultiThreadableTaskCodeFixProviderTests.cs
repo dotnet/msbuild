@@ -28,13 +28,20 @@ public class MultiThreadableTaskCodeFixProviderTests
         };
         test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
         test.FixedState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/Test.globalconfig", AllTaskMigrationGlobalConfig));
+        test.FixedState.AnalyzerConfigFiles.Add(("/Test.globalconfig", AllTaskMigrationGlobalConfig));
         test.ExpectedDiagnostics.AddRange(expected);
         return test;
     }
 
+    private const string AllTaskMigrationGlobalConfig = """
+        is_global = true
+        msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+        """;
+
     /// <summary>
     /// Creates a DiagnosticResult for the given diagnostic ID.
-    /// Uses the Warning-severity descriptor since code fix tests use IMultiThreadableTask.
+    /// Uses the Warning-severity descriptor for MT migration diagnostics.
     /// </summary>
     private static DiagnosticResult Diag(string id) => id switch
     {
@@ -638,6 +645,8 @@ public class MultiThreadableTaskCodeFixProviderTests
         };
         test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
         test.FixedState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/Test.globalconfig", AllTaskMigrationGlobalConfig));
+        test.FixedState.AnalyzerConfigFiles.Add(("/Test.globalconfig", AllTaskMigrationGlobalConfig));
 
         const string Hint = "wrap path argument with TaskEnvironment.GetAbsolutePath()";
         var staticDiagnostic = Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(3)
@@ -765,6 +774,8 @@ public class MultiThreadableTaskCodeFixProviderTests
         test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
         test.FixedState.Sources.Add(("Test.cs", code));
         test.FixedState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/Test.globalconfig", AllTaskMigrationGlobalConfig));
+        test.FixedState.AnalyzerConfigFiles.Add(("/Test.globalconfig", AllTaskMigrationGlobalConfig));
         test.TestState.ExpectedDiagnostics.AddRange(expected);
         test.FixedState.ExpectedDiagnostics.AddRange(expected);
         await test.RunAsync();

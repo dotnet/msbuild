@@ -46,7 +46,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
@@ -56,7 +55,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
                 compilationContext.Compilation,
                 iTaskType,
-                iMultiThreadableTaskType,
                 multiThreadableTaskAttributeType,
                 analyzedAttributeType);
 
@@ -75,7 +73,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 if (!IsDirectlyAnalyzedType(
                     namedType,
                     iTaskType,
-                    iMultiThreadableTaskType,
                     multiThreadableTaskAttributeType,
                     analyzedAttributeType,
                     contributingMultiThreadableTaskBaseTypes,

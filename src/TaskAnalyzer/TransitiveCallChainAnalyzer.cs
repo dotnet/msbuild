@@ -52,7 +52,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
             var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
 
@@ -66,7 +65,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
                 compilationContext.Compilation,
                 iTaskType,
-                iMultiThreadableTaskType,
                 multiThreadableTaskAttributeType,
                 analyzedAttributeType);
 
@@ -81,7 +79,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
                     taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType,
-                    iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType,
+                    multiThreadableTaskAttributeType, analyzedAttributeType,
                     contributingMultiThreadableTaskBaseTypes, directAnalysisStateCache);
             },
             OperationKind.Invocation,
@@ -94,7 +92,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType,
                     bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType,
-                    iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType);
+                    multiThreadableTaskAttributeType, analyzedAttributeType);
             });
         }
 
@@ -112,7 +110,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
             INamedTypeSymbol iTaskType,
-            INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType,
             ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
@@ -137,7 +134,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     bool isDirectlyAnalyzed = IsDirectlyAnalyzedType(
                         containingType,
                         iTaskType,
-                        iMultiThreadableTaskType,
                         multiThreadableTaskAttributeType,
                         analyzedAttributeType,
                         contributingMultiThreadableTaskBaseTypes,
@@ -299,7 +295,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
-            INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType)
         {
@@ -328,9 +323,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             foreach (var taskType in taskTypes)
             {
-                bool isMultiThreadableTask = IsMultiThreadableOptIn(
+                bool isMultiThreadableTask = IsMtAnalysisOptIn(
                         taskType,
-                        iMultiThreadableTaskType,
                         multiThreadableTaskAttributeType,
                         analyzedAttributeType,
                         out _);

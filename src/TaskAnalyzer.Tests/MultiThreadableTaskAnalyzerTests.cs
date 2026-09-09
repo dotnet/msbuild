@@ -215,7 +215,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // MSBuildTask0002: TaskEnvironment required (only for IMultiThreadableTask)
+    // MSBuildTask0002: TaskEnvironment required
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
@@ -224,6 +224,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.Diagnostics;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -244,6 +245,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.Diagnostics;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -264,6 +266,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -284,6 +287,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -299,7 +303,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // MSBuildTask0003: File path requires absolute (only for IMultiThreadableTask)
+    // MSBuildTask0003: File path requires absolute
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
@@ -308,6 +312,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -328,6 +333,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -348,6 +354,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -372,6 +379,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -392,6 +400,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -413,6 +422,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -437,6 +447,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -461,6 +472,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -486,6 +498,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -508,6 +521,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -529,6 +543,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -551,6 +566,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -572,6 +588,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -714,6 +731,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -736,6 +754,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -760,6 +779,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -784,6 +804,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -807,6 +828,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -827,6 +849,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -958,6 +981,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class GenericTask<T> : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -980,6 +1004,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1019,6 +1044,7 @@ public class MultiThreadableTaskAnalyzerTests
             using System.IO;
             using System.Reflection;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1047,6 +1073,7 @@ public class MultiThreadableTaskAnalyzerTests
             using System;
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class CorrectTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1170,6 +1197,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1259,6 +1287,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.Xml.Linq;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1280,6 +1309,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.Xml;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1300,6 +1330,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO.Compression;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1342,6 +1373,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1362,6 +1394,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1382,6 +1415,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1402,6 +1436,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1476,6 +1511,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.Diagnostics;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1594,6 +1630,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1615,6 +1652,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1637,6 +1675,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1663,6 +1702,7 @@ public class MultiThreadableTaskAnalyzerTests
             using System;
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1757,6 +1797,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1776,6 +1817,7 @@ public class MultiThreadableTaskAnalyzerTests
             using System.IO;
             using System.Threading.Tasks;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1802,6 +1844,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1824,6 +1867,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1846,6 +1890,7 @@ public class MultiThreadableTaskAnalyzerTests
             using System;
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1917,6 +1962,52 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
+    public async Task Task_WithOnlyMultiThreadableInterface_DoesNotGetMtMigrationRulesByDefault()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    File.Exists("foo.txt");
+                    _ = Environment.GetEnvironmentVariable("PATH");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+    }
+
+    [Fact]
+    public async Task Task_WithOnlyMultiThreadableInterface_GetsMtMigrationRulesInAllTaskMode()
+    {
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    File.Exists("foo.txt");
+                    _ = Environment.GetEnvironmentVariable("PATH");
+                    return true;
+                }
+            }
+            """, enabled: true);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+    }
+
+    [Fact]
     public async Task UsingStaticConsole_DetectedByTypeLevelBan()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1941,6 +2032,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1962,6 +2054,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -1984,6 +2077,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -2031,6 +2125,7 @@ public class MultiThreadableTaskAnalyzerTests
             using System;
             using System.IO;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -2203,6 +2298,7 @@ public class MultiThreadableTaskAnalyzerTests
                     return File.Exists("relative.txt");
                 }
             }
+            [MSBuildMultiThreadableTask]
             public class MyMtTask : MyBaseTask, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -2230,6 +2326,7 @@ public class MultiThreadableTaskAnalyzerTests
                     return File.Exists("relative.txt");
                 }
             }
+            [MSBuildMultiThreadableTask]
             public sealed class MtTask : Base, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
@@ -2350,6 +2447,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }

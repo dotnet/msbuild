@@ -18,10 +18,11 @@ By default, MT migration rules MSBuildTask0002 and MSBuildTask0003 apply only to
 
 MT-scoped code includes these types:
 
-- A task that implements `IMultiThreadableTask`.
 - A task with `[MSBuildMultiThreadableTask]` applied directly.
 - A helper with `[MSBuildMultiThreadableTaskAnalyzed]` applied directly.
 - A source base class that contributes implementation code to one of these tasks.
+
+`IMultiThreadableTask` only enables `TaskEnvironment` injection. It does not route a task to the MT environment and does not enable MT migration rules by itself.
 
 ### Default rule matrix
 

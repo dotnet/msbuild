@@ -38,9 +38,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 enabled;
         }
 
-        internal static bool IsMultiThreadableOptIn(
+        internal static bool IsMtAnalysisOptIn(
             INamedTypeSymbol type,
-            INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType,
             out bool hasAnalyzedAttribute)
@@ -63,24 +62,21 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            return (iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType)) ||
-                hasMultiThreadableAttribute ||
+            return hasMultiThreadableAttribute ||
                 hasAnalyzedAttribute;
         }
 
         internal static bool IsDirectlyAnalyzedType(
             INamedTypeSymbol type,
             INamedTypeSymbol iTaskType,
-            INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType,
             ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
             out bool analyzeAsMultiThreadable)
         {
             bool isTask = ImplementsInterface(type, iTaskType);
-            bool hasMultiThreadableOptIn = IsMultiThreadableOptIn(
+            bool hasMultiThreadableOptIn = IsMtAnalysisOptIn(
                 type,
-                iMultiThreadableTaskType,
                 multiThreadableTaskAttributeType,
                 analyzedAttributeType,
                 out bool hasAnalyzedAttribute);
@@ -94,7 +90,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         internal static ImmutableHashSet<INamedTypeSymbol> FindContributingMultiThreadableTaskBaseTypes(
             Compilation compilation,
             INamedTypeSymbol iTaskType,
-            INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType)
         {
@@ -103,7 +98,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 compilation.Assembly.GlobalNamespace,
                 builder,
                 iTaskType,
-                iMultiThreadableTaskType,
                 multiThreadableTaskAttributeType,
                 analyzedAttributeType);
             return builder.ToImmutable();
@@ -113,7 +107,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamespaceOrTypeSymbol container,
             ImmutableHashSet<INamedTypeSymbol>.Builder result,
             INamedTypeSymbol iTaskType,
-            INamedTypeSymbol? iMultiThreadableTaskType,
             INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType)
         {
@@ -125,7 +118,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         childNamespace,
                         result,
                         iTaskType,
-                        iMultiThreadableTaskType,
                         multiThreadableTaskAttributeType,
                         analyzedAttributeType);
                     continue;
@@ -137,15 +129,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
 
                 if (ImplementsInterface(type, iTaskType) &&
-                    IsMultiThreadableOptIn(
+                    IsMtAnalysisOptIn(
                         type,
-                        iMultiThreadableTaskType,
                         multiThreadableTaskAttributeType,
                         analyzedAttributeType,
                         out bool hasAnalyzedAttribute) &&
-                    (!type.IsAbstract ||
-                     hasAnalyzedAttribute ||
-                     (iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType))))
+                    (!type.IsAbstract || hasAnalyzedAttribute))
                 {
                     for (INamedTypeSymbol? baseType = type.BaseType;
                          baseType is not null && baseType.SpecialType != SpecialType.System_Object;
@@ -159,7 +148,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     type,
                     result,
                     iTaskType,
-                    iMultiThreadableTaskType,
                     multiThreadableTaskAttributeType,
                     analyzedAttributeType);
             }
