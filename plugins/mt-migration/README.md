@@ -1,69 +1,41 @@
-# mt-migration plugin
+# MT migration plugin
 
-A GitHub Copilot plugin that bundles the MSBuild **multithreaded task migration** playbook plus an MT-specific PR reviewer.
-
-Use this on any repository that authors MSBuild tasks consuming the
-`IMultiThreadableTask` / `TaskEnvironment` / `[MSBuildMultiThreadableTask]` API
-surface from `Microsoft.Build.Framework` — currently `dotnet/msbuild`,
-`dotnet/sdk`, and downstream task assemblies (NuGet, EF, ASP.NET Core, etc.).
+Task-authoring guidance and an evidence-focused reviewer for MSBuild's multithreaded execution model. Use the plugin when changing task support for `MSBuildMultiThreadableTask`, `IMultiThreadableTask`, or `TaskEnvironment`, not for generic context audits, CI triage, or build-performance comparisons.
 
 ## Contents
 
-```
-mt-migration/
-├── plugin.json
-├── skills/
-│   └── multithreaded-task-migration/
-│       └── SKILL.md         # The 8 deadly sins, ToolTask hazards, helper patterns, test patterns, sign-off checklist
-└── agents/
-    └── mt-migration-reviewer.agent.md   # MT-specific PR reviewer that follows call chains end-to-end
-```
+| Component | Responsibility |
+| --- | --- |
+| [Migration skill](skills/multithreaded-task-migration/SKILL.md) | Scope, source preflight, migration workflow, and evidence/stop criteria |
+| [MT reviewer](agents/mt-migration-reviewer.agent.md) | Read-only review of reachable MT-specific defects; reuse existing general review |
+| [Source and migration](skills/multithreaded-task-migration/references/source-and-migration.md) | Attribute versus interface, construction/injection, environment lifetime, and migration decisions |
+| [Path and diagnostic compatibility](skills/multithreaded-task-migration/references/path-and-diagnostic-compatibility.md) | Eight compatibility hazards, examples, exception timing, and input/output contracts |
+| [Call chains and shared state](skills/multithreaded-task-migration/references/call-chains-and-shared-state.md) | Bases, abstractions, analyzer limits, caches, registered objects, and nested tasks |
+| [ToolTask and processes](skills/multithreaded-task-migration/references/tooltask-and-processes.md) | Lifecycle overrides, executable lookup, working directories, arguments, and environment propagation |
+| [Validation and review](skills/multithreaded-task-migration/references/validation-and-review.md) | Regression-sensitive examples, host evidence, test isolation, and finding format |
 
-## What it does
+Read the entry point, then only the reference needed for the current boundary. The references preserve technical detail; they are not a checklist to preload or a reason to launch a reviewer per topic.
 
-| Component | When invoked | What it does |
-|---|---|---|
-| `multithreaded-task-migration` skill | Author migrating a task | Step-by-step migration recipe + compatibility red-team checklist. Distilled from ~50 merged migration PRs across `dotnet/msbuild` and `dotnet/sdk`. |
-| `mt-migration-reviewer` agent | Reviewing an MT migration PR | Delegates the 24-dimension general review to the host repo's expert reviewer (if any), then layers MT-specific findings on top. Mandatorily traces every call chain from `Execute()` to leaves and reports hazards by chain, not by file. Verifies tests are not theater. |
+## Host adaptation
 
-The reviewer is deliberately complementary to a generic code reviewer: it does
-not re-explain migration steps, does not redo style/perf/naming review, and
-will not flag a clean attribute-only migration as needing a concurrency test if
-the call-chain audit comes back clean.
+Determine the task-authoring repository, revision, supported hosts, framework references, TFMs, test runner, and available helpers before applying a recipe. Source landmarks in the references describe an MSBuild checkout; another task repository must resolve the corresponding implementation or package version.
 
-## Installing
+Attribute eligibility, environment injection, process hosting, and test helpers are different contracts. A standalone task test does not prove engine routing, and a clean analyzer run does not establish complete runtime safety.
 
-### As a local plugin (from a clone of this repo)
+Reviews do not authorize code changes, GitHub publication, thread resolution, or installation. General review is requested only for an uncovered scope, not repeated as a fixed multi-agent pass. Leaving a task unannotated is a legitimate outcome when its intended concurrency contract cannot be supported.
 
-```sh
-# from a GitHub Copilot session
-/plugin install file://$(pwd)/plugins/mt-migration
-```
+## Packaging and refresh
 
-### Across multiple repos (recommended)
+`plugin.json` retains the `mt-migration` identity, version, skill directory, and agent path. This directory is repository-owned authoring source. An installed copy with the same name has a separate lifecycle; its name alone does not establish its source revision.
 
-Publish this plugin folder to a small standalone repo (e.g.
-`your-org/mt-migration-plugin`) and install from there. The plugin contains no
-hard-coded references to `dotnet/msbuild` repo-local filesystem paths — only to
-the public `Microsoft.Build.Framework` API surface (with source links for
-reference) — so it works on any task-authoring repo unchanged.
+Installation or refresh is an explicit owner action, not part of a review or documentation change. Consult the current [CLI plugin documentation](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference) before using its local-directory install/update operations. Ordinary cached installs and local directory-marketplace sources have different refresh behavior.
 
-```sh
-/plugin install github:your-org/mt-migration-plugin
-```
+Distinguish contributing-source inventory from effective skill resolution and from an already-running session. Updating these files does not prove an existing session has loaded them.
 
-## Relationship to the in-repo skill
+## Maintenance
 
-This plugin is the **single, canonical** home of the MT migration skill. It is not duplicated under `.github/skills/` in `dotnet/msbuild` — install the plugin to use it locally. The skill-validator workflow in `dotnet/msbuild` only scans `.github/skills/` and `.github/agents/`, so the plugin lives outside that scope and is not subject to it.
+Aim for small skill and interactive-agent entry points; 100 lines and 6 KiB are useful authoring targets, not mandatory contribution limits. Move corrected technical material into focused references rather than deleting it to reach a size target.
 
-## Updating the skill from PR experience
+Use the authoring repository's available documentation and context checks.
 
-The skill's "deadly sins" and call-chain hazard table grow as new
-defect classes are found in merged migrations. To contribute:
-
-1. Find a defect that was caught in PR review and would have been missed by
-   the existing skill.
-2. Add a sin / hazard / pattern with a real-world citation (PR + line range).
-3. Update `skills/multithreaded-task-migration/SKILL.md`.
-4. Keep the agent file slim — it should keep delegating to the skill rather
-   than absorbing the rules itself.
+Documentation changes need local-link, metadata, scope, and content checks, not a product build. Static validation does not prove every runtime scenario. Add source-backed examples for newly understood hazards; do not turn unverified anecdotes, analyzer-version assumptions, or task-specific exceptions into universal rules.
