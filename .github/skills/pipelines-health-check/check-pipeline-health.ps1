@@ -1,220 +1,124 @@
+#requires -Version 5.1
 <#
 .SYNOPSIS
-    Checks health of MSBuild Azure DevOps pipelines.
-
+Reads recent MSBuild pipeline outcomes and the last successful run.
 .DESCRIPTION
-    Queries recent pipeline runs for the specified pipelines, finds the last
-    successful run, and extracts failure reasons from failed runs using the
-    Build Timeline API. Outputs structured JSON for agent consumption.
-
-.PARAMETER PipelineIds
-    Array of pipeline definition IDs to check. Defaults to MSBuild (9434) and
-    MSBuild-OptProf (17389).
-
-.PARAMETER Organization
-    Azure DevOps organization URL.
-
-.PARAMETER Project
-    Azure DevOps project name.
-
-.PARAMETER Branch
-    Branch to filter runs by. Defaults to "main".
-
-.PARAMETER Top
-    Number of recent runs to retrieve per pipeline. Defaults to 5.
-
-.EXAMPLE
-    .\check-pipeline-health.ps1
-    .\check-pipeline-health.ps1 -PipelineIds @(9434) -Branch main -Top 10
+Read-only. Uses existing az authentication and built-in az rest, not automatic
+extension installation. Defaults are discovery hints: default IDs must still
+resolve to the expected pipeline names. Required query failures terminate without
+success-shaped JSON. The output is always an array; recent runs are a bounded
+sample, not exhaustive history.
+.PARAMETER IncludeFailureDetails
+Read timeline failure records only when deeper detail is requested.
 #>
 [CmdletBinding()]
 param(
+    [ValidateNotNullOrEmpty()]
     [int[]]$PipelineIds = @(9434, 17389),
-    [string]$Organization = "https://dev.azure.com/devdiv",
-    [string]$Project = "DevDiv",
-    [string]$Branch = "main",
-    [int]$Top = 5
+    [string]$Organization = 'https://dev.azure.com/devdiv',
+    [string]$Project = 'DevDiv',
+    [ValidateNotNullOrEmpty()]
+    [string]$Branch = 'main',
+    [ValidateRange(1, 100)]
+    [int]$Top = 5,
+    [switch]$IncludeFailureDetails
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'HealthCheck.Common.ps1')
 
-# Azure DevOps first-party Entra app ID (used by az rest --resource)
-$script:AzDoResource = "499b84ac-1321-427f-aa17-267ca6975798"
-
-function Get-PipelineName {
-    param([int]$PipelineId)
-    $rawJson = az pipelines show --id $PipelineId --organization $Organization --project $Project --query "{name:name}" -o json 2>$null
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($rawJson)) {
-        Write-Warning "Failed to resolve name for pipeline $PipelineId (exit code: $LASTEXITCODE). Is 'az extension add --name azure-devops' installed and 'az login' done?"
-        return "Pipeline-$PipelineId"
-    }
-    $info = $rawJson | ConvertFrom-Json
-    return $info.name
+$organizationName = Get-HealthOrganizationName -Organization $Organization
+$Organization = "https://dev.azure.com/$organizationName"
+$baseUrl = "$Organization/$([Uri]::EscapeDataString($Project))"
+$branchRef = if ($Branch.StartsWith('refs/')) { $Branch } else { "refs/heads/$Branch" }
+$encodedBranch = [Uri]::EscapeDataString($branchRef)
+$expectedNames = @{}
+if ($organizationName -eq 'devdiv' -and $Project -eq 'DevDiv')
+{
+    $expectedNames = @{ 9434 = 'MSBuild'; 17389 = 'MSBuild-OptProf' }
 }
+$now = [DateTimeOffset]::UtcNow
+$results = [System.Collections.Generic.List[object]]::new()
 
-function Get-RecentRuns {
-    param([int]$PipelineId)
-    $runsJson = az pipelines runs list `
-        --pipeline-id $PipelineId `
-        --organization $Organization `
-        --project $Project `
-        --branch $Branch `
-        --top $Top `
-        -o json 2>$null
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($runsJson)) {
-        Write-Warning "Failed to list runs for pipeline $PipelineId (exit code: $LASTEXITCODE)."
-        return @()
+foreach ($pipelineId in $PipelineIds)
+{
+    if ($pipelineId -le 0) { throw 'Pipeline IDs must be positive.' }
+    $definition = Invoke-HealthAzDoGet -Url "$baseUrl/_apis/build/definitions/$pipelineId`?api-version=7.1"
+    if ($definition.id -ne $pipelineId -or [string]::IsNullOrWhiteSpace($definition.name))
+    {
+        throw "Pipeline $pipelineId did not resolve to a valid definition."
     }
-    return $runsJson | ConvertFrom-Json
-}
-
-function Get-LastSuccessfulRun {
-    param([int]$PipelineId)
-    $runsJson = az pipelines runs list `
-        --pipeline-id $PipelineId `
-        --organization $Organization `
-        --project $Project `
-        --branch $Branch `
-        --result succeeded `
-        --top 1 `
-        -o json 2>$null
-    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($runsJson)) {
-        Write-Warning "Failed to query last successful run for pipeline $PipelineId (exit code: $LASTEXITCODE)."
-        return $null
+    if ($expectedNames.ContainsKey($pipelineId) -and $definition.name -ne $expectedNames[$pipelineId])
+    {
+        throw "Default pipeline ID $pipelineId no longer resolves to the expected pipeline. Discover the current definition before continuing."
     }
-    $runs = $runsJson | ConvertFrom-Json
-    if ($runs.Count -eq 0) { return $null }
-    return $runs[0]
-}
 
-function Sanitize-ErrorString {
-    <#
-    .SYNOPSIS
-        Cleans an error string for safe JSON serialization: strips control
-        characters and truncates to a reasonable length.
-    #>
-    param(
-        [string]$Text,
-        [int]$MaxLength = 500
+    $runsUrl = "$baseUrl/_apis/build/builds?definitions=$pipelineId&branchName=$encodedBranch&queryOrder=queueTimeDescending&api-version=7.1"
+    $response = Invoke-HealthAzDoGet -Url "$runsUrl&`$top=$Top"
+    $runs = @(Get-HealthResponseValues -Response $response -Operation "Recent runs for pipeline $pipelineId")
+    $runResults = @(
+        foreach ($run in $runs)
+        {
+            if ($run.definition.id -ne $pipelineId -or $run.sourceBranch -ne $branchRef)
+            {
+                throw 'A returned build does not match the requested pipeline/branch.'
+            }
+            $item = [ordered]@{
+                id = $run.id
+                result = $run.result
+                status = $run.status
+                branch = $run.sourceBranch
+                sourceVersion = $run.sourceVersion
+                startTime = $run.startTime
+                finishTime = $run.finishTime
+                reason = $run.reason
+                url = "$baseUrl/_build/results?buildId=$($run.id)"
+            }
+            if ($IncludeFailureDetails -and $run.result -in @('failed', 'partiallySucceeded'))
+            {
+                $item.failureDetails = @(Get-HealthTimelineDetails -Url "$baseUrl/_apis/build/builds/$($run.id)/timeline?api-version=7.1")
+            }
+            [pscustomobject]$item
+        }
     )
 
-    if ([string]::IsNullOrEmpty($Text)) { return "" }
-
-    # Strip control characters (0x00-0x1F) except common whitespace (\n \r \t)
-    $cleaned = $Text -replace '[\x00-\x08\x0B\x0C\x0E-\x1F]', ''
-    # Collapse runs of whitespace (newlines, tabs, spaces) into a single space
-    $cleaned = $cleaned -replace '\s+', ' '
-    $cleaned = $cleaned.Trim()
-
-    if ($cleaned.Length -gt $MaxLength) {
-        $cleaned = $cleaned.Substring(0, $MaxLength) + "..."
+    $successUrl = $runsUrl.Replace('queryOrder=queueTimeDescending', 'queryOrder=finishTimeDescending')
+    $successResponse = Invoke-HealthAzDoGet -Url "$successUrl&resultFilter=succeeded&statusFilter=completed&`$top=1"
+    $successes = @(Get-HealthResponseValues -Response $successResponse -Operation "Last successful run for pipeline $pipelineId")
+    $lastSuccess = $null
+    if ($successes.Count -gt 0)
+    {
+        $run = $successes[0]
+        if ($run.definition.id -ne $pipelineId -or $run.sourceBranch -ne $branchRef -or
+            $run.result -ne 'succeeded' -or $run.status -ne 'completed')
+        {
+            throw 'The last-success query returned a nonmatching build.'
+        }
+        $finish = [DateTimeOffset]::Parse($run.finishTime)
+        $lastSuccess = [ordered]@{
+            id = $run.id
+            finishTime = $run.finishTime
+            ageHours = [Math]::Round(($now - $finish).TotalHours, 1)
+            url = "$baseUrl/_build/results?buildId=$($run.id)"
+        }
     }
-    return $cleaned
+
+    $health = Get-HealthRunState -Runs $runs
+    $results.Add([pscustomobject][ordered]@{
+        schemaVersion = 2
+        collectionStatus = 'complete'
+        observedAt = $now.ToString('o')
+        organization = $Organization
+        project = $Project
+        pipelineName = $definition.name
+        pipelineId = $pipelineId
+        branch = $branchRef
+        sampleLimit = $Top
+        lastSuccessfulRun = $lastSuccess
+        recentRuns = $runResults
+        healthState = $health.state
+        healthSummary = $health.summary
+    })
 }
 
-function Get-FailedTasksFromTimeline {
-    param([int]$BuildId)
-    $url = "$Organization/$Project/_apis/build/builds/$BuildId/timeline?api-version=7.1"
-    try {
-        $timelineJson = az rest --method get --url $url --resource $script:AzDoResource 2>$null
-        $timeline = $timelineJson | ConvertFrom-Json
-    }
-    catch {
-        return @()
-    }
-
-    $failedTasks = $timeline.records | Where-Object { $_.type -eq "Task" -and $_.result -eq "failed" }
-    $results = @()
-    foreach ($task in $failedTasks) {
-        $errors = @()
-        if ($task.issues) {
-            $errors = @($task.issues | Where-Object { $_.type -eq "error" } | ForEach-Object {
-                Sanitize-ErrorString -Text $_.message
-            })
-        }
-        $results += [PSCustomObject]@{
-            name   = $task.name
-            errors = $errors
-        }
-    }
-    return $results
-}
-
-# --- Main ---
-
-$now = [DateTimeOffset]::UtcNow
-$allResults = @()
-
-foreach ($pipelineId in $PipelineIds) {
-    $pipelineName = Get-PipelineName -PipelineId $pipelineId
-
-    # Get recent runs
-    $recentRuns = Get-RecentRuns -PipelineId $pipelineId
-    $runResults = @()
-    foreach ($run in $recentRuns) {
-        $runObj = [ordered]@{
-            id        = $run.id
-            result    = $run.result
-            status    = $run.status
-            branch    = $run.sourceBranch
-            startTime = $run.startTime
-            reason    = $run.reason
-            url       = "$Organization/$Project/_build/results?buildId=$($run.id)"
-        }
-
-        # Get failure details for failed runs
-        if ($run.result -eq "failed") {
-            $failedTasks = Get-FailedTasksFromTimeline -BuildId $run.id
-            $runObj.failedTasks = @($failedTasks | ForEach-Object {
-                [ordered]@{
-                    name   = $_.name
-                    errors = @($_.errors)
-                }
-            })
-        }
-
-        $runResults += [PSCustomObject]$runObj
-    }
-
-    # Get last successful run
-    $lastSuccess = Get-LastSuccessfulRun -PipelineId $pipelineId
-    $lastSuccessObj = $null
-    if ($lastSuccess) {
-        $finishTime = [DateTimeOffset]::Parse($lastSuccess.finishTime)
-        $ageHours = [math]::Round(($now - $finishTime).TotalHours, 1)
-        $lastSuccessObj = [ordered]@{
-            id         = $lastSuccess.id
-            finishTime = $lastSuccess.finishTime
-            ageHours   = $ageHours
-            url        = "$Organization/$Project/_build/results?buildId=$($lastSuccess.id)"
-        }
-    }
-
-    # Compute health summary
-    $totalRuns = $recentRuns.Count
-    $failedCount = @($recentRuns | Where-Object { $_.result -eq "failed" }).Count
-    $succeededCount = @($recentRuns | Where-Object { $_.result -eq "succeeded" }).Count
-    if ($totalRuns -eq 0) {
-        $healthSummary = "UNKNOWN - no recent runs found"
-    }
-    elseif ($failedCount -eq 0) {
-        $healthSummary = "HEALTHY - $succeededCount/$totalRuns recent runs succeeded"
-    }
-    elseif ($failedCount -eq $totalRuns) {
-        $healthSummary = "UNHEALTHY - $failedCount/$totalRuns recent runs failed"
-    }
-    else {
-        $healthSummary = "FLAKY - $failedCount/$totalRuns recent runs failed, $succeededCount succeeded"
-    }
-
-    $allResults += [PSCustomObject][ordered]@{
-        pipelineName     = $pipelineName
-        pipelineId       = $pipelineId
-        branch           = "refs/heads/$Branch"
-        lastSuccessfulRun = $lastSuccessObj
-        recentRuns       = @($runResults)
-        healthSummary    = $healthSummary
-    }
-}
-
-$allResults | ConvertTo-Json -Depth 6
+ConvertTo-Json -InputObject @($results.ToArray()) -Depth 10
