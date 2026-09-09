@@ -1,74 +1,29 @@
 ---
 name: changewaves
-description: 'Manage MSBuild Change Waves: create new waves, condition features behind opt-out flags, write tests for wave-gated features, document change waves in ChangeWaves.md, and retire expired waves. Use when adding changes that need an opt-out or rotating out old change waves. Changes that introduce a user-visible behavior change should consider whether to use a changewave.'
-argument-hint: 'Add, query, or remove changewaves and changewave checks.'
+description: "Implement an already-justified MSBuild ChangeWave, inspect an opt-out, or retire a wave when explicitly requested. Not a requirement to gate every behavioral fix or to rotate waves during unrelated work."
+argument-hint: "Describe the feature gate, opt-out behavior, or requested retirement."
 ---
 
-# Managing MSBuild Change Waves
+# Manage MSBuild ChangeWaves
 
-A Change Wave is an opt-out flag that groups risky features together. Users disable features by setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the wave version. This skill covers the **how** — the full lifecycle: creating a wave, conditioning code on it, testing, documenting, and retiring.
+**Use for:** selecting/registering the release's wave, conditioning a feature, proving opt-out behavior, or an authorized retirement.
 
-For the **when** — deciding whether a change is a breaking change and whether it needs a ChangeWave at all — see [assessing-breaking-changes](../assessing-breaking-changes/SKILL.md).
+**Do not use for:** automatic retirement, a new feature already isolated by an explicit opt-in, or deciding compatibility without first using [assessing-breaking-changes](../assessing-breaking-changes/SKILL.md).
 
+## Source preflight
 
-## Decide Whether a Change Wave Is Appropriate
+Read [eng/Versions.props](../../../eng/Versions.props) for the development version and [ChangeWaves.cs](../../../src/Framework/ChangeWaves.cs) for named fields, ordered `AllWaves`, and cached opt-out state. Do not copy a version number from a skill or old example.
 
-Use a change wave when a change is valuable but has meaningful compatibility risk for existing builds.
+Inspect the affected caller and [current wave documentation](../../../documentation/wiki/ChangeWaves.md). Follow [framework instructions](../../instructions/framework.instructions.md) when changing the wave registry.
 
-Good candidates:
-- User-visible behavior changes that may regress some build graphs.
-- Changes in parsing/evaluation/execution semantics where real-world usage is broad or hard to predict.
-- Changes that may require customer adaptation time and benefit from a temporary opt-out.
+## Workflow
 
-Usually avoid a change wave for:
-- Pure bug fixes that restore intended existing behavior with low compatibility risk.
-- Internal refactoring/perf work with no externally observable behavior change.
-- New functionality that is already explicitly opt-in (for example, gated by a new property, switch, or API surface).
+1. Use the development release's existing named wave; add one only if the justified feature requires it and that wave is absent.
+2. Gate the changed behavior with `AreFeaturesEnabled`, preserving the old path. Use the feature's named wave, not a moving `HighestWave` lookup.
+3. Cover the new behavior and the same scenario with the wave disabled. Follow the [lifecycle reference](references/lifecycle.md) for process-cached state and test isolation.
+4. Add the feature to the matching current-rotation heading in `ChangeWaves.md`; use the real PR link when available.
+5. Retire a wave only when requested, following the separate retirement procedure and checking affected callers.
 
-If uncertain, default to safety:
-1. Assess blast radius and rollback difficulty.
-2. Check whether the change could be experienced as a breaking change in production builds.
-3. Use a wave if an opt-out is likely needed while customers adapt.
+## Evidence and stop condition
 
-Document the decision in PR notes so reviewers can validate the call.
-
-If a changewave is appropriate, consult [ChangeWaves-Dev.md](../../../documentation/wiki/ChangeWaves-Dev.md) (developer-facing) and [ChangeWaves.md](../../../documentation/wiki/ChangeWaves.md) (public-facing) for details on how to follow the below steps.
-
-## Step 1: Determine the Correct Wave Version
-
-Look up the current MSBuild version. If a wave already exists for that version in `src/Framework/ChangeWaves.cs`, use it. Otherwise, create a new one.
-
-## Step 2: Condition Your Feature on the Wave
-
-C# and MSBuild examples are in [ChangeWaves-Dev.md](../../../documentation/wiki/ChangeWaves-Dev.md). Prefer to put checks inline rather than abstracting out a method to host the check.
-
-## Step 3: Write Tests
-
-Write normal tests for the new behavior. Then add at least one test that verifies the old behavior is **preserved** when the wave is opted out.
-
-## Step 4: Document the Feature
-
-Add an entry to the **Current Rotation of Change Waves** section in [ChangeWaves.md](../../../documentation/wiki/ChangeWaves.md).
-
-- If a heading for this wave already exists, add a bullet under it.
-- If not, add a new `### {Major}.{Minor}` heading at the top of the current rotation list.
-
-Each entry is a bullet with a link to the PR:
-
-```markdown
-### 18.6
-- [Short description of the change.](https://github.com/dotnet/msbuild/pull/NNNNN)
-```
-
-## Only when explicitly requested: Retire an Expired Wave
-
-Waves rotate out when a new major .NET version will be released. When retiring a wave, follow the detailed description in [ChangeWaves-Dev.md](../../../documentation/wiki/ChangeWaves-Dev.md).
-
-## Checklist
-
-- [ ] Decision made: change wave needed?
-- [ ] Correct wave version chosen from `eng/Versions.props`
-- [ ] Wave field and `AllWaves` entry added in `ChangeWaves.cs` (if new wave)
-- [ ] Feature code wrapped with `AreFeaturesEnabled`
-- [ ] Test verifying opt-out disables the feature
-- [ ] Entry added to `documentation/wiki/ChangeWaves.md`
+Stop after the requested gate or retirement, its scoped evidence, and documentation are complete. An unset variable enables waves by default; a successful default-path test does not prove opt-out. Do not sweep unrelated waves, invent release-retention promises, or require a full build for a wave-documentation question.

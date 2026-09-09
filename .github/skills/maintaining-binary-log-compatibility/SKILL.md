@@ -1,130 +1,29 @@
 ---
 name: maintaining-binary-log-compatibility
-description: 'Guides changes to MSBuild binary log infrastructure. Consult when modifying BinaryLogger or BinaryLogReplayEventSource, adding new BuildEventArgs types, changing event serialization/deserialization, modifying ProjectImportsCollector, adjusting message importance levels, or making changes that affect .binlog content. Also applies when verifying that behavioral changes are properly reflected in binary log output.'
-argument-hint: 'Describe the binary log change or event serialization concern.'
+description: "Change MSBuild structured build events, binary-log codecs, replay compatibility, or import collection. Not routine binlog analysis, ordinary diagnostic severity selection, or a requirement to add logging for every behavior change."
+argument-hint: "Identify the event/codec/content change and required reader or host compatibility."
 ---
 
-# Binary Log Considerations
+# Maintain binary-log contracts
 
-The binary log (`.binlog`) is MSBuild's primary diagnostic format and source of truth for build analysis. It captures the complete build event stream with full fidelity. Format changes have strict compatibility requirements.
+**Use for:** a changed serialized event, record/field format, replay path, event-content contract, or embedded-import behavior.
 
-For general binary log usage, see [Binary-Log.md](../../../documentation/wiki/Binary-Log.md).
+**Do not use for:** merely opening a binlog or adding an ordinary resource-based diagnostic. Use [diagnostic authoring](../authoring-errors-and-warnings/SKILL.md) when no format/content boundary changes.
 
-## Core Principles
+## Source preflight
 
-1. **The binlog captures everything.** All meaningful build events must be represented. If your change alters build behavior, it must be observable in the binlog.
-2. **Format changes must be backward-compatible.** Older versions of MSBuild Structured Log Viewer and other tools must be able to read binlogs produced by newer MSBuild, at minimum gracefully degrading.
-3. **Forward compatibility matters too.** Newer viewers should handle binlogs from older MSBuild without crashing, even if some events are unrecognized.
+Read the affected producer and [logging instructions](../../instructions/logging.instructions.md). Inspect [BinaryLogger](../../../src/Build/Logging/BinaryLogger/BinaryLogger.cs), [BuildEventArgsWriter](../../../src/Build/Logging/BinaryLogger/BuildEventArgsWriter.cs), and [BuildEventArgsReader](../../../src/Build/Logging/BinaryLogger/BuildEventArgsReader.cs).
 
-## Architecture Overview
+For a new/changed event class, also inspect its separate [node transport](../../../src/Shared/LogMessagePacketBase.cs) and [Framework instructions](../../instructions/framework.instructions.md). Do not infer binlog support from event `WriteToStream` methods.
 
-```
-Build Engine
-  → BuildEventArgs (structured events)
-    → BinaryLogger (serializes to .binlog)
-      → ProjectImportsCollector (embeds project/targets files)
+## Workflow
 
-Replay:
-  .binlog file
-    → BinaryLogReplayEventSource (deserializes)
-      → Any ILogger (console, structured log viewer, analyzers)
-```
+1. Classify the change: emitted content, node transport, binlog codec, reader behavior, or more than one.
+2. Follow [format and replay](references/format-and-replay.md) for the required registrations, codecs, version decision, and supported compatibility boundary.
+3. Follow [event content](references/event-content.md) for importance, output events, filtering, import modes, and privacy. A binlog is not a guaranteed full-fidelity snapshot.
+4. Preserve null/empty distinctions, existing field contracts, and version-specific reading. Coordinate the relevant Structured Log implementation when its codec must change.
+5. Select round-trip, historical/future-version, transport, or content evidence for the changed boundary. Do not promise every old reader can gracefully read every new format.
 
-Key source files:
-- `src/Build/Logging/BinaryLogger/BinaryLogger.cs` — the logger itself
-- `src/Framework/BuildEventArgs.cs` — base class for all build events
-- `src/Build/Logging/BinaryLogger/ProjectImportsCollector.cs` — captures imported files
+## Evidence and stop condition
 
-## Adding New Build Event Types
-
-When adding a new `BuildEventArgs` subclass:
-
-1. **Define the new event class** inheriting from the appropriate base (`BuildMessageEventArgs`, `BuildWarningEventArgs`, etc.)
-2. **Add serialization support** — implement `WriteToStream` and `CreateFromStream` methods
-3. **Increment the binary log version** if the new event type changes the format
-4. **Add a new record type constant** in the binary logger's record type enum
-5. **Handle the unknown-type case** in the replay source — older readers must skip gracefully
-
-### Serialization Compatibility Rules
-
-- **Never remove fields** from existing event args serialization
-- **New fields must be appended** to the end of the serialization stream
-- **Use version checks** when reading — if the binlog version is older, use defaults for new fields
-- **Nullable fields** should serialize a presence flag before the value
-
-```csharp
-// Pattern for backward-compatible field addition
-if (logVersion >= newFieldVersion)
-{
-    writer.Write(newField);
-}
-
-// Reading with backward compatibility
-if (logVersion >= newFieldVersion)
-{
-    newField = reader.ReadString();
-}
-else
-{
-    newField = defaultValue;
-}
-```
-
-## Message Importance Levels
-
-Importance controls what appears in console output, but **everything goes to binlog** regardless of importance.
-
-| Level | Use For | Console Verbosity |
-|-------|---------|------------------|
-| `High` | Critical user-facing information | Minimal and above |
-| `Normal` | Standard build progress | Normal and above |
-| `Low` | Detailed diagnostic information | Detailed and above |
-| `Diagnostic` | Internal debugging | Diagnostic only |
-
-### Rules
-
-- Default to `Normal` for user-relevant information
-- Use `Low` for information useful when debugging but noisy in normal builds
-- `High` is reserved for important warnings/status — use sparingly
-- Never skip logging because "it's too verbose" — log at `Low` instead
-
-## ProjectImportsCollector
-
-The `ProjectImportsCollector` embeds all imported `.props`, `.targets`, and project files into the binlog. This enables the "preprocessed view" in log viewers.
-
-### Considerations
-
-- `MSBUILDLOGIMPORTS=1` (or the `/bl` switch) enables import collection
-- Imported file content is captured at evaluation time — reflects the actual content used
-- Large import chains increase binlog size — this is acceptable for diagnostic completeness
-- Sensitive content in imported files will be embedded — document this for users
-
-## Changes That Affect Binlog Content
-
-When modifying MSBuild behavior, verify binlog impact:
-
-| Change Type | Binlog Consideration |
-|------------|---------------------|
-| New property set during evaluation | Appears in `PropertyInitialValue` or `PropertyReassignment` events |
-| New target added | Produces `TargetStarted`/`TargetFinished` events |
-| Changed task behavior | Task output items/properties captured in `TaskFinished` |
-| New warning/error | Captured as `BuildWarningEventArgs`/`BuildErrorEventArgs` |
-| Modified import chain | Changes which files `ProjectImportsCollector` captures |
-
-## Testing Binlog Changes
-
-- **Round-trip test**: Write a binlog, replay it, verify all events are reconstructed
-- **Version compatibility test**: Verify older replay sources handle new events gracefully
-- **Content verification**: Assert specific events appear in the binlog for behavioral changes
-- **Size regression**: Monitor binlog size for unexpectedly large increases
-- Use `BinaryLogReplayEventSource` in tests to verify binlog content programmatically
-
-## Checklist
-
-- [ ] New event types have `WriteToStream`/`CreateFromStream` implementations
-- [ ] Binary log format version incremented if format changed
-- [ ] Backward compatibility: older readers skip/degrade gracefully
-- [ ] Forward compatibility: newer readers handle old format
-- [ ] Importance levels set correctly for new messages
-- [ ] Behavioral changes produce observable binlog events
-- [ ] Round-trip test passes (serialize → deserialize → verify)
+Stop when the requested contract is supported by the necessary source/round-trip/content evidence and remaining reader/host limits are stated. An investigation does not authorize producing or uploading logs, changing unrelated diagnostics, or running a full build merely because logging code exists.

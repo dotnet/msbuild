@@ -2,47 +2,15 @@
 applyTo: "src/MSBuild/**"
 ---
 
-# MSBuild CLI Instructions
+# MSBuild command line
 
-Command-line entry point (`XMake.cs`), argument parsing, server mode, and CLI-specific logic.
+- Preserve accepted switch names/aliases, exit codes, response-file behavior, and existing project discovery unless an intentional compatibility change is in scope.
+- Switch aliases are explicitly listed and compared in [CommandLineSwitches](../../src/MSBuild/CommandLine/CommandLineSwitches.cs); do not invent shortest-unique-prefix matching.
+- Check the specific switch's parameter rules. Not every switch accepts bare, `:true`, and `:false` forms.
+- Trace `XMake` parsing through server selection and build parameters. A `dotnet` verb may have a separate SDK parser/forwarding path; use the [SDK integration skill](../skills/integrating-sdk-and-msbuild/SKILL.md) at that boundary.
+- Avoid unnecessary startup initialization. Server-mode changes must account for repeated builds, environment changes, and state reset.
+- Preserve the existing exception boundary. Do not catch every exception or turn an internal failure into an apparently successful invocation.
+- Use resource-based diagnostics and existing exit behavior. Assess user-visible differences with the [compatibility skill](../skills/assessing-breaking-changes/SKILL.md), rather than requiring a ChangeWave for every edit.
+- Validate the affected combinations of explicit arguments, response files, environment defaults, and host/mode. Confirm which executable handled the command.
 
-## CLI Switch Stability (Critical)
-
-* **Never remove or rename existing switches or aliases** — build scripts worldwide depend on them.
-* New switches must not conflict with existing switches or their abbreviations.
-* Switch abbreviation rules must be preserved — existing shortest-unique prefixes must continue to work.
-
-## XMake.cs Entry Point
-
-* Exit codes must remain stable — scripts check specific exit codes.
-* Startup performance matters — avoid unnecessary initialization on the critical path.
-* Top-level error handling must catch and report all exceptions with actionable messages.
-
-## Server Mode
-
-* Server mode keeps processes alive between builds — state leaks cause intermittent failures.
-* Ensure all per-build state is properly reset between builds.
-* See [threading spec](../../documentation/specs/threading.md) for concurrency constraints.
-
-## Command-Line Parsing
-
-* Backward compatible — existing valid command lines must work identically.
-* Boolean switches: `-switch`, `-switch:true`, `-switch:false` — handle all forms.
-* Response file (`@file`) processing must maintain ordering and nesting semantics.
-
-## CLI Behavior Compatibility
-
-* Default verbosity, output format, and behavior must not change without a [ChangeWave](../../documentation/wiki/ChangeWaves.md).
-* The set of automatically-forwarded properties to child nodes must remain stable.
-* Changes to project discovery (`.sln` vs `.slnx` handling) require careful compatibility analysis.
-
-## Error Messages
-
-* CLI-level errors (bad arguments, missing project files) must be immediately actionable.
-* Include the `/help` pointer when appropriate.
-
-## Related Documentation
-
-* [MSBuild Environment Variables](../../documentation/wiki/MSBuild-Environment-Variables.md)
-* [ChangeWaves](../../documentation/wiki/ChangeWaves.md)
-* [MSBuild apphost spec](../../documentation/specs/msbuild-apphost.md)
+Relevant references: [environment variables](../../documentation/wiki/MSBuild-Environment-Variables.md), [threading](../../documentation/specs/threading.md), and [apphost](../../documentation/specs/msbuild-apphost.md). Read the one matching the changed path.

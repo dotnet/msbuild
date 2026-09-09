@@ -1,88 +1,29 @@
 ---
 name: assessing-breaking-changes
-description: 'Guides assessment of backward compatibility for MSBuild changes. Consult when modifying behavior, adding warnings or errors, changing defaults, altering target ordering, removing or deprecating features, deciding whether a change needs a ChangeWave, reviewing blast radius of behavioral changes, or when a PR introduces user-visible output differences.'
-argument-hint: 'Describe the change and its potential compatibility impact.'
+description: "Assess compatibility risk in changes to existing MSBuild behavior, diagnostics, defaults, or public contracts. Not ChangeWave implementation or a mandatory review of semantics-preserving refactoring."
+argument-hint: "Describe the old and proposed behavior and affected consumers."
 ---
 
-# Backward Compatibility in MSBuild
+# Assess MSBuild compatibility
 
-Backward compatibility is the default — any change that could alter existing build behavior must be explicitly justified.
+**Use for:** deciding whether an observable change is acceptable, needs an opt-in or temporary opt-out, or requires a migration plan.
 
-This skill covers **how to evaluate compatibility risk**. For the mechanics of ChangeWave implementation, see the [changewaves skill](../changewaves/SKILL.md).
+**Do not use for:** implementing an already-decided wave, assigning diagnostic codes, or expanding an internal refactor into a full compatibility matrix.
 
-## Core Philosophy
+## Source preflight
 
-1. **Existing builds must not break.** If a project built successfully yesterday, it must build successfully today with identical semantics.
-2. **New warnings are breaking changes.** Builds that use `-WarnAsError` or `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` will fail if you introduce a new warning. Always gate new warnings behind a ChangeWave or emit them as `Message` importance instead.
-3. **Output changes are behavioral changes.** Even "improvements" to output formatting, file paths, or diagnostic text can break downstream consumers that parse MSBuild output.
-4. **Removal is nearly impossible.** Never remove CLI switches, public APIs, or property names. Deprecate with warnings first, then gate removal behind a ChangeWave after multiple release cycles.
+Identify the baseline, changed behavior, callers, and supported hosts/TFMs. Read the [instructions for the affected paths](../../instructions) and the current [framework configuration](../../../src/Directory.Build.props).
 
-## Blast Radius Checklist
+For diagnostic changes, inspect the actual [warning-promotion logic](../../../src/Build/BackEnd/Components/Logging/LoggingService.cs), not just similarly named project properties. For an opt-out, inspect [ChangeWaves](../../../src/Framework/ChangeWaves.cs).
 
-Before merging any behavioral change, evaluate:
+## Workflow
 
-| Question | If Yes |
-|----------|--------|
-| Does this change what gets built or how? | ChangeWave required |
-| Does this add a new warning? | ChangeWave required (WarnAsError impact) |
-| Does this change a property default? | ChangeWave required (existing .csproj files depend on defaults) |
-| Does this alter target execution order? | Test with real-world solutions; likely ChangeWave |
-| Does this change console or binlog output format? | Consider downstream tool impact |
-| Does this affect only internal code paths with no user-visible effect? | No ChangeWave needed |
-| Is this a pure bug fix restoring documented behavior? | Usually no ChangeWave; use judgment on blast radius |
+1. Describe a concrete existing build or consumer that can observe the difference: success/failure, outputs, ordering, API availability, logs, or performance.
+2. Separate existing behavior from genuinely new opt-in functionality. A bug fix still needs a blast-radius assessment; not every bug fix needs a wave.
+3. Apply the relevant part of [compatibility decisions](references/compatibility-decisions.md). New warnings can fail warning-as-error builds; changing a warning into an error is not a compatibility workaround.
+4. Choose the mitigation and evidence needed for the affected boundary. A ChangeWave is default-on risk management, not proof that existing builds remain unchanged.
+5. Record the decision and remaining uncertainty. Use [changewaves](../changewaves/SKILL.md) only for implementation, or [diagnostic authoring](../authoring-errors-and-warnings/SKILL.md) for the selected diagnostic.
 
-## When ChangeWave Is NOT Needed
+## Evidence and stop condition
 
-- Internal refactoring with no observable behavior change
-- Performance improvements that don't change semantics
-- New opt-in features gated by a new property or switch
-- Bug fixes that restore clearly-intended behavior with limited blast radius
-
-For detailed ChangeWave mechanics, see [ChangeWaves-Dev.md](../../../documentation/wiki/ChangeWaves-Dev.md) and [ChangeWaves.md](../../../documentation/wiki/ChangeWaves.md).
-
-## The Warnings-as-Errors Rule
-
-This is the most commonly missed compatibility concern:
-
-```xml
-<!-- Many enterprise builds set this globally -->
-<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-```
-
-Any new `MSBxxxx` warning you add will **break these builds**. Options:
-1. **Gate behind ChangeWave** — preferred for genuinely important warnings
-2. **Use `MessageImportance.Low` or `Normal`** — for informational diagnostics
-3. **Add as an error from the start** — if the condition is always wrong
-
-## Deprecation Protocol
-
-1. Add a deprecation warning (behind ChangeWave if broad impact)
-2. Document the deprecation in release notes
-3. Maintain the old behavior for at least two major .NET versions
-4. Only remove after the ChangeWave has rotated out
-
-## Compatibility Test Matrix
-
-When testing backward compatibility, verify:
-
-- **Multi-targeting projects** — `<TargetFrameworks>net472;net8.0</TargetFrameworks>`
-- **Solution builds with mixed project types** — C#, F#, VB, C++/CLI
-- **Incremental builds** — second build should be a no-op
-- **Design-time builds** — Visual Studio calls different target contracts
-- **Cross-platform** — path separator differences, case sensitivity on Linux
-- **WarnAsError builds** — explicitly test with `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`
-
-## Decision Framework
-
-```
-Is the change user-visible?
-├── No → Ship it (no ChangeWave needed)
-└── Yes
-    ├── Is it a new opt-in feature? → Ship it (no ChangeWave needed)
-    └── Does it change existing behavior?
-        ├── Bug fix with low blast radius? → Ship it, add regression test
-        └── Behavioral change or new warning?
-            └── Gate behind ChangeWave, test opt-out path
-```
-
-Document the compatibility decision in your PR description so reviewers can validate it.
+Stop when the observable difference, affected consumers, compatibility decision, and scoped evidence are clear. An assessment-only request does not authorize code changes or executing a broad test matrix. For a fix, require evidence for the changed contract rather than claiming all builds are compatible.
