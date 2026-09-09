@@ -52,7 +52,7 @@ The general pattern is:
 C:\Program Files\Microsoft Visual Studio\{version}\{edition}\MSBuild\Current\Bin
 ```
 
-For Visual Studio 2026, `{version}` is `18` (not `2026`), and `{edition}` is `Enterprise`, `Professional`, or `Community`.
+For Visual Studio 2026, `{version}` is `18` (not `2026`). Common `{edition}` folders include `Enterprise`, `Professional`, and `Community`; prerelease/Insiders installations may use a different folder, so use `vswhere` below to confirm the path.
 
 Example paths:
 
@@ -67,10 +67,10 @@ The most reliable way to locate your VS installation is with `vswhere`:
 
 ```powershell
 # List all VS installations with their paths
-& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -all -format table
+& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -all -prerelease -format table
 
 # Get the MSBuild Bin path for the latest installation
-$vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+$vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -property installationPath
 "$vsPath\MSBuild\Current\Bin"
 ```
 
