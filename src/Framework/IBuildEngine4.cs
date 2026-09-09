@@ -31,6 +31,10 @@ namespace Microsoft.Build.Framework
     /// This interface extends IBuildEngine to provide a mechanism allowing tasks to
     /// share data between task invocations.
     /// </summary>
+    /// <remarks>
+    /// In-process tasks share registered objects across thread nodes in multithreaded builds.
+    /// Tasks running in different processes do not share registered objects.
+    /// </remarks>
     public interface IBuildEngine4 : IBuildEngine3
     {
         /// <summary>
@@ -40,7 +44,7 @@ namespace Microsoft.Build.Framework
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="obj">The object to be held for later disposal.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
-        /// <param name="allowEarlyCollection">The object may be disposed earlier that the requested time if
+        /// <param name="allowEarlyCollection">The object may be disposed earlier than the requested time if
         /// MSBuild needs to reclaim memory.</param>
         /// <remarks>
         /// <para>
@@ -49,6 +53,15 @@ namespace Microsoft.Build.Framework
         /// build.  It is strongly recommended that <paramref name="allowEarlyCollection"/> be set to true if the
         /// object will retain any significant amount of data, as this gives MSBuild the most flexibility to
         /// manage limited process memory resources.
+        /// </para>
+        /// <para>
+        /// In multithreaded builds, in-process tasks share registered objects across thread nodes.
+        /// The registered object must be safe for concurrent use. Tasks running in different
+        /// processes, including TaskHost processes, do not share registered objects.
+        /// </para>
+        /// <para>
+        /// If an object is already registered under an equal key, this call does not replace it.
+        /// MSBuild does not dispose an object that is not retained by the registration.
         /// </para>
         /// <para>
         /// The thread on which the object is disposed may be arbitrary - however it is guaranteed not to
@@ -69,7 +82,7 @@ namespace Microsoft.Build.Framework
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
         /// <returns>
-        /// The registered object, or null is there is no object registered under that key or the object
+        /// The registered object, or null if there is no object registered under that key or the object
         /// has been discarded through early collection.
         /// </returns>
         object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
@@ -80,7 +93,7 @@ namespace Microsoft.Build.Framework
         /// <param name="key">The key used to retrieve the object.</param>
         /// <param name="lifetime">The lifetime of the object.</param>
         /// <returns>
-        /// The registered object, or null is there is no object registered under that key or the object
+        /// The registered object, or null if there is no object registered under that key or the object
         /// has been discarded through early collection.
         /// </returns>
         object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
