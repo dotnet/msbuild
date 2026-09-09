@@ -1,38 +1,15 @@
 ---
-applyTo: "src/Build/Globbing/**"
+applyTo: "src/Build/Globbing/**,src/Framework/Utilities/FileMatcher.cs"
 ---
 
-# Globbing Instructions
+# Globbing
 
-Resolves file patterns (e.g., `**/*.cs`) for item includes/excludes. Runs during evaluation — performance-critical.
+- Preserve the established wildcard, escaping, include/exclude/remove, and relative-root semantics. Do not replace them with general-purpose filesystem glob assumptions.
+- [FileMatcher](../../src/Framework/Utilities/FileMatcher.cs) is the implementation boundary for filesystem matching; it is not in `src/Shared`.
+- Excludes can prune recursion during enumeration. Preserve that optimization and its equivalence to the intended result; do not force all excludes into a post-processing pass.
+- Distinguish evaluation-time globs from item operations inside executing targets. Filesystem state and expansion context belong to the actual operation.
+- Cache results only with a defined root, matching options, filesystem-state assumptions, and invalidation lifetime.
+- Test relevant literal/wildcard patterns, nested excludes, separator/case behavior, symlinks, and missing paths. Assert MSBuild's established behavior rather than assuming OS filesystem rules alone define it.
+- Measure enumeration and allocation costs before changing algorithms. Use [compatibility assessment](../skills/assessing-breaking-changes/SKILL.md) for observable matching changes.
 
-## Glob Pattern Correctness
-
-* Semantics: `*` matches within a directory, `**` across directories, `?` a single character.
-* Include and exclude patterns must use the same matching rules.
-* Handle edge cases: empty patterns, only-wildcard patterns, literal special characters, trailing separators.
-* Relative vs absolute patterns must produce consistent results regardless of working directory.
-
-## Performance
-
-* Minimize filesystem enumeration — prune directory traversal early using glob structure.
-* Cache results when the same pattern is evaluated multiple times (common with `**/*.cs` across imports).
-* Avoid allocating intermediate string collections — use lazy evaluation where possible.
-
-## Exclude Patterns
-
-* Excludes are applied after includes, not during.
-* `Remove` with globs must use the same matching engine.
-* Test with nested excludes (e.g., `**/*.cs` include with `**/obj/**` exclude).
-
-## Evaluation-Time Behavior
-
-* Globs resolve at evaluation time — filesystem state at that point determines the item list.
-* Changes affect all SDK-style projects (implicit `**/*.cs` includes).
-* Gate behavioral changes behind a [ChangeWave](../../documentation/wiki/ChangeWaves.md).
-
-## Cross-Platform
-
-* Glob patterns must work with both `\` and `/` separators.
-* Case sensitivity must follow OS filesystem conventions.
-* Symlink traversal must be safe (no infinite loops).
+Start with [FileMatcher tests](../../src/Framework.UnitTests/FileMatcher_Tests.cs) and the tests nearest the changed matching path; expand only for additional affected semantics.
