@@ -674,7 +674,10 @@ namespace Microsoft.Build.BackEnd
                     or LoggingEventType.BuildWarningEvent
                     or LoggingEventType.TaskCommandLineEvent
                     or LoggingEventType.BuildMessageEvent
-                    or LoggingEventType.CustomEvent))
+                    or LoggingEventType.CustomEvent
+                    or LoggingEventType.AssemblyResolutionSearchTraceEvent
+                    or LoggingEventType.AssemblyConflictDependencyDetailsEvent
+                    or LoggingEventType.AssemblyConflictWarningEvent))
             {
                 return;
             }

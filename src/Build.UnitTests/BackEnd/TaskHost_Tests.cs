@@ -641,6 +641,37 @@ namespace Microsoft.Build.UnitTests.BackEnd
             engine.Log.ShouldContain("Received telemetry event 'Task telemetry'");
         }
 
+        [Fact]
+        public void TaskHostTaskForwardsWave1811EventsWhenWave1812IsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable(
+                    "MSBUILDDISABLEFEATURESFROMVERSION",
+                    ChangeWaves.Wave18_12.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                var searchEvent = new AssemblyResolutionSearchTraceEventArgs();
+                var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs();
+                var warningEvent = new AssemblyConflictWarningEventArgs();
+                var engine = new MockEngine();
+
+                TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, searchEvent)));
+                TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, detailsEvent)));
+                TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, warningEvent)));
+
+                engine.MessageEvents.ShouldBe([searchEvent, detailsEvent]);
+                engine.WarningEvents.ShouldHaveSingleItem().ShouldBeSameAs(warningEvent);
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            }
+        }
+
         /// <summary>
         /// Test that custom events are logged properly
         /// </summary>
