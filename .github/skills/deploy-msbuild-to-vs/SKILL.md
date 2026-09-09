@@ -52,7 +52,7 @@ The general pattern is:
 C:\Program Files\Microsoft Visual Studio\{version}\{edition}\MSBuild\Current\Bin
 ```
 
-For Visual Studio 2026, `{version}` is `18` (not `2026`). Common `{edition}` folders include `Enterprise`, `Professional`, and `Community`; prerelease/Insiders installations may use a different folder, so use `vswhere` below to confirm the path.
+For Visual Studio 2026, `{version}` is `18` (not `2026`). Common `{edition}` folders include `Enterprise`, `Professional`, and `Community`; this is customizable, so use `vswhere` below to confirm the path.
 
 Example paths:
 
