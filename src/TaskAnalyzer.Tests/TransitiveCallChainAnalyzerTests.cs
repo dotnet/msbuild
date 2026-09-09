@@ -520,4 +520,53 @@ public class TransitiveCallChainAnalyzerTests
         transitive.Length.ShouldBe(2);
         transitive.Select(d => d.Location.SourceSpan).Distinct().Count().ShouldBe(2);
     }
+
+    [Theory]
+    [InlineData(25)]
+    public async Task InheritedTaskMethodCallingDeepUnsafeExtension_ProducesDiagnostic(int helperCount)
+    {
+        string helperMethods = string.Join(
+            "\n",
+            Enumerable.Range(0, helperCount).Select(index =>
+            {
+                string target = index + 1 == helperCount
+                    ? "taskEnvironment.GetTempPath()"
+                    : $"GetTempPath{index + 1}(taskEnvironment)";
+                return $"public static string GetTempPath{index}(TaskEnvironment taskEnvironment) => {target};";
+            }));
+
+        var diags = await GetAllDiagnosticsAsync($$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+
+            public static class TaskEnvironmentExtensions
+            {
+                public static string GetTempPath(this TaskEnvironment taskEnvironment) => Path.GetTempPath();
+            }
+
+            public static class Helpers
+            {
+                {{helperMethods}}
+            }
+
+            public abstract class CommandLineTaskBase
+            {
+                public IBuildEngine BuildEngine { get; set; } = new BuildEngineStub();
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public bool Execute() { Helpers.GetTempPath0(TaskEnvironment); return true; }
+            }
+
+            public abstract class CompilerTaskBase : CommandLineTaskBase { }
+            public abstract class ManagedCompiler : CompilerTaskBase { }
+            public class Csc : ManagedCompiler, IMultiThreadableTask { }
+            """);
+
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.Length.ShouldBe(1);
+        transitive[0].GetMessage().ShouldContain("CommandLineTaskBase.Execute");
+        transitive[0].GetMessage().ShouldContain("Helpers.GetTempPath0");
+        transitive[0].GetMessage().ShouldContain($"Helpers.GetTempPath{helperCount - 1}");
+        transitive[0].GetMessage().ShouldContain("TaskEnvironmentExtensions.GetTempPath");
+        transitive[0].GetMessage().ShouldContain("Path.GetTempPath");
+    }
 }

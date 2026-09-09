@@ -54,6 +54,121 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
+        /// The source types and inheritance hierarchies that can execute as part of a task.
+        /// </summary>
+        internal readonly struct TaskTypeAnalysis
+        {
+            public ImmutableArray<INamedTypeSymbol> ConcreteTaskTypes { get; }
+            public ImmutableHashSet<INamedTypeSymbol> TaskHierarchyTypes { get; }
+            public ImmutableHashSet<INamedTypeSymbol> MultiThreadableTaskHierarchyTypes { get; }
+
+            public TaskTypeAnalysis(
+                ImmutableArray<INamedTypeSymbol> concreteTaskTypes,
+                ImmutableHashSet<INamedTypeSymbol> taskHierarchyTypes,
+                ImmutableHashSet<INamedTypeSymbol> multiThreadableTaskHierarchyTypes)
+            {
+                ConcreteTaskTypes = concreteTaskTypes;
+                TaskHierarchyTypes = taskHierarchyTypes;
+                MultiThreadableTaskHierarchyTypes = multiThreadableTaskHierarchyTypes;
+            }
+        }
+
+        /// <summary>
+        /// Builds the task analysis model for all source types in the compilation.
+        /// Base types are included because their members execute in the context of derived tasks,
+        /// even when the base type does not implement <c>ITask</c> itself.
+        /// </summary>
+        internal static TaskTypeAnalysis BuildTaskTypeAnalysis(
+            Compilation compilation,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType)
+        {
+            var concreteTaskTypes = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
+            var taskHierarchyTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+            var multiThreadableTaskHierarchyTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+
+            foreach (INamedTypeSymbol type in GetSourceTypes(compilation.Assembly.GlobalNamespace))
+            {
+                bool isTask = ImplementsInterface(type, iTaskType);
+                bool isMultiThreadableTask = isTask &&
+                    ((iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType)) ||
+                     HasAttribute(type, multiThreadableTaskAttributeType) ||
+                     HasAttribute(type, analyzedAttributeType));
+
+                if (isTask)
+                {
+                    AddTypeHierarchy(taskHierarchyTypes, type);
+
+                    if (!type.IsAbstract)
+                    {
+                        concreteTaskTypes.Add(type);
+                    }
+                }
+
+                if (isMultiThreadableTask)
+                {
+                    AddTypeHierarchy(multiThreadableTaskHierarchyTypes, type);
+                }
+            }
+
+            return new TaskTypeAnalysis(
+                concreteTaskTypes.ToImmutable(),
+                taskHierarchyTypes.ToImmutable(),
+                multiThreadableTaskHierarchyTypes.ToImmutable());
+        }
+
+        internal static bool HasAttribute(INamedTypeSymbol type, INamedTypeSymbol? attributeType)
+        {
+            if (attributeType is null)
+            {
+                return false;
+            }
+
+            foreach (AttributeData attribute in type.GetAttributes())
+            {
+                if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, attributeType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void AddTypeHierarchy(
+            ImmutableHashSet<INamedTypeSymbol>.Builder builder,
+            INamedTypeSymbol type)
+        {
+            for (INamedTypeSymbol? current = type;
+                 current is not null && current.SpecialType != SpecialType.System_Object;
+                 current = current.BaseType)
+            {
+                builder.Add(current.OriginalDefinition);
+            }
+        }
+
+        private static IEnumerable<INamedTypeSymbol> GetSourceTypes(INamespaceOrTypeSymbol container)
+        {
+            foreach (ISymbol member in container.GetMembers())
+            {
+                if (member is INamedTypeSymbol type)
+                {
+                    yield return type;
+                }
+
+                if (member is INamespaceOrTypeSymbol child)
+                {
+                    foreach (INamedTypeSymbol descendant in GetSourceTypes(child))
+                    {
+                        yield return descendant;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Determines if a parameter name suggests it represents a file system path.
         /// Excludes XML namespace parameters (namespaceURI, etc.) and non-path names.
         /// </summary>
@@ -451,6 +566,27 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     if (member is IPropertySymbol property && seen.Add(property.Name))
                     {
                         yield return property;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates methods declared on <paramref name="type"/> and all of its base
+        /// types, most-derived type first. All declarations are returned because a base implementation
+        /// can still be reached through another inherited member even when a derived member overrides it.
+        /// </summary>
+        internal static IEnumerable<IMethodSymbol> GetMethodsIncludingBaseTypes(INamedTypeSymbol type)
+        {
+            for (INamedTypeSymbol? current = type;
+                 current is not null && current.SpecialType != SpecialType.System_Object;
+                 current = current.BaseType)
+            {
+                foreach (ISymbol member in current.GetMembers())
+                {
+                    if (member is IMethodSymbol { IsImplicitlyDeclared: false } method)
+                    {
+                        yield return method;
                     }
                 }
             }
