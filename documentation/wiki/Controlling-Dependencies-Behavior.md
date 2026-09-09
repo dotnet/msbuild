@@ -202,7 +202,7 @@ Same metadata and logic applies here as it is being inherited from the `Referenc
 
 In a specific scenarios we might want to indicate that specific project should be built prior our project but said project should not be reference accessible nor its output copied to current project output. This can be helpful for build time only dependencies - projects defining behavior that is going to be used as build step of a current project.
 
-Such a behavior can be achived with [`ReferenceOutputAssembly` metadata](https://learn.microsoft.com/visualstudio/msbuild/common-msbuild-project-items#projectreference):
+Such a behavior can be achieved with [`ReferenceOutputAssembly` metadata](https://learn.microsoft.com/visualstudio/msbuild/common-msbuild-project-items#projectreference):
 
 ```xml
 <ItemGroup>
