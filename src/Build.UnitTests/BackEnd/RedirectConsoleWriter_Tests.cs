@@ -26,5 +26,28 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             sb.ToString().ShouldBe($"Line 1{Environment.NewLine}Line 2");
         }
+
+        [Fact]
+        public void WriteAfterDispose_IsDiscardedWithoutThrowingOrInvokingCallback()
+        {
+            StringBuilder output = new();
+            int callbackCount = 0;
+            OutOfProcServerNode.RedirectConsoleWriter writer = new(text =>
+            {
+                callbackCount++;
+                output.Append(text);
+            });
+
+            writer.Write("before dispose");
+            writer.Dispose();
+            output.ToString().ShouldBe("before dispose");
+            int callbackCountAfterDispose = callbackCount;
+
+            Should.NotThrow(() => writer.WriteLine("after dispose"));
+            writer.Flush();
+
+            output.ToString().ShouldBe("before dispose");
+            callbackCount.ShouldBe(callbackCountAfterDispose);
+        }
     }
 }

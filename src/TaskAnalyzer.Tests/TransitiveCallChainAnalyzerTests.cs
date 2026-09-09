@@ -23,6 +23,10 @@ public class TransitiveCallChainAnalyzerTests
     [InlineData("using System;", "Console.WriteLine(\"test\");", "Console.WriteLine")]
     [InlineData("using System.IO;", "File.Exists(\"test.txt\");", "File.Exists")]
     [InlineData("using System;", "Environment.GetEnvironmentVariable(\"KEY\");", "GetEnvironmentVariable")]
+    [InlineData("using System.IO;", "Directory.CreateTempSubdirectory();", "Directory.CreateTempSubdirectory")]
+    [InlineData("using System.IO;", "Directory.CreateTempSubdirectory(null);", "Directory.CreateTempSubdirectory")]
+    [InlineData("using System.IO;", "Directory.CreateTempSubdirectory(prefix: \"msbuild-\");", "Directory.CreateTempSubdirectory")]
+    [InlineData("using System.CodeDom.Compiler;", "using var files = new TempFileCollection();", "TempFileCollection")]
     public async Task HelperCallingBannedApi_TransitivelyFromTask_ProducesDiagnostic(
         string usingDirective, string helperBody, string expectedApiName)
     {
@@ -127,6 +131,92 @@ public class TransitiveCallChainAnalyzerTests
 
         var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall);
         transitive.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("all", "GetCanonicalForm")]
+    [InlineData("multithreadable_only", "GetCanonicalForm")]
+    [InlineData("all", "Normalize")]
+    [InlineData("multithreadable_only", "Normalize")]
+    public async Task AbsolutePathCanonicalizationPolyfill_NoDiagnostics(string scope, string methodName)
+    {
+        var source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+
+            public static class AbsolutePathExtensions
+            {
+                public static AbsolutePath {{methodName}}(this AbsolutePath path) =>
+                    new AbsolutePath(Path.GetFullPath(path.Value));
+
+                public static bool Exists(AbsolutePath path) =>
+                    File.Exists(Path.GetFullPath(path.Value));
+            }
+
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public override bool Execute()
+                {
+                    AbsolutePath path = TaskEnvironment.GetAbsolutePath("relative.txt");
+                    File.Exists(path.{{methodName}}());
+                    File.Exists(AbsolutePathExtensions.{{methodName}}(path));
+                    AbsolutePathExtensions.Exists(path);
+                    return true;
+                }
+            }
+            """;
+
+        var compilation = CreateCompilation(source);
+        compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var options = new AnalyzerOptions([], new TestAnalyzerConfigOptionsProvider(new()
+        {
+            [SharedAnalyzerHelpers.ScopeOptionKey] = scope
+        }));
+        var diags = await compilation.WithAnalyzers(
+            [new MultiThreadableTaskAnalyzer(), new TransitiveCallChainAnalyzer()], options).GetAnalyzerDiagnosticsAsync();
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("path.OriginalValue")]
+    [InlineData("relative")]
+    [InlineData("other.Value")]
+    public async Task CanonicalizationPolyfillWithUnsafeInput_StillProducesDiagnostic(string argument)
+    {
+        var source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class OtherPath { public string Value => "relative.txt"; }
+            public static class AbsolutePathExtensions
+            {
+                public static AbsolutePath GetCanonicalForm(this AbsolutePath path)
+                {
+                    var other = new OtherPath();
+                    string relative = path.Value;
+                    relative = "relative.txt";
+                    return new AbsolutePath(Path.GetFullPath({{argument}}));
+                }
+            }
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    AbsolutePath path = new TaskEnvironment().GetAbsolutePath("relative.txt");
+                    File.Exists(path.GetCanonicalForm());
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetAllDiagnosticsAsync(source);
+
+        var diagnostic = diags.ShouldHaveSingleItem();
+        diagnostic.Id.ShouldBe(DiagnosticIds.TransitiveUnsafeCall);
+        diagnostic.GetMessage().ShouldContain("Path.GetFullPath");
     }
 
     [Fact]

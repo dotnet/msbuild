@@ -1,8 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Shouldly;
 using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
@@ -578,6 +582,124 @@ public class MultiThreadableTaskAnalyzerTests
             """);
 
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Theory]
+    [InlineData("all")]
+    [InlineData("multithreadable_only")]
+    public async Task GetFullPathOfAbsolutePathValue_NoDiagnostics(string scope)
+    {
+        const string source = """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            using IOPath = System.IO.Path;
+
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public override bool Execute()
+                {
+                    AbsolutePath path = TaskEnvironment.GetAbsolutePath("relative.txt");
+                    AbsolutePath? nullablePath = path;
+                    string canonical = Path.GetFullPath(path.Value);
+                    File.Exists(canonical);
+                    File.Exists(IOPath.GetFullPath(path: TaskEnvironment.GetAbsolutePath("other.txt").Value));
+                    File.Exists(Path.GetFullPath(nullablePath.Value.Value));
+                    File.Exists(Path.GetFullPath((string)path.Value));
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetDiagnosticsWithScopeAsync(source, scope);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("\"relative.txt\"")]
+    [InlineData("path.OriginalValue")]
+    [InlineData("other.Value")]
+    [InlineData("text")]
+    [InlineData("path.Value.Substring(1)")]
+    [InlineData("Path.Combine(path.Value, \"relative.txt\")")]
+    [InlineData("path.Value, path.Value")]
+    public async Task GetFullPathWithoutAbsolutePathValue_StillProducesDiagnostic(string arguments)
+    {
+        var source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class OtherPath { public string Value => "relative.txt"; }
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    AbsolutePath path = new TaskEnvironment().GetAbsolutePath("relative.txt");
+                    var other = new OtherPath();
+                    string text = path.Value;
+                    text = "relative.txt";
+                    _ = Path.GetFullPath({{arguments}});
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetDiagnosticsAsync(source);
+
+        diags.ShouldHaveSingleItem().Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetFullPathLookalike_DoesNotProveAnAbsoluteResult(bool useMetadataReference)
+    {
+        const string lookalikeSource = """
+            namespace System.IO
+            {
+                public static class Path
+                {
+                    public static string GetFullPath(string path) => "relative.txt";
+                }
+            }
+            """;
+        const string source = """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    AbsolutePath path = new TaskEnvironment().GetAbsolutePath("relative.txt");
+                    File.Exists(Path.GetFullPath(path.Value));
+                    return true;
+                }
+            }
+            """;
+
+        var compilation = CreateCompilation(useMetadataReference
+            ? "extern alias lookalike; using Path = lookalike::System.IO.Path;\n" + source
+            : source + lookalikeSource);
+        if (useMetadataReference)
+        {
+            var lookalikeCompilation = CSharpCompilation.Create(
+                "PathLookalike",
+                [CSharpSyntaxTree.ParseText(lookalikeSource)],
+                GetCoreReferences(),
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            using var image = new MemoryStream();
+            lookalikeCompilation.Emit(image).Success.ShouldBeTrue();
+            compilation = compilation.AddReferences(MetadataReference.CreateFromImage(
+                image.ToArray(), MetadataReferenceProperties.Assembly.WithAliases(["lookalike"])));
+        }
+
+        compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await compilation.WithAnalyzers([new MultiThreadableTaskAnalyzer()]).GetAnalyzerDiagnosticsAsync();
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
     [Fact]
@@ -1259,6 +1381,95 @@ public class MultiThreadableTaskAnalyzerTests
             """);
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("null")]
+    [InlineData("\"\"")]
+    [InlineData("\"msbuild-\"")]
+    [InlineData("prefix: \"msbuild-\"")]
+    public async Task DirectoryCreateTempSubdirectory_InMultiThreadable_ProducesWarning(string prefixArgument)
+    {
+        string invocation = $"Directory.CreateTempSubdirectory({prefixArgument})";
+        string source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public override bool Execute()
+                {
+                    var dir = {{invocation}};
+                    return true;
+                }
+            }
+            """;
+
+        var diags = await GetDiagnosticsAsync(source);
+
+        var diagnostic = diags.ShouldHaveSingleItem();
+        diagnostic.Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+        diagnostic.GetMessage().ShouldContain("Directory.CreateTempSubdirectory");
+        diagnostic.GetMessage().ShouldContain("depends on TMP/TEMP environment variables");
+        source.Substring(diagnostic.Location.SourceSpan.Start, diagnostic.Location.SourceSpan.Length).ShouldBe(invocation);
+    }
+
+    [Fact]
+    public async Task PathGetRandomFileName_DirectAndTransitive_NoDiagnostics()
+    {
+        var diags = await GetAllDiagnosticsAsync("""
+            using System.IO;
+            public static class TempHelper
+            {
+                public static string GetName() => Path.GetRandomFileName();
+            }
+
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var direct = Path.GetRandomFileName();
+                    var transitive = TempHelper.GetName();
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("", true)]
+    [InlineData("TaskEnvironment.ProjectDirectory", false)]
+    [InlineData("TaskEnvironment.ProjectDirectory, keepFiles: true", false)]
+    public async Task TempFileCollection_OnlyDefaultConstructor_ProducesWarning(string arguments, bool expectDiagnostic)
+    {
+        var diags = await GetDiagnosticsAsync($$"""
+            using System.CodeDom.Compiler;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public override bool Execute()
+                {
+                    using var files = new TempFileCollection({{arguments}});
+                    return true;
+                }
+            }
+            """);
+
+        if (expectDiagnostic)
+        {
+            var diagnostic = diags.ShouldHaveSingleItem();
+            diagnostic.Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+            diagnostic.GetMessage().ShouldContain("TempFileCollection");
+        }
+        else
+        {
+            diags.ShouldBeEmpty();
+        }
     }
 
     [Fact]
