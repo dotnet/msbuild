@@ -149,7 +149,9 @@ Two counters track the TaskHost's availability:
 
 ### Per-Task Isolation (TaskExecutionContext)
 
-Each task gets a `TaskExecutionContext` stored in `_taskContexts` (ConcurrentDictionary) and accessed via `_currentTaskContext` (AsyncLocal). The context holds configuration, saved environment (CWD, env vars, warning settings), pending callback requests, and execution state. `EffectiveConfiguration` reads from the per-task context first, falling back to `_currentConfiguration`.
+Each task gets a `TaskExecutionContext` stored in `_taskContexts` (ConcurrentDictionary) and accessed via `_currentTaskContext` (AsyncLocal). The context holds configuration, saved environment (CWD, env vars, warning settings), pending callback requests, and execution state. `AllowFailureWithoutError` belongs to this context, so a nested task cannot change its caller's value. `EffectiveConfiguration` reads from the per-task context first, falling back to `_currentConfiguration`.
+
+On .NET Framework, callbacks from a task in another AppDomain carry its task ID in the logical call context. The TaskHost uses that ID to find the same per-task state.
 
 ## TaskHost Lifecycle
 

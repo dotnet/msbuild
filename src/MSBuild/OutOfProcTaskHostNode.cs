@@ -20,6 +20,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+using System.Runtime.Remoting.Messaging;
 #endif
 
 #nullable disable
@@ -229,6 +230,10 @@ namespace Microsoft.Build.CommandLine
         private readonly AsyncLocal<TaskExecutionContext> _currentTaskContext
             = new AsyncLocal<TaskExecutionContext>();
 
+#if FEATURE_APPDOMAIN
+        private const string TaskContextIdSlot = "MSBuild.TaskHost.TaskContextId";
+#endif
+
         /// <summary>
         /// Counter for generating task IDs when configuration doesn't provide one.
         /// </summary>
@@ -369,7 +374,21 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = false;
+        public bool AllowFailureWithoutError
+        {
+            get
+            {
+                TaskExecutionContext context = GetCurrentTaskContext();
+                Assumed.NotNull(context);
+                return context.AllowFailureWithoutError;
+            }
+            set
+            {
+                TaskExecutionContext context = GetCurrentTaskContext();
+                Assumed.NotNull(context);
+                context.AllowFailureWithoutError = value;
+            }
+        }
         #endregion
 
         #region IBuildEngine8 Implementation
@@ -1103,7 +1122,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private TaskExecutionContext GetCurrentTaskContext()
         {
-            return _currentTaskContext.Value;
+            TaskExecutionContext context = _currentTaskContext.Value;
+#if FEATURE_APPDOMAIN
+            // AsyncLocal values do not cross AppDomain boundaries. Resolve the serialized task ID.
+            if (context is null && CallContext.LogicalGetData(TaskContextIdSlot) is int taskId)
+            {
+                _taskContexts.TryGetValue(taskId, out context);
+            }
+#endif
+            return context;
         }
 
         /// <summary>
@@ -1404,10 +1431,6 @@ namespace Microsoft.Build.CommandLine
             // and would spin the next build's wait loop.
             _taskCancelledEvent.Reset();
 
-            // Set by tasks through IBuildEngine and never re-established per task, so it would leak
-            // into the next build.
-            AllowFailureWithoutError = false;
-
             // Release the build directory while idle; Windows holds a handle to the current directory.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
@@ -1542,6 +1565,9 @@ namespace Microsoft.Build.CommandLine
             if (taskContext is not null)
             {
                 _currentTaskContext.Value = taskContext;
+#if FEATURE_APPDOMAIN
+                CallContext.LogicalSetData(TaskContextIdSlot, taskContext.TaskId);
+#endif
             }
 
             IDictionary<string, TaskParameter> taskParams = taskConfiguration.TaskParameters;
@@ -1706,6 +1732,9 @@ namespace Microsoft.Build.CommandLine
                     {
                         taskContext.State = TaskExecutionState.Completed;
                         _currentTaskContext.Value = null;
+#if FEATURE_APPDOMAIN
+                        CallContext.FreeNamedDataSlot(TaskContextIdSlot);
+#endif
                         RemoveTaskContext(taskContext.TaskId);
                     }
 
