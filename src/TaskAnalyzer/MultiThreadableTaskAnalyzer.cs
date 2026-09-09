@@ -64,7 +64,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
             var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
             var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
-            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
 
             // Build symbol lookup for banned APIs
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
@@ -86,8 +85,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     namedType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType));
 
                 // Tasks marked with [MSBuildMultiThreadableTask] should be analyzed as multithreadable
-                bool hasMultiThreadableAttribute = multiThreadableTaskAttributeType is not null &&
-                    namedType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType));
+                bool hasMultiThreadableAttribute = SharedAnalyzerHelpers.HasMultiThreadableTaskAttribute(namedType);
 
                 if (!isTask && !hasAnalyzedAttribute)
                 {

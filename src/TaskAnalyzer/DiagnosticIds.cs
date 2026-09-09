@@ -50,5 +50,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>[MSBuildMultiThreadableTask] is applied to a type MSBuild never routes as a task, so it has no effect.</summary>
         public const string MultiThreadableTaskAttributeHasNoEffect = "MSBuildTask0014";
+
+        /// <summary>Concrete task type does not declare multithreading support and is routed to an out-of-proc TaskHost.</summary>
+        public const string RequireMultiThreadableTask = "MSBuildTask0015";
     }
 }

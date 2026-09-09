@@ -417,6 +417,34 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
         diagnostic.GetMessage().ShouldContain("MyTask");
     }
 
+    /// <summary>
+    /// The attribute is matched by full name, mirroring the engine, so these rules keep working when a
+    /// repository's own copy of the attribute makes the name ambiguous and unresolvable as a symbol.
+    /// See SharedAnalyzerHelpers.HasMultiThreadableTaskAttribute.
+    /// </summary>
+    [Fact]
+    public async Task AttributeFromReferencedAssembly_OnNonTaskType_ProducesWarning()
+    {
+        CSharpCompilation compilation = CreateCompilationWithAttributeFromReferences("""
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class PathHelper
+            {
+                public string Combine(string a, string b) => a + b;
+            }
+            """);
+
+        // The premise of the name-based matching: the symbol is unresolvable here.
+        compilation.GetTypeByMetadataName("Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute").ShouldBeNull();
+
+        var diagnostics = await compilation
+            .WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(new MultiThreadableTaskDeclarationAnalyzer()))
+            .GetAnalyzerDiagnosticsAsync();
+
+        Diagnostic diagnostic = diagnostics
+            .Single(d => d.Id == DiagnosticIds.MultiThreadableTaskAttributeHasNoEffect);
+        diagnostic.GetMessage().ShouldContain("PathHelper");
+    }
+
     private static async Task<Diagnostic[]> GetDiagnosticsWithMissingAttributeRuleEnabledAsync(string source)
     {
         CSharpCompilation compilation = CreateCompilation(source);

@@ -40,6 +40,7 @@ internal static class TestHelpers
 
             public class TaskEnvironment
             {
+                public static TaskEnvironment Fallback { get; } = new TaskEnvironment();
                 public AbsolutePath ProjectDirectory => default;
                 public string? GetEnvironmentVariable(string name) => null;
                 public void SetEnvironmentVariable(string name, string? value) { }
@@ -241,22 +242,105 @@ internal static class TestHelpers
     }
 
     /// <summary>
+    /// Creates a compilation in which <c>Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute</c> is
+    /// contributed by two referenced assemblies rather than by source.
+    /// <para>
+    /// This is the shape a repository ends up in when it keeps its own copy of the attribute -- the shim that
+    /// lets its tasks stay buildable against an MSBuild that predates it -- while also referencing a
+    /// Microsoft.Build.Framework that declares the real one. The engine matches the attribute by full name and
+    /// ignores the defining assembly, so those tasks really are routed in-process and the analyzers must agree.
+    /// It is also the case where <see cref="Compilation.GetTypeByMetadataName"/> gives up and returns null,
+    /// which is why the analyzers cannot resolve the attribute as a symbol.
+    /// </para>
+    /// </summary>
+    public static CSharpCompilation CreateCompilationWithAttributeFromReferences(string source)
+    {
+        const string attributeDeclaration = "public class MSBuildMultiThreadableTaskAttribute : System.Attribute { }";
+
+        string stubsWithoutAttribute = FrameworkStubs.Replace(attributeDeclaration, string.Empty);
+        if (stubsWithoutAttribute.Length == FrameworkStubs.Length)
+        {
+            throw new System.InvalidOperationException(
+                "The attribute declaration was not found in FrameworkStubs; this helper needs updating.");
+        }
+
+        var references = s_coreReferences
+            .Concat(new[] { CreateAttributeAssembly("CustomerShim"), CreateAttributeAssembly("FrameworkLike") });
+
+        return CSharpCompilation.Create(
+            "TestAssembly",
+            new[]
+            {
+                CSharpSyntaxTree.ParseText(source, path: "Test.cs"),
+                CSharpSyntaxTree.ParseText(stubsWithoutAttribute, path: "Stubs.cs"),
+            },
+            references,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                .WithNullableContextOptions(NullableContextOptions.Enable));
+    }
+
+    private static MetadataReference CreateAttributeAssembly(string assemblyName)
+    {
+        var assembly = CSharpCompilation.Create(
+            assemblyName,
+            new[]
+            {
+                CSharpSyntaxTree.ParseText("""
+                    namespace Microsoft.Build.Framework
+                    {
+                        [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false)]
+                        public class MSBuildMultiThreadableTaskAttribute : System.Attribute { }
+                    }
+                    """),
+            },
+            s_coreReferences,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        var stream = new System.IO.MemoryStream();
+        Microsoft.CodeAnalysis.Emit.EmitResult result = assembly.Emit(stream);
+        if (!result.Success)
+        {
+            throw new System.InvalidOperationException(
+                $"Failed to compile '{assemblyName}': " + string.Join("; ", result.Diagnostics));
+        }
+
+        stream.Position = 0;
+        return MetadataReference.CreateFromStream(stream);
+    }
+
+    /// <summary>
     /// Runs the MultiThreadableTaskAnalyzer with a specific scope option and returns analyzer diagnostics.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(string source, string scope)
-    {
-        var compilation = CreateCompilation(source);
-        var analyzer = new MultiThreadableTaskAnalyzer();
+    public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(string source, string scope) =>
+        GetDiagnosticsWithGlobalOptionsAsync(
+            source,
+            new MultiThreadableTaskAnalyzer(),
+            new Dictionary<string, string> { { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope } });
 
-        var globalOptions = new Dictionary<string, string>
-        {
-            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
-        };
+    /// <summary>
+    /// Runs the given analyzer with the supplied global analyzer config options (the options a
+    /// .globalconfig or an MSBuild property surfaces to analyzers) and returns analyzer diagnostics.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithGlobalOptionsAsync(
+        string source,
+        DiagnosticAnalyzer analyzer,
+        Dictionary<string, string> globalOptions) =>
+        await GetDiagnosticsWithGlobalOptionsAsync(CreateCompilation(source), analyzer, globalOptions);
+
+    /// <summary>
+    /// Runs the given analyzer against an already-built compilation, for tests that need to control how the
+    /// compilation is assembled.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithGlobalOptionsAsync(
+        Compilation compilation,
+        DiagnosticAnalyzer analyzer,
+        Dictionary<string, string> globalOptions)
+    {
         var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
         var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
 
         var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), options);
+            ImmutableArray.Create(analyzer), options);
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 

@@ -139,6 +139,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "TaskRouter reads [MSBuildMultiThreadableTask] with inherit: false, off the concrete type the engine has just instantiated as a task. The attribute therefore only has an effect on a non-abstract class that implements ITask. On a type that is not a task, nothing ever reads it. On an abstract task, the engine never instantiates that type, and because the attribute is not inherited the concrete subclasses do not pick it up -- so every one of them is still routed to an out-of-proc TaskHost. Both shapes usually mean the attribute was applied to the wrong class: a helper type beside the real task, or a shared base instead of each task that derives from it.");
 
+        public static readonly DiagnosticDescriptor RequireMultiThreadableTask = new(
+            id: DiagnosticIds.RequireMultiThreadableTask,
+            title: "Concrete MSBuild task type does not opt into multithreaded execution",
+            messageFormat: "Task '{0}' does not declare multithreading support; apply [MSBuildMultiThreadableTask] so it is not routed to an out-of-proc TaskHost",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "In multithreaded builds, a task without the [MSBuildMultiThreadableTask] attribute runs in an out-of-proc TaskHost, which succeeds but is slow. The attribute is not inherited, so deriving from a migrated base class is not enough. This rule reports nothing unless it is opted into, either with 'msbuild_task_analyzer.scope = require_multithreadable' or by configuring its severity explicitly; a repository that has finished migrating its tasks opts in to keep new tasks from silently regressing. It covers every concrete task type, so it subsumes MSBuildTask0013, which reports the same missing attribute only on the narrower set of tasks that declare IMultiThreadableTask; a repository that opts into this rule does not also need to enable that one.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -153,6 +162,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             PreferTaskEnvironmentConstructorInjection,
             TaskEnvironmentNeverAssigned,
             MissingMultiThreadableTaskAttribute,
-            MultiThreadableTaskAttributeHasNoEffect);
+            MultiThreadableTaskAttributeHasNoEffect,
+            RequireMultiThreadableTask);
     }
 }
