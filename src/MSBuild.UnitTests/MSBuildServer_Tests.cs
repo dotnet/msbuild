@@ -798,11 +798,14 @@ namespace Microsoft.Build.Engine.UnitTests
                 outputHelper: _output,
                 environmentVariables: RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables());
 
-        [Fact]
-        public void SidecarDoesNotOutliveANonServerBuild()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("18.12")]
+        public void SidecarWithoutServerHonorsOwnershipChangeWave(string? disabledWave)
         {
             PrepareIsolatedServerEnv(useServer: false);
             _env.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
 
             // A sidecar only exists when node reuse is on, and CI disables it by default. Without
             // this the build would use a short-lived TaskHost that exits on its own, so the test
@@ -833,10 +836,8 @@ namespace Microsoft.Build.Engine.UnitTests
             int sidecarPid = ParseNumber(output, "Sidecar ID is ");
             _env.WithTransientProcess(sidecarPid);
 
-            // Without a server the sidecar's owner is the command-line MSBuild process itself, which
-            // has now exited. The sidecar must go with it rather than lingering in a reuse pool where
-            // nothing can shut it down.
-            WaitForProcessExit(sidecarPid).ShouldBeTrue($"Sidecar process {sidecarPid} should exit with the build that created it.");
+            // Ownership ends the sidecar when its launcher exits. Opting out preserves pooling.
+            WaitForProcessExit(sidecarPid).ShouldBe(disabledWave is null);
         }
 
         /// <summary>

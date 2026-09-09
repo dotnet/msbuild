@@ -28,11 +28,11 @@ namespace Microsoft.Build.UnitTests
             OutOfProcTaskHostNode node = new();
 
             // A task can set this through IBuildEngine, and nothing re-establishes it per task, so
-            // it would otherwise be inherited by the next build.
+            // make sure it isn't inherited by the next build.
             node.AllowFailureWithoutError = true;
 
             // A cancellation arriving as the build ends would otherwise stay signalled and spin the
-            // next build's wait loop.
+            // next build's wait loop if this wasn't reset.
             node.TaskCancelledEvent.Set();
 
             // The reset restores the working directory, which is process-wide state in this test.

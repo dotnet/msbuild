@@ -1350,7 +1350,7 @@ namespace Microsoft.Build.CommandLine
             // because the reset is ordered behind NodeBuildComplete on the same pipe and runs on
             // the packet-processing thread, so the next build's TaskHostConfiguration cannot
             // overtake it.
-            if (_nodeReuse && buildComplete.PrepareForReuse && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            if (_nodeReuse && buildComplete.PrepareForReuse && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
             {
                 PrepareForNextBuild();
                 return;
@@ -1358,7 +1358,7 @@ namespace Microsoft.Build.CommandLine
 
             if (_nodeReuse)
             {
-                // Either a pooled task host, or opted out of ChangeWaves.Wave18_11: disconnect and
+                // Either a pooled task host, or opted out of ChangeWaves.Wave18_12: disconnect and
                 // go back to listening, rejoining the machine-wide pool. An older owner never sets
                 // PrepareForReuse for a task host it launched with node reuse, so it lands here too
                 // and behaves exactly as it always has.
@@ -1408,9 +1408,10 @@ namespace Microsoft.Build.CommandLine
             // into the next build.
             AllowFailureWithoutError = false;
 
-            // A task may have changed either of these, and the next build must not inherit them.
+            // Release the build directory while idle; Windows holds a handle to the current directory.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
+            // Restore the launch environment while idle. RunTask applies the next task's environment.
             try
             {
                 CommunicationsUtilities.SetEnvironment(_savedEnvironment);
@@ -1495,19 +1496,6 @@ namespace Microsoft.Build.CommandLine
                     FailAllPendingCallbackRequests("TaskHost lost connection to owning worker node during callback.");
 
                     _shutdownEvent.Set();
-                    break;
-
-                case LinkStatus.Inactive:
-                    if (_nodeReuse)
-                    {
-                        // A sidecar has no owner other than the process it is connected to, so a
-                        // lost connection means it can never be reached again. Exit instead of
-                        // lingering as an orphan that nothing can shut down.
-                        _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
-                        FailAllPendingCallbackRequests("Sidecar TaskHost lost its connection to its owner.");
-                        _shutdownEvent.Set();
-                    }
-
                     break;
 
                 default:

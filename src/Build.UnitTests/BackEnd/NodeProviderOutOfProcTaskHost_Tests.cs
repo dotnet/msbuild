@@ -25,6 +25,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </remarks>
     public class NodeProviderOutOfProcTaskHost_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public NodeProviderOutOfProcTaskHost_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         public void CreateProcessWideComponent_ReturnsTheSameInstanceEveryTime()
         {
@@ -123,24 +130,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "a task host of another architecture is useful to every process that needs that architecture");
         }
 
-        [Fact]
-        public void ConnectionDoesNotPersistWhenTheChangeWaveIsDisabled()
+        [Theory]
+        [InlineData("18.12", false)]
+        [InlineData("999.999", true)]
+        public void ConnectionPersistenceUsesWave18_12(string disabledWave, bool expectedPersistence)
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
             ChangeWaves.ResetStateForTests();
 
-            try
-            {
-                NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+            NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+            HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, TaskHostParameters.Empty, nodeReuse: true);
 
-                provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | (XMakeAttributes.GetCurrentMSBuildArchitecture() == XMakeAttributes.MSBuildArchitectureValues.x64 ? HandshakeOptions.X64 : HandshakeOptions.None)).ShouldBeFalse(
-                    "opting out of the wave must return the task host to the machine-wide pool it used to join");
-            }
-            finally
-            {
-                ChangeWaves.ResetStateForTests();
-            }
+            ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11).ShouldBeTrue();
+            provider.ConnectionPersists(options).ShouldBe(expectedPersistence);
         }
     }
 }

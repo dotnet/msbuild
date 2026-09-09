@@ -222,20 +222,16 @@ namespace Microsoft.Build.BackEnd
         /// process may claim.
         /// </summary>
         /// <remarks>
-        /// Only a task host that exists to keep a task out of *this* process is owned. One that
-        /// exists because this process cannot run the task itself -- a different runtime
-        /// (Runtime="NET" under .NET Framework MSBuild, Runtime="CLR2") or a different architecture
-        /// -- stays pooled, because it is useful to every process that needs that runtime or
-        /// architecture. Owning those would cost one idle task host per worker node for a task that
-        /// only ever runs in one of them at a time, since a connected task host cannot be claimed by
-        /// anyone else.
+        /// Explicit <c>TaskFactory="TaskHostFactory"</c> requests disable node reuse before this
+        /// check. Among reusable task hosts, only sidecars stay connected. Hosts needed for a
+        /// different runtime or architecture remain pooled so other processes can use them.
         ///
-        /// Behind <see cref="ChangeWaves.Wave18_11"/>: opting out pools every task host, which is
-        /// what they all did before. The node reads the same wave, and learns which of the two it is
+        /// Behind <see cref="ChangeWaves.Wave18_12"/>: opting out pools every reusable task host.
+        /// The node reads the same wave, and learns which of the two it is
         /// from the <see cref="NodeBuildComplete.PrepareForReuse"/> flag its owner sends.
         /// </remarks>
         protected override bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions)
-            => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+            => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
                 && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse)
                 && !ExistsOnlyForCompatibility(handshakeOptions);
 
@@ -345,7 +341,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            // Sidecars stay connected between builds, so they are reachable here and are not found
+            // Sidecars stay connected between builds, so they are reachable here and wouldn't be found
             // by the scan below, which looks for nodes this process is not connected to.
             ShutdownConnectedNodes(enableReuse: false);
 

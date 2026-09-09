@@ -155,7 +155,7 @@ Each task gets a `TaskExecutionContext` stored in `_taskContexts` (ConcurrentDic
 
 The TaskHost process can execute multiple tasks, both sequentially and concurrently. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal. When a task calls `BuildProjectFile`, the TaskHost blocks (incrementing `_blockedTaskCount`, then decrementing `_activeTaskCount`), allowing the scheduler to dispatch a nested task to the same process while the outer task is blocked waiting for the callback response.
 
-A **sidecar** is a TaskHost that matches its launcher's runtime and architecture and is used for routing of non-multithreadable tasks in `-mt` execution and under `MSBUILDFORCEALLTASKSOUTOFPROC`. Under Change Wave 18.11 a sidecar shares the lifetime of its launcher; opting out of the wave makes it disconnect and idle after each build, as every TaskHost did before.
+A **sidecar** is a TaskHost that matches its launcher's runtime and architecture and is used for routing of non-multithreadable tasks in `-mt` execution and under `MSBUILDFORCEALLTASKSOUTOFPROC`. Under Change Wave 18.12 a sidecar shares the lifetime of its launcher; opting out of the wave makes it disconnect and idle after each build, as every TaskHost did before.
 
 ### Event Loop Cycle
 
@@ -191,11 +191,13 @@ Each new `TaskHostConfiguration` carries a full environment snapshot, task param
 
 When the owning worker node sends `NodeBuildComplete`, `HandleNodeBuildComplete()` decides whether to exit or stay alive:
 
-**Sidecar** TaskHosts (`_nodeReuse = true`, `buildComplete.PrepareForReuse = true`, Change Wave 18.11 active) keep their named-pipe connection to their launcher and reset in place via `PrepareForNextBuild()`.
+**Sidecar** TaskHosts (`_nodeReuse = true`, `buildComplete.PrepareForReuse = true`, Change Wave 18.12 active) keep their named-pipe connection to their launcher and reset in place via `PrepareForNextBuild()`.
 
 A TaskHost launched without node reuse normally sets `BuildComplete` and exits. For compatibility, it honors `buildComplete.PrepareForReuse` only when `Traits.Instance.EscapeHatches.ReuseTaskHostNodes` is enabled. This avoids holding assembly locks on custom task DLLs between builds.
 
 A sidecar sends nothing back to report the reset. Its owner already knows the node is idle -- a build cannot complete while one of its tasks is still outstanding, which `HandleNodeBuildComplete()` asserts on receipt -- and it does not need to be told when the reset has finished, because the reset is ordered behind `NodeBuildComplete` on the same pipe and runs on the packet-processing thread, so the next build's `TaskHostConfiguration` cannot overtake it. The owner therefore retires the still-connected sidecar from its active set locally at the point it sends `NodeBuildComplete`.
+
+The reset releases the build's working directory while the sidecar is idle, so Windows does not keep that directory open. Each task's configuration sets its working directory and environment again before execution.
 
 Because a sidecar stays connected, its owner exiting -- normally, via `dotnet build-server shutdown`, or by crashing -- breaks the pipe, and the `LinkStatus.Failed` handler terminates it. Reaping a sidecar therefore requires no shutdown cascade and no process enumeration: it is reachable through the connection it already holds. A sidecar has no idle timeout; it waits indefinitely on its owner's connection.
 

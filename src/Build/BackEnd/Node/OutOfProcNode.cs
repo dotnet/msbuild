@@ -159,7 +159,7 @@ namespace Microsoft.Build.Execution
             //
             // Behind the same wave as the connections themselves: when they do not persist, the
             // provider has nothing to carry across builds and the original per-build one is used.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
             {
                 _componentFactories.ReplaceFactory(BuildComponentType.OutOfProcTaskHostNodeProvider, NodeProviderOutOfProcTaskHost.CreateProcessWideComponent);
             }

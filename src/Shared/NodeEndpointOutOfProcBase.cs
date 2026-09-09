@@ -656,8 +656,8 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
-        private void RunReadLoop(
-            NamedPipeServerStream localPipe,
+        internal void RunReadLoop(
+            Stream localPipe,
             ConcurrentQueue<INodePacket> localPacketQueue,
             AutoResetEvent localPacketAvailable,
             AutoResetEvent localTerminatePacketPump)
@@ -674,7 +674,7 @@ namespace Microsoft.Build.BackEnd
             // Use 64 KB read-ahead under the change wave; retain the legacy 1 KB size otherwise.
             BufferedReadStream localReadPipe = preBufferPacketBody
                 ? new BufferedReadStream(localPipe, 64 * 1024)
-                : new BufferedReadStream(localPipe);
+                : new BufferedReadStream(localPipe, 1024);
 
             byte[] headerByte = new byte[5];
             ITranslator writeTranslator = null;
@@ -720,10 +720,10 @@ namespace Microsoft.Build.BackEnd
                                 }
                                 catch (Exception e)
                                 {
-                                    // Lost communications.  Abort (but allow node reuse)
+                                    // A failed read terminates the connection, just like unexpected EOF.
                                     CommunicationsUtilities.Trace($"Exception reading from server.  {e}");
                                     DebugUtils.DumpExceptionToFile(e);
-                                    ChangeLinkStatus(LinkStatus.Inactive);
+                                    ChangeLinkStatus(LinkStatus.Failed);
                                     exitLoop = true;
                                     break;
                                 }
