@@ -196,6 +196,21 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal static TaskParameter CreateForTaskOutput(object wrappedParameter, Type declaredType)
+        {
+            Type elementType = declaredType.IsArray ? declaredType.GetElementType() : declaredType;
+            if (wrappedParameter is null
+                && !elementType.IsValueType
+                && typeof(ITaskItem).IsAssignableFrom(elementType))
+            {
+                var parameter = new TaskParameter();
+                parameter._parameterType = TaskParameterType.ITaskItem;
+                return parameter;
+            }
+
+            return new TaskParameter(wrappedParameter);
+        }
+
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>

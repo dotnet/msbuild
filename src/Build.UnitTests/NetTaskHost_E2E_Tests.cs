@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -134,6 +135,52 @@ namespace Microsoft.Build.Engine.UnitTests
             // Both tasks actually ran and produced a correct archive round trip.
             output.ShouldContain("TAR_ROUND_TRIP_OK", customMessage: output);
             File.Exists(Path.Combine(workDir, "extracted", "hello.txt")).ShouldBeTrue();
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_BindsParametersUnavailableInWorkerRuntime()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            string project = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestParameterBinding.proj");
+            string projectDirectory = Path.GetDirectoryName(project)!;
+            string sdkDirectory = Path.Combine(coreDirectory, "sdk", RunnerUtilities.BootstrapSdkVersion);
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{project}\" -t:TestParameterBinding -v:n -nodeReuse:false -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -p:NetCoreSdkRoot=\"{sdkDirectory}\"",
+                out bool success,
+                outputHelper: _output);
+
+            success.ShouldBeTrue(customMessage: output);
+            output.ShouldContain(
+                $"PARAMETER_BINDING_OK Flag=True Text=hello;world Item=basic.item:input Mode=Deep Modes=Shallow,Deep File={Path.Combine(projectDirectory, "folder;name", "file.txt")} Files={Path.Combine(projectDirectory, "first.txt")},{Path.Combine(projectDirectory, "second;part.txt")} Directory={Path.Combine(projectDirectory, "directory with space")}",
+                customMessage: output);
+            output.ShouldContain(
+                $"PARAMETER_OUTPUTS_OK Date=09/04/2026 Dates=09/04/2026|09/05/2026 File={Path.Combine(projectDirectory, "folder;name", "file.txt")} Files={Path.Combine(projectDirectory, "first.txt")}|{Path.Combine(projectDirectory, "second;part.txt")} Directory={Path.Combine(projectDirectory, "directory with space")} Typed=typed.item:scalar TypedItems=first.item:first|second.item:second Null=",
+                customMessage: output);
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_DoesNotSendConvertedParametersToOldHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string fakeSdkDirectory = Path.Combine(env.CreateFolder().Path, "10.0.100");
+            Directory.CreateDirectory(fakeSdkDirectory);
+            File.Copy(
+                typeof(NodeProviderOutOfProcTaskHost).Assembly.Location,
+                Path.Combine(fakeSdkDirectory, Constants.MSBuildAssemblyName));
+
+            string project = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestParameterBinding.proj");
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{project}\" -t:TestParameterBinding -v:n -nodeReuse:false -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -p:NetCoreSdkRoot=\"{fakeSdkDirectory}\"",
+                out bool success,
+                outputHelper: _output);
+
+            success.ShouldBeFalse(customMessage: output);
+            output.ShouldContain("MSB4069", customMessage: output);
+            output.ShouldContain("\"DestinationFiles\" parameter", customMessage: output);
+            output.ShouldContain("System.IO.FileInfo[]", customMessage: output);
         }
 
         [WindowsFullFrameworkOnlyFact] // Verifies that when using the app host, DOTNET_ROOT is properly set for child processes to find the runtime.

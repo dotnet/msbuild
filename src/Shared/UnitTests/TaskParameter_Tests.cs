@@ -317,6 +317,19 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(TypeCode.String, t2.ParameterTypeCode);
         }
 
+        [Fact]
+        public void Int32EnumArrayUsesLegacyPrimitiveArrayTransport()
+        {
+            TestEnumForParameter[] value = [TestEnumForParameter.Something, TestEnumForParameter.SomethingElse];
+            TaskParameter parameter = new(value);
+
+            ((ITranslatable)parameter).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter deserialized = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            Assert.Equal(TaskParameterType.PrimitiveTypeArray, deserialized.ParameterType);
+            Assert.Equal(value, (TestEnumForParameter[])deserialized.WrappedParameter);
+        }
+
         /// <summary>
         /// Verifies that construction and serialization with an ITaskItem parameter is OK.
         /// </summary>

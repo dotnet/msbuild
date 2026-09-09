@@ -729,6 +729,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ValidateTaskParameterNotSet("EnumParam", "");
         }
 
+        [Theory]
+        [InlineData("EnumParam", "$(NonExistentProperty)")]
+        [InlineData("EnumArrayParam", "@(NonExistentItem)")]
+        public void OldNetTaskHostAllowsOptionalConversionParameterWhenExpansionIsEmpty(string parameterName, string value)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TaskHostTask task = UseTaskHostWithoutParameterConversion(env);
+            var parameters = GetStandardParametersDictionary(true);
+            parameters[parameterName] = (value, ElementLocation.Create("foo.proj"));
+
+            _host.SetTaskParameters(parameters).ShouldBeTrue();
+            GetSetParameters(task).ContainsKey(parameterName).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void OldNetTaskHostRejectsRequiredEmptyConversionArray()
+        {
+            TaskPropertyInfo property = _host._UNITTESTONLY_TaskFactoryWrapper.GetProperty("EnumArrayParam");
+            MethodInfo initializeVector = typeof(TaskExecutionHost).GetMethod(
+                "InitializeTaskVectorParameter",
+                BindingFlags.Instance | BindingFlags.NonPublic)!;
+            object[] arguments =
+            [
+                property,
+                typeof(TaskBuilderTestTask.TestTaskEnum[]),
+                "@(NonExistentItem)",
+                ElementLocation.Create("foo.proj"),
+                true,
+                true,
+                false,
+            ];
+
+            TargetInvocationException exception = Should.Throw<TargetInvocationException>(
+                () => initializeVector.Invoke(_host, arguments));
+            ((InvalidProjectFileException)exception.InnerException!).ErrorCode.ShouldBe("MSB4069");
+        }
+
+        [Fact]
+        public void OldNetTaskHostKeepsLegacyInt32EnumArrayTransport()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TaskHostTask task = UseTaskHostWithoutParameterConversion(env);
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["EnumArrayParam"] = ("First;Second", ElementLocation.Create("foo.proj"));
+
+            _host.SetTaskParameters(parameters).ShouldBeTrue();
+            GetSetParameters(task)["EnumArrayParam"]
+                .ShouldBe(new[] { TaskBuilderTestTask.TestTaskEnum.First, TaskBuilderTestTask.TestTaskEnum.Second });
+        }
+
         /// <summary>
         /// Validate that setting an enum parameter to a value that does not map to a defined member is an error.
         /// </summary>
@@ -2271,6 +2321,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
             parameters["ExecuteReturnParam"] = (returnParam ? "true" : "false", ElementLocation.Create("foo.proj"));
             return parameters;
         }
+
+        private TaskHostTask UseTaskHostWithoutParameterConversion(TestEnvironment env)
+        {
+            string hostDirectory = env.CreateFolder().Path;
+            File.WriteAllText(Path.Combine(hostDirectory, Constants.MSBuildAssemblyName), string.Empty);
+            var taskHostParameters = new TaskHostParameters(
+                "NET",
+                architecture: null,
+                dotnetHostPath: null,
+                msBuildAssemblyPath: hostDirectory);
+            var task = new TaskHostTask(
+                ElementLocation.Create("foo.proj"),
+                taskLoggingContext: null,
+                buildComponentHost: null,
+                taskHostParameters: taskHostParameters,
+                taskType: _host._UNITTESTONLY_TaskFactoryWrapper.TaskFactoryLoadedType,
+                useSidecarTaskHost: false,
+                projectFile: "proj.proj",
+#if FEATURE_APPDOMAIN
+                appDomainSetup: null,
+#endif
+                hostServices: null,
+                scheduledNodeId: 1,
+                taskEnvironment: TaskEnvironmentHelper.CreateForTest());
+            typeof(TaskExecutionHost)
+                .GetProperty(nameof(TaskExecutionHost.TaskInstance), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!
+                .SetValue(_host, task);
+            return task;
+        }
+
+        private static IDictionary<string, object> GetSetParameters(TaskHostTask task) =>
+            (IDictionary<string, object>)typeof(TaskHostTask)
+                .GetField("_setParameters", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .GetValue(task);
 
         /// <summary>
         /// Creates a test project.
