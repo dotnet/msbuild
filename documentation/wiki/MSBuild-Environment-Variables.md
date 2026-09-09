@@ -25,6 +25,8 @@ Some of the env variables listed here are unsupported, meaning there is no guara
 - `MSBUILDDEBUGONSTART=1`
   - Launches debugger on build start. Works on Windows operating systems only.
   - Setting the value of 2 allows for manually attaching a debugger to a process ID. This works on Windows and non-Windows operating systems.
+  - `4` launches a debugger only in MSBuild Server; `5` waits for manual attachment there. Both stop after the client connects and before evaluation, so attaching does not consume the connection timeout. They work with new or reused servers and leave the forwarding client, workers, and TaskHosts alone.
+  - For `5`, attach to the server PID printed in the client terminal; no Enter key is needed. These settings do not enable Server. Existing cancellation and fallback behavior are unchanged; resume or stop the server manually to abandon an attachment wait.
 - `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
   - Dumps scheduler state at specified directory.
 - `MsBuildSkipEagerWildCardEvaluationRegexes`
