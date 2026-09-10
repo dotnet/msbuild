@@ -17,6 +17,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             CriticalError,
             /// <summary>MSBuildTask0002: Requires TaskEnvironment replacement.</summary>
             TaskEnvironment,
+            /// <summary>MSBuildTask0003: File APIs require absolute paths.</summary>
+            FilePathRequiresAbsolute,
             /// <summary>MSBuildTask0004: Potential issue - review required.</summary>
             PotentialIssue,
         }
