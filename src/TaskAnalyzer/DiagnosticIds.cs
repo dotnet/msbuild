@@ -50,5 +50,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>[MSBuildMultiThreadableTask] is applied to a type MSBuild never routes as a task, so it has no effect.</summary>
         public const string MultiThreadableTaskAttributeHasNoEffect = "MSBuildTask0014";
+
+        /// <summary>A task constructed inside a task does not receive the constructing task's TaskEnvironment.</summary>
+        public const string PropagateTaskEnvironmentToConstructedTask = "MSBuildTask0015";
     }
 }
