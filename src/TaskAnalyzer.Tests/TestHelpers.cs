@@ -233,25 +233,6 @@ internal static class TestHelpers
     }
 
     /// <summary>
-    /// Runs the UnsupportedTaskItemTypeAnalyzer with an explicit severity configured for a single rule,
-    /// mirroring a <c>dotnet_diagnostic.&lt;ID&gt;.severity</c> entry in an .editorconfig.
-    /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetUnsupportedTaskItemTypeDiagnosticsWithConfiguredSeverityAsync(
-        string source,
-        string diagnosticId,
-        ReportDiagnostic reportDiagnostic)
-    {
-        var compilation = CreateCompilation(source);
-        compilation = compilation.WithOptions(compilation.Options.WithSpecificDiagnosticOptions(
-            ImmutableDictionary<string, ReportDiagnostic>.Empty.Add(diagnosticId, reportDiagnostic)));
-
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(new UnsupportedTaskItemTypeAnalyzer()));
-
-        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-    }
-
-    /// <summary>
     /// Creates a compilation with the given source code and framework stubs.
     /// </summary>
     public static CSharpCompilation CreateCompilation(string source)

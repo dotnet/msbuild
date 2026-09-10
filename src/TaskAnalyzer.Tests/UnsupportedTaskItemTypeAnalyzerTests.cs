@@ -4,6 +4,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
 using Shouldly;
 using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
@@ -387,49 +389,69 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Theory]
-    [InlineData(ReportDiagnostic.Warn, DiagnosticSeverity.Warning)]
-    [InlineData(ReportDiagnostic.Error, DiagnosticSeverity.Error)]
+    [InlineData("warning", DiagnosticSeverity.Warning)]
+    [InlineData("error", DiagnosticSeverity.Error)]
     public async Task UnsupportedTaskItemType_ConfiguredSeverity_OverridesInfoDefault(
-        ReportDiagnostic reportDiagnostic,
+        string configuredSeverity,
         DiagnosticSeverity expectedSeverity)
     {
-        var diags = await GetUnsupportedTaskItemTypeDiagnosticsWithConfiguredSeverityAsync(
+        await VerifyConfiguredSeverityAsync(
             """
             using System;
             using Microsoft.Build.Framework;
             public class MyTask : Microsoft.Build.Utilities.Task
             {
-                public ITaskItem<Guid> Item { get; set; } = null!;
+                public ITaskItem<Guid> {|#0:Item|} { get; set; } = null!;
                 public override bool Execute() => true;
             }
             """,
             DiagnosticIds.UnsupportedTaskItemType,
-            reportDiagnostic);
-
-        diags.Where(d => d.Id == DiagnosticIds.UnsupportedTaskItemType).ShouldHaveSingleItem()
-            .Severity.ShouldBe(expectedSeverity);
+            configuredSeverity,
+            expectedSeverity);
     }
 
     [Theory]
-    [InlineData(ReportDiagnostic.Warn, DiagnosticSeverity.Warning)]
-    [InlineData(ReportDiagnostic.Error, DiagnosticSeverity.Error)]
+    [InlineData("warning", DiagnosticSeverity.Warning)]
+    [InlineData("error", DiagnosticSeverity.Error)]
     public async Task CultureSensitiveTaskItemType_ConfiguredSeverity_OverridesInfoDefault(
-        ReportDiagnostic reportDiagnostic,
+        string configuredSeverity,
         DiagnosticSeverity expectedSeverity)
     {
-        var diags = await GetUnsupportedTaskItemTypeDiagnosticsWithConfiguredSeverityAsync(
+        await VerifyConfiguredSeverityAsync(
             """
             using Microsoft.Build.Framework;
             public class MyTask : Microsoft.Build.Utilities.Task
             {
-                public ITaskItem<int> Item { get; set; } = null!;
+                public ITaskItem<int> {|#0:Item|} { get; set; } = null!;
                 public override bool Execute() => true;
             }
             """,
             DiagnosticIds.CultureSensitiveTaskItemType,
-            reportDiagnostic);
+            configuredSeverity,
+            expectedSeverity);
+    }
 
-        diags.Where(d => d.Id == DiagnosticIds.CultureSensitiveTaskItemType).ShouldHaveSingleItem()
-            .Severity.ShouldBe(expectedSeverity);
+    private static async Task VerifyConfiguredSeverityAsync(
+        string source,
+        string diagnosticId,
+        string configuredSeverity,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var test = new CSharpAnalyzerTest<UnsupportedTaskItemTypeAnalyzer, DefaultVerifier>
+        {
+            TestCode = source,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", $$"""
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.{{diagnosticId}}.severity = {{configuredSeverity}}
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(diagnosticId, expectedSeverity).WithLocation(0));
+
+        await test.RunAsync();
     }
 }

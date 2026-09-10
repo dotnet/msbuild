@@ -2485,6 +2485,33 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
+    public async Task DefaultConfiguration_InterfaceDeclaringDerivedTask_AnalyzesUnsafeBaseTaskMethod()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public abstract class MyBaseTask : Microsoft.Build.Utilities.Task
+            {
+                protected bool UsesProcessState()
+                {
+                    _ = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            public class MyMtTask : MyBaseTask, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute() => UsesProcessState();
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+    }
+
+    [Fact]
     public async Task DefaultConfiguration_MultiThreadableTask_ReportsOnlyDirectDiagnosticsForContributingNonTaskBase()
     {
         var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
