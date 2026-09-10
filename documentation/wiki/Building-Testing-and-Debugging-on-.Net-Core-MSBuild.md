@@ -71,7 +71,7 @@ dotnet test --filter "FullyQualifiedName~TESTNAME" # run individual test
 
 ## Run tests in Visual Studio
 
-Use developer command prompt for Visual Studio or put devenv on you PATH
+Use a `Developer Command Prompt for VS 2026` or put `devenv` on your `PATH`.
 
 ```shell
 build.cmd # to have a full build first
