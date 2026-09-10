@@ -531,6 +531,13 @@ namespace Microsoft.Build.Execution
 
                 if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
                 {
+                    TaskResultCacheStatisticsSnapshot cacheStatistics =
+                        TaskResultCacheStatistics.GetAndResetSnapshot();
+                    if (!cacheStatistics.IsEmpty)
+                    {
+                        _nodeEndpoint.SendData(new TaskResultCacheStatisticsPacket(cacheStatistics));
+                    }
+
                     // Notify the BuildManager that we are done.
                     _nodeEndpoint.SendData(new NodeShutdown(_shutdownReason == NodeEngineShutdownReason.Error ? NodeShutdownReason.Error : NodeShutdownReason.Requested, exception));
 
@@ -554,6 +561,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CleanupCaches()
         {
+            _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheFileDigestCache);
+
             if (_componentFactories.GetComponent(BuildComponentType.ConfigCache) is IConfigCache configCache)
             {
                 configCache.ClearConfigurations();

@@ -322,9 +322,25 @@ namespace Microsoft.Build.CommandLine
                 out bool shutdownServerAfterBuild,
                 out CommandLineSwitches switchesFromAutoResponseFile,
                 out CommandLineSwitches switchesNotFromAutoResponseFile,
+                out TaskCacheStatisticsCommand taskCacheStatisticsCommand,
                 out ServerNotUsedReason? serverDisabled);
 
             int exitCode;
+            if (taskCacheStatisticsCommand != TaskCacheStatisticsCommand.None)
+            {
+                if (taskCacheStatisticsCommand == TaskCacheStatisticsCommand.Invalid)
+                {
+                    Console.Error.WriteLine(ResourceUtilities.GetResourceString("TaskCacheStatisticsInvalidInvocation"));
+                    return 1;
+                }
+
+                return MSBuildClientApp.ExecuteTaskCacheStatisticsCommand(
+                    taskCacheStatisticsCommand == TaskCacheStatisticsCommand.Reset,
+                    CancellationToken.None) == ExitType.Success
+                    ? 0
+                    : 1;
+            }
+
             bool shouldUseServer = ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason);
             bool stdOutHatchPreventsServer = Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
             if (
@@ -404,6 +420,7 @@ namespace Microsoft.Build.CommandLine
             out bool shutdownServerAfterBuild,
             out CommandLineSwitches switchesFromAutoResponseFile,
             out CommandLineSwitches switchesNotFromAutoResponseFile,
+            out TaskCacheStatisticsCommand taskCacheStatisticsCommand,
             out ServerNotUsedReason? serverDisabled)
         {
             bool canRunServer = true;
@@ -411,6 +428,7 @@ namespace Microsoft.Build.CommandLine
             shutdownServerAfterBuild = false;
             switchesFromAutoResponseFile = null;
             switchesNotFromAutoResponseFile = null;
+            taskCacheStatisticsCommand = TaskCacheStatisticsCommand.None;
             serverDisabled = null;
             bool switchesFullyGathered = false;
             try
@@ -424,6 +442,22 @@ namespace Microsoft.Build.CommandLine
                     out s_exeName);
 
                 CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
+                bool showTaskCacheStatistics =
+                    commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.TaskCacheStats];
+                bool resetTaskCacheStatistics =
+                    commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.ResetTaskCacheStats];
+                if (showTaskCacheStatistics || resetTaskCacheStatistics)
+                {
+                    taskCacheStatisticsCommand =
+                        showTaskCacheStatistics == resetTaskCacheStatistics ||
+                        commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Project)
+                            ? TaskCacheStatisticsCommand.Invalid
+                            : showTaskCacheStatistics
+                                ? TaskCacheStatisticsCommand.Show
+                                : TaskCacheStatisticsCommand.Reset;
+                    return true;
+                }
+
                 if (commandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine))
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
@@ -515,6 +549,14 @@ namespace Microsoft.Build.CommandLine
             }
 
             return canRunServer;
+        }
+
+        private enum TaskCacheStatisticsCommand
+        {
+            None,
+            Show,
+            Reset,
+            Invalid,
         }
 
         /// <summary>
