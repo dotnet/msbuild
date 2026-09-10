@@ -1496,6 +1496,7 @@ public class MultiThreadableTaskAnalyzerTests
         var diags = await GetDiagnosticsAsync($$"""
             using System.CodeDom.Compiler;
             using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; } = new();
