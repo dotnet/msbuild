@@ -10,6 +10,7 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
 #endif
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Collections;
@@ -80,6 +81,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private object _callbackMonitor;
 
+        private HardenedResultCacheEventCollector _hardenedResultCacheEventCollector;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// A client sponsor is a class
@@ -128,6 +131,41 @@ namespace Microsoft.Build.BackEnd
             _callbackMonitor = new object();
             _disableInprocNode = Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode;
             EngineServices = new EngineServicesImpl(this);
+        }
+
+        internal IDisposable BeginHardenedResultCacheEventCapture(
+            HardenedResultCacheEventCollector eventCollector)
+        {
+            lock (_callbackMonitor)
+            {
+                Assumed.Null(_hardenedResultCacheEventCollector);
+                _hardenedResultCacheEventCollector = eventCollector;
+            }
+
+            return new HardenedResultCacheEventCapture(this, eventCollector);
+        }
+
+        private void EndHardenedResultCacheEventCapture(
+            HardenedResultCacheEventCollector eventCollector)
+        {
+            lock (_callbackMonitor)
+            {
+                Assumed.True(ReferenceEquals(eventCollector, _hardenedResultCacheEventCollector));
+                _hardenedResultCacheEventCollector = null;
+            }
+        }
+
+        private sealed class HardenedResultCacheEventCapture(
+            TaskHost taskHost,
+            HardenedResultCacheEventCollector eventCollector) : IDisposable
+        {
+            private TaskHost _taskHost = taskHost;
+
+            public void Dispose()
+            {
+                TaskHost currentTaskHost = Interlocked.Exchange(ref _taskHost, null);
+                currentTaskHost?.EndHardenedResultCacheEventCapture(eventCollector);
+            }
         }
 
         /// <summary>
@@ -428,6 +466,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                _hardenedResultCacheEventCollector?.MarkUnsupported();
+
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
@@ -535,6 +575,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                _hardenedResultCacheEventCollector?.Record(e);
+
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
@@ -576,6 +618,8 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                _hardenedResultCacheEventCollector?.Record(e);
+
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
@@ -616,6 +660,8 @@ namespace Microsoft.Build.BackEnd
 
                     return;
                 }
+
+                _hardenedResultCacheEventCollector?.MarkUnsupported();
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -708,6 +754,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                _hardenedResultCacheEventCollector?.MarkUnsupported();
                 _taskLoggingContext.LoggingService.LogTelemetry(_taskLoggingContext.BuildEventContext, eventName, properties);
             }
         }

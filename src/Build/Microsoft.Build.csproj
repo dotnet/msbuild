@@ -167,6 +167,8 @@
     <Compile Include="BackEnd\Client\MSBuildClientExitResult.cs" />
     <Compile Include="BackEnd\Client\MSBuildClient.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
+    <Compile Include="BackEnd\Components\Caching\HardenedResultCache.cs" />
+    <Compile Include="BackEnd\Components\Caching\HardenedResultCacheEvent.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\Experimental\*.cs" />
