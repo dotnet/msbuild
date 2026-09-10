@@ -612,23 +612,13 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
 
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
-                {
-                    // If any logger requested the data - we need to emit them
-                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
-                        sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
-                    // If any logger didn't request the data - hence it's likely legacy logger
-                    //  - we need to populate the data in legacy way
-                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
-                        sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
-                }
-                else
-                {
-                    bool allSinksIncludeEvalData = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
-
-                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = allSinksIncludeEvalData;
-                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !allSinksIncludeEvalData;
-                }
+                // If any logger requested the data - we need to emit them
+                IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                    sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                // If any logger didn't request the data - hence it's likely legacy logger
+                //  - we need to populate the data in legacy way
+                IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                    sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
             }
         }
 

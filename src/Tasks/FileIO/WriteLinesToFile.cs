@@ -131,43 +131,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // Use transactional mode by default when ChangeWave 18.3 is enabled
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
-            {
-                return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
-            }
-            else
-            {
-                return ExecuteNonTransactional(filePath, directoryPath, contentsAsString, encoding);
-            }
-        }
-
-        private bool ExecuteNonTransactional(AbsolutePath filePath, string directoryPath, string contentsAsString, Encoding encoding)
-        {
-            try
-            {
-                if (Overwrite)
-                {
-                    System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
-                }
-                else
-                {
-                    if (WriteOnlyWhenDifferent)
-                    {
-                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath.OriginalValue);
-                    }
-
-                    System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
-                }
-
-                return !Log.HasLoggedErrors;
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, e.Message, lockedFileMessage);
-                return !Log.HasLoggedErrors;
-            }
+            return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
         }
 
         private bool ExecuteTransactional(AbsolutePath filePath, string directoryPath, string contentsAsString, Encoding encoding)

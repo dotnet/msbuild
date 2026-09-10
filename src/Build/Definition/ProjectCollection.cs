@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -251,7 +251,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="loggers">The loggers to register. May be null.</param>
         /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, ToolsetDefinitionLocations toolsetDefinitionLocations)
-            : this(globalProperties, loggers, toolsetDefinitionLocations, 1 /* node count */, false /* do not only log critical events */, loadProjectsReadOnly: false, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false)
+            : this(globalProperties, loggers, toolsetDefinitionLocations, 1 /* node count */, false /* do not only log critical events */, loadProjectsReadOnly: false, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false, parseConfigDirectory: null)
         {
         }
 
@@ -338,12 +338,27 @@ namespace Microsoft.Build.Evaluation
         /// <param name="enableTargetOutputLogging">If set to true, loggers will collect and send Target outputs when targets are finished executing.</param>
         [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
-            : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging)
+            : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging, parseConfigDirectory: null)
         {
-            // Forwarding loggers load logger assemblies by reflection, which is incompatible with
-            // trimming - that is why every overload taking forwarding loggers is RequiresUnreferencedCode
-            // while the overloads taking none are not. The trim-safe construction happens in the chained
-            // private constructor above; only this reflective registration is gated behind the attribute.
+            try
+            {
+                RegisterForwardingLoggers(remoteLoggers);
+            }
+            catch (Exception)
+            {
+                ShutDownLoggingService();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Instantiates a project collection with the specified parameters and a directory to search
+        /// for a Directory.Parse.config file (walked upward from the given directory).
+        /// </summary>
+        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging, string parseConfigDirectory)
+            : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging, parseConfigDirectory)
+        {
             try
             {
                 RegisterForwardingLoggers(remoteLoggers);
@@ -360,7 +375,7 @@ namespace Microsoft.Build.Evaluation
         /// registers ordinary (non-forwarding) loggers, but does not load forwarding loggers by
         /// reflection, so the overloads that take none can be called without RequiresUnreferencedCode.
         /// </summary>
-        private ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
+        private ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging, string parseConfigDirectory)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
@@ -381,10 +396,29 @@ namespace Microsoft.Build.Evaluation
                 // we do not need to auto reload.
                 bool autoReloadFromDisk = reuseProjectRootElementCache;
                 ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly);
+
                 if (reuseProjectRootElementCache)
                 {
                     s_projectRootElementCache = ProjectRootElementCache;
                 }
+            }
+
+            if (!Traits.Instance.EscapeHatches.DisableParseConfig)
+            {
+                ParserIgnoreConfiguration.ClearBinlogEmbedPaths();
+
+                var config = ParserIgnoreConfiguration.LoadGlobalConfig();
+
+                if (!string.IsNullOrEmpty(parseConfigDirectory))
+                {
+                    string configPath = FileUtilities.GetPathOfFileAbove(ParserIgnoreConfiguration.ConfigFileName, parseConfigDirectory);
+                    if (!string.IsNullOrEmpty(configPath) && !config.ContainsLoadedFile(configPath))
+                    {
+                        config = ParserIgnoreConfiguration.Merge(config, ParserIgnoreConfiguration.LoadFromFile(configPath));
+                    }
+                }
+
+                ProjectRootElementCache.SetParserIgnoreConfiguration(config);
             }
 
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
@@ -492,7 +526,7 @@ namespace Microsoft.Build.Evaluation
                     // Take care to ensure that there is never more than one value observed
                     // from this property even in the case of race conditions while lazily initializing.
                     var local = new ProjectCollection(null, null, ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: false);
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: false, parseConfigDirectory: null);
 
                     if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
                     {
@@ -562,6 +596,16 @@ namespace Microsoft.Build.Evaluation
         /// Properties passed from the command line (e.g. by using /p:).
         /// </summary>
         public ICollection<string> PropertiesFromCommandLine { get; set; }
+
+        /// <summary>
+        /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
+        /// When set, this configuration will be used by builds started from this collection.
+        /// </summary>
+        internal ParserIgnoreConfiguration ParserIgnoreConfiguration
+        {
+            get => ProjectRootElementCache.ParserIgnoreConfiguration;
+            set => ProjectRootElementCache.SetParserIgnoreConfiguration(value);
+        }
 
         /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they

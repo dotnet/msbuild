@@ -56,6 +56,7 @@
             <xs:element name="Target" type="msb:TargetType"/>
             <xs:element name="Import" type="msb:ImportType"/>
             <xs:element name="ImportGroup" type="msb:ImportGroupType"/>
+            <xs:element name="Sdk" type="msb:SdkType"/>
             <xs:element name="ProjectExtensions" type="msb:ProjectExtensionsType"/>
         </xs:choice>
     </xs:group>
@@ -65,6 +66,7 @@
             <xs:element name="Target" type="msb:TargetType"/>
             <xs:element name="Import" type="msb:ImportType"/>
             <xs:element name="ImportGroup" type="msb:ImportGroupType"/>
+            <xs:element name="Sdk" type="msb:SdkType"/>
         </xs:choice>
     </xs:group>    
     <!-- ======================================================================================= -->        
@@ -400,6 +402,27 @@
             <xs:annotation>
                 <xs:documentation>
                     <!-- _locID_text="ImportType_MinimumVersion" _locComment="" -->Optional expression used to specify the minimum SDK version required by the referring import</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <!-- ======================================================================================= -->  
+    <xs:complexType name="SdkType">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="SdkType" _locComment="" -->Declares that the project should be built with the specified MSBuild SDK, by implicitly importing its Sdk.props at the top and its Sdk.targets at the bottom of the project</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="Name" type="msb:non_empty_string" use="required">
+            <xs:annotation>
+                <xs:documentation><!-- _locID_text="SdkType_Name" _locComment="" -->Name of the SDK this project should be built with</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="Version" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation><!-- _locID_text="SdkType_Version" _locComment="" -->Optional expression used to specify the version of the SDK referenced by this element</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="MinimumVersion" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation><!-- _locID_text="SdkType_MinimumVersion" _locComment="" -->Optional expression used to specify the minimum SDK version required by this element</xs:documentation>
             </xs:annotation>
         </xs:attribute>
     </xs:complexType>

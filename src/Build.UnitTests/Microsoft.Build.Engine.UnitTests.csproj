@@ -64,7 +64,6 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">

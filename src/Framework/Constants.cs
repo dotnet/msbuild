@@ -116,6 +116,40 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal const string SdkMetadataName = "Sdk";
 
+        /// <summary>
+        /// Name of the MSBuild property that opts in to synthesizing <c>MSBuildItemGlob</c> items,
+        /// exposing the unevaluated include/exclude/remove glob patterns of selected item types to
+        /// targets and tasks. The value is a semicolon-separated list of item types to expose
+        /// (for example <c>Compile;Content</c>). Projects that do not set it pay zero cost.
+        /// </summary>
+        internal const string MSBuildProvideItemGlobsPropertyName = "MSBuildProvideItemGlobs";
+
+        /// <summary>
+        /// Item type for synthesized glob items created when
+        /// <c>MSBuildProvideItemGlobs</c> lists the owning item type.
+        /// The item's identity is the item type (for example <c>Compile</c>); the glob patterns are
+        /// carried in metadata so that they are never expanded against the file system.
+        /// </summary>
+        internal const string MSBuildItemGlobItemType = "MSBuildItemGlob";
+
+        /// <summary>
+        /// Metadata name on <c>MSBuildItemGlob</c> items holding the include glob
+        /// pattern(s) of a single item element (semicolon-separated, wildcards preserved).
+        /// </summary>
+        internal const string ItemGlobIncludeMetadataName = "Include";
+
+        /// <summary>
+        /// Metadata name on <c>MSBuildItemGlob</c> items holding the exclude
+        /// pattern(s) that apply to the include (semicolon-separated; literals and globs).
+        /// </summary>
+        internal const string ItemGlobExcludeMetadataName = "Exclude";
+
+        /// <summary>
+        /// Metadata name on <c>MSBuildItemGlob</c> items holding the remove
+        /// pattern(s) that apply to the include (semicolon-separated; literals and globs).
+        /// </summary>
+        internal const string ItemGlobRemoveMetadataName = "Remove";
+
         internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
     }
 }

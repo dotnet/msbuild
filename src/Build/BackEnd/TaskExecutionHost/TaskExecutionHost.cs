@@ -517,8 +517,13 @@ namespace Microsoft.Build.BackEnd
             // meaningless) in a single-file/Native AOT host - and a registered task is already the loaded
             // type. On .NET, guard the read on dynamic-code support so ILC dead-strips it (and its IL3000)
             // under Native AOT while the JIT keeps the diagnostic; .NET Framework (no AOT) always runs it.
+            // A TaskHostTask is only an in-proc proxy - the task assembly it stands for is loaded in the task
+            // host process, so the proxy's own location (always Microsoft.Build.dll) says nothing about where
+            // the task came from and comparing it would report a mismatch for every out-of-proc task.
 #if NET
-            if (RuntimeFeature.IsDynamicCodeSupported)
+            if (RuntimeFeature.IsDynamicCodeSupported && TaskInstance is not TaskHostTask)
+#else
+            if (TaskInstance is not TaskHostTask)
 #endif
             {
                 // When MSBuild loads a task assembly, it uses Assembly.LoadFrom() with a specific path, but
@@ -530,10 +535,7 @@ namespace Microsoft.Build.BackEnd
                 string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
                 if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) && realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
                 {
-                    if (!IsTaskAssemblyMatchFactoryType())
-                    {
-                        _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
-                    }
+                    _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
                 }
             }
 
@@ -546,10 +548,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return true;
-
-            // Function to validate that if this is a TaskHostTask, the assembly it loaded is the same one we found in the registry.
-            bool IsTaskAssemblyMatchFactoryType() => TaskInstance is not TaskHostTask tht
-                || tht.LoadedTaskAssemblyInfo.AssemblyLocation == _taskFactoryWrapper.TaskFactoryLoadedType.Path;
         }
 
         /// <summary>
@@ -1710,8 +1708,6 @@ namespace Microsoft.Build.BackEnd
             return success;
         }
 
-        private static readonly string TaskParameterFormatString = ItemGroupLoggingHelper.TaskParameterPrefix + "{0}={1}";
-
         /// <summary>
         /// Given an instantiated task, this helper method sets the specified parameter
         /// </summary>
@@ -1724,22 +1720,11 @@ namespace Microsoft.Build.BackEnd
             if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
             {
                 IList parameterValueAsList = parameterValue as IList;
-                bool legacyBehavior = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12);
-
-                // Legacy textual logging for parameters that are not lists.
-                if (legacyBehavior && parameterValueAsList == null)
-                {
-                    _taskLoggingContext.LogCommentFromText(
-                       MessageImportance.Low,
-                       TaskParameterFormatString,
-                       parameter.Name,
-                       ItemGroupLoggingHelper.GetStringFromParameterValue(parameterValue));
-                }
 
                 if (parameter.Log)
                 {
                     // Structured logging for all parameters that have logging enabled and are not empty lists.
-                    if (parameterValueAsList?.Count > 0 || (parameterValueAsList == null && !legacyBehavior))
+                    if (parameterValueAsList?.Count > 0 || parameterValueAsList == null)
                     {
                         // Note: We're setting TaskParameterEventArgs.ItemType to parameter name for backward compatibility with
                         // older loggers and binlog viewers.
@@ -1928,23 +1913,16 @@ namespace Microsoft.Build.BackEnd
                         var outputString = joinedOutputs.ToString();
                         if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
-                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
-                            {
-                                // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
-                                // older loggers and binlog viewers.
-                                ItemGroupLoggingHelper.LogTaskParameter(
-                                    _taskLoggingContext,
-                                    TaskParameterMessageKind.TaskOutput,
-                                    parameterName: parameter.Name,
-                                    propertyName: outputTargetName,
-                                    itemType: outputTargetName,
-                                    (object[])[outputString],
-                                    parameter.LogItemMetadata);
-                            }
-                            else
-                            {
-                                _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
-                            }
+                            // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
+                            // older loggers and binlog viewers.
+                            ItemGroupLoggingHelper.LogTaskParameter(
+                                _taskLoggingContext,
+                                TaskParameterMessageKind.TaskOutput,
+                                parameterName: parameter.Name,
+                                propertyName: outputTargetName,
+                                itemType: outputTargetName,
+                                (object[])[outputString],
+                                parameter.LogItemMetadata);
                         }
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
@@ -2015,23 +1993,16 @@ namespace Microsoft.Build.BackEnd
                         var outputString = joinedOutputs.ToString();
                         if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
-                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
-                            {
-                                // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
-                                // older loggers and binlog viewers.
-                                ItemGroupLoggingHelper.LogTaskParameter(
-                                    _taskLoggingContext,
-                                    TaskParameterMessageKind.TaskOutput,
-                                    parameterName: parameter.Name,
-                                    propertyName: outputTargetName,
-                                    itemType: outputTargetName,
-                                    (object[])[outputString],
-                                    parameter.LogItemMetadata);
-                            }
-                            else
-                            {
-                                _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
-                            }
+                            // Note: We're setting TaskParameterEventArgs.ItemType to property name for backward compatibility with
+                            // older loggers and binlog viewers.
+                            ItemGroupLoggingHelper.LogTaskParameter(
+                                _taskLoggingContext,
+                                TaskParameterMessageKind.TaskOutput,
+                                parameterName: parameter.Name,
+                                propertyName: outputTargetName,
+                                itemType: outputTargetName,
+                                (object[])[outputString],
+                                parameter.LogItemMetadata);
                         }
 
                         PropertyTrackingUtils.LogPropertyAssignment(

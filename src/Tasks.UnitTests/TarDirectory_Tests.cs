@@ -1,0 +1,505 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// TarDirectory relies on System.Formats.Tar which is only available on .NET (not .NET Framework).
+#if NET
+
+using System;
+using System.Collections.Generic;
+using System.Formats.Tar;
+using System.IO;
+using System.IO.Compression;
+using Microsoft.Build.Utilities;
+using Microsoft.Build.UnitTests;
+using Shouldly;
+using Xunit;
+
+namespace Microsoft.Build.Tasks.UnitTests
+{
+    public class TarDirectory_Tests
+    {
+        private readonly MockEngine _mockEngine = new MockEngine();
+
+        [Theory]
+        [InlineData(TarDirectory.TarCompression.None)]
+        [InlineData(TarDirectory.TarCompression.GZip)]
+        [InlineData(TarDirectory.TarCompression.ZStandard)]
+        public void CanTarDirectory(TarDirectory.TarCompression compression)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "6DE6060259C44DB6B145159376751C22.txt", "6DE6060259C44DB6B145159376751C22");
+                testEnvironment.CreateFile(sourceFolder, "CDA3DD8C25A54A7CAC638A444CB1EAD0.txt", "CDA3DD8C25A54A7CAC638A444CB1EAD0");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    Compression = compression.ToString(),
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(tarFilePath, customMessage: _mockEngine.Log);
+
+                // Should not contain any warnings in the TarDirectory bucket (MSB4321 - MSB4330).
+                _mockEngine.Log.ShouldNotContain("MSB432", customMessage: _mockEngine.Log);
+
+                GetTarEntryNames(tarFilePath, compression)
+                    .ShouldBe(
+                        [
+                            "6DE6060259C44DB6B145159376751C22.txt",
+                            "CDA3DD8C25A54A7CAC638A444CB1EAD0.txt"
+                        ],
+                        ignoreOrder: true);
+            }
+        }
+
+        [Fact]
+        public void CanOverwriteExistingFile()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "F1C22D660B0D4DAAA296C1B980320B03.txt", "F1C22D660B0D4DAAA296C1B980320B03");
+                testEnvironment.CreateFile(sourceFolder, "AA825D1CB154492BAA58E1002CE1DFEB.txt", "AA825D1CB154492BAA58E1002CE1DFEB");
+
+                TransientTestFile file = testEnvironment.CreateFile(testEnvironment.DefaultTestDirectory, "test.tar", contents: "test");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(file.Path),
+                    Overwrite = true,
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(file.Path, customMessage: _mockEngine.Log);
+
+                GetTarEntryNames(file.Path, TarDirectory.TarCompression.None)
+                    .ShouldBe(
+                        [
+                            "F1C22D660B0D4DAAA296C1B980320B03.txt",
+                            "AA825D1CB154492BAA58E1002CE1DFEB.txt"
+                        ],
+                        ignoreOrder: true);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorIfDestinationExists()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+
+                TransientTestFile file = testEnvironment.CreateFile("foo.tar", "foo");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(file.Path),
+                    SourceDirectory = new TaskItem(folder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB4322", customMessage: _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void CancelStopsBeforeWritingArchive()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "A9E8E0B7F0C24F3E8F7F1B2C3D4E5F60.txt", "A9E8E0B7F0C24F3E8F7F1B2C3D4E5F60");
+
+                string tarFilePath = Path.Combine(testEnvironment.DefaultTestDirectory.Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                // Cancelling before Execute means the very first write-loop iteration observes cancellation and stops.
+                tarDirectory.Cancel();
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                // Cancellation is a clean stop, not a failure, so no error is logged.
+                _mockEngine.Log.ShouldNotContain("MSB432", customMessage: _mockEngine.Log);
+
+                // The partially-written archive is cleaned up so a later non-Overwrite build is not blocked.
+                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorIfDirectoryDoesNotExist()
+        {
+            TarDirectory tarDirectory = new TarDirectory
+            {
+                BuildEngine = _mockEngine,
+                DestinationFile = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "test.tar")),
+                SourceDirectory = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+            };
+
+            tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+            _mockEngine.Log.ShouldContain("MSB4321", customMessage: _mockEngine.Log);
+        }
+
+        [Theory]
+        [InlineData(nameof(TarEntryFormat.Pax), TarEntryFormat.Pax)]
+        [InlineData(nameof(TarEntryFormat.Gnu), TarEntryFormat.Gnu)]
+        [InlineData(nameof(TarEntryFormat.Ustar), TarEntryFormat.Ustar)]
+        [InlineData(nameof(TarEntryFormat.V7), TarEntryFormat.V7)]
+
+        // The value is matched case-insensitively, and an empty value selects the Pax default.
+        [InlineData("gnu", TarEntryFormat.Gnu)]
+        [InlineData("", TarEntryFormat.Pax)]
+        [InlineData(null, TarEntryFormat.Pax)]
+        public void CanTarDirectoryWithFormat(string? format, TarEntryFormat expectedFormat)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "3F6D2F2E3C1A4B5C8D9E0F1A2B3C4D5E.txt", "content");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    Format = format,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                GetTarEntryFormats(tarFilePath)
+                    .ShouldAllBe(entryFormat => entryFormat == expectedFormat, _mockEngine.Log);
+
+                GetTarEntryNames(tarFilePath, TarDirectory.TarCompression.None)
+                    .ShouldBe(["3F6D2F2E3C1A4B5C8D9E0F1A2B3C4D5E.txt"]);
+            }
+        }
+
+        [Fact]
+        public void InvalidFormatLogsError()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "0F1E2D3C4B5A69788796A5B4C3D2E1F0.txt", "content");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    Format = "NotARealFormat",
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB4326", customMessage: _mockEngine.Log);
+
+                File.Exists(tarFilePath).ShouldBeFalse();
+            }
+        }
+
+        [Fact]
+        public void InvalidCompressionLogsError()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "5C4B3A29180716253443526170F1E2D3.txt", "content");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    Compression = "NotARealCompression",
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB4327", customMessage: _mockEngine.Log);
+
+                File.Exists(tarFilePath).ShouldBeFalse();
+            }
+        }
+
+        [Fact]
+        public void UnknownFormatFallsBackToPax()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "1A2B3C4D5E6F70819AABBCCDDEEFF001.txt", "content");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+
+                    // TarEntryFormat.Unknown is not a real archive format; the task falls back to the Pax default.
+                    Format = nameof(TarEntryFormat.Unknown),
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                GetTarEntryFormats(tarFilePath)
+                    .ShouldAllBe(entryFormat => entryFormat == TarEntryFormat.Pax, _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void WritesEntriesInDeterministicSortedOrder()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                // Create files and a nested directory in a deliberately non-sorted order to prove the task
+                // reorders them rather than relying on the filesystem enumeration order.
+                testEnvironment.CreateFile(sourceFolder, "zebra.txt", "z");
+                testEnvironment.CreateFile(sourceFolder, "apple.txt", "a");
+                TransientTestFolder nestedFolder = testEnvironment.CreateFolder(Path.Combine(sourceFolder.Path, "middle"), createFolder: true);
+                testEnvironment.CreateFile(nestedFolder, "inner.txt", "i");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                // Entries must be emitted in ordinal-sorted order, and a directory must always precede its
+                // contents (its name ends in '/', which is a prefix of everything inside it).
+                GetAllTarEntryNames(tarFilePath)
+                    .ShouldBe(["apple.txt", "middle/", "middle/inner.txt", "zebra.txt"]);
+            }
+        }
+
+        [Theory]
+        [InlineData("1704067200")]
+        [InlineData("2024-01-01T00:00:00Z")]
+        public void DeterministicTimestampStampsEveryEntry(string deterministicTimestamp)
+        {
+            DateTimeOffset expected = DateTimeOffset.FromUnixTimeSeconds(1704067200);
+
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "a.txt", "a");
+                TransientTestFolder nestedFolder = testEnvironment.CreateFolder(Path.Combine(sourceFolder.Path, "nested"), createFolder: true);
+                testEnvironment.CreateFile(nestedFolder, "b.txt", "b");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DeterministicTimestamp = deterministicTimestamp,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                GetTarEntryModificationTimes(tarFilePath)
+                    .ShouldAllBe(modificationTime => modificationTime == expected, _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void DeterministicTimestampProducesByteIdenticalArchives()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "z.txt", "z");
+                testEnvironment.CreateFile(sourceFolder, "a.txt", "a");
+                TransientTestFolder nestedFolder = testEnvironment.CreateFolder(Path.Combine(sourceFolder.Path, "nested"), createFolder: true);
+                testEnvironment.CreateFile(nestedFolder, "b.txt", "b");
+
+                byte[] first = TarWithDeterministicTimestamp(testEnvironment, sourceFolder.Path, "1704067200");
+                byte[] second = TarWithDeterministicTimestamp(testEnvironment, sourceFolder.Path, "1704067200");
+
+                second.ShouldBe(first);
+            }
+        }
+
+        [Theory]
+        [InlineData("not-a-timestamp")]
+        [InlineData("-62135596801")] // one second below DateTimeOffset.MinValue
+        [InlineData("253402300800")] // one second above DateTimeOffset.MaxValue
+        [InlineData("99999999999999")] // grossly out of range
+        [InlineData("1704067200000")] // Unix milliseconds mistaken for seconds
+        public void LogsErrorForInvalidDeterministicTimestamp(string deterministicTimestamp)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "a.txt", "a");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DeterministicTimestamp = deterministicTimestamp,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB4324", customMessage: _mockEngine.Log);
+                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+            }
+        }
+
+        private byte[] TarWithDeterministicTimestamp(TestEnvironment testEnvironment, string sourceDirectory, string deterministicTimestamp)
+        {
+            string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+            TarDirectory tarDirectory = new TarDirectory
+            {
+                BuildEngine = _mockEngine,
+                DeterministicTimestamp = deterministicTimestamp,
+                DestinationFile = new TaskItem(tarFilePath),
+                SourceDirectory = new TaskItem(sourceDirectory),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+            };
+
+            tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+            return File.ReadAllBytes(tarFilePath);
+        }
+
+        private static List<DateTimeOffset> GetTarEntryModificationTimes(string tarFilePath)
+        {
+            List<DateTimeOffset> modificationTimes = new List<DateTimeOffset>();
+
+            using FileStream stream = new FileStream(tarFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using TarReader reader = new TarReader(stream);
+            for (TarEntry? entry = reader.GetNextEntry(); entry is not null; entry = reader.GetNextEntry())
+            {
+                modificationTimes.Add(entry.ModificationTime);
+            }
+
+            return modificationTimes;
+        }
+
+        private static List<string> GetAllTarEntryNames(string tarFilePath)
+        {
+            List<string> names = new List<string>();
+
+            using FileStream stream = new FileStream(tarFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using TarReader reader = new TarReader(stream);
+            for (TarEntry? entry = reader.GetNextEntry(); entry is not null; entry = reader.GetNextEntry())
+            {
+                names.Add(entry.Name);
+            }
+
+            return names;
+        }
+
+        private static List<string> GetTarEntryNames(string tarFilePath, TarDirectory.TarCompression compression)
+        {
+            List<string> names = new List<string>();
+
+            using FileStream stream = new FileStream(tarFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+            // Wrap the file stream in a matching decompression stream, if the archive was compressed.
+            Stream? decompressionStream = compression switch
+            {
+                TarDirectory.TarCompression.None => null,
+                TarDirectory.TarCompression.GZip => new GZipStream(stream, CompressionMode.Decompress),
+                TarDirectory.TarCompression.ZStandard => new ZstandardStream(stream, CompressionMode.Decompress),
+                _ => throw new ArgumentException($"Unexpected compression '{compression}'.", nameof(compression)),
+            };
+
+            using (decompressionStream)
+            {
+                using TarReader reader = new TarReader(decompressionStream ?? stream);
+                for (TarEntry? entry = reader.GetNextEntry(); entry is not null; entry = reader.GetNextEntry())
+                {
+                    if (entry.EntryType is TarEntryType.RegularFile or TarEntryType.V7RegularFile)
+                    {
+                        names.Add(entry.Name);
+                    }
+                }
+            }
+
+            return names;
+        }
+
+        private static List<TarEntryFormat> GetTarEntryFormats(string tarFilePath)
+        {
+            List<TarEntryFormat> formats = new List<TarEntryFormat>();
+
+            using FileStream stream = new FileStream(tarFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using TarReader reader = new TarReader(stream);
+            for (TarEntry? entry = reader.GetNextEntry(); entry is not null; entry = reader.GetNextEntry())
+            {
+                formats.Add(entry.Format);
+            }
+
+            return formats;
+        }
+    }
+}
+
+#endif

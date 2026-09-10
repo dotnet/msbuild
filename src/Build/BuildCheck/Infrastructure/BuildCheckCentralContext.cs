@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Shared;
 
@@ -12,6 +13,11 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <summary>
 /// A manager of the runs of the checks - deciding based on configuration of what to run and what to postfilter.
 /// </summary>
+/// <remarks>
+/// Callback registration and deregistration publish immutable snapshots. Dispatch uses the snapshot current at its start,
+/// so an in-flight dispatch may invoke a callback after its check is deregistered. The <c>Has*Actions</c> properties are
+/// advisory and callers must rely on dispatch snapshot semantics for correctness.
+/// </remarks>
 internal sealed class BuildCheckCentralContext
 {
     private readonly IConfigurationProvider _configurationProvider;
@@ -24,34 +30,67 @@ internal sealed class BuildCheckCentralContext
         _removeChecks = removeCheck;
     }
 
-    private record CallbackRegistry(
-        List<(CheckWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>>)> EvaluatedPropertiesActions,
-#pragma warning disable CS0618 // Type or member is obsolete
-        List<(CheckWrapper, Action<BuildCheckDataContext<ParsedItemsCheckData>>)> ParsedItemsActions,
-#pragma warning restore CS0618 // Type or member is obsolete
-        List<(CheckWrapper, Action<BuildCheckDataContext<EvaluatedItemsCheckData>>)> EvaluatedItemsActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<TaskInvocationCheckData>>)> TaskInvocationActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<ProjectRequestProcessingDoneData>>)> ProjectRequestProcessingDoneActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<BuildFinishedCheckData>>)> BuildFinishedActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<EnvironmentVariableCheckData>>)> EnvironmentVariableCheckDataActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<ProjectImportedCheckData>>)> ProjectImportedCheckDataActions)
+    private sealed class CallbackRegistry
     {
-        public CallbackRegistry()
-            : this([], [], [], [], [], [], [], [], [], [])
+        internal CallbackCollection<EvaluatedPropertiesCheckData> EvaluatedPropertiesActions { get; } = new();
+#pragma warning disable CS0618 // Type or member is obsolete
+        internal CallbackCollection<ParsedItemsCheckData> ParsedItemsActions { get; } = new();
+#pragma warning restore CS0618 // Type or member is obsolete
+        internal CallbackCollection<EvaluatedItemsCheckData> EvaluatedItemsActions { get; } = new();
+        internal CallbackCollection<TaskInvocationCheckData> TaskInvocationActions { get; } = new();
+        internal CallbackCollection<PropertyReadData> PropertyReadActions { get; } = new();
+        internal CallbackCollection<PropertyWriteData> PropertyWriteActions { get; } = new();
+        internal CallbackCollection<ProjectRequestProcessingDoneData> ProjectRequestProcessingDoneActions { get; } = new();
+        internal CallbackCollection<BuildFinishedCheckData> BuildFinishedActions { get; } = new();
+        internal CallbackCollection<EnvironmentVariableCheckData> EnvironmentVariableCheckDataActions { get; } = new();
+        internal CallbackCollection<ProjectImportedCheckData> ProjectImportedCheckDataActions { get; } = new();
+
+        internal void DeregisterCheck(CheckWrapper check)
         {
+            EvaluatedPropertiesActions.DeregisterCheck(check);
+            ParsedItemsActions.DeregisterCheck(check);
+            EvaluatedItemsActions.DeregisterCheck(check);
+            TaskInvocationActions.DeregisterCheck(check);
+            PropertyReadActions.DeregisterCheck(check);
+            PropertyWriteActions.DeregisterCheck(check);
+            ProjectRequestProcessingDoneActions.DeregisterCheck(check);
+            BuildFinishedActions.DeregisterCheck(check);
+            EnvironmentVariableCheckDataActions.DeregisterCheck(check);
+            ProjectImportedCheckDataActions.DeregisterCheck(check);
+        }
+    }
+
+    private sealed class CallbackCollection<T>
+        where T : CheckData
+    {
+        private readonly object _writeLock = new();
+        private (CheckWrapper, Action<BuildCheckDataContext<T>>)[] _callbacks = [];
+
+        internal bool HasActions => Volatile.Read(ref _callbacks).Length > 0;
+
+        internal (CheckWrapper, Action<BuildCheckDataContext<T>>)[] Snapshot => Volatile.Read(ref _callbacks);
+
+        internal void Register(CheckWrapper check, Action<BuildCheckDataContext<T>> callback)
+        {
+            lock (_writeLock)
+            {
+                (CheckWrapper, Action<BuildCheckDataContext<T>>)[] callbacks = _callbacks;
+                Array.Resize(ref callbacks, callbacks.Length + 1);
+                callbacks[^1] = (check, callback);
+                Volatile.Write(ref _callbacks, callbacks);
+            }
         }
 
         internal void DeregisterCheck(CheckWrapper check)
         {
-            EvaluatedPropertiesActions.RemoveAll(a => a.Item1 == check);
-            ParsedItemsActions.RemoveAll(a => a.Item1 == check);
-            EvaluatedItemsActions.RemoveAll(a => a.Item1 == check);
-            PropertyReadActions.RemoveAll(a => a.Item1 == check);
-            PropertyWriteActions.RemoveAll(a => a.Item1 == check);
-            ProjectRequestProcessingDoneActions.RemoveAll(a => a.Item1 == check);
-            BuildFinishedActions.RemoveAll(a => a.Item1 == check);
+            lock (_writeLock)
+            {
+                (CheckWrapper, Action<BuildCheckDataContext<T>>)[] callbacks = _callbacks;
+                if (callbacks.Any(callback => callback.Item1 == check))
+                {
+                    Volatile.Write(ref _callbacks, callbacks.Where(callback => callback.Item1 != check).ToArray());
+                }
+            }
         }
     }
 
@@ -62,17 +101,25 @@ internal sealed class BuildCheckCentralContext
 
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when checks might not be known yet
-    internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Count > 0;
+    internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.HasActions;
 
-    internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Count > 0;
+    internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.HasActions;
 
-    internal bool HasTaskInvocationActions => _globalCallbacks.TaskInvocationActions.Count > 0;
+    internal bool HasEvaluatedItemsActions => _globalCallbacks.EvaluatedItemsActions.HasActions;
 
-    internal bool HasPropertyReadActions => _globalCallbacks.PropertyReadActions.Count > 0;
+    internal bool HasTaskInvocationActions => _globalCallbacks.TaskInvocationActions.HasActions;
 
-    internal bool HasPropertyWriteActions => _globalCallbacks.PropertyWriteActions.Count > 0;
+    internal bool HasPropertyReadActions => _globalCallbacks.PropertyReadActions.HasActions;
 
-    internal bool HasBuildFinishedActions => _globalCallbacks.BuildFinishedActions.Count > 0;
+    internal bool HasPropertyWriteActions => _globalCallbacks.PropertyWriteActions.HasActions;
+
+    internal bool HasProjectRequestProcessingDoneActions => _globalCallbacks.ProjectRequestProcessingDoneActions.HasActions;
+
+    internal bool HasBuildFinishedActions => _globalCallbacks.BuildFinishedActions.HasActions;
+
+    internal bool HasEnvironmentVariableActions => _globalCallbacks.EnvironmentVariableCheckDataActions.HasActions;
+
+    internal bool HasProjectImportedActions => _globalCallbacks.ProjectImportedCheckDataActions.HasActions;
 
     internal void RegisterEnvironmentVariableReadAction(CheckWrapper check, Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction)
        => RegisterAction(check, environmentVariableAction, _globalCallbacks.EnvironmentVariableCheckDataActions);
@@ -111,7 +158,7 @@ internal sealed class BuildCheckCentralContext
     private void RegisterAction<T>(
         CheckWrapper wrappedCheck,
         Action<BuildCheckDataContext<T>> handler,
-        List<(CheckWrapper, Action<BuildCheckDataContext<T>>)> handlersRegistry)
+        CallbackCollection<T> handlersRegistry)
         where T : CheckData
     {
         void WrappedHandler(BuildCheckDataContext<T> context)
@@ -120,10 +167,7 @@ internal sealed class BuildCheckCentralContext
             handler(context);
         }
 
-        lock (handlersRegistry)
-        {
-            handlersRegistry.Add((wrappedCheck, WrappedHandler));
-        }
+        handlersRegistry.Register(wrappedCheck, WrappedHandler);
     }
 
     internal void DeregisterCheck(CheckWrapper check) => _globalCallbacks.DeregisterCheck(check);
@@ -205,7 +249,7 @@ internal sealed class BuildCheckCentralContext
         => RunRegisteredActions(_globalCallbacks.ProjectImportedCheckDataActions, projectImportedCheckData, checkContext, resultHandler);
 
     private void RunRegisteredActions<T>(
-        List<(CheckWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
+        CallbackCollection<T> registeredCallbacks,
         T checkData,
         ICheckContext checkContext,
         Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult> resultHandler)
@@ -213,8 +257,9 @@ internal sealed class BuildCheckCentralContext
     {
         string projectFullPath = checkData.ProjectFilePath;
         List<CheckWrapper>? checksToRemove = null;
+        (CheckWrapper, Action<BuildCheckDataContext<T>>)[] callbacksSnapshot = registeredCallbacks.Snapshot;
 
-        foreach (var checkCallback in registeredCallbacks)
+        foreach (var checkCallback in callbacksSnapshot)
         {
             // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
             //  to the relevant check (with BuildCheckConfigurationEffective only the currently accounted part as being the 'core-execution' subspan)
@@ -226,7 +271,7 @@ internal sealed class BuildCheckCentralContext
             {
                 if (!commonConfig.IsEnabled)
                 {
-                    return;
+                    continue;
                 }
 
                 configPerRule = [commonConfig];
@@ -236,7 +281,7 @@ internal sealed class BuildCheckCentralContext
                 configPerRule = _configurationProvider.GetMergedConfigurations(projectFullPath, checkCallback.Item1.Check);
                 if (configPerRule.All(c => !c.IsEnabled))
                 {
-                    return;
+                    continue;
                 }
             }
 

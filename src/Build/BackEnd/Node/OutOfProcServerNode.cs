@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -15,16 +16,23 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental
+namespace Microsoft.Build.Server
 {
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
     /// </summary>
+    /// <remarks>
+    /// This type is public only so that the MSBuild command-line application can host the MSBuild server;
+    /// third-party use is not expected or supported. It exists to wrap the MSBuild CLI and offers nothing
+    /// beyond it, so invoke the CLI instead.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         /// <summary>
         /// A callback used to execute command line build.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public delegate (int exitCode, string exitType) BuildCallback(string[] commandLine);
 
         private readonly BuildCallback _buildFunction;
@@ -84,9 +92,17 @@ namespace Microsoft.Build.Experimental
         private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcServerNode(BuildCallback buildFunction)
+        /// <summary>
+        /// Identifies this transient server, or <see langword="null"/> when this is the resident
+        /// server. Supplied by the client that launched this process, which derives the same pipe and
+        /// mutex names from it.
+        /// </summary>
+        private readonly string? _instanceId;
+
+        public OutOfProcServerNode(BuildCallback buildFunction, string? instanceId = null)
         {
             _buildFunction = buildFunction;
+            _instanceId = instanceId;
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
@@ -108,7 +124,8 @@ namespace Microsoft.Build.Experimental
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
             ServerNodeHandshake handshake = new(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
+                _instanceId);
 
             _serverBusyMutexName = GetBusyServerMutexName(handshake);
 
@@ -176,6 +193,13 @@ namespace Microsoft.Build.Experimental
         }
 
         #endregion
+
+        /// <summary>
+        /// The command line switch a client uses to tell the transient server it launches which
+        /// instance it is. Both sides fold the value into <see cref="ServerNodeHandshake.ComputeHash"/>,
+        /// so a transient server is addressable only by that client.
+        /// </summary>
+        internal const string ServerInstanceIdCommandLineSwitch = "/serverinstanceid:";
 
         internal static string GetPipeName(ServerNodeHandshake handshake)
             => NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildServer-{handshake.ComputeHash()}");
@@ -333,7 +357,8 @@ namespace Microsoft.Build.Experimental
         /// <param name="buildComplete"></param>
         private void HandleServerShutdownCommand(NodeBuildComplete buildComplete)
         {
-            bool shouldReuse = buildComplete.PrepareForReuse;
+            // A transient server is private to one build and must never enter the resident reuse loop.
+            bool shouldReuse = buildComplete.PrepareForReuse && _instanceId is null;
 
             if (shouldReuse)
             {
@@ -486,32 +511,37 @@ namespace Microsoft.Build.Experimental
             _shutdownEvent.Set();
         }
 
+        /// <remarks>
+        /// Disposed instances remain writable but discard output because third-party code may retain
+        /// <see cref="Console.Out"/> across server requests. Stale output must not reach a later client.
+        /// </remarks>
         internal sealed class RedirectConsoleWriter : TextWriter
         {
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
             private readonly LockType _lock = new LockType();
-            private readonly StringWriter _internalWriter;
+            private readonly StringWriter _bufferWriter;
+            private TextWriter _destination;
+            private bool _disposed;
 
             public RedirectConsoleWriter(Action<string> writeCallback)
             {
                 _writeCallback = writeCallback;
-                _internalWriter = new StringWriter();
+                _bufferWriter = new StringWriter();
+                _destination = _bufferWriter;
                 _timer = new Timer(TimerCallback, null, 0, 40);
             }
 
-            public override Encoding Encoding => _internalWriter.Encoding;
+            public override Encoding Encoding => _bufferWriter.Encoding;
 
             public override void Flush()
             {
                 lock (_lock)
                 {
-                    var sb = _internalWriter.GetStringBuilder();
-                    string captured = sb.ToString();
-                    sb.Clear();
-
-                    _writeCallback(captured);
-                    _internalWriter.Flush();
+                    if (!_disposed)
+                    {
+                        FlushInternal();
+                    }
                 }
             }
 
@@ -519,7 +549,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -527,7 +557,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(buffer);
+                    _destination.Write(buffer);
                 }
             }
 
@@ -535,7 +565,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(buffer, index, count);
+                    _destination.Write(buffer, index, count);
                 }
             }
 
@@ -543,7 +573,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -551,7 +581,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -559,7 +589,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -567,7 +597,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -575,7 +605,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -583,7 +613,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -591,7 +621,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -599,7 +629,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -607,7 +637,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -615,7 +645,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(value);
+                    _destination.Write(value);
                 }
             }
 
@@ -623,7 +653,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(format, arg0);
+                    _destination.Write(format, arg0);
                 }
             }
 
@@ -631,7 +661,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(format, arg0, arg1);
+                    _destination.Write(format, arg0, arg1);
                 }
             }
 
@@ -639,7 +669,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.Write(format, arg0, arg1, arg2);
+                    _destination.Write(format, arg0, arg1, arg2);
                 }
             }
 
@@ -647,7 +677,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(format, arg);
+                    _destination.WriteLine(format, arg);
                 }
             }
 
@@ -655,7 +685,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine();
+                    _destination.WriteLine();
                 }
             }
 
@@ -663,7 +693,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -671,7 +701,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -679,7 +709,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(buffer);
+                    _destination.WriteLine(buffer);
                 }
             }
 
@@ -687,7 +717,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(buffer, index, count);
+                    _destination.WriteLine(buffer, index, count);
                 }
             }
 
@@ -695,7 +725,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -703,7 +733,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -711,7 +741,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -719,7 +749,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -727,7 +757,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -735,7 +765,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -743,7 +773,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -751,7 +781,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -759,7 +789,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(value);
+                    _destination.WriteLine(value);
                 }
             }
 
@@ -767,7 +797,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(format, arg0);
+                    _destination.WriteLine(format, arg0);
                 }
             }
 
@@ -775,7 +805,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(format, arg0, arg1);
+                    _destination.WriteLine(format, arg0, arg1);
                 }
             }
 
@@ -783,7 +813,7 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(format, arg0, arg1, arg2);
+                    _destination.WriteLine(format, arg0, arg1, arg2);
                 }
             }
 
@@ -791,13 +821,13 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    _internalWriter.WriteLine(format, arg);
+                    _destination.WriteLine(format, arg);
                 }
             }
 
             private void TimerCallback(object? state)
             {
-                if (_internalWriter.GetStringBuilder().Length > 0)
+                if (_bufferWriter.GetStringBuilder().Length > 0)
                 {
                     Flush();
                 }
@@ -808,11 +838,36 @@ namespace Microsoft.Build.Experimental
                 if (disposing)
                 {
                     _timer.Dispose();
-                    Flush();
-                    _internalWriter?.Dispose();
+
+                    lock (_lock)
+                    {
+                        if (!_disposed)
+                        {
+                            try
+                            {
+                                FlushInternal();
+                            }
+                            finally
+                            {
+                                _destination = TextWriter.Null;
+                                _disposed = true;
+                                _bufferWriter.Dispose();
+                            }
+                        }
+                    }
                 }
 
                 base.Dispose(disposing);
+            }
+
+            private void FlushInternal()
+            {
+                var sb = _bufferWriter.GetStringBuilder();
+                string captured = sb.ToString();
+                sb.Clear();
+
+                _writeCallback(captured);
+                _bufferWriter.Flush();
             }
         }
     }

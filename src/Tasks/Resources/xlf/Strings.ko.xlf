@@ -2672,6 +2672,46 @@
         <target state="translated">MSB3353: 서명 연기에 필요한 공개 키를 지정하지 않았습니다.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.Comment">
+        <source>Creating tar archive from directory "{0}" to "{1}".</source>
+        <target state="translated">디렉터리 "{0}"에서 "{1}"(으)로 tar 압축 파일을 만드는 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB4321: 디렉터리 "{0}"이(가) 없거나 액세스할 수 없기 때문에 디렉터리를 tar로 압축하지 못했습니다.</target>
+        <note>{StrBegin="MSB4321: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
+        <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
+        <target state="translated">MSB4325: 압축 파일이 최신 상태가 아니고 증분 빌드가 요청되었으므로 디렉터리 "{0}"을(를) 파일 "{1}"에 tar로 압축하지 못했습니다.</target>
+        <note>{StrBegin="MSB4325: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFailed">
+        <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="translated">MSB4323: 디렉터리 "{0}"을(를) 파일 "{1}"에 tar로 압축하지 못했습니다. {2} {3}</target>
+        <note>{StrBegin="MSB4323: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFileExists">
+        <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="translated">MSB4322: 파일이 이미 있기 때문에 tar 파일 "{0}"을(를) 만들지 못했습니다.  파일을 삭제하거나 이름을 바꾸고 다시 시도하세요.</target>
+        <note>{StrBegin="MSB4322: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidCompression">
+        <source>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</source>
+        <target state="translated">MSB4327: 압축 값 "{0}"이(가) 잘못되었습니다. "None", "GZip" 또는 "ZStandard" 중 하나를 지정하세요.</target>
+        <note>{StrBegin="MSB4327: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
+        <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
+        <target state="translated">MSB4324: DeterministicTimestamp 값 "{0}"이(가) 잘못되었습니다. RFC 3339 날짜-시간(예: "2024-01-01T00:00:00Z") 또는 Unix epoch 이후의 정수 시간(초)을 지정하세요.</target>
+        <note>{StrBegin="MSB4324: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidFormat">
+        <source>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</source>
+        <target state="translated">MSB4326: 형식 값 "{0}"이(가) 잘못되었습니다. "Pax", "Ustar", "V7" 또는 "Gnu" 중 하나를 지정하세요.</target>
+        <note>{StrBegin="MSB4326: "}</note>
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: "{0}" 작업은 MSBuild의 .NET Core 버전에서 지원되지 않습니다. MSBuild의 .NET Framework 버전을 사용하세요. 자세한 내용은 https://aka.ms/msbuild/MSB4803을 참조하세요.</target>
@@ -2776,6 +2816,71 @@
         <source>MSB3394: Type library "{0}" is not registered, cannot unregister.</source>
         <target state="translated">MSB3394: 형식 라이브러리 "{0}"은(는) 등록되어 있지 않으므로 등록을 취소할 수 없습니다.</target>
         <note>{StrBegin="MSB3394: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfEntryType">
+        <source>Did not untar entry "{0}" because its entry type "{1}" is not supported.</source>
+        <target state="translated">해당 항목 종류 "{1}"이(가) 지원되지 않으므로 항목 "{0}"의 압축을 해제하지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfFileMatch">
+        <source>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="translated">"{2}" 매개 변수가 프로젝트에 "{3}"(으)로 설정되었고 파일 크기와 타임스탬프가 일치하기 때문에 "{0}" 파일에서 "{1}" 파일로 압축을 풀지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfFilter">
+        <source>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
+        <target state="translated">파일 "{0}"이(가) 포함 필터와 일치하지 않거나 제외 필터와 일치하므로 압축을 풀지 않았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</source>
+        <target state="translated">MSB4331: 디렉터리 "{0}"을(를) 만들 수 없기 때문에 디렉터리의 압축을 풀지 못했습니다. {1}</target>
+        <note>{StrBegin="MSB4331: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotExtractFile">
+        <source>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</source>
+        <target state="translated">MSB4336: 파일 "{0}"의 압축을 "{1}"에 풀지 못했습니다. {2}</target>
+        <note>{StrBegin="MSB4336: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotMakeFileWriteable">
+        <source>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
+        <target state="translated">MSB4335: 대상 파일 "{1}"이(가) 읽기 전용이고 쓰기 가능하도록 만들 수 없기 때문에 파일 "{0}"의 압축을 풀지 못했습니다. {2} {3}</target>
+        <note>{StrBegin="MSB4335: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotOpenFile">
+        <source>MSB4333: Failed to open tar file "{0}".  {1}</source>
+        <target state="translated">MSB4333: tar 파일 "{0}"을(를) 열지 못했습니다. {1}</target>
+        <note>{StrBegin="MSB4333: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="translated">MSB4334: 대상 디렉터리 밖에 있기 때문에 파일 "{0}"의 압축을 "{1}"에 풀지 못했습니다.</target>
+        <note>{StrBegin="MSB4334: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorFileDoesNotExist">
+        <source>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="translated">MSB4332: 파일 "{0}"이(가) 존재하지 않거나 액세스할 수 없기 때문에 파일의 압축을 풀지 못했습니다.</target>
+        <note>{StrBegin="MSB4332: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorParsingPatternInvalidPath">
+        <source>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
+        <target state="translated">MSB4337: 잘못된 경로 문자가 포함되어 있기 때문에 패턴 "{0}"을(를) 구문 분석하지 못했습니다.</target>
+        <note>{StrBegin="MSB4337: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorParsingPatternPropertyReferences">
+        <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
+        <target state="translated">MSB4338: 지원되지 않는 속성 참조가 포함되어 있기 때문에 패턴 "{0}"을(를) 구문 분석하지 못했습니다.</target>
+        <note>{StrBegin="MSB4338: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorFailIfNotIncremental">
+        <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
+        <target state="translated">MSB4339: 대상이 최신 상태가 아니고 증분 빌드가 요청되었으므로 파일 "{0}"의 압축을 "{1}"에 풀지 못했습니다.</target>
+        <note>{StrBegin="MSB4339: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.FileComment">
+        <source>Untarring file "{0}" to "{1}".</source>
+        <target state="translated">파일 "{0}"의 압축을 "{1}"에 푸는 중입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
@@ -3007,6 +3112,11 @@
         <target state="translated">MSB3723: "{0}" 매개 변수를 사용하려면 누락된 매개 변수 "{1}"을(를) 설정해야 합니다.</target>
         <note>{StrBegin="MSB3723: "}</note>
       </trans-unit>
+      <trans-unit id="XmlPeekPoke.InputDtdProhibited">
+        <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="translated">MSB3733: XML 입력에 DTD가 포함되어 있습니다. DTD는 보안상의 이유로 기본적으로 금지되어 있습니다. DTD를 제거하거나 DTD를 무시하려면 "{1}" 작업에서 "{0}"을(를) "false"로 설정하여 중지합니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
         <source>MSB3701: Unable to load arguments for the XslTransformation task. {0}</source>
         <target state="translated">MSB3701: XslTransformation 작업의 인수를 로드할 수 없습니다. {0}</target>
@@ -3021,6 +3131,11 @@
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
         <target state="translated">UseTrustedSettings 매개 변수를 통해 완화된 XSLT 보안 설정을 사용하도록 설정합니다. 이 설정의 보안 영향에 대한 자세한 내용은 https://aka.ms/msbuild/xsltransformation-task를 참조하세요.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.TransformDtdProhibited">
+        <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
+        <target state="translated">MSB3703: XML 입력 "{0}"에 DTD가 포함되어 있으므로 변환을 실행할 수 없습니다. DTD는 보안상의 이유로 기본적으로 금지되어 있습니다. DTD를 제거하거나 입력을 신뢰하는 경우 "{2}" 작업에서 "{1}"을(를) "false"로 설정하여 DTD를 무시합니다.</target>
+        <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
@@ -3051,6 +3166,11 @@
         <source>One of XslContent, XslInputPath and XslCompiledDllPath arguments must be set.</source>
         <target state="translated">XslContent, XslInputPath 및 XslCompiledDllPath 인수 중 하나를 설정해야 합니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.XsltLoadDtdProhibited">
+        <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="translated">MSB3704: 지정된 Xslt에 DTD가 포함되어 있으므로 로드할 수 없습니다. DTD는 보안상의 이유로 기본적으로 금지되어 있습니다. DTD를 제거하거나 입력을 신뢰하는 경우 "{1}" 작업에서 "{0}"을(를) "false"로 설정하여 DTD를 무시합니다.</target>
+        <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">
         <source>MSB3704: Unable to load the specified Xslt. {0}</source>

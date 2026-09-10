@@ -448,6 +448,24 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        /// <inheritdoc />
+        internal override void ClearCachesAfterBuildIfNeeded()
+        {
+            if (!_autoReloadFromDisk || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            {
+                base.ClearCachesAfterBuildIfNeeded();
+                return;
+            }
+
+            // Nothing to discard. The only files a restore rewrites that this cache may already hold are the ones it
+            // generates next to the project, such as nuget.g.props and nuget.g.targets, and IsInvalidEntry reloads
+            // those on the next read because their timestamp changed. The entries it never revalidates are the ones
+            // under a location FileClassifier treats as immutable - the NuGet cache, where a package's content is
+            // fixed by its version and is never rewritten in place, and the SDK and Visual Studio install, which a
+            // build does not write to at all - so a restore cannot have invalidated them either.
+            DebugTraceCache("Keeping cache after build (auto reload from disk): ", _weakCache.Count);
+        }
+
         /// <summary>
         /// Discard any entries (weak and strong) which do not have the explicitlyLoaded flag set.
         /// </summary>

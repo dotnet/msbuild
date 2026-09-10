@@ -4,8 +4,8 @@
 using System;
 using System.Globalization;
 using System.Threading;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 
 #if RUNTIME_TYPE_NETCORE

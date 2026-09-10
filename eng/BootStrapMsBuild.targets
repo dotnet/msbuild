@@ -306,6 +306,30 @@
           DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <!--
+      The .NET SDK layout keeps some of MSBuild's own props/targets under sdk\<ver>\Current\ rather than at the
+      SDK root, because they are imported through $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\... and
+      $(MSBuildToolsVersion) is "Current" there. Microsoft.Common.props is the notable one: it exists *only*
+      under Current\, and Microsoft.NET.Sdk's Sdk.props imports it from that path for every SDK-style project.
+
+      Our build output has no Current\ subdirectory, so the overlay above lands those files at the SDK root only
+      and leaves the acquired SDK's copies - belonging to whatever older MSBuild it shipped with - in place. Every
+      bootstrap build then silently evaluates the stale file, so changes to src\Tasks\Microsoft.Common.props never
+      take effect in bootstrap-based tests.
+
+      Overlay our freshly-built copy of any file the acquired SDK keeps in Current\. Directories under Current\
+      (the Microsoft.Common.targets\ImportAfter\ style extension points) are not matched by the glob and are
+      correctly left alone.
+    -->
+    <ItemGroup>
+      <_AcquiredSdkCurrentFile Include="$(InstallDir)sdk\$(BootstrapSdkVersion)\Current\*.*" />
+      <_FreshlyBuiltCurrentFile Include="$(OutDir)%(_AcquiredSdkCurrentFile.Filename)%(_AcquiredSdkCurrentFile.Extension)"
+                                Condition="Exists('$(OutDir)%(_AcquiredSdkCurrentFile.Filename)%(_AcquiredSdkCurrentFile.Extension)')" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_FreshlyBuiltCurrentFile)"
+          DestinationFolder="$(InstallDir)sdk\$(BootstrapSdkVersion)\Current" />
+
+    <!--
       MSBuild can target an earlier .NET runtime than the SDK we overlay it onto.
       In that case the freshly-built *.runtimeconfig.json files pin Microsoft.NETCore.App to a runtime version
       (e.g. 10.0.0) that isn't present in the bootstrap layout, so the just-built MSBuild would fail to start.

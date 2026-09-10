@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -618,6 +618,11 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
+                if (!Traits.Instance.EscapeHatches.DisableParseConfig)
+                {
+                    _buildParameters.ParserIgnoreConfiguration = _buildParameters.ProjectRootElementCache.ParserIgnoreConfiguration;
+                }
+
                 if (_buildParameters.UsesCachedResults() && _buildParameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
                     // If input or output caches are used and the project isolation mode is set to
@@ -1229,6 +1234,18 @@ namespace Microsoft.Build.Execution
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
 
+                            // Emit per-task execution details as a separate "build/tasks/details" event.
+                            // The SDK merges these into the aggregated build/tasks telemetry event,
+                            // providing parity with the Activity-based path used by VS telemetry.
+                            if (!Traits.Instance.ExcludeTasksDetailsFromTelemetry)
+                            {
+                                Dictionary<string, string>? tasksDetailsProperties = _telemetryConsumingLogger?.WorkerNodeTelemetryData.GetTasksDetailsProperties();
+                                if (tasksDetailsProperties is not null)
+                                {
+                                    loggingService.LogTelemetry(buildEventContext: null, TasksDetailsTelemetry.TasksDetailsEventName, tasksDetailsProperties);
+                                }
+                            }
+
                             EndBuildTelemetry();
 
                             // Clean telemetry to make it ready for next build submission.
@@ -1493,7 +1510,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void ShutdownAllNodes()
         {
-            Experimental.MSBuildClient.ShutdownServer(CancellationToken.None);
+            Microsoft.Build.Server.MSBuildClient.ShutdownServer(CancellationToken.None);
 
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();
@@ -1772,9 +1789,9 @@ namespace Microsoft.Build.Execution
                             {
                                 ExecuteGraphBuildScheduler(submission);
                             }
-                            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                            catch (Exception ex)
                             {
-                                HandleSubmissionException(submission, ex);
+                                HandleGraphSubmissionException(submission, ex);
                             }
                         },
                         _executionCancellationTokenSource!.Token,
@@ -1783,10 +1800,22 @@ namespace Microsoft.Build.Execution
                 }
             }
             // The handling of submission exception needs to be done outside of the lock
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            catch (Exception ex)
+            {
+                HandleGraphSubmissionException(submission, ex);
+                throw;
+            }
+        }
+
+        private void HandleGraphSubmissionException(GraphBuildSubmission submission, Exception ex)
+        {
+            if (ExceptionHandling.IsCriticalException(ex))
+            {
+                OnThreadException(ex);
+            }
+            else
             {
                 HandleSubmissionException(submission, ex);
-                throw;
             }
         }
 
@@ -3091,9 +3120,12 @@ namespace Microsoft.Build.Execution
                 {
                     // Reset the project root element cache if specified which ensures that projects will be re-loaded from disk.  We do not need to reset the
                     // cache on child nodes because the OutOfProcNode class sets "autoReloadFromDisk" to "true" which handles the case when a restore modifies
-                    // part of the import graph.
-                    _buildParameters?.ProjectRootElementCache?.Clear();
+                    // part of the import graph. The same reasoning applies to any cache that reloads from disk on the node running this build, such as the
+                    // one the MSBuild Server entry node reuses across builds, so the cache itself decides how much of it a restore invalidated.
+                    _buildParameters?.ProjectRootElementCache?.ClearCachesAfterBuildIfNeeded();
 
+                    // Unlike the XML cache, these hold negative results (a file that did not exist, a glob that matched nothing) which no
+                    // timestamp check can invalidate, and which restore invalidates precisely by creating files. They are always cleared.
                     FileMatcher.ClearCaches();
                     FileUtilities.ClearFileExistenceCache();
                 }
@@ -3549,7 +3581,10 @@ namespace Microsoft.Build.Execution
                         s_singletonInstance = null;
                     }
 
-                    TelemetryManager.Instance.Dispose();
+                    // The telemetry session is process wide and is owned by whoever initialized it (the MSBuild
+                    // entry point, or the host such as Visual Studio). A BuildManager is not its owner, so it must
+                    // not tear it down here - doing so would kill telemetry (including crash telemetry) for the
+                    // rest of the process, which still runs after the build manager is disposed.
 
                     _disposed = true;
                 }

@@ -240,7 +240,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -253,7 +253,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="translated">  -wielowątkowy[:true|false]
                      Włącza tryb EKSPERYMENTALNY wielowątkowości w programie MSBuild.
                      Oznacza to, że program MSBuild będzie używać wielu wątków
                      do równoległego kompilowania projektów,
@@ -311,6 +311,16 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1072: wartość trybu wielowątkowego jest nieprawidłowa. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -381,62 +391,62 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
-        <target state="needs-review-translation">nie można było połączyć się z serwerem w oknie limitu czasu; serwer mógł się nie uruchomić</target>
+        <target state="translated">nie można było połączyć się z serwerem w oknie limitu czasu; serwer mógł się nie uruchomić</target>
         <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerCrashedOnLaunch">
         <source>the server process exited with code {0} immediately after launch</source>
-        <target state="needs-review-translation">proces serwera zakończył działanie z kodem {0} zaraz po uruchomieniu</target>
+        <target state="translated">proces serwera zakończył działanie z kodem {0} zaraz po uruchomieniu</target>
         <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
-        <target state="needs-review-translation">nie można uruchomić procesu serwera</target>
+        <target state="translated">nie można uruchomić procesu serwera</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">Ponowne użycie uruchomionego węzła serwera MSBuild dla tej kompilacji (identyfikator procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">Węzeł serwera MSBuild został uruchomiony dla tej kompilacji (identyfikator procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">Węzeł serwera MSBuild został uruchomiony tylko dla tej kompilacji; zostanie ona później zamknięta (identyfikator procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">Zażądano serwera MSBuild Server, ale nie użyto go dla tej kompilacji: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">serwer był zajęty inną kompilacją</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">to wywołanie nie jest zgodne z serwerem MSBuild</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">ponowne użycie węzła jest wyłączone (-nodeReuse:false lub MSBUILDDISABLENODEREUSE=1)</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">kreskowanie ucieczki MSBUILDENSURESTDOUTFORTASKPROCESSES jest włączone</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
-        <target state="needs-review-translation">nie można określić bieżącego stanu serwera</target>
+        <target state="translated">nie można określić bieżącego stanu serwera</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerUnavailable">
@@ -568,25 +578,24 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -isolateProjects[:True|MessageUponIsolationViolation|False]
-                     Powoduje, że program MSBuild kompiluje każdy projekt osobno.
+                     Powoduje, że program MSBuild kompiluje każdy projekt w izolacji.
 
                      Po ustawieniu na wartość „MessageUponIsolationViolation” (lub jej skróconą
                      formę „Message”), serializowane są tylko wyniki z celów najwyższego poziomu
                      , jeśli przełącznik -outputResultsCache jest
                      dostarczony. Ma to na celu zmniejszenie szans na to, że cel 
-                     naruszy izolację w projekcie zależnym przy użyciu
-                     nieprawidłowego stanu z powodu jego zależności od buforowanego celu
+                     naruszy izolację w projekcie zależności przy użyciu
+                     nieprawidłowego stanu z powodu jego zależności od buforowanego celu,
                      którego efekty uboczne nie byłyby brane pod uwagę.
                      (Na przykład definicja właściwości).
 
-                     Jest to bardziej restrykcyjny tryb MSBuild, ponieważ wymaga
-,
+                     Jest to bardziej restrykcyjny tryb programu MSBuild, ponieważ wymaga,
                      aby graf projektu był statycznie wykrywalny w
-                     czasie ewaluacji, ale może też poprawiać planowanie i zmniejszyć
-                     pamięć podczas budowania dużego zestawu projektów.
+                     czasie oceny, ale może też poprawiać planowanie i zmniejszać
+                     zapas pamięci podczas budowania dużego zestawu projektów.
                      (Skrócona forma: -isolate)
 
-                     Ta flaga jest eksperymentalna i może nie działać zgodnie z przeznaczeniem.
+                     Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.

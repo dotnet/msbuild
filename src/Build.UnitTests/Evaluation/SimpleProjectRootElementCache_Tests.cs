@@ -27,6 +27,20 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         }
 
         [Fact]
+        public void DiscardImplicitReferences_RemovesAllEntries()
+        {
+            string projectFile = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
+            ProjectRootElement rootElementToCache = ProjectRootElement.Create(projectFile);
+
+            var cache = new SimpleProjectRootElementCache();
+            cache.AddEntry(rootElementToCache);
+
+            cache.DiscardImplicitReferences();
+
+            cache.Get(projectFile, null, false, null).ShouldBeNull();
+        }
+
+        [Fact]
         public void Get_GivenCachedProjectFile_ReturnsRootElement()
         {
             string projectFile = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";

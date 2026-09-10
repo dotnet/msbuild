@@ -47,6 +47,18 @@ Set the environment variable `MSBUILDDEBUGONSTART` to control debugger behavior 
 
 For example, set `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the process manually after it starts.
 
+## Debugging MSBuild Server
+
+With Server enabled, use `MSBUILDDEBUGONSTART=4` to launch a debugger in the server (Windows), or `5` to wait for manual attachment. These modes skip the forwarding client and other child nodes, and pause **after connection but before evaluation**, on either a new or reused server.
+
+```powershell
+$env:MSBUILDUSESERVER = '1'
+$env:MSBUILDDEBUGONSTART = '5'
+dotnet msbuild .\project.proj
+```
+
+Attach to the server PID printed in the terminal and resume execution; unlike mode `2`, no Enter key is needed. No connection or handshake changes are required because the client is already connected. Existing cancellation/fallback behavior is unchanged: resume or stop the server manually to abandon the wait. Unset `MSBUILDDEBUGONSTART` when finished. These modes do not cover server startup or handshake debugging.
+
 ## Using the repository binaries to perform builds
 
 ## Run tests from the command line

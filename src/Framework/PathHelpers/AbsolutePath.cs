@@ -186,7 +186,7 @@ namespace Microsoft.Build.Framework
         /// Preserves the OriginalValue of the current instance.
         /// </para>
         /// </remarks>
-        internal AbsolutePath GetCanonicalForm()
+        public AbsolutePath GetCanonicalForm()
         {
             return new AbsolutePath(System.IO.Path.GetFullPath(Value), OriginalValue, ignoreRootedCheck: true);
         }

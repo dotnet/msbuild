@@ -4,7 +4,7 @@
 
 Enable binary logging in CI/CD pipelines without modifying artifacts on disk.
 
-**Proposed solution:** An environment variable that enables diagnostic logging without touching any files on disk-no response file creation, no project file modifications, no build script changes.
+**Proposed solution:** An environment variable (`MSBUILD_LOGGING_ARGS`) that enables diagnostic logging without touching any files on disk—no response file creation, no project file modifications, and no build script changes.
 
 **Important for company-wide deployment:** When enabling this feature organization-wide (e.g., via CI/CD pipeline configuration), the team setting the environment variable may not be the team that owns individual codebases. Ensure stakeholders understand that builds with `/warnaserror` may be affected and be ready to mitigate this.
 

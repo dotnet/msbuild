@@ -111,7 +111,9 @@ namespace Microsoft.Build.Evaluation
 
         internal override void DiscardImplicitReferences()
         {
-            throw new NotImplementedException();
+            // This cache does not track whether an entry was explicitly loaded - Get ignores isExplicitlyLoaded -
+            // so every entry it holds is an implicit reference and discarding all of them is the correct behavior.
+            Clear();
         }
 
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)

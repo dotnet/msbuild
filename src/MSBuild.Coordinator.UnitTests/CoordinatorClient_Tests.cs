@@ -201,6 +201,115 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
+    public async Task Dispose_IsIdempotentAndSendsSingleRelease()
+    {
+        using NamedPipeServerStream serverPipe = new(
+            _pipeName,
+            PipeDirection.InOut,
+            NamedPipeServerStream.MaxAllowedServerInstances,
+            PipeTransmissionMode.Byte,
+            PipeOptions.Asynchronous);
+
+        Task serverTask = Task.Run(async () =>
+        {
+            await serverPipe.WaitForConnectionAsync(_cts.Token);
+
+            using BinaryReader reader = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
+            BinaryWriter writer = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
+            try
+            {
+                reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
+                writer.Write(new ServerHandshakeMessage([Capabilities.NestedGrants]));
+
+                reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
+                writer.Write(new NodeGrantMessage(Guid.NewGuid(), grantedNodes: 4));
+
+                (await ReadClientMessageWithTimeout(reader)).ShouldBe(ReleaseNodesMessage.Instance);
+
+                Task<ClientMessage> secondRead = Task.Run(reader.ReadClientMessage);
+                (await Task.WhenAny(secondRead, Task.Delay(5000))).ShouldBe(secondRead);
+                Exception ex = await Should.ThrowAsync<Exception>(async () => await secondRead);
+                (ex is IOException or EndOfStreamException).ShouldBeTrue($"Expected {nameof(IOException)} or {nameof(EndOfStreamException)}, got {ex.GetType().FullName}");
+            }
+            finally
+            {
+                DisposeWriterIgnoringBrokenPipe(writer);
+            }
+        });
+
+        CoordinatorClient? client = TryConnectToServer(
+            requestedNodes: 8,
+            DefaultSettings with
+            {
+                ProcessId = Pid1,
+            });
+
+        client.ShouldNotBeNull();
+
+        await Task.WhenAll(
+            Task.Run(client.Dispose),
+            Task.Run(client.Dispose),
+            Task.Run(client.Dispose),
+            Task.Run(client.Dispose));
+
+        await serverTask;
+    }
+
+    [Fact]
+    public async Task DeferredGrant_SendsHeartbeatsWhileWaiting()
+    {
+        using NamedPipeServerStream serverPipe = new(
+            _pipeName,
+            PipeDirection.InOut,
+            NamedPipeServerStream.MaxAllowedServerInstances,
+            PipeTransmissionMode.Byte,
+            PipeOptions.Asynchronous);
+
+        Task serverTask = Task.Run(async () =>
+        {
+            await serverPipe.WaitForConnectionAsync(_cts.Token);
+
+            using BinaryReader reader = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
+            using BinaryWriter writer = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
+
+            reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
+            writer.Write(new ServerHandshakeMessage([Capabilities.NestedGrants]));
+
+            reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
+            writer.Write(WaitMessage.Instance);
+
+            (await ReadClientMessageWithTimeout(reader)).ShouldBe(HeartbeatMessage.Instance);
+
+            writer.Write(new NodeGrantMessage(Guid.NewGuid(), grantedNodes: 3));
+
+            ClientMessage message;
+            do
+            {
+                message = await ReadClientMessageWithTimeout(reader);
+            }
+            while (message is HeartbeatMessage);
+
+            message.ShouldBe(ReleaseNodesMessage.Instance);
+        });
+
+        Task<CoordinatorClient?> clientTask = Task.Run(() =>
+            TryConnectToServer(
+                requestedNodes: 8,
+                DefaultSettings with
+                {
+                    ProcessId = Pid1,
+                    HeartbeatIntervalMs = 50,
+                }));
+
+        using CoordinatorClient? client = await clientTask;
+        client.ShouldNotBeNull();
+        client.GrantedNodes.ShouldBe(3);
+        client.Dispose();
+
+        await serverTask;
+    }
+
+    [Fact]
     public Task TryConnect_CustomSettings_UsesSettingsPipeName()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -287,4 +396,23 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
 
     private CoordinatorClient? TryConnectToServer(int requestedNodes, CoordinatorSettings settings)
         => CoordinatorClient.TestAccessor.TryConnectToServer(requestedNodes, settings, _output);
+
+    private static async Task<ClientMessage> ReadClientMessageWithTimeout(BinaryReader reader)
+    {
+        Task<ClientMessage> readTask = Task.Run(reader.ReadClientMessage);
+        (await Task.WhenAny(readTask, Task.Delay(5000))).ShouldBe(readTask);
+        return await readTask;
+    }
+
+    private static void DisposeWriterIgnoringBrokenPipe(BinaryWriter writer)
+    {
+        try
+        {
+            writer.Dispose();
+        }
+        catch (IOException)
+        {
+            // BinaryWriter.Dispose flushes; the client may already have closed the test pipe.
+        }
+    }
 }

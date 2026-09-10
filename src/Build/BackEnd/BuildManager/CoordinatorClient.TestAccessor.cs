@@ -35,19 +35,23 @@ internal sealed partial class CoordinatorClient
                 if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
                 {
                     output.WriteLine("CoordinatorClient: Test connection timed out");
-                    pipeStream.Dispose();
                     return null;
                 }
 
                 output.WriteLine("CoordinatorClient: Connected to test server");
 
-                return TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService: null);
+                CoordinatorClient? client = TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService: null);
+                pipeStream = null; // Ownership transferred unconditionally; TryNegotiate disposes on failure.
+                return client;
             }
             catch (Exception ex) when (!Debugger.IsAttached)
             {
                 output.WriteLine($"CoordinatorClient: Exception during test connect: {ex.Message}");
-                pipeStream?.Dispose();
                 return null;
+            }
+            finally
+            {
+                pipeStream?.Dispose();
             }
         }
     }

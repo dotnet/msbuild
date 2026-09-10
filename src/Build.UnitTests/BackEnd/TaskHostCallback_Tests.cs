@@ -60,6 +60,43 @@ namespace Microsoft.Build.UnitTests.BackEnd
             bool.Parse(projectInstance.GetPropertyValue("Result")).ShouldBe(expectedResult);
         }
 
+        [Fact]
+        public void TaskHostCommunication_WorksWhenPacketPreBufferingDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+
+                string projectContents = $"""
+                    <Project>
+                        <UsingTask TaskName="{nameof(IsRunningMultipleNodesTask)}" AssemblyFile="{typeof(IsRunningMultipleNodesTask).Assembly.Location}" TaskFactory="TaskHostFactory" />
+                        <Target Name="Test">
+                            <{nameof(IsRunningMultipleNodesTask)}>
+                                <Output PropertyName="Result" TaskParameter="IsRunningMultipleNodes" />
+                            </{nameof(IsRunningMultipleNodesTask)}>
+                        </Target>
+                    </Project>
+                    """;
+
+                TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+                ProjectInstance projectInstance = new(project.ProjectFile);
+
+                BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                    new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false },
+                    new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                bool.Parse(projectInstance.GetPropertyValue("Result")).ShouldBeTrue();
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
         /// <summary>
         /// Verifies IsRunningMultipleNodes callback works when unmarked task is auto-ejected to TaskHost in MT mode.
         /// </summary>

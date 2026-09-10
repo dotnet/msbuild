@@ -4,6 +4,7 @@
 using System.Collections.Immutable;
 using System.IO;
 using System.IO.Pipes;
+using System.Threading;
 using Microsoft.Build.Framework.Coordinator;
 
 namespace Microsoft.Build.Coordinator;
@@ -18,6 +19,7 @@ internal sealed partial class CoordinatorServer
         private readonly NamedPipeServerStream _pipeStream;
         private readonly BinaryReader _reader;
         private readonly BinaryWriter _writer;
+        private int _disposed;
 
         /// <summary>
         ///  Gets the unique identifier for this connection, assigned by the client during handshake.
@@ -71,6 +73,11 @@ internal sealed partial class CoordinatorServer
 
         public void Dispose()
         {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
             try
             {
                 _writer.Dispose();

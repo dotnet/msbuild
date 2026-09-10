@@ -2070,6 +2070,156 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// A cache that reloads changed files from disk - the one the MSBuild Server entry node reuses across builds -
+        /// already notices whatever an implicit restore rewrote, so <see cref="BuildRequestDataFlags.ClearCachesAfterBuild"/>
+        /// must leave it populated. Discarding it would only force the build that follows restore to re-parse the
+        /// entire import closure. Opting out of the change wave restores the unconditional flush.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ClearCachesAfterBuildKeepsCacheThatReloadsFromDisk(bool changeWaveEnabled)
+        {
+            if (!changeWaveEnabled)
+            {
+                ChangeWaves.ResetStateForTests();
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            }
+
+            // Matches how the MSBuild Server entry node configures its cache.
+            ProjectRootElementCache cache = RunSubmission(autoReloadFromDisk: true, BuildRequestDataFlags.ClearCachesAfterBuild, out string projectPath);
+
+            if (changeWaveEnabled)
+            {
+                cache.TryGet(projectPath).ShouldNotBeNull();
+            }
+            else
+            {
+                cache.TryGet(projectPath).ShouldBeNull();
+            }
+        }
+
+        /// <summary>
+        /// A cache that cannot notice that a file changed on disk has no way to pick up what restore rewrote, so it
+        /// must still be discarded even when the change wave is enabled.
+        /// </summary>
+        [Fact]
+        public void ClearCachesAfterBuildStillClearsCacheThatDoesNotReloadFromDisk()
+        {
+            // Control: the same submission without the flag leaves the project in the cache, so the assertion
+            // below fails if the entry ever stops being discarded, rather than passing because a build of this
+            // shape never populated the cache in the first place.
+            RunSubmission(autoReloadFromDisk: false, BuildRequestDataFlags.None, out string controlProjectPath)
+                .TryGet(controlProjectPath).ShouldNotBeNull();
+
+            ProjectRootElementCache cache = RunSubmission(autoReloadFromDisk: false, BuildRequestDataFlags.ClearCachesAfterBuild, out string projectPath);
+
+            cache.TryGet(projectPath).ShouldBeNull();
+        }
+
+        /// <summary>
+        /// Keeping the cache is only safe because the entries a restore can invalidate are reloaded from disk on the
+        /// next read. This is the invariant the optimization rests on: the build that follows a submission which
+        /// rewrote an imported file must observe the rewrite, even though the cache was never flushed.
+        /// </summary>
+        [Fact]
+        public void ClearCachesAfterBuildKeptCacheStillSeesRewrittenImport()
+        {
+            TransientTestFolder folder = _env.CreateFolder();
+            string importPath = Path.Combine(folder.Path, "generated.props");
+
+            File.WriteAllText(importPath, "<Project><PropertyGroup><PropertyFromImport>before</PropertyFromImport></PropertyGroup></Project>");
+
+            // Make sure the rewrite below lands on a different timestamp regardless of file system granularity.
+            File.SetLastWriteTime(importPath, DateTime.Now.AddMinutes(-1));
+
+            string rewrittenImport = "&lt;Project&gt;&lt;PropertyGroup&gt;&lt;PropertyFromImport&gt;after&lt;/PropertyFromImport&gt;&lt;/PropertyGroup&gt;&lt;/Project&gt;";
+            string projectPath = _env.CreateFile(folder, "test.proj", $@"
+<Project>
+  <Import Project=""{importPath}"" />
+  <Target Name=""Restore"">
+    <WriteLinesToFile File=""{importPath}"" Overwrite=""true"" Lines=""{rewrittenImport}"" />
+  </Target>
+  <Target Name=""Build"">
+    <Error Text=""Stale import: PropertyFromImport was '$(PropertyFromImport)'"" Condition=""'$(PropertyFromImport)' != 'after'"" />
+  </Target>
+</Project>").Path;
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk: true);
+            _parameters.ProjectRootElementCache = cache;
+
+            // Restore runs in its own build session, the way MSBuild.exe sequences an implicit restore.
+            _buildManager.BeginBuild(_parameters);
+            _buildManager.BuildRequest(new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "Restore" },
+                null,
+                BuildRequestDataFlags.ClearCachesAfterBuild)).OverallResult.ShouldBe(BuildResultCode.Success);
+            _buildManager.EndBuild();
+
+            // The cache survived the flush, which is the optimization. Reading the project file does not disturb
+            // the cache because the restore did not rewrite it.
+            cache.TryGet(projectPath).ShouldNotBeNull();
+
+            // The build that follows still sees what the restore rewrote.
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "Build" },
+                null,
+                BuildRequestDataFlags.None));
+            _buildManager.EndBuild();
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // It saw it because reading the rewritten file revalidated its timestamp, dropped the stale entry and
+            // reloaded from disk, so the cache now holds the rewritten content instead of what it read before the
+            // restore. That revalidation is what makes keeping the rest of the cache safe.
+            ProjectRootElement reloadedImport = cache.TryGet(importPath);
+            reloadedImport.ShouldNotBeNull();
+            reloadedImport.Properties.ShouldContain(property => property.Name == "PropertyFromImport" && property.Value == "after");
+        }
+
+        /// <summary>
+        /// Runs a single build request carrying <paramref name="flags"/> against a trivial project, and returns the
+        /// cache it used so the caller can assert on what survived.
+        /// </summary>
+        private ProjectRootElementCache RunSubmission(bool autoReloadFromDisk, BuildRequestDataFlags flags, out string projectPath)
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test' />
+</Project>
+");
+
+            projectPath = _env.CreateFile(".proj").Path;
+            File.WriteAllText(projectPath, contents);
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk);
+            _parameters.ProjectRootElementCache = cache;
+
+            var data = new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "test" },
+                null,
+                flags);
+
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(data);
+            _buildManager.EndBuild();
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            return cache;
+        }
+
+        /// <summary>
         /// Verifies that explicitly loaded projects' imports are all marked as also explicitly loaded.
         /// </summary>
         [Fact]

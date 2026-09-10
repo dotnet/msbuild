@@ -71,10 +71,6 @@ Knobs:
 * `MSBUILDADDITIONALSDKRESOLVERSFOLDER` (and `_NET` / `_NETFRAMEWORK` variants) - test hook
   that adds an override resolver folder.
 * `MSBUILDINCLUDEDEFAULTSDKRESOLVER=false` - drop the built-in default resolver.
-* Legacy path: when ChangeWave 17.10 is **disabled**, `SdkResolverService` uses a
-  non-caching `SdkResolverLoader` and the eager `LoadAllResolvers`, which scans
-  `MSBuildToolsDirectory32\SdkResolvers` and loads **every** resolver up front. The default
-  (17.10 enabled) path is manifest-based and lazy via `CachingSdkResolverLoader`.
 
 ### 1.3 The built-in fallback resolver
 
@@ -318,10 +314,6 @@ it, can be removed. Drop `[RequiresUnreferencedCode]` from (build-verify after e
 through the guard: `SdkResolverLoader.LoadResolverAssembly`, `GetResolverTypes`,
 `LoadResolvers`, `LoadResolversFromManifest`, `LoadAllResolvers`, and
 `CachingSdkResolverLoader.LoadResolversFromManifest`.
-
-Legacy note: the `LoadAllResolvers` path (only used when ChangeWave 17.10 is disabled) is also
-reflective. Either apply the same guard there, or document that disabling Wave17.10 is not part
-of the trim-safe contract (the default, caching, manifest-based path is what trims).
 
 ### 2.5 Step 4 - the error resource
 

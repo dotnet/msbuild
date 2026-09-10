@@ -627,7 +627,7 @@
     </comment>
   </data>
   <data name="HelpMessage_49_MultiThreadedSwitch" xml:space="preserve">
-    <value>  -multithreaded
+    <value>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -1495,6 +1495,15 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="InvalidMultiThreadedValue" xml:space="preserve">
+    <value>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="InvalidIsolateProjectsValue" xml:space="preserve">
     <value>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</value>
     <comment>
@@ -1828,7 +1837,7 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1072.
+        Next error code should be MSB1073.
 
         Don't forget to update this comment after using the new code.
   -->

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 
@@ -60,7 +61,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Maps a node id to the currently executing request, if any.
         /// </summary>
-        private readonly Dictionary<int, SchedulableRequest> _executingRequestByNode = new Dictionary<int, SchedulableRequest>(32);
+        /// <remarks>
+        /// This is concurrent because file access reporting reads it from the thread draining a detoured node's
+        /// report pipe, which does not hold the BuildManager's lock. Writes still only ever come from the
+        /// scheduler, hence a concurrency level of 1.
+        /// </remarks>
+        private readonly ConcurrentDictionary<int, SchedulableRequest> _executingRequestByNode = new(concurrencyLevel: 1, capacity: 32);
 
         /// <summary>
         /// Maps a node id to those requests which are ready to execute, if any.
@@ -376,7 +382,7 @@ namespace Microsoft.Build.BackEnd
 
                 case SchedulableRequestState.Executing:
                     Assumed.False(_executingRequests.ContainsKey(request.BuildRequest.GlobalRequestId), $"Request with global id {request.BuildRequest.GlobalRequestId} is already executing!");
-                    Assumed.True(!_executingRequestByNode.ContainsKey(request.AssignedNode) || _executingRequestByNode[request.AssignedNode] == null, $"Node {request.AssignedNode} is currently executing a request.");
+                    Assumed.True(GetExecutingRequestByNode(request.AssignedNode) is null, $"Node {request.AssignedNode} is currently executing a request.");
 
                     _executingRequests[request.BuildRequest.GlobalRequestId] = request;
                     _executingRequestByNode[request.AssignedNode] = request;
@@ -497,13 +503,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool IsNodeWorking(int nodeId)
         {
-            SchedulableRequest request;
-            if (!_executingRequestByNode.TryGetValue(nodeId, out request))
-            {
-                return false;
-            }
-
-            return request != null;
+            return GetExecutingRequestByNode(nodeId) is not null;
         }
 
         /// <summary>
@@ -534,11 +534,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets the request currently executing on the node.
+        /// Gets the request currently executing on the node, or null if the node is not executing one.
         /// </summary>
         public SchedulableRequest GetExecutingRequestByNode(int nodeId)
         {
-            return _executingRequestByNode[nodeId];
+            return _executingRequestByNode.TryGetValue(nodeId, out SchedulableRequest request) ? request : null;
         }
 
         /// <summary>

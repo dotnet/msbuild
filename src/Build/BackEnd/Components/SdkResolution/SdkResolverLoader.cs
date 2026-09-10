@@ -245,37 +245,35 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         protected virtual Assembly LoadResolverAssembly(string resolverPath)
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+            string resolverFileName = Path.GetFileNameWithoutExtension(resolverPath);
+            if (resolverFileName.Equals("Microsoft.DotNet.MSBuildSdkResolver", StringComparison.OrdinalIgnoreCase))
             {
-                string resolverFileName = Path.GetFileNameWithoutExtension(resolverPath);
-                if (resolverFileName.Equals("Microsoft.DotNet.MSBuildSdkResolver", StringComparison.OrdinalIgnoreCase))
+                // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
+                // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
+                var buildEnvironment = BuildEnvironmentHelper.Instance;
+                AssemblyName assemblyName = CreateAssemblyNameWithCodeBase(resolverFileName, resolverPath);
+
+                // Need fallback for scenarios where we're not running directly in MSBuild.exe app host.
+                // RunningInMSBuildExe is true when the actual process is MSBuild.exe (app host),
+                // false when running via dotnet CLI (dotnet MSBuild.dll), external API callers, or test runners.
+                // VS and MSBuild.exe app host can use Assembly.Load reliably and benefit from NGEN.
+                bool needsFallback = buildEnvironment.Mode == BuildEnvironmentMode.Standalone && !buildEnvironment.RunningInMSBuildExe;
+
+                if (needsFallback)
                 {
-                    // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
-                    // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
-                    var buildEnvironment = BuildEnvironmentHelper.Instance;
-                    AssemblyName assemblyName = CreateAssemblyNameWithCodeBase(resolverFileName, resolverPath);
-
-                    // Need fallback for scenarios where we're not running directly in MSBuild.exe app host.
-                    // RunningInMSBuildExe is true when the actual process is MSBuild.exe (app host),
-                    // false when running via dotnet CLI (dotnet MSBuild.dll), external API callers, or test runners.
-                    // VS and MSBuild.exe app host can use Assembly.Load reliably and benefit from NGEN.
-                    bool needsFallback = buildEnvironment.Mode == BuildEnvironmentMode.Standalone && !buildEnvironment.RunningInMSBuildExe;
-
-                    if (needsFallback)
-                    {
-                        // For external API users and dotnet CLI, use LoadFrom directly
-                        // Assembly.Load fails in these scenarios due to assembly resolution context,
-                        // so we use LoadFrom which works reliably without needing try-catch
-                        return Assembly.LoadFrom(resolverPath);
-                    }
-                    else
-                    {
-                        // VS and MSBuild.exe direct usage: use Assembly.Load directly without fallback
-                        // These scenarios should work reliably with Assembly.Load and benefit from NGEN
-                        return Assembly.Load(assemblyName);
-                    }
+                    // For external API users and dotnet CLI, use LoadFrom directly
+                    // Assembly.Load fails in these scenarios due to assembly resolution context,
+                    // so we use LoadFrom which works reliably without needing try-catch
+                    return Assembly.LoadFrom(resolverPath);
+                }
+                else
+                {
+                    // VS and MSBuild.exe direct usage: use Assembly.Load directly without fallback
+                    // These scenarios should work reliably with Assembly.Load and benefit from NGEN
+                    return Assembly.Load(assemblyName);
                 }
             }
+
             return Assembly.LoadFrom(resolverPath);
 #else
             return s_loader.LoadFromPath(resolverPath);

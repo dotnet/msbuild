@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
         int GetConfigurationIdFromPlan(string configurationPath);
 
         /// <summary>
-        /// Retrieves the request executing on a node.
+        /// Retrieves the request executing on a node, or null if the node is not executing one.
         /// </summary>
         BuildRequest GetExecutingRequestByNode(int nodeId);
 

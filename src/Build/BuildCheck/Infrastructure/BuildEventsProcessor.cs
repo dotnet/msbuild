@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -149,7 +150,9 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
             // Add a new entry to _tasksBeingExecuted. TaskParameters are initialized empty and will be recorded
             // based on TaskParameterEventArgs we receive later.
-            Dictionary<string, TaskInvocationCheckData.TaskParameter> taskParameters = new();
+            // Parameter names are MSBuild names - compare them case-insensitively so checks are not sensitive
+            // to the casing a project author happened to use.
+            Dictionary<string, TaskInvocationCheckData.TaskParameter> taskParameters = new(MSBuildNameIgnoreCaseComparer.Default);
 
             ExecutingTaskData taskData = new()
             {
@@ -171,20 +174,17 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         ICheckContext checkContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
-        if (!_buildCheckCentralContext.HasTaskInvocationActions)
-        {
-            // No check is interested in task invocation actions -> nothing to do.
-            return;
-        }
-
         if (taskFinishedEventArgs?.BuildEventContext is not null)
         {
             TaskKey taskKey = new TaskKey(taskFinishedEventArgs.BuildEventContext);
             if (_tasksBeingExecuted.TryGetValue(taskKey, out ExecutingTaskData taskData))
             {
-                // All task parameters have been recorded by now so remove the task from the dictionary and fire the registered build check actions.
+                // Always remove completed tasks, even if the last interested check was deregistered while the task was running.
                 _tasksBeingExecuted.Remove(taskKey);
-                _buildCheckCentralContext.RunTaskInvocationActions(taskData.CheckData, checkContext, ReportResult);
+                if (_buildCheckCentralContext.HasTaskInvocationActions)
+                {
+                    _buildCheckCentralContext.RunTaskInvocationActions(taskData.CheckData, checkContext, ReportResult);
+                }
             }
         }
     }
