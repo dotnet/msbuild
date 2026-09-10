@@ -22,13 +22,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// Fixes:
     /// - MSBuildTask0002: Replaces banned APIs with TaskEnvironment equivalents
     /// - MSBuildTask0003: Wraps path arguments with TaskEnvironment.GetAbsolutePath()
+    /// - MSBuildTask0015: Resolves paths before extracting their directory or root
     /// </summary>
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MultiThreadableTaskCodeFixProvider))]
     [Shared]
     public sealed class MultiThreadableTaskCodeFixProvider : CodeFixProvider
     {
         public override ImmutableArray<string> FixableDiagnosticIds =>
-            ImmutableArray.Create(DiagnosticIds.TaskEnvironmentRequired, DiagnosticIds.FilePathRequiresAbsolute);
+            ImmutableArray.Create(DiagnosticIds.TaskEnvironmentRequired, DiagnosticIds.FilePathRequiresAbsolute, DiagnosticIds.ResolvePathBeforeExtraction);
 
         public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -62,6 +63,25 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 {
                     RegisterTaskEnvironmentFix(context, semanticModel, node, diagnostic);
                 }
+                else if (diagnostic.Id == DiagnosticIds.ResolvePathBeforeExtraction &&
+                    node is InvocationExpressionSyntax invocationSyntax &&
+                    semanticModel.GetOperation(node) is IInvocationOperation invocation &&
+                    GetInvertedPathExtraction(invocation, semanticModel.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName)) is not null &&
+                    GetPathToResolve(invocation.Arguments[0]).Syntax.FirstAncestorOrSelf<ArgumentSyntax>() is { } innerArgument)
+                {
+                    // The swap returns string, not AbsolutePath, and GetAbsolutePath requires a non-null
+                    // input even though extraction accepts null. Don't introduce compiler diagnostics.
+                    if (invocation.Parent is IConversionOperation { Type.SpecialType: SpecialType.System_String } &&
+                        semanticModel.GetTypeInfo(innerArgument.Expression).Nullability.FlowState != NullableFlowState.MaybeNull)
+                    {
+                        context.RegisterCodeFix(
+                            CodeAction.Create(
+                                title: "Resolve path before extracting its directory or root",
+                                createChangedDocument: ct => SwapPathExtractionAsync(context.Document, invocationSyntax, innerArgument, ct),
+                                equivalenceKey: "ResolvePathBeforeExtraction"),
+                            diagnostic);
+                    }
+                }
             }
         }
 
@@ -89,6 +109,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var targetArg = FindPathArgument(semanticModel, node, argumentList);
             if (targetArg is null)
+            {
+                return;
+            }
+
+            // Moving inside an extraction must not introduce a nullable argument warning.
+            if (!argumentList.Arguments.Contains(targetArg) &&
+                semanticModel.GetTypeInfo(targetArg.Expression).Nullability.FlowState == NullableFlowState.MaybeNull)
             {
                 return;
             }
@@ -134,12 +161,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     }
 
                     // Skip arguments that aren't written in this call's argument list (e.g. defaulted
-                    // optional parameters, whose syntax is the call itself).
-                    if (argument.Syntax is ArgumentSyntax argumentSyntax &&
+                    // optional parameters, whose syntax is the call itself). Null-forgiving syntax can
+                    // make the operation point at the expression rather than its ArgumentSyntax.
+                    if (argument.Syntax.FirstAncestorOrSelf<ArgumentSyntax>() is { } argumentSyntax &&
                         argumentList.Arguments.Contains(argumentSyntax) &&
                         !IsWrappedSafely(argument.Value, taskEnvironmentType, absolutePathType, iTaskItemType))
                     {
-                        return argumentSyntax;
+                        return GetPathToResolve(argument).Syntax.FirstAncestorOrSelf<ArgumentSyntax>();
                     }
                 }
 
@@ -155,6 +183,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return null;
+        }
+
+        private static IArgumentOperation GetPathToResolve(IArgumentOperation argument)
+        {
+            // Resolve the original path before extracting a directory/root, including nested extractions.
+            while (argument.Value is IInvocationOperation extraction && IsPathExtraction(extraction))
+            {
+                argument = extraction.Arguments[0];
+            }
+
+            return argument;
         }
 
         /// <summary>
@@ -371,6 +410,22 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             var newArgument = argument.WithExpression(wrappedExpr);
             editor.ReplaceNode(argument, newArgument);
+
+            return editor.GetChangedDocument();
+        }
+
+        private static async Task<Document> SwapPathExtractionAsync(
+            Document document, InvocationExpressionSyntax invocation, ArgumentSyntax innerArgument, CancellationToken ct)
+        {
+            var editor = await DocumentEditor.CreateAsync(document, ct).ConfigureAwait(false);
+            var outerArgument = invocation.ArgumentList.Arguments[0];
+            var resolvedArgument = outerArgument.WithExpression(innerArgument.Expression.WithoutTrivia());
+            var resolvedPath = invocation.WithArgumentList(
+                invocation.ArgumentList.WithArguments(SyntaxFactory.SingletonSeparatedList(resolvedArgument)))
+                .WithoutTrivia();
+            var replacement = outerArgument.Expression.ReplaceNode(
+                innerArgument.Expression, resolvedPath.WithTriviaFrom(innerArgument.Expression));
+            editor.ReplaceNode(invocation, replacement.WithTriviaFrom(invocation));
 
             return editor.GetChangedDocument();
         }

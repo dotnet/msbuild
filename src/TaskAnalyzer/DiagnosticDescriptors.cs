@@ -139,6 +139,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "TaskRouter reads [MSBuildMultiThreadableTask] with inherit: false, off the concrete type the engine has just instantiated as a task. The attribute therefore only has an effect on a non-abstract class that implements ITask. On a type that is not a task, nothing ever reads it. On an abstract task, the engine never instantiates that type, and because the attribute is not inherited the concrete subclasses do not pick it up -- so every one of them is still routed to an out-of-proc TaskHost. Both shapes usually mean the attribute was applied to the wrong class: a helper type beside the real task, or a shared base instead of each task that derives from it.");
 
+        public static readonly DiagnosticDescriptor ResolvePathBeforeExtraction = new(
+            id: DiagnosticIds.ResolvePathBeforeExtraction,
+            title: "Resolve the path before extracting its directory or root",
+            messageFormat: "'Path.{0}' can return an empty or null path that GetAbsolutePath rejects; use Path.{0}(TaskEnvironment.GetAbsolutePath(...)) instead",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "Resolve the original path through TaskEnvironment.GetAbsolutePath before calling Path.GetDirectoryName or Path.GetPathRoot, rather than resolving the extracted directory or root.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -153,6 +162,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             PreferTaskEnvironmentConstructorInjection,
             TaskEnvironmentNeverAssigned,
             MissingMultiThreadableTaskAttribute,
-            MultiThreadableTaskAttributeHasNoEffect);
+            MultiThreadableTaskAttributeHasNoEffect,
+            ResolvePathBeforeExtraction);
     }
 }

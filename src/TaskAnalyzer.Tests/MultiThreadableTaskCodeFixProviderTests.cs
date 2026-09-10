@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
@@ -43,6 +44,7 @@ public class MultiThreadableTaskCodeFixProviderTests
         DiagnosticIds.FilePathRequiresAbsolute => new DiagnosticResult(DiagnosticDescriptors.FilePathRequiresAbsolute),
         DiagnosticIds.PotentialIssue => new DiagnosticResult(DiagnosticDescriptors.PotentialIssue),
         DiagnosticIds.TransitiveUnsafeCall => new DiagnosticResult(DiagnosticDescriptors.TransitiveUnsafeCall),
+        DiagnosticIds.ResolvePathBeforeExtraction => new DiagnosticResult(DiagnosticDescriptors.ResolvePathBeforeExtraction),
         _ => new DiagnosticResult(id, DiagnosticSeverity.Warning),
     };
 
@@ -214,6 +216,205 @@ public class MultiThreadableTaskCodeFixProviderTests
                 """,
             Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
                 .WithArguments("File.Exists(string?)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
+    }
+
+    [Theory]
+    [InlineData("Path.GetDirectoryName(TargetFile)", "Path.GetDirectoryName(TaskEnvironment.GetAbsolutePath(TargetFile))")]
+    [InlineData("Path.GetPathRoot(TargetFile)", "Path.GetPathRoot(TaskEnvironment.GetAbsolutePath(TargetFile))")]
+    [InlineData("System.IO.Path.GetDirectoryName(TargetFile)", "System.IO.Path.GetDirectoryName(TaskEnvironment.GetAbsolutePath(TargetFile))")]
+    [InlineData("IOPath.GetPathRoot(TargetFile)", "IOPath.GetPathRoot(TaskEnvironment.GetAbsolutePath(TargetFile))")]
+    [InlineData("GetDirectoryName(TargetFile)", "GetDirectoryName(TaskEnvironment.GetAbsolutePath(TargetFile))")]
+    [InlineData("(Path.GetDirectoryName(path: TargetFile))!", "(Path.GetDirectoryName(path: TaskEnvironment.GetAbsolutePath(TargetFile)))!")]
+    [InlineData("Path.GetDirectoryName(/* file */ TargetFile)", "Path.GetDirectoryName(/* file */ TaskEnvironment.GetAbsolutePath(TargetFile))")]
+    [InlineData("Path.GetDirectoryName(Path.GetDirectoryName(TargetFile))", "Path.GetDirectoryName(Path.GetDirectoryName(TaskEnvironment.GetAbsolutePath(TargetFile)))")]
+    public async Task Fix_PathExtraction_WrapsOriginalPath(string expression, string fixedExpression)
+    {
+        var source = """
+            using System.IO;
+            using IOPath = System.IO.Path;
+            using static System.IO.Path;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public string TargetFile { get; set; } = "list.xml";
+                public override bool Execute()
+                {
+                    REPLACE;
+                    return true;
+                }
+            }
+            """;
+
+        await CreateFixTest(
+            source.Replace("REPLACE", "{|#0:Directory.CreateDirectory(path: " + expression + ")|}"),
+            source.Replace("REPLACE", "Directory.CreateDirectory(path: " + fixedExpression + ")"),
+            Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("Directory.CreateDirectory(string)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
+    }
+
+    [Theory]
+    [InlineData("Path.GetDirectoryName(TargetFile)", "Path.GetDirectoryName(this.TaskEnvironment.GetAbsolutePath(path: TargetFile))", "GetDirectoryName")]
+    [InlineData("IOPath.GetPathRoot(path: TargetFile)", "IOPath.GetPathRoot(path: this.TaskEnvironment.GetAbsolutePath(path: TargetFile))", "GetPathRoot")]
+    [InlineData("(GetDirectoryName(TargetFile))!", "(GetDirectoryName(this.TaskEnvironment.GetAbsolutePath(path: TargetFile)))!", "GetDirectoryName")]
+    [InlineData("Path.GetDirectoryName(/* file */ TargetFile)", "Path.GetDirectoryName(/* file */ this.TaskEnvironment.GetAbsolutePath(path: TargetFile))", "GetDirectoryName")]
+    [InlineData("Path.GetDirectoryName(Path.GetDirectoryName(TargetFile))", "Path.GetDirectoryName(Path.GetDirectoryName(this.TaskEnvironment.GetAbsolutePath(path: TargetFile)))", "GetDirectoryName")]
+    public async Task Fix_InvertedPathExtraction_SwapsCalls(string expression, string fixedExpression, string method)
+    {
+        var source = """
+            using System.IO;
+            using IOPath = System.IO.Path;
+            using static System.IO.Path;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public string TargetFile { get; set; } = "list.xml";
+                public override bool Execute()
+                {
+                    Directory.CreateDirectory(REPLACE);
+                    return true;
+                }
+            }
+            """;
+
+        await CreateFixTest(
+            source.Replace("REPLACE", "{|#0:this.TaskEnvironment.GetAbsolutePath(path: " + expression + ")|}"),
+            source.Replace("REPLACE", fixedExpression),
+            Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(0).WithArguments(method)).RunAsync();
+    }
+
+    [Theory]
+    [InlineData("GetDirectoryName")]
+    [InlineData("GetPathRoot")]
+    public async Task Fix_PathExtraction_LookalikeMethod_WrapsWholeExpression(string method)
+    {
+        var source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    REPLACE;
+                    return true;
+                }
+                private static class Path
+                {
+                    public static string {{method}}(string path) => path;
+                }
+            }
+            """;
+        var expression = $"Path.{method}(\"list.xml\")";
+
+        await CreateFixTest(
+            source.Replace("REPLACE", "{|#0:Directory.CreateDirectory(" + expression + ")|}"),
+            source.Replace("REPLACE", "Directory.CreateDirectory(TaskEnvironment.GetAbsolutePath(" + expression + "))"),
+            Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("Directory.CreateDirectory(string)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
+    }
+
+    [Fact]
+    public async Task Fix_InvertedPathExtraction_AbsolutePathConsumers_NoFixOffered()
+    {
+        await CreateNoFixTest(
+            """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath dir = {|#0:TaskEnvironment.GetAbsolutePath(Path.GetDirectoryName("list.xml"))|};
+                    var root = {|#1:TaskEnvironment.GetAbsolutePath(Path.GetPathRoot("list.xml"))|};
+                    string value = root.Value;
+                    return true;
+                }
+            }
+            """,
+            Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(0).WithArguments("GetDirectoryName"),
+            Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(1).WithArguments("GetPathRoot"));
+    }
+
+    [Fact]
+    public async Task Fix_InvertedPathExtraction_FixAllPreservesReceiver()
+    {
+        var source = """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => true;
+                private static string Resolve(TaskEnvironment environment, string file)
+                {
+                    string dir = DIRECTORY;
+                    return ROOT;
+                }
+            }
+            """;
+        await CreateFixTest(
+            source.Replace("DIRECTORY", "{|#0:environment.GetAbsolutePath(Path.GetDirectoryName(file))|}")
+                .Replace("ROOT", "{|#1:environment.GetAbsolutePath(Path.GetPathRoot(file))|}"),
+            source.Replace("DIRECTORY", "Path.GetDirectoryName(environment.GetAbsolutePath(file))")
+                .Replace("ROOT", "Path.GetPathRoot(environment.GetAbsolutePath(file))"),
+            Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(0).WithArguments("GetDirectoryName"),
+            Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(1).WithArguments("GetPathRoot")).RunAsync();
+    }
+
+    [Theory]
+    [InlineData("GetDirectoryName", false, false)]
+    [InlineData("GetDirectoryName", true, false)]
+    [InlineData("GetPathRoot", false, false)]
+    [InlineData("GetPathRoot", true, false)]
+    [InlineData("GetDirectoryName", false, true)]
+    [InlineData("GetDirectoryName", true, true)]
+    [InlineData("GetPathRoot", false, true)]
+    [InlineData("GetPathRoot", true, true)]
+    public async Task Fix_PathExtraction_NullableInput(string method, bool inverted, bool suppressInput)
+    {
+        var source = """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+                public string? TargetFile { get; set; }
+                public override bool Execute()
+                {
+                    REPLACE;
+                    return true;
+                }
+            }
+            """;
+        var input = suppressInput ? "TargetFile!" : "TargetFile";
+        var extraction = $"Path.{method}({input})!";
+        var original = inverted
+            ? "Directory.CreateDirectory({|#0:TaskEnvironment.GetAbsolutePath(" + extraction + ")|})"
+            : "{|#0:Directory.CreateDirectory(" + extraction + ")|}";
+        var diagnostic = inverted
+            ? Diag(DiagnosticIds.ResolvePathBeforeExtraction).WithLocation(0).WithArguments(method)
+            : Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("Directory.CreateDirectory(string)", "wrap path argument with TaskEnvironment.GetAbsolutePath()");
+        var fixedStatement = suppressInput
+            ? $"Directory.CreateDirectory(Path.{method}(TaskEnvironment.GetAbsolutePath({input}))!)"
+            : original;
+        var test = CreateFixTest(source.Replace("REPLACE", original), source.Replace("REPLACE", fixedStatement), diagnostic);
+        if (!suppressInput)
+        {
+            test.FixedState.ExpectedDiagnostics.Add(diagnostic);
+        }
+
+        test.CompilerDiagnostics = CompilerDiagnostics.Warnings;
+        test.SolutionTransforms.Add((solution, projectId) =>
+        {
+            var project = solution.GetProject(projectId)!;
+            return solution.WithProjectCompilationOptions(projectId,
+                    ((CSharpCompilationOptions)project.CompilationOptions!).WithNullableContextOptions(NullableContextOptions.Enable))
+                .WithProjectParseOptions(projectId, project.ParseOptions!.WithDocumentationMode(DocumentationMode.Parse));
+        });
+        await test.RunAsync();
     }
 
     [Fact]

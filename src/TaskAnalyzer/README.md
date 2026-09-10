@@ -28,6 +28,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0012** | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` applied directly | MSBuild never assigns the `TaskEnvironment` property |
 | **MSBuildTask0013** | Info (off by default) | Concrete tasks declaring `IMultiThreadableTask` in their own base list | Missing `[MSBuildMultiThreadableTask]`, so the task still runs out-of-proc |
 | **MSBuildTask0014** | Warning | Classes carrying `[MSBuildMultiThreadableTask]` that are not an `ITask`, or are abstract | The attribute has no effect because MSBuild never routes that type as a task |
+| **MSBuildTask0015** | Warning | All `ITask` implementations | Resolve the path before extracting its directory or root |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -107,6 +108,10 @@ File.Exists(item.GetMetadataValue("FullPath"))
 
 // 5. Argument already typed as AbsolutePath
 void Helper(AbsolutePath p) => File.Exists(p);
+
+// 6. Extract the directory or root of an absolute path
+Directory.CreateDirectory(Path.GetDirectoryName(TaskEnvironment.GetAbsolutePath(relativePath)))
+Directory.Exists(Path.GetPathRoot(TaskEnvironment.GetAbsolutePath(relativePath)))
 ```
 
 ### MSBuildTask0004 — Potential Issue (Review Required)
@@ -438,30 +443,46 @@ Fix by moving the attribute onto each concrete task class. Both shapes usually m
 
 A concrete task that MSBuild cannot construct — no public parameterless constructor and no public single-`TaskEnvironment` constructor — is a third inert shape, but it is **not** reported. `Microsoft.Build.Utilities.Task.RegisterTask(string, Func<TaskEnvironment, ITask>)` lets a host supply an arbitrary factory, so such a task may be perfectly reachable.
 
+### MSBuildTask0015 — Resolve Before Extracting the Directory or Root
+
+Resolve the original path before calling `Path.GetDirectoryName` or `Path.GetPathRoot`:
+
+```csharp
+// Incorrect: GetDirectoryName("list.xml") returns "", which GetAbsolutePath rejects.
+TaskEnvironment.GetAbsolutePath(Path.GetDirectoryName(TargetFile));
+
+// Correct: resolve "list.xml" against the project directory, then take its parent.
+Path.GetDirectoryName(TaskEnvironment.GetAbsolutePath(TargetFile));
+```
+
+The same rule applies to `Path.GetPathRoot`, which returns an empty string for a relative path without a root. Extraction can also return `null`, which `GetAbsolutePath` rejects. The diagnostic checks the actual `TaskEnvironment` and `System.IO.Path` methods, including aliases and `using static`, rather than matching method names alone.
+
+Like MSBuildTask0002/0003, this rule honors `msbuild_task_analyzer.scope`: `all` by default, or `multithreadable_only` to restrict it to multithreadable tasks and opted-in helpers. The code fix swaps the calls where the result is consumed as a string. Uses that retain the `AbsolutePath` type (including inferred `var` locals) require manual migration of their consumers, so no automatic swap is offered there.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
+| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010, MSBuildTask0015 |
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
-| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
-| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
+| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0011, MSBuildTask0015 |
+| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005, MSBuildTask0015 |
 | Regular class (no task interface or attribute) | Not analyzed |
 | Class with `[MSBuildMultiThreadableTask]` that does not implement `ITask` | MSBuildTask0014 |
 | Abstract class with `[MSBuildMultiThreadableTask]` | MSBuildTask0014 |
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
-The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis and reports at the unsafe call site, but it offers no code fixes and only fires for helpers actually reachable from a task. Adding this attribute to a helper class gives you diagnostics and code fixes in the helper's source regardless of whether a task reaches it.
+The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004 and MSBuildTask0015). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis and reports at the unsafe call site, but it offers no code fixes and only fires for helpers actually reachable from a task. Adding this attribute to a helper class gives you diagnostics and code fixes in the helper's source regardless of whether a task reaches it.
 
 **When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles) on unsafe APIs within those helpers. Note that the MSBuildTask0002/0003 code fixes reference a `TaskEnvironment` member, so they are only offered in a helper that declares one — see [Code Fixes](#code-fixes).
 
 ### Severity Levels
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
-- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, and MSBuildTask0010** report as **Warning**.
+- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, MSBuildTask0010, and MSBuildTask0015** report as **Warning**.
 - **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
@@ -477,6 +498,7 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0002: `Environment.CurrentDirectory` | → `TaskEnvironment.ProjectDirectory` |
 | MSBuildTask0002: `Directory.GetCurrentDirectory()` | → `TaskEnvironment.ProjectDirectory` |
 | MSBuildTask0003: `File.Exists(relativePath)` | → `File.Exists(TaskEnvironment.GetAbsolutePath(relativePath))` |
+| MSBuildTask0003: `Directory.CreateDirectory(Path.GetDirectoryName(x))` | → `Directory.CreateDirectory(Path.GetDirectoryName(TaskEnvironment.GetAbsolutePath(x)))` (also applies to `GetPathRoot`) |
 | MSBuildTask0006: `new AbsolutePath(InputPath)` | → Retype `InputPath` to `AbsolutePath` and replace conversion with direct property usage |
 | MSBuildTask0006: `new FileInfo(FilePath)` / `new DirectoryInfo(DirPath)` | → Retype property to `FileInfo`/`DirectoryInfo` and replace conversion with direct property usage |
 | MSBuildTask0006: `Path.GetFullPath(InputPath)` | → Retype `InputPath` to `AbsolutePath` and collapse the call to the property (one-shot for the 0002 shape) |
@@ -485,8 +507,13 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0007: `new FileInfo(item.ItemSpec)` in `foreach` over `ITaskItem[]` | → Retype source property to ``ITaskItem<FileInfo>[]`` and replace with `item.Value` |
 | MSBuildTask0007: `new AbsolutePath(Item.GetMetadata("FullPath"))` | → Retype `Item` to ``ITaskItem<AbsolutePath>`` and replace with `Item.Value` |
 | MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
+| MSBuildTask0015: `TaskEnvironment.GetAbsolutePath(Path.GetDirectoryName(x))` | → `Path.GetDirectoryName(TaskEnvironment.GetAbsolutePath(x))` (also applies to `GetPathRoot`; string consumers only) |
 
 The MSBuildTask0003 fixer anchors on the **call the analyzer flagged** (the one whose parameter takes the path) and wraps that call's own path argument. This matters when the flagged call is nested inside another call — `new StreamWriter(File.Create(OutputPath))` becomes `new StreamWriter(File.Create(TaskEnvironment.GetAbsolutePath(OutputPath)))`, not a wrap around the `Stream` the outer constructor receives. Within that call it wraps the first **unwrapped** path parameter rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument, and for `Directory.GetFiles(dir, searchPattern)` it leaves the search pattern alone.
+
+If the path argument extracts a directory or root, the fixer wraps the original input inside `Path.GetDirectoryName`/`Path.GetPathRoot`, including nested extractions, rather than wrapping their possibly empty or null result.
+
+Both extraction fixes are withheld if the original input is maybe-null under nullable analysis: extraction accepts null, but `GetAbsolutePath` does not. Validate the input first (or explicitly null-forgive it if it is known to be non-null); suppressing nullability only on the extraction's result does not establish that the input is non-null.
 
 Both the MSBuildTask0002 and MSBuildTask0003 fixers reference the instance `TaskEnvironment` member, so no fix is offered where that reference would not compile: where `this` is unavailable — a static method, static local function, or static lambda (CS0120), or an instance field or property initializer (CS0236) — or where the task type simply has no `TaskEnvironment` member (CS0103), which the default `all` scope allows since it analyzes every `ITask`. Making the enclosing member non-static, moving the initializer into `Execute()`, or implementing `IMultiThreadableTask` re-enables the fix.
 
@@ -596,7 +623,7 @@ Unit tests for all rules, safe patterns, edge cases, code fixes, and compiler di
 | File | Purpose |
 |---|---|
 | `MultiThreadableTaskAnalyzer.cs` | Core analyzer — `RegisterSymbolStartAction` scopes per type, `RegisterOperationAction` checks each API call |
-| `MultiThreadableTaskCodeFixProvider.cs` | Code fixes for MSBuildTask0002 and MSBuildTask0003 |
+| `MultiThreadableTaskCodeFixProvider.cs` | Code fixes for MSBuildTask0002, MSBuildTask0003, and MSBuildTask0015 |
 | `BannedApiDefinitions.cs` | ~50 banned API entries resolved via `DocumentationCommentId` for O(1) symbol lookup |
 | `SharedAnalyzerHelpers.cs` | Shared path safety analysis, banned API resolution, and interface checking helpers |
 | `DiagnosticDescriptors.cs` | Eight diagnostic descriptors in category `MSBuild.TaskAuthoring` |

@@ -476,6 +476,140 @@ public class MultiThreadableTaskAnalyzerTests
     // Safe wrapper recognition: Path.GetDirectoryName, Path.Combine, Path.GetFullPath
     // ═══════════════════════════════════════════════════════════════════════
 
+    [Theory]
+    [InlineData("Path.GetDirectoryName(TargetFile)")]
+    [InlineData("Path.GetPathRoot(TargetFile)")]
+    [InlineData("System.IO.Path.GetDirectoryName(path: TargetFile)")]
+    [InlineData("IOPath.GetPathRoot(TargetFile)")]
+    [InlineData("(GetDirectoryName(TargetFile))!")]
+    public async Task InvertedPathExtraction_ProducesDiagnostic(string expression)
+    {
+        var source = $$"""
+            using System.IO;
+            using IOPath = System.IO.Path;
+            using static System.IO.Path;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public string TargetFile { get; set; } = "list.xml";
+                public override bool Execute()
+                {
+                    Directory.CreateDirectory(TaskEnvironment.GetAbsolutePath({{expression}}));
+                    return true;
+                }
+            }
+            """;
+        var diags = await GetDiagnosticsAsync(source);
+
+        var diagnostic = diags.ShouldHaveSingleItem();
+        diagnostic.Id.ShouldBe(DiagnosticIds.ResolvePathBeforeExtraction);
+        source.Substring(diagnostic.Location.SourceSpan.Start, diagnostic.Location.SourceSpan.Length)
+            .ShouldBe($"TaskEnvironment.GetAbsolutePath({expression})");
+    }
+
+    [Fact]
+    public async Task InvertedPathExtraction_SystemIOPathLookalike_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            namespace System.IO
+            {
+                internal static class Path
+                {
+                    public static string GetDirectoryName(string path) => path;
+                }
+            }
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    var dir = TaskEnvironment.GetAbsolutePath(System.IO.Path.GetDirectoryName("list.xml"));
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.ResolvePathBeforeExtraction);
+    }
+
+    [Theory]
+    [InlineData("GetDirectoryName")]
+    [InlineData("GetPathRoot")]
+    public async Task PathExtraction_AfterResolvingPath_NoDiagnostic(string method)
+    {
+        var diags = await GetDiagnosticsAsync($$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    string dir = Path.{{method}}(TaskEnvironment.GetAbsolutePath("list.xml"));
+                    Directory.CreateDirectory(dir);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("all", "", 1)]
+    [InlineData("multithreadable_only", "", 0)]
+    [InlineData("multithreadable_only", ", IMultiThreadableTask", 1)]
+    public async Task InvertedPathExtraction_RespectsScope(string scope, string taskInterface, int expectedCount)
+    {
+        var diags = await GetDiagnosticsWithScopeAsync($$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task{{taskInterface}}
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    var dir = TaskEnvironment.GetAbsolutePath(Path.GetDirectoryName("list.xml"));
+                    return true;
+                }
+            }
+            """, scope);
+
+        diags.Length.ShouldBe(expectedCount);
+        diags.ShouldAllBe(d => d.Id == DiagnosticIds.ResolvePathBeforeExtraction);
+    }
+
+    [Fact]
+    public async Task PathExtraction_UnrelatedMethods_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    var a = TaskEnvironment.GetAbsolutePath(OtherPath.GetDirectoryName("list.xml"));
+                    var b = TaskEnvironment.GetAbsolutePath(OtherPath.GetPathRoot("list.xml"));
+                    var c = GetAbsolutePath(Path.GetDirectoryName("list.xml"));
+                    var d = TaskEnvironment.GetAbsolutePath(Path.GetFileName("dir/list.xml"));
+                    return true;
+                }
+                private static string GetAbsolutePath(string path) => path;
+            }
+            public static class OtherPath
+            {
+                public static string GetDirectoryName(string path) => path;
+                public static string GetPathRoot(string path) => path;
+            }
+            """);
+
+        diags.ShouldBeEmpty();
+    }
+
     [Fact]
     public async Task DirectoryCreate_WithGetDirectoryNameOfAbsolutePath_NoDiagnostic()
     {

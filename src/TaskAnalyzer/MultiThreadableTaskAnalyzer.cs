@@ -18,7 +18,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// 
     /// Scope (controlled by .editorconfig option "msbuild_task_analyzer.scope"):
     /// - "all" (default): All rules fire on ALL ITask implementations
-    /// - "multithreadable_only": MSBuildTask0002, 0003 fire only on IMultiThreadableTask or [MSBuildMultiThreadableTask]
+    /// - "multithreadable_only": MSBuildTask0002, 0003, 0015 fire only on IMultiThreadableTask or [MSBuildMultiThreadableTask]
     ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
     /// 
     /// Per review feedback from @rainersigwald:
@@ -97,7 +97,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Helper classes with the attribute or tasks with [MSBuildMultiThreadableTask] are treated as IMultiThreadableTask
                 bool analyzeAsMultiThreadable = isMultiThreadableTask || hasAnalyzedAttribute || hasMultiThreadableAttribute;
 
-                // When scope is "multithreadable_only", only analyze MSBuildTask0002/0003 for multithreadable tasks
+                // When scope is "multithreadable_only", only analyze environment rules for multithreadable tasks
                 bool reportEnvironmentRules = analyzeAllTasks || analyzeAsMultiThreadable;
 
                 // Register operation-level analysis within this type
@@ -200,6 +200,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         displayName, message));
                     return;
                 }
+            }
+
+            // MSBuildTask0015 supersedes the MSBuildTask0003 check below. The flagged call is itself a
+            // GetAbsolutePath resolution, so 0003 has nothing to add, and reporting both would produce
+            // two diagnostics — offering conflicting fixes — for a single defect.
+            if (reportEnvironmentRules &&
+                context.Operation is IInvocationOperation pathInvocation &&
+                GetInvertedPathExtraction(pathInvocation, taskEnvironmentType) is { } extraction)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    DiagnosticDescriptors.ResolvePathBeforeExtraction,
+                    context.Operation.Syntax.GetLocation(),
+                    extraction.TargetMethod.Name));
+                return;
             }
 
             // Check file path APIs (MSBuildTask0003) - gated by scope setting

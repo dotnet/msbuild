@@ -50,5 +50,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>[MSBuildMultiThreadableTask] is applied to a type MSBuild never routes as a task, so it has no effect.</summary>
         public const string MultiThreadableTaskAttributeHasNoEffect = "MSBuildTask0014";
+
+        /// <summary>Resolve the original path before extracting its directory or root.</summary>
+        public const string ResolvePathBeforeExtraction = "MSBuildTask0015";
     }
 }
