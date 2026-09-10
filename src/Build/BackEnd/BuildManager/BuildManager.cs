@@ -2876,10 +2876,9 @@ namespace Microsoft.Build.Execution
                 }
 
                 // We are aborting the build because a node exited unexpectedly.
-                // Do not reuse nodes, as their state may be compromised by attempts to shut down while the build is in-progress.
-                // Do not cleanly shut down the task host nodes here because we are aborting the task host will hear about it in time through the task building infrastructure.
-                _nodeManager!.ShutdownConnectedNodes(false);
-                
+                // Do not reuse nodes, as their state may be compromised by attempts to shut down while the build is in progress.
+                // Do not shut down task host nodes here: during an abort they will be notified through the task execution infrastructure.
+                _nodeManager!.ShutdownConnectedNodes(enableReuse: false);
                 foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                 {
                     // The submission has not started
