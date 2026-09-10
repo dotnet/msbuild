@@ -16,8 +16,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// <summary>
     /// Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
     /// 
-    /// By default, MSBuildTask0002 and MSBuildTask0003 apply only to MT-scoped code.
-    /// The "msbuild_task_analyzer.run_mt_analyzers_on_all_tasks" option enables these rules for all tasks.
+    /// By default, MSBuildTask0002 and MSBuildTask0003 apply at their full severity only to MT-scoped code.
+    /// Other tasks receive the same diagnostic IDs as migration guidance (Info/Suggestion).
+    /// The "msbuild_task_analyzer.run_mt_analyzers_on_all_tasks" option reports these rules at their full
+    /// severity for all tasks.
     ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
     /// 
     /// Per review feedback from @rainersigwald:
@@ -146,17 +148,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
 
-                // MSBuildTask0002 (TaskEnvironment) is gated by scope setting
-                if (entry.Category == BannedApiDefinitions.ApiCategory.TaskEnvironment &&
-                    !ShouldReportEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree))
-                {
-                    return;
-                }
+                // MSBuildTask0002 (TaskEnvironment) keeps its severity for MT-scoped code and is
+                // downgraded to migration guidance elsewhere.
+                bool enforceAsMultiThreadable =
+                    entry.Category != BannedApiDefinitions.ApiCategory.TaskEnvironment ||
+                    ShouldEnforceEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree);
 
                 var descriptor = GetDescriptor(entry.Category);
                 var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
-                context.ReportDiagnostic(Diagnostic.Create(descriptor, context.Operation.Syntax.GetLocation(),
-                    displayName, entry.Message));
+                context.ReportDiagnostic(CreateWithContextualSeverity(
+                    descriptor,
+                    context.Operation.Syntax.GetLocation(),
+                    enforceAsMultiThreadable,
+                    displayName,
+                    entry.Message));
                 return;
             }
 
@@ -179,13 +184,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            // MSBuildTask0003 is limited to MT-scoped code unless migration analysis is enabled.
+            // MSBuildTask0003 keeps its severity for MT-scoped code and is downgraded to migration
+            // guidance elsewhere.
             if (!arguments.IsDefaultOrEmpty && referencedSymbol is IMethodSymbol method)
             {
                 var containingType = method.ContainingType;
                 if (containingType is not null &&
                     filePathTypes.Contains(containingType) &&
-                    ShouldReportEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree) &&
                     HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
                 {
                     string displayName = isConstructor
@@ -193,15 +198,21 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         : referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
 
                     string hint = "wrap path argument with TaskEnvironment.GetAbsolutePath()";
-                    context.ReportDiagnostic(Diagnostic.Create(
+                    context.ReportDiagnostic(CreateWithContextualSeverity(
                         DiagnosticDescriptors.FilePathRequiresAbsolute,
                         context.Operation.Syntax.GetLocation(),
-                        displayName, hint));
+                        ShouldEnforceEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree),
+                        displayName,
+                        hint));
                 }
             }
         }
 
-        private static bool ShouldReportEnvironmentRules(
+        /// <summary>
+        /// Returns true when MT migration rules apply at their full severity: the code is MT-scoped, or
+        /// the all-task migration option is enabled for the source tree.
+        /// </summary>
+        private static bool ShouldEnforceEnvironmentRules(
             OperationAnalysisContext context,
             bool analyzeAsMultiThreadable,
             ConcurrentDictionary<SyntaxTree, bool> analyzeAllTasksByTree)
