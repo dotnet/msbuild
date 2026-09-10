@@ -138,8 +138,10 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Warning);
     }
 
     [Fact]
@@ -167,7 +169,7 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task DefaultMode_PlainTaskCallingPlainTask_DoesNotReportMtMigrationViolation()
+    public async Task DefaultMode_PlainTaskCallingPlainTask_ReportsDirectSuggestionOnly()
     {
         var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
@@ -186,7 +188,10 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+        // The helper is itself a task, so the direct analyzer already reports the call as a suggestion.
+        // Repeating it as MSBuildTask0005 on the same call site would only duplicate that guidance.
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
         diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
     }
 
@@ -414,7 +419,7 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task DefaultConfiguration_PlainTask_DoesNotGetTransitiveDiagnostic()
+    public async Task DefaultConfiguration_PlainTask_GetsTransitiveDiagnosticAsSuggestion()
     {
         var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
@@ -432,7 +437,8 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -505,7 +511,7 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task DefaultConfiguration_InterfaceOnlyTask_DoesNotGetMtMigrationTransitiveDiagnostic()
+    public async Task DefaultConfiguration_InterfaceOnlyTask_GetsMtMigrationTransitiveDiagnosticAsSuggestion()
     {
         var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
@@ -525,7 +531,8 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -951,7 +958,7 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task DefaultConfiguration_PlainTask_DoesNotGetFilePathTransitiveDiagnostic()
+    public async Task DefaultConfiguration_PlainTask_GetsFilePathTransitiveDiagnosticAsSuggestion()
     {
         var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System.IO;
@@ -965,7 +972,8 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -1021,8 +1029,14 @@ public class TransitiveCallChainAnalyzerTests
             """);
 
         var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.Count(d => d.GetMessage().Contains("PlainTask")).ShouldBe(1);
-        transitive.Count(d => d.GetMessage().Contains("MtTask")).ShouldBe(2);
+        var plainTaskDiagnostics = transitive.Where(d => d.GetMessage().Contains("PlainTask")).ToArray();
+        plainTaskDiagnostics.Length.ShouldBe(2);
+        plainTaskDiagnostics.Count(d => d.Severity == DiagnosticSeverity.Warning).ShouldBe(1);
+        plainTaskDiagnostics.Count(d => d.Severity == DiagnosticSeverity.Info).ShouldBe(1);
+
+        var mtTaskDiagnostics = transitive.Where(d => d.GetMessage().Contains("MtTask")).ToArray();
+        mtTaskDiagnostics.Length.ShouldBe(2);
+        mtTaskDiagnostics.ShouldAllBe(d => d.Severity == DiagnosticSeverity.Warning);
     }
 
     [Fact]
@@ -1081,5 +1095,42 @@ public class TransitiveCallChainAnalyzerTests
             """);
 
         diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task ContextualSeverity_PlainTask_ExplicitSeverityOverridesTransitiveSuggestion()
+    {
+        var test = new CSharpAnalyzerTest<TransitiveCallChainAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public static class Helper
+                {
+                    public static void Run() => {|#0:Environment.GetEnvironmentVariable("KEY")|};
+                }
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool {|#1:Execute|}()
+                    {
+                        Helper.Run();
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0005.severity = error
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Error)
+                .WithLocation(0)
+                .WithLocation(1));
+
+        await test.RunAsync();
     }
 }

@@ -14,7 +14,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 
 The analyzer enables all rules except MSBuildTask0013 by default. A rule can be enabled but remain out of scope for a given task.
 
-By default, MT migration rules MSBuildTask0002 and MSBuildTask0003 apply only to MT-scoped code.
+By default, MT migration rules MSBuildTask0002 and MSBuildTask0003 — and the MSBuildTask0005 findings that carry them through a call chain — apply at their full severity only to MT-scoped code. Other task implementations receive the same diagnostic IDs as suggestions (`Info`), so the migration guidance stays visible in the IDE without affecting a command-line build. An explicit `dotnet_diagnostic.<ID>.severity` setting always overrides the severity chosen from the task context.
 
 MT-scoped code includes these types:
 
@@ -29,10 +29,10 @@ MT-scoped code includes these types:
 | ID | Rule | Default state | Severity | Reported for by default |
 |---|---|---|---|---|
 | **MSBuildTask0001** | API is never safe in an MSBuild task | Enabled | Error | All task implementations and MT-scoped helpers |
-| **MSBuildTask0002** | API requires a `TaskEnvironment` alternative | Enabled | Warning | MT-scoped code only |
-| **MSBuildTask0003** | File system API requires an absolute path | Enabled | Warning | MT-scoped code only |
+| **MSBuildTask0002** | API requires a `TaskEnvironment` alternative | Enabled | Warning for MT-scoped code, Info elsewhere | All task implementations and MT-scoped helpers |
+| **MSBuildTask0003** | File system API requires an absolute path | Enabled | Warning for MT-scoped code, Info elsewhere | All task implementations and MT-scoped helpers |
 | **MSBuildTask0004** | API requires review for MT execution | Enabled | Warning | All task implementations and MT-scoped helpers |
-| **MSBuildTask0005** | A task call chain reaches an unsafe API | Enabled | Warning | All tasks for transitive MSBuildTask0001 and MSBuildTask0004 violations; MT tasks for all supported transitive violations |
+| **MSBuildTask0005** | A task call chain reaches an unsafe API | Enabled | Warning, except Info for a transitive MT migration violation reached from a task that is not MT-scoped | All tasks |
 | **MSBuildTask0006** | Prefer a typed path property | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
 | **MSBuildTask0007** | Prefer `ITaskItem<T>` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
 | **MSBuildTask0008** | Initialize a relative path default in `Execute()` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
@@ -73,7 +73,7 @@ msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
 
 Include directories that contain unsafe calls, including helper files. Selecting only task declaration files does not enable transitive diagnostics in other directories.
 
-The option adds MSBuildTask0002 and MSBuildTask0003 analysis to regular tasks. It also adds related transitive MSBuildTask0005 findings.
+The option reports MSBuildTask0002, MSBuildTask0003, and the related transitive MSBuildTask0005 findings at their full severity for regular tasks instead of as suggestions.
 
 Roslyn combines settings from `.globalconfig` and `.editorconfig`. A matching `.editorconfig` value overrides the `.globalconfig` value.
 
@@ -100,8 +100,8 @@ Valid severity values include `error`, `warning`, `suggestion`, `silent`, `none`
 
 The migration option and severity configuration have different purposes:
 
-- `msbuild_task_analyzer.run_mt_analyzers_on_all_tasks` adds regular-task analysis for MSBuildTask0002, MSBuildTask0003, and related MSBuildTask0005 findings.
-- `dotnet_diagnostic.<ID>.severity` enables, disables, or changes the severity of one rule.
+- `msbuild_task_analyzer.run_mt_analyzers_on_all_tasks` raises regular-task MSBuildTask0002, MSBuildTask0003, and related MSBuildTask0005 findings from suggestions to their full severity.
+- `dotnet_diagnostic.<ID>.severity` enables, disables, or changes the severity of one rule, and takes precedence over the severity the analyzer selects from the task context.
 
 ## Diagnostic Rule Details
 
@@ -199,9 +199,9 @@ These APIs may cause version conflicts or other issues in a shared task host.
 
 ### MSBuildTask0005 — Transitive Unsafe API Usage
 
-MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class — or inside a helper explicitly opted in with `[MSBuildMultiThreadableTaskAnalyzed]` (see [Analysis Scope](#analysis-scope)). MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from each task's members. Transitive MSBuildTask0001/0004 violations are reported for every task; transitive MSBuildTask0002/0003 violations follow the configured migration option.
+MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class — or inside a helper explicitly opted in with `[MSBuildMultiThreadableTaskAnalyzed]` (see [Analysis Scope](#analysis-scope)). MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from each task's members. Transitive MSBuildTask0001/0004 violations are reported for every task at the full severity. A transitive MSBuildTask0002/0003 violation is reported at the full severity when the task is MT-scoped or the migration option is enabled, and as a suggestion otherwise.
 
-The call graph can pass through another task class. If an MT task reaches an MSBuildTask0002 or MSBuildTask0003 violation in a regular task class, MSBuildTask0005 reports the call chain. When direct analysis already reports that violation, MSBuildTask0005 does not report a duplicate.
+The call graph can pass through another task class. If an MT task reaches an MSBuildTask0002 or MSBuildTask0003 violation in a regular task class, MSBuildTask0005 reports the call chain. When direct analysis already reports that violation at the same severity, MSBuildTask0005 does not report a duplicate.
 
 The diagnostic is reported **at the unsafe call site** — inside the helper — and names the task entry point plus the full call chain in the message:
 
@@ -520,11 +520,11 @@ A concrete task that MSBuild cannot construct — no public parameterless constr
 
 See [Default Rules and Configuration](#default-rules-and-configuration) for the default-state matrix and copy-ready configuration.
 
-By default, MT migration warnings do not affect regular tasks. The analyzer recognizes `[MSBuildMultiThreadableTask]` as the task routing opt-in and `[MSBuildMultiThreadableTaskAnalyzed]` as an analyzer-only opt-in.
+By default, MT migration rules are reported as suggestions rather than warnings on regular tasks, so they do not affect a command-line build. The analyzer recognizes `[MSBuildMultiThreadableTask]` as the task routing opt-in and `[MSBuildMultiThreadableTaskAnalyzed]` as an analyzer-only opt-in.
 
 | Type | Rules Applied |
 |---|---|
-| Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations |
+| Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010, and MSBuildTask0005 at the full severity; MSBuildTask0002, MSBuildTask0003, and the MSBuildTask0005 findings that carry them as suggestions |
 | Concrete `ITask` class with `[MSBuildMultiThreadableTask]` applied directly | MSBuildTask0001–MSBuildTask0010; MSBuildTask0011 and MSBuildTask0012 apply only when their conditions match |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0011, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations; MSBuildTask0013 is available but disabled by default |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` | Direct MSBuildTask0001–MSBuildTask0004 analysis; MSBuildTask0005 reports only when a task reaches the helper |
