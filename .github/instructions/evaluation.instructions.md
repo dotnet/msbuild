@@ -2,42 +2,14 @@
 applyTo: "src/Build/Evaluation/**"
 ---
 
-# Evaluation Engine Instructions
+# Evaluation
 
-The evaluation engine (`Evaluator.cs`, `Expander.cs`, `LazyItemEvaluator.cs`) is MSBuild's hottest code path. Every project load passes through here.
+- Trace the relevant passes in [Evaluator](../../src/Build/Evaluation/Evaluator.cs). Property/import processing, item definitions, items, and targets do not share one universal "condition evaluated immediately" rule.
+- Global properties normally override project assignments; account for `TreatAsLocalProperty`. Do not generalize last-write-wins to every property source.
+- Preserve item/metadata scope, escaping, evaluation order, and lazy-item semantics. Undefined versus empty metadata must follow the specific API/operation contract.
+- Expansion caches need the correct property/item/metadata context and lifetime. Repeating the same expression text does not imply the same result.
+- Measure hot paths before optimizing. Avoid repeated allocations and filesystem work, but do not invent invocation counts or add caches without invalidation.
+- For intrinsic/property functions, check the actual allowlist, feature guards, runtime availability, and existing error behavior. File/environment access is not uniformly an opt-in feature.
+- Test the affected import, condition, global-property, and reevaluation scenarios. Assess observable changes with the [compatibility skill](../skills/assessing-breaking-changes/SKILL.md).
 
-## Evaluation Model Integrity
-
-* Strict evaluation order: environment → global properties → project properties (file order with imports) → item definitions → items. Never alter this order.
-* Conditions are evaluated at the point they appear, not deferred.
-* Undefined metadata and empty-string metadata must be treated equivalently.
-* Property precedence is last-write-wins within the import chain.
-* Gate evaluation behavior changes behind a [ChangeWave](../../documentation/wiki/ChangeWaves.md).
-
-## Expander Safety
-
-* `Expander.cs` is called millions of times per evaluation — every allocation counts.
-* Cache expanded values when the same expression is expanded repeatedly.
-
-## IntrinsicFunctions
-
-* New intrinsic functions are permanent public API — can never be removed once shipped.
-* Validate all inputs; called from user-authored MSBuild with arbitrary arguments.
-* Security-sensitive functions (file I/O, registry, environment) must check for opt-in.
-* Test edge cases: null, empty strings, very long strings, culture-sensitive formatting.
-
-## Condition Evaluation
-
-* Condition parsing is allocation-sensitive — prefer `Span<char>`-based parsing.
-* Boolean conditions must short-circuit correctly.
-* String comparisons in conditions use MSBuild semantics (case-insensitive for identifiers).
-
-## ProjectRootElementCache
-
-* Cache invalidation bugs cause stale evaluations or memory leaks — test eviction scenarios.
-* Thread safety is critical — the cache is accessed from multiple nodes.
-
-## Related Documentation
-
-* [ChangeWaves](../../documentation/wiki/ChangeWaves.md)
-* [Target Maps](../../documentation/wiki/Target-Maps.md)
+Load [performance guidance](../skills/optimizing-msbuild-performance/SKILL.md) for an actual performance change and [SDK integration](../skills/integrating-sdk-and-msbuild/SKILL.md) for SDK/import-boundary work.
