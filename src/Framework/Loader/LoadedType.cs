@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 #if NET
@@ -48,6 +49,13 @@ namespace Microsoft.Build.Shared
             Assembly = assemblyLoadInfo;
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
+            ReadMSBuildDeclaredIOAttributes(
+                out bool hasMSBuildDeclaredIOTaskAttribute,
+                out bool hasValidMSBuildDeclaredIOAttributes,
+                out IReadOnlyList<string> declaredIORequiredUnsetParameters);
+            HasMSBuildDeclaredIOTaskAttribute = hasMSBuildDeclaredIOTaskAttribute;
+            HasValidMSBuildDeclaredIOAttributes = hasValidMSBuildDeclaredIOAttributes;
+            DeclaredIORequiredUnsetParameters = declaredIORequiredUnsetParameters;
             LoadedAssemblyName = loadedAssembly.GetName();
             LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
             Architecture = architecture;
@@ -276,6 +284,21 @@ namespace Microsoft.Build.Shared
         public bool LoadedViaMetadataLoadContext { get; }
 
         /// <summary>
+        /// Gets whether the exact task type is marked with MSBuildDeclaredIOTaskAttribute.
+        /// </summary>
+        internal bool HasMSBuildDeclaredIOTaskAttribute { get; }
+
+        /// <summary>
+        /// Gets whether every recognized declared-I/O annotation has the expected shape.
+        /// </summary>
+        internal bool HasValidMSBuildDeclaredIOAttributes { get; }
+
+        /// <summary>
+        /// Gets task parameters that must be unset for the declared-I/O contract to apply.
+        /// </summary>
+        internal IReadOnlyList<string> DeclaredIORequiredUnsetParameters { get; }
+
+        /// <summary>
         /// Determines if the task has a hardcoded requirement for STA thread usage.
         /// </summary>
         private bool CheckForHardcodedSTARequirement()
@@ -415,5 +438,67 @@ namespace Microsoft.Build.Shared
         internal AssemblyLoadInfo Assembly { get; private set; }
 
         #endregion
+
+        private void ReadMSBuildDeclaredIOAttributes(
+            out bool hasTaskAttribute,
+            out bool hasValidAttributes,
+            out IReadOnlyList<string> requiredUnsetParameters)
+        {
+            const string taskAttributeFullName = "Microsoft.Build.Framework.MSBuildDeclaredIOTaskAttribute";
+            const string requiresUnsetAttributeFullName = "Microsoft.Build.Framework.MSBuildDeclaredIORequiresUnsetAttribute";
+
+            hasTaskAttribute = false;
+            hasValidAttributes = true;
+            List<string>? unsetParameters = null;
+
+            foreach (CustomAttributeData attribute in CustomAttributeData.GetCustomAttributes(Type))
+            {
+                string? attributeTypeName;
+                try
+                {
+                    attributeTypeName = attribute.AttributeType?.FullName;
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    continue;
+                }
+
+                if (attributeTypeName == taskAttributeFullName)
+                {
+                    hasTaskAttribute = true;
+                    continue;
+                }
+
+                if (attributeTypeName == requiresUnsetAttributeFullName)
+                {
+                    if (!TryReadDeclaredIOParameterName(attribute, out string? unsetParameter))
+                    {
+                        hasValidAttributes = false;
+                        continue;
+                    }
+
+                    unsetParameters ??= [];
+                    unsetParameters.Add(unsetParameter);
+                }
+            }
+
+            requiredUnsetParameters = unsetParameters ?? [];
+        }
+
+        private static bool TryReadDeclaredIOParameterName(
+            CustomAttributeData attribute,
+            [NotNullWhen(true)] out string? parameterName)
+        {
+            parameterName = null;
+            if (attribute.ConstructorArguments.Count != 1 ||
+                attribute.ConstructorArguments[0].Value is not string candidate ||
+                string.IsNullOrEmpty(candidate))
+            {
+                return false;
+            }
+
+            parameterName = candidate;
+            return true;
+        }
     }
 }

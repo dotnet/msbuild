@@ -19,7 +19,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd.Components.Caching
 {
-    internal enum HardenedResultCacheOpenResult
+    internal enum TaskResultCacheOpenResult
     {
         Ineligible,
         Unavailable,
@@ -27,12 +27,12 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         Hit,
     }
 
-    internal sealed class HardenedResultCacheSession : IDisposable
+    internal sealed class TaskResultCacheSession : IDisposable
     {
-        internal const string CacheDirectoryPropertyName = "MSBuildHardenedResultCacheDirectory";
+        internal const string CacheDirectoryPropertyName = "MSBuildTaskCacheDirectory";
 
         private const string ManifestFileName = "manifest.bin";
-        private const string ManifestMagic = "MSBuild Hardened Result Cache";
+        private const string ManifestMagic = "MSBuild Task Result Cache";
         private const int ManifestVersion = 3;
         private const int MaximumEventCount = 1_000_000;
         private const int LockRetryCount = 300;
@@ -43,7 +43,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private readonly IReadOnlyList<string> _outputPaths;
         private readonly FileStream _lockStream;
 
-        private HardenedResultCacheSession(
+        private TaskResultCacheSession(
             string entryDirectory,
             string key,
             IReadOnlyList<string> outputPaths,
@@ -57,14 +57,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         internal string Key => _key;
 
-        internal static HardenedResultCacheOpenResult TryOpen(
+        internal static TaskResultCacheOpenResult TryOpen(
             ITask task,
             ICollection<string> parameterNames,
             string projectFullPath,
             string projectDirectory,
             string cacheDirectory,
-            out HardenedResultCacheSession session,
-            out IReadOnlyList<HardenedResultCacheEvent> events,
+            out TaskResultCacheSession session,
+            out IReadOnlyList<TaskResultCacheEvent> events,
             out string reason)
         {
             session = null;
@@ -80,7 +80,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     out IReadOnlyList<string> outputPaths,
                     out reason))
             {
-                return HardenedResultCacheOpenResult.Ineligible;
+                return TaskResultCacheOpenResult.Ineligible;
             }
 
             string normalizedCacheDirectory;
@@ -93,7 +93,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             catch (Exception e) when (IsExpectedCacheException(e))
             {
                 reason = e.Message;
-                return HardenedResultCacheOpenResult.Unavailable;
+                return TaskResultCacheOpenResult.Unavailable;
             }
 
             string entryDirectory = Path.Combine(
@@ -107,7 +107,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(entryDirectory));
                 lockStream = AcquireLock(lockPath);
-                session = new HardenedResultCacheSession(
+                session = new TaskResultCacheSession(
                     entryDirectory,
                     key,
                     outputPaths,
@@ -117,7 +117,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             catch (Exception e) when (IsExpectedCacheException(e))
             {
                 reason = e.Message;
-                return HardenedResultCacheOpenResult.Unavailable;
+                return TaskResultCacheOpenResult.Unavailable;
             }
             finally
             {
@@ -126,20 +126,20 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
             if (!Directory.Exists(entryDirectory))
             {
-                return HardenedResultCacheOpenResult.Miss;
+                return TaskResultCacheOpenResult.Miss;
             }
 
             if (session.TryRestore(out events, out reason))
             {
-                return HardenedResultCacheOpenResult.Hit;
+                return TaskResultCacheOpenResult.Hit;
             }
 
             session.DeleteEntryBestEffort();
-            return HardenedResultCacheOpenResult.Miss;
+            return TaskResultCacheOpenResult.Miss;
         }
 
         internal bool TryStore(
-            IReadOnlyList<HardenedResultCacheEvent> events,
+            IReadOnlyList<TaskResultCacheEvent> events,
             out string reason)
         {
             reason = null;
@@ -225,7 +225,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         }
 
         private bool TryRestore(
-            out IReadOnlyList<HardenedResultCacheEvent> events,
+            out IReadOnlyList<TaskResultCacheEvent> events,
             out string reason)
         {
             events = null;
@@ -376,7 +376,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
                 writer.Write(ManifestVersion);
                 writer.Write(taskType.AssemblyQualifiedName);
-                writer.Write(typeof(HardenedResultCacheSession).Assembly.GetName().Version.ToString());
+                writer.Write(typeof(TaskResultCacheSession).Assembly.GetName().Version.ToString());
                 writer.Write(RuntimeInformation.FrameworkDescription);
                 writer.Write(RuntimeInformation.OSArchitecture.ToString());
                 writer.Write(RuntimeInformation.ProcessArchitecture.ToString());
@@ -646,7 +646,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private void WriteManifest(
             string manifestPath,
             IReadOnlyList<CachedOutput> outputs,
-            IReadOnlyList<HardenedResultCacheEvent> events)
+            IReadOnlyList<TaskResultCacheEvent> events)
         {
             using var stream = new FileStream(
                 manifestPath,
@@ -681,7 +681,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         private IReadOnlyList<CachedOutput> ReadManifest(
             string manifestPath,
-            out IReadOnlyList<HardenedResultCacheEvent> events)
+            out IReadOnlyList<TaskResultCacheEvent> events)
         {
             using var stream = new FileStream(
                 manifestPath,
@@ -734,10 +734,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 throw new InvalidDataException("The cache manifest event count is invalid.");
             }
 
-            var cachedEvents = new HardenedResultCacheEvent[eventCount];
+            var cachedEvents = new TaskResultCacheEvent[eventCount];
             for (int i = 0; i < eventCount; i++)
             {
-                cachedEvents[i] = HardenedResultCacheEvent.Read(reader);
+                cachedEvents[i] = TaskResultCacheEvent.Read(reader);
             }
 
             if (stream.Position != stream.Length)

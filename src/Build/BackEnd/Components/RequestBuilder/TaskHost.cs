@@ -81,7 +81,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private object _callbackMonitor;
 
-        private HardenedResultCacheEventCollector _hardenedResultCacheEventCollector;
+        private TaskResultCacheEventCollector _taskResultCacheEventCollector;
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -133,38 +133,38 @@ namespace Microsoft.Build.BackEnd
             EngineServices = new EngineServicesImpl(this);
         }
 
-        internal IDisposable BeginHardenedResultCacheEventCapture(
-            HardenedResultCacheEventCollector eventCollector)
+        internal IDisposable BeginTaskResultCacheEventCapture(
+            TaskResultCacheEventCollector eventCollector)
         {
             lock (_callbackMonitor)
             {
-                Assumed.Null(_hardenedResultCacheEventCollector);
-                _hardenedResultCacheEventCollector = eventCollector;
+                Assumed.Null(_taskResultCacheEventCollector);
+                _taskResultCacheEventCollector = eventCollector;
             }
 
-            return new HardenedResultCacheEventCapture(this, eventCollector);
+            return new TaskResultCacheEventCapture(this, eventCollector);
         }
 
-        private void EndHardenedResultCacheEventCapture(
-            HardenedResultCacheEventCollector eventCollector)
+        private void EndTaskResultCacheEventCapture(
+            TaskResultCacheEventCollector eventCollector)
         {
             lock (_callbackMonitor)
             {
-                Assumed.True(ReferenceEquals(eventCollector, _hardenedResultCacheEventCollector));
-                _hardenedResultCacheEventCollector = null;
+                Assumed.True(ReferenceEquals(eventCollector, _taskResultCacheEventCollector));
+                _taskResultCacheEventCollector = null;
             }
         }
 
-        private sealed class HardenedResultCacheEventCapture(
+        private sealed class TaskResultCacheEventCapture(
             TaskHost taskHost,
-            HardenedResultCacheEventCollector eventCollector) : IDisposable
+            TaskResultCacheEventCollector eventCollector) : IDisposable
         {
             private TaskHost _taskHost = taskHost;
 
             public void Dispose()
             {
                 TaskHost currentTaskHost = Interlocked.Exchange(ref _taskHost, null);
-                currentTaskHost?.EndHardenedResultCacheEventCapture(eventCollector);
+                currentTaskHost?.EndTaskResultCacheEventCapture(eventCollector);
             }
         }
 
@@ -466,7 +466,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _hardenedResultCacheEventCollector?.MarkUnsupported();
+                _taskResultCacheEventCollector?.MarkUnsupported();
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -575,7 +575,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _hardenedResultCacheEventCollector?.Record(e);
+                _taskResultCacheEventCollector?.Record(e);
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -618,7 +618,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _hardenedResultCacheEventCollector?.Record(e);
+                _taskResultCacheEventCollector?.Record(e);
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -661,7 +661,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _hardenedResultCacheEventCollector?.MarkUnsupported();
+                _taskResultCacheEventCollector?.MarkUnsupported();
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -754,7 +754,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _hardenedResultCacheEventCollector?.MarkUnsupported();
+                _taskResultCacheEventCollector?.MarkUnsupported();
                 _taskLoggingContext.LoggingService.LogTelemetry(_taskLoggingContext.BuildEventContext, eventName, properties);
             }
         }
