@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void HardenedDeclaredIOResultCacheRestoresOutputsAndReplaysWarnings()
+        public void DeclaredIOResultCacheRestoresOutputsAndReplaysWarnings()
         {
             using TestEnvironment env = TestEnvironment.Create(_testOutput);
             TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
@@ -114,17 +114,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 <Project>
                   <PropertyGroup>
                     <WorkspaceRoot>true</WorkspaceRoot>
-                    <MSBuildHardenedResultCacheDirectory>cache</MSBuildHardenedResultCacheDirectory>
+                    <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
                   </PropertyGroup>
                   <UsingTask
-                      TaskName="{typeof(HardenedResultCacheTestTask).FullName}"
-                      AssemblyFile="{SecurityElement.Escape(typeof(HardenedResultCacheTestTask).Assembly.Location)}" />
+                      TaskName="{typeof(TaskResultCacheTestTask).FullName}"
+                      AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
                   <ItemGroup>
                     <CacheInput Include="input.txt" />
                     <CacheOutput Include="output.txt" />
                   </ItemGroup>
                   <Target Name="Build">
-                    <HardenedResultCacheTestTask
+                    <TaskResultCacheTestTask
                         Input="@(CacheInput)"
                         OutputFile="@(CacheOutput)"
                         Marker="!"
@@ -134,19 +134,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 """);
 
-            MockLogger firstLogger = BuildHardenedCacheProject(projectPath);
+            MockLogger firstLogger = BuildCacheProject(projectPath);
             firstLogger.AssertNoErrors();
             firstLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("first!");
-            firstLogger.FullLog.ShouldContain("Hardened result cache miss");
+            firstLogger.FullLog.ShouldContain("Task result cache miss");
 
             File.Delete(outputPath);
 
-            MockLogger secondLogger = BuildHardenedCacheProject(projectPath);
+            MockLogger secondLogger = BuildCacheProject(projectPath);
             secondLogger.AssertNoErrors();
             secondLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("first!");
-            secondLogger.FullLog.ShouldContain("Hardened result cache hit");
+            secondLogger.FullLog.ShouldContain("Task result cache hit");
 
             File.WriteAllText(
                 projectPath,
@@ -156,24 +156,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     StringComparison.Ordinal));
             File.Delete(outputPath);
 
-            MockLogger parameterChangeLogger = BuildHardenedCacheProject(projectPath);
+            MockLogger parameterChangeLogger = BuildCacheProject(projectPath);
             parameterChangeLogger.AssertNoErrors();
             parameterChangeLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("first?");
-            parameterChangeLogger.FullLog.ShouldContain("Hardened result cache miss");
+            parameterChangeLogger.FullLog.ShouldContain("Task result cache miss");
 
             File.WriteAllText(inputPath, "second");
             File.Delete(outputPath);
 
-            MockLogger thirdLogger = BuildHardenedCacheProject(projectPath);
+            MockLogger thirdLogger = BuildCacheProject(projectPath);
             thirdLogger.AssertNoErrors();
             thirdLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("second?");
-            thirdLogger.FullLog.ShouldContain("Hardened result cache miss");
+            thirdLogger.FullLog.ShouldContain("Task result cache miss");
         }
 
         [Fact]
-        public void HardenedDeclaredIOResultCacheRestoresAbsentOutputsAndRecoversFromCorruption()
+        public void DeclaredIOResultCacheRestoresAbsentOutputsAndRecoversFromCorruption()
         {
             using TestEnvironment env = TestEnvironment.Create(_testOutput);
             TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
@@ -188,17 +188,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 <Project>
                   <PropertyGroup>
                     <WorkspaceRoot>true</WorkspaceRoot>
-                    <MSBuildHardenedResultCacheDirectory>cache</MSBuildHardenedResultCacheDirectory>
+                    <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
                   </PropertyGroup>
                   <UsingTask
-                      TaskName="{typeof(HardenedResultCacheTestTask).FullName}"
-                      AssemblyFile="{SecurityElement.Escape(typeof(HardenedResultCacheTestTask).Assembly.Location)}" />
+                      TaskName="{typeof(TaskResultCacheTestTask).FullName}"
+                      AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
                   <ItemGroup>
                     <CacheInput Include="input.txt" />
                     <CacheOutput Include="output.txt" />
                   </ItemGroup>
                   <Target Name="Build">
-                    <HardenedResultCacheTestTask
+                    <TaskResultCacheTestTask
                         Input="@(CacheInput)"
                         OutputFile="@(CacheOutput)"
                         WriteOutput="false"
@@ -208,17 +208,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 """);
 
-            MockLogger firstLogger = BuildHardenedCacheProject(projectPath);
+            MockLogger firstLogger = BuildCacheProject(projectPath);
             firstLogger.AssertNoErrors();
             File.Exists(outputPath).ShouldBeFalse();
-            firstLogger.FullLog.ShouldContain("Hardened result cache miss");
+            firstLogger.FullLog.ShouldContain("Task result cache miss");
 
             File.WriteAllText(outputPath, "stale");
 
-            MockLogger secondLogger = BuildHardenedCacheProject(projectPath);
+            MockLogger secondLogger = BuildCacheProject(projectPath);
             secondLogger.AssertNoErrors();
             File.Exists(outputPath).ShouldBeFalse();
-            secondLogger.FullLog.ShouldContain("Hardened result cache hit");
+            secondLogger.FullLog.ShouldContain("Task result cache hit");
 
             string manifestPath = Directory.GetFiles(
                 cachePath,
@@ -227,15 +227,73 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(manifestPath, "corrupt");
             File.WriteAllText(outputPath, "stale");
 
-            MockLogger thirdLogger = BuildHardenedCacheProject(projectPath);
+            MockLogger thirdLogger = BuildCacheProject(projectPath);
             thirdLogger.AssertNoErrors();
             File.Exists(outputPath).ShouldBeFalse();
-            thirdLogger.FullLog.ShouldContain("The hardened result cache could not be used");
-            thirdLogger.FullLog.ShouldContain("Hardened result cache miss");
+            thirdLogger.FullLog.ShouldContain("The task result cache could not be used");
+            thirdLogger.FullLog.ShouldContain("Task result cache miss");
         }
 
         [Fact]
-        public async Task HardenedDeclaredIOResultCacheCoalescesConcurrentWriters()
+        public async Task DeclaredIOResultCacheCoalescesConcurrentWriters()
+        {
+            string originalCurrentDirectory = Directory.GetCurrentDirectory();
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            try
+            {
+                TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+                string inputPath = Path.Combine(projectFolder.Path, "input.txt");
+                string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+                string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+                File.WriteAllText(inputPath, "input");
+                File.WriteAllText(
+                    projectPath,
+                    $"""
+                    <Project>
+                      <PropertyGroup>
+                        <WorkspaceRoot>true</WorkspaceRoot>
+                        <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+                      </PropertyGroup>
+                      <UsingTask
+                          TaskName="{typeof(TaskResultCacheTestTask).FullName}"
+                          AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
+                      <ItemGroup>
+                        <CacheInput Include="input.txt" />
+                        <CacheOutput Include="output.txt" />
+                      </ItemGroup>
+                      <Target Name="Build">
+                        <TaskResultCacheTestTask
+                            Input="@(CacheInput)"
+                            OutputFile="@(CacheOutput)"
+                            CreateOutputOnly="true"
+                            DeclaredInputs="@(CacheInput)"
+                            DeclaredOutputs="@(CacheOutput)" />
+                      </Target>
+                    </Project>
+                    """);
+
+                Task<MockLogger> firstBuild = Task.Run(() => BuildCacheProject(projectPath));
+                Task<MockLogger> secondBuild = Task.Run(() => BuildCacheProject(projectPath));
+                MockLogger[] loggers = await Task.WhenAll(firstBuild, secondBuild);
+
+                File.ReadAllText(outputPath).ShouldBe("input");
+                int missCount =
+                    (loggers[0].FullLog.Contains("Task result cache miss", StringComparison.Ordinal) ? 1 : 0) +
+                    (loggers[1].FullLog.Contains("Task result cache miss", StringComparison.Ordinal) ? 1 : 0);
+                int hitCount =
+                    (loggers[0].FullLog.Contains("Task result cache hit", StringComparison.Ordinal) ? 1 : 0) +
+                    (loggers[1].FullLog.Contains("Task result cache hit", StringComparison.Ordinal) ? 1 : 0);
+                missCount.ShouldBe(1);
+                hitCount.ShouldBe(1);
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalCurrentDirectory);
+            }
+        }
+
+        [Fact]
+        public void DeclaredIOResultCacheHonorsRequiresUnset()
         {
             using TestEnvironment env = TestEnvironment.Create(_testOutput);
             TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
@@ -248,43 +306,37 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 $"""
                 <Project>
                   <PropertyGroup>
-                    <WorkspaceRoot>true</WorkspaceRoot>
-                    <MSBuildHardenedResultCacheDirectory>cache</MSBuildHardenedResultCacheDirectory>
+                    <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
                   </PropertyGroup>
                   <UsingTask
-                      TaskName="{typeof(HardenedResultCacheTestTask).FullName}"
-                      AssemblyFile="{SecurityElement.Escape(typeof(HardenedResultCacheTestTask).Assembly.Location)}" />
-                  <ItemGroup>
-                    <CacheInput Include="input.txt" />
-                    <CacheOutput Include="output.txt" />
-                  </ItemGroup>
+                      TaskName="{typeof(TaskResultCacheTestTask).FullName}"
+                      AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
                   <Target Name="Build">
-                    <HardenedResultCacheTestTask
-                        Input="@(CacheInput)"
-                        OutputFile="@(CacheOutput)"
-                        CreateOutputOnly="true"
-                        DeclaredInputs="@(CacheInput)"
-                        DeclaredOutputs="@(CacheOutput)" />
+                    <TaskResultCacheTestTask
+                        Input="input.txt"
+                        OutputFile="output.txt"
+                        UncacheableMode="true"
+                        DeclaredInputs="input.txt"
+                        DeclaredOutputs="output.txt" />
                   </Target>
                 </Project>
                 """);
 
-            Task<MockLogger> firstBuild = Task.Run(() => BuildHardenedCacheProject(projectPath));
-            Task<MockLogger> secondBuild = Task.Run(() => BuildHardenedCacheProject(projectPath));
-            MockLogger[] loggers = await Task.WhenAll(firstBuild, secondBuild);
+            MockLogger firstLogger = BuildCacheProject(projectPath);
+            firstLogger.AssertNoErrors();
+            firstLogger.FullLog.ShouldContain("the task parameter \"UncacheableMode\" must be unset");
+            firstLogger.FullLog.ShouldNotContain("Task result cache miss");
 
+            File.Delete(outputPath);
+
+            MockLogger secondLogger = BuildCacheProject(projectPath);
+            secondLogger.AssertNoErrors();
+            secondLogger.FullLog.ShouldContain("the task parameter \"UncacheableMode\" must be unset");
+            secondLogger.FullLog.ShouldNotContain("Task result cache hit");
             File.ReadAllText(outputPath).ShouldBe("input");
-            int missCount =
-                (loggers[0].FullLog.Contains("Hardened result cache miss", StringComparison.Ordinal) ? 1 : 0) +
-                (loggers[1].FullLog.Contains("Hardened result cache miss", StringComparison.Ordinal) ? 1 : 0);
-            int hitCount =
-                (loggers[0].FullLog.Contains("Hardened result cache hit", StringComparison.Ordinal) ? 1 : 0) +
-                (loggers[1].FullLog.Contains("Hardened result cache hit", StringComparison.Ordinal) ? 1 : 0);
-            missCount.ShouldBe(1);
-            hitCount.ShouldBe(1);
         }
 
-        private MockLogger BuildHardenedCacheProject(string projectPath)
+        private MockLogger BuildCacheProject(string projectPath)
         {
             using var projectCollection = new ProjectCollection();
             var logger = new MockLogger(_testOutput)
@@ -294,7 +346,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var parameters = new BuildParameters(projectCollection)
             {
                 EnableNodeReuse = false,
-                HardenedGraphValidation = true,
                 Loggers = [logger],
                 MaxNodeCount = 1,
                 ShutdownInProcNodeOnBuildFinish = true,
@@ -1473,7 +1524,8 @@ namespace ClassLibrary2
     }
 
     [MSBuildDeclaredIOTask]
-    public sealed class HardenedResultCacheTestTask : Microsoft.Build.Utilities.Task
+    [MSBuildDeclaredIORequiresUnset(nameof(UncacheableMode))]
+    public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
     {
         public ITaskItem Input { get; set; }
 
@@ -1485,14 +1537,16 @@ namespace ClassLibrary2
 
         public bool CreateOutputOnly { get; set; }
 
+        public bool UncacheableMode { get; set; }
+
         public ITaskItem[] DeclaredInputs { get; set; }
 
         public ITaskItem[] DeclaredOutputs { get; set; }
 
         public override bool Execute()
         {
-            Log.LogMessage(MessageImportance.Normal, "hardened-result-cache-test-message");
-            Log.LogWarning("hardened-result-cache-test-warning");
+            Log.LogMessage(MessageImportance.Normal, "task-result-cache-test-message");
+            Log.LogWarning("task-result-cache-test-warning");
             if (WriteOutput)
             {
                 string contents = File.ReadAllText(Input.ItemSpec) + Marker;

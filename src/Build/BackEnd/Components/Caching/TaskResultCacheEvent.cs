@@ -10,17 +10,17 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd.Components.Caching
 {
-    internal sealed class HardenedResultCacheEventCollector
+    internal sealed class TaskResultCacheEventCollector
     {
-        private readonly List<HardenedResultCacheEvent> _events = [];
+        private readonly List<TaskResultCacheEvent> _events = [];
 
-        internal IReadOnlyList<HardenedResultCacheEvent> Events => _events;
+        internal IReadOnlyList<TaskResultCacheEvent> Events => _events;
 
         internal bool IsSupported { get; private set; } = true;
 
         internal void Record(BuildMessageEventArgs buildEvent)
         {
-            if (!HardenedResultCacheEvent.TryCreate(buildEvent, out HardenedResultCacheEvent cacheEvent))
+            if (!TaskResultCacheEvent.TryCreate(buildEvent, out TaskResultCacheEvent cacheEvent))
             {
                 IsSupported = false;
                 return;
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         internal void Record(BuildWarningEventArgs buildEvent)
         {
-            if (!HardenedResultCacheEvent.TryCreate(buildEvent, out HardenedResultCacheEvent cacheEvent))
+            if (!TaskResultCacheEvent.TryCreate(buildEvent, out TaskResultCacheEvent cacheEvent))
             {
                 IsSupported = false;
                 return;
@@ -46,7 +46,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         }
     }
 
-    internal sealed class HardenedResultCacheEvent
+    internal sealed class TaskResultCacheEvent
     {
         private enum EventKind : byte
         {
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             TaskCommandLine,
         }
 
-        private HardenedResultCacheEvent(
+        private TaskResultCacheEvent(
             EventKind kind,
             string subcategory,
             string code,
@@ -113,7 +113,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         internal static bool TryCreate(
             BuildMessageEventArgs buildEvent,
-            out HardenedResultCacheEvent cacheEvent)
+            out TaskResultCacheEvent cacheEvent)
         {
             EventKind kind;
             if (buildEvent.GetType() == typeof(BuildMessageEventArgs))
@@ -130,7 +130,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 return false;
             }
 
-            cacheEvent = new HardenedResultCacheEvent(
+            cacheEvent = new TaskResultCacheEvent(
                 kind,
                 buildEvent.Subcategory,
                 buildEvent.Code,
@@ -149,7 +149,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         internal static bool TryCreate(
             BuildWarningEventArgs buildEvent,
-            out HardenedResultCacheEvent cacheEvent)
+            out TaskResultCacheEvent cacheEvent)
         {
             if (buildEvent.GetType() != typeof(BuildWarningEventArgs))
             {
@@ -157,7 +157,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 return false;
             }
 
-            cacheEvent = new HardenedResultCacheEvent(
+            cacheEvent = new TaskResultCacheEvent(
                 EventKind.Warning,
                 buildEvent.Subcategory,
                 buildEvent.Code,
@@ -241,7 +241,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             writer.Write((byte)Importance);
         }
 
-        internal static HardenedResultCacheEvent Read(BinaryReader reader)
+        internal static TaskResultCacheEvent Read(BinaryReader reader)
         {
             EventKind kind = (EventKind)reader.ReadByte();
             if (kind is < EventKind.Message or > EventKind.TaskCommandLine)
@@ -266,7 +266,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 throw new InvalidDataException();
             }
 
-            return new HardenedResultCacheEvent(
+            return new TaskResultCacheEvent(
                 kind,
                 subcategory,
                 code,
