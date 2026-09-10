@@ -1800,6 +1800,28 @@
   <!-- **** TaskHost strings end **** -->
 
   <!-- **** MSBuild Server fallback strings begin **** -->
+  <data name="TaskCacheStatisticsServerUnavailable" xml:space="preserve">
+    <value>MSBuild task cache statistics are unavailable because the resident MSBuild server is not running or is busy. Run a build with MSBUILDUSESERVER=1 to start the resident server, then retry the command.</value>
+    <comment>LOCALIZATION: The task cache statistics command could not connect to an idle resident MSBuild server. MSBUILDUSESERVER=1 is an environment-variable assignment and must not be localized. No format arguments.</comment>
+  </data>
+  <data name="TaskCacheStatisticsInvalidInvocation" xml:space="preserve">
+    <value>The task cache statistics commands cannot be combined with each other or with a project argument.</value>
+    <comment>LOCALIZATION: The user specified both task-cache statistics commands, or combined one with a project path. No format arguments.</comment>
+  </data>
+  <data name="HelpMessage_TaskCacheStatsSwitch" xml:space="preserve">
+    <value>
+                     -taskCacheStats
+                     Displays cumulative task-result cache statistics from the
+                     resident MSBuild server.</value>
+    <comment>LOCALIZATION: Help text for the taskCacheStats command-line switch. Keep the switch name unchanged.</comment>
+  </data>
+  <data name="HelpMessage_ResetTaskCacheStatsSwitch" xml:space="preserve">
+    <value>
+                     -resetTaskCacheStats
+                     Resets cumulative task-result cache statistics in the
+                     resident MSBuild server.</value>
+    <comment>LOCALIZATION: Help text for the resetTaskCacheStats command-line switch. Keep the switch name unchanged.</comment>
+  </data>
   <data name="MSBuildServerUnavailable" xml:space="preserve">
     <value>MSBuild server unavailable: {0}. Falling back to an in-process build.</value>
     <comment>LOCALIZATION: {0} is a sub-message describing why the MSBuild server could not be used. It is one of MSBuildServerCrashedOnLaunch / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed. The outer template supplies the trailing period after {0}; sub-messages must NOT end with a period or other sentence-final punctuation.</comment>

@@ -9,6 +9,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
@@ -102,10 +103,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DeclaredIOResultCacheRestoresOutputsAndReplaysWarnings()
         {
+            TaskResultCacheStatistics.Reset();
             using TestEnvironment env = TestEnvironment.Create(_testOutput);
             TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
             string inputPath = Path.Combine(projectFolder.Path, "input.txt");
             string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+            string cachePath = Path.Combine(projectFolder.Path, "cache");
             string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
             File.WriteAllText(inputPath, "first");
             File.WriteAllText(
@@ -170,6 +173,92 @@ namespace Microsoft.Build.UnitTests.BackEnd
             thirdLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("second?");
             thirdLogger.FullLog.ShouldContain("Task result cache miss");
+
+            TaskResultCacheStatisticsSnapshot statistics =
+                TaskResultCacheStatistics.GetSnapshot();
+            statistics.Requests.ShouldBe(4);
+            statistics.CacheRequests.ShouldBe(4);
+            statistics.Hits.ShouldBe(1);
+            statistics.Misses.ShouldBe(3);
+            statistics.Ineligible.ShouldBe(0);
+            statistics.Errors.ShouldBe(0);
+            statistics.Stores.ShouldBe(3);
+            statistics.StoreErrors.ShouldBe(0);
+            statistics.HitDurationTicks.ShouldBeGreaterThan(0);
+            statistics.MissDurationTicks.ShouldBeGreaterThan(0);
+            statistics.AverageHitTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            statistics.AverageMissTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            statistics.HitRate.ShouldBe(0.25);
+            File.Exists(Path.Combine(cachePath, "statistics.txt")).ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("cache", "", "cache")]
+        [InlineData("cache", "false", "cache")]
+        [InlineData("", "", null)]
+        [InlineData("", "false", null)]
+        public void TaskResultCacheDirectoryResolution(
+            string configuredDirectory,
+            string enabled,
+            string expected)
+        {
+            TaskResultCacheSession.ResolveCacheDirectory(configuredDirectory, enabled).ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData("true")]
+        [InlineData("True")]
+        public void EnabledTaskResultCacheUsesUserCacheDirectory(string enabled)
+        {
+            TaskResultCacheSession.ResolveCacheDirectory("", enabled)
+                .ShouldBe(TaskResultCacheSession.GetDefaultCacheDirectory());
+        }
+
+        [Theory]
+        [InlineData("-taskCacheStats", false)]
+        [InlineData("/TASKCACHESTATS", false)]
+        [InlineData("--resetTaskCacheStats", true)]
+        public void TaskResultCacheStatisticsCommandsAreStandalone(string argument, bool expectedReset)
+        {
+            TaskResultCacheStatistics.IsStatisticsCommand(
+                ["MSBuild.exe", argument],
+                out bool reset).ShouldBeTrue();
+            reset.ShouldBe(expectedReset);
+
+            TaskResultCacheStatistics.IsStatisticsCommand(
+                ["MSBuild.exe", argument, "project.proj"],
+                out _).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void TaskResultCacheStatisticsPacketRoundTrips()
+        {
+            var snapshot = new TaskResultCacheStatisticsSnapshot(
+                requests: 9,
+                hits: 4,
+                misses: 3,
+                ineligible: 2,
+                errors: 1,
+                stores: 3,
+                storeErrors: 1,
+                hitDurationTicks: 40,
+                missDurationTicks: 90);
+            var packet = new TaskResultCacheStatisticsPacket(snapshot);
+
+            packet.Translate(TranslationHelpers.GetWriteTranslator());
+            TaskResultCacheStatisticsPacket roundTripped = (TaskResultCacheStatisticsPacket)
+                TaskResultCacheStatisticsPacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            roundTripped.Type.ShouldBe(NodePacketType.TaskResultCacheStatistics);
+            roundTripped.Snapshot.Requests.ShouldBe(9);
+            roundTripped.Snapshot.Hits.ShouldBe(4);
+            roundTripped.Snapshot.Misses.ShouldBe(3);
+            roundTripped.Snapshot.Ineligible.ShouldBe(2);
+            roundTripped.Snapshot.Errors.ShouldBe(1);
+            roundTripped.Snapshot.Stores.ShouldBe(3);
+            roundTripped.Snapshot.StoreErrors.ShouldBe(1);
+            roundTripped.Snapshot.HitDurationTicks.ShouldBe(40);
+            roundTripped.Snapshot.MissDurationTicks.ShouldBe(90);
         }
 
         [Fact]
@@ -290,6 +379,91 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Directory.SetCurrentDirectory(originalCurrentDirectory);
             }
+        }
+
+        [Fact]
+        public async Task DeclaredIOResultCacheLockWaitHonorsCancellation()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+            string inputPath = Path.Combine(projectFolder.Path, "input.txt");
+            string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+            File.WriteAllText(inputPath, "input");
+
+            var input = new Microsoft.Build.Utilities.TaskItem(inputPath);
+            var output = new Microsoft.Build.Utilities.TaskItem(outputPath);
+            var task = new TaskResultCacheTestTask
+            {
+                Input = input,
+                OutputFile = output,
+                DeclaredInputs = [input],
+                DeclaredOutputs = [output],
+            };
+            string[] parameterNames =
+            [
+                nameof(TaskResultCacheTestTask.Input),
+                nameof(TaskResultCacheTestTask.OutputFile),
+                nameof(TaskResultCacheTestTask.DeclaredInputs),
+                nameof(TaskResultCacheTestTask.DeclaredOutputs),
+            ];
+
+            TaskResultCacheOpenResponse firstOpen = await TaskResultCacheSession.TryOpenAsync(
+                task,
+                parameterNames,
+                Path.Combine(projectFolder.Path, "cache.proj"),
+                projectFolder.Path,
+                "cache",
+                new TaskResultCacheFileDigestCache(),
+                CancellationToken.None);
+            firstOpen.Result.ShouldBe(TaskResultCacheOpenResult.Miss);
+            using TaskResultCacheSession firstSession = firstOpen.Session;
+            using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(50));
+            var fileDigestCache = new TaskResultCacheFileDigestCache();
+
+            await Should.ThrowAsync<OperationCanceledException>(async () =>
+                await TaskResultCacheSession.TryOpenAsync(
+                    task,
+                    parameterNames,
+                    Path.Combine(projectFolder.Path, "cache.proj"),
+                    projectFolder.Path,
+                    "cache",
+                    fileDigestCache,
+                    cancellation.Token));
+        }
+
+        [Fact]
+        public async Task TaskResultCacheReusesUnchangedDigestAndRehashesChangedInput()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFile input = env.CreateFile("input.txt", "first");
+            var fileDigestCache = new TaskResultCacheFileDigestCache();
+
+            var requests = new Task<TaskResultCacheFileDigest>[16];
+            for (int i = 0; i < requests.Length; i++)
+            {
+                requests[i] = fileDigestCache
+                    .GetDigestAsync(input.Path, CancellationToken.None)
+                    .AsTask();
+            }
+
+            TaskResultCacheFileDigest[] digests = await Task.WhenAll(requests);
+            TaskResultCacheFileDigest first = digests[0];
+            for (int i = 1; i < digests.Length; i++)
+            {
+                digests[i].Hash.ShouldBeSameAs(first.Hash);
+            }
+
+            File.WriteAllText(input.Path, "second");
+            TaskResultCacheFileDigest second =
+                await fileDigestCache.GetDigestAsync(input.Path, CancellationToken.None);
+
+            second.Hash.ShouldNotBe(first.Hash);
+
+            fileDigestCache.ShutdownComponent();
+            TaskResultCacheFileDigest nextBuild =
+                await fileDigestCache.GetDigestAsync(input.Path, CancellationToken.None);
+            nextBuild.Hash.ShouldBe(second.Hash);
+            nextBuild.Hash.ShouldNotBeSameAs(second.Hash);
         }
 
         [Fact]
@@ -1395,6 +1569,8 @@ namespace ClassLibrary2
             /// </summary>
             private IResultsCache _resultsCache;
 
+            private TaskResultCacheFileDigestCache _taskResultCacheFileDigestCache;
+
             /// <summary>
             /// The request builder
             /// </summary>
@@ -1435,6 +1611,9 @@ namespace ClassLibrary2
 
                 _resultsCache = new ResultsCache();
                 ((IBuildComponent)_resultsCache).InitializeComponent(this);
+
+                _taskResultCacheFileDigestCache = new TaskResultCacheFileDigestCache();
+                _taskResultCacheFileDigestCache.InitializeComponent(this);
 
                 _requestBuilder = new RequestBuilder();
                 ((IBuildComponent)_requestBuilder).InitializeComponent(this);
@@ -1502,6 +1681,7 @@ namespace ClassLibrary2
                     BuildComponentType.ConfigCache => (IBuildComponent)_configCache,
                     BuildComponentType.LoggingService => (IBuildComponent)_loggingService,
                     BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
+                    BuildComponentType.TaskResultCacheFileDigestCache => _taskResultCacheFileDigestCache,
                     BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                     BuildComponentType.TargetBuilder => (IBuildComponent)_targetBuilder,
                     BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,

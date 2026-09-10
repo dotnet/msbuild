@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -485,7 +486,21 @@ namespace Microsoft.Build.Server
                     // Publish whether this build's server is short-lived so the build callback can report it.
                     s_currentBuildShutsDownServerNode = command.ShutdownAfterBuild;
 
-                    buildResult = _buildFunction(command.CommandLine);
+                    if (TaskResultCacheStatistics.IsStatisticsCommand(command.CommandLine, out bool resetStatistics))
+                    {
+                        if (resetStatistics)
+                        {
+                            TaskResultCacheStatistics.Reset();
+                        }
+
+                        Console.Out.Write(TaskResultCacheStatistics.FormatSnapshot(
+                            TaskResultCacheStatistics.GetSnapshot()));
+                        buildResult = (0, "Success");
+                    }
+                    else
+                    {
+                        buildResult = _buildFunction(command.CommandLine);
+                    }
                 }
             }
             finally
