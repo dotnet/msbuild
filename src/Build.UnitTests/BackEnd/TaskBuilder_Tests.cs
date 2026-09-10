@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -96,6 +97,216 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             count.ShouldBe(1);
+        }
+
+        [Fact]
+        public void HardenedDeclaredIOResultCacheRestoresOutputsAndReplaysWarnings()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+            string inputPath = Path.Combine(projectFolder.Path, "input.txt");
+            string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+            string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+            File.WriteAllText(inputPath, "first");
+            File.WriteAllText(
+                projectPath,
+                $"""
+                <Project>
+                  <PropertyGroup>
+                    <WorkspaceRoot>true</WorkspaceRoot>
+                    <MSBuildHardenedResultCacheDirectory>cache</MSBuildHardenedResultCacheDirectory>
+                  </PropertyGroup>
+                  <UsingTask
+                      TaskName="{typeof(HardenedResultCacheTestTask).FullName}"
+                      AssemblyFile="{SecurityElement.Escape(typeof(HardenedResultCacheTestTask).Assembly.Location)}" />
+                  <ItemGroup>
+                    <CacheInput Include="input.txt" />
+                    <CacheOutput Include="output.txt" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <HardenedResultCacheTestTask
+                        Input="@(CacheInput)"
+                        OutputFile="@(CacheOutput)"
+                        Marker="!"
+                        DeclaredInputs="@(CacheInput)"
+                        DeclaredOutputs="@(CacheOutput)" />
+                  </Target>
+                </Project>
+                """);
+
+            MockLogger firstLogger = BuildHardenedCacheProject(projectPath);
+            firstLogger.AssertNoErrors();
+            firstLogger.WarningCount.ShouldBe(1);
+            File.ReadAllText(outputPath).ShouldBe("first!");
+            firstLogger.FullLog.ShouldContain("Hardened result cache miss");
+
+            File.Delete(outputPath);
+
+            MockLogger secondLogger = BuildHardenedCacheProject(projectPath);
+            secondLogger.AssertNoErrors();
+            secondLogger.WarningCount.ShouldBe(1);
+            File.ReadAllText(outputPath).ShouldBe("first!");
+            secondLogger.FullLog.ShouldContain("Hardened result cache hit");
+
+            File.WriteAllText(
+                projectPath,
+                File.ReadAllText(projectPath).Replace(
+                    "Marker=\"!\"",
+                    "Marker=\"?\"",
+                    StringComparison.Ordinal));
+            File.Delete(outputPath);
+
+            MockLogger parameterChangeLogger = BuildHardenedCacheProject(projectPath);
+            parameterChangeLogger.AssertNoErrors();
+            parameterChangeLogger.WarningCount.ShouldBe(1);
+            File.ReadAllText(outputPath).ShouldBe("first?");
+            parameterChangeLogger.FullLog.ShouldContain("Hardened result cache miss");
+
+            File.WriteAllText(inputPath, "second");
+            File.Delete(outputPath);
+
+            MockLogger thirdLogger = BuildHardenedCacheProject(projectPath);
+            thirdLogger.AssertNoErrors();
+            thirdLogger.WarningCount.ShouldBe(1);
+            File.ReadAllText(outputPath).ShouldBe("second?");
+            thirdLogger.FullLog.ShouldContain("Hardened result cache miss");
+        }
+
+        [Fact]
+        public void HardenedDeclaredIOResultCacheRestoresAbsentOutputsAndRecoversFromCorruption()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+            string inputPath = Path.Combine(projectFolder.Path, "input.txt");
+            string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+            string cachePath = Path.Combine(projectFolder.Path, "cache");
+            string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+            File.WriteAllText(inputPath, "input");
+            File.WriteAllText(
+                projectPath,
+                $"""
+                <Project>
+                  <PropertyGroup>
+                    <WorkspaceRoot>true</WorkspaceRoot>
+                    <MSBuildHardenedResultCacheDirectory>cache</MSBuildHardenedResultCacheDirectory>
+                  </PropertyGroup>
+                  <UsingTask
+                      TaskName="{typeof(HardenedResultCacheTestTask).FullName}"
+                      AssemblyFile="{SecurityElement.Escape(typeof(HardenedResultCacheTestTask).Assembly.Location)}" />
+                  <ItemGroup>
+                    <CacheInput Include="input.txt" />
+                    <CacheOutput Include="output.txt" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <HardenedResultCacheTestTask
+                        Input="@(CacheInput)"
+                        OutputFile="@(CacheOutput)"
+                        WriteOutput="false"
+                        DeclaredInputs="@(CacheInput)"
+                        DeclaredOutputs="@(CacheOutput)" />
+                  </Target>
+                </Project>
+                """);
+
+            MockLogger firstLogger = BuildHardenedCacheProject(projectPath);
+            firstLogger.AssertNoErrors();
+            File.Exists(outputPath).ShouldBeFalse();
+            firstLogger.FullLog.ShouldContain("Hardened result cache miss");
+
+            File.WriteAllText(outputPath, "stale");
+
+            MockLogger secondLogger = BuildHardenedCacheProject(projectPath);
+            secondLogger.AssertNoErrors();
+            File.Exists(outputPath).ShouldBeFalse();
+            secondLogger.FullLog.ShouldContain("Hardened result cache hit");
+
+            string manifestPath = Directory.GetFiles(
+                cachePath,
+                "manifest.bin",
+                SearchOption.AllDirectories).ShouldHaveSingleItem();
+            File.WriteAllText(manifestPath, "corrupt");
+            File.WriteAllText(outputPath, "stale");
+
+            MockLogger thirdLogger = BuildHardenedCacheProject(projectPath);
+            thirdLogger.AssertNoErrors();
+            File.Exists(outputPath).ShouldBeFalse();
+            thirdLogger.FullLog.ShouldContain("The hardened result cache could not be used");
+            thirdLogger.FullLog.ShouldContain("Hardened result cache miss");
+        }
+
+        [Fact]
+        public async Task HardenedDeclaredIOResultCacheCoalescesConcurrentWriters()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+            string inputPath = Path.Combine(projectFolder.Path, "input.txt");
+            string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+            string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+            File.WriteAllText(inputPath, "input");
+            File.WriteAllText(
+                projectPath,
+                $"""
+                <Project>
+                  <PropertyGroup>
+                    <WorkspaceRoot>true</WorkspaceRoot>
+                    <MSBuildHardenedResultCacheDirectory>cache</MSBuildHardenedResultCacheDirectory>
+                  </PropertyGroup>
+                  <UsingTask
+                      TaskName="{typeof(HardenedResultCacheTestTask).FullName}"
+                      AssemblyFile="{SecurityElement.Escape(typeof(HardenedResultCacheTestTask).Assembly.Location)}" />
+                  <ItemGroup>
+                    <CacheInput Include="input.txt" />
+                    <CacheOutput Include="output.txt" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <HardenedResultCacheTestTask
+                        Input="@(CacheInput)"
+                        OutputFile="@(CacheOutput)"
+                        CreateOutputOnly="true"
+                        DeclaredInputs="@(CacheInput)"
+                        DeclaredOutputs="@(CacheOutput)" />
+                  </Target>
+                </Project>
+                """);
+
+            Task<MockLogger> firstBuild = Task.Run(() => BuildHardenedCacheProject(projectPath));
+            Task<MockLogger> secondBuild = Task.Run(() => BuildHardenedCacheProject(projectPath));
+            MockLogger[] loggers = await Task.WhenAll(firstBuild, secondBuild);
+
+            File.ReadAllText(outputPath).ShouldBe("input");
+            int missCount =
+                (loggers[0].FullLog.Contains("Hardened result cache miss", StringComparison.Ordinal) ? 1 : 0) +
+                (loggers[1].FullLog.Contains("Hardened result cache miss", StringComparison.Ordinal) ? 1 : 0);
+            int hitCount =
+                (loggers[0].FullLog.Contains("Hardened result cache hit", StringComparison.Ordinal) ? 1 : 0) +
+                (loggers[1].FullLog.Contains("Hardened result cache hit", StringComparison.Ordinal) ? 1 : 0);
+            missCount.ShouldBe(1);
+            hitCount.ShouldBe(1);
+        }
+
+        private MockLogger BuildHardenedCacheProject(string projectPath)
+        {
+            using var projectCollection = new ProjectCollection();
+            var logger = new MockLogger(_testOutput)
+            {
+                Verbosity = LoggerVerbosity.Diagnostic,
+            };
+            var parameters = new BuildParameters(projectCollection)
+            {
+                EnableNodeReuse = false,
+                HardenedGraphValidation = true,
+                Loggers = [logger],
+                MaxNodeCount = 1,
+                ShutdownInProcNodeOnBuildFinish = true,
+            };
+            Project project = projectCollection.LoadProject(projectPath);
+            using var buildManager = new BuildManager();
+            BuildResult result = buildManager.Build(
+                parameters,
+                new BuildRequestData(project.CreateProjectInstance(), ["Build"]));
+
+            result.ShouldHaveSucceeded();
+            return logger;
         }
 
         /// <summary>
@@ -1258,6 +1469,54 @@ namespace ClassLibrary2
             }
 
             #endregion
+        }
+    }
+
+    [MSBuildDeclaredIOTask]
+    public sealed class HardenedResultCacheTestTask : Microsoft.Build.Utilities.Task
+    {
+        public ITaskItem Input { get; set; }
+
+        public ITaskItem OutputFile { get; set; }
+
+        public string Marker { get; set; }
+
+        public bool WriteOutput { get; set; } = true;
+
+        public bool CreateOutputOnly { get; set; }
+
+        public ITaskItem[] DeclaredInputs { get; set; }
+
+        public ITaskItem[] DeclaredOutputs { get; set; }
+
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.Normal, "hardened-result-cache-test-message");
+            Log.LogWarning("hardened-result-cache-test-warning");
+            if (WriteOutput)
+            {
+                string contents = File.ReadAllText(Input.ItemSpec) + Marker;
+                if (CreateOutputOnly)
+                {
+                    using var stream = new FileStream(
+                        OutputFile.ItemSpec,
+                        FileMode.CreateNew,
+                        FileAccess.Write,
+                        FileShare.None);
+                    using var writer = new StreamWriter(stream);
+                    writer.Write(contents);
+                }
+                else
+                {
+                    File.WriteAllText(OutputFile.ItemSpec, contents);
+                }
+            }
+            else
+            {
+                File.Delete(OutputFile.ItemSpec);
+            }
+
+            return true;
         }
     }
 }

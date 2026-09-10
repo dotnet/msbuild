@@ -10,6 +10,7 @@ using System.Runtime.ExceptionServices;
 #endif
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -17,6 +18,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph.Hardened;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -803,11 +805,90 @@ namespace Microsoft.Build.BackEnd
             {
                 bool taskReturned = false;
                 Exception taskException = null;
+                HardenedResultCacheOpenResult cacheOpenResult = HardenedResultCacheOpenResult.Ineligible;
+                HardenedResultCacheSession cacheSession = null;
+                IReadOnlyList<HardenedResultCacheEvent> cachedEvents = null;
+                HardenedResultCacheEventCollector eventCollector = null;
+
+                if (_componentHost.BuildParameters.HardenedGraphValidation &&
+                    _taskNode.Outputs.Count == 0 &&
+                    taskExecutionHost.TaskInstance is not TaskHostTask &&
+                    taskExecutionHost.TaskLoadedType is not null &&
+                    HardenedTaskClassificationResolver.Describe(taskExecutionHost.TaskLoadedType).Classification ==
+                        HardenedTaskClassification.DeclaredIO)
+                {
+                    string cacheDirectory = _buildRequestEntry.RequestConfiguration.Project
+                        .GetPropertyValue(HardenedResultCacheSession.CacheDirectoryPropertyName);
+                    if (!String.IsNullOrWhiteSpace(cacheDirectory))
+                    {
+                        cacheOpenResult = HardenedResultCacheSession.TryOpen(
+                            taskExecutionHost.TaskInstance,
+                            _taskNode.ParametersForBuild.Keys,
+                            _projectFullPath,
+                            _buildRequestEntry.ProjectRootDirectory,
+                            cacheDirectory,
+                            out cacheSession,
+                            out cachedEvents,
+                            out string cacheReason);
+
+                        switch (cacheOpenResult)
+                        {
+                            case HardenedResultCacheOpenResult.Hit:
+                                taskLoggingContext.LogComment(
+                                    MessageImportance.Low,
+                                    "HardenedResultCacheHit",
+                                    _taskNode.Name,
+                                    cacheSession.Key);
+                                break;
+
+                            case HardenedResultCacheOpenResult.Miss:
+                                if (!String.IsNullOrEmpty(cacheReason))
+                                {
+                                    taskLoggingContext.LogComment(
+                                        MessageImportance.Low,
+                                        "HardenedResultCacheFailure",
+                                        _taskNode.Name,
+                                        cacheReason);
+                                }
+
+                                taskLoggingContext.LogComment(
+                                    MessageImportance.Low,
+                                    "HardenedResultCacheMiss",
+                                    _taskNode.Name,
+                                    cacheSession.Key);
+                                eventCollector = new HardenedResultCacheEventCollector();
+                                break;
+
+                            case HardenedResultCacheOpenResult.Ineligible:
+                            case HardenedResultCacheOpenResult.Unavailable:
+                                taskLoggingContext.LogComment(
+                                    MessageImportance.Low,
+                                    "HardenedResultCacheFailure",
+                                    _taskNode.Name,
+                                    cacheReason);
+                                break;
+                        }
+                    }
+                }
+
+                using HardenedResultCacheSession cacheSessionLease = cacheSession;
+                using IDisposable cacheEventCapture = eventCollector is null
+                    ? null
+                    : taskHost.BeginHardenedResultCacheEventCapture(eventCollector);
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
                 try
                 {
-                    if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
+                    if (cacheOpenResult == HardenedResultCacheOpenResult.Hit)
+                    {
+                        for (int i = 0; i < cachedEvents.Count; i++)
+                        {
+                            cachedEvents[i].Replay(taskHost);
+                        }
+
+                        taskResult = true;
+                    }
+                    else if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
                     {
                         // https://github.com/dotnet/msbuild/issues/11025
                         // The metaproject's inner <MSBuild> tasks are generator-authored plumbing,
@@ -885,6 +966,8 @@ namespace Microsoft.Build.BackEnd
 
                     taskException = ex;
                 }
+
+                cacheEventCapture?.Dispose();
 
                 if (taskException == null)
                 {
@@ -1043,6 +1126,30 @@ namespace Microsoft.Build.BackEnd
                 if (taskReturned)
                 {
                     taskResult = GatherTaskOutputs(taskExecutionHost, howToExecuteTask, bucket) && taskResult;
+                }
+
+                if (cacheOpenResult == HardenedResultCacheOpenResult.Miss &&
+                    cacheSession is not null &&
+                    taskReturned &&
+                    taskResult &&
+                    !taskLoggingContext.HasLoggedErrors)
+                {
+                    if (!eventCollector.IsSupported)
+                    {
+                        taskLoggingContext.LogComment(
+                            MessageImportance.Low,
+                            "HardenedResultCacheFailure",
+                            _taskNode.Name,
+                            "the task emitted an event type that the cache cannot replay");
+                    }
+                    else if (!cacheSession.TryStore(eventCollector.Events, out string cacheStoreReason))
+                    {
+                        taskLoggingContext.LogComment(
+                            MessageImportance.Low,
+                            "HardenedResultCacheFailure",
+                            _taskNode.Name,
+                            cacheStoreReason);
+                    }
                 }
 
                 // If the taskResults are false look at ContinueOnError.  If ContinueOnError=false (default)
