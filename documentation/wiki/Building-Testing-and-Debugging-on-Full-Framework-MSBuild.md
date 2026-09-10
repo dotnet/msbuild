@@ -4,7 +4,7 @@ These instructions refer to working with the `main` branch.
 
 ## Required Software
 
-**Latest Microsoft Visual Studio 2026**: You can download the Visual Studio Community edition from [visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/). Select the **.NET desktop development** workload and the **.NET Framework 3.5 development tools** individual component, as specified in [`.vsconfig`](../../.vsconfig).
+**Latest Microsoft Visual Studio 2026**: You can download the Visual Studio Community edition from [visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/). Select the components specified in [`.vsconfig`](../../.vsconfig).
 
 **.NET Framework 3.5** must also be installed on the Windows machine for the full build to succeed. `MSBuildTaskHost.exe` still targets .NET Framework 3.5; a newer .NET SDK or .NET Framework 4.x does not replace it.
 
