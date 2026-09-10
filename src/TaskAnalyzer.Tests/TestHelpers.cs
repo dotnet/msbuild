@@ -346,6 +346,7 @@ internal static class TestHelpers
             typeof(System.Xml.XmlReader).Assembly,            // System.Xml.ReaderWriter
             typeof(System.IO.Compression.ZipFile).Assembly,   // System.IO.Compression.ZipFile
             typeof(System.IO.Compression.ZipArchive).Assembly, // System.IO.Compression
+            typeof(System.CodeDom.Compiler.TempFileCollection).Assembly, // System.CodeDom
         };
 
         var locations = assemblies
