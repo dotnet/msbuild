@@ -1120,7 +1120,7 @@ namespace Microsoft.Build.BackEnd
                         int totalBytesRead = 0;
                         while (totalBytesRead < _headerByte.Length)
                         {
-                            int bytesRead = await _pipeStream.ReadAsync(_headerByte.AsMemory(totalBytesRead, _headerByte.Length - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            int bytesRead = await _readStream.ReadAsync(_headerByte.AsMemory(totalBytesRead, _headerByte.Length - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
                             if (bytesRead == 0)
                             {
                                 break;
