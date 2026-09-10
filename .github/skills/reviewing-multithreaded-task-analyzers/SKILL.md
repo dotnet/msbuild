@@ -1,26 +1,27 @@
 ---
 name: reviewing-multithreaded-task-analyzers
-description: "Use when reviewing a PR that adds or changes an MSBuildTaskNNNN diagnostic in the MSBuild thread-safe task analyzer (src/TaskAnalyzer/, Microsoft.Build.TaskAuthoring.Analyzer) — the rules that steer task authors toward IMultiThreadableTask / TaskEnvironment / [MSBuildMultiThreadableTask]. Layers on top of reviewing-roslyn-analyzers to judge whether the encoded rule matches MSBuild multithreaded-task semantics: attribute-vs-interface routing/injection, TaskEnvironment injection timing, AbsolutePath path-rooting, banned-API rationale, scope-gating of unscoped vs MT-specific rules, config reachability, and the hazards the analyzer cannot model by design."
+description: "Use when reviewing changes to MSBuildTaskNNNN diagnostics in src/TaskAnalyzer/ (Microsoft.Build.TaskAuthoring.Analyzer), including banned APIs, safe patterns, scope, messages, and fixes involving IMultiThreadableTask, TaskEnvironment, AbsolutePath, or MSBuildMultiThreadableTask."
 argument-hint: "Paste the analyzer PR number/URL or the MSBuildTaskNNNN rule diff to review."
 ---
 
 # Reviewing Multithreaded-Task Analyzer Contributions
 
-This is the **specialized layer** on top of **reviewing-roslyn-analyzers**. That skill judges whether the analyzer is well-built (registration, descriptors, release tracking, fixes, tests). This skill judges the harder question: **does the encoded rule actually match MSBuild multithreaded-task semantics?**
+This adds MSBuild domain checks to **reviewing-roslyn-analyzers**: **does the encoded rule match multithreaded-task semantics?**
 
-The single most important framing: **MT-safety is a dataflow + lifetime property** — "does any task input reach a process-global sink, through any path, at any point in the object's life?" — and it is only *partially* expressible as banned-symbol / AST rules. The analyzer is a deliberately incomplete static approximation of the ground truth. The ground truth lives in the **multithreaded-task-migration** skill; treat that skill as the specification and the analyzer as the (partial) enforcement.
+**MT-safety is a dataflow + lifetime property**: can task input reach process-global state at any point in the object's life? The analyzer enforces only part of the **multithreaded-task-migration** specification.
 
 ## When to use
 
 - A PR adds, removes, widens, narrows, or re-scopes an `MSBuildTaskNNNN` rule, its banned-API list, its safe-pattern set, its message text, or its code fix.
 - A PR changes analysis **scope** (`all` vs `multithreadable_only`) or the config surface that controls it.
-- Always run **reviewing-roslyn-analyzers** first (Waves 1–5); this skill adds **Wave 6**.
 
 Not for: reviewing a *task* being migrated to MT — that is the `mt-migration-reviewer` agent's job, driven by the `multithreaded-task-migration` skill.
 
-## Load the domain first
+## How to use
 
-Before judging a rule, load **multithreaded-task-migration** (the 8 compatibility sins, the leaf-API hazard table, the decoy-CWD / cross-instance test patterns). A rule is only "correct" if it rewards the shape that skill calls correct and flags the shape it calls a defect.
+1. Apply **reviewing-roslyn-analyzers** (Waves 1–5).
+2. Load **multithreaded-task-migration** before judging domain behavior. Use its compatibility sins, hazard table, and decoy-CWD / cross-instance test patterns.
+3. Apply Wave 6 below and add its coverage row to the generic report.
 
 ## The MT model on one screen (verify a rule against this)
 
@@ -34,7 +35,7 @@ Before judging a rule, load **multithreaded-task-migration** (the 8 compatibilit
 | Attribute | Interface / TE ctor | Effect | Correct diagnostic |
 |---|---|---|---|
 | ✅ | ✅ concrete, no TE ctor | in-proc, env injected post-construction | 0011 Info — prefer ctor injection |
-| ✅ | ❌ but has (incl. inherited) a settable `TaskEnvironment` property, no TE ctor | in-proc, **engine never assigns it** → resolves against shared CWD | 0012 Warning |
+| ✅ | ❌ but has (incl. inherited) a settable `TaskEnvironment` property, no TE ctor | in-proc, **engine never assigns it**; value depends on task code | 0012 Warning |
 | ❌ | ✅ in own base list | correct paths but **still out-of-proc** (no perf win) | 0013 Info, off by default |
 | ✅ on a non-`ITask` class, or an abstract `ITask` class | — | attribute reaches nothing the engine routes | 0014 Warning |
 | ✅ | ❌, no TE property at all | no **declaration** diagnostic — "migrated" only if 0001–0005 + a call-chain audit are clean | none (0011–0014) |
@@ -83,31 +84,12 @@ Apply after Waves 1–5. Add a **W6 — MT semantics** coverage row with `CLEAN 
 
 ## Known blind spots — what the analyzer cannot model (do not accept "analyzer is clean" as proof; do not demand it model these either)
 
-The analyzer is a partial static approximation of an MT-safety property that is fundamentally dataflow + lifetime. As a calibration point, a large migration with this analyzer enabled and a clean 0/0 build can still contain real defects the analyzer cannot see. When a rule change claims to "cover" MT-safety, remember these residual hazards live outside static reach **by design**:
+A clean analyzer run does not prove MT-safety. These residual hazards are outside its coverage **by design**:
 - **Unannotated base classes** run multithreaded but aren't analyzed under `multithreadable_only` (`Inherited=false`); base-class coverage may be extended over time, so verify the current analyzer scope.
 - **Analyzer-invisible path consumers** not on the 0003 monitored list: `AssemblyName.GetAssemblyName`, `XDocument/XmlDocument.Load(string)`, `XmlReader/XmlWriter.Create(string)`, `ZipFile.*`, `X509CertificateLoader`, `Image.FromFile`, `Assembly.LoadFrom` (string overloads).
 - **Dataflow/lifetime hazards:** task inputs crossing a DI/interface/delegate boundary; `RegisterTaskObject`/`GetRegisteredTaskObject` races; process-state-seeded `static` fields; nested `new MyTask().Execute()`; and the behavioral-parity **8 sins** (`[Output]`/message inflation, `?? ""` control-flow changes, canonicalization/exception-type changes).
 
 So: a widened allow-list can never make the analyzer "complete" — value it as one layer, and route dataflow/lifetime review to the `mt-migration-reviewer` agent.
-
-## MT review invariants (reapply on every analyzer PR)
-
-These recur across analyzer reviews:
-
-1. No auto-fix that applies `[MSBuildMultiThreadableTask]` — it's the last step, not the fix.
-2. Messages must be MT-accurate and honest; attribute-only can be a complete migration.
-3. Keep the unscoped rules (0001 never-safe, 0004 review-required) firing on all tasks; only gate the genuinely MT-specific ones (0002/0003/0005).
-4. Minimize config surface; prefer existing severity knobs; make any option reachable.
-5. Verify engine behavior empirically before asserting it in a message, doc, or rule.
-
-## Sign-off (MT layer)
-
-- [ ] Every new/changed rule verified against the routing/injection truth table and the banned-API rationale.
-- [ ] Messages state only engine-guaranteed behavior; no rule/message/fix implies the attribute alone is sufficient.
-- [ ] Unscoped vs MT-specific scoping is correct; no un-opt-out-able new break for plain `ITask` consumers.
-- [ ] Path safe-patterns match domain semantics (no `IsPathRooted` gate; `GetAbsolutePath` ≠ canonicalize).
-- [ ] Config option is reachable; no bespoke knob where severity config suffices.
-- [ ] Residual dataflow/lifetime hazards acknowledged, not assumed covered.
 
 ## Cross-references
 

@@ -42,7 +42,7 @@ These rules are for authoring and reviewing **the analyzer itself**. They are ge
 
 ## Robustness
 
-* An analyzer must **never throw** — an exception suppresses *all* diagnostics for the compilation. Guard **locations** before reporting: a symbol may have zero `Locations`, and a `Location` from metadata has a null `SourceTree` — never index `Locations[0]` or dereference `SourceTree` unconditionally; use `Location.None` as the fallback.
+* An analyzer must **never throw**. Roslyn normally reports analyzer failures as `AD0001`, and analysis can be incomplete. An exception does not necessarily remove existing diagnostics or stop unrelated analyzers. Guard **locations** before reporting: a symbol may have zero `Locations`, and a metadata location has a null `SourceTree`. Never index `Locations[0]` or dereference `SourceTree` unconditionally. Use `Location.None` when no source location exists.
 * Do not use file/environment/other non-deterministic APIs inside analyzer callbacks (RS1035).
 * Deduplicate diagnostics on the exact key you report at; report at the precise offending location (with the task entry point as an `AdditionalLocation`) so `#pragma warning disable`/`[SuppressMessage]` work where the code lives.
 
