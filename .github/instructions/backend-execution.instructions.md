@@ -2,47 +2,24 @@
 applyTo: "src/Build/BackEnd/**"
 ---
 
-# BackEnd & Execution Engine Instructions
+# Execution engine
 
-MSBuild's multi-process execution engine: `BuildManager`, node communication, scheduler, result caching, and task execution.
+## State and scheduling
 
-## Concurrency & Thread Safety (Critical)
+- Establish thread/process ownership before adding synchronization. Distinguish in-process nodes, worker processes, multithreaded nodes, and external TaskHosts; they do not have the same isolation.
+- Preserve `BuildManager` lifecycle invariants across initialization failure, cancellation, shutdown, and repeated builds. Invalid lifecycle calls should follow existing validation, not acquire a silent recovery path.
+- For scheduler changes, construct the actual request/target sequence and check deadlock, starvation, yield/unyield, and cached-result behavior.
+- Document lock order when introducing interacting locks. A mutable field is not itself proof of a race; trace all relevant owners and callbacks.
 
-* All shared mutable state must be synchronized — tasks run across in-proc and out-of-proc nodes concurrently.
-* `BuildManager.cs` is the most complex file — `BeginBuild`/`EndBuild`/`ResetCaches` sequences must remain correct.
-* Test in **both** in-proc and out-of-proc scenarios — they differ in state isolation, type loading, and serialization.
-* Lock ordering must be consistent to prevent deadlocks. Document acquisition order when introducing new locks.
+## Caching and IPC
 
-## Node Communication & IPC
+- Trace configuration identity and target results through the actual caches rather than assuming a single `(path, properties, targets)` key. See [Results Cache](../../documentation/wiki/Results-Cache.md).
+- Identify which peers can actually connect before changing packet layout. Inspect handshake/reuse compatibility and any negotiated version; do not assume arbitrary old/new workers support rolling updates.
+- Preserve packet ordering and read/write symmetry for supported peers. Do not assume old streams contain optional fields or that a new version number alone makes them compatible.
+- SDK resolver changes can affect cached state across evaluations/builds. Define its owner and invalidation boundary rather than banning all persistent state.
 
-* Never change the IPC packet format without versioning — old nodes must communicate with new ones during rolling updates.
-* IPC message ordering matters — race conditions cause intermittent, hard-to-reproduce failures.
-* Task host node (`NodeProviderOutOfProcTaskHost.cs`) has additional isolation constraints for type loading.
+## Evidence and deeper context
 
-## Scheduler Correctness
+Use representative in-proc, worker-process, MT, or TaskHost cases according to the changed boundary, not all modes for every edit. For an executable claim, use the [bootstrap skill](../skills/use-bootstrap-msbuild/SKILL.md).
 
-* Changes can cause deadlocks, starvation, or incorrect parallelism.
-* Yield/unyield semantics must be preserved — tasks that yield allow their node to process other requests.
-
-## Result Caching
-
-* Results are cached by `(project path, global properties, targets)` — changes to cache key computation break incremental builds.
-* Cache coherence between nodes is critical — stale results cause incorrect builds.
-* See [Results Cache](../../documentation/wiki/Results-Cache.md) and [Cache Flow](../../documentation/wiki/CacheFlow.png).
-
-## SDK Resolution
-
-* `SdkResolverService.cs` resolves SDK references during evaluation — changes affect every SDK-style project.
-* SDK resolution must not have side effects that persist across evaluations.
-
-## BuildManager Lifecycle
-
-* `BeginBuild` → submissions → `EndBuild` is the required sequence. Handle reentrant calls and out-of-order events gracefully.
-* `ResetCaches` must not lose in-flight results.
-
-## Related Documentation
-
-* [Nodes Orchestration](../../documentation/wiki/Nodes-Orchestration.md)
-* [Results Cache](../../documentation/wiki/Results-Cache.md)
-* [Logging Internals](../../documentation/wiki/Logging-Internals.md)
-* [Threading spec](../../documentation/specs/threading.md)
+Read [node orchestration](../../documentation/wiki/Nodes-Orchestration.md), [logging internals](../../documentation/wiki/Logging-Internals.md), or the [threading spec](../../documentation/specs/threading.md) only for the relevant investigation. Check design prose against current implementation.
