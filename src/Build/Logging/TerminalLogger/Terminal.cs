@@ -111,7 +111,9 @@ internal sealed class Terminal : ITerminal
         return (Width, Height);
     }
 
+#if FEATURE_WINDOWSINTEROP
     private static int NormalizeDimension(int dimension) => dimension <= 0 ? BigUnknownDimension : dimension;
+#endif
 
     /// <inheritdoc/>
     /// <remarks>

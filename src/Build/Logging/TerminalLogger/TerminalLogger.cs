@@ -811,7 +811,12 @@ public sealed partial class TerminalLogger : INodeLogger
                 Terminal.BeginUpdate();
                 try
                 {
-                    EraseNodes();
+                    (int Width, int Height)? terminalSize = null;
+                    if (_currentFrame.NodesCount > 0)
+                    {
+                        terminalSize = Terminal.GetSize();
+                        EraseNodes(terminalSize.Value.Width);
+                    }
 
                     string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
                     ReadOnlyMemory<char>? outputPath = project.OutputPath;
@@ -880,9 +885,10 @@ public sealed partial class TerminalLogger : INodeLogger
                     _buildErrorsCount += project.ErrorCount;
                     _buildWarningsCount += project.WarningCount;
 
-                    if (_showNodesDisplay && Verbosity > LoggerVerbosity.Quiet)
+                    if (_showNodesDisplay && Verbosity > LoggerVerbosity.Quiet && HasActiveNodes())
                     {
-                        DisplayNodes();
+                        (int width, int height) = terminalSize ?? Terminal.GetSize();
+                        DisplayNodes(width, height);
                     }
                 }
                 finally
@@ -1484,16 +1490,36 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Refreshes the node display using the current terminal dimensions.
     /// </summary>
     /// <remarks>
-    /// The terminal is queried on every frame. The number of physical rows the live block occupies
-    /// changes as soon as the terminal is resized, so rendering a delta against dimensions captured
-    /// on an earlier frame moves the cursor to the wrong place and corrupts the output.
-    /// <see cref="ITerminal.GetSize"/> keeps that to a single console query per frame.
+    /// The terminal is queried once per active frame. The number of physical rows the live block
+    /// occupies changes as soon as the terminal is resized, so rendering a delta against dimensions
+    /// captured on an earlier frame moves the cursor to the wrong place and corrupts the output.
     /// </remarks>
     internal void Refresh()
     {
+        TerminalNodesFrame currentFrame;
+        int currentFrameNodesCount;
         lock (_lock)
         {
-            (int width, int height) = Terminal.GetSize();
+            if (_currentFrame.NodesCount == 0 && !HasActiveNodes())
+            {
+                return;
+            }
+
+            currentFrame = _currentFrame;
+            currentFrameNodesCount = currentFrame.NodesCount;
+        }
+
+        (int width, int height) = Terminal.GetSize();
+
+        lock (_lock)
+        {
+            if (!ReferenceEquals(currentFrame, _currentFrame)
+                || currentFrame.NodesCount != currentFrameNodesCount
+                || (_currentFrame.NodesCount == 0 && !HasActiveNodes()))
+            {
+                return;
+            }
+
             DisplayNodes(width, height);
         }
     }
@@ -1537,7 +1563,15 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Erases the previously printed live node output.
     /// </summary>
-    private void EraseNodes() => EraseNodes(Terminal.GetSize().Width);
+    private void EraseNodes()
+    {
+        if (_currentFrame.NodesCount == 0)
+        {
+            return;
+        }
+
+        EraseNodes(Terminal.GetSize().Width);
+    }
 
     private void EraseNodes(int terminalWidth)
     {
@@ -1553,6 +1587,19 @@ public sealed partial class TerminalLogger : INodeLogger
     #endregion
 
     #region Helpers
+
+    private bool HasActiveNodes()
+    {
+        foreach (TerminalNodeStatus? node in _nodes)
+        {
+            if (node is not null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Returns the display name for the given target.

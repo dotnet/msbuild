@@ -931,7 +931,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void RefreshRendersEveryFrameWithASingleSizeQuery()
+        public void RefreshUsesOneSnapshotOnlyWhileNodesAreActive()
         {
             using StringWriter output = new();
             using ResizableTerminal terminal = new(output, width: 120, height: 40);
@@ -941,64 +941,37 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 terminalLogger.Initialize(eventSource, _nodeCount);
-                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
-                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
-                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
-                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
-
                 terminalLogger.Refresh();
-                int queriesAfterFirstFrame = terminal.SizeQueryCount;
-                output.GetStringBuilder().Clear();
 
-                for (int i = 0; i < 10; i++)
-                {
-                    terminalLogger.Refresh();
-                    output.ToString().ShouldNotBeEmpty($"Frame {i} was not rendered.");
-                    output.GetStringBuilder().Clear();
-                }
+                terminal.SizeQueryCount.ShouldBe(0);
+                output.ToString().ShouldBeEmpty();
 
-                // Both dimensions have to come from a single console round-trip per frame.
-                (terminal.SizeQueryCount - queriesAfterFirstFrame).ShouldBe(10);
-            }
-            finally
-            {
-                terminalLogger.Shutdown();
-            }
-        }
-
-        [Fact]
-        public void RefreshRedrawsImmediatelyAfterTerminalResize()
-        {
-            using StringWriter output = new();
-            using ResizableTerminal terminal = new(output, width: 120, height: 40);
-
-            MockBuildEventSink eventSource = new(0);
-            TerminalLogger terminalLogger = new(terminal);
-            try
-            {
-                terminalLogger.Initialize(eventSource, _nodeCount);
-                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
-                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
-                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
-                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
-
+                StartActiveProject(eventSource, _projectFile);
                 terminalLogger.Refresh();
                 output.GetStringBuilder().Clear();
 
-                // Unchanged dimensions keep the cheap delta render.
                 terminalLogger.Refresh();
+
+                terminal.SizeQueryCount.ShouldBe(2);
+                output.ToString().ShouldNotBeEmpty();
                 output.ToString().ShouldNotContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
-                output.GetStringBuilder().Clear();
 
-                // The node line was laid out 119 columns wide, so at 40 columns the terminal reflows it
-                // into 3 physical rows and the cursor has to move up by 4 before erasing.
-                terminal.Width = 40;
+                BuildEventContext secondProjectContext = MakeBuildEventContext(evalId: 2, projectContextId: 2, nodeId: 2);
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile2, buildEventContext: secondProjectContext));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile2, buildEventContext: secondProjectContext));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile2, "Build", secondProjectContext));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile2, "Task", secondProjectContext));
                 terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+                int queriesBeforeProjectFinished = terminal.SizeQueryCount;
+                eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded: true));
 
-                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}4{AnsiCodes.MoveUpToLineStart}");
-                output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                (terminal.SizeQueryCount - queriesBeforeProjectFinished).ShouldBe(1);
+                string projectFinishedOutput = output.ToString();
+                projectFinishedOutput.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                string liveNodes = projectFinishedOutput.Substring(projectFinishedOutput.LastIndexOf(AnsiCodes.HideCursor, StringComparison.Ordinal));
+                liveNodes.ShouldContain("project2");
+                liveNodes.Split([AnsiCodes.SetCursorHorizontal(120)], StringSplitOptions.None).Length.ShouldBe(2);
             }
             finally
             {
@@ -1006,37 +979,53 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void RefreshUsesUncappedWidthForReflow()
+        [Theory]
+        [InlineData(120, 40, 40, 40, 4)]
+        [InlineData(120, 40, 119, 40, 3)]
+        [InlineData(80, 40, 40, 40, 3)]
+        [InlineData(140, 40, 130, 40, 2)]
+        [InlineData(120, 40, 120, 20, 2)]
+        public void RefreshRedrawsImmediatelyAfterTerminalResize(
+            int initialWidth,
+            int initialHeight,
+            int resizedWidth,
+            int resizedHeight,
+            int expectedCursorMove)
         {
             using StringWriter output = new();
-            using ResizableTerminal terminal = new(output, width: 140, height: 40);
-            string projectFile = $"{new string('a', 130)}.proj";
+            using ResizableTerminal terminal = new(output, width: initialWidth, height: initialHeight);
 
             MockBuildEventSink eventSource = new(0);
             TerminalLogger terminalLogger = new(terminal);
             try
             {
                 terminalLogger.Initialize(eventSource, _nodeCount);
-                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(projectFile));
-                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(projectFile));
-                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(projectFile, "Build"));
-                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(projectFile, "Task"));
-
+                StartActiveProject(eventSource, _projectFile);
                 terminalLogger.Refresh();
                 output.GetStringBuilder().Clear();
 
-                terminal.Width = 130;
+                terminal.Width = resizedWidth;
+                terminal.Height = resizedHeight;
                 terminalLogger.Refresh();
 
-                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}2{AnsiCodes.MoveUpToLineStart}");
-                output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                string resizedOutput = output.ToString();
+                resizedOutput.ShouldStartWith($"{AnsiCodes.CSI}{expectedCursorMove}{AnsiCodes.MoveUpToLineStart}");
+                resizedOutput.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                resizedOutput.ShouldContain("project");
             }
             finally
             {
                 terminalLogger.Shutdown();
             }
+        }
+
+        private void StartActiveProject(MockBuildEventSink eventSource, string projectFile)
+        {
+            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(projectFile));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(projectFile));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(projectFile, "Build"));
+            eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(projectFile, "Task"));
         }
 
         [Fact]
