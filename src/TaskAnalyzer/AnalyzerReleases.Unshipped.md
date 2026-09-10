@@ -10,8 +10,8 @@ MSBuildTask0005 | MSBuild.TaskAuthoring | Warning | Transitive unsafe API usage 
 MSBuildTask0006 | MSBuild.TaskAuthoring | Info | Prefer typed path parameter (AbsolutePath/FileInfo/DirectoryInfo) over string (code fix available)
 MSBuildTask0007 | MSBuild.TaskAuthoring | Info | Prefer ITaskItem<T> over manual ItemSpec parsing (code fix available)
 MSBuildTask0008 | MSBuild.TaskAuthoring | Info | Initialize a relative default path in Execute() so TaskEnvironment can root it when the property is retyped (code fix available)
-MSBuildTask0009 | MSBuild.TaskAuthoring | Warning | ITaskItem<T> used with a type argument T that MSBuild cannot bind as a task parameter
-MSBuildTask0010 | MSBuild.TaskAuthoring | Warning | ITaskItem<T> used with a type argument T that MSBuild parses through Convert.ChangeType
+MSBuildTask0009 | MSBuild.TaskAuthoring | Info | ITaskItem<T> used with a type argument T that MSBuild cannot bind as a task parameter
+MSBuildTask0010 | MSBuild.TaskAuthoring | Info | ITaskItem<T> used with a type argument T that MSBuild parses through Convert.ChangeType
 MSBuildTask0011 | MSBuild.TaskAuthoring | Info | Prefer constructor injection for TaskEnvironment
 MSBuildTask0012 | MSBuild.TaskAuthoring | Warning | TaskEnvironment property is never assigned by MSBuild because the task does not implement IMultiThreadableTask
 MSBuildTask0013 | MSBuild.TaskAuthoring | Info | Task declares IMultiThreadableTask but is not marked with [MSBuildMultiThreadableTask] (disabled by default)

@@ -2110,7 +2110,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Task_WithOnlyMultiThreadableInterface_DoesNotGetMtMigrationRulesByDefault()
+    public async Task Task_DeclaringMultiThreadableInterface_GetsMtMigrationRulesByDefault()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -2119,6 +2119,32 @@ public class MultiThreadableTaskAnalyzerTests
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    File.Exists("foo.txt");
+                    _ = Environment.GetEnvironmentVariable("PATH");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+    }
+
+    [Fact]
+    public async Task Task_InheritingMultiThreadableInterface_DoesNotGetMtMigrationRulesByDefault()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public abstract class MtBase : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+            }
+            public class MyTask : MtBase
+            {
                 public override bool Execute()
                 {
                     File.Exists("foo.txt");
