@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 
@@ -19,7 +20,8 @@ namespace Microsoft.Build.CommandLine
     /// This class implements client for MSBuild server. It
     /// 1. starts the MSBuild server in a separate process if it does not yet exist.
     /// 2. establishes a connection with MSBuild server and sends a build request.
-    /// 3. if server is busy, it falls back to old build behavior.
+    /// 3. if the resident server is busy, it tries a transient server for multithreaded builds.
+    /// 4. if no server is available, it falls back to an in-process build.
     /// </summary>
     internal static class MSBuildClientApp
     {
@@ -68,6 +70,17 @@ namespace Microsoft.Build.CommandLine
         {
             MSBuildClient msbuildClient = new MSBuildClient(commandLineArgs, msbuildLocation, multiThreaded, shutdownServerAfterBuild);
             MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
+
+            if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy &&
+                multiThreaded &&
+                !shutdownServerAfterBuild &&
+                !cancellationToken.IsCancellationRequested)
+            {
+                // Retry admission once with a private identity, preserving the build's node-reuse setting.
+                CommunicationsUtilities.Trace("Resident server is busy; trying a transient server for the multithreaded build.");
+                MSBuildClient transientClient = new(commandLineArgs, msbuildLocation, multiThreaded, shutdownServerAfterBuild: true);
+                exitResult = transientClient.Execute(cancellationToken);
+            }
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
