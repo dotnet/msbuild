@@ -151,13 +151,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var child = _env.CreateFile(hostDirectory, "child.proj", """
                 <Project><Target Name="Build" /></Project>
                 """);
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            // Match the CWD's resolved spelling when the temporary directory is a symlink.
+            string childPath = Path.Combine(Directory.GetCurrentDirectory(), Path.GetFileName(child.Path));
             var root = _env.CreateFile(projectDirectory, "root.proj", $"""
                 <Project>
                   <ItemGroup><ProjectReference Include="child.proj" /></ItemGroup>
-                  <Target Name="Build"><MSBuild Projects="{child.Path}" Targets="Build" /></Target>
+                  <Target Name="Build"><MSBuild Projects="{childPath}" Targets="Build" /></Target>
                 </Project>
                 """);
-            _env.SetCurrentDirectory(hostDirectory.Path);
             using BuildManager manager = new();
             manager.BeginBuild(new BuildParameters
             {
@@ -172,7 +174,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             });
             try
             {
-                manager.BuildRequest(new BuildRequestData(child.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+                manager.BuildRequest(new BuildRequestData(childPath, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
                 manager.BuildRequest(new BuildRequestData(root.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
             }
             finally
