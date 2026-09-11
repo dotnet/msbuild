@@ -1504,6 +1504,13 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="ReportFileAccessesIncompatibleWithMultiThreaded" xml:space="preserve">
+    <value>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </comment>
+  </data>
   <data name="InvalidIsolateProjectsValue" xml:space="preserve">
     <value>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</value>
     <comment>
@@ -1837,7 +1844,7 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1073.
+        Next error code should be MSB1074.
 
         Don't forget to update this comment after using the new code.
   -->

@@ -234,6 +234,53 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostPacketHelpers.AreEqual(itemArray, deserializedItemArray);
         }
 
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Regression coverage for https://github.com/dotnet/msbuild/issues/14824.
+        /// </summary>
+        [Fact]
+        public void FileAccessDataRoundTripsWithoutLosingStructUpdates()
+        {
+            FileAccessData original = new(
+                ReportedFileOperation.CreateFile,
+                RequestedAccess.Enumerate,
+                processId: 1234,
+                id: 42,
+                correlationId: 7,
+                error: 5,
+                DesiredAccess.GENERIC_READ,
+                FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
+                @"C:\repo\src",
+                processArgs: "task.exe input",
+                isAnAugmentedFileAccess: true,
+                enumeratePattern: "*.cs",
+                openedFileOrDirectoryAttributes: FlagsAndAttributes.FILE_ATTRIBUTE_DIRECTORY);
+            TaskHostTaskComplete complete = new(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success),
+                [original],
+                buildProcessEnvironment: null);
+
+            ((ITranslatable)complete).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskHostTaskComplete deserialized = (TaskHostTaskComplete)TaskHostTaskComplete.FactoryForDeserialization(
+                TranslationHelpers.GetReadTranslator());
+
+            FileAccessData actual = deserialized.FileAccessData.ShouldHaveSingleItem();
+            actual.Operation.ShouldBe(original.Operation);
+            actual.RequestedAccess.ShouldBe(original.RequestedAccess);
+            actual.ProcessId.ShouldBe(original.ProcessId);
+            actual.Id.ShouldBe(original.Id);
+            actual.CorrelationId.ShouldBe(original.CorrelationId);
+            actual.Error.ShouldBe(original.Error);
+            actual.DesiredAccess.ShouldBe(original.DesiredAccess);
+            actual.FlagsAndAttributes.ShouldBe(original.FlagsAndAttributes);
+            actual.Path.ShouldBe(original.Path);
+            actual.ProcessArgs.ShouldBe(original.ProcessArgs);
+            actual.IsAnAugmentedFileAccess.ShouldBe(original.IsAnAugmentedFileAccess);
+            actual.EnumeratePattern.ShouldBe(original.EnumeratePattern);
+            actual.OpenedFileOrDirectoryAttributes.ShouldBe(original.OpenedFileOrDirectoryAttributes);
+        }
+#endif
+
         /// <summary>
         /// With the environment-delta wire format (packet version >= 5) and the default
         /// <see cref="InvariantPayloadTransferMode.Full"/> mode, the build process environment

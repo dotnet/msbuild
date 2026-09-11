@@ -13,9 +13,13 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Evaluation;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.Experimental.FileAccess;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -3431,6 +3435,149 @@ EndGlobal
                 () => MSBuildApp.IsMultiThreadedEnabled(switches));
             exception.Message.ShouldContain("MSB1072");
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Regression coverage for https://github.com/dotnet/msbuild/issues/14825.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedAndReportFileAccessesAreRejected()
+        {
+            CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
+                () => MSBuildApp.VerifyBuildModeCompatibility(multiThreaded: true, reportFileAccesses: true));
+
+            exception.Message.ShouldContain("MSB1073");
+            exception.Message.ShouldContain("Multi-threaded mode");
+            exception.Message.ShouldContain("-reportFileAccesses");
+            exception.Message.ShouldContain("MSBUILDFORCEMULTITHREADED");
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public void MultiThreadedOrReportFileAccessesRemainValidIndividually(bool multiThreaded, bool reportFileAccesses)
+        {
+            Should.NotThrow(() => MSBuildApp.VerifyBuildModeCompatibility(multiThreaded, reportFileAccesses));
+        }
+
+        [Fact]
+        public void MultiThreadedAndReportFileAccessesCommandLineReturnsSwitchError()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+            string project = testEnvironment.CreateTestProjectWithFiles(
+                "project.proj",
+                "<Project />").ProjectFile;
+
+            MSBuildApp.Execute([BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project, "-mt", "-reportFileAccesses"])
+                .ShouldBe(MSBuildApp.ExitType.SwitchError);
+        }
+
+        [Fact]
+        public void TaskHostFileAccessCollectionIsGatedAndIsolatedPerTask()
+        {
+            FileAccessData fileAccessData = new(
+                ReportedFileOperation.CreateFile,
+                RequestedAccess.Read,
+                processId: 123,
+                id: 1,
+                correlationId: 0,
+                error: 0,
+                DesiredAccess.GENERIC_READ,
+                FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
+                @"C:\repo\input.txt",
+                processArgs: null,
+                isAnAugmentedFileAccess: true);
+            using TaskExecutionContext enabledContext = new(taskId: 1, CreateTaskHostConfiguration(reportFileAccesses: true));
+            using TaskExecutionContext secondEnabledContext = new(taskId: 2, CreateTaskHostConfiguration(reportFileAccesses: true));
+            using TaskExecutionContext disabledContext = new(taskId: 3, CreateTaskHostConfiguration(reportFileAccesses: false));
+
+            OutOfProcTaskHostNode.TryReportFileAccess(enabledContext, fileAccessData).ShouldBeTrue();
+            OutOfProcTaskHostNode.TryReportFileAccess(disabledContext, fileAccessData).ShouldBeTrue();
+
+            enabledContext.FileAccesses.ShouldHaveSingleItem().Path.ShouldBe(fileAccessData.Path);
+            secondEnabledContext.FileAccesses.ShouldBeEmpty();
+            disabledContext.FileAccesses.ShouldBeEmpty();
+            OutOfProcTaskHostNode.TryReportFileAccess(taskContext: null, fileAccessData).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void EnabledTaskHostFileAccessSurvivesConfigurationCaptureAndCompletionTransport()
+        {
+            FileAccessData expected = new(
+                ReportedFileOperation.CreateFile,
+                RequestedAccess.Read,
+                processId: 123,
+                id: 1,
+                correlationId: 0,
+                error: 0,
+                DesiredAccess.GENERIC_READ,
+                FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
+                @"C:\repo\input.txt",
+                processArgs: null,
+                isAnAugmentedFileAccess: true);
+            TaskHostConfiguration configuration = CreateTaskHostConfiguration(reportFileAccesses: true);
+            using MemoryStream configurationStream = new();
+            ITranslator configurationWriter = BinaryTranslator.GetWriteTranslator(configurationStream);
+            configurationWriter.NegotiatedPacketVersion = 0;
+            configuration.Translate(configurationWriter);
+            configurationStream.Position = 0;
+            ITranslator configurationReader = BinaryTranslator.GetReadTranslator(
+                configurationStream,
+                InterningBinaryReader.PoolingBuffer);
+            configurationReader.NegotiatedPacketVersion = 0;
+            TaskHostConfiguration transportedConfiguration =
+                (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(configurationReader);
+            using TaskExecutionContext taskContext = new(taskId: 1, transportedConfiguration);
+
+            OutOfProcTaskHostNode.TryReportFileAccess(taskContext, expected).ShouldBeTrue();
+
+            TaskHostTaskComplete completion = new(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success),
+                taskContext.FileAccesses,
+                buildProcessEnvironment: null);
+            using MemoryStream completionStream = new();
+            completion.Translate(BinaryTranslator.GetWriteTranslator(completionStream));
+            completionStream.Position = 0;
+            TaskHostTaskComplete transportedCompletion =
+                (TaskHostTaskComplete)TaskHostTaskComplete.FactoryForDeserialization(
+                    BinaryTranslator.GetReadTranslator(completionStream, InterningBinaryReader.PoolingBuffer));
+
+            FileAccessData actual = transportedCompletion.FileAccessData.ShouldHaveSingleItem();
+            actual.Path.ShouldBe(expected.Path);
+            actual.Operation.ShouldBe(expected.Operation);
+            actual.ProcessId.ShouldBe(expected.ProcessId);
+        }
+
+        private static TaskHostConfiguration CreateTaskHostConfiguration(bool reportFileAccesses)
+            => new(
+                nodeId: 1,
+                startupDirectory: Directory.GetCurrentDirectory(),
+                buildProcessEnvironment: new Dictionary<string, string>(),
+                culture: CultureInfo.CurrentCulture,
+                uiCulture: CultureInfo.CurrentUICulture,
+                hostServices: null,
+#if FEATURE_APPDOMAIN
+                appDomainSetup: null,
+#endif
+                lineNumberOfTask: 1,
+                columnNumberOfTask: 1,
+                projectFileOfTask: @"C:\repo\project.proj",
+                continueOnError: false,
+                taskName: "Task",
+                taskLocation: @"C:\repo\task.dll",
+                targetName: "Build",
+                projectFile: @"C:\repo\project.proj",
+                isTaskInputLoggingEnabled: false,
+                taskParameters: new Dictionary<string, object>(),
+                globalParameters: new Dictionary<string, string>(),
+                warningsAsErrors: null,
+                warningsNotAsErrors: null,
+                warningsAsMessages: null,
+                reportFileAccesses: reportFileAccesses);
+#endif
 
         [Fact]
         public void MSBuildForceMultiThreadedEnvironmentVariableUnsetDoesNotEnableMultiThreadedMode()

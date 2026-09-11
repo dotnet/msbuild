@@ -2109,6 +2109,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="ReportFileAccessesX64Only" xml:space="preserve">
     <value>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</value>
   </data>
+  <data name="ReportFileAccessesIncompatibleWithMultiThreaded" xml:space="preserve">
+    <value>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</value>
+  </data>
   <data name="Binlog_Source_MultiSubscribeError" xml:space="preserve">
     <value>Structured events and raw events cannot be replayed at the same time.</value>
   </data>

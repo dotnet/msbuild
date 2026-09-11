@@ -187,13 +187,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
 
-#if FEATURE_REPORTFILEACCESSES
-        /// <summary>
-        /// The file accesses reported by the most recently completed task.
-        /// </summary>
-        private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
-#endif
-
         /// <summary>
         /// Counter for generating unique request IDs for callback correlation.
         /// </summary>
@@ -774,7 +767,11 @@ namespace Microsoft.Build.CommandLine
             /// <param name="fileAccessData">The file access to report.</param>
             public void ReportFileAccess(FileAccessData fileAccessData)
             {
-                _taskHost._fileAccessData.Add(fileAccessData);
+                TaskExecutionContext taskContext = _taskHost.GetCurrentTaskContext();
+                if (!TryReportFileAccess(taskContext, fileAccessData))
+                {
+                    CommunicationsUtilities.Trace("Ignoring a task-host file access because it could not be associated with a task execution context.");
+                }
             }
 #endif
         }
@@ -1097,6 +1094,19 @@ namespace Microsoft.Build.CommandLine
         {
             return _currentTaskContext.Value;
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        internal static bool TryReportFileAccess(TaskExecutionContext taskContext, FileAccessData fileAccessData)
+        {
+            if (taskContext is null)
+            {
+                return false;
+            }
+
+            taskContext.ReportFileAccess(fileAccessData);
+            return true;
+        }
+#endif
 
         /// <summary>
         /// Gets the configuration for the currently executing task on this thread.
@@ -1577,7 +1587,7 @@ namespace Microsoft.Build.CommandLine
                     _taskCompletePacket = new TaskHostTaskComplete(
                         taskResult,
 #if FEATURE_REPORTFILEACCESSES
-                        _fileAccessData,
+                        taskContext?.FileAccesses,
 #endif
                         currentEnvironment);
 
@@ -1611,16 +1621,12 @@ namespace Microsoft.Build.CommandLine
                     _taskCompletePacket = new TaskHostTaskComplete(
                         new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
 #if FEATURE_REPORTFILEACCESSES
-                        _fileAccessData,
+                        taskContext?.FileAccesses,
 #endif
                         null);
                 }
                 finally
                 {
-#if FEATURE_REPORTFILEACCESSES
-                    _fileAccessData = new List<FileAccessData>();
-#endif
-
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
                     // Use local variable -- _taskWrapper may have been overwritten by a nested task.
                     taskWrapper?.CleanupTask();
