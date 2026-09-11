@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests
                     "MSBUILDDEBUGPATH",
                     Path.Combine(ambientDebugPath, $"test_{EnvironmentUtilities.CurrentProcessId}"));
 
-                // Lets re-resolve FrameworkDebugUtils.DebugPath, which is cached, so it picks up new MSBUILDDEBUGPATH
+                // Let's re-resolve FrameworkDebugUtils.DebugPath, which is cached, so it picks up new MSBUILDDEBUGPATH
                 FrameworkDebugUtils.SetDebugPath();
             }
 
