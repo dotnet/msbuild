@@ -505,7 +505,7 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
-    public async Task DefaultConfiguration_InterfaceOnlyTask_DoesNotGetMtMigrationTransitiveDiagnostic()
+    public async Task DefaultConfiguration_TaskDeclaringInterface_GetsMtMigrationTransitiveDiagnostic()
     {
         var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
             using System;
@@ -517,6 +517,33 @@ public class TransitiveCallChainAnalyzerTests
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task DefaultConfiguration_TaskInheritingInterface_DoesNotGetMtMigrationTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public abstract class MtBase : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+            }
+            public class MyTask : MtBase
+            {
                 public override bool Execute()
                 {
                     Helper.Run();

@@ -124,35 +124,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     ReportOnType(context, DiagnosticDescriptors.TaskEnvironmentNeverAssigned, type);
                 }
             }
-            else if (!hasAttribute && DeclaresMultiThreadableTaskInterface(type, multiThreadableTaskType))
+            else if (!hasAttribute && SharedAnalyzerHelpers.DeclaresMultiThreadableTaskInterface(type, multiThreadableTaskType))
             {
                 ReportOnType(context, DiagnosticDescriptors.MissingMultiThreadableTaskAttribute, type);
             }
-        }
-
-        /// <summary>
-        /// Reports whether the type opts into <c>IMultiThreadableTask</c> in its own base list, rather
-        /// than merely inheriting it.
-        /// <para>
-        /// <c>ToolTask</c> implements <c>IMultiThreadableTask</c>, so every <c>ToolTask</c>-derived task in
-        /// the ecosystem satisfies the interface without its author having declared anything. Treating an
-        /// inherited implementation as intent would report thousands of untouched tasks, which is the same
-        /// reason <c>TaskRouter</c> cannot use the interface as a routing signal.
-        /// </para>
-        /// </summary>
-        private static bool DeclaresMultiThreadableTaskInterface(
-            INamedTypeSymbol type,
-            INamedTypeSymbol multiThreadableTaskType)
-        {
-            foreach (INamedTypeSymbol declaredInterface in type.Interfaces)
-            {
-                if (SymbolEqualityComparer.Default.Equals(declaredInterface, multiThreadableTaskType))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static bool HasMultiThreadableTaskAttribute(INamedTypeSymbol type, INamedTypeSymbol attributeType)

@@ -56,12 +56,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
             var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
+            var multiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
 
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
             var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
                 compilationContext.Compilation,
-                iTaskType);
+                iTaskType,
+                multiThreadableTaskType);
 
             // Thread-safe collections for building the graph across concurrent operation callbacks
             var callGraph = new ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>>(SymbolEqualityComparer.Default);
@@ -74,7 +76,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
                     taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType,
-                    contributingMultiThreadableTaskBaseTypes, directAnalysisStateCache);
+                    multiThreadableTaskType, contributingMultiThreadableTaskBaseTypes, directAnalysisStateCache);
             },
             OperationKind.Invocation,
             OperationKind.ObjectCreation,
@@ -85,7 +87,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             compilationContext.RegisterCompilationEndAction(endCtx =>
             {
                 AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType,
-                    bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType);
+                    multiThreadableTaskType, bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType,
+                    iTaskItemType, consoleType);
             });
         }
 
@@ -103,6 +106,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? consoleType,
             INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? multiThreadableTaskType,
             ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
             ConcurrentDictionary<INamedTypeSymbol, DirectAnalysisState> directAnalysisStateCache)
         {
@@ -125,6 +129,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     bool isDirectlyAnalyzed = IsDirectlyAnalyzedType(
                         containingType,
                         iTaskType,
+                        multiThreadableTaskType,
                         contributingMultiThreadableTaskBaseTypes,
                         out bool analyzeAsMultiThreadable);
                     directAnalysisState = new DirectAnalysisState(
@@ -278,6 +283,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>> callGraph,
             ConcurrentDictionary<ISymbol, ConcurrentBag<ViolationInfo>> directViolations,
             INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? multiThreadableTaskType,
             Dictionary<ISymbol, BannedApiEntry> bannedApiLookup,
             ImmutableHashSet<INamedTypeSymbol> filePathTypes,
             INamedTypeSymbol? taskEnvironmentType,
@@ -312,6 +318,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 bool isMultiThreadableTask = IsMtAnalysisOptIn(
                         taskType,
+                        multiThreadableTaskType,
                         out _);
 
                 var executeImplementation = iTaskExecuteMethod is null

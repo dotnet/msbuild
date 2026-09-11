@@ -22,11 +22,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 public class MultiThreadableTaskAnalyzerTests
 {
     // ═══════════════════════════════════════════════════════════════════════
-    // MSBuildTask0001: Critical errors
+    // MSBuildTask0001: APIs that are never safe in tasks
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task ConsoleWriteLine_InAnyTask_ProducesError()
+    public async Task ConsoleWriteLine_InAnyTask_ProducesInfo()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -40,8 +40,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
-        diags.Length.ShouldBe(1);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
@@ -62,11 +61,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(4);
+        AssertCriticalInfoDiagnostics(diags, 4);
     }
 
     [Fact]
-    public async Task ConsoleOut_PropertyAccess_ProducesError()
+    public async Task ConsoleOut_PropertyAccess_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -80,11 +79,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
-    public async Task EnvironmentExit_ProducesError()
+    public async Task EnvironmentExit_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -98,12 +97,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
-        diags.Length.ShouldBe(1);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
-    public async Task EnvironmentFailFast_ProducesError()
+    public async Task EnvironmentFailFast_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -117,11 +115,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
-    public async Task ThreadPoolSetMinMaxThreads_ProducesError()
+    public async Task ThreadPoolSetMinMaxThreads_ProducesDiagnostics()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Threading;
@@ -136,11 +134,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
+        AssertCriticalInfoDiagnostics(diags, 2);
     }
 
     [Fact]
-    public async Task CultureInfoDefaults_ProducesError()
+    public async Task CultureInfoDefaults_ProduceDiagnostics()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Globalization;
@@ -155,11 +153,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
+        AssertCriticalInfoDiagnostics(diags, 2);
     }
 
     [Fact]
-    public async Task ConsoleReadLine_ProducesError()
+    public async Task ConsoleReadLine_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -173,11 +171,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
-    public async Task ProcessKill_InAnyTask_ProducesError()
+    public async Task ProcessKill_InAnyTask_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Diagnostics;
@@ -192,7 +190,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
@@ -211,7 +209,54 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
+        AssertCriticalInfoDiagnostics(diags, 2);
+    }
+
+    [Theory]
+    [InlineData("warning", DiagnosticSeverity.Warning)]
+    [InlineData("error", DiagnosticSeverity.Error)]
+    public async Task MSBuildTask0001_ConfiguredSeverity_OverridesInfoDefault(
+        string configuredSeverity,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        {|#0:Console.WriteLine("hello")|};
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", $$"""
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0001.severity = {{configuredSeverity}}
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.CriticalError, expectedSeverity).WithLocation(0));
+
+        await test.RunAsync();
+    }
+
+    private static void AssertCriticalInfoDiagnostics(
+        System.Collections.Generic.IEnumerable<Diagnostic> diagnostics,
+        int expectedCount)
+    {
+        Diagnostic[] criticalDiagnostics = diagnostics
+            .Where(d => d.Id == DiagnosticIds.CriticalError)
+            .ToArray();
+
+        criticalDiagnostics.Length.ShouldBe(expectedCount);
+        criticalDiagnostics.ShouldAllBe(d => d.Severity == DiagnosticSeverity.Info);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -1350,7 +1395,7 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task DirectorySetCurrentDirectory_ProducesCriticalError()
+    public async Task DirectorySetCurrentDirectory_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
@@ -1542,7 +1587,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ConsoleSetOut_TypeLevelBan_ProducesError()
+    public async Task ConsoleSetOut_TypeLevelBan_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -1560,7 +1605,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ConsoleForegroundColor_TypeLevelBan_ProducesError()
+    public async Task ConsoleForegroundColor_TypeLevelBan_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -1578,7 +1623,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ConsoleTitle_TypeLevelBan_ProducesError()
+    public async Task ConsoleTitle_TypeLevelBan_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -2110,7 +2155,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Task_WithOnlyMultiThreadableInterface_DoesNotGetMtMigrationRulesByDefault()
+    public async Task Task_DeclaringMultiThreadableInterface_GetsMtMigrationRulesByDefault()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -2119,6 +2164,32 @@ public class MultiThreadableTaskAnalyzerTests
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    File.Exists("foo.txt");
+                    _ = Environment.GetEnvironmentVariable("PATH");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+    }
+
+    [Fact]
+    public async Task Task_InheritingMultiThreadableInterface_DoesNotGetMtMigrationRulesByDefault()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public abstract class MtBase : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+            }
+            public class MyTask : MtBase
+            {
                 public override bool Execute()
                 {
                     File.Exists("foo.txt");
@@ -2456,6 +2527,33 @@ public class MultiThreadableTaskAnalyzerTests
 
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
         diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task DefaultConfiguration_InterfaceDeclaringDerivedTask_AnalyzesUnsafeBaseTaskMethod()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultConfigurationAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public abstract class MyBaseTask : Microsoft.Build.Utilities.Task
+            {
+                protected bool UsesProcessState()
+                {
+                    _ = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            public class MyMtTask : MyBaseTask, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute() => UsesProcessState();
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
     }
 
     [Fact]

@@ -16,7 +16,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// <summary>
     /// Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
     /// 
-    /// By default, MSBuildTask0002 and MSBuildTask0003 apply only to MT-scoped code.
+    /// By default, MSBuildTask0002 and MSBuildTask0003 apply only to MT-scoped code: a type carrying
+    /// [MSBuildMultiThreadableTask] or [MSBuildMultiThreadableTaskAnalyzed], or a task that declares
+    /// IMultiThreadableTask in its own base list. The declared interface signals analyzer migration intent
+    /// only -- runtime routing still depends on [MSBuildMultiThreadableTask].
     /// The "msbuild_task_analyzer.run_mt_analyzers_on_all_tasks" option enables these rules for all tasks.
     ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
     /// 
@@ -50,9 +53,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
             var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
+            var multiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
                 compilationContext.Compilation,
-                iTaskType);
+                iTaskType,
+                multiThreadableTaskType);
 
             // Build symbol lookup for banned APIs
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
@@ -69,6 +74,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 if (!IsDirectlyAnalyzedType(
                     namedType,
                     iTaskType,
+                    multiThreadableTaskType,
                     contributingMultiThreadableTaskBaseTypes,
                     out bool analyzeAsMultiThreadable))
                 {
