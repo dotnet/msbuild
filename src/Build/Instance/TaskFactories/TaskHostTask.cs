@@ -691,9 +691,6 @@ namespace Microsoft.Build.BackEnd
                 case TelemetryEventArgs telemetry when buildEngine is IBuildEngine5 buildEngine5:
                     buildEngine5.LogTelemetry(telemetry.EventName, telemetry.Properties);
                     break;
-                default:
-                    InternalError.Throw("Unknown event args type.");
-                    break;
             }
         }
 
