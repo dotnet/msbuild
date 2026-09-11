@@ -19,6 +19,10 @@ namespace Microsoft.Build.Coordinator;
 /// <param name="output">Optional debug trace output. Defaults to file-based trace logging gated on MSBUILDDEBUGCOMM.</param>
 internal sealed partial class CoordinatorServer(CoordinatorSettings settings, ICoordinatorDebugOutput? output = null) : IDisposable
 {
+    private const int NotDisposed = 0;
+    private const int Disposing = 1;
+    private const int Disposed = 2;
+
     private readonly CoordinatorSettings _settings = settings;
     private readonly NodeBudgetManager _budgetManager = new(settings.TotalNodeBudget);
     private readonly string _pipeName = settings.PipeName;
@@ -29,9 +33,17 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private readonly ReaderWriterLockSlim _clientsLock = new();
     private readonly CancellationTokenSource _cts = new();
     private readonly ICoordinatorDebugOutput _output = output ?? DefaultDebugOutput.Instance;
+    private readonly object _lifecycleLock = new();
     private Timer? _heartbeatMonitor;
     private Timer? _shutdownTimer;
+    private Action? _heartbeatCallbackStartedForTests;
     private int _activeConnections;
+    private int _activeTimerCallbacks;
+    private int _disposeState;
+    private bool _disposeCancellationCompleted;
+    private bool _runStarted;
+    private bool _runCompleted;
+    private bool _stopping;
 
     private bool HasActiveConnections => Volatile.Read(ref _activeConnections) > 0;
 
@@ -39,11 +51,25 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
     public void Dispose()
     {
-        _cts.Cancel();
-        _heartbeatMonitor?.Dispose();
-        _shutdownTimer?.Dispose();
-        _cts.Dispose();
-        _clientsLock.Dispose();
+        if (Interlocked.CompareExchange(ref _disposeState, Disposing, NotDisposed) != NotDisposed)
+        {
+            return;
+        }
+
+        try
+        {
+            StopTimers();
+            _cts.Cancel();
+        }
+        finally
+        {
+            lock (_lifecycleLock)
+            {
+                _disposeCancellationCompleted = true;
+            }
+
+            TryDisposeSynchronizationState();
+        }
     }
 
     /// <summary>
@@ -53,28 +79,31 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// <param name="cancellationToken">Token to signal the server should stop accepting connections.</param>
     public async Task RunAsync(CancellationToken cancellationToken = default)
     {
-        using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _cts.Token);
-        CancellationToken token = linked.Token;
+        lock (_lifecycleLock)
+        {
+            ObjectDisposedException.ThrowIf(_disposeState != NotDisposed, this);
 
-        // Start heartbeat monitoring.
-        _heartbeatMonitor = new Timer(
-            CheckHeartbeats,
-            state: null,
-            dueTime: _heartbeatIntervalMs,
-            period: _heartbeatIntervalMs);
-
-        // Start auto-shutdown timer.
-        ResetShutdownTimer();
-
-        _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget})");
+            if (_runStarted)
+            {
+                throw new InvalidOperationException("The coordinator server can only be run once.");
+            }
+            _runStarted = true;
+        }
 
         ConcurrentDictionary<Task, byte> clientTasks = [];
 
         try
         {
+            using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _cts.Token);
+            CancellationToken token = linked.Token;
+
+            StartTimers();
+
+            _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget})");
+
             while (!token.IsCancellationRequested)
             {
-                NamedPipeServerStream? pipeStream = await WaitForClientAsync(token);
+                NamedPipeServerStream? pipeStream = await WaitForClientAsync(token).ConfigureAwait(false);
 
                 if (pipeStream is null)
                 {
@@ -98,25 +127,130 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         }
         finally
         {
-            _output.WriteLine("CoordinatorServer: Accept loop exiting");
-            _heartbeatMonitor?.Dispose();
-            _shutdownTimer?.Dispose();
-
-            // Wait for all remaining client tasks to complete before exiting.
-            // This ensures logging (which may reference the test context) completes cleanly.
-            ICollection<Task> remainingTasks = clientTasks.Keys;
-
-            if (remainingTasks.Count > 0)
+            try
             {
+                _output.WriteLine("CoordinatorServer: Accept loop exiting");
+            }
+            finally
+            {
+                StopTimers();
+
                 try
                 {
-                    await Task.WhenAll(remainingTasks);
+                    // Wait for all remaining client tasks to complete before exiting.
+                    // This ensures logging (which may reference the test context) completes cleanly.
+                    ICollection<Task> remainingTasks = clientTasks.Keys;
+
+                    if (remainingTasks.Count > 0)
+                    {
+                        try
+                        {
+                            await Task.WhenAll(remainingTasks).ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            // Swallow exceptions from client tasks; they're already logged.
+                        }
+                    }
                 }
-                catch
+                finally
                 {
-                    // Swallow exceptions from client tasks; they're already logged.
+                    lock (_lifecycleLock)
+                    {
+                        _runCompleted = true;
+                    }
+
+                    TryDisposeSynchronizationState();
                 }
             }
+        }
+    }
+
+    private void StartTimers()
+    {
+        lock (_lifecycleLock)
+        {
+            if (_stopping)
+            {
+                return;
+            }
+
+            _heartbeatMonitor = new Timer(
+                static state => ((CoordinatorServer)state!).CheckHeartbeats(),
+                state: this,
+                dueTime: _heartbeatIntervalMs,
+                period: _heartbeatIntervalMs);
+
+            _shutdownTimer = new Timer(
+                static state => ((CoordinatorServer)state!).CheckForAutoShutdown(),
+                state: this,
+                dueTime: _shutdownTimeoutMs,
+                period: Timeout.Infinite);
+        }
+    }
+
+    private void StopTimers()
+    {
+        Timer? heartbeatMonitor;
+        Timer? shutdownTimer;
+
+        lock (_lifecycleLock)
+        {
+            _stopping = true;
+            heartbeatMonitor = Interlocked.Exchange(ref _heartbeatMonitor, null);
+            shutdownTimer = Interlocked.Exchange(ref _shutdownTimer, null);
+        }
+
+        heartbeatMonitor?.Dispose();
+        shutdownTimer?.Dispose();
+    }
+
+    private bool TryEnterTimerCallback()
+    {
+        lock (_lifecycleLock)
+        {
+            if (_stopping)
+            {
+                return false;
+            }
+
+            _activeTimerCallbacks++;
+            return true;
+        }
+    }
+
+    private void ExitTimerCallback()
+    {
+        lock (_lifecycleLock)
+        {
+            _activeTimerCallbacks--;
+        }
+
+        TryDisposeSynchronizationState();
+    }
+
+    private void TryDisposeSynchronizationState()
+    {
+        bool dispose;
+
+        lock (_lifecycleLock)
+        {
+            dispose =
+                _disposeState == Disposing &&
+                _disposeCancellationCompleted &&
+                _activeTimerCallbacks == 0 &&
+                (!_runStarted || _runCompleted);
+
+            if (dispose)
+            {
+                _disposeState = Disposed;
+            }
+        }
+
+        if (dispose)
+        {
+            _cts.Dispose();
+            _clientsLock.Dispose();
         }
     }
 
@@ -522,35 +656,47 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// <summary>
     ///  Periodically checks for builds that have missed heartbeats and reclaims their grants.
     /// </summary>
-    /// <param name="state">Timer callback state (unused).</param>
-    private void CheckHeartbeats(object? state)
+    private void CheckHeartbeats()
     {
-        DateTime threshold = DateTime.UtcNow - TimeSpan.FromMilliseconds(_settings.HeartbeatTimeoutMs);
-
-        List<ConnectedClient> clientsToCheck;
-
-        using (_clientsLock.EnterDisposableReadLock())
+        if (!TryEnterTimerCallback())
         {
-            clientsToCheck = [.. _clientsById.Values];
+            return;
         }
 
-        foreach (ConnectedClient client in clientsToCheck)
+        try
         {
-            if (client.Grant.LastHeartbeat >= threshold)
+            DateTime threshold = DateTime.UtcNow - TimeSpan.FromMilliseconds(_settings.HeartbeatTimeoutMs);
+
+            List<ConnectedClient> clientsToCheck;
+
+            using (_clientsLock.EnterDisposableReadLock())
             {
-                continue;
+                _heartbeatCallbackStartedForTests?.Invoke();
+                clientsToCheck = [.. _clientsById.Values];
             }
 
-            // Check if the process is still alive before reclaiming.
-            if (IsProcessAlive(client.ProcessId))
+            foreach (ConnectedClient client in clientsToCheck)
             {
-                continue;
+                if (client.Grant.LastHeartbeat >= threshold)
+                {
+                    continue;
+                }
+
+                // Check if the process is still alive before reclaiming.
+                if (IsProcessAlive(client.ProcessId))
+                {
+                    continue;
+                }
+
+                _output.WriteLine($"CoordinatorServer: Reclaiming grant from dead PID {client.ProcessId}");
+
+                // ReleaseClient will acquire its own write lock.
+                ReleaseClient(client);
             }
-
-            _output.WriteLine($"CoordinatorServer: Reclaiming grant from dead PID {client.ProcessId}");
-
-            // ReleaseClient will acquire its own write lock.
-            ReleaseClient(client);
+        }
+        finally
+        {
+            ExitTimerCallback();
         }
     }
 
@@ -581,19 +727,33 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// </summary>
     private void ResetShutdownTimer()
     {
-        var newTimer = new Timer(
-            _ =>
+        lock (_lifecycleLock)
+        {
+            if (!_stopping)
             {
-                if (IsIdle)
-                {
-                    _output.WriteLine("CoordinatorServer: Auto-shutdown (no active or waiting builds)");
-                    _cts.Cancel();
-                }
-            },
-            state: null,
-            dueTime: _shutdownTimeoutMs,
-            period: Timeout.Infinite);
+                _shutdownTimer?.Change(_shutdownTimeoutMs, Timeout.Infinite);
+            }
+        }
+    }
 
-        Interlocked.Exchange(ref _shutdownTimer, newTimer)?.Dispose();
+    private void CheckForAutoShutdown()
+    {
+        if (!TryEnterTimerCallback())
+        {
+            return;
+        }
+
+        try
+        {
+            if (IsIdle)
+            {
+                _output.WriteLine("CoordinatorServer: Auto-shutdown (no active or waiting builds)");
+                _cts.Cancel();
+            }
+        }
+        finally
+        {
+            ExitTimerCallback();
+        }
     }
 }

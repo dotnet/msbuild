@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
+using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
@@ -415,6 +416,56 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         _cts.Cancel();
 
         await serverTask;
+    }
+
+    [Fact]
+    public async Task Dispose_DefersSharedStateDisposalUntilInFlightHeartbeatCompletes()
+    {
+        using TestEnvironment env = TestEnvironment.Create(testOutput);
+        using ManualResetEventSlim heartbeatStarted = new();
+        using ManualResetEventSlim continueHeartbeat = new();
+        CoordinatorServer server = CreateServer(
+            DefaultSettings with
+            {
+                TotalNodeBudget = 16,
+                HeartbeatIntervalMs = CoordinatorSettings.MaxHeartbeatIntervalMs,
+            });
+        CoordinatorServer.TestAccessor accessor = server.GetTestAccessor();
+        accessor.SetHeartbeatCallbackStarted(
+            () =>
+            {
+                heartbeatStarted.Set();
+                continueHeartbeat.Wait();
+            });
+
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        try
+        {
+            accessor.TriggerHeartbeatCheck();
+            heartbeatStarted.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+
+            Task disposeTask = Task.Run(
+                () =>
+                {
+                    Parallel.Invoke(server.Dispose, server.Dispose, server.Dispose);
+                });
+            (await Task.WhenAny(disposeTask, Task.Delay(5000))).ShouldBe(disposeTask);
+            await disposeTask;
+            accessor.IsDisposing.ShouldBeTrue();
+
+            continueHeartbeat.Set();
+
+            (await Task.WhenAny(serverTask, Task.Delay(5000))).ShouldBe(serverTask);
+            await serverTask;
+
+            server.Dispose();
+        }
+        finally
+        {
+            continueHeartbeat.Set();
+            server.Dispose();
+        }
     }
 
     [Fact]
