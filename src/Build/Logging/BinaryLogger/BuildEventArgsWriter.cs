@@ -542,6 +542,7 @@ namespace Microsoft.Build.Logging
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
                 case MSBuildServerLifecycleEventArgs serverLifecycle: return Write(serverLifecycle);
+                case AssemblyResolutionSearchTraceEventArgs assemblyResolutionSearchTrace: return Write(assemblyResolutionSearchTrace);
 
                 default: // actual BuildMessageEventArgs
                     WriteMessageFields(e, writeImportance: true);
@@ -597,6 +598,39 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.ReasonCode);
             Write(e.ShortLived);
             return BinaryLogRecordKind.MSBuildServerLifecycle;
+        }
+
+        private BinaryLogRecordKind Write(AssemblyResolutionSearchTraceEventArgs e)
+        {
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
+            WriteDeduplicatedString(e.RequestedAssemblyName);
+            WriteDeduplicatedString(e.TargetProcessorArchitecture);
+
+            AssemblyResolutionSearchTraceMessageFormats formats = e.MessageFormats!;
+            WriteDeduplicatedString(formats.SearchPath);
+            WriteDeduplicatedString(formats.SearchPathAddedByParentAssembly);
+            WriteDeduplicatedString(formats.SearchedAssemblyFoldersEx);
+            WriteDeduplicatedString(formats.FileNotFound);
+            WriteDeduplicatedString(formats.FusionNamesDidNotMatch);
+            WriteDeduplicatedString(formats.TargetHadNoFusionName);
+            WriteDeduplicatedString(formats.NotInGac);
+            WriteDeduplicatedString(formats.NotAFileNameOnDisk);
+            WriteDeduplicatedString(formats.ProcessorArchitectureDoesNotMatch);
+
+            Write(e.SearchAttempts.Count);
+            for (int i = 0; i < e.SearchAttempts.Count; i++)
+            {
+                AssemblyResolutionSearchAttempt attempt = e.SearchAttempts[i];
+                WriteDeduplicatedString(attempt.FileNameAttempted);
+                WriteDeduplicatedString(attempt.SearchPath);
+                WriteDeduplicatedString(attempt.ParentAssembly);
+                WriteDeduplicatedString(attempt.AssemblyName);
+                Write((int)attempt.Result);
+                WriteDeduplicatedString(attempt.ProcessorArchitecture);
+                Write(attempt.IsAssemblyFoldersExSearch);
+            }
+
+            return BinaryLogRecordKind.AssemblyResolutionSearchTrace;
         }
 
         private BinaryLogRecordKind Write(CriticalBuildMessageEventArgs e)
