@@ -5,9 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if !NET
 using System.Globalization;
-#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -136,11 +134,12 @@ namespace Microsoft.Build.Tasks
                     string GetResourceFourSpaces(string name) => FourSpaces + log.GetResourceMessage(name);
                     string GetResourceEightSpaces(string name) => EightSpaces + log.GetResourceMessage(name);
 
-                    ConsideredAndRejectedBecauseFusionNamesDidntMatch = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch");
-                    ConsideredAndRejectedBecauseNoFile = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile");
-                    ConsideredAndRejectedBecauseNotAFileNameOnDisk = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk");
-                    ConsideredAndRejectedBecauseNotInGac = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac");
-                    ConsideredAndRejectedBecauseTargetDidntHaveFusionName = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName");
+                    AssemblyResolutionSearchTraceEventArgs.MessageFormats searchTraceFormats = AssemblyResolutionSearchTraceEventArgs.GetMessageFormats(CultureInfo.CurrentUICulture);
+                    ConsideredAndRejectedBecauseFusionNamesDidntMatch = searchTraceFormats.FusionNamesDidNotMatch;
+                    ConsideredAndRejectedBecauseNoFile = searchTraceFormats.FileNotFound;
+                    ConsideredAndRejectedBecauseNotAFileNameOnDisk = searchTraceFormats.NotAFileNameOnDisk;
+                    ConsideredAndRejectedBecauseNotInGac = searchTraceFormats.NotInGac;
+                    ConsideredAndRejectedBecauseTargetDidntHaveFusionName = searchTraceFormats.TargetHadNoFusionName;
                     Dependency = GetResource("ResolveAssemblyReference.Dependency");
                     FormattedAssemblyInfo = GetResourceFourSpaces("ResolveAssemblyReference.FormattedAssemblyInfo");
                     FoundRelatedFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundRelatedFile");
@@ -163,10 +162,10 @@ namespace Microsoft.Build.Tasks
                     RequiredBy = GetResourceFourSpaces("ResolveAssemblyReference.RequiredBy");
                     Resolved = GetResourceFourSpaces("ResolveAssemblyReference.Resolved");
                     ResolvedFrom = GetResourceFourSpaces("ResolveAssemblyReference.ResolvedFrom");
-                    SearchedAssemblyFoldersEx = GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx");
-                    SearchPath = GetResourceEightSpaces("ResolveAssemblyReference.SearchPath");
-                    SearchPathAddedByParentAssembly = GetResourceEightSpaces("ResolveAssemblyReference.SearchPathAddedByParentAssembly");
-                    TargetedProcessorArchitectureDoesNotMatch = GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch");
+                    SearchedAssemblyFoldersEx = searchTraceFormats.SearchedAssemblyFoldersEx;
+                    SearchPath = searchTraceFormats.SearchPath;
+                    SearchPathAddedByParentAssembly = searchTraceFormats.SearchPathAddedByParentAssembly;
+                    TargetedProcessorArchitectureDoesNotMatch = searchTraceFormats.ProcessorArchitectureDoesNotMatch;
                     UnificationByAppConfig = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAppConfig");
                     UnificationByAutoUnify = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAutoUnify");
                     UnificationByFrameworkRetarget = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByFrameworkRetarget");

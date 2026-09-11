@@ -1429,9 +1429,6 @@
   <data name="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
     <value>AssemblyFoldersEx location: "{0}"</value>
   </data>
-  <data name="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
-    <value>Considered AssemblyFoldersEx locations.</value>
-  </data>
     <data name="ResolveAssemblyReference.ConflictFound">
     <value>There was a conflict between "{0}" and "{1}".</value>
   </data>
@@ -1449,26 +1446,6 @@
                 {2} and {4} are file names correspending to {1} and {3} respectively
                 {0} is an assembly name with no version number like 'D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa'
     </comment>
-  </data>
-  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch">
-    <value>Considered "{0}",
-			but its name "{1}"
-			didn't match the expected name "{2}".</value>
-  </data>
-  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">
-    <value>Considered "{0}", but it didn't exist.</value>
-  </data>
-  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk">
-    <value>Considered treating "{0}" as a file name, but it didn't exist.</value>
-  </data>
-  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac">
-    <value>Considered "{0}", which was not found in the GAC.</value>
-  </data>
-  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-    <value>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</value>
-  </data>
-  <data name="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
-    <value>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</value>
   </data>
   <data name="ResolveAssemblyReference.Dependency">
     <value>Dependency "{0}".</value>
@@ -1733,13 +1710,6 @@
   </data>
   <data name="ResolveAssemblyReference.ResolvedFrom">
     <value>Reference found at search path location "{0}".</value>
-  </data>
-  <data name="ResolveAssemblyReference.SearchPath">
-    <value>For SearchPath "{0}".</value>
-  </data>
-  <data name="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
-    <value>For SearchPath "{0}" (added by referencing assembly "{1}").</value>
-    <comment> {1} is the name of the parent assembly for which SearchPath was used.</comment>
   </data>
   <data name="ResolveAssemblyReference.UnificationByAppConfig">
     <value>Using this version instead of original version "{0}" in "{2}" because of a binding redirect entry in the file "{1}".</value>

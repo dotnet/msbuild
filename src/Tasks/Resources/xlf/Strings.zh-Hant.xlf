@@ -1834,16 +1834,6 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
-        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
-        <target state="translated">針對 SearchPath "{0}" (由參考組件 "{1}" 新增)。</target>
-        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
-        <source>Considered AssemblyFoldersEx locations.</source>
-        <target state="translated">已考慮 AssemblyFoldersEx 位置。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConflictFound">
         <source>There was a conflict between "{0}" and "{1}".</source>
         <target state="translated">"{0}" 和 "{1}" 之間發生衝突。</target>
@@ -1868,40 +1858,6 @@
                 {2} and {4} are file names correspending to {1} and {3} respectively
                 {0} is an assembly name with no version number like 'D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa'
     </note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch">
-        <source>Considered "{0}",
-			but its name "{1}"
-			didn't match the expected name "{2}".</source>
-        <target state="translated">已考慮 "{0}"，
-			但其名稱 "{1}"
-			與預期名稱 "{2}" 不相符。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">
-        <source>Considered "{0}", but it didn't exist.</source>
-        <target state="translated">已考慮 "{0}"，但它不存在。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk">
-        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
-        <target state="translated">已考慮將 "{0}" 視為檔名，但它不存在。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac">
-        <source>Considered "{0}", which was not found in the GAC.</source>
-        <target state="translated">已考慮 "{0}"，但在 GAC 中找不到它。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
-        <target state="translated">已考慮 "{0}"，但似乎不是有效的 .NET 元件。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
-        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
-        <target state="translated">視為 "{0}"，雖然存在，但是具有處理器架構 "{1}"，此架構與目標處理器架構 "{2}" 不相符。</target>
-        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Dependency">
         <source>Dependency "{0}".</source>
@@ -2241,11 +2197,6 @@
       <trans-unit id="ResolveAssemblyReference.ResolvedFrom">
         <source>Reference found at search path location "{0}".</source>
         <target state="translated">在搜尋路徑位置 "{0}" 找到參考。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPath">
-        <source>For SearchPath "{0}".</source>
-        <target state="translated">針對 SearchPath "{0}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByAppConfig">

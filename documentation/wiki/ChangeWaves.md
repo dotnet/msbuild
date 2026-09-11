@@ -36,7 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.12
-- [RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate.](https://github.com/dotnet/msbuild/pull/14599) This change reduces binary-log size. Loggers receive one invariant-English multiline message for each reference. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to retain localized individual candidate messages.
+- [RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate.](https://github.com/dotnet/msbuild/pull/14599) This change reduces binary-log size. The event's default message uses the invariant culture, while the console and terminal loggers render it using the current UI culture. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to retain individual candidate messages.
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)

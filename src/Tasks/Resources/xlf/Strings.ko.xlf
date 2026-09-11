@@ -1834,16 +1834,6 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
-        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
-        <target state="translated">SearchPath "{0}"의 경우(어셈블리 "{1}"을(를) 참조하여 추가됨).</target>
-        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
-        <source>Considered AssemblyFoldersEx locations.</source>
-        <target state="translated">AssemblyFoldersEx 위치로 간주했습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConflictFound">
         <source>There was a conflict between "{0}" and "{1}".</source>
         <target state="translated">"{0}"과(와) "{1}" 사이에 충돌이 발생했습니다.</target>
@@ -1868,40 +1858,6 @@
                 {2} and {4} are file names correspending to {1} and {3} respectively
                 {0} is an assembly name with no version number like 'D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa'
     </note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch">
-        <source>Considered "{0}",
-			but its name "{1}"
-			didn't match the expected name "{2}".</source>
-        <target state="translated">"{0}"(으)로 간주했지만
-			이름 "{1}"이(가)
-			필요한 이름 "{2}"과(와) 일치하지 않습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">
-        <source>Considered "{0}", but it didn't exist.</source>
-        <target state="translated">"{0}"(으)로 간주했지만 존재하지 않습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk">
-        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
-        <target state="translated">"{0}"을(를) 파일 이름으로 간주했지만 존재하지 않습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac">
-        <source>Considered "{0}", which was not found in the GAC.</source>
-        <target state="translated">"{0}"(으)로 간주했지만 GAC에서 찾을 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
-        <target state="translated">존재하지만 유효한 .NET 어셈블리로 보이지 않는 "{0}"(으)로 간주됩니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
-        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
-        <target state="translated">이미 있는 "{0}"(으)로 간주했지만 대상 프로세서 아키텍처 "{2}"과(와) 일치하지 않는 프로세서 아키텍처 "{1}"이 있습니다.</target>
-        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Dependency">
         <source>Dependency "{0}".</source>
@@ -2241,11 +2197,6 @@
       <trans-unit id="ResolveAssemblyReference.ResolvedFrom">
         <source>Reference found at search path location "{0}".</source>
         <target state="translated">검색 경로 위치 "{0}"에서 참조를 찾았습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPath">
-        <source>For SearchPath "{0}".</source>
-        <target state="translated">SearchPath "{0}"에 사용됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByAppConfig">

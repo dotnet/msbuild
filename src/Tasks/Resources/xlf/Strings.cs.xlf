@@ -1834,16 +1834,6 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
-        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
-        <target state="translated">Pro SearchPath „{0}“ (přidáno odkazem na sestavení „{1}“)</target>
-        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
-        <source>Considered AssemblyFoldersEx locations.</source>
-        <target state="translated">Byla uvažována umístění AssemblyFoldersEx.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConflictFound">
         <source>There was a conflict between "{0}" and "{1}".</source>
         <target state="translated">Došlo ke konfliktu mezi sestavením {0} a sestavením {1}.</target>
@@ -1868,40 +1858,6 @@
                 {2} and {4} are file names correspending to {1} and {3} respectively
                 {0} is an assembly name with no version number like 'D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa'
     </note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch">
-        <source>Considered "{0}",
-			but its name "{1}"
-			didn't match the expected name "{2}".</source>
-        <target state="translated">Považovalo se za {0},
-			ale příslušný název "{1}"
-			neodpovídal očekávanému názvu "{2}".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">
-        <source>Considered "{0}", but it didn't exist.</source>
-        <target state="translated">Byl proveden pokus o použití sestavení {0}, ale sestavení neexistovalo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk">
-        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
-        <target state="translated">Byl proveden pokus o použití sestavení {0} jako názvu souboru. Sestavení však neexistovalo.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac">
-        <source>Considered "{0}", which was not found in the GAC.</source>
-        <target state="translated">Byl proveden pokus o použití sestavení {0}. Nebylo však nalezeno v mezipaměti GAC.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
-        <target state="translated">Zvažuje se {0}, což existovalo, ale zřejmě nebylo platným sestavením .NET.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
-        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
-        <target state="translated">Byl proveden pokus o použití existujícího sestavení {0} s architekturou procesoru {1}, která se však neshoduje s cílovou architekturou procesoru {2}.</target>
-        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Dependency">
         <source>Dependency "{0}".</source>
@@ -2241,11 +2197,6 @@
       <trans-unit id="ResolveAssemblyReference.ResolvedFrom">
         <source>Reference found at search path location "{0}".</source>
         <target state="translated">Odkaz byl nalezen v umístění cesty pro hledání {0}.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPath">
-        <source>For SearchPath "{0}".</source>
-        <target state="translated">Pro funkci SearchPath {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByAppConfig">

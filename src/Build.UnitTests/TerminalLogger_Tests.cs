@@ -560,6 +560,42 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void AssemblyResolutionSearchTraceUsesCurrentUICulture()
+        {
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+            try
+            {
+                CultureInfo frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+                CultureInfo.CurrentUICulture = frenchCulture;
+                _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+                _terminallogger.ParseParameters();
+
+                var searchEvent = new AssemblyResolutionSearchTraceEventArgs(
+                    "Requested, Version=1.0.0.0",
+                    targetProcessorArchitecture: null,
+                    [new("missing.dll", "path", null, null, AssemblyResolutionSearchResult.FileNotFound, null, false)],
+                    "ResolveAssemblyReference",
+                    MessageImportance.High,
+                    eventTimestamp: default)
+                {
+                    BuildEventContext = MakeBuildEventContext(),
+                    ProjectFile = _projectFile,
+                };
+
+                InvokeLoggerCallbacksForSimpleProject(
+                    succeeded: true,
+                    () => _centralNodeEventSource.InvokeMessageRaised(searchEvent));
+
+                _outputWriter.ToString().ShouldContain(searchEvent.FormatMessage(frenchCulture));
+                _outputWriter.ToString().ShouldNotContain(searchEvent.Message.ShouldNotBeNull());
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        [Fact]
         public Task PrintImmediateMessage_Skipped()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>

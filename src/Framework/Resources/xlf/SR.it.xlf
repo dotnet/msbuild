@@ -218,6 +218,55 @@
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPath">
+        <source>For SearchPath "{0}".</source>
+        <target state="translated">Per SearchPath "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">Per SearchPath "{0}" (aggiunto facendo riferimento all'assembly "{1}").</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
+        <source>Considered AssemblyFoldersEx locations.</source>
+        <target state="translated">Percorsi AssemblyFoldersEx considerati.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">
+        <source>Considered "{0}",
+			but its name "{1}"
+			didn't match the expected name "{2}".</source>
+        <target state="translated">È stato considerato "{0}",
+			ma il nome "{1}"
+			non corrispondeva al nome previsto "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile">
+        <source>Considered "{0}", but it didn't exist.</source>
+        <target state="translated">È stato considerato "{0}", ma non esisteva.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk">
+        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
+        <target state="translated">Si è tentato di considerare "{0}" come nome di file, ma non esisteva.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac">
+        <source>Considered "{0}", which was not found in the GAC.</source>
+        <target state="translated">È stato considerato "{0}", ma non è stato trovato nella cache assembly globale.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">Considerato "{0}", che esisteva ma non sembra essere un assembly .NET valido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch">
+        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
+        <target state="translated">Considerato "{0}", che esiste ma con un'architettura di processore "{1}" non corrispondente all'architettura di processore di destinazione "{2}".</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -218,6 +218,55 @@
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPath">
+        <source>For SearchPath "{0}".</source>
+        <target state="translated">検索パスは "{0}" です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">SearchPath "{0}" の場合 (アセンブリ "{1}" を参照して追加)。</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
+        <source>Considered AssemblyFoldersEx locations.</source>
+        <target state="translated">AssemblyFoldersEx の場所が考慮されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">
+        <source>Considered "{0}",
+			but its name "{1}"
+			didn't match the expected name "{2}".</source>
+        <target state="translated">"{0}" を考慮しましたが、
+			名前 "{1}"は
+			必要な名前 "{2}" と一致しませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile">
+        <source>Considered "{0}", but it didn't exist.</source>
+        <target state="translated">"{0}" を考慮しましたが、存在しませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk">
+        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
+        <target state="translated">"{0}" をファイル名として扱いましたが、存在しませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac">
+        <source>Considered "{0}", which was not found in the GAC.</source>
+        <target state="translated">GAC で見つからなかった "{0}" を考慮しました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">"{0}" と考えられます。これは存在していましたが、有効な .NET アセンブリではないようです。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch">
+        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
+        <target state="translated">"{0}" は存在しますが、プロセッサ アーキテクチャ "{1}" が、ターゲットのプロセッサ アーキテクチャ "{2}" と一致していません。</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -1200,10 +1200,14 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return;
         }
-        string? message = e.Message;
-
-        if (message is not null && e.Importance == MessageImportance.High)
+        if (e.Importance == MessageImportance.High)
         {
+            string? message = GetMessage(e);
+            if (message is null)
+            {
+                return;
+            }
+
             bool hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project);
 
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
@@ -1215,7 +1219,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 if (!projectFileName.IsEmpty &&
                     message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
                 {
-                    ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
+                    ReadOnlyMemory<char> outputPath = message.AsMemory().Slice(index + 4);
                     project!.OutputPath = outputPath;
                     return;
                 }
@@ -1305,9 +1309,9 @@ public sealed partial class TerminalLogger : INodeLogger
 
                         case "TLTESTOUTPUT":
                             {
-                                if (e.Message != null && Verbosity > LoggerVerbosity.Quiet)
+                                if (Verbosity > LoggerVerbosity.Quiet)
                                 {
-                                    RenderImmediateMessage(e.Message);
+                                    RenderImmediateMessage(message);
                                 }
                                 break;
                             }
@@ -1325,7 +1329,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
                 if (hasProject)
                 {
-                    project!.AddBuildMessage(TerminalMessageSeverity.Message, FormatInformationalMessage(e));
+                    project!.AddBuildMessage(TerminalMessageSeverity.Message, FormatInformationalMessage(e, message));
                 }
                 else
                 {
@@ -1639,10 +1643,10 @@ public sealed partial class TerminalLogger : INodeLogger
                 indent,
                 terminalWidth: Terminal.Width);
 
-    private string FormatInformationalMessage(BuildMessageEventArgs e) => FormatEventMessage(
+    private string FormatInformationalMessage(BuildMessageEventArgs e, string message) => FormatEventMessage(
                 category: null,
                 subcategory: e.Subcategory,
-                message: e.Message,
+                message,
                 code: CreateLink(GenerateLinkForMessage(e), e.Code),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
@@ -1652,6 +1656,11 @@ public sealed partial class TerminalLogger : INodeLogger
                 indent: string.Empty,
                 terminalWidth: Terminal.Width,
                 requireFileAndLinePortion: false);
+
+    private static string? GetMessage(BuildMessageEventArgs e)
+        => e is AssemblyResolutionSearchTraceEventArgs searchTrace
+            ? searchTrace.FormatMessage(CultureInfo.CurrentUICulture)
+            : e.Message;
 
     /// <summary>
     /// Renders message with just code/category/message data.
