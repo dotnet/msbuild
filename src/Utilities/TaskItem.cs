@@ -593,18 +593,15 @@ namespace Microsoft.Build.Utilities
 
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata()
         {
-#if FEATURE_APPDOMAIN
-            // Can't send a yield-return iterator across AppDomain boundaries
-            // so have to allocate
-            if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
-            {
-                return EnumerateMetadataEager();
-            }
-#endif
-
-            // In general case we want to return an iterator without allocating a collection
-            // to hold the result, so we can stream the items directly to the consumer.
-            return EnumerateMetadataLazy();
+            // Always materialize eagerly. A yield-return iterator over an ImmutableDictionary
+            // parks a copy of the dictionary's pooled enumerator struct inside a heap-allocated
+            // state machine whose lifetime is harder to reason about than a one-shot snapshot;
+            // it has been observed to interact with logger serialization to produce
+            // ObjectDisposedException, surfacing as MSB4166 "Child node exited prematurely"
+            // (dotnet/runtime#92290). Eager materialization removes the entire class of issues
+            // by returning a regular array. Same reasoning as the
+            // Microsoft.Build.Execution.ProjectItemInstance.TaskItem.EnumerateMetadata twin.
+            return EnumerateMetadataEager();
         }
 
         void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
@@ -619,7 +616,14 @@ namespace Microsoft.Build.Utilities
             _metadata = _metadata.SetItems(metadata.Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value ?? string.Empty)));
         }
 
-#if FEATURE_APPDOMAIN
+        /// <summary>
+        /// Materialize the metadata snapshot eagerly into a heap-allocated array.
+        /// </summary>
+        /// <remarks>
+        /// Used historically only on the AppDomain-crossing path because a yield-iterator state
+        /// machine is not [Serializable]. Now used unconditionally — see the
+        /// IMetadataContainer.EnumerateMetadata implementation above for the rationale.
+        /// </remarks>
         private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
         {
             if (_metadata == null)
@@ -637,21 +641,6 @@ namespace Microsoft.Build.Utilities
             }
 
             return result;
-        }
-#endif
-
-        private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
-        {
-            if (_metadata == null)
-            {
-                yield break;
-            }
-
-            foreach (var kvp in _metadata)
-            {
-                var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
-                yield return unescaped;
-            }
         }
     }
 }

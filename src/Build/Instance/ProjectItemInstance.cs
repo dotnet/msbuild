@@ -1117,24 +1117,7 @@ namespace Microsoft.Build.Execution
                 // If we have item definitions, call the expensive property that does the right thing.
                 // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
                 var list = _itemDefinitions != null ? MetadataCollection : DirectMetadata;
-                if (list != null)
-                {
-#if FEATURE_APPDOMAIN
-                    // Can't send a yield-return iterator across AppDomain boundaries
-                    if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
-                    {
-                        return EnumerateMetadataEager(list);
-                    }
-#endif
-                    // Mainline scenario, returns an iterator to avoid allocating an array
-                    // to store the results. With the iterator, results can stream to the
-                    // consumer (e.g. binlog writer) without allocations.
-                    return EnumerateMetadata(list);
-                }
-                else
-                {
-                    return [];
-                }
+                return list != null ? EnumerateMetadataEager(list) : [];
             }
 
             /// <summary>
@@ -1192,33 +1175,39 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-#if FEATURE_APPDOMAIN
             /// <summary>
-            /// Used to return metadata from another AppDomain. Can't use yield return because the
-            /// generated state machine is not marked as [Serializable], so we need to allocate.
+            /// Materialize the metadata snapshot eagerly into a heap-allocated array.
             /// </summary>
+            /// <remarks>
+            /// Used historically only on the AppDomain-crossing path because a yield-iterator
+            /// state machine is not [Serializable]. Now used unconditionally to avoid letting
+            /// a copy of the pooled <see cref="ImmutableDictionary{TKey,TValue}.Enumerator"/>
+            /// struct escape the call frame inside a compiler-generated iterator. That state
+            /// machine has a complex lifetime that has been observed to interact with logger
+            /// serialization to produce ObjectDisposedException in
+            /// <see cref="Microsoft.Build.Logging.BuildEventArgsWriter"/>, surfacing as
+            /// MSB4166 "Child node exited prematurely" — see dotnet/runtime#92290. Eager
+            /// materialization removes the entire class of issues by returning a regular
+            /// array that has no relationship to the BCL enumerator pool.
+            /// </remarks>
             /// <param name="list">The source list to return metadata from.</param>
             /// <returns>An array of string key-value pairs representing metadata.</returns>
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager(ImmutableDictionary<string, string> list)
             {
-                var result = new List<KeyValuePair<string, string>>(list.Count);
-
+                int count = list.Count;
+                if (count == 0)
+                {
+                    return [];
+                }
+                var snapshot = new KeyValuePair<string, string>[count];
+                int i = 0;
                 foreach (KeyValuePair<string, string> projectMetadataInstance in list)
                 {
-                    result.Add(new KeyValuePair<string, string>(projectMetadataInstance.Key, EscapingUtilities.UnescapeAll(projectMetadataInstance.Value)));
+                    snapshot[i++] = new KeyValuePair<string, string>(
+                        projectMetadataInstance.Key,
+                        EscapingUtilities.UnescapeAll(projectMetadataInstance.Value));
                 }
-
-                // Probably better to send the raw array across the wire even if it's another allocation.
-                return result.ToArray();
-            }
-#endif
-
-            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(ImmutableDictionary<string, string> list)
-            {
-                foreach (KeyValuePair<string, string> projectMetadataInstance in list)
-                {
-                    yield return new KeyValuePair<string, string>(projectMetadataInstance.Key, EscapingUtilities.UnescapeAll(projectMetadataInstance.Value));
-                }
+                return snapshot;
             }
 
             /// <summary>
