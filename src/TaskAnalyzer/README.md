@@ -31,7 +31,7 @@ Inheriting `IMultiThreadableTask` from a base class does not make a task MT-scop
 
 | ID | Rule | Default state | Severity | Reported for by default |
 |---|---|---|---|---|
-| **MSBuildTask0001** | API is never safe in an MSBuild task | Enabled | Error | All task implementations and MT-scoped helpers |
+| **MSBuildTask0001** | API is never safe in an MSBuild task | Enabled | Info | All task implementations and MT-scoped helpers |
 | **MSBuildTask0002** | API requires a `TaskEnvironment` alternative | Enabled | Warning | MT-scoped code only |
 | **MSBuildTask0003** | File system API requires an absolute path | Enabled | Warning | MT-scoped code only |
 | **MSBuildTask0004** | API requires review for MT execution | Enabled | Warning | All task implementations and MT-scoped helpers |
@@ -108,9 +108,9 @@ The migration option and severity configuration have different purposes:
 
 ## Diagnostic Rule Details
 
-### MSBuildTask0001 — Critical: No Safe Alternative
+### MSBuildTask0001 — No Safe Alternative
 
-These APIs affect the entire process or interfere with build infrastructure. They are **errors** and should never appear in any MSBuild task.
+These APIs affect the entire process or interfere with build infrastructure and should never appear in any MSBuild task. The rule defaults to Info to avoid breaking builds that consume a newer analyzer package. Repositories can enforce it as a warning or error through `dotnet_diagnostic.MSBuildTask0001.severity`.
 
 | API | Why it's banned |
 |---|---|
@@ -546,9 +546,8 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 ### Severity Levels
 
-- **MSBuildTask0001** has a default severity of **Error**. These APIs are never safe in an MSBuild task.
 - **MSBuildTask0002–MSBuildTask0005, MSBuildTask0012, and MSBuildTask0014** have a default severity of **Warning**.
-- **MSBuildTask0006–MSBuildTask0011** have a default severity of **Info**. MSBuildTask0009 and MSBuildTask0010 are guidance for task authors who are not doing MT migration, so they default to **Info** rather than **Warning**.
+- **MSBuildTask0001 and MSBuildTask0006–MSBuildTask0011** have a default severity of **Info**. MSBuildTask0001, MSBuildTask0009, and MSBuildTask0010 default to **Info** rather than a stronger severity to avoid breaking builds that consume a newer analyzer package.
 - Any of these defaults can be raised or lowered with `dotnet_diagnostic.<ID>.severity` in an .editorconfig.
 - **MSBuildTask0013** has a severity of **Info**, but the rule is disabled by default.
 

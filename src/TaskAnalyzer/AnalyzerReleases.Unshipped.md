@@ -2,7 +2,7 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-MSBuildTask0001 | MSBuild.TaskAuthoring | Error | APIs that must not be used in any MSBuild task (Environment.Exit, Console.*, etc.)
+MSBuildTask0001 | MSBuild.TaskAuthoring | Info | APIs that must not be used in any MSBuild task (Environment.Exit, Console.*, etc.)
 MSBuildTask0002 | MSBuild.TaskAuthoring | Warning | APIs that should use TaskEnvironment alternatives
 MSBuildTask0003 | MSBuild.TaskAuthoring | Warning | File APIs that need absolute paths
 MSBuildTask0004 | MSBuild.TaskAuthoring | Warning | APIs that may cause issues in multithreaded task execution

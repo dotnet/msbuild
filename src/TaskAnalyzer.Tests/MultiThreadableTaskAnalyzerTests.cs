@@ -22,11 +22,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 public class MultiThreadableTaskAnalyzerTests
 {
     // ═══════════════════════════════════════════════════════════════════════
-    // MSBuildTask0001: Critical errors
+    // MSBuildTask0001: APIs that are never safe in tasks
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task ConsoleWriteLine_InAnyTask_ProducesError()
+    public async Task ConsoleWriteLine_InAnyTask_ProducesInfo()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -40,8 +40,9 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
-        diags.Length.ShouldBe(1);
+        var diagnostic = diags.ShouldHaveSingleItem();
+        diagnostic.Id.ShouldBe(DiagnosticIds.CriticalError);
+        diagnostic.Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -66,7 +67,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ConsoleOut_PropertyAccess_ProducesError()
+    public async Task ConsoleOut_PropertyAccess_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -84,7 +85,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task EnvironmentExit_ProducesError()
+    public async Task EnvironmentExit_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -103,7 +104,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task EnvironmentFailFast_ProducesError()
+    public async Task EnvironmentFailFast_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -121,7 +122,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ThreadPoolSetMinMaxThreads_ProducesError()
+    public async Task ThreadPoolSetMinMaxThreads_ProducesDiagnostics()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Threading;
@@ -140,7 +141,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task CultureInfoDefaults_ProducesError()
+    public async Task CultureInfoDefaults_ProduceDiagnostics()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Globalization;
@@ -159,7 +160,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ConsoleReadLine_ProducesError()
+    public async Task ConsoleReadLine_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -177,7 +178,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ProcessKill_InAnyTask_ProducesError()
+    public async Task ProcessKill_InAnyTask_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Diagnostics;
@@ -212,6 +213,41 @@ public class MultiThreadableTaskAnalyzerTests
             """);
 
         diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
+    }
+
+    [Theory]
+    [InlineData("warning", DiagnosticSeverity.Warning)]
+    [InlineData("error", DiagnosticSeverity.Error)]
+    public async Task MSBuildTask0001_ConfiguredSeverity_OverridesInfoDefault(
+        string configuredSeverity,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        {|#0:Console.WriteLine("hello")|};
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", $$"""
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0001.severity = {{configuredSeverity}}
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.CriticalError, expectedSeverity).WithLocation(0));
+
+        await test.RunAsync();
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -1350,7 +1386,7 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task DirectorySetCurrentDirectory_ProducesCriticalError()
+    public async Task DirectorySetCurrentDirectory_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
@@ -1542,7 +1578,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ConsoleSetOut_TypeLevelBan_ProducesError()
+    public async Task ConsoleSetOut_TypeLevelBan_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -1560,7 +1596,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ConsoleForegroundColor_TypeLevelBan_ProducesError()
+    public async Task ConsoleForegroundColor_TypeLevelBan_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -1578,7 +1614,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ConsoleTitle_TypeLevelBan_ProducesError()
+    public async Task ConsoleTitle_TypeLevelBan_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;

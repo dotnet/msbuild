@@ -17,7 +17,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "API is never safe in MSBuild task implementations",
             messageFormat: "'{0}' must not be used in MSBuild tasks: {1}",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Error,
+            defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: "This API has no safe alternative in MSBuild tasks. It affects the entire process or interferes with build infrastructure.");
 
