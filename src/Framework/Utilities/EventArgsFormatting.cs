@@ -28,17 +28,10 @@ namespace Microsoft.Build.Shared
                 AssemblyResolutionSearchTraceEventArgs searchTrace => searchTrace.FormatMessage(culture),
                 AssemblyConflictDependencyDetailsMessageEventArgs details
                     when details.Victor is not null && details.Victim is not null =>
-                    AssemblyConflictMessageFormatter.FormatDependencyDetails(details.Victor, details.Victim, culture),
+                    details.FormatMessage(culture),
                 AssemblyConflictWarningEventArgs warning
                     when warning.Victor is not null && warning.Victim is not null =>
-                    AssemblyConflictMessageFormatter.FormatWarningMessage(
-                        warning.SimpleAssemblyName,
-                        AssemblyConflictMessageFormatter.FormatWarningBody(
-                            warning.LossReason,
-                            warning.Victor,
-                            warning.Victim,
-                            culture),
-                        culture),
+                    warning.FormatMessage(culture),
                 _ => e.Message
             };
         }

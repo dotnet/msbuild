@@ -1093,6 +1093,24 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void AssemblyConflictMessagesCanBeFormattedAndCachedForAnotherCulture()
+        {
+            CultureInfo culture = CultureInfo.GetCultureInfo("fr-FR");
+            AssemblyConflictDependencyDetailsMessageEventArgs details = CreateAssemblyConflictDependencyDetailsEvent();
+            AssemblyConflictWarningEventArgs warning = CreateAssemblyConflictWarningEvent();
+
+            string localizedDetails = details.FormatMessage(culture);
+            string localizedWarning = warning.FormatMessage(culture);
+
+            localizedDetails.ShouldStartWith("    Références qui dépendent de");
+            localizedWarning.ShouldStartWith("détection de conflits");
+            details.FormatMessage(culture).ShouldBeSameAs(localizedDetails);
+            warning.FormatMessage(culture).ShouldBeSameAs(localizedWarning);
+            details.IsMessageMaterialized.ShouldBeFalse();
+            warning.IsMessageMaterialized.ShouldBeFalse();
+        }
+
         /// <summary>
         /// Verifies a binary-log round trip for a large structured conflict event.
         /// The event contains many dependees and source items without one large preformatted string.

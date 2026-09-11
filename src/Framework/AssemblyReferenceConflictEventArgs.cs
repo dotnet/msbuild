@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Framework;
@@ -212,19 +214,11 @@ public sealed class AssemblyConflictReferenceDetails
 /// </summary>
 internal static class AssemblyConflictMessageFormatter
 {
+    private static readonly ConditionalWeakTable<CultureInfo, MessageFormats> s_formatsByCulture = new();
     private const string FourSpaces = "    ";
     private const string EightSpaces = "        ";
     private const string TenSpaces = "          ";
     private const string TwelveSpaces = "            ";
-    private const string ConflictFound = "AssemblyConflict_ConflictFound";
-    private const string ConflictHigherVersionChosen = "AssemblyConflict_ConflictHigherVersionChosen";
-    private const string ConflictPrimaryChosen = "AssemblyConflict_ConflictPrimaryChosen";
-    private const string ConflictUnsolvable = "AssemblyConflict_ConflictUnsolvable";
-    private const string ReferenceDependsOn = "AssemblyConflict_ReferenceDependsOn";
-    private const string UnifiedReferenceDependsOn = "AssemblyConflict_UnifiedReferenceDependsOn";
-    private const string UnresolvedPrimaryItemSpec = "AssemblyConflict_UnResolvedPrimaryItemSpec";
-    private const string PrimarySourceItemsForReference = "AssemblyConflict_PrimarySourceItemsForReference";
-    private const string FoundConflicts = "AssemblyConflict_FoundConflicts";
 
     internal static string FormatDependencyDetails(
         AssemblyConflictReferenceDetails victor,
@@ -236,8 +230,9 @@ internal static class AssemblyConflictMessageFormatter
         AssemblyConflictReferenceDetails victim,
         CultureInfo culture)
     {
+        MessageFormats formats = GetMessageFormats(culture);
         var log = new StringBuilder();
-        AppendDependencyDetails(log, victor, victim, culture);
+        AppendDependencyDetails(log, victor, victim, formats, culture);
         return log.ToString();
     }
 
@@ -250,12 +245,7 @@ internal static class AssemblyConflictMessageFormatter
         string simpleAssemblyName,
         string body,
         CultureInfo culture)
-    {
-        string message = Format(culture, FoundConflicts, simpleAssemblyName, body);
-        return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
-            ? strippedMessage
-            : message;
-    }
+        => Format(culture, GetMessageFormats(culture).FoundConflicts, simpleAssemblyName, body);
 
     /// <summary>
     /// Formats the conflict header and dependency details without the outer MSB3277 wrapper.
@@ -275,10 +265,11 @@ internal static class AssemblyConflictMessageFormatter
         AssemblyConflictReferenceDetails victim,
         CultureInfo culture)
     {
+        MessageFormats formats = GetMessageFormats(culture);
         var log = new StringBuilder();
-        log.Append(FormatHeaderOnly(victor.FusionName, victim.FusionName, lossReason, victim.IsPrimary, culture));
+        log.Append(FormatHeaderOnly(victor.FusionName, victim.FusionName, lossReason, victim.IsPrimary, formats, culture));
         log.AppendLine();
-        AppendDependencyDetails(log, victor, victim, culture);
+        AppendDependencyDetails(log, victor, victim, formats, culture);
         return log.ToString();
     }
 
@@ -299,16 +290,31 @@ internal static class AssemblyConflictMessageFormatter
         AssemblyConflictLossReason lossReason,
         bool victimIsPrimary,
         CultureInfo culture)
+        => FormatHeaderOnly(
+            victorFusionName,
+            victimFusionName,
+            lossReason,
+            victimIsPrimary,
+            GetMessageFormats(culture),
+            culture);
+
+    private static string FormatHeaderOnly(
+        string victorFusionName,
+        string victimFusionName,
+        AssemblyConflictLossReason lossReason,
+        bool victimIsPrimary,
+        MessageFormats formats,
+        CultureInfo culture)
     {
-        string header = Format(culture, ConflictFound, victorFusionName, victimFusionName);
+        string header = Format(culture, formats.ConflictFound, victorFusionName, victimFusionName);
         return lossReason switch
         {
             AssemblyConflictLossReason.HadLowerVersion
-                => string.Concat(header, Environment.NewLine, FourSpaces, Format(culture, ConflictHigherVersionChosen, victorFusionName)),
+                => string.Concat(header, Environment.NewLine, FourSpaces, Format(culture, formats.ConflictHigherVersionChosen, victorFusionName)),
             AssemblyConflictLossReason.WasNotPrimary
-                => string.Concat(header, Environment.NewLine, FourSpaces, Format(culture, ConflictPrimaryChosen, victorFusionName, victimFusionName)),
+                => string.Concat(header, Environment.NewLine, FourSpaces, Format(culture, formats.ConflictPrimaryChosen, victorFusionName, victimFusionName)),
             AssemblyConflictLossReason.InsolubleConflict when !victimIsPrimary
-                => string.Concat(header, Environment.NewLine, Format(culture, ConflictUnsolvable, victorFusionName, victimFusionName)),
+                => string.Concat(header, Environment.NewLine, Format(culture, formats.ConflictUnsolvable, victorFusionName, victimFusionName)),
             _ => header,
         };
     }
@@ -317,30 +323,32 @@ internal static class AssemblyConflictMessageFormatter
         StringBuilder log,
         AssemblyConflictReferenceDetails victor,
         AssemblyConflictReferenceDetails victim,
+        MessageFormats formats,
         CultureInfo culture)
     {
-        AppendReferenceDetails(log, victor, ReferenceDependsOn, culture);
+        AppendReferenceDetails(log, victor, formats.ReferenceDependsOn, formats, culture);
         log.AppendLine();
-        AppendReferenceDetails(log, victim, UnifiedReferenceDependsOn, culture);
+        AppendReferenceDetails(log, victim, formats.UnifiedReferenceDependsOn, formats, culture);
     }
 
     private static void AppendReferenceDetails(
         StringBuilder log,
         AssemblyConflictReferenceDetails details,
-        string headerResourceName,
+        string headerFormat,
+        MessageFormats formats,
         CultureInfo culture)
     {
         log.Append(FourSpaces);
-        log.Append(Format(culture, headerResourceName, details.FusionName, details.FullPath));
+        log.Append(Format(culture, headerFormat, details.FusionName, details.FullPath));
 
         if (details.IsPrimary && !details.IsResolved)
         {
-            log.AppendLine().Append(EightSpaces).Append(Format(culture, UnresolvedPrimaryItemSpec, details.UnresolvedPrimaryItemSpec));
+            log.AppendLine().Append(EightSpaces).Append(Format(culture, formats.UnresolvedPrimaryItemSpec, details.UnresolvedPrimaryItemSpec));
         }
         else if (details.IsPrimary && details.IsResolved)
         {
             log.AppendLine().Append(EightSpaces).AppendLine(details.FullPath);
-            log.Append(TenSpaces).Append(Format(culture, PrimarySourceItemsForReference, details.FullPath));
+            log.Append(TenSpaces).Append(Format(culture, formats.PrimarySourceItemsForReference, details.FullPath));
             for (int i = 0; i < details.PrimarySourceItemSpecs.Count; i++)
             {
                 log.AppendLine().Append(TwelveSpaces).Append(details.PrimarySourceItemSpecs[i]);
@@ -351,7 +359,7 @@ internal static class AssemblyConflictMessageFormatter
         {
             AssemblyConflictDependee dependee = details.Dependees[i];
             log.AppendLine().Append(EightSpaces).AppendLine(dependee.DependeeFullPath);
-            log.Append(TenSpaces).Append(Format(culture, PrimarySourceItemsForReference, dependee.DependeeFullPath));
+            log.Append(TenSpaces).Append(Format(culture, formats.PrimarySourceItemsForReference, dependee.DependeeFullPath));
             for (int j = 0; j < dependee.SourceItemSpecs.Count; j++)
             {
                 log.AppendLine().Append(TwelveSpaces).Append(dependee.SourceItemSpecs[j]);
@@ -359,18 +367,53 @@ internal static class AssemblyConflictMessageFormatter
         }
     }
 
-    private static string Format(CultureInfo culture, string resourceName, object? arg0)
+    private static MessageFormats GetMessageFormats(CultureInfo culture)
+        => s_formatsByCulture.GetValue(culture, static culture => new MessageFormats(culture));
+
+    private static string Format(CultureInfo culture, string format, object? arg0)
+        => MessageFormatter.Format(culture, format, arg0);
+
+    private static string Format(CultureInfo culture, string format, object? arg0, object? arg1)
+        => MessageFormatter.Format(culture, format, arg0, arg1);
+
+    internal sealed class LocalizedMessage(CultureInfo culture, string message)
     {
-        string format = Resources.SR.ResourceManager.GetString(resourceName, culture)
-            ?? throw new InvalidOperationException($"The resource string '{resourceName}' was not found.");
-        return MessageFormatter.Format(culture, format, arg0);
+        internal CultureInfo Culture { get; } = culture;
+        internal string Message { get; } = message;
     }
 
-    private static string Format(CultureInfo culture, string resourceName, object? arg0, object? arg1)
+    private sealed class MessageFormats
     {
-        string format = Resources.SR.ResourceManager.GetString(resourceName, culture)
-            ?? throw new InvalidOperationException($"The resource string '{resourceName}' was not found.");
-        return MessageFormatter.Format(culture, format, arg0, arg1);
+        internal MessageFormats(CultureInfo culture)
+        {
+            ConflictFound = GetResource("AssemblyConflict_ConflictFound", culture);
+            ConflictHigherVersionChosen = GetResource("AssemblyConflict_ConflictHigherVersionChosen", culture);
+            ConflictPrimaryChosen = GetResource("AssemblyConflict_ConflictPrimaryChosen", culture);
+            ConflictUnsolvable = GetResource("AssemblyConflict_ConflictUnsolvable", culture);
+            ReferenceDependsOn = GetResource("AssemblyConflict_ReferenceDependsOn", culture);
+            UnifiedReferenceDependsOn = GetResource("AssemblyConflict_UnifiedReferenceDependsOn", culture);
+            UnresolvedPrimaryItemSpec = GetResource("AssemblyConflict_UnResolvedPrimaryItemSpec", culture);
+            PrimarySourceItemsForReference = GetResource("AssemblyConflict_PrimarySourceItemsForReference", culture);
+
+            string foundConflicts = GetResource("AssemblyConflict_FoundConflicts", culture);
+            FoundConflicts = MessageParser.TryStripAnyCode(foundConflicts, out string? strippedMessage)
+                ? strippedMessage
+                : foundConflicts;
+        }
+
+        internal string ConflictFound { get; }
+        internal string ConflictHigherVersionChosen { get; }
+        internal string ConflictPrimaryChosen { get; }
+        internal string ConflictUnsolvable { get; }
+        internal string ReferenceDependsOn { get; }
+        internal string UnifiedReferenceDependsOn { get; }
+        internal string UnresolvedPrimaryItemSpec { get; }
+        internal string PrimarySourceItemsForReference { get; }
+        internal string FoundConflicts { get; }
+
+        private static string GetResource(string resourceName, CultureInfo culture)
+            => Resources.SR.ResourceManager.GetString(resourceName, culture)
+                ?? throw new InvalidOperationException($"The resource string '{resourceName}' was not found for culture '{culture.Name}'.");
     }
 }
 
@@ -383,6 +426,8 @@ internal static class AssemblyConflictMessageFormatter
 public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMessageEventArgs
 {
     private string? _formattedMessage;
+    [NonSerialized]
+    private AssemblyConflictMessageFormatter.LocalizedMessage? _localizedMessage;
 
     internal AssemblyConflictDependencyDetailsMessageEventArgs()
     {
@@ -424,6 +469,32 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
         }
     }
 
+    /// <summary>
+    /// Formats the message using resources and argument formatting for the specified culture.
+    /// </summary>
+    /// <param name="culture">The culture to use when formatting the message.</param>
+    /// <returns>The formatted message.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="culture"/> is <see langword="null"/>.</exception>
+    public string FormatMessage(CultureInfo culture)
+    {
+        ArgumentNullException.ThrowIfNull(culture);
+
+        if (culture.Equals(CultureInfo.InvariantCulture))
+        {
+            return Message ?? string.Empty;
+        }
+
+        AssemblyConflictMessageFormatter.LocalizedMessage? localizedMessage = Volatile.Read(ref _localizedMessage);
+        if (localizedMessage is not null && localizedMessage.Culture.Equals(culture))
+        {
+            return localizedMessage.Message;
+        }
+
+        string message = AssemblyConflictMessageFormatter.FormatDependencyDetails(Victor, Victim, culture);
+        Volatile.Write(ref _localizedMessage, new(culture, message));
+        return message;
+    }
+
     internal bool IsMessageMaterialized => _formattedMessage is not null;
 
     internal override void WriteToStream(BinaryWriter writer)
@@ -452,6 +523,8 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
 {
     private string? _formattedBody;
     private string? _formattedMessage;
+    [NonSerialized]
+    private AssemblyConflictMessageFormatter.LocalizedMessage? _localizedMessage;
 
     internal AssemblyConflictWarningEventArgs()
     {
@@ -524,6 +597,33 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
 
             return _formattedMessage ?? base.Message;
         }
+    }
+
+    /// <summary>
+    /// Formats the message using resources and argument formatting for the specified culture.
+    /// </summary>
+    /// <param name="culture">The culture to use when formatting the message.</param>
+    /// <returns>The formatted message.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="culture"/> is <see langword="null"/>.</exception>
+    public string FormatMessage(CultureInfo culture)
+    {
+        ArgumentNullException.ThrowIfNull(culture);
+
+        if (culture.Equals(CultureInfo.InvariantCulture))
+        {
+            return Message ?? string.Empty;
+        }
+
+        AssemblyConflictMessageFormatter.LocalizedMessage? localizedMessage = Volatile.Read(ref _localizedMessage);
+        if (localizedMessage is not null && localizedMessage.Culture.Equals(culture))
+        {
+            return localizedMessage.Message;
+        }
+
+        string body = AssemblyConflictMessageFormatter.FormatWarningBody(LossReason, Victor, Victim, culture);
+        string message = AssemblyConflictMessageFormatter.FormatWarningMessage(SimpleAssemblyName, body, culture);
+        Volatile.Write(ref _localizedMessage, new(culture, message));
+        return message;
     }
 
     internal bool IsMessageMaterialized => _formattedMessage is not null;
