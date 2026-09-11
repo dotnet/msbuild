@@ -1,6 +1,12 @@
 trigger:
-- main
-- vs*
+  branches:
+    include:
+    - main
+    - vs*
+  paths:
+    exclude:
+    - documentation/**
+    - .github/**
 
 parameters:
 - name: OptProfDropName
