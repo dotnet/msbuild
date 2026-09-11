@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -35,9 +37,6 @@ public sealed class AssemblyResolutionSearchLogging_Tests
         searchEvent.SearchAttempts[1].Result.ShouldBe(AssemblyResolutionSearchResult.FusionNamesDidNotMatch);
         searchEvent.SearchAttempts[1].AssemblyName.ShouldBe("Candidate, Version=2.0.0.0");
         searchEvent.SearchAttempts[2].IsAssemblyFoldersExSearch.ShouldBeTrue();
-        searchEvent.MessageFormats.ShouldNotBeNull().SearchPath.ShouldBe(
-            "        " + AssemblyResources.PrimaryResources.GetString(
-                "ResolveAssemblyReference.SearchPath"));
         searchEvent.Message.ShouldNotBeNull().ShouldContain("first.dll");
         searchEvent.Message.ShouldNotBeNull().ShouldContain("Candidate, Version=2.0.0.0");
         searchEvent.Message.ShouldNotBeNull().ShouldNotContain("assembly-folder-candidate.dll");
@@ -65,20 +64,48 @@ public sealed class AssemblyResolutionSearchLogging_Tests
     }
 
     [Fact]
-    public void AggregatedMessagePreservesLegacyText()
+    public async Task AggregatedMessageUsesInvariantCultureAndPreservesLegacyInvariantText()
     {
-        using TestEnvironment env = TestEnvironment.Create();
+        const string requestedAssemblyName = "Requested, Version=1.0.0.0";
+        const string targetProcessorArchitecture = "MSIL";
+        var searchEvent = new AssemblyResolutionSearchTraceEventArgs(
+            requestedAssemblyName,
+            targetProcessorArchitecture,
+            [
+                new("missing.dll", "path", null, null, AssemblyResolutionSearchResult.FileNotFound, null, false),
+                new("not-an-assembly.dll", "path", null, null, AssemblyResolutionSearchResult.TargetHadNoFusionName, null, false),
+                new("not-in-gac.dll", "path", null, null, AssemblyResolutionSearchResult.NotInGac, null, false),
+                new("not-a-file.dll", "path", null, null, AssemblyResolutionSearchResult.NotAFileNameOnDisk, null, false),
+                new("wrong-architecture.dll", "path", null, null, AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch, "AMD64", false),
+                new("wrong-name.dll", "parent-path", "parent.dll", "Candidate, Version=2.0.0.0", AssemblyResolutionSearchResult.FusionNamesDidNotMatch, null, false),
+                new("assembly-folder-candidate.dll", AssemblyResolutionConstants.assemblyFoldersExSentinel + "test", null, null, AssemblyResolutionSearchResult.FileNotFound, null, true),
+            ],
+            nameof(ResolveAssemblyReference),
+            MessageImportance.Low,
+            eventTimestamp: default);
 
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
-        ChangeWaves.ResetStateForTests();
-        string aggregatedLog = LogSearchAttempts().Log;
+        string actualMessage = await Task.Run(() =>
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+            return searchEvent.Message.ShouldNotBeNull();
+        });
 
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_12.ToString());
-        ChangeWaves.ResetStateForTests();
-        string legacyLog = LogSearchAttempts().Log;
+        string[] expectedMessages =
+        [
+            FormatInvariantResource("ResolveAssemblyReference.SearchPath", "path"),
+            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile", "missing.dll"),
+            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName", "not-an-assembly.dll"),
+            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac", "not-in-gac.dll"),
+            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk", "not-a-file.dll"),
+            FormatInvariantResource("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch", "wrong-architecture.dll", "AMD64", targetProcessorArchitecture),
+            FormatInvariantResource("ResolveAssemblyReference.SearchPathAddedByParentAssembly", "parent-path", "parent.dll"),
+            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch", "wrong-name.dll", "Candidate, Version=2.0.0.0", requestedAssemblyName),
+            FormatInvariantResource("ResolveAssemblyReference.SearchPath", AssemblyResolutionConstants.assemblyFoldersExSentinel + "test"),
+            FormatInvariantResource("ResolveAssemblyReference.SearchedAssemblyFoldersEx"),
+        ];
 
-        aggregatedLog.ShouldBe(legacyLog);
-        ChangeWaves.ResetStateForTests();
+        actualMessage.ShouldBe(string.Join(System.Environment.NewLine, expectedMessages));
     }
 
     [Fact]
@@ -140,6 +167,12 @@ public sealed class AssemblyResolutionSearchLogging_Tests
             MessageImportance.Low);
         return engine;
     }
+
+    private static string FormatInvariantResource(string resourceName, params object[] arguments)
+        => string.Format(
+            CultureInfo.InvariantCulture,
+            "        " + AssemblyResources.GetString(resourceName, CultureInfo.InvariantCulture),
+            arguments);
 
     private static Reference CreateReference()
         => new(

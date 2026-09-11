@@ -51,21 +51,6 @@ public enum AssemblyResolutionSearchResult
 }
 
 [Flags]
-internal enum AssemblyResolutionSearchTraceFormat
-{
-    None = 0,
-    SearchPath = 1 << 0,
-    SearchPathAddedByParentAssembly = 1 << 1,
-    SearchedAssemblyFoldersEx = 1 << 2,
-    FileNotFound = 1 << 3,
-    FusionNamesDidNotMatch = 1 << 4,
-    TargetHadNoFusionName = 1 << 5,
-    NotInGac = 1 << 6,
-    NotAFileNameOnDisk = 1 << 7,
-    ProcessorArchitectureDoesNotMatch = 1 << 8,
-}
-
-[Flags]
 internal enum AssemblyResolutionSearchAttemptContext
 {
     None = 0,
@@ -209,11 +194,24 @@ public sealed class AssemblyResolutionSearchAttempt
 /// <summary>
 /// Describes all candidates considered while resolving one assembly reference.
 /// </summary>
+/// <remarks>
+/// The <see cref="BuildEventArgs.Message"/> is rendered in invariant English.
+/// </remarks>
 [Serializable]
 public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventArgs
 {
+    private const string SearchPathFormat = "        For SearchPath \"{0}\".";
+    private const string SearchPathAddedByParentAssemblyFormat = "        For SearchPath \"{0}\" (added by referencing assembly \"{1}\").";
+    private const string SearchedAssemblyFoldersExMessage = "        Considered AssemblyFoldersEx locations.";
+    private const string FileNotFoundFormat = "        Considered \"{0}\", but it didn't exist.";
+    private const string TargetHadNoFusionNameFormat = "        Considered \"{0}\", which existed but did not appear to be a valid .NET assembly.";
+    private const string NotInGacFormat = "        Considered \"{0}\", which was not found in the GAC.";
+    private const string NotAFileNameOnDiskFormat = "        Considered treating \"{0}\" as a file name, but it didn't exist.";
+    private const string ProcessorArchitectureDoesNotMatchFormat = "        Considered \"{0}\", which existed but had a processor architecture \"{1}\" which does not match the targeted processor architecture \"{2}\".";
+
+    private static readonly string s_fusionNamesDidNotMatchFormat = $"        Considered \"{{0}}\",{Environment.NewLine}\t\t\tbut its name \"{{1}}\"{Environment.NewLine}\t\t\tdidn't match the expected name \"{{2}}\".";
+
     private IReadOnlyList<AssemblyResolutionSearchAttempt> _searchAttempts = [];
-    private AssemblyResolutionSearchTraceMessageFormats? _messageFormats;
     private string? _formattedMessage;
 
     internal AssemblyResolutionSearchTraceEventArgs()
@@ -224,7 +222,6 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
         string requestedAssemblyName,
         string? targetProcessorArchitecture,
         IReadOnlyList<AssemblyResolutionSearchAttempt> searchAttempts,
-        AssemblyResolutionSearchTraceMessageFormats messageFormats,
         string senderName,
         MessageImportance importance,
         DateTime eventTimestamp)
@@ -233,7 +230,6 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
         RequestedAssemblyName = requestedAssemblyName;
         TargetProcessorArchitecture = targetProcessorArchitecture;
         _searchAttempts = searchAttempts;
-        _messageFormats = messageFormats;
     }
 
     /// <summary>
@@ -253,9 +249,7 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
 
     /// <inheritdoc />
     public override string? Message
-        => _messageFormats is null ? base.Message : (_formattedMessage ??= FormatMessage());
-
-    internal AssemblyResolutionSearchTraceMessageFormats? MessageFormats => _messageFormats;
+        => _formattedMessage ??= FormatMessage();
 
     internal override void WriteToStream(BinaryWriter writer)
     {
@@ -263,9 +257,6 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
         base.WriteToStream(writer);
         writer.Write(RequestedAssemblyName);
         writer.WriteOptionalString(TargetProcessorArchitecture);
-        AssemblyResolutionSearchTraceFormat usedFormats = GetUsedFormats();
-        writer.Write7BitEncodedInt((int)usedFormats);
-        _messageFormats!.WriteToStream(writer, usedFormats);
         writer.Write7BitEncodedInt(_searchAttempts.Count);
         AssemblyResolutionSearchAttempt? previous = null;
         for (int i = 0; i < _searchAttempts.Count; i++)
@@ -281,8 +272,6 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
         base.CreateFromStream(reader, version);
         RequestedAssemblyName = reader.ReadString();
         TargetProcessorArchitecture = reader.ReadOptionalString();
-        var usedFormats = (AssemblyResolutionSearchTraceFormat)reader.Read7BitEncodedInt();
-        _messageFormats = AssemblyResolutionSearchTraceMessageFormats.CreateFromStream(reader, usedFormats);
 
         int count = reader.Read7BitEncodedInt();
         var attempts = new AssemblyResolutionSearchAttempt[count];
@@ -297,52 +286,9 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
         _searchAttempts = attempts;
     }
 
-    internal AssemblyResolutionSearchTraceFormat GetUsedFormats()
-    {
-        AssemblyResolutionSearchTraceFormat usedFormats = AssemblyResolutionSearchTraceFormat.None;
-        string? lastSearchPath = null;
-
-        for (int i = 0; i < _searchAttempts.Count; i++)
-        {
-            AssemblyResolutionSearchAttempt attempt = _searchAttempts[i];
-            if (!string.Equals(lastSearchPath, attempt.SearchPath, StringComparison.Ordinal))
-            {
-                lastSearchPath = attempt.SearchPath;
-                usedFormats |= attempt.ParentAssembly is null
-                    ? AssemblyResolutionSearchTraceFormat.SearchPath
-                    : AssemblyResolutionSearchTraceFormat.SearchPathAddedByParentAssembly;
-
-                if (attempt.IsAssemblyFoldersExSearch)
-                {
-                    usedFormats |= AssemblyResolutionSearchTraceFormat.SearchedAssemblyFoldersEx;
-                }
-            }
-
-            usedFormats |= attempt.Result switch
-            {
-                AssemblyResolutionSearchResult.FileNotFound when !attempt.IsAssemblyFoldersExSearch
-                    => AssemblyResolutionSearchTraceFormat.FileNotFound,
-                AssemblyResolutionSearchResult.FusionNamesDidNotMatch
-                    => AssemblyResolutionSearchTraceFormat.FusionNamesDidNotMatch,
-                AssemblyResolutionSearchResult.TargetHadNoFusionName
-                    => AssemblyResolutionSearchTraceFormat.TargetHadNoFusionName,
-                AssemblyResolutionSearchResult.NotInGac
-                    => AssemblyResolutionSearchTraceFormat.NotInGac,
-                AssemblyResolutionSearchResult.NotAFileNameOnDisk when !attempt.IsAssemblyFoldersExSearch
-                    => AssemblyResolutionSearchTraceFormat.NotAFileNameOnDisk,
-                AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch
-                    => AssemblyResolutionSearchTraceFormat.ProcessorArchitectureDoesNotMatch,
-                _ => AssemblyResolutionSearchTraceFormat.None,
-            };
-        }
-
-        return usedFormats;
-    }
-
     private string FormatMessage()
     {
         var builder = new StringBuilder();
-        AssemblyResolutionSearchTraceMessageFormats formats = _messageFormats!;
         string? lastSearchPath = null;
 
         for (int i = 0; i < _searchAttempts.Count; i++)
@@ -354,29 +300,29 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
                 AppendMessage(
                     builder,
                     attempt.ParentAssembly is null
-                        ? Format(formats.SearchPath, attempt.SearchPath)
-                        : Format(formats.SearchPathAddedByParentAssembly, attempt.SearchPath, attempt.ParentAssembly));
+                        ? Format(SearchPathFormat, attempt.SearchPath)
+                        : Format(SearchPathAddedByParentAssemblyFormat, attempt.SearchPath, attempt.ParentAssembly));
 
                 if (attempt.IsAssemblyFoldersExSearch)
                 {
-                    AppendMessage(builder, formats.SearchedAssemblyFoldersEx);
+                    AppendMessage(builder, SearchedAssemblyFoldersExMessage);
                 }
             }
 
             string? message = attempt.Result switch
             {
                 AssemblyResolutionSearchResult.FileNotFound when !attempt.IsAssemblyFoldersExSearch
-                    => Format(formats.FileNotFound, attempt.FileNameAttempted),
+                    => Format(FileNotFoundFormat, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.FusionNamesDidNotMatch
-                    => Format(formats.FusionNamesDidNotMatch, attempt.FileNameAttempted, attempt.AssemblyName, RequestedAssemblyName),
+                    => Format(s_fusionNamesDidNotMatchFormat, attempt.FileNameAttempted, attempt.AssemblyName, RequestedAssemblyName),
                 AssemblyResolutionSearchResult.TargetHadNoFusionName
-                    => Format(formats.TargetHadNoFusionName, attempt.FileNameAttempted),
+                    => Format(TargetHadNoFusionNameFormat, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.NotInGac
-                    => Format(formats.NotInGac, attempt.FileNameAttempted),
+                    => Format(NotInGacFormat, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.NotAFileNameOnDisk when !attempt.IsAssemblyFoldersExSearch
-                    => Format(formats.NotAFileNameOnDisk, attempt.FileNameAttempted),
+                    => Format(NotAFileNameOnDiskFormat, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch
-                    => Format(formats.ProcessorArchitectureDoesNotMatch, attempt.FileNameAttempted, attempt.ProcessorArchitecture, TargetProcessorArchitecture),
+                    => Format(ProcessorArchitectureDoesNotMatchFormat, attempt.FileNameAttempted, attempt.ProcessorArchitecture, TargetProcessorArchitecture),
                 _ => null,
             };
 
@@ -390,7 +336,7 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
     }
 
     private static string Format(string format, params object?[] arguments)
-        => string.Format(CultureInfo.CurrentCulture, format, arguments);
+        => string.Format(CultureInfo.InvariantCulture, format, arguments);
 
     private static void AppendMessage(StringBuilder builder, string message)
     {
@@ -401,83 +347,4 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
 
         builder.Append(message);
     }
-}
-
-[Serializable]
-internal sealed class AssemblyResolutionSearchTraceMessageFormats
-{
-    internal AssemblyResolutionSearchTraceMessageFormats(
-        string searchPath,
-        string searchPathAddedByParentAssembly,
-        string searchedAssemblyFoldersEx,
-        string fileNotFound,
-        string fusionNamesDidNotMatch,
-        string targetHadNoFusionName,
-        string notInGac,
-        string notAFileNameOnDisk,
-        string processorArchitectureDoesNotMatch)
-    {
-        SearchPath = searchPath;
-        SearchPathAddedByParentAssembly = searchPathAddedByParentAssembly;
-        SearchedAssemblyFoldersEx = searchedAssemblyFoldersEx;
-        FileNotFound = fileNotFound;
-        FusionNamesDidNotMatch = fusionNamesDidNotMatch;
-        TargetHadNoFusionName = targetHadNoFusionName;
-        NotInGac = notInGac;
-        NotAFileNameOnDisk = notAFileNameOnDisk;
-        ProcessorArchitectureDoesNotMatch = processorArchitectureDoesNotMatch;
-    }
-
-    internal string SearchPath { get; }
-    internal string SearchPathAddedByParentAssembly { get; }
-    internal string SearchedAssemblyFoldersEx { get; }
-    internal string FileNotFound { get; }
-    internal string FusionNamesDidNotMatch { get; }
-    internal string TargetHadNoFusionName { get; }
-    internal string NotInGac { get; }
-    internal string NotAFileNameOnDisk { get; }
-    internal string ProcessorArchitectureDoesNotMatch { get; }
-
-    internal void WriteToStream(BinaryWriter writer, AssemblyResolutionSearchTraceFormat usedFormats)
-    {
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.SearchPath, SearchPath);
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.SearchPathAddedByParentAssembly, SearchPathAddedByParentAssembly);
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.SearchedAssemblyFoldersEx, SearchedAssemblyFoldersEx);
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.FileNotFound, FileNotFound);
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.FusionNamesDidNotMatch, FusionNamesDidNotMatch);
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.TargetHadNoFusionName, TargetHadNoFusionName);
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.NotInGac, NotInGac);
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.NotAFileNameOnDisk, NotAFileNameOnDisk);
-        WriteIfUsed(writer, usedFormats, AssemblyResolutionSearchTraceFormat.ProcessorArchitectureDoesNotMatch, ProcessorArchitectureDoesNotMatch);
-    }
-
-    internal static AssemblyResolutionSearchTraceMessageFormats CreateFromStream(BinaryReader reader, AssemblyResolutionSearchTraceFormat usedFormats)
-        => new(
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.SearchPath),
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.SearchPathAddedByParentAssembly),
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.SearchedAssemblyFoldersEx),
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.FileNotFound),
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.FusionNamesDidNotMatch),
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.TargetHadNoFusionName),
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.NotInGac),
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.NotAFileNameOnDisk),
-            ReadIfUsed(reader, usedFormats, AssemblyResolutionSearchTraceFormat.ProcessorArchitectureDoesNotMatch));
-
-    private static void WriteIfUsed(
-        BinaryWriter writer,
-        AssemblyResolutionSearchTraceFormat usedFormats,
-        AssemblyResolutionSearchTraceFormat format,
-        string value)
-    {
-        if ((usedFormats & format) != 0)
-        {
-            writer.Write(value);
-        }
-    }
-
-    private static string ReadIfUsed(
-        BinaryReader reader,
-        AssemblyResolutionSearchTraceFormat usedFormats,
-        AssemblyResolutionSearchTraceFormat format)
-        => (usedFormats & format) != 0 ? reader.ReadString() : string.Empty;
 }
