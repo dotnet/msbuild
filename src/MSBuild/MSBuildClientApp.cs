@@ -73,6 +73,7 @@ namespace Microsoft.Build.CommandLine
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy &&
                 multiThreaded &&
+                // if we started a transient server we don't want to fall back to a transient server
                 !shutdownServerAfterBuild &&
                 !cancellationToken.IsCancellationRequested)
             {
