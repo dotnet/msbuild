@@ -265,8 +265,13 @@ Set **`MSBUILDMTNONSTRICT=1`** (or `true`, case-insensitive) in the environment 
 MSBuild to opt out of strict checks without disabling MT. Unset the variable or set it to `0`
 or `false` to retain the default checks. Other values do not opt out. There is no separate
 strict-mode command-line switch, project property, or public API setting.
+API hosts can change the environment variable before a subsequent `BeginBuild`; its value is
+captured once for that build. Changing it during execution does not change the active checks.
+Use absolute entry-project paths in API builds, or construct relative-path `BuildRequestData`
+before `BeginBuild`, while the host's working directory is still active.
 
-MSBuild checks process state after task execution, output retrieval and task-factory cleanup:
+After task execution, output retrieval and task-factory cleanup return, MSBuild checks process
+state unless cancellation has been requested:
 
 | Diagnostic | Meaning |
 |---|---|
@@ -274,11 +279,20 @@ MSBuild checks process state after task execution, output retrieval and task-fac
 | `MSB4287` | Files or directories were created in the sentinel. MSBuild attempts to remove them. |
 
 These diagnostics fail the task and follow `ContinueOnError`. For a CI gate, use
-`"-warnAsError:MSB4286;MSB4287"` so they cannot be downgraded to passing warnings.
+`"-warnAsError:MSB4286;MSB4287"` to prevent `ContinueOnError` from turning them into passing
+warnings. Do not also suppress these codes through `-nowarn` or `MSBuildWarningsAsMessages`;
+normal warning-to-message suppression takes precedence over warning-to-error promotion.
 Existing task diagnostics keep their normal timing: `MSB4181` can appear alongside a strict
 diagnostic. Cancellation skips strict checks that have not run, but does not retract earlier diagnostics.
 The original process directory is restored when the build ends. Failures to enable strict
 mode, check its state, or restore the directory fail the build; they do not silently disable checks.
+After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
+Locked leftovers are not reused by later builds. Cleanup is best-effort and does not replace
+the reported build result.
+
+Each independently observed CWD change is reported, even if an earlier task changed to the
+same directory. An undeletable sentinel entry is reported once while it remains present;
+later checks retry removal and retire its remembered name when it is no longer observed.
 
 For migration sign-off, also [capture a binlog and search for sentinel-path leaks](thread-safe-tasks.md#validate-a-task-migration).
 A successful build alone does not establish that the migration is correct.

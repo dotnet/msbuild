@@ -478,17 +478,33 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             // Both execution paths have gathered outputs and cleaned up the task before returning.
-                            if (_componentHost.BuildParameters.MultiThreadedStrict
-                                && !_cancellationToken.IsCancellationRequested
+                            if (!_cancellationToken.IsCancellationRequested
                                 && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
-                                && scope.VerifyAndReportProcessState(taskLoggingContext, _taskNode.Name, _targetChildInstance.Location,
-                                    convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue))
+                                && scope.BuildId == _componentHost.BuildParameters.BuildId)
                             {
-                                bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
-                                taskResult = new WorkUnitResult(
-                                    WorkUnitResultCode.Failed,
-                                    _continueOnError == ContinueOnError.ErrorAndStop ? WorkUnitActionCode.Stop : WorkUnitActionCode.Continue,
-                                    taskResult.Exception);
+                                bool violation;
+                                try
+                                {
+                                    violation = scope.VerifyAndReportProcessState(
+                                        taskLoggingContext, _taskNode.Name, _targetChildInstance.Location,
+                                        convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue);
+                                }
+                                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                                {
+                                    _continueOnError = ContinueOnError.ErrorAndStop;
+                                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                                    taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
+                                    throw;
+                                }
+
+                                if (violation)
+                                {
+                                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                                    taskResult = new WorkUnitResult(
+                                        WorkUnitResultCode.Failed,
+                                        _continueOnError == ContinueOnError.ErrorAndStop ? WorkUnitActionCode.Stop : WorkUnitActionCode.Continue,
+                                        taskResult.Exception);
+                                }
                             }
 
                             if (lookupHash != null)
@@ -1075,12 +1091,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
+            string projectDirectory = _buildRequestEntry.TaskEnvironment.ProjectDirectory.Value;
 
             var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, FileUtilities.PathComparer);
 
             foreach (var projectReferenceItem in projectReferenceItems)
             {
-                declaredProjects.Add(FileUtilities.NormalizePath(_buildRequestEntry.ProjectRootDirectory, projectReferenceItem.EvaluatedInclude));
+                declaredProjects.Add(FileUtilities.NormalizePath(projectDirectory, projectReferenceItem.EvaluatedInclude));
             }
 
             // allow a project to msbuild itself
@@ -1090,7 +1107,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (var msbuildProject in msbuildTask.Projects)
             {
-                var normalizedMSBuildProject = FileUtilities.NormalizePath(_buildRequestEntry.ProjectRootDirectory, msbuildProject.ItemSpec);
+                var normalizedMSBuildProject = FileUtilities.NormalizePath(projectDirectory, msbuildProject.ItemSpec);
 
                 if (
                     !(declaredProjects.Contains(normalizedMSBuildProject)

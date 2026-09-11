@@ -25,20 +25,24 @@ internal sealed class MultiThreadedStrictModeScope
 
     private readonly object _reportedEntriesLock = new();
     private readonly HashSet<string> _reportedEntries = new(FileUtilities.PathComparer);
-    private readonly HashSet<string> _reportedCurrentDirectories = new(FileUtilities.PathComparer);
     private readonly string _directoryToRestore;
+    private readonly string _temporaryDirectory;
 
-    private MultiThreadedStrictModeScope(string sentinelDirectory, string directoryToRestore)
+    private MultiThreadedStrictModeScope(int buildId, string sentinelDirectory, string directoryToRestore, string temporaryDirectory)
     {
+        BuildId = buildId;
         SentinelDirectory = sentinelDirectory;
         _directoryToRestore = directoryToRestore;
+        _temporaryDirectory = temporaryDirectory;
     }
+
+    internal int BuildId { get; }
 
     internal string SentinelDirectory { get; }
 
     internal static MultiThreadedStrictModeScope? ActiveScope => Volatile.Read(ref s_activeScope);
 
-    internal static MultiThreadedStrictModeScope Enter()
+    internal static MultiThreadedStrictModeScope Enter(int buildId)
     {
         lock (s_stateLock)
         {
@@ -46,12 +50,31 @@ internal sealed class MultiThreadedStrictModeScope
 
             // Capture only after taking ownership. An exiting scope may still be restoring CWD.
             string directoryToRestore = Directory.GetCurrentDirectory();
-            string sentinelDirectory = FileUtilities.GetTemporaryDirectory(subfolder: SentinelDirectoryName);
+            string temporaryDirectory = FileUtilities.GetTemporaryDirectory(createDirectory: false);
+            string sentinelDirectory = Path.Combine(temporaryDirectory, SentinelDirectoryName);
+            Directory.CreateDirectory(sentinelDirectory);
             Directory.SetCurrentDirectory(sentinelDirectory);
-            // Keep the actual spelling: entering a directory can resolve symlinks.
-            MultiThreadedStrictModeScope scope = new(Directory.GetCurrentDirectory(), directoryToRestore);
-            Volatile.Write(ref s_activeScope, scope);
-            return scope;
+            try
+            {
+                // Keep the actual spelling: entering a directory can resolve symlinks.
+                MultiThreadedStrictModeScope scope = new(buildId, Directory.GetCurrentDirectory(), directoryToRestore, temporaryDirectory);
+                Volatile.Write(ref s_activeScope, scope);
+                return scope;
+            }
+            catch (Exception entryFailure) when (!ExceptionHandling.IsCriticalException(entryFailure))
+            {
+                try
+                {
+                    Directory.SetCurrentDirectory(directoryToRestore);
+                }
+                catch (Exception restorationFailure) when (!ExceptionHandling.IsCriticalException(restorationFailure))
+                {
+                    throw new AggregateException(entryFailure, restorationFailure);
+                }
+
+                TryDelete(temporaryDirectory);
+                throw;
+            }
         }
     }
 
@@ -73,6 +96,8 @@ internal sealed class MultiThreadedStrictModeScope
                 Volatile.Write(ref s_activeScope, null);
             }
         }
+
+        TryDelete(_temporaryDirectory);
     }
 
     internal bool VerifyAndReportProcessState(
@@ -112,15 +137,17 @@ internal sealed class MultiThreadedStrictModeScope
     {
         string? unexpectedDirectory = null;
         string currentDirectory = Directory.GetCurrentDirectory();
-        if (!FileUtilities.PathsEqual(currentDirectory, SentinelDirectory))
+        if (!FileUtilities.PathComparer.Equals(currentDirectory, SentinelDirectory))
         {
             lock (s_stateLock)
             {
                 if (ReferenceEquals(s_activeScope, this))
                 {
-                    Directory.SetCurrentDirectory(SentinelDirectory);
-                    if (_reportedCurrentDirectories.Add(currentDirectory))
+                    // Another checker may have repaired the directory while this one waited for the lock.
+                    currentDirectory = Directory.GetCurrentDirectory();
+                    if (!FileUtilities.PathComparer.Equals(currentDirectory, SentinelDirectory))
                     {
+                        Directory.SetCurrentDirectory(SentinelDirectory);
                         unexpectedDirectory = currentDirectory;
                     }
                 }
@@ -132,44 +159,36 @@ internal sealed class MultiThreadedStrictModeScope
 
     private string? TakeUnreportedSentinelDirectoryEntries()
     {
-        // Timestamps cannot safely replace enumeration: multiple writes can share the same timestamp.
-        if (!HasAnyEntry(SentinelDirectory))
-        {
-            return null;
-        }
-
-        List<string> entries = [];
         lock (_reportedEntriesLock)
         {
+            // Only failed deletions remain remembered between checks.
+            HashSet<string>? noLongerPresent = _reportedEntries.Count == 0 ? null : new(_reportedEntries, FileUtilities.PathComparer);
+            List<string>? entries = null;
+            // Timestamps cannot safely replace enumeration: multiple writes can share the same timestamp.
             foreach (string entry in Directory.EnumerateFileSystemEntries(SentinelDirectory))
             {
                 string name = Path.GetFileName(entry);
-                if (!_reportedEntries.Add(name))
+                noLongerPresent?.Remove(name);
+                if (_reportedEntries.Add(name))
                 {
-                    continue;
+                    (entries ??= []).Add(name);
                 }
 
-                entries.Add(name);
                 // Remove stray outputs so they cannot satisfy later unresolved reads.
-                // Remember undeletable entries to avoid repeatedly blaming subsequent tasks.
+                // Retry locked leftovers without repeatedly blaming subsequent tasks.
                 if (TryDelete(entry))
                 {
                     _reportedEntries.Remove(name);
                 }
             }
+
+            if (noLongerPresent is not null)
+            {
+                _reportedEntries.ExceptWith(noLongerPresent);
+            }
+
+            return entries is null ? null : string.Join(", ", entries);
         }
-
-        return entries.Count == 0 ? null : string.Join(", ", entries);
-    }
-
-    private static bool HasAnyEntry(string directory)
-    {
-        foreach (string unused in Directory.EnumerateFileSystemEntries(directory))
-        {
-            return true;
-        }
-
-        return false;
     }
 
     private static bool TryDelete(string entry)

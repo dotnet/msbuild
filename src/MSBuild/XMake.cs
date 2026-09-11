@@ -1621,7 +1621,7 @@ namespace Microsoft.Build.CommandLine
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
-            if (multiThreaded && !Traits.Instance.MultiThreadedNonStrict)
+            if (multiThreaded && !Traits.MultiThreadedNonStrict)
             {
                 // Strict mode moves the process current directory to a sentinel directory for the duration of the
                 // build, so every path the engine would otherwise resolve against it has to be made absolute here,

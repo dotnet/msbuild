@@ -54,7 +54,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Disable the default strict checks in multi-threaded builds without disabling multi-threading.
         /// </summary>
-        public readonly bool MultiThreadedNonStrict = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMTNONSTRICT");
+        public static bool MultiThreadedNonStrict => EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMTNONSTRICT");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern

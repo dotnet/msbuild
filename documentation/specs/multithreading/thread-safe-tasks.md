@@ -129,6 +129,7 @@ dotnet build .\MyProject.csproj -m -mt -nr:false -bl:migration-strict.binlog "-w
 ```
 
 Ensure `MSBUILDMTNONSTRICT` is unset so the default strict checks are active.
+Do not suppress `MSB4286` or `MSB4287` through `-nowarn` or `MSBuildWarningsAsMessages`.
 Clean the relevant outputs or invoke the required targets so the migrated task actually
 runs. In the binlog, confirm that the expected task assembly was used and the task ran
 in-process, rather than being skipped or using a legacy copy in a TaskHost.

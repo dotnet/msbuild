@@ -37,31 +37,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         public void Dispose() => _env.Dispose();
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void BuildParametersClonePreservesMultiThreadedStrict(bool strict)
-        {
-            BuildParameters parameters = new() { MultiThreaded = true, MultiThreadedStrict = strict };
-
-            BuildParameters clone = parameters.Clone();
-
-            clone.MultiThreadedStrict.ShouldBe(strict);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void BuildParametersTranslationPreservesMultiThreadedStrict(bool strict)
-        {
-            BuildParameters parameters = new() { MultiThreaded = true, MultiThreadedStrict = strict };
-
-            ((ITranslatable)parameters).Translate(TranslationHelpers.GetWriteTranslator());
-            BuildParameters deserialized = BuildParameters.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            deserialized.MultiThreaded.ShouldBeTrue();
-            deserialized.MultiThreadedStrict.ShouldBe(strict);
-        }
+        public static bool FileSystemIsCaseSensitive => FileUtilities.IsFileSystemCaseSensitive;
 
         [Theory]
         [InlineData(true, null, true)]
@@ -92,9 +68,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                ((IBuildComponentHost)manager).BuildParameters.MultiThreadedStrict.ShouldBe(expectedStrict);
                 (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(expectedStrict);
-                if (!expectedStrict)
+                if (expectedStrict)
+                {
+                    MultiThreadedStrictModeScope.ActiveScope!.BuildId.ShouldBe(((IBuildComponentHost)manager).BuildParameters.BuildId);
+                }
+                else
                 {
                     Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
                 }
@@ -121,7 +100,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 manager.BeginBuild(parameters);
                 try
                 {
-                    ((IBuildComponentHost)manager).BuildParameters.MultiThreadedStrict.ShouldBe(!optOut);
                     (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(!optOut);
                 }
                 finally
@@ -130,6 +108,76 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
 
                 Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            }
+        }
+
+        [Fact]
+        public void ProductionApiBuildRecapturesStrictOptOut()
+        {
+            bool runningTests = BuildEnvironmentState.s_runningTests;
+            try
+            {
+                Traits.UpdateFromEnvironment();
+                BuildEnvironmentState.s_runningTests = false;
+                using BuildManager manager = new();
+                string?[] optOutValues = [null, "1", null];
+                foreach (string? optOut in optOutValues)
+                {
+                    _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut);
+                    manager.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
+                    try
+                    {
+                        (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(optOut is null);
+                    }
+                    finally
+                    {
+                        manager.EndBuild();
+                    }
+                }
+            }
+            finally
+            {
+                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
+                BuildEnvironmentState.s_runningTests = runningTests;
+                Traits.UpdateFromEnvironment();
+            }
+        }
+
+        [Fact]
+        public void NonMtIsolationPreservesHostRelativeDeclarations()
+        {
+            var projectDirectory = _env.CreateFolder();
+            var hostDirectory = _env.CreateFolder();
+            var child = _env.CreateFile(hostDirectory, "child.proj", """
+                <Project><Target Name="Build" /></Project>
+                """);
+            var root = _env.CreateFile(projectDirectory, "root.proj", $"""
+                <Project>
+                  <ItemGroup><ProjectReference Include="child.proj" /></ItemGroup>
+                  <Target Name="Build"><MSBuild Projects="{child.Path}" Targets="Build" /></Target>
+                </Project>
+                """);
+            _env.SetCurrentDirectory(hostDirectory.Path);
+            using BuildManager manager = new();
+            manager.BeginBuild(new BuildParameters
+            {
+                MultiThreaded = false,
+                SaveOperatingEnvironment = false,
+                ProjectIsolationMode = ProjectIsolationMode.True,
+                DisableInProcNode = false,
+                MaxNodeCount = 1,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [new MockLogger(_output)],
+            });
+            try
+            {
+                manager.BuildRequest(new BuildRequestData(child.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+                manager.BuildRequest(new BuildRequestData(root.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+            }
+            finally
+            {
+                manager.EndBuild();
             }
         }
 
@@ -177,6 +225,54 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TaskChecksOnlyUseTheirOwnBuildsScope(bool multiThreaded)
+        {
+            var project = _env.CreateFile("foreign-scope.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask Violation="Write">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                  </Target>
+                </Project>
+                """);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            using BuildManager owner = new();
+            owner.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
+            try
+            {
+                var scope = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull();
+                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", "1");
+                MockLogger logger = new(_output);
+                using BuildManager other = new();
+                BuildParameters parameters = new()
+                {
+                    MultiThreaded = multiThreaded,
+                    SaveOperatingEnvironment = false,
+                    ShutdownInProcNodeOnBuildFinish = true,
+                    EnableNodeReuse = false,
+                    Loggers = [logger],
+                };
+
+                other.Build(parameters, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+
+                logger.AssertNoErrors();
+                logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+                MultiThreadedStrictModeScope.ActiveScope.ShouldBeSameAs(scope);
+                scope.DetectViolations().UnresolvedPathWrites.ShouldBe("late-output.txt");
+            }
+            finally
+            {
+                owner.EndBuild();
+            }
+
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+        }
+
         /// <summary>
         /// The scope owns process-wide state, so entering must move the process and exiting must put it back.
         /// </summary>
@@ -185,7 +281,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(0);
 
             try
             {
@@ -204,6 +300,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            Directory.Exists(scope.SentinelDirectory).ShouldBeFalse();
+            Directory.Exists(Path.GetDirectoryName(scope.SentinelDirectory)).ShouldBeFalse();
         }
 
         /// <summary>
@@ -215,11 +313,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(0);
 
             try
             {
-                Should.Throw<InvalidOperationException>(() => MultiThreadedStrictModeScope.Enter());
+                Should.Throw<InvalidOperationException>(() => MultiThreadedStrictModeScope.Enter(1));
                 MultiThreadedStrictModeScope.ActiveScope.ShouldBe(scope);
             }
             finally
@@ -238,7 +336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void UnresolvedPathWriteIsDetectedOnceAndRemoved()
         {
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(0);
 
             try
             {
@@ -268,7 +366,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void UnresolvedPathWriteIsDetectedEveryTime()
         {
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(0);
 
             try
             {
@@ -286,12 +384,48 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        [WindowsOnlyFact]
+        public void RecreatedPreviouslyLockedEntryIsReportedAgain()
+        {
+            var scope = MultiThreadedStrictModeScope.Enter(0);
+            using var lifetime = new ScopeLifetime(scope);
+            const string Name = "reused.txt";
+            using (FileStream held = new(Name, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.Read))
+            {
+                scope.DetectViolations().UnresolvedPathWrites.ShouldBe(Name);
+                File.Exists(Name).ShouldBeTrue();
+            }
+
+            File.Delete(Name);
+            scope.DetectViolations().Any.ShouldBeFalse();
+            File.WriteAllText(Name, "new output");
+
+            scope.DetectViolations().UnresolvedPathWrites.ShouldBe(Name);
+            File.Exists(Name).ShouldBeFalse();
+        }
+
+        [WindowsOnlyFact]
+        public void PreviouslyReportedEntryIsRetriedOnceUnlocked()
+        {
+            var scope = MultiThreadedStrictModeScope.Enter(0);
+            using var lifetime = new ScopeLifetime(scope);
+            const string Name = "unlocked.txt";
+            using (FileStream held = new(Name, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.Read))
+            {
+                scope.DetectViolations().UnresolvedPathWrites.ShouldBe(Name);
+                scope.DetectViolations().Any.ShouldBeFalse();
+            }
+
+            scope.DetectViolations().Any.ShouldBeFalse();
+            File.Exists(Name).ShouldBeFalse();
+        }
+
         [Fact]
         public void UnresolvedPathWritesAreReportedAndRemovedInOneCheck()
         {
             const int StrayCount = 25;
             using TestEnvironment env = TestEnvironment.Create(_output);
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(0);
             using var lifetime = new ScopeLifetime(scope);
             string[] expected = new string[StrayCount];
 
@@ -313,7 +447,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string originalDirectory = Directory.GetCurrentDirectory();
 
-            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(0);
 
             try
             {
@@ -333,6 +467,104 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 scope.Exit();
             }
 
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+        }
+
+        [Fact]
+        public void RepeatedChangesToTheSameDirectoryAreDetected()
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var scope = MultiThreadedStrictModeScope.Enter(0);
+            using var lifetime = new ScopeLifetime(scope);
+
+            for (int i = 0; i < 2; i++)
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                scope.DetectViolations().UnexpectedCurrentDirectory.ShouldBe(originalDirectory);
+                Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
+                scope.DetectViolations().Any.ShouldBeFalse();
+            }
+        }
+
+        [Fact(Skip = "Requires a case-sensitive file system.", SkipUnless = nameof(FileSystemIsCaseSensitive))]
+        public void CaseDistinctSiblingDirectoryIsDetectedAndRepaired()
+        {
+            var scope = MultiThreadedStrictModeScope.Enter(0);
+            using var lifetime = new ScopeLifetime(scope);
+            string sibling = Path.Combine(Path.GetDirectoryName(scope.SentinelDirectory)!, "msbuild-mt-strict-sentinel-cwd");
+            Directory.CreateDirectory(sibling);
+            Directory.SetCurrentDirectory(sibling);
+
+            scope.DetectViolations().UnexpectedCurrentDirectory.ShouldBe(sibling);
+            Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
+        }
+
+        [Fact]
+        public void RepeatedDirectoryViolationHonorsEachTasksFailurePolicy()
+        {
+            string otherDirectory = _env.CreateFolder().Path;
+            var project = _env.CreateFile("repeated-directory-change.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask ChangeDirectoryOnExecute="true" OtherDirectory="{otherDirectory}" ContinueOnError="WarnAndContinue" />
+                    <StrictLifetimeTask ChangeDirectoryOnExecute="true" OtherDirectory="{otherDirectory}" />
+                    <Message Text="UNEXPECTED-CONTINUATION" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+            MockLogger logger = new(_output);
+
+            BuildStrictProject(project.Path, logger).ShouldHaveFailed();
+
+            logger.Warnings.ShouldHaveSingleItem().Code.ShouldBe("MSB4286");
+            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("MSB4286");
+            logger.TaskFinishedEvents.Count.ShouldBe(2);
+            logger.TaskFinishedEvents.ShouldAllBe(e => !e.Succeeded);
+            logger.AssertLogDoesntContain("UNEXPECTED-CONTINUATION");
+        }
+
+        [Theory]
+        [InlineData("ErrorAndStop")]
+        [InlineData("WarnAndContinue")]
+        public void VerificationFailureDoesNotLogSuccessfulTaskCompletion(string continueOnError)
+        {
+            _env.SetCurrentDirectory(_env.CreateFolder().Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var project = _env.CreateFile("verification-failure.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask ContinueOnError="{continueOnError}">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                    <Message Text="UNEXPECTED-CONTINUATION" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+            HostServices hostServices = new();
+            hostServices.RegisterHostObject(project.Path, "Build", nameof(StrictLifetimeTask), new OutputCallbackHost(() =>
+            {
+                string sentinel = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(originalDirectory);
+                Directory.Delete(sentinel);
+            }));
+            MockLogger logger = new(_output) { AllowTaskCrashes = true };
+            BuildResult? result = null;
+            Exception? exception = Record.Exception(() => result = BuildStrictProject(project.Path, logger, hostServices: hostServices));
+
+            if (exception is null)
+            {
+                result.ShouldNotBeNull().ShouldHaveFailed();
+            }
+            else
+            {
+                exception.ShouldBeOfType<DirectoryNotFoundException>();
+            }
+
+            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
+            logger.AssertLogDoesntContain("UNEXPECTED-CONTINUATION");
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
 
@@ -443,13 +675,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetCurrentDirectory(Directory.GetCurrentDirectory());
-            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter(0);
             using var firstLifetime = new ScopeLifetime(first);
             string file = Path.Combine(first.SentinelDirectory, "locked.txt");
             using FileStream lockedFile = new(file, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.Read);
             first.Exit();
 
-            MultiThreadedStrictModeScope second = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope second = MultiThreadedStrictModeScope.Enter(1);
             using var secondLifetime = new ScopeLifetime(second);
             second.SentinelDirectory.ShouldNotBe(first.SentinelDirectory);
             File.Exists(file).ShouldBeTrue();
@@ -463,7 +695,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetCurrentDirectory(env.CreateFolder().Path);
             string originalDirectory = Directory.GetCurrentDirectory();
-            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter();
+            MultiThreadedStrictModeScope first = MultiThreadedStrictModeScope.Enter(0);
             using var firstLifetime = new ScopeLifetime(first);
             MultiThreadedStrictModeScope? second = null;
             Exception? threadException = null;
@@ -473,7 +705,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 started.Set();
                 try
                 {
-                    second = MultiThreadedStrictModeScope.Enter();
+                    second = MultiThreadedStrictModeScope.Enter(1);
                 }
                 catch (Exception e)
                 {
@@ -756,7 +988,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 temp.Path, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete,
                 1, FileOptions.DeleteOnClose);
 
-            Should.Throw<IOException>(() => MultiThreadedStrictModeScope.Enter());
+            Should.Throw<IOException>(() => MultiThreadedStrictModeScope.Enter(0));
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
@@ -767,7 +999,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using TestEnvironment env = TestEnvironment.Create(_output);
             string originalDirectory = Directory.GetCurrentDirectory();
             env.SetCurrentDirectory(originalDirectory);
-            var scope = MultiThreadedStrictModeScope.Enter();
+            var scope = MultiThreadedStrictModeScope.Enter(0);
             using var lifetime = new ScopeLifetime(scope);
             Directory.SetCurrentDirectory(originalDirectory);
             Directory.Delete(scope.SentinelDirectory);
@@ -782,7 +1014,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var project = env.CreateFile("retry-entry.proj", """
                 <Project><Target Name="Build"><Message Text="retry succeeded" /></Target></Project>
                 """);
-            var first = MultiThreadedStrictModeScope.Enter();
+            var first = MultiThreadedStrictModeScope.Enter(0);
             using var lifetime = new ScopeLifetime(first);
             using BuildManager manager = new();
             string outputCache = Path.Combine(env.CreateFolder().Path, "failed-entry.cache");
@@ -812,7 +1044,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FailedStrictEntryPreservesEntryAndShutdownExceptions()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            var first = MultiThreadedStrictModeScope.Enter();
+            var first = MultiThreadedStrictModeScope.Enter(0);
             using var lifetime = new ScopeLifetime(first);
             using BuildManager manager = new();
             LoggerException shutdownFailure = new("logger shutdown failure");
@@ -842,7 +1074,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void FailedStrictEntryDrainsPendingCallbacksBeforeRetry()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            var first = MultiThreadedStrictModeScope.Enter();
+            var first = MultiThreadedStrictModeScope.Enter(0);
             using var lifetime = new ScopeLifetime(first);
             using BuildManager manager = new();
             BuildParameters parameters = new()
@@ -905,6 +1137,62 @@ namespace Microsoft.Build.UnitTests.BackEnd
             parameters.Loggers = [new MockLogger(_output)];
             manager.BeginBuild(parameters);
             manager.EndBuild();
+        }
+
+        [Fact]
+        public void RejectedStrictBuildDoesNotRestoreAnEndedOwnersSentinel()
+        {
+            _env.SetCurrentDirectory(_env.CreateFolder().Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            using BuildManager owner = new();
+            using BuildManager rejected = new();
+            owner.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
+            using ManualResetEventSlim callbackStarted = new();
+            using ManualResetEventSlim releaseCallback = new();
+            Exception? entryFailure = null;
+            Thread thread = new(() => entryFailure = Record.Exception(() => rejected.BeginBuild(
+                new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] })));
+            object stateLock = typeof(MultiThreadedStrictModeScope)
+                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+            FieldInfo queueField = typeof(BuildManager).GetField("_workQueue", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            FieldInfo buildState = typeof(BuildManager).GetField("_buildManagerState", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            bool ownerEnded = false;
+
+            try
+            {
+                lock (stateLock)
+                {
+                    thread.Start();
+                    SpinWait.SpinUntil(() => queueField.GetValue(rejected) is not null, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                    var queue = (ActionBlock<Action>)queueField.GetValue(rejected)!;
+                    queue.Post(() =>
+                    {
+                        callbackStarted.Set();
+                        releaseCallback.Wait();
+                    }).ShouldBeTrue();
+                    callbackStarted.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                }
+
+                SpinWait.SpinUntil(
+                    () => buildState.GetValue(rejected)!.ToString() == "WaitingForBuildToComplete",
+                    TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                owner.EndBuild();
+                ownerEnded = true;
+                Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            }
+            finally
+            {
+                releaseCallback.Set();
+                thread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                if (!ownerEnded)
+                {
+                    owner.EndBuild();
+                }
+            }
+
+            entryFailure.ShouldBeOfType<InvalidOperationException>();
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
 
         [Fact]

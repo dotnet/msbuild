@@ -113,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public TaskEnvironment TaskEnvironment { get; set; } = null!;
 
         /// <summary>
-        /// What the task should do: <c>WriteRelativeFile</c>, <c>ChangeCurrentDirectory</c> or <c>Nothing</c>.
+        /// Selects the deliberate process-directory or unresolved-path behavior to exercise.
         /// </summary>
         public string Behavior { get; set; } = "Nothing";
 
@@ -129,6 +129,34 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 case "ChangeCurrentDirectory":
                     Directory.SetCurrentDirectory(Path.GetTempPath());
+                    break;
+
+                case "DeleteSentinel":
+                    string sentinel = Directory.GetCurrentDirectory();
+                    if (Path.GetFileName(sentinel) != "MSBuild-MT-Strict-Sentinel-CWD")
+                    {
+                        throw new InvalidOperationException("The probe must run in the strict sentinel directory.");
+                    }
+                    Directory.SetCurrentDirectory(Path.GetDirectoryName(sentinel)!);
+                    Directory.Delete(sentinel);
+                    break;
+
+                case "WriteManyFiles":
+                    for (int i = 0; i < 30; i++)
+                    {
+                        File.WriteAllText($"strict-probe-{i:D2}.txt", "probe");
+                    }
+                    break;
+
+                case "CaseDistinctDirectory":
+                    string currentDirectory = Directory.GetCurrentDirectory();
+                    if (Path.GetFileName(currentDirectory) != "MSBuild-MT-Strict-Sentinel-CWD")
+                    {
+                        throw new InvalidOperationException("The probe must run in the strict sentinel directory.");
+                    }
+                    string sibling = Path.Combine(Path.GetDirectoryName(currentDirectory)!, "msbuild-mt-strict-sentinel-cwd");
+                    Directory.CreateDirectory(sibling);
+                    Directory.SetCurrentDirectory(sibling);
                     break;
             }
 
@@ -157,6 +185,8 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _env.Dispose();
         }
+
+        public static bool FileSystemIsCaseSensitive => FileUtilities.IsFileSystemCaseSensitive;
 
         [Theory]
         [InlineData(true, "/m /nodereuse:false /mt")]
@@ -378,6 +408,65 @@ namespace Microsoft.Build.Engine.UnitTests
 
             success.ShouldBe(optOut, output);
             output.Contains("MSB4286").ShouldBe(!optOut, output);
+        }
+
+        [Fact]
+        public void StrictMode_RepeatedDirectoryChangeDoesNotInheritEarlierWarningPolicy()
+        {
+            var project = _env.CreateFile("repeated-directory-change.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictModeProbeTask" AssemblyFile="{typeof(StrictModeProbeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictModeProbeTask Behavior="ChangeCurrentDirectory" ContinueOnError="WarnAndContinue" />
+                    <StrictModeProbeTask Behavior="ChangeCurrentDirectory" />
+                    <Message Text="UNEXPECTED-CONTINUATION" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{project.Path}\" /m:1 /mt /nr:false",
+                out bool success, false, _output);
+
+            success.ShouldBeFalse(output);
+            output.ShouldContain("MSB4286");
+            output.ShouldContain("1 Warning(s)");
+            output.ShouldContain("1 Error(s)");
+            output.ShouldNotContain("UNEXPECTED-CONTINUATION");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void StrictMode_DeletedSentinelCannotBeDowngradedToSuccess(bool continueOnError)
+        {
+            string output = RunStrictModeProbe("DeleteSentinel", "/m /mt /nr:false", out bool success, continueOnError: continueOnError);
+
+            success.ShouldBeFalse(output);
+            output.ShouldContain("MSBuild-MT-Strict-Sentinel-CWD");
+        }
+
+        [Fact]
+        public void StrictMode_AllUnexpectedFilesAreReported()
+        {
+            string output = RunStrictModeProbe("WriteManyFiles", "/m /mt /nr:false", out bool success);
+
+            success.ShouldBeFalse(output);
+            output.ShouldContain("MSB4287");
+            for (int i = 0; i < 30; i++)
+            {
+                output.ShouldContain($"strict-probe-{i:D2}.txt");
+            }
+        }
+
+        [Fact(Skip = "Requires a case-sensitive file system.", SkipUnless = nameof(FileSystemIsCaseSensitive))]
+        public void StrictMode_CaseDistinctDirectoryCannotBypassChecks()
+        {
+            string output = RunStrictModeProbe("CaseDistinctDirectory", "/m /mt /nr:false", out bool success);
+
+            success.ShouldBeFalse(output);
+            output.ShouldContain("MSB4286");
         }
 
         private string RunStrictModeProbe(string behavior, string msbuildArgs, out bool success, bool useRelativeProjectPath = false, bool continueOnError = false)

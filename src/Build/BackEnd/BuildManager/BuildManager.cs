@@ -623,11 +623,11 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
-                _buildParameters.MultiThreadedStrict = _buildParameters.MultiThreaded
-                    && !Traits.Instance.MultiThreadedNonStrict;
+                bool strictMode = _buildParameters.MultiThreaded
+                    && !Traits.MultiThreadedNonStrict;
 
-                // MT nodes share the process directory, so restoration belongs to the build owner.
-                _savedCurrentDirectory = _buildParameters.MultiThreaded && _buildParameters.SaveOperatingEnvironment
+                // A strict scope owns its own restoration; rejected scope entry must not restore another build's CWD.
+                _savedCurrentDirectory = _buildParameters.MultiThreaded && !strictMode && _buildParameters.SaveOperatingEnvironment
                     ? Directory.GetCurrentDirectory()
                     : null;
 
@@ -768,7 +768,7 @@ namespace Microsoft.Build.Execution
 
                 // Enter strict mode last: everything above (loggers in particular) still resolves paths against
                 // the directory the build was launched from, and only project execution should see the sentinel.
-                if (_buildParameters.MultiThreadedStrict)
+                if (strictMode)
                 {
                     try
                     {
@@ -778,7 +778,7 @@ namespace Microsoft.Build.Execution
                             _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(_buildParameters.OutputResultsCacheFile);
                         }
 
-                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter();
+                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter(_buildParameters.BuildId);
                         loggingService.LogComment(
                             BuildEventContext.Invalid,
                             MessageImportance.Low,
@@ -789,7 +789,6 @@ namespace Microsoft.Build.Execution
                     {
                         strictEntryFailure = ExceptionDispatchInfo.Capture(e);
                         _overallBuildSuccess = false;
-                        _buildParameters.MultiThreadedStrict = false;
                         _buildParameters.OutputResultsCacheFile = null;
                     }
                 }

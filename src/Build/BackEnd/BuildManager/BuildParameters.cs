@@ -228,11 +228,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private bool _multiThreaded;
 
-        /// <summary>
-        /// Whether strict checks are enabled for the active multi-threaded build.
-        /// </summary>
-        private bool _multiThreadedStrict;
-
         private ProjectIsolationMode _projectIsolationMode;
 
         private string[] _inputResultsCacheFiles;
@@ -307,7 +302,6 @@ namespace Microsoft.Build.Execution
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
             MultiThreaded = other.MultiThreaded;
-            MultiThreadedStrict = other.MultiThreadedStrict;
             _memoryUseLimit = other._memoryUseLimit;
             _nodeExeLocation = other._nodeExeLocation;
             NodeId = other.NodeId;
@@ -592,15 +586,6 @@ namespace Microsoft.Build.Execution
         {
             get => _multiThreaded;
             set => _multiThreaded = value;
-        }
-
-        /// <summary>
-        /// Effective strict-mode state, captured by BuildManager from the MT setting and environment opt-out.
-        /// </summary>
-        internal bool MultiThreadedStrict
-        {
-            get => _multiThreadedStrict;
-            set => _multiThreadedStrict = value;
         }
 
         /// <summary>
@@ -1032,7 +1017,6 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
-            translator.Translate(ref _multiThreadedStrict);
             translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
 
             // ProjectRootElementCache is not transmitted.
