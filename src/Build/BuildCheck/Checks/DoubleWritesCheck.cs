@@ -2,11 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 #if !FEATURE_MSIOREDIST
 using System.IO;
 #endif
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using static Microsoft.Build.Experimental.BuildCheck.TaskInvocationCheckData;
 
@@ -46,15 +48,25 @@ internal sealed class DoubleWritesCheck : Check
     /// </summary>
     private readonly Dictionary<string, (string projectFilePath, string taskName)> _filesWritten = new(StringComparer.CurrentCultureIgnoreCase);
 
+    /// <summary>
+    /// Compiler tasks known to write files.
+    /// </summary>
+    private static readonly FrozenSet<string> s_compilerTaskNames = new[] { "Csc", "Vbc", "Fsc" }.ToFrozenSet(MSBuildNameIgnoreCaseComparer.Default);
+
     private void TaskInvocationAction(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
         // This check uses a hard-coded list of tasks known to write files.
-        switch (context.Data.TaskName)
+        // Task names are matched case-insensitively - MSBuild resolves task names without regard to casing,
+        // so the logged name carries whatever casing the project author used.
+        string taskName = context.Data.TaskName;
+
+        if (s_compilerTaskNames.Contains(taskName))
         {
-            case "Csc":
-            case "Vbc":
-            case "Fsc": CheckCompilerTask(context); break;
-            case "Copy": CheckCopyTask(context); break;
+            CheckCompilerTask(context);
+        }
+        else if (MSBuildNameIgnoreCaseComparer.Default.Equals(taskName, "Copy"))
+        {
+            CheckCopyTask(context);
         }
     }
 

@@ -19,9 +19,9 @@ schedules:
 
 parameters:
 - name: extraPropertiesStage2
-  displayName: 'Extra MSBuild properties for stage 2 (e.g., /p:DotNetBuildMT=true)'
+  displayName: 'Extra flags passed to the stage2 build (e.g., -mt 1)'
   type: string
-  default: '/p:DotNetBuildMT=true'
+  default: '-mt 1'
 
 variables:
 - template: /eng/common/templates/variables/pool-providers.yml@self

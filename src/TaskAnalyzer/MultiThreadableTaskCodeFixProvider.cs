@@ -3,7 +3,6 @@
 
 using System.Collections.Immutable;
 using System.Composition;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -12,6 +11,9 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.Operations;
+
+using static Microsoft.Build.TaskAuthoring.Analyzer.SharedAnalyzerHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
@@ -38,31 +40,34 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            foreach (var diagnostic in context.Diagnostics)
-            {
-                var node = root.FindNode(diagnostic.Location.SourceSpan);
-
-                if (diagnostic.Id == DiagnosticIds.FilePathRequiresAbsolute)
-                {
-                    RegisterFilePathFix(context, node, diagnostic);
-                }
-                else if (diagnostic.Id == DiagnosticIds.TaskEnvironmentRequired)
-                {
-                    RegisterTaskEnvironmentFix(context, node, diagnostic);
-                }
-            }
-        }
-
-        private static void RegisterFilePathFix(CodeFixContext context, SyntaxNode node, Diagnostic diagnostic)
-        {
-            // Find the invocation or object creation expression
-            var invocation = FindContainingCall(node);
-            if (invocation is null)
+            var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
+            if (semanticModel is null)
             {
                 return;
             }
 
-            ArgumentListSyntax? argumentList = invocation switch
+            foreach (var diagnostic in context.Diagnostics)
+            {
+                // The analyzer reports on the operation's own syntax node, so anchor on exactly that node.
+                // getInnermostNodeForTie is required because a call that is itself an argument of another
+                // call shares its span with the enclosing ArgumentSyntax; without it the fix would walk up
+                // to — and rewrite — the enclosing call instead of the flagged one.
+                var node = root.FindNode(diagnostic.Location.SourceSpan, getInnermostNodeForTie: true);
+
+                if (diagnostic.Id == DiagnosticIds.FilePathRequiresAbsolute)
+                {
+                    RegisterFilePathFix(context, semanticModel, node, diagnostic);
+                }
+                else if (diagnostic.Id == DiagnosticIds.TaskEnvironmentRequired)
+                {
+                    RegisterTaskEnvironmentFix(context, semanticModel, node, diagnostic);
+                }
+            }
+        }
+
+        private static void RegisterFilePathFix(CodeFixContext context, SemanticModel semanticModel, SyntaxNode node, Diagnostic diagnostic)
+        {
+            ArgumentListSyntax? argumentList = node switch
             {
                 InvocationExpressionSyntax inv => inv.ArgumentList,
                 ObjectCreationExpressionSyntax obj => obj.ArgumentList,
@@ -75,17 +80,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Find the first argument that is NOT already wrapped with TaskEnvironment.GetAbsolutePath()
-            ArgumentSyntax? targetArg = null;
-            foreach (var arg in argumentList.Arguments)
+            // The wrap references the instance TaskEnvironment member; withhold the fix rather than emit a
+            // reference that cannot bind here.
+            if (!CanReferenceTaskEnvironment(semanticModel, node))
             {
-                if (!IsAlreadyWrapped(arg.Expression))
-                {
-                    targetArg = arg;
-                    break;
-                }
+                return;
             }
 
+            var targetArg = FindPathArgument(semanticModel, node, argumentList);
             if (targetArg is null)
             {
                 return;
@@ -97,6 +99,144 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     createChangedDocument: ct => WrapArgumentWithGetAbsolutePathAsync(context.Document, targetArg, ct),
                     equivalenceKey: "WrapWithGetAbsolutePath"),
                 diagnostic);
+        }
+
+        /// <summary>
+        /// Finds the argument of the flagged call that the analyzer considered an unrooted path: the first
+        /// argument bound to a <see cref="string"/> parameter whose name reads as a path and whose value is
+        /// not already rooted. Falls back to the first syntactically unwrapped argument when no semantic
+        /// information is available.
+        /// </summary>
+        private static ArgumentSyntax? FindPathArgument(SemanticModel semanticModel, SyntaxNode call, ArgumentListSyntax argumentList)
+        {
+            ImmutableArray<IArgumentOperation> arguments = semanticModel.GetOperation(call) switch
+            {
+                IInvocationOperation invocation => invocation.Arguments,
+                IObjectCreationOperation creation => creation.Arguments,
+                _ => default,
+            };
+
+            if (!arguments.IsDefaultOrEmpty)
+            {
+                var compilation = semanticModel.Compilation;
+                var taskEnvironmentType = compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
+                var absolutePathType = compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
+                var iTaskItemType = compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
+
+                foreach (var argument in arguments)
+                {
+                    var parameter = argument.Parameter;
+                    if (parameter is null ||
+                        parameter.Type.SpecialType != SpecialType.System_String ||
+                        !IsPathParameterName(parameter.Name))
+                    {
+                        continue;
+                    }
+
+                    // Skip arguments that aren't written in this call's argument list (e.g. defaulted
+                    // optional parameters, whose syntax is the call itself).
+                    if (argument.Syntax is ArgumentSyntax argumentSyntax &&
+                        argumentList.Arguments.Contains(argumentSyntax) &&
+                        !IsWrappedSafely(argument.Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                    {
+                        return argumentSyntax;
+                    }
+                }
+
+                return null;
+            }
+
+            foreach (var argument in argumentList.Arguments)
+            {
+                if (!IsAlreadyWrapped(argument.Expression))
+                {
+                    return argument;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Determines whether a generated reference to the instance <c>TaskEnvironment</c> member would compile
+        /// at <paramref name="node"/>: the enclosing type must actually expose such a member, and <c>this</c>
+        /// must be reachable from there.
+        /// </summary>
+        private static bool CanReferenceTaskEnvironment(SemanticModel semanticModel, SyntaxNode node)
+        {
+            var enclosingSymbol = semanticModel.GetEnclosingSymbol(node.SpanStart);
+
+            return !IsThisUnavailable(enclosingSymbol, node) &&
+                HasTaskEnvironmentMember(enclosingSymbol?.ContainingType);
+        }
+
+        /// <summary>
+        /// Determines whether <paramref name="type"/> or one of its base types declares a <c>TaskEnvironment</c>
+        /// property or field. Tasks are only required to implement <c>ITask</c>, and the default analyzer scope
+        /// covers all of them, so the member the fix would reference need not exist.
+        /// </summary>
+        private static bool HasTaskEnvironmentMember(INamedTypeSymbol? type)
+        {
+            for (INamedTypeSymbol? current = type; current is not null; current = current.BaseType)
+            {
+                foreach (var member in current.GetMembers("TaskEnvironment"))
+                {
+                    if (member is IPropertySymbol or IFieldSymbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether <paramref name="node"/> sits in a context where <c>this</c> is unavailable — a
+        /// static member, a static local function, a static lambda, an instance field or property
+        /// initializer, or a constructor initializer (including a primary constructor's base arguments).
+        /// </summary>
+        private static bool IsThisUnavailable(ISymbol? enclosingSymbol, SyntaxNode node)
+        {
+            for (ISymbol? symbol = enclosingSymbol; symbol is not null; symbol = symbol.ContainingSymbol)
+            {
+                if (symbol.IsStatic)
+                {
+                    return true;
+                }
+
+                // A non-static lambda or local function inherits the staticness of what encloses it.
+                if (symbol is IMethodSymbol { MethodKind: MethodKind.AnonymousFunction or MethodKind.LocalFunction })
+                {
+                    continue;
+                }
+
+                break;
+            }
+
+            // Instance field and property initializers run before `this` is usable (CS0236), and a
+            // constructor initializer — including a primary constructor's base argument list — runs
+            // before the instance exists (CS0027), including from inside a lambda declared there.
+            for (SyntaxNode? current = node; current is not null; current = current.Parent)
+            {
+                if (current is ConstructorInitializerSyntax or PrimaryConstructorBaseTypeSyntax)
+                {
+                    return true;
+                }
+
+                if (current is EqualsValueClauseSyntax &&
+                    current.Parent is PropertyDeclarationSyntax or VariableDeclaratorSyntax { Parent.Parent: BaseFieldDeclarationSyntax })
+                {
+                    return true;
+                }
+
+                if (current is MemberDeclarationSyntax)
+                {
+                    break;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -115,11 +255,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             return false;
         }
 
-        private static void RegisterTaskEnvironmentFix(CodeFixContext context, SyntaxNode node, Diagnostic diagnostic)
+        private static void RegisterTaskEnvironmentFix(CodeFixContext context, SemanticModel semanticModel, SyntaxNode node, Diagnostic diagnostic)
         {
-            // Try to determine which API replacement to offer
-            var invocation = node as InvocationExpressionSyntax ?? node.AncestorsAndSelf().OfType<InvocationExpressionSyntax>().FirstOrDefault();
-            var memberAccess = node as MemberAccessExpressionSyntax ?? node.AncestorsAndSelf().OfType<MemberAccessExpressionSyntax>().FirstOrDefault();
+            // The replacements below all reference the instance TaskEnvironment member; withhold the fix
+            // rather than emit a reference that cannot bind here.
+            if (!CanReferenceTaskEnvironment(semanticModel, node))
+            {
+                return;
+            }
+
+            // Anchor on the reported node itself: walking ancestors would rewrite an enclosing call when the
+            // flagged one is nested as an argument.
+            var invocation = node as InvocationExpressionSyntax;
+            var memberAccess = node as MemberAccessExpressionSyntax;
 
             if (invocation is not null && invocation.Expression is MemberAccessExpressionSyntax invMemberAccess)
             {
@@ -290,17 +438,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 MemberAccessExpressionSyntax ma => ma.Name.Identifier.Text,
                 _ => null,
             };
-        }
-
-        /// <summary>
-        /// Finds the containing invocation or object creation from a diagnostic node.
-        /// </summary>
-        private static SyntaxNode? FindContainingCall(SyntaxNode node)
-        {
-            return node.AncestorsAndSelf().FirstOrDefault(n =>
-                n is InvocationExpressionSyntax ||
-                n is ObjectCreationExpressionSyntax ||
-                n is ImplicitObjectCreationExpressionSyntax);
         }
     }
 }

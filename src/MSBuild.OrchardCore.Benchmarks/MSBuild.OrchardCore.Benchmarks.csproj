@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UseAppHost>false</UseAppHost>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+
+    <IsPackable>false</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\MSBuild.Benchmarks\Extensions.cs" Link="Extensions.cs" />
+  </ItemGroup>
+</Project>

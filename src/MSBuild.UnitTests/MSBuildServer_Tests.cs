@@ -24,6 +24,8 @@ using System.IO;
 using Shouldly;
 using Xunit;
 using Path = System.IO.Path;
+using StringWriter = System.IO.StringWriter;
+using TextWriter = System.IO.TextWriter;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -125,6 +127,81 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         public void Dispose() => _env.Dispose();
+
+        [Theory]
+        [InlineData("4")]
+        [InlineData("5")]
+        public void ServerOnlyDebuggingSkipsInProcessBuilds(string mode)
+        {
+            _env.SetEnvironmentVariable("MSBUILDDEBUGONSTART", mode);
+            TransientTestFile project = _env.CreateFile("debug.proj", "<Project><Target Name='Build' /></Project>");
+            MSBuildApp.Execute(["MSBuild.exe", project.Path]).ShouldBe(MSBuildApp.ExitType.Success);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task ServerOnlyDebuggingWaitsBeforeEvaluation(bool warmServer)
+        {
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            _env.SetEnvironmentVariable("MSBUILDDEBUGONSTART", null);
+            TransientTestFile project = _env.CreateFile("debug.proj", "<Project><Target Name='Build' /></Project>");
+            MSBuildClient launchClient = new(["MSBuild.exe", project.Path], BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+            FieldInfo pidField = typeof(MSBuildClient).GetField("_launchedServerPid", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            if (warmServer)
+            {
+                launchClient.Execute(CancellationToken.None).MSBuildAppExitTypeString.ShouldBe("Success");
+            }
+
+            _env.SetEnvironmentVariable("MSBUILDDEBUGONSTART", "5");
+            MSBuildClient debugClient = warmServer
+                ? new(["MSBuild.exe", "never-evaluated.proj"], BuildEnvironmentHelper.Instance.CurrentMSBuildExePath)
+                : launchClient;
+            using StringWriter output = new();
+            TextWriter originalOutput = Console.Out;
+            TextWriter synchronizedOutput = TextWriter.Synchronized(output);
+            Task<MSBuildClientExitResult>? build = null;
+            Process? server = null;
+            try
+            {
+                Console.SetOut(synchronizedOutput);
+                build = Task.Run(() => debugClient.Execute(CancellationToken.None));
+                SpinWait.SpinUntil(() => pidField.GetValue(launchClient) is int || build.IsCompleted, 10000).ShouldBeTrue();
+                int pid = pidField.GetValue(launchClient).ShouldBeOfType<int>();
+                _env.WithTransientProcess(pid);
+                server = Process.GetProcessById(pid);
+                SpinWait.SpinUntil(() =>
+                {
+                    lock (synchronizedOutput)
+                    {
+                        return output.ToString().Contains($"PID {pid}") || build.IsCompleted;
+                    }
+                }, 10000).ShouldBeTrue();
+                build.IsCompleted.ShouldBeFalse("the server must wait before evaluating the project");
+                lock (synchronizedOutput)
+                {
+                    output.ToString().ShouldContain($"PID {pid}");
+                }
+            }
+            finally
+            {
+                Console.SetOut(originalOutput);
+                // No debugger is attached in this test; stop only the isolated server we launched.
+                if (server is not null)
+                {
+                    if (!server.HasExited)
+                    {
+                        server.Kill();
+                    }
+                    server.Dispose();
+                }
+                if (build is not null)
+                {
+                    await Task.WhenAny(build, Task.Delay(10000));
+                    build.IsCompleted.ShouldBeTrue();
+                }
+            }
+        }
 
         [Fact]
         public void MSBuildServerTest()
