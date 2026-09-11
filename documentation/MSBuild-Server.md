@@ -20,10 +20,11 @@ When a build is multithreaded (`/mt`), the server node is launched with [Server 
 MSBuild Server is a form of node reuse: the whole point of the server is to stay resident between builds so later builds reuse its warmed-up process and caches. Consequently:
 
 - **Node reuse on (the default).** The server is eligible and, after a build, returns to listening so the next compatible client reuses it.
+- **Node reuse on with `/mt` while the resident is busy.** The client makes one attempt to launch and connect to a private, short-lived server, including when another client is already launching the resident. The build keeps its original node-reuse setting, but this private server exits after serving it. If the private server cannot be launched or connected, the client retains the existing in-process fallback. Non-multithreaded builds continue to fall back directly.
 - **Node reuse off (`-nodeReuse:false` / `-nr:false`) without `/mt`.** Keeping a process resident contradicts the no-reuse intent, so the build does not use the server at all (it runs entirely in the launching process). See `ServerShouldNotRunWhenNodeReuseEqualsFalse`.
 - **Node reuse off *with* `/mt`.** A `/mt` build needs the server for a different reason: multithreaded project execution runs inside the server process, which is where Server GC is applied (see [Garbage collection](#garbage-collection)). So a `/mt` build still engages the server even when node reuse is off - but it must honor the no-reuse request by **not** leaving the server resident afterwards. This is a *short-lived* server: a fresh process that tears itself down after the build.
 
-The client makes a single, response-file-aware determination and sets the `ShutdownAfterBuild` flag on the `ServerNodeBuildCommand` packet if server needs shutdown.
+The client determines the requested mode and node-reuse setting from the response-file-aware command-line parse. It sets the `ShutdownAfterBuild` flag on the `ServerNodeBuildCommand` packet for a short-lived server, whether requested by `/mt -nodeReuse:false` or used after resident-server contention. The in-process fallback does not acquire Server GC merely because `/mt` was requested.
 
 ## Diagnostics: server lifecycle messages
 
@@ -35,7 +36,8 @@ The server node uses same IPC approach as current worker nodes - named pipes. Th
 
 1. Try to connect to server
    - If server is not running, start new instance
-   - If server is busy or the connection is broken, fall back to previous build behavior
+   - If the resident is busy, try one private server for a multithreaded build; otherwise fall back to in-process execution
+   - If server acquisition still fails, fall back to in-process execution; do not retry a build already submitted to a server
 2. Initiate handshake
 2. Issue build command with `ServerNodeBuildCommand` packet
 3. Read packets from pipe
