@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using Microsoft.Build.Framework.Utilities;
@@ -206,96 +207,6 @@ public sealed class AssemblyConflictReferenceDetails
 }
 
 /// <summary>
-/// Contains localized templates that reconstruct assembly conflict messages only when a reader requests the messages.
-/// Capturing the producer's templates preserves the original text when a reader replays a binary log with a different culture.
-/// </summary>
-[Serializable]
-internal sealed class AssemblyConflictMessageFormats
-{
-    internal AssemblyConflictMessageFormats(
-        string conflictFound,
-        string conflictHigherVersionChosen,
-        string conflictPrimaryChosen,
-        string conflictUnsolvable,
-        string referenceDependsOn,
-        string unifiedReferenceDependsOn,
-        string unresolvedPrimaryItemSpec,
-        string primarySourceItemsForReference,
-        string foundConflicts)
-    {
-        ConflictFound = conflictFound;
-        ConflictHigherVersionChosen = conflictHigherVersionChosen;
-        ConflictPrimaryChosen = conflictPrimaryChosen;
-        ConflictUnsolvable = conflictUnsolvable;
-        ReferenceDependsOn = referenceDependsOn;
-        UnifiedReferenceDependsOn = unifiedReferenceDependsOn;
-        UnresolvedPrimaryItemSpec = unresolvedPrimaryItemSpec;
-        PrimarySourceItemsForReference = primarySourceItemsForReference;
-        FoundConflicts = foundConflicts;
-    }
-
-    internal string ConflictFound { get; }
-    internal string ConflictHigherVersionChosen { get; }
-    internal string ConflictPrimaryChosen { get; }
-    internal string ConflictUnsolvable { get; }
-    internal string ReferenceDependsOn { get; }
-    internal string UnifiedReferenceDependsOn { get; }
-    internal string UnresolvedPrimaryItemSpec { get; }
-    internal string PrimarySourceItemsForReference { get; }
-    internal string FoundConflicts { get; }
-
-    internal void WriteToStream(BinaryWriter writer, bool includeWarningFormats)
-    {
-        writer.Write(ReferenceDependsOn);
-        writer.Write(UnifiedReferenceDependsOn);
-        writer.Write(UnresolvedPrimaryItemSpec);
-        writer.Write(PrimarySourceItemsForReference);
-
-        if (includeWarningFormats)
-        {
-            writer.Write(ConflictFound);
-            writer.Write(ConflictHigherVersionChosen);
-            writer.Write(ConflictPrimaryChosen);
-            writer.Write(ConflictUnsolvable);
-            writer.Write(FoundConflicts);
-        }
-    }
-
-    internal static AssemblyConflictMessageFormats CreateFromStream(BinaryReader reader, bool includeWarningFormats)
-    {
-        string referenceDependsOn = reader.ReadString();
-        string unifiedReferenceDependsOn = reader.ReadString();
-        string unresolvedPrimaryItemSpec = reader.ReadString();
-        string primarySourceItemsForReference = reader.ReadString();
-
-        string conflictFound = string.Empty;
-        string conflictHigherVersionChosen = string.Empty;
-        string conflictPrimaryChosen = string.Empty;
-        string conflictUnsolvable = string.Empty;
-        string foundConflicts = string.Empty;
-        if (includeWarningFormats)
-        {
-            conflictFound = reader.ReadString();
-            conflictHigherVersionChosen = reader.ReadString();
-            conflictPrimaryChosen = reader.ReadString();
-            conflictUnsolvable = reader.ReadString();
-            foundConflicts = reader.ReadString();
-        }
-
-        return new(
-            conflictFound,
-            conflictHigherVersionChosen,
-            conflictPrimaryChosen,
-            conflictUnsolvable,
-            referenceDependsOn,
-            unifiedReferenceDependsOn,
-            unresolvedPrimaryItemSpec,
-            primarySourceItemsForReference,
-            foundConflicts);
-    }
-}
-
-/// <summary>
 /// Formats conflict reference details and complete conflict messages.
 /// Both structured conflict event types use this class to produce identical text.
 /// </summary>
@@ -305,22 +216,46 @@ internal static class AssemblyConflictMessageFormatter
     private const string EightSpaces = "        ";
     private const string TenSpaces = "          ";
     private const string TwelveSpaces = "            ";
+    private const string ConflictFound = "AssemblyConflict_ConflictFound";
+    private const string ConflictHigherVersionChosen = "AssemblyConflict_ConflictHigherVersionChosen";
+    private const string ConflictPrimaryChosen = "AssemblyConflict_ConflictPrimaryChosen";
+    private const string ConflictUnsolvable = "AssemblyConflict_ConflictUnsolvable";
+    private const string ReferenceDependsOn = "AssemblyConflict_ReferenceDependsOn";
+    private const string UnifiedReferenceDependsOn = "AssemblyConflict_UnifiedReferenceDependsOn";
+    private const string UnresolvedPrimaryItemSpec = "AssemblyConflict_UnResolvedPrimaryItemSpec";
+    private const string PrimarySourceItemsForReference = "AssemblyConflict_PrimarySourceItemsForReference";
+    private const string FoundConflicts = "AssemblyConflict_FoundConflicts";
+
+    internal static string FormatDependencyDetails(
+        AssemblyConflictReferenceDetails victor,
+        AssemblyConflictReferenceDetails victim) =>
+        FormatDependencyDetails(victor, victim, CultureInfo.InvariantCulture);
 
     internal static string FormatDependencyDetails(
         AssemblyConflictReferenceDetails victor,
         AssemblyConflictReferenceDetails victim,
-        AssemblyConflictMessageFormats formats)
+        CultureInfo culture)
     {
         var log = new StringBuilder();
-        AppendDependencyDetails(log, victor, victim, formats);
+        AppendDependencyDetails(log, victor, victim, culture);
         return log.ToString();
     }
 
     internal static string FormatWarningMessage(
         string simpleAssemblyName,
+        string body) =>
+        FormatWarningMessage(simpleAssemblyName, body, CultureInfo.InvariantCulture);
+
+    internal static string FormatWarningMessage(
+        string simpleAssemblyName,
         string body,
-        AssemblyConflictMessageFormats formats)
-        => Format(formats.FoundConflicts, simpleAssemblyName, body);
+        CultureInfo culture)
+    {
+        string message = Format(culture, FoundConflicts, simpleAssemblyName, body);
+        return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
+            ? strippedMessage
+            : message;
+    }
 
     /// <summary>
     /// Formats the conflict header and dependency details without the outer MSB3277 wrapper.
@@ -331,13 +266,19 @@ internal static class AssemblyConflictMessageFormatter
     internal static string FormatWarningBody(
         AssemblyConflictLossReason lossReason,
         AssemblyConflictReferenceDetails victor,
+        AssemblyConflictReferenceDetails victim) =>
+        FormatWarningBody(lossReason, victor, victim, CultureInfo.InvariantCulture);
+
+    internal static string FormatWarningBody(
+        AssemblyConflictLossReason lossReason,
+        AssemblyConflictReferenceDetails victor,
         AssemblyConflictReferenceDetails victim,
-        AssemblyConflictMessageFormats formats)
+        CultureInfo culture)
     {
         var log = new StringBuilder();
-        log.Append(FormatHeaderOnly(victor.FusionName, victim.FusionName, lossReason, victim.IsPrimary, formats));
+        log.Append(FormatHeaderOnly(victor.FusionName, victim.FusionName, lossReason, victim.IsPrimary, culture));
         log.AppendLine();
-        AppendDependencyDetails(log, victor, victim, formats);
+        AppendDependencyDetails(log, victor, victim, culture);
         return log.ToString();
     }
 
@@ -349,18 +290,25 @@ internal static class AssemblyConflictMessageFormatter
         string victorFusionName,
         string victimFusionName,
         AssemblyConflictLossReason lossReason,
+        bool victimIsPrimary) =>
+        FormatHeaderOnly(victorFusionName, victimFusionName, lossReason, victimIsPrimary, CultureInfo.InvariantCulture);
+
+    internal static string FormatHeaderOnly(
+        string victorFusionName,
+        string victimFusionName,
+        AssemblyConflictLossReason lossReason,
         bool victimIsPrimary,
-        AssemblyConflictMessageFormats formats)
+        CultureInfo culture)
     {
-        string header = Format(formats.ConflictFound, victorFusionName, victimFusionName);
+        string header = Format(culture, ConflictFound, victorFusionName, victimFusionName);
         return lossReason switch
         {
             AssemblyConflictLossReason.HadLowerVersion
-                => string.Concat(header, Environment.NewLine, FourSpaces, Format(formats.ConflictHigherVersionChosen, victorFusionName)),
+                => string.Concat(header, Environment.NewLine, FourSpaces, Format(culture, ConflictHigherVersionChosen, victorFusionName)),
             AssemblyConflictLossReason.WasNotPrimary
-                => string.Concat(header, Environment.NewLine, FourSpaces, Format(formats.ConflictPrimaryChosen, victorFusionName, victimFusionName)),
+                => string.Concat(header, Environment.NewLine, FourSpaces, Format(culture, ConflictPrimaryChosen, victorFusionName, victimFusionName)),
             AssemblyConflictLossReason.InsolubleConflict when !victimIsPrimary
-                => string.Concat(header, Environment.NewLine, Format(formats.ConflictUnsolvable, victorFusionName, victimFusionName)),
+                => string.Concat(header, Environment.NewLine, Format(culture, ConflictUnsolvable, victorFusionName, victimFusionName)),
             _ => header,
         };
     }
@@ -369,30 +317,30 @@ internal static class AssemblyConflictMessageFormatter
         StringBuilder log,
         AssemblyConflictReferenceDetails victor,
         AssemblyConflictReferenceDetails victim,
-        AssemblyConflictMessageFormats formats)
+        CultureInfo culture)
     {
-        AppendReferenceDetails(log, victor, formats.ReferenceDependsOn, formats);
+        AppendReferenceDetails(log, victor, ReferenceDependsOn, culture);
         log.AppendLine();
-        AppendReferenceDetails(log, victim, formats.UnifiedReferenceDependsOn, formats);
+        AppendReferenceDetails(log, victim, UnifiedReferenceDependsOn, culture);
     }
 
     private static void AppendReferenceDetails(
         StringBuilder log,
         AssemblyConflictReferenceDetails details,
-        string headerFormat,
-        AssemblyConflictMessageFormats formats)
+        string headerResourceName,
+        CultureInfo culture)
     {
         log.Append(FourSpaces);
-        log.Append(Format(headerFormat, details.FusionName, details.FullPath));
+        log.Append(Format(culture, headerResourceName, details.FusionName, details.FullPath));
 
         if (details.IsPrimary && !details.IsResolved)
         {
-            log.AppendLine().Append(EightSpaces).Append(Format(formats.UnresolvedPrimaryItemSpec, details.UnresolvedPrimaryItemSpec));
+            log.AppendLine().Append(EightSpaces).Append(Format(culture, UnresolvedPrimaryItemSpec, details.UnresolvedPrimaryItemSpec));
         }
         else if (details.IsPrimary && details.IsResolved)
         {
             log.AppendLine().Append(EightSpaces).AppendLine(details.FullPath);
-            log.Append(TenSpaces).Append(Format(formats.PrimarySourceItemsForReference, details.FullPath));
+            log.Append(TenSpaces).Append(Format(culture, PrimarySourceItemsForReference, details.FullPath));
             for (int i = 0; i < details.PrimarySourceItemSpecs.Count; i++)
             {
                 log.AppendLine().Append(TwelveSpaces).Append(details.PrimarySourceItemSpecs[i]);
@@ -403,7 +351,7 @@ internal static class AssemblyConflictMessageFormatter
         {
             AssemblyConflictDependee dependee = details.Dependees[i];
             log.AppendLine().Append(EightSpaces).AppendLine(dependee.DependeeFullPath);
-            log.Append(TenSpaces).Append(Format(formats.PrimarySourceItemsForReference, dependee.DependeeFullPath));
+            log.Append(TenSpaces).Append(Format(culture, PrimarySourceItemsForReference, dependee.DependeeFullPath));
             for (int j = 0; j < dependee.SourceItemSpecs.Count; j++)
             {
                 log.AppendLine().Append(TwelveSpaces).Append(dependee.SourceItemSpecs[j]);
@@ -411,21 +359,29 @@ internal static class AssemblyConflictMessageFormatter
         }
     }
 
-    private static string Format(string format, object? arg0)
-        => MessageFormatter.Format(format, arg0);
+    private static string Format(CultureInfo culture, string resourceName, object? arg0)
+    {
+        string format = Resources.SR.ResourceManager.GetString(resourceName, culture)
+            ?? throw new InvalidOperationException($"The resource string '{resourceName}' was not found.");
+        return MessageFormatter.Format(culture, format, arg0);
+    }
 
-    private static string Format(string format, object? arg0, object? arg1)
-        => MessageFormatter.Format(format, arg0, arg1);
+    private static string Format(CultureInfo culture, string resourceName, object? arg0, object? arg1)
+    {
+        string format = Resources.SR.ResourceManager.GetString(resourceName, culture)
+            ?? throw new InvalidOperationException($"The resource string '{resourceName}' was not found.");
+        return MessageFormatter.Format(culture, format, arg0, arg1);
+    }
 }
 
 /// <summary>
 /// Reports the references and project items that caused an assembly conflict.
 /// RAR logs this low-importance event when conflict resolution does not produce a warning.
+/// The <see cref="BuildEventArgs.Message"/> is rendered in invariant English from the structured details.
 /// </summary>
 [Serializable]
 public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMessageEventArgs
 {
-    private AssemblyConflictMessageFormats? _messageFormats;
     private string? _formattedMessage;
 
     internal AssemblyConflictDependencyDetailsMessageEventArgs()
@@ -435,7 +391,6 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
     internal AssemblyConflictDependencyDetailsMessageEventArgs(
         AssemblyConflictReferenceDetails victor,
         AssemblyConflictReferenceDetails victim,
-        AssemblyConflictMessageFormats messageFormats,
         string senderName,
         MessageImportance importance,
         DateTime eventTimestamp)
@@ -443,7 +398,6 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
     {
         Victor = victor;
         Victim = victim;
-        _messageFormats = messageFormats;
     }
 
     /// <summary>
@@ -461,16 +415,14 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
     {
         get
         {
-            if (_formattedMessage is null && _messageFormats is not null)
+            if (_formattedMessage is null && Victor is not null && Victim is not null)
             {
-                _formattedMessage = AssemblyConflictMessageFormatter.FormatDependencyDetails(Victor, Victim, _messageFormats);
+                _formattedMessage = AssemblyConflictMessageFormatter.FormatDependencyDetails(Victor, Victim);
             }
 
             return _formattedMessage ?? base.Message;
         }
     }
-
-    internal AssemblyConflictMessageFormats? MessageFormats => _messageFormats;
 
     internal bool IsMessageMaterialized => _formattedMessage is not null;
 
@@ -480,7 +432,6 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
         base.WriteToStream(writer);
         Victor.WriteToStream(writer);
         Victim.WriteToStream(writer);
-        _messageFormats!.WriteToStream(writer, includeWarningFormats: false);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
@@ -488,18 +439,17 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
         base.CreateFromStream(reader, version);
         Victor = AssemblyConflictReferenceDetails.CreateFromStream(reader);
         Victim = AssemblyConflictReferenceDetails.CreateFromStream(reader);
-        _messageFormats = AssemblyConflictMessageFormats.CreateFromStream(reader, includeWarningFormats: false);
     }
 }
 
 /// <summary>
 /// Reports an unresolved assembly version conflict (MSB3277).
 /// The structured details identify the victor, the victim, and their dependency chains.
+/// The <see cref="BuildEventArgs.Message"/> is rendered in invariant English from the structured details.
 /// </summary>
 [Serializable]
 public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
 {
-    private AssemblyConflictMessageFormats? _messageFormats;
     private string? _formattedBody;
     private string? _formattedMessage;
 
@@ -512,7 +462,6 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
         AssemblyConflictLossReason lossReason,
         AssemblyConflictReferenceDetails victor,
         AssemblyConflictReferenceDetails victim,
-        AssemblyConflictMessageFormats messageFormats,
         string code,
         string? file,
         int lineNumber,
@@ -538,7 +487,6 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
         LossReason = lossReason;
         Victor = victor;
         Victim = victim;
-        _messageFormats = messageFormats;
         _formattedBody = formattedBody;
     }
 
@@ -567,18 +515,16 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
     {
         get
         {
-            if (_formattedMessage is null && _messageFormats is not null)
+            if (_formattedMessage is null && Victor is not null && Victim is not null)
             {
-                string body = _formattedBody ?? AssemblyConflictMessageFormatter.FormatWarningBody(LossReason, Victor, Victim, _messageFormats);
-                _formattedMessage = AssemblyConflictMessageFormatter.FormatWarningMessage(SimpleAssemblyName, body, _messageFormats);
+                string body = _formattedBody ?? AssemblyConflictMessageFormatter.FormatWarningBody(LossReason, Victor, Victim);
+                _formattedMessage = AssemblyConflictMessageFormatter.FormatWarningMessage(SimpleAssemblyName, body);
                 _formattedBody = null;
             }
 
             return _formattedMessage ?? base.Message;
         }
     }
-
-    internal AssemblyConflictMessageFormats? MessageFormats => _messageFormats;
 
     internal bool IsMessageMaterialized => _formattedMessage is not null;
 
@@ -590,7 +536,6 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
         writer.Write7BitEncodedInt((int)LossReason);
         Victor.WriteToStream(writer);
         Victim.WriteToStream(writer);
-        _messageFormats!.WriteToStream(writer, includeWarningFormats: true);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
@@ -600,6 +545,5 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
         LossReason = (AssemblyConflictLossReason)reader.Read7BitEncodedInt();
         Victor = AssemblyConflictReferenceDetails.CreateFromStream(reader);
         Victim = AssemblyConflictReferenceDetails.CreateFromStream(reader);
-        _messageFormats = AssemblyConflictMessageFormats.CreateFromStream(reader, includeWarningFormats: true);
     }
 }

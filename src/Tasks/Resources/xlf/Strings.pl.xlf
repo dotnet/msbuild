@@ -1834,21 +1834,6 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictFound">
-        <source>There was a conflict between "{0}" and "{1}".</source>
-        <target state="translated">Wystąpił konflikt między „{0}” a „{1}”.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictHigherVersionChosen">
-        <source>"{0}" was chosen because it had a higher version.</source>
-        <target state="translated">Wybrano „{0}”, ponieważ jest w nowszej wersji.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictPrimaryChosen">
-        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
-        <target state="translated">Wybrano parametr „{0}”, ponieważ jest parametrem podstawowym. Parametr „{1}” nie jest takim parametrem.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConflictRedirectSuggestion">
         <source>Consider app.config remapping of assembly "{0}" from Version "{1}" [{2}] to Version "{3}" [{4}] to solve conflict and get rid of warning.</source>
         <target state="translated">Dokonaj ponownego mapowania parametru app.config zestawu „{0}” z wersji „{1}” [{2}] na wersję „{3}” [{4}], aby wyeliminować konflikt i pozbyć się ostrzeżenia.</target>
@@ -1913,11 +1898,6 @@
         <source>MSB3242: Conflict between mutually exclusive parameters. AutoUnify was 'true' and AppConfigFile was set.</source>
         <target state="translated">MSB3242: Konflikt między wzajemnie wykluczającymi się parametrami. Parametr AutoUnify ma wartość „true” i ustawiono parametr AppConfigFile.</target>
         <note>{StrBegin="MSB3242: "}</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictUnsolvable">
-        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
-        <target state="translated">MSB3243: Nie ma sposobu na rozwiązanie konfliktu między „{0}” i „{1}”. Umownie zostanie wybrany parametr „{0}”.</target>
-        <note>{StrBegin="MSB3243: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedToFindDependentFiles">
         <source>MSB3244: Could not find dependent files. {0}</source>
@@ -2059,11 +2039,6 @@
         <target state="translated">Znaleziono nieprawidłowy nagłówek PE. Plik implementacji nie zostanie użyty.</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
-        <source>References which depend on or have been unified to "{0}" [{1}].</source>
-        <target state="translated">Odwołania, które są zależne lub zostały ujednolicone dla „{0}” [{1}].</target>
-        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: Nieznana architektura procesora. Plik implementacji {0} dla „{1}” ma wartość ImageFileMachine równą „0x{2}”. Jeśli chcesz użyć tego pliku implementacji, upewnij się, że dla właściwości „ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch” w projekcie jest ustawiona wartość „Warning” lub „None”.</target>
@@ -2083,13 +2058,6 @@
         <source>MSB3276: Found conflicts between different versions of the same dependent assembly. Please set the "AutoGenerateBindingRedirects" property to true in the project file. For more information, see http://go.microsoft.com/fwlink/?LinkId=294190.</source>
         <target state="translated">MSB3276: Wykryto konflikty między różnymi wersjami tego samego zestawu zależnego. W pliku projektu ustaw dla właściwości „AutoGenerateBindingRedirects” wartość true. Aby uzyskać więcej informacji, zobacz http://go.microsoft.com/fwlink/?LinkId=294190.</target>
         <note>{StrBegin="MSB3276: "}</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
-{1}</source>
-        <target state="translated">MSB3277: Znaleziono konflikty między różnymi wersjami elementu „{0}”, których nie można rozstrzygnąć.
-{1}</target>
-        <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
         <source>{0} = '{1}'</source>
@@ -2173,21 +2141,6 @@
         <source>Required by "{0}".</source>
         <target state="translated">Wymagane przez „{0}”.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ReferenceDependsOn">
-        <source>References which depend on "{0}" [{1}].</source>
-        <target state="translated">Odwołania z zależnością od „{0}” [{1}].</target>
-        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
-        <source>Unresolved primary reference with an item include of "{0}".</source>
-        <target state="translated">Nierozpoznane odwołanie podstawowe do zawartości elementu „{0}”.</target>
-        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.PrimarySourceItemsForReference">
-        <source>Project file item includes which caused reference "{0}".</source>
-        <target state="translated">Element pliku projektu zawiera składnik powodujący odwołanie „{0}”.</target>
-        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Resolved">
         <source>Resolved file path is "{0}".</source>
