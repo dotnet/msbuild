@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -20,6 +20,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
+using System.Runtime.Remoting.Messaging;
 #endif
 
 #nullable disable
@@ -154,10 +155,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private ManualResetEvent _taskCancelledEvent;
 
-        /// This is the wrapper for the user task to be executed.
-        /// We are providing a wrapper to create a possibility of executing the task in a separate AppDomain
+        /// <summary>
+        /// Signalled when the current build cancelled a task. FOR UNIT TESTING ONLY: a cancellation
+        /// from one build must not still be signalled when the node is reset for the next.
         /// </summary>
-        private OutOfProcTaskAppDomainWrapper _taskWrapper;
+        internal ManualResetEvent TaskCancelledEvent => _taskCancelledEvent;
 
         /// <summary>
         /// Flag indicating if we should debug communications or not.
@@ -178,14 +180,16 @@ namespace Microsoft.Build.CommandLine
         private bool _updateEnvironmentAndLog;
 
         /// <summary>
-        /// setting this to true means we're running a long-lived sidecar node.
+        /// Whether this task host was launched with node reuse, so it does not exit at the end of a
+        /// build. Whether it then stays connected to its launcher as a sidecar, or disconnects into
+        /// the machine-wide pool, is what <see cref="NodeBuildComplete.PrepareForReuse"/> says.
         /// </summary>
         private bool _nodeReuse;
 
         /// <summary>
         /// The task object cache.
         /// </summary>
-        private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
+        private RegisteredTaskObjectCacheBase _registeredTaskObjectCache = new();
 
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
@@ -220,6 +224,10 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private readonly AsyncLocal<TaskExecutionContext> _currentTaskContext
             = new AsyncLocal<TaskExecutionContext>();
+
+#if FEATURE_APPDOMAIN
+        private const string TaskContextIdSlot = "MSBuild.TaskHost.TaskContextId";
+#endif
 
         /// <summary>
         /// Counter for generating task IDs when configuration doesn't provide one.
@@ -361,7 +369,21 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Enables or disables emitting a default error when a task fails without logging errors
         /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = false;
+        public bool AllowFailureWithoutError
+        {
+            get
+            {
+                TaskExecutionContext context = GetCurrentTaskContext();
+                Assumed.NotNull(context);
+                return context.AllowFailureWithoutError;
+            }
+            set
+            {
+                TaskExecutionContext context = GetCurrentTaskContext();
+                Assumed.NotNull(context);
+                context.AllowFailureWithoutError = value;
+            }
+        }
         #endregion
 
         #region IBuildEngine8 Implementation
@@ -1095,7 +1117,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private TaskExecutionContext GetCurrentTaskContext()
         {
-            return _currentTaskContext.Value;
+            TaskExecutionContext context = _currentTaskContext.Value;
+#if FEATURE_APPDOMAIN
+            // AsyncLocal values do not cross AppDomain boundaries. Resolve the serialized task ID.
+            if (context is null && CallContext.LogicalGetData(TaskContextIdSlot) is int taskId)
+            {
+                _taskContexts.TryGetValue(taskId, out context);
+            }
+#endif
+            return context;
         }
 
         /// <summary>
@@ -1201,6 +1231,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             _currentConfiguration = taskHostConfiguration;
+            _parentPacketVersion = _nodeEndpoint.NegotiatedPacketVersion;
             ResolveIncomingEnvironment(taskHostConfiguration);
             ResolveIncomingGlobalParameters(taskHostConfiguration);
 
@@ -1292,13 +1323,44 @@ namespace Microsoft.Build.CommandLine
             // multiple tasks may be active on the same TaskHost process.
             foreach (var kvp in _taskContexts)
             {
-                var ctxWrapper = kvp.Value.TaskWrapper;
-                ctxWrapper?.CancelTask();
-            }
+                var context = kvp.Value;
+                lock (context)
+                {
+                    var ctxWrapper = context.TaskWrapper;
+                    if (context.State == TaskExecutionState.Completed || ctxWrapper is null || ctxWrapper.CancelPending)
+                    {
+                        continue;
+                    }
 
-            // Also cancel via the shared field for the case where no context exists yet
-            var wrapper = _taskWrapper;
-            wrapper?.CancelTask();
+                    // Cancellation runs on the packet-processing thread, not the task's Execute thread.
+                    var previousContext = _currentTaskContext.Value;
+#if FEATURE_APPDOMAIN
+                    object previousContextId = CallContext.LogicalGetData(TaskContextIdSlot);
+#endif
+                    try
+                    {
+                        _currentTaskContext.Value = context;
+#if FEATURE_APPDOMAIN
+                        CallContext.LogicalSetData(TaskContextIdSlot, context.TaskId);
+#endif
+                        ctxWrapper.CancelTask();
+                    }
+                    finally
+                    {
+                        _currentTaskContext.Value = previousContext;
+#if FEATURE_APPDOMAIN
+                        if (previousContextId is null)
+                        {
+                            CallContext.FreeNamedDataSlot(TaskContextIdSlot);
+                        }
+                        else
+                        {
+                            CallContext.LogicalSetData(TaskContextIdSlot, previousContextId);
+                        }
+#endif
+                    }
+                }
+            }
 
             if (Environment.GetEnvironmentVariable("MSBUILDTASKHOSTABORTTASKONCANCEL") == "1")
             {
@@ -1329,17 +1391,82 @@ namespace Microsoft.Build.CommandLine
             // the next build performs a fresh apply rather than trusting state left over from this build.
             _lastAppliedConfigEnvironment = null;
 
-            // Sidecar TaskHost will persist after the build is done.
+            // Only an explicit, negotiated action establishes ownership. Older parents also send
+            // PrepareForReuse=true, but expect the TaskHost to disconnect and acknowledge shutdown.
+            if (buildComplete.Action == NodeBuildCompleteAction.ReuseWithConnection)
+            {
+                Assumed.True(_nodeReuse && buildComplete.PrepareForReuse);
+                // The parent gates ownership on its change wave. A pooled child may have been
+                // launched under a different wave, so its cached wave cannot override this action.
+                PrepareForNextBuild();
+                return;
+            }
+
+            if (buildComplete.Action == NodeBuildCompleteAction.Shutdown)
+            {
+                _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+                _shutdownEvent.Set();
+                return;
+            }
+
+            Assumed.Equal(buildComplete.Action, NodeBuildCompleteAction.Legacy);
             if (_nodeReuse)
             {
+                // Preserve the legacy pooling policy independently of PrepareForReuse.
                 _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+                _shutdownEvent.Set();
+                return;
             }
-            else
-            {
-                // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
-                _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
-            }
+
+            // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
+            _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
+        }
+
+        /// <summary>
+        /// Disposes build-scoped state so this sidecar can serve the next build of its owner
+        /// without being torn down and relaunched.
+        /// </summary>
+        /// <remarks>
+        /// A TaskHost used to serve exactly one build: <see cref="XMake"/> constructed a fresh node
+        /// per build, so build state was reset by construction and no field could be missed. A
+        /// sidecar keeps its connection across builds and tearing the node down would tear that
+        /// connection down with it, so it resets in place instead. Every field added to this class
+        /// therefore has to be classified: build-scoped fields must be reset here, or their values
+        /// leak into the next, unrelated build served by this same process.
+        /// </remarks>
+        internal void PrepareForNextBuild()
+        {
+            // Only state that the next build will not re-establish for itself belongs here.
+            // Per-task state -- the configuration, the warning sets, the environment flags, the task
+            // wrapper and its completion packet -- is assigned unconditionally from each incoming
+            // TaskHostConfiguration before it is ever read, so clearing it here would be dead code
+            // and clearing _taskCompletePacket could discard a result that has not been sent yet.
+
+            // Defensive, and matches HandleShutdown: a task blocked on a callback would never
+            // unblock once the parent stops answering for this build. No-op when nothing is pending.
+            FailAllPendingCallbackRequests("TaskHost resetting for the next build.");
+
+            // Build-lifetime objects registered by tasks. Nothing else disposes these while the node
+            // stays alive; a node that exited at the end of a build did it in HandleShutdown.
+            _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
+
+            // A cancellation that arrived as the build was ending would otherwise still be signalled
+            // and would spin the next build's wait loop.
+            _taskCancelledEvent.Reset();
+
+            // Release the build directory while idle; Windows holds a handle to the current directory.
+            NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+
+            // Restore the launch environment while idle. RunTask applies the next task's environment.
+            try
+            {
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                CommunicationsUtilities.Trace($"Failed to restore the sidecar TaskHost environment: {ex}");
+            }
         }
 
         /// <summary>
@@ -1418,9 +1545,6 @@ namespace Microsoft.Build.CommandLine
                     _shutdownEvent.Set();
                     break;
 
-                case LinkStatus.Inactive:
-                    break;
-
                 default:
                     break;
             }
@@ -1465,6 +1589,9 @@ namespace Microsoft.Build.CommandLine
             if (taskContext is not null)
             {
                 _currentTaskContext.Value = taskContext;
+#if FEATURE_APPDOMAIN
+                CallContext.LogicalSetData(TaskContextIdSlot, taskContext.TaskId);
+#endif
             }
 
             IDictionary<string, TaskParameter> taskParams = taskConfiguration.TaskParameters;
@@ -1524,7 +1651,6 @@ namespace Microsoft.Build.CommandLine
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 taskWrapper = new OutOfProcTaskAppDomainWrapper();
-                _taskWrapper = taskWrapper;
 
                 // Store in per-task context so CancelTask() can find the correct wrapper
                 // when multiple tasks are active (nested builds via BuildProjectFile callbacks).
@@ -1621,15 +1747,23 @@ namespace Microsoft.Build.CommandLine
                     _fileAccessData = new List<FileAccessData>();
 #endif
 
-                    // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
-                    // Use local variable -- _taskWrapper may have been overwritten by a nested task.
-                    taskWrapper?.CleanupTask();
-                    // Mark context as completed and clean up
                     if (taskContext is not null)
                     {
-                        taskContext.State = TaskExecutionState.Completed;
-                        _currentTaskContext.Value = null;
-                        RemoveTaskContext(taskContext.TaskId);
+                        // Keep the context and AppDomain alive until an in-flight Cancel returns.
+                        lock (taskContext)
+                        {
+                            taskContext.State = TaskExecutionState.Completed;
+                            taskWrapper?.CleanupTask();
+                            _currentTaskContext.Value = null;
+#if FEATURE_APPDOMAIN
+                            CallContext.FreeNamedDataSlot(TaskContextIdSlot);
+#endif
+                            RemoveTaskContext(taskContext.TaskId);
+                        }
+                    }
+                    else
+                    {
+                        taskWrapper?.CleanupTask();
                     }
 
                     // The task has now fully completed executing.

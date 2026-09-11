@@ -69,6 +69,12 @@ namespace Microsoft.Build.BackEnd
         private readonly ConcurrentDictionary<string, byte /*void*/> _processesToIgnore = new();
 
         /// <summary>
+        /// Stops skipping the processes this provider failed to connect to, so the next build
+        /// retries them instead of starting new nodes.
+        /// </summary>
+        private protected void ClearProcessesToIgnore() => _processesToIgnore.Clear();
+
+        /// <summary>
         /// Delegate used to tell the node provider that a context has been created.
         /// </summary>
         /// <param name="context">The created node context.</param>
@@ -440,11 +446,22 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, nodeLaunchData.Handshake.HandshakeOptions);
+                HandshakeOptions handshakeOptions = nodeLaunchData.Handshake.HandshakeOptions;
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions, negotiatedVersion));
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
         }
+
+        /// <summary>
+        /// Whether a node launched with these handshake options stays connected to this process after
+        /// one of its builds completes, so that this process can use it again for the next one. Such
+        /// a node resets in place rather than disconnecting, and more packets follow on its
+        /// connection afterwards.
+        /// False by default: a node disconnects at the end of a build and, if reusable, waits on its
+        /// pipe for some other process to claim it.
+        /// </summary>
+        protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion) => false;
 
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
@@ -1002,6 +1019,8 @@ namespace Microsoft.Build.BackEnd
             /// Used to signal the consuming thread that a packet has been enqueued;
             /// </summary>
             private readonly AutoResetEvent _packetEnqueued;
+            private bool _sendCompleted;
+            private int _closed;
 
             /// <summary>
             /// Used to signal that the exit packet has been sent and we no longer need to wait for the queue to drain.
@@ -1053,9 +1072,11 @@ namespace Microsoft.Build.BackEnd
                 INodePacketFactory factory,
                 NodeContextTerminateDelegate terminateDelegate,
                 byte negotiatedVersion,
-                HandshakeOptions handshakeOptions = HandshakeOptions.None)
+                HandshakeOptions handshakeOptions = HandshakeOptions.None,
+                bool connectionPersistsAcrossBuilds = false)
             {
                 _nodeId = nodeId;
+                _connectionPersistsAcrossBuilds = connectionPersistsAcrossBuilds;
                 _process = process;
                 _pipeStream = nodePipe;
 #if !FEATURE_APM
@@ -1094,6 +1115,21 @@ namespace Microsoft.Build.BackEnd
             /// Id of node.
             /// </summary>
             public int NodeId => _nodeId;
+
+            /// <summary>
+            /// Whether this node stays connected after a build completes, so that its owner can use
+            /// it again for the next one, instead of disconnecting into the pool of nodes that any
+            /// process may claim.
+            /// </summary>
+            private readonly bool _connectionPersistsAcrossBuilds;
+
+            /// <summary>
+            /// Whether this node stays connected after a build completes. Its owner uses this to
+            /// tell the nodes that will disconnect from the ones it must retire itself.
+            /// </summary>
+            public bool ConnectionPersistsAcrossBuilds => _connectionPersistsAcrossBuilds;
+
+            internal bool WaitForSendCompletion(int millisecondsTimeout) => _drainPacketQueueThread.Join(millisecondsTimeout);
 
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
@@ -1189,12 +1225,21 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
             {
-                if (IsExitPacket(packet))
+                lock (_packetWriteQueue)
                 {
-                    _exitPacketState = ExitPacketState.ExitPacketQueued;
+                    if (_sendCompleted)
+                    {
+                        CommunicationsUtilities.Trace(_nodeId, $"Ignoring {packet.Type} after the node send queue closed.");
+                        return;
+                    }
+
+                    if (IsExitPacket(packet))
+                    {
+                        _exitPacketState = ExitPacketState.ExitPacketQueued;
+                    }
+                    _packetWriteQueue.Enqueue(packet);
+                    _packetEnqueued.Set();
                 }
-                _packetWriteQueue.Enqueue(packet);
-                _packetEnqueued.Set();
             }
 
             /// <summary>
@@ -1250,6 +1295,27 @@ namespace Microsoft.Build.BackEnd
             /// a burst of SendData comes in, with 10-20 packets scheduled.</remarks>
             private void DrainPacketQueue(object state)
             {
+                try
+                {
+                    DrainPacketQueueCore(state);
+                }
+                finally
+                {
+                    lock (_packetWriteQueue)
+                    {
+                        _sendCompleted = true;
+                        _packetEnqueued.Dispose();
+                        while (_packetWriteQueue.TryDequeue(out _))
+                        {
+                        }
+                    }
+
+                    _writeBufferMemoryStream.Dispose();
+                }
+            }
+
+            private void DrainPacketQueueCore(object state)
+            {
                 NodeContext context = (NodeContext)state;
                 MemoryStream writeStream = context._writeBufferMemoryStream;
                 Stream serverToClientStream = context._pipeStream;
@@ -1257,6 +1323,11 @@ namespace Microsoft.Build.BackEnd
                 while (true)
                 {
                     context._packetEnqueued.WaitOne();
+                    if (Volatile.Read(ref _closed) != 0)
+                    {
+                        return;
+                    }
+
                     while (context._packetWriteQueue.TryDequeue(out INodePacket packet))
                     {
                         // clear the buffer but keep the underlying capacity to avoid reallocations
@@ -1269,7 +1340,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Write packet type with extended header.
                             // On the receiving side we will check if the extended header is present before making an attempt to read the packet version.
-                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType);
+                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType, _negotiatedPacketVersion);
                             writeStream.WriteByte(rawPacketType);
 
                             // Pad for the packet length
@@ -1330,7 +1401,11 @@ namespace Microsoft.Build.BackEnd
                         // disposed); otherwise the thread loops back to WaitOne() and blocks forever, leaking the
                         // thread and the NodeContext it captures. In a long-lived host like Visual Studio these
                         // leaked threads accumulate across builds.
-                        if (packet is NodeBuildComplete)
+                        //
+                        // A node that stays connected is the exception: its owner sends it more packets after this
+                        // one, so the drain thread has to keep running.
+                        if (packet is NodeBuildComplete buildComplete &&
+                            !(_connectionPersistsAcrossBuilds && buildComplete.PrepareForReuse))
                         {
                             if (IsExitPacket(packet))
                             {
@@ -1371,6 +1446,20 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private void Close()
             {
+                if (Interlocked.Exchange(ref _closed, 1) != 0)
+                {
+                    return;
+                }
+
+                lock (_packetWriteQueue)
+                {
+                    if (!_sendCompleted)
+                    {
+                        _sendCompleted = true;
+                        _packetEnqueued.Set();
+                    }
+                }
+
                 _pipeStream.Dispose();
                 _terminateDelegate(_nodeId);
             }
