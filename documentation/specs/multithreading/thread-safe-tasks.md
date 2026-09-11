@@ -108,6 +108,17 @@ For tasks to be eligible for multithreaded execution using this approach, they m
 public class MyTask : Task {...}
 ```
 
+### Registered task objects
+
+In multithreaded builds, in-process tasks share the `IBuildEngine4` registered-task-object cache across thread nodes. Tasks in worker or TaskHost processes use separate caches.
+
+Using the API is safe when the task accounts for this sharing. Before adding `[MSBuildMultiThreadableTask]`, review that:
+
+* registered objects support concurrent access;
+* keys cannot collide with unrelated tasks;
+* if multiple tasks race to register equal keys, only one object is retained and the task disposes any unretained object that needs cleanup; and
+* correctness does not require two task invocations to use the same cache so the task is functional both in multithreaded and multiprocess modes.
+
 ## Validate a task migration
 
 Run a representative build with an MSBuild version that supports

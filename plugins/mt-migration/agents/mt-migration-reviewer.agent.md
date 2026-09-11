@@ -45,7 +45,7 @@ Use grep, glob, view, and (if the host has it) code-intelligence tools to walk r
 
 ### Step 2 — Flag hazards at each leaf
 
-For every leaf, classify against this list. Every match is a finding (BLOCKING unless explicitly justified):
+For every leaf, classify against this list. Every match is a finding (BLOCKING unless explicitly justified), except registered task objects, which require review and are findings only when the use is unsafe:
 
 | Leaf API | Hazard | Migration expectation |
 |---|---|---|
@@ -60,7 +60,7 @@ For every leaf, classify against this list. Every match is a finding (BLOCKING u
 | `Console.*` (Write, WriteLine, In, Out, Error) | Shared in MT mode | Use `Log.*` |
 | `Environment.Exit`, `FailFast`, `Process.Kill`, `ThreadPool.SetMin/MaxThreads` | Process-fatal | Return false / throw / let engine handle |
 | `static` field initialized from process state (`s_x = Directory.GetCurrentDirectory()`, `s_y = Environment.GetEnvironmentVariable(...)`) | Captures first caller's environment forever | Replace with `ConcurrentDictionary` keyed on inputs |
-| `IBuildEngine4.GetRegisteredTaskObject` / `RegisterTaskObject` pair | Non-atomic read/write — two instances can both miss and both populate. Engine-owned, so no `static` field appears and it reads as thread-safe | Benign only if the cached computation is pure **and** deduplication is not the point. If it dedupes a side effect (log once per build) or caches a *failure* — BLOCKING |
+| `IBuildEngine4.GetRegisteredTaskObject` / `RegisterTaskObject` | Shared across in-process thread nodes but not across processes; get/register is non-atomic, only one equal-key object is retained, and registration returns no result | Review object thread safety, key collisions, process-local visibility, unretained-object cleanup, and whether a race duplicates a side effect or reuses a failure with the wrong inputs. Report only an actual unsafe use. |
 | `Assembly.Load*`, `Activator.CreateInstance*` | Version conflicts | Audit; usually requires explicit binding policy |
 | Any API that throws with the input path in the message | Sin 2 leakage | Caller must catch and sanitize, or pass `OriginalValue` |
 | `new SomeOtherTask()` followed by `.Execute()` | Nested task — bypasses TaskFactory injection | Parent must propagate `TaskEnvironment` before calling `Execute()` |

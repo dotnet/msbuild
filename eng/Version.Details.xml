@@ -106,9 +106,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="11.0.0-beta.26430.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="11.0.0-beta.26456.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>5403b94aa10dc99d67036c9ee45429f832c3700e</Sha>
+      <Sha>66b75e61d883abd9e3af86a811c3809a8d9142ca</Sha>
     </Dependency>
     <!-- This is the NuGet.* package family. NuGet.Frameworks is also pulled in via this
          version on .NET Core, where Microsoft.Build takes a direct compile-time PackageReference
@@ -124,9 +124,9 @@
       <Uri>https://github.com/dotnet/roslyn</Uri>
       <Sha>92a36efa9ae1a26a14872f87798526a1c3dd050b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="11.0.0-beta.26430.1">
+    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="11.0.0-beta.26456.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>5403b94aa10dc99d67036c9ee45429f832c3700e</Sha>
+      <Sha>66b75e61d883abd9e3af86a811c3809a8d9142ca</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

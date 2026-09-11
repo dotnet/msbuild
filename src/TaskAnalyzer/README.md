@@ -10,24 +10,100 @@ MSBuild is introducing multithreaded task execution via `IMultiThreadableTask`. 
 
 This analyzer catches unsafe API usage at compile time and offers code fixes to migrate to the safe `TaskEnvironment` alternatives.
 
-## Diagnostic Rules
+## Default Rules and Configuration
 
-| ID | Severity | Scope | Title |
-|---|---|---|---|
-| **MSBuildTask0001** | Error | All `ITask` implementations | API is never safe in MSBuild tasks |
-| **MSBuildTask0002** | Warning | All `ITask` implementations | API requires `TaskEnvironment` alternative |
-| **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
-| **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
-| **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
-| **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
-| **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
-| **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
-| **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
-| **MSBuildTask0010** | Warning | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
-| **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
-| **MSBuildTask0012** | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` applied directly | MSBuild never assigns the `TaskEnvironment` property |
-| **MSBuildTask0013** | Info (off by default) | Concrete tasks declaring `IMultiThreadableTask` in their own base list | Missing `[MSBuildMultiThreadableTask]`, so the task still runs out-of-proc |
-| **MSBuildTask0014** | Warning | Classes carrying `[MSBuildMultiThreadableTask]` that are not an `ITask`, or are abstract | The attribute has no effect because MSBuild never routes that type as a task |
+The analyzer enables all rules except MSBuildTask0013 by default. A rule can be enabled but remain out of scope for a given task.
+
+By default, MT migration rules MSBuildTask0002 and MSBuildTask0003 apply only to MT-scoped code.
+
+MT-scoped code includes these types:
+
+- A task with `[MSBuildMultiThreadableTask]` applied directly.
+- A helper with `[MSBuildMultiThreadableTaskAnalyzed]` applied directly.
+- A source base class that contributes implementation code to one of these tasks.
+
+`IMultiThreadableTask` only enables `TaskEnvironment` injection. It does not route a task to the MT environment and does not enable MT migration rules by itself.
+
+### Default rule matrix
+
+| ID | Rule | Default state | Severity | Reported for by default |
+|---|---|---|---|---|
+| **MSBuildTask0001** | API is never safe in an MSBuild task | Enabled | Error | All task implementations and MT-scoped helpers |
+| **MSBuildTask0002** | API requires a `TaskEnvironment` alternative | Enabled | Warning | MT-scoped code only |
+| **MSBuildTask0003** | File system API requires an absolute path | Enabled | Warning | MT-scoped code only |
+| **MSBuildTask0004** | API requires review for MT execution | Enabled | Warning | All task implementations and MT-scoped helpers |
+| **MSBuildTask0005** | A task call chain reaches an unsafe API | Enabled | Warning | All tasks for transitive MSBuildTask0001 and MSBuildTask0004 violations; MT tasks for all supported transitive violations |
+| **MSBuildTask0006** | Prefer a typed path property | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
+| **MSBuildTask0007** | Prefer `ITaskItem<T>` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
+| **MSBuildTask0008** | Initialize a relative path default in `Execute()` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
+| **MSBuildTask0009** | `ITaskItem<T>` uses an unsupported type | Enabled | Warning | All task implementations that use an unsupported `ITaskItem<T>` type |
+| **MSBuildTask0010** | `ITaskItem<T>` uses culture-sensitive conversion | Enabled | Warning | All task implementations that use culture-sensitive `ITaskItem<T>` conversion |
+| **MSBuildTask0011** | Prefer `TaskEnvironment` constructor injection | Enabled | Info | Concrete `IMultiThreadableTask` implementations without constructor injection |
+| **MSBuildTask0012** | MSBuild does not assign the `TaskEnvironment` property | Enabled | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` and an unassigned `TaskEnvironment` property |
+| **MSBuildTask0013** | The task does not have `[MSBuildMultiThreadableTask]` | **Disabled** | Info | Concrete tasks that declare `IMultiThreadableTask` directly but do not have `[MSBuildMultiThreadableTask]` |
+| **MSBuildTask0014** | `[MSBuildMultiThreadableTask]` has no effect | Enabled | Warning | Non-task or abstract types with `[MSBuildMultiThreadableTask]` |
+
+### Analyze all tasks for MT migration
+
+Set the option to `true` to analyze regular tasks for MT migration:
+
+```ini
+# .globalconfig
+is_global = true
+global_level = 100
+
+msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+```
+
+You can also set the option in a matching `.editorconfig` section:
+
+```ini
+# .editorconfig
+[*.cs]
+msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+```
+
+You can enable the option for a specific directory:
+
+```ini
+# .editorconfig
+[MigrationTasks/*.cs]
+msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true
+```
+
+Include directories that contain unsafe calls, including helper files. Selecting only task declaration files does not enable transitive diagnostics in other directories.
+
+The option adds MSBuildTask0002 and MSBuildTask0003 analysis to regular tasks. It also adds related transitive MSBuildTask0005 findings.
+
+Roslyn combines settings from `.globalconfig` and `.editorconfig`. A matching `.editorconfig` value overrides the `.globalconfig` value.
+
+MSBuild discovers `.editorconfig` files automatically. Add a `.globalconfig` file through the `GlobalAnalyzerConfigFiles` MSBuild item.
+
+The source file that contains the reported unsafe operation controls the `.editorconfig` value. If the option is missing or invalid, it is `false`.
+
+### Enable, disable, or change a rule
+
+Use standard Roslyn severity configuration for each diagnostic ID. You can put these entries in `.globalconfig` or in a matching `.editorconfig` section.
+
+```ini
+# Enable MSBuildTask0013, which is disabled by default.
+dotnet_diagnostic.MSBuildTask0013.severity = suggestion
+
+# Disable a rule.
+dotnet_diagnostic.MSBuildTask0004.severity = none
+
+# Change a rule severity.
+dotnet_diagnostic.MSBuildTask0002.severity = error
+```
+
+Valid severity values include `error`, `warning`, `suggestion`, `silent`, `none`, and `default`. Remove an entry to use the analyzer default.
+
+The migration option and severity configuration have different purposes:
+
+- `msbuild_task_analyzer.run_mt_analyzers_on_all_tasks` adds regular-task analysis for MSBuildTask0002, MSBuildTask0003, and related MSBuildTask0005 findings.
+- `dotnet_diagnostic.<ID>.severity` enables, disables, or changes the severity of one rule.
+
+## Diagnostic Rule Details
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -62,8 +138,14 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath()` |
 | `Path.GetTempPath()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
 | `Path.GetTempFileName()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
+| `Directory.CreateTempSubdirectory()` (with or without a prefix) | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
+| `new TempFileCollection()` | Pass an explicit task-resolved temporary directory, or suppress with a justification. |
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
+
+The temp helpers above depend on process-wide temporary-directory environment variables. Until a `TaskEnvironment` alternative is available, suppress `MSBuildTask0002` (or `MSBuildTask0005` for a call through a helper) with a justification. `Path.GetRandomFileName()` only generates a name and does not resolve a temporary directory, so it is not banned.
+
+`TempFileCollection` constructors accepting `tempDir` are not banned because they can use an explicit task-resolved directory. Passing null or empty still falls back to the global temporary directory; this conditional usage is not currently detected.
 
 **Canonicalization exception:** `Path.GetFullPath(path.Value)` is accepted when `path.Value`
 is the instance property of the resolved `Microsoft.Build.Framework.AbsolutePath` type.
@@ -117,7 +199,9 @@ These APIs may cause version conflicts or other issues in a shared task host.
 
 ### MSBuildTask0005 — Transitive Unsafe API Usage
 
-MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class — or inside a helper explicitly opted in with `[MSBuildMultiThreadableTaskAnalyzed]` (see [Analysis Scope](#analysis-scope)). MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from every task's members, so an unsafe API reached through a shared helper is still reported.
+MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class — or inside a helper explicitly opted in with `[MSBuildMultiThreadableTaskAnalyzed]` (see [Analysis Scope](#analysis-scope)). MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from each task's members. Transitive MSBuildTask0001/0004 violations are reported for every task; transitive MSBuildTask0002/0003 violations follow the configured migration option.
+
+The call graph can pass through another task class. If an MT task reaches an MSBuildTask0002 or MSBuildTask0003 violation in a regular task class, MSBuildTask0005 reports the call chain. When direct analysis already reports that violation, MSBuildTask0005 does not report a duplicate.
 
 The diagnostic is reported **at the unsafe call site** — inside the helper — and names the task entry point plus the full call chain in the message:
 
@@ -145,7 +229,7 @@ or `[SuppressMessage]` on the containing member, which records the review next t
 private static void KillProcessTree(Process process) => process.Kill(entireProcessTree: true);
 ```
 
-Each unsafe call site is reported once per task type, so suppressing one reviewed call does **not** hide other transitive violations reachable from the same task — including other calls to the same API. Suppressing on the task's `Execute` method has no effect; scope the suppression to the call site instead.
+Each unsafe call site is reported once per effective task implementation. Multiple derived tasks that share the same inherited `Execute` implementation produce one diagnostic, while distinct task implementations are reported independently. Suppressing one reviewed call does **not** hide other transitive violations reachable from the same implementation — including other calls to the same API. Suppressing on the task's `Execute` method has no effect; scope the suppression to the call site instead.
 
 ### MSBuildTask0006 — Prefer Typed Path Parameters
 
@@ -434,17 +518,21 @@ A concrete task that MSBuild cannot construct — no public parameterless constr
 
 ## Analysis Scope
 
-The analyzer determines what to check based on the type declaration:
+See [Default Rules and Configuration](#default-rules-and-configuration) for the default-state matrix and copy-ready configuration.
+
+By default, MT migration warnings do not affect regular tasks. The analyzer recognizes `[MSBuildMultiThreadableTask]` as the task routing opt-in and `[MSBuildMultiThreadableTaskAnalyzed]` as an analyzer-only opt-in.
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
-| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
-| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
-| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
+| Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations |
+| Concrete `ITask` class with `[MSBuildMultiThreadableTask]` applied directly | MSBuildTask0001–MSBuildTask0010; MSBuildTask0011 and MSBuildTask0012 apply only when their conditions match |
+| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0011, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations; MSBuildTask0013 is available but disabled by default |
+| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` | Direct MSBuildTask0001–MSBuildTask0004 analysis; MSBuildTask0005 reports only when a task reaches the helper |
 | Regular class (no task interface or attribute) | Not analyzed |
 | Class with `[MSBuildMultiThreadableTask]` that does not implement `ITask` | MSBuildTask0014 |
 | Abstract class with `[MSBuildMultiThreadableTask]` | MSBuildTask0014 |
+
+Base classes of an `ITask` with `[MSBuildMultiThreadableTask]` or `[MSBuildMultiThreadableTaskAnalyzed]` applied directly are analyzed as part of that task's implementation.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
@@ -454,9 +542,10 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 ### Severity Levels
 
-- **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
-- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, and MSBuildTask0010** report as **Warning**.
-- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
+- **MSBuildTask0001** has a default severity of **Error**. These APIs are never safe in an MSBuild task.
+- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, MSBuildTask0010, MSBuildTask0012, and MSBuildTask0014** have a default severity of **Warning**.
+- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** have a default severity of **Info**.
+- **MSBuildTask0013** has a severity of **Info**, but the rule is disabled by default.
 
 ## Code Fixes
 
@@ -482,7 +571,7 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 
 The MSBuildTask0003 fixer anchors on the **call the analyzer flagged** (the one whose parameter takes the path) and wraps that call's own path argument. This matters when the flagged call is nested inside another call — `new StreamWriter(File.Create(OutputPath))` becomes `new StreamWriter(File.Create(TaskEnvironment.GetAbsolutePath(OutputPath)))`, not a wrap around the `Stream` the outer constructor receives. Within that call it wraps the first **unwrapped** path parameter rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument, and for `Directory.GetFiles(dir, searchPattern)` it leaves the search pattern alone.
 
-Both the MSBuildTask0002 and MSBuildTask0003 fixers reference the instance `TaskEnvironment` member, so no fix is offered where that reference would not compile: where `this` is unavailable — a static method, static local function, or static lambda (CS0120), or an instance field or property initializer (CS0236) — or where the task type simply has no `TaskEnvironment` member (CS0103), which the default `all` scope allows since it analyzes every `ITask`. Making the enclosing member non-static, moving the initializer into `Execute()`, or implementing `IMultiThreadableTask` re-enables the fix.
+Both the MSBuildTask0002 and MSBuildTask0003 fixers reference the instance `TaskEnvironment` member, so no fix is offered where that reference would not compile: where `this` is unavailable — a static method, static local function, or static lambda (CS0120), or an instance field or property initializer (CS0236) — or where the task type has no `TaskEnvironment` member (CS0103). The last case is reachable when an attribute opts in a type that declares no such member, or when `run_mt_analyzers_on_all_tasks = true` analyzes a regular task. Making the enclosing member non-static, moving the initializer into `Execute()`, or implementing `IMultiThreadableTask` re-enables the fix.
 
 When bulk-applying with `dotnet format analyzers`, note that the tool derives the batch from the *first* reported diagnostic: if that occurrence is one of the ones above where no fix is offered, it logs `Unable to fix MSBuildTask0003…` and applies nothing. Resolve or suppress that first occurrence by hand, then re-run.
 

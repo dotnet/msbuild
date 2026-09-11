@@ -340,17 +340,19 @@ Note that implementing `IMultiThreadableTask` on the base is safe and does not c
 
 ### Engine-Owned Shared State: `RegisterTaskObject`
 
-The guidance about `static` fields has a less obvious sibling: `IBuildEngine4.GetRegisteredTaskObject` / `RegisterTaskObject`. The state lives in the *engine*, so no `static` field appears and nothing looks shared — but the read/write pair is **not atomic**, and under MT two instances of the same task in one node can both miss and both populate.
+The guidance about `static` fields has a less obvious sibling: `IBuildEngine4.GetRegisteredTaskObject` / `RegisterTaskObject`. Under MT, in-process thread nodes share this engine-owned state. Tasks in different worker or TaskHost processes do not.
 
-Whether that matters depends entirely on what is being cached:
+Using these APIs is a **review signal, not a warning**. Check object thread safety, key collisions, and whether correctness depends on two task invocations sharing a cache.
 
-| Cached computation | Verdict |
+The get/register sequence is not atomic. Two tasks can both miss and create an object. Only one equal-key object is retained; `RegisterTaskObject` returns no result, and MSBuild does not dispose an unretained object. Whether that matters depends on what is cached:
+
+| Cached computation | Review result |
 |---|---|
-| Pure and deterministic for the key (e.g., "where is dotnet?") | **Benign** — the loser overwrites an identical entry. Leave it, but say so in a comment. |
-| Deduplication is the *point* (e.g., "log this error exactly once") | **Broken** — both instances observe "not yet reported" and both act. |
-| A cached *failure* | **Suspect** — a failure computed under one task's environment gets served to a task with a different `ProjectDirectory`. Key the cache on the inputs that determine the result, or don't cache failures. |
+| Pure and deterministic for the key | Safe if the losing object needs no cleanup, or the task cleans it up |
+| Deduplication is the point, such as logging once per build | Unsafe because both tasks can perform the side effect |
+| A failure | Check that the key includes every input that affects the result; otherwise do not cache it |
 
-Real examples from dotnet/arcade: `LocateDotNet` is benign (pure computation). `SingleError` — whose entire purpose is emitting exactly one error per build — is broken by the race, and we removed the annotation rather than ship it. Same API shape, opposite conclusions.
+Real examples from dotnet/arcade: `LocateDotNet` was safe because its computation was pure. `SingleError` was not safe because its purpose was to emit exactly one error per build, so its annotation was removed.
 
 ### Tasks Instantiated Directly by Other Tasks
 
@@ -506,7 +508,7 @@ Verify behavior on **both** .NET Framework and .NET TFMs.
 
 1. Two tasks with different `ProjectDirectory` values don't interfere
 2. No writes to static fields (shared across threads)
-3. No non-atomic `GetRegisteredTaskObject` / `RegisterTaskObject` pair whose race is not provably benign
+3. Every registered task object is reviewed for thread safety, key collisions, registration races, and process-local visibility
 4. No cached *failures* — a failure computed under one task's environment must not be served to another
 5. All file operations use absolutized paths
 
@@ -545,8 +547,8 @@ Assertions: Execute() return value, [Output] exact string, error message content
     - No `Environment.CurrentDirectory` / `Directory.GetCurrentDirectory()` / `Path.GetFullPath(x)` without a base anywhere in the transitive call graph
     - No direct `Environment.Get/SetEnvironmentVariable` (route through `TaskEnvironment`)
     - No `static` mutable fields seeded from process state; replace with `ConcurrentDictionary` keyed on inputs
-    - No non-atomic `GetRegisteredTaskObject`/`RegisterTaskObject` pair unless the cached computation is pure *and* deduplication is not the point
-    - No cached *failures* — a failure computed under one task's environment must not be served to another
+    - Every `RegisterTaskObject` use reviewed for object thread safety, key collisions, registration races, and process-local visibility
+    - No cached *failures* whose key omits inputs that affect the result
     - No `Console.*`, `Environment.Exit`, `Process.Kill`, `FailFast`
 - [ ] ToolTask overrides audited (`GenerateFullPathToTool`, `SkipTaskExecution`, `ValidateParameters`); `ProcessStartInfo.FileName` is absolute, tool *arguments* stay relative
 - [ ] No nested tasks created via `new …Task()` without explicit `TaskEnvironment` propagation
