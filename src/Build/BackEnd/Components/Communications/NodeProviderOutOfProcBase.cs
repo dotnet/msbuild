@@ -447,7 +447,7 @@ namespace Microsoft.Build.BackEnd
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
             {
                 HandshakeOptions handshakeOptions = nodeLaunchData.Handshake.HandshakeOptions;
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions));
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions, negotiatedVersion));
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -461,7 +461,7 @@ namespace Microsoft.Build.BackEnd
         /// False by default: a node disconnects at the end of a build and, if reusable, waits on its
         /// pipe for some other process to claim it.
         /// </summary>
-        protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions) => false;
+        protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion) => false;
 
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
@@ -1019,6 +1019,8 @@ namespace Microsoft.Build.BackEnd
             /// Used to signal the consuming thread that a packet has been enqueued;
             /// </summary>
             private readonly AutoResetEvent _packetEnqueued;
+            private bool _sendCompleted;
+            private int _closed;
 
             /// <summary>
             /// Used to signal that the exit packet has been sent and we no longer need to wait for the queue to drain.
@@ -1127,6 +1129,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public bool ConnectionPersistsAcrossBuilds => _connectionPersistsAcrossBuilds;
 
+            internal bool WaitForSendCompletion(int millisecondsTimeout) => _drainPacketQueueThread.Join(millisecondsTimeout);
+
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
             /// </summary>
@@ -1221,12 +1225,21 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
             {
-                if (IsExitPacket(packet))
+                lock (_packetWriteQueue)
                 {
-                    _exitPacketState = ExitPacketState.ExitPacketQueued;
+                    if (_sendCompleted)
+                    {
+                        CommunicationsUtilities.Trace(_nodeId, $"Ignoring {packet.Type} after the node send queue closed.");
+                        return;
+                    }
+
+                    if (IsExitPacket(packet))
+                    {
+                        _exitPacketState = ExitPacketState.ExitPacketQueued;
+                    }
+                    _packetWriteQueue.Enqueue(packet);
+                    _packetEnqueued.Set();
                 }
-                _packetWriteQueue.Enqueue(packet);
-                _packetEnqueued.Set();
             }
 
             /// <summary>
@@ -1282,6 +1295,27 @@ namespace Microsoft.Build.BackEnd
             /// a burst of SendData comes in, with 10-20 packets scheduled.</remarks>
             private void DrainPacketQueue(object state)
             {
+                try
+                {
+                    DrainPacketQueueCore(state);
+                }
+                finally
+                {
+                    lock (_packetWriteQueue)
+                    {
+                        _sendCompleted = true;
+                        _packetEnqueued.Dispose();
+                        while (_packetWriteQueue.TryDequeue(out _))
+                        {
+                        }
+                    }
+
+                    _writeBufferMemoryStream.Dispose();
+                }
+            }
+
+            private void DrainPacketQueueCore(object state)
+            {
                 NodeContext context = (NodeContext)state;
                 MemoryStream writeStream = context._writeBufferMemoryStream;
                 Stream serverToClientStream = context._pipeStream;
@@ -1289,6 +1323,11 @@ namespace Microsoft.Build.BackEnd
                 while (true)
                 {
                     context._packetEnqueued.WaitOne();
+                    if (Volatile.Read(ref _closed) != 0)
+                    {
+                        return;
+                    }
+
                     while (context._packetWriteQueue.TryDequeue(out INodePacket packet))
                     {
                         // clear the buffer but keep the underlying capacity to avoid reallocations
@@ -1301,7 +1340,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Write packet type with extended header.
                             // On the receiving side we will check if the extended header is present before making an attempt to read the packet version.
-                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType);
+                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType, _negotiatedPacketVersion);
                             writeStream.WriteByte(rawPacketType);
 
                             // Pad for the packet length
@@ -1407,6 +1446,20 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private void Close()
             {
+                if (Interlocked.Exchange(ref _closed, 1) != 0)
+                {
+                    return;
+                }
+
+                lock (_packetWriteQueue)
+                {
+                    if (!_sendCompleted)
+                    {
+                        _sendCompleted = true;
+                        _packetEnqueued.Set();
+                    }
+                }
+
                 _pipeStream.Dispose();
                 _terminateDelegate(_nodeId);
             }

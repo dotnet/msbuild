@@ -1231,6 +1231,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             _currentConfiguration = taskHostConfiguration;
+            _parentPacketVersion = _nodeEndpoint.NegotiatedPacketVersion;
             ResolveIncomingEnvironment(taskHostConfiguration);
             ResolveIncomingGlobalParameters(taskHostConfiguration);
 
@@ -1390,31 +1391,28 @@ namespace Microsoft.Build.CommandLine
             // the next build performs a fresh apply rather than trusting state left over from this build.
             _lastAppliedConfigEnvironment = null;
 
-            // A task host launched with node reuse is either owned by the process that launched it,
-            // staying connected and resetting in place between builds so it can never outlive its
-            // owner, or pooled, disconnecting into the machine-wide set any process may claim.
-            // PrepareForReuse is how the owner says which: it exists to keep a task out of the
-            // owner's process (owned), or because the owner cannot run the task itself, being a
-            // different runtime or architecture (pooled, and useful to every process that needs it).
-            //
-            // Nothing is sent back. The owner already knows this node is idle: it cannot have
-            // completed the build while a task was still outstanding, which is the invariant
-            // asserted above. It also does not need to be told when the reset below has finished,
-            // because the reset is ordered behind NodeBuildComplete on the same pipe and runs on
-            // the packet-processing thread, so the next build's TaskHostConfiguration cannot
-            // overtake it.
-            if (_nodeReuse && buildComplete.PrepareForReuse && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
+            // Only an explicit, negotiated action establishes ownership. Older parents also send
+            // PrepareForReuse=true, but expect the TaskHost to disconnect and acknowledge shutdown.
+            if (buildComplete.Action == NodeBuildCompleteAction.ReuseWithConnection)
             {
+                Assumed.True(_nodeReuse && buildComplete.PrepareForReuse);
+                // The parent gates ownership on its change wave. A pooled child may have been
+                // launched under a different wave, so its cached wave cannot override this action.
                 PrepareForNextBuild();
                 return;
             }
 
+            if (buildComplete.Action == NodeBuildCompleteAction.Shutdown)
+            {
+                _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+                _shutdownEvent.Set();
+                return;
+            }
+
+            Assumed.Equal(buildComplete.Action, NodeBuildCompleteAction.Legacy);
             if (_nodeReuse)
             {
-                // Either a pooled task host, or opted out of ChangeWaves.Wave18_12: disconnect and
-                // go back to listening, rejoining the machine-wide pool. An older owner never sets
-                // PrepareForReuse for a task host it launched with node reuse, so it lands here too
-                // and behaves exactly as it always has.
+                // Preserve the legacy pooling policy independently of PrepareForReuse.
                 _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
                 _shutdownEvent.Set();
                 return;

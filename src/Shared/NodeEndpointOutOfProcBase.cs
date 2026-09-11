@@ -173,6 +173,8 @@ namespace Microsoft.Build.BackEnd
             get { return _status; }
         }
 
+        internal byte NegotiatedPacketVersion => _negotiatedWriteVersion;
+
         #endregion
 
         #region Properties
@@ -825,6 +827,8 @@ namespace Microsoft.Build.BackEnd
                                     if (hasExtendedHeader)
                                     {
                                         parentVersion = NodePacketTypeExtensions.ReadVersion(deserializationStream);
+                                        // A pooled TaskHost may reconnect to a different parent than its launcher.
+                                        _negotiatedWriteVersion = NodePacketTypeExtensions.GetNegotiatedPacketVersion(parentVersion);
                                     }
 
                                     ITranslator readTranslator = BinaryTranslator.GetReadTranslator(deserializationStream, _sharedReadBuffer);

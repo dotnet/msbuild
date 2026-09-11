@@ -145,5 +145,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11).ShouldBeTrue();
             provider.ConnectionPersists(options).ShouldBe(expectedPersistence);
         }
+
+        [Theory]
+        [InlineData(4)]
+        [InlineData(5)]
+        public void LegacyTaskHostsAreNotTreatedAsPersistentConnections(byte version)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+            HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, TaskHostParameters.Empty, nodeReuse: true);
+
+            provider.ConnectionPersists(options, version).ShouldBeFalse();
+        }
     }
 }

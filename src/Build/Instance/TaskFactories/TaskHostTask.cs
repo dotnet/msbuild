@@ -109,6 +109,7 @@ namespace Microsoft.Build.BackEnd
         /// True if currently connected to the task host; false otherwise.
         /// </summary>
         private bool _connectedToTaskHost = false;
+        private NodeProviderOutOfProcBase.NodeContext _taskHostConnection;
 
         /// <summary>
         /// The provider for task host nodes.
@@ -286,7 +287,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
                     {
-                        _taskHostProvider.SendData(_taskHostNodeKey, new TaskHostTaskCancelled());
+                        _taskHostConnection.SendData(new TaskHostTaskCancelled());
                     }
                 }
 
@@ -375,7 +376,8 @@ namespace Microsoft.Build.BackEnd
                             hostConfiguration,
                             _taskHostParameters,
                             out hostProcessId,
-                            out wasNewlyCreated);
+                            out wasNewlyCreated,
+                            out _taskHostConnection);
                     }
 
                     if (_connectedToTaskHost)
@@ -414,8 +416,9 @@ namespace Microsoft.Build.BackEnd
                         {
                             lock (_taskHostLock)
                             {
-                                _taskHostProvider.DisconnectFromHost(_taskHostNodeKey);
+                                _taskHostProvider.DisconnectFromHost(_taskHostConnection, this);
                                 _connectedToTaskHost = false;
+                                _taskHostConnection = null;
                             }
                         }
                     }
@@ -753,7 +756,7 @@ namespace Microsoft.Build.BackEnd
         {
             bool result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
             var response = new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result);
-            _taskHostProvider.SendData(_taskHostNodeKey, response);
+            _taskHostConnection.SendData(response);
         }
 
         /// <summary>
@@ -783,7 +786,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
-            _taskHostProvider.SendData(_taskHostNodeKey, response);
+            _taskHostConnection.SendData(response);
         }
 
         /// <summary>
@@ -841,7 +844,7 @@ namespace Microsoft.Build.BackEnd
                 // Exceptions propagate to TaskBuilder which handles them identically
                 // to the in-proc TaskHost path (CircularDependencyException, etc.).
                 response ??= new TaskHostBuildResponse(request.RequestId, false, null);
-                _taskHostProvider.SendData(_taskHostNodeKey, response);
+                _taskHostConnection.SendData(response);
             }
         }
 

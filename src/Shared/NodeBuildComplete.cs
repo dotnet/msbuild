@@ -6,6 +6,13 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.BackEnd
 {
+    internal enum NodeBuildCompleteAction
+    {
+        Legacy,
+        ReuseWithConnection,
+        Shutdown
+    }
+
     /// <summary>
     /// The NodeBuildComplete packet is used to indicate to a node that it should clean up its current build and
     /// possibly prepare for node reuse.
@@ -16,13 +23,15 @@ namespace Microsoft.Build.BackEnd
         /// Flag indicating if the node should prepare for reuse after cleanup.
         /// </summary>
         private bool _prepareForReuse;
+        private NodeBuildCompleteAction _action;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public NodeBuildComplete(bool prepareForReuse)
+        public NodeBuildComplete(bool prepareForReuse, NodeBuildCompleteAction action = NodeBuildCompleteAction.Legacy)
         {
             _prepareForReuse = prepareForReuse;
+            _action = action;
         }
 
         /// <summary>
@@ -41,6 +50,8 @@ namespace Microsoft.Build.BackEnd
             get
             { return _prepareForReuse; }
         }
+
+        internal NodeBuildCompleteAction Action => _action;
 
         #region INodePacket Members
 
@@ -65,6 +76,10 @@ namespace Microsoft.Build.BackEnd
         public void Translate(ITranslator translator)
         {
             translator.Translate(ref _prepareForReuse);
+            if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskHostOwnershipMinVersion)
+            {
+                translator.TranslateEnum(ref _action, (int)_action);
+            }
         }
 
         /// <summary>

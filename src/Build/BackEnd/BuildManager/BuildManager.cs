@@ -1514,6 +1514,13 @@ namespace Microsoft.Build.Execution
 
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();
+            lock (_syncLock)
+            {
+                if (_buildManagerState == BuildManagerState.Idle)
+                {
+                    _taskHostNodeManager?.ShutdownConnectedNodes(enableReuse: false);
+                }
+            }
         }
 
         /// <summary>
