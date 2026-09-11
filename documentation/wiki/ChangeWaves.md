@@ -38,7 +38,7 @@ Change wave checks around features will be removed in the release that accompani
 ### 18.12
 - [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)
 - [Events that a task logs from a TaskHost - extended errors, warnings and messages, critical messages, telemetry, and any other event kind the router did not enumerate - reach the parent process instead of being dropped.](https://github.com/dotnet/msbuild/pull/14876)
-- [RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate.](https://github.com/dotnet/msbuild/pull/14599) This change reduces binary-log size and preserves the diagnostic text. Loggers receive one multiline message for each reference. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to retain individual candidate messages.
+- [RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate.](https://github.com/dotnet/msbuild/pull/14599) This change reduces binary-log size. Loggers receive one invariant-English multiline message for each reference. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to retain localized individual candidate messages.
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
