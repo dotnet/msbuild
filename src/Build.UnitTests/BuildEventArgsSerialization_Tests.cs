@@ -972,12 +972,14 @@ namespace Microsoft.Build.UnitTests
         public void RoundtripAssemblyResolutionSearchTraceEventArgs()
         {
             var args = CreateAssemblyResolutionSearchEvent();
+            args.ProjectFile = "project.proj";
 
             Roundtrip(
                 args,
                 e => e.RequestedAssemblyName,
                 e => e.TargetProcessorArchitecture,
                 e => e.Importance.ToString(),
+                e => e.ProjectFile,
                 e => e.Message,
                 e => string.Join("|", e.SearchAttempts.Select(
                     attempt => $"{attempt.SearchPath};{attempt.ParentAssembly};{attempt.FileNameAttempted};{attempt.AssemblyName};{attempt.Result};{attempt.ProcessorArchitecture};{attempt.IsAssemblyFoldersExSearch}")));

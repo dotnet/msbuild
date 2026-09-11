@@ -527,29 +527,34 @@ namespace Microsoft.Build.Logging
             BuildEventArgsFields fields = ReadBuildEventArgsFields(readImportance: true);
             string requestedAssemblyName = ReadOptionalString() ?? string.Empty;
             string? targetProcessorArchitecture = ReadOptionalString();
+            var usedFormats = (AssemblyResolutionSearchTraceFormat)ReadInt32();
             var formats = new AssemblyResolutionSearchTraceMessageFormats(
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty);
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchPath),
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchPathAddedByParentAssembly),
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchedAssemblyFoldersEx),
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.FileNotFound),
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.FusionNamesDidNotMatch),
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.TargetHadNoFusionName),
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.NotInGac),
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.NotAFileNameOnDisk),
+                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.ProcessorArchitectureDoesNotMatch));
 
             int count = ReadInt32();
             var attempts = new AssemblyResolutionSearchAttempt[count];
+            AssemblyResolutionSearchAttempt? previous = null;
             for (int i = 0; i < count; i++)
             {
-                attempts[i] = new AssemblyResolutionSearchAttempt(
+                var unchangedContext = (AssemblyResolutionSearchAttemptContext)_binaryReader.ReadByte();
+                var attempt = new AssemblyResolutionSearchAttempt(
                     ReadOptionalString(),
-                    ReadOptionalString(),
-                    ReadOptionalString(),
+                    (unchangedContext & AssemblyResolutionSearchAttemptContext.SearchPathUnchanged) != 0 ? previous?.SearchPath : ReadOptionalString(),
+                    (unchangedContext & AssemblyResolutionSearchAttemptContext.ParentAssemblyUnchanged) != 0 ? previous?.ParentAssembly : ReadOptionalString(),
                     ReadOptionalString(),
                     (AssemblyResolutionSearchResult)ReadInt32(),
                     ReadOptionalString(),
-                    ReadBoolean());
+                    (unchangedContext & AssemblyResolutionSearchAttemptContext.AssemblyFoldersExUnchanged) != 0 ? previous?.IsAssemblyFoldersExSearch ?? false : ReadBoolean());
+                attempts[i] = attempt;
+                previous = attempt;
             }
 
             var e = new AssemblyResolutionSearchTraceEventArgs(
@@ -561,8 +566,14 @@ namespace Microsoft.Build.Logging
                 fields.Importance,
                 fields.Timestamp);
             SetCommonFields(e, fields);
+            e.ProjectFile = fields.ProjectFile;
             return e;
         }
+
+        private string ReadAssemblyResolutionSearchTraceFormat(
+            AssemblyResolutionSearchTraceFormat usedFormats,
+            AssemblyResolutionSearchTraceFormat format)
+            => (usedFormats & format) != 0 ? ReadOptionalString() ?? string.Empty : string.Empty;
 
         private BuildEventArgs ReadProjectImportedEventArgs()
         {

@@ -50,7 +50,7 @@ public sealed class AssemblyResolutionSearchLogging_Tests
     public void ChangeWaveOptOutPreservesIndividualMessages()
     {
         using TestEnvironment env = TestEnvironment.Create();
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_12.ToString());
         ChangeWaves.ResetStateForTests();
 
         MockEngine engine = LogSearchAttempts();
@@ -73,7 +73,7 @@ public sealed class AssemblyResolutionSearchLogging_Tests
         ChangeWaves.ResetStateForTests();
         string aggregatedLog = LogSearchAttempts().Log;
 
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_12.ToString());
         ChangeWaves.ResetStateForTests();
         string legacyLog = LogSearchAttempts().Log;
 

@@ -664,7 +664,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Handle logged messages from the task host.
         /// </summary>
-        private void HandleLoggedMessage(LogMessagePacket logMessagePacket)
+        internal void HandleLoggedMessage(LogMessagePacket logMessagePacket)
         {
             switch (logMessagePacket.EventType)
             {
@@ -676,6 +676,7 @@ namespace Microsoft.Build.BackEnd
                     break;
                 case LoggingEventType.TaskCommandLineEvent:
                 case LoggingEventType.BuildMessageEvent:
+                case LoggingEventType.AssemblyResolutionSearchTraceEvent:
                     this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.CustomEvent:
