@@ -895,6 +895,100 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void Initialize_CalledTwice_DoesNotDuplicateTrackedEvents()
+        {
+            _terminallogger.Initialize(_centralNodeEventSource, _nodeCount);
+
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+            _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Reported once"));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded: true));
+
+            int occurrenceCount = _outputWriter.ToString()
+                .Split(["Reported once"], StringSplitOptions.None)
+                .Length - 1;
+            occurrenceCount.ShouldBe(1);
+        }
+
+        [Fact]
+        public void BuildStarted_SecondRestoreBuild_DoesNotRestartProjectTimingForMSBuildTask()
+        {
+            var stopwatches = new List<MockStopwatch>();
+            _terminallogger._createStopwatch = () =>
+            {
+                var stopwatch = new MockStopwatch();
+                stopwatches.Add(stopwatch);
+                return stopwatch;
+            };
+
+            BuildEventContext firstContext = MakeBuildEventContext(evalId: 1, projectContextId: 1);
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: firstContext));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, "Restore", firstContext));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(
+                _projectFile,
+                succeeded: true,
+                buildEventContext: firstContext));
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true, firstContext));
+
+            BuildEventContext secondContext = MakeBuildEventContext(evalId: 1, projectContextId: 2);
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs(secondContext));
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile2, buildEventContext: secondContext));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile2, "Restore", secondContext));
+
+            stopwatches.Count.ShouldBe(2);
+            stopwatches[1].ElapsedSeconds.ShouldBe(0.1);
+
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile2, "MSBuild", secondContext));
+
+            stopwatches[1].IsStarted.ShouldBeTrue();
+            stopwatches[1].ElapsedSeconds.ShouldBe(0.1);
+
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile2, "MSBuild", true, secondContext));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile2, true, secondContext));
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true, secondContext));
+        }
+
+        [Fact]
+        public void ProjectStarted_UnicodeRestoreLookalike_IsNotTreatedAsRestore()
+        {
+            var stopwatch = new MockStopwatch();
+            _terminallogger._createStopwatch = () => stopwatch;
+
+            BuildEventContext context = MakeBuildEventContext();
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs(context));
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: context));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, "\u0152estore", context));
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "MSBuild", context));
+
+            stopwatch.IsStarted.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void TaskEvents_UnicodeMSBuildLookalike_AreNotTreatedAsMSBuild()
+        {
+            var stopwatch = new MockStopwatch();
+            _terminallogger._createStopwatch = () => stopwatch;
+
+            BuildEventContext context = MakeBuildEventContext();
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs(context));
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: context));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, buildEventContext: context));
+
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "\u014DSBuild", context));
+            stopwatch.IsStarted.ShouldBeTrue();
+
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "MSBuild", context));
+            stopwatch.IsStarted.ShouldBeFalse();
+
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "\u014DSBuild", true, context));
+            stopwatch.IsStarted.ShouldBeFalse();
+
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "MSBuild", true, context));
+            stopwatch.IsStarted.ShouldBeTrue();
+        }
 
         [Fact]
         public async Task DisplayNodesOverwritesWithNewTargetFramework()
