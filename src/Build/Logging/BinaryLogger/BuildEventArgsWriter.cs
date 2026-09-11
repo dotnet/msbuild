@@ -680,6 +680,12 @@ namespace Microsoft.Build.Logging
             Write(details.IsResolved);
             WriteDeduplicatedString(details.UnresolvedPrimaryItemSpec);
 
+            Write(details.PrimarySourceItemSpecs.Count);
+            for (int i = 0; i < details.PrimarySourceItemSpecs.Count; i++)
+            {
+                WriteDeduplicatedString(details.PrimarySourceItemSpecs[i]);
+            }
+
             Write(details.Dependees.Count);
             for (int i = 0; i < details.Dependees.Count; i++)
             {

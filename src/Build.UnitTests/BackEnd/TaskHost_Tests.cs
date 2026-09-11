@@ -541,7 +541,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
 
         private static AssemblyConflictReferenceDetails CreateConflictVictimDetails()
             => new(
@@ -550,7 +551,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
 
         [Fact]
         public void TestLogAssemblyConflictDependencyDetailsMessageEventMP()
@@ -629,6 +631,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
             engine.MessageEvents[2].ShouldBeSameAs(detailsEvent);
             engine.WarningEvents.ShouldHaveSingleItem().ShouldBeSameAs(warningEvent);
             engine.Log.ShouldContain("Received telemetry event 'Task telemetry'");
+        }
+
+        [Fact]
+        public void TaskHostTaskIgnoresEventsUnsupportedByBuildEngine()
+        {
+            var engine = new BaseBuildEngine();
+            var telemetryEvent = new TelemetryEventArgs
+            {
+                EventName = "Task telemetry",
+                Properties = new Dictionary<string, string> { ["Property"] = "Value" },
+            };
+
+            Should.NotThrow(() => TaskHostTask.HandleLoggedMessage(
+                engine,
+                new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, telemetryEvent))));
+            Should.NotThrow(() => TaskHostTask.HandleLoggedMessage(
+                engine,
+                new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, new UnknownBuildEventArgs()))));
         }
 
         /// <summary>
@@ -969,6 +989,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         #region Helper Classes
+
+        private sealed class UnknownBuildEventArgs : BuildEventArgs
+        {
+        }
+
+        private sealed class BaseBuildEngine : IBuildEngine
+        {
+            public bool ContinueOnError => false;
+
+            public int LineNumberOfTaskNode => 0;
+
+            public int ColumnNumberOfTaskNode => 0;
+
+            public string ProjectFileOfTaskNode => string.Empty;
+
+            public void LogErrorEvent(BuildErrorEventArgs e)
+            {
+            }
+
+            public void LogWarningEvent(BuildWarningEventArgs e)
+            {
+            }
+
+            public void LogMessageEvent(BuildMessageEventArgs e)
+            {
+            }
+
+            public void LogCustomEvent(CustomBuildEventArgs e)
+            {
+            }
+
+            public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
+                => false;
+        }
 
         /// <summary>
         /// Create a custom message event to make sure it can get sent correctly

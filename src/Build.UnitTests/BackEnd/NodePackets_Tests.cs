@@ -409,7 +409,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
 
         private static AssemblyConflictReferenceDetails CreateAssemblyConflictVictimDetails()
             => new(
@@ -418,7 +419,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
 
         private static AssemblyConflictDependencyDetailsMessageEventArgs CreateAssemblyConflictDependencyDetails()
             => new(

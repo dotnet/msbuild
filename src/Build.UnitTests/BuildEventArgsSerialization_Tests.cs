@@ -1100,6 +1100,7 @@ namespace Microsoft.Build.UnitTests
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: [],
                 dependees);
 
             var victor = new AssemblyConflictReferenceDetails(
@@ -1108,7 +1109,8 @@ namespace Microsoft.Build.UnitTests
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/deps/v1/D.dll", ["D"])]);
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
 
             var args = new AssemblyConflictWarningEventArgs(
                 "D",
@@ -1127,6 +1129,7 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(
                 args,
                 e => e.Message,
+                e => e.Victor.PrimarySourceItemSpecs.Count.ToString(),
                 e => e.Victor.Dependees.Count.ToString(),
                 e => e.Victim.Dependees.Count.ToString(),
                 e => DescribeConflictReferenceDetails(e.Victim));
@@ -1141,6 +1144,7 @@ namespace Microsoft.Build.UnitTests
 
         private static string DescribeConflictReferenceDetails(AssemblyConflictReferenceDetails details)
             => $"{details.FusionName};{details.FullPath};{details.IsPrimary};{details.IsResolved};{details.UnresolvedPrimaryItemSpec};"
+                + $"[{string.Join(",", details.PrimarySourceItemSpecs)}];"
                 + string.Join("|", details.Dependees.Select(d => $"{d.DependeeFullPath}=[{string.Join(",", d.SourceItemSpecs)}]"));
 
         private static AssemblyConflictDependencyDetailsMessageEventArgs CreateAssemblyConflictDependencyDetailsEvent()
@@ -1151,7 +1155,8 @@ namespace Microsoft.Build.UnitTests
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
 
             var victim = new AssemblyConflictReferenceDetails(
                 "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
@@ -1159,7 +1164,8 @@ namespace Microsoft.Build.UnitTests
                 isPrimary: false,
                 isResolved: false,
                 unresolvedPrimaryItemSpec: "D, Version=2.0.0.0",
-                [new AssemblyConflictDependee("/libs/B.dll", ["B", "B2"])]);
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B", "B2"])]);
 
             return new AssemblyConflictDependencyDetailsMessageEventArgs(
                 victor,
@@ -1181,7 +1187,8 @@ namespace Microsoft.Build.UnitTests
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
 
             var victim = new AssemblyConflictReferenceDetails(
                 "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
@@ -1189,7 +1196,8 @@ namespace Microsoft.Build.UnitTests
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
 
             return new AssemblyConflictWarningEventArgs(
                 "D",

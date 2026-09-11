@@ -1299,7 +1299,7 @@ namespace Microsoft.Build.Tasks
                             // Log the assemblies and primary source items which are related to the conflict which was just logged.
                             Reference victor = dependencyTable.GetReference(conflictCandidate.ConflictVictorName);
 
-                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
                             {
                                 LogConflictStructured(assemblyName, fusionName, conflictCandidate, victor, logWarning);
                             }
@@ -2315,7 +2315,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Logs the structured equivalent of <see cref="LogConflict(Reference, string, StringBuilder)"/> and
         /// <see cref="LogReferenceDependenciesAndSourceItemsToStringBuilder(string, Reference, StringBuilder, bool)"/>.
-        /// <see cref="ChangeWaves.Wave18_11"/> controls this behavior.
+        /// <see cref="ChangeWaves.Wave18_12"/> controls this behavior.
         /// The method does not build large dependency-list strings until a consumer requests the event message.
         /// </summary>
         private void LogConflictStructured(AssemblyNameExtension assemblyName, string fusionName, Reference conflictCandidate, Reference victor, bool logWarning)
@@ -2457,22 +2457,16 @@ namespace Microsoft.Build.Tasks
 
             string unresolvedPrimaryItemSpec = null;
             HashSet<Reference> dependeeReferences = reference.GetDependees();
-            int dependeeCount = dependeeReferences.Count + (reference.IsPrimary && reference.IsResolved ? 1 : 0);
-            var dependees = new AssemblyConflictDependee[dependeeCount];
+            IReadOnlyList<string> primarySourceItemSpecs = reference.IsPrimary && reference.IsResolved
+                ? GetSourceItemSpecs(reference)
+                : [];
+            var dependees = new AssemblyConflictDependee[dependeeReferences.Count];
             int dependeeIndex = 0;
 
-            if (reference.IsPrimary)
+            if (reference.IsPrimary && !reference.IsResolved)
             {
-                if (reference.IsResolved)
-                {
-                    // Include the primary reference as its own dependee to preserve the legacy text.
-                    dependees[dependeeIndex++] = BuildConflictDependee(reference);
-                }
-                else
-                {
-                    // Use ToString() because the legacy text contains the escaped include.
-                    unresolvedPrimaryItemSpec = reference.PrimarySourceItem?.ToString();
-                }
+                // Use ToString() because the legacy text contains the escaped include.
+                unresolvedPrimaryItemSpec = reference.PrimarySourceItem?.ToString();
             }
 
             foreach (Reference dependeeReference in dependeeReferences)
@@ -2486,12 +2480,16 @@ namespace Microsoft.Build.Tasks
                 reference.IsPrimary,
                 reference.IsResolved,
                 unresolvedPrimaryItemSpec,
+                primarySourceItemSpecs,
                 dependees);
         }
 
         private static AssemblyConflictDependee BuildConflictDependee(Reference dependeeReference)
+            => new(dependeeReference.FullPath, GetSourceItemSpecs(dependeeReference));
+
+        private static IReadOnlyList<string> GetSourceItemSpecs(Reference reference)
         {
-            Dictionary<string, ITaskItem>.ValueCollection sourceItems = dependeeReference.GetSourceItems();
+            Dictionary<string, ITaskItem>.ValueCollection sourceItems = reference.GetSourceItems();
             var sourceItemSpecs = new string[sourceItems.Count];
             int sourceItemIndex = 0;
             foreach (ITaskItem sourceItem in sourceItems)
@@ -2499,7 +2497,7 @@ namespace Microsoft.Build.Tasks
                 sourceItemSpecs[sourceItemIndex++] = sourceItem.ItemSpec;
             }
 
-            return new AssemblyConflictDependee(dependeeReference.FullPath, sourceItemSpecs);
+            return sourceItemSpecs;
         }
 
         private static AssemblyConflictLossReason ToPublicLossReason(ConflictLossReason reason)

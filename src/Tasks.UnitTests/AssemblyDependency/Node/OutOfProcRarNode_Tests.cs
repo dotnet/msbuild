@@ -130,14 +130,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
             var victim = new AssemblyConflictReferenceDetails(
                 "D, Version=2.0.0.0",
                 "/libs/v2/D.dll",
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
-                [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
             var formats = new AssemblyConflictMessageFormats(
                 "There was a conflict between \"{0}\" and \"{1}\".",
                 "Choosing \"{0}\" because it has a higher version.",

@@ -37,6 +37,11 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.12
 - [RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate.](https://github.com/dotnet/msbuild/pull/14599) This change reduces binary-log size. The event's default message uses the invariant culture, while the console and terminal loggers render it using the current UI culture. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to retain individual candidate messages.
+- RAR now logs structured events for version-conflict dependency details. These events replace large text messages for MSB3277 warnings and low-importance diagnostics.
+  - The events contain victor and victim identities, dependency chains, and source items.
+  - Events capture the producer's localized templates so replay preserves the text from the original build regardless of the reader's culture.
+  - Strict readers older than binary-log format 28 reject the newer format. Forward-compatible readers skip the structured conflict records.
+  - Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to restore the legacy localized plain-text events.
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
@@ -44,11 +49,6 @@ Change wave checks around features will be removed in the release that accompani
 - [Restore no longer discards a ProjectRootElementCache that reloads changed files from disk, so the build that follows an implicit restore does not re-parse the import closure.](https://github.com/dotnet/msbuild/pull/14558)
 - [Use optimized MSBuild file specification matching and enumeration](https://github.com/dotnet/msbuild/pull/14663). Regex-backed file globs use culture-invariant case folding; set `MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS=1` to preserve legacy current-culture folding without disabling other Wave 18.11 features.
 - [Isolated (`-graph -isolate`) builds fail deterministically with MSB4252 on a cross-project reference to a target that is not declared via `ProjectReferenceTargets`, instead of passing if the referenced project happened to build on that node previously.](https://github.com/dotnet/msbuild/pull/14280)
-- RAR now logs structured events for version-conflict dependency details. These events replace large text messages for MSB3277 warnings and low-importance diagnostics.
-  - The events contain victor and victim identities, dependency chains, and source items.
-  - Events capture the producer's localized templates so replay preserves the text from the original build regardless of the reader's culture.
-  - Strict readers older than binary-log format 29 reject the newer format. Forward-compatible readers skip the structured conflict records.
-  - Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to restore the legacy localized plain-text events.
 
 ### 18.10
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
