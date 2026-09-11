@@ -161,11 +161,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal ManualResetEvent TaskCancelledEvent => _taskCancelledEvent;
 
-        /// This is the wrapper for the user task to be executed.
-        /// We are providing a wrapper to create a possibility of executing the task in a separate AppDomain
-        /// </summary>
-        private OutOfProcTaskAppDomainWrapper _taskWrapper;
-
         /// <summary>
         /// Flag indicating if we should debug communications or not.
         /// </summary>
@@ -1327,13 +1322,44 @@ namespace Microsoft.Build.CommandLine
             // multiple tasks may be active on the same TaskHost process.
             foreach (var kvp in _taskContexts)
             {
-                var ctxWrapper = kvp.Value.TaskWrapper;
-                ctxWrapper?.CancelTask();
-            }
+                var context = kvp.Value;
+                lock (context)
+                {
+                    var ctxWrapper = context.TaskWrapper;
+                    if (context.State == TaskExecutionState.Completed || ctxWrapper is null || ctxWrapper.CancelPending)
+                    {
+                        continue;
+                    }
 
-            // Also cancel via the shared field for the case where no context exists yet
-            var wrapper = _taskWrapper;
-            wrapper?.CancelTask();
+                    // Cancellation runs on the packet-processing thread, not the task's Execute thread.
+                    var previousContext = _currentTaskContext.Value;
+#if FEATURE_APPDOMAIN
+                    object previousContextId = CallContext.LogicalGetData(TaskContextIdSlot);
+#endif
+                    try
+                    {
+                        _currentTaskContext.Value = context;
+#if FEATURE_APPDOMAIN
+                        CallContext.LogicalSetData(TaskContextIdSlot, context.TaskId);
+#endif
+                        ctxWrapper.CancelTask();
+                    }
+                    finally
+                    {
+                        _currentTaskContext.Value = previousContext;
+#if FEATURE_APPDOMAIN
+                        if (previousContextId is null)
+                        {
+                            CallContext.FreeNamedDataSlot(TaskContextIdSlot);
+                        }
+                        else
+                        {
+                            CallContext.LogicalSetData(TaskContextIdSlot, previousContextId);
+                        }
+#endif
+                    }
+                }
+            }
 
             if (Environment.GetEnvironmentVariable("MSBUILDTASKHOSTABORTTASKONCANCEL") == "1")
             {
@@ -1627,7 +1653,6 @@ namespace Microsoft.Build.CommandLine
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 taskWrapper = new OutOfProcTaskAppDomainWrapper();
-                _taskWrapper = taskWrapper;
 
                 // Store in per-task context so CancelTask() can find the correct wrapper
                 // when multiple tasks are active (nested builds via BuildProjectFile callbacks).
@@ -1724,18 +1749,23 @@ namespace Microsoft.Build.CommandLine
                     _fileAccessData = new List<FileAccessData>();
 #endif
 
-                    // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
-                    // Use local variable -- _taskWrapper may have been overwritten by a nested task.
-                    taskWrapper?.CleanupTask();
-                    // Mark context as completed and clean up
                     if (taskContext is not null)
                     {
-                        taskContext.State = TaskExecutionState.Completed;
-                        _currentTaskContext.Value = null;
+                        // Keep the context and AppDomain alive until an in-flight Cancel returns.
+                        lock (taskContext)
+                        {
+                            taskContext.State = TaskExecutionState.Completed;
+                            taskWrapper?.CleanupTask();
+                            _currentTaskContext.Value = null;
 #if FEATURE_APPDOMAIN
-                        CallContext.FreeNamedDataSlot(TaskContextIdSlot);
+                            CallContext.FreeNamedDataSlot(TaskContextIdSlot);
 #endif
-                        RemoveTaskContext(taskContext.TaskId);
+                            RemoveTaskContext(taskContext.TaskId);
+                        }
+                    }
+                    else
+                    {
+                        taskWrapper?.CleanupTask();
                     }
 
                     // The task has now fully completed executing.
