@@ -1353,6 +1353,21 @@
     <value>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</value>
     <comment>{StrBegin="MSB4285: "}</comment>
   </data>
+  <data name="MultiThreadedStrictModeEnabled" xml:space="preserve">
+    <value>Multi-threaded strict mode is enabled. Process current directory: "{0}".</value>
+    <comment>{0} is the full path of the sentinel directory.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeAlreadyActive" xml:space="preserve">
+    <value>Another strict build is already active in this process. Finish it before starting a new strict build.</value>
+  </data>
+  <data name="MultiThreadedStrictModeCurrentDirectoryChanged" xml:space="preserve">
+    <value>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code.</value>
+    <comment>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeUnresolvedPathWrite" xml:space="preserve">
+    <value>MSB4287: Multi-threaded strict mode found "{1}" in the sentinel directory "{2}" after task "{0}". Resolve paths with TaskEnvironment. The write may come from another task, a logger, or host code.</value>
+    <comment>{StrBegin="MSB4287: "}{0} is the task checked. {1} is a comma-separated list of file and directory names. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
+  </data>
   <data name="CouldNotLoadSdkResolver" xml:space="preserve">
     <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>
     <comment>{StrBegin="MSB4237: "}</comment>

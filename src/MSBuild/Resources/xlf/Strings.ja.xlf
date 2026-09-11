@@ -251,9 +251,14 @@
                      In case of multi-threaded mode on
                      and MSBUILDFORCEALLTASKSOUTOFPROC=1
                      maxCpuCount cannot be greater than 256.
+                     Builds run from an empty sentinel current directory by
+                     default. Changes to the process directory and files written
+                     there are reported as task errors.
+                     Set MSBUILDMTNONSTRICT=1 to disable these checks while
+                     keeping multi-threaded execution enabled.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded[:true|false]
+        <target state="needs-review-translation">  -multithreaded[:true|false]
                      MSBuild で試験的なマルチスレッド モードを有効にします。
                      これは、MSBuild でプロジェクトのビルドを
                      並列実行する際に、複数のプロセスではなく
@@ -315,8 +320,8 @@
     </note>
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
-        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1072: マルチスレッド モードの値が無効です。{0}</target>
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. It must be "true" or "false". {0}</source>
+        <target state="needs-review-translation">MSBUILD : error MSB1072: マルチスレッド モードの値が無効です。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

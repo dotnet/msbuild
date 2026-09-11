@@ -577,6 +577,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enables running build in multiple in-proc nodes.
         /// </summary>
+        /// <remarks>
+        /// Multi-threaded builds use an empty sentinel current directory and check for process-directory
+        /// changes and unresolved relative-path writes. Set the MSBUILDMTNONSTRICT environment variable to
+        /// 1 or true to disable these checks without disabling multi-threading.
+        /// </remarks>
         public bool MultiThreaded
         {
             get => _multiThreaded;

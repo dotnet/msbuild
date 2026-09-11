@@ -112,6 +112,46 @@ namespace Microsoft.Build.Engine.UnitTests
 
         public void Dispose() => _env.Dispose();
 
+        [Fact]
+        public void ReusedServerHonorsStrictOptOutPerRequest()
+        {
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            var project = _env.CreateFile("strict-server.proj", $"""
+                <Project>
+                  <UsingTask TaskName="ProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                  <UsingTask TaskName="StrictModeProbeTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                  <Target Name="Build">
+                    <ProcessIdTask>
+                      <Output PropertyName="PID" TaskParameter="Pid" />
+                    </ProcessIdTask>
+                    <Message Text="Server ID is $(PID)" Importance="high" />
+                    <StrictModeProbeTask Behavior="ChangeCurrentDirectory" />
+                  </Target>
+                </Project>
+                """);
+            int? serverPid = null;
+            bool[] optOutValues = [false, true, false];
+            foreach (bool optOut in optOutValues)
+            {
+                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? "1" : null);
+                string output = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"\"{project.Path}\" -m:1 -mt -nr:true", out bool success, false, _output);
+                int pid = ParseNumber(output, "Server ID is ");
+                if (serverPid != pid)
+                {
+                    _env.WithTransientProcess(pid);
+                }
+                serverPid ??= pid;
+
+                pid.ShouldBe(serverPid.Value);
+                pid.ShouldNotBe(ParseNumber(output, "Process ID is "));
+                success.ShouldBe(optOut, output);
+                output.Contains("MSB4286").ShouldBe(!optOut, output);
+            }
+        }
+
         [Theory]
         [InlineData("4")]
         [InlineData("5")]

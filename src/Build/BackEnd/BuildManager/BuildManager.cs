@@ -268,6 +268,14 @@ namespace Microsoft.Build.Execution
 
         private CoordinatorClient? _coordinatorClient;
 
+        /// <summary>
+        /// The installed multi-threaded strict mode scope, or <see langword="null"/> when strict mode is not active
+        /// for the build in progress.
+        /// </summary>
+        private MultiThreadedStrictModeScope? _multiThreadedStrictModeScope;
+
+        private MultiThreadedStrictModeScope.CurrentDirectorySnapshot? _savedCurrentDirectory;
+
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
 #if DEBUG
@@ -574,6 +582,7 @@ namespace Microsoft.Build.Execution
                 parameters.LogTaskInputs = true;
             }
 
+            ExceptionDispatchInfo? strictEntryFailure = null;
             lock (_syncLock)
             {
                 AttachDebugger();
@@ -614,6 +623,26 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+                string? nonStrictValue = null;
+                bool strictMode = _buildParameters.MultiThreaded
+                    && !EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMTNONSTRICT", out nonStrictValue);
+                var buildEntryDirectory = strictMode || (_buildParameters.MultiThreaded && _buildParameters.SaveOperatingEnvironment)
+                    ? MultiThreadedStrictModeScope.CaptureCurrentDirectory()
+                    : default;
+
+                if (_buildParameters.MultiThreaded)
+                {
+                    _buildParameters.BuildProcessEnvironment.TryGetValue("MSBUILDMTNONSTRICT", out string? capturedValue);
+                    if (!string.Equals(capturedValue, nonStrictValue, StringComparison.Ordinal))
+                    {
+                        _buildParameters.SetBuildProcessEnvironmentVariable("MSBUILDMTNONSTRICT", nonStrictValue);
+                    }
+                }
+
+                // A strict scope owns its own restoration; rejected scope entry must not restore another build's CWD.
+                _savedCurrentDirectory = _buildParameters.MultiThreaded && !strictMode && _buildParameters.SaveOperatingEnvironment
+                    ? buildEntryDirectory
+                    : null;
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
@@ -635,7 +664,9 @@ namespace Microsoft.Build.Execution
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
                 {
-                    _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
+                    _buildParameters.OutputResultsCacheFile = strictMode
+                        ? FileUtilities.NormalizePath(buildEntryDirectory.Directory, "msbuild-cache")
+                        : FileUtilities.NormalizePath("msbuild-cache");
                 }
 
                 // Launch the RAR node before the detoured launcher overrides the default node launcher.
@@ -750,10 +781,52 @@ namespace Microsoft.Build.Execution
                     _workQueue = new ActionBlock<Action>(action => ProcessWorkQueue(action));
                 }
 
+                // Enter strict mode last: everything above (loggers in particular) still resolves paths against
+                // the directory the build was launched from, and only project execution should see the sentinel.
+                if (strictMode)
+                {
+                    try
+                    {
+                        // EndBuild serializes output caches before restoring CWD. Resolve their paths now.
+                        if (_buildParameters.UsesOutputCache())
+                        {
+                            _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(buildEntryDirectory.Directory, _buildParameters.OutputResultsCacheFile);
+                        }
+
+                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter(_buildParameters.BuildId, buildEntryDirectory);
+                        loggingService.LogComment(
+                            BuildEventContext.Invalid,
+                            MessageImportance.Low,
+                            "MultiThreadedStrictModeEnabled",
+                            Directory.GetCurrentDirectory());
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        strictEntryFailure = ExceptionDispatchInfo.Capture(e);
+                        _overallBuildSuccess = false;
+                        _buildParameters.OutputResultsCacheFile = null;
+                    }
+                }
+
                 _buildManagerState = BuildManagerState.Building;
 
                 _noActiveSubmissionsEvent!.Set();
                 _noNodesActiveEvent!.Set();
+            }
+
+            if (strictEntryFailure is not null)
+            {
+                // Drain callbacks through normal teardown, outside _syncLock, before allowing another build.
+                try
+                {
+                    EndBuild();
+                }
+                catch (Exception cleanupFailure) when (!ExceptionHandling.IsCriticalException(cleanupFailure))
+                {
+                    throw new AggregateException(strictEntryFailure.SourceException, cleanupFailure);
+                }
+
+                strictEntryFailure.Throw();
             }
 
             ILoggingService InitializeLoggingService()
@@ -1097,6 +1170,7 @@ namespace Microsoft.Build.Execution
             }
 
             var exceptionsThrownInEndBuild = false;
+            bool nodesStopped = false;
 
             try
             {
@@ -1126,6 +1200,8 @@ namespace Microsoft.Build.Execution
                         EmitEndBuildHangDiagnostics("WaitingForNodes", hangWatch);
                     }
                 }
+
+                nodesStopped = true;
 
                 // Wait for all of the actions in the work queue to drain.
                 // _workQueue.Completion.Wait() could throw here if there was an unhandled exception in the work queue,
@@ -1193,6 +1269,33 @@ namespace Microsoft.Build.Execution
             }
             finally
             {
+                // Restore before logger shutdown. Defer restoration errors until the remaining cleanup completes.
+                try
+                {
+                    if (_multiThreadedStrictModeScope is not null)
+                    {
+                        _multiThreadedStrictModeScope.Exit();
+                    }
+                    else if (nodesStopped && _savedCurrentDirectory is not null)
+                    {
+                        _savedCurrentDirectory.Value.Restore();
+                    }
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    if (!exceptionsThrownInEndBuild)
+                    {
+                        _threadException ??= ExceptionDispatchInfo.Capture(e);
+                    }
+
+                    exceptionsThrownInEndBuild = true;
+                }
+                finally
+                {
+                    _multiThreadedStrictModeScope = null;
+                    _savedCurrentDirectory = null;
+                }
+
                 try
                 {
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;

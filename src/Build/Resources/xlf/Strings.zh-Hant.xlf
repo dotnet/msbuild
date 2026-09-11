@@ -654,6 +654,26 @@
         <target state="translated">已產生中繼專案 "{0}"。</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>Another strict build is already active in this process. Finish it before starting a new strict build.</source>
+        <target state="new">Another strict build is already active in this process. Finish it before starting a new strict build.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code.</source>
+        <target state="new">MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
+        <target state="new">Multi-threaded strict mode is enabled. Process current directory: "{0}".</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode found "{1}" in the sentinel directory "{2}" after task "{0}". Resolve paths with TaskEnvironment. The write may come from another task, a logger, or host code.</source>
+        <target state="new">MSB4287: Multi-threaded strict mode found "{1}" in the sentinel directory "{2}" after task "{0}". Resolve paths with TaskEnvironment. The write may come from another task, a logger, or host code.</target>
+        <note>{StrBegin="MSB4287: "}{0} is the task checked. {1} is a comma-separated list of file and directory names. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>

@@ -638,6 +638,11 @@
                      In case of multi-threaded mode on
                      and MSBUILDFORCEALLTASKSOUTOFPROC=1
                      maxCpuCount cannot be greater than 256.
+                     Builds run from an empty sentinel current directory by
+                     default. Changes to the process directory and files written
+                     there are reported as task errors.
+                     Set MSBUILDMTNONSTRICT=1 to disable these checks while
+                     keeping multi-threaded execution enabled.
                      (Short form: -mt)
     </value>
   </data>
@@ -1496,7 +1501,7 @@
     </comment>
   </data>
   <data name="InvalidMultiThreadedValue" xml:space="preserve">
-    <value>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</value>
+    <value>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. It must be "true" or "false". {0}</value>
     <comment>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
