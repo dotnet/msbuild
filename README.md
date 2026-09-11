@@ -19,7 +19,6 @@ To get started with **Visual Studio 2026**:
 
 1. [Install Visual Studio 2026](https://visualstudio.microsoft.com/downloads/) with the components listed in [`.vsconfig`](.vsconfig):
    - **.NET desktop development** workload
-   - **.NET Framework 3.5 development tools** individual component
 2. [Install .NET Framework 3.5](https://learn.microsoft.com/dotnet/framework/install/dotnet-35-windows-11). A full MSBuild build includes outputs that require this.
 3. Ensure [long path support](https://learn.microsoft.com/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later) is enabled at the Windows level.
 4. Open a `Developer Command Prompt for VS 2026` prompt.
