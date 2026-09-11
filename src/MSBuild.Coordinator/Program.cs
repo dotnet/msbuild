@@ -5,6 +5,15 @@ using Microsoft.Build.Coordinator;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Framework.Telemetry;
 
+static string FormatHighPriorityReservedNodes(int value)
+    => value == 0 ? "0 (disabled)" : value.ToString();
+
+static string FormatMaxNodesPerBuild(int value)
+    => value == 0 ? "0 (uncapped)" : value.ToString();
+
+static string FormatMaxNodesPerBuildWhenIdle(int value)
+    => value == 0 ? "0 (disabled)" : value.ToString();
+
 TelemetryManager.Instance.Initialize(isStandalone: true);
 
 CoordinatorSettings settings = CoordinatorSettings.FromEnvironment();
@@ -22,6 +31,14 @@ if (!createdNew)
 Console.WriteLine($"MSBuild Coordinator starting.");
 Console.WriteLine($"  Pipe: {settings.PipeName}");
 Console.WriteLine($"  Node budget: {settings.TotalNodeBudget}");
+Console.WriteLine($"  High-priority reserved nodes: {FormatHighPriorityReservedNodes(settings.HighPriorityReservedNodes)}");
+Console.WriteLine($"  Max nodes per build: {FormatMaxNodesPerBuild(settings.MaxNodesPerBuild)}");
+Console.WriteLine($"  Max nodes per build when idle: {FormatMaxNodesPerBuildWhenIdle(settings.MaxNodesPerBuildWhenIdle)}");
+if (settings.DefaultNodeSettingsOptOutMessage is { } defaultNodeSettingsOptOutMessage)
+{
+    Console.WriteLine($"  Default node settings are active. {defaultNodeSettingsOptOutMessage}");
+}
+
 Console.WriteLine($"  Heartbeat interval: {settings.HeartbeatIntervalMs}ms");
 Console.WriteLine($"  Shutdown timeout: {settings.ShutdownTimeoutMs}ms");
 
