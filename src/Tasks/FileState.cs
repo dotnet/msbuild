@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -131,7 +131,9 @@ namespace Microsoft.Build.Tasks
                             }
 
                             // Throw nice message as far as we can. At this point IO is OK.
+#pragma warning disable MSBuildTask0005 // FileState's AbsolutePath remains fully qualified after AttemptToShortenPath.
                             Length = new FileInfo(_filename).Length;
+#pragma warning restore MSBuildTask0005
 
                             // Otherwise this will give at least something
                             NativeMethodsShared.ThrowExceptionForErrorCode(error);
@@ -148,7 +150,9 @@ namespace Microsoft.Build.Tasks
                     else
 #endif
                     {
+#pragma warning disable MSBuildTask0005 // FileState's AbsolutePath remains fully qualified after AttemptToShortenPath.
                         var fileInfo = new FileInfo(_filename);
+#pragma warning restore MSBuildTask0005
 
                         if (fileInfo.Exists)
                         {
@@ -160,7 +164,9 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
+#pragma warning disable MSBuildTask0005 // _filename is the fully qualified path supplied by FileState.
                             var directoryInfo = new DirectoryInfo(_filename);
+#pragma warning restore MSBuildTask0005
 
                             if (directoryInfo.Exists)
                             {
@@ -201,7 +207,9 @@ namespace Microsoft.Build.Tasks
                 if (doThrow)
                 {
                     // Provoke exception
+#pragma warning disable MSBuildTask0005 // _filename is the fully qualified path supplied by FileState.
                     var length = (new FileInfo(_filename)).Length;
+#pragma warning restore MSBuildTask0005
                 }
             }
 

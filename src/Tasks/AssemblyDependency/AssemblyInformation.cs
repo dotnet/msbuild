@@ -515,7 +515,10 @@ namespace Microsoft.Build.Tasks
                     return;
                 }
 
+                // RAR reads metadata only from resolved reference paths; direct AssemblyFiles inputs are documented as fully qualified.
+#pragma warning disable MSBuildTask0005
                 using (var stream = File.OpenRead(_sourceFile))
+#pragma warning restore MSBuildTask0005
                 using (var peFile = new PEReader(stream))
                 {
                     bool hasMetadata = false;
@@ -996,7 +999,10 @@ namespace Microsoft.Build.Tasks
                 return string.Empty;
             }
 
+            // RAR probes runtime versions only for resolved reference paths; direct AssemblyFiles inputs are documented as fully qualified.
+#pragma warning disable MSBuildTask0005
             using Stream stream = File.OpenRead(path);
+#pragma warning restore MSBuildTask0005
             using BinaryReader reader = new BinaryReader(stream);
             return GetRuntimeVersion(reader);
         }

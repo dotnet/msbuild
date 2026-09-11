@@ -638,8 +638,8 @@ helper call chains. Running the analyzer on every build does not opt unmigrated 
 into all-task migration analysis. Rules that apply to all tasks remain active.
 
 Its warnings are not demoted through `WarningsNotAsErrors`, so under `/warnaserror` (which Arcade
-passes in CI) a new finding breaks the build. Suppress a verified false positive at the call site
-with `#pragma warning disable`, and always state in the comment why that specific call is safe.
+passes in CI) a new finding breaks the build. Suppress a verified safe use at the call site with
+`#pragma warning disable`, and always state in the comment which invariant makes that call safe.
 
 ## Example
 
