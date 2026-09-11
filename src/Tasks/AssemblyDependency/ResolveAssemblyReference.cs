@@ -109,7 +109,6 @@ namespace Microsoft.Build.Tasks
             public static string SearchPath;
             public static string SearchPathAddedByParentAssembly;
             public static string TargetedProcessorArchitectureDoesNotMatch;
-            public static AssemblyResolutionSearchTraceMessageFormats SearchTraceMessageFormats;
             public static string UnificationByAppConfig;
             public static string UnificationByAutoUnify;
             public static string UnificationByFrameworkRetarget;
@@ -173,17 +172,6 @@ namespace Microsoft.Build.Tasks
                     UnificationByFrameworkRetarget = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByFrameworkRetarget");
                     UnifiedDependency = GetResource("ResolveAssemblyReference.UnifiedDependency");
                     UnifiedPrimaryReference = GetResource("ResolveAssemblyReference.UnifiedPrimaryReference");
-
-                    SearchTraceMessageFormats = new(
-                        SearchPath,
-                        SearchPathAddedByParentAssembly,
-                        SearchedAssemblyFoldersEx,
-                        ConsideredAndRejectedBecauseNoFile,
-                        ConsideredAndRejectedBecauseFusionNamesDidntMatch,
-                        ConsideredAndRejectedBecauseTargetDidntHaveFusionName,
-                        ConsideredAndRejectedBecauseNotInGac,
-                        ConsideredAndRejectedBecauseNotAFileNameOnDisk,
-                        TargetedProcessorArchitectureDoesNotMatch);
 
                     initialized = true;
                 }
@@ -1987,7 +1975,6 @@ namespace Microsoft.Build.Tasks
                         fusionName,
                         _targetProcessorArchitecture,
                         attempts,
-                        Strings.SearchTraceMessageFormats,
                         GetType().Name,
                         importance,
                         DateTime.UtcNow));

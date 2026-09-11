@@ -527,17 +527,6 @@ namespace Microsoft.Build.Logging
             BuildEventArgsFields fields = ReadBuildEventArgsFields(readImportance: true);
             string requestedAssemblyName = ReadOptionalString() ?? string.Empty;
             string? targetProcessorArchitecture = ReadOptionalString();
-            var usedFormats = (AssemblyResolutionSearchTraceFormat)ReadInt32();
-            var formats = new AssemblyResolutionSearchTraceMessageFormats(
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchPath),
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchPathAddedByParentAssembly),
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchedAssemblyFoldersEx),
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.FileNotFound),
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.FusionNamesDidNotMatch),
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.TargetHadNoFusionName),
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.NotInGac),
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.NotAFileNameOnDisk),
-                ReadAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.ProcessorArchitectureDoesNotMatch));
 
             int count = ReadInt32();
             var attempts = new AssemblyResolutionSearchAttempt[count];
@@ -561,7 +550,6 @@ namespace Microsoft.Build.Logging
                 requestedAssemblyName,
                 targetProcessorArchitecture,
                 attempts,
-                formats,
                 fields.SenderName ?? string.Empty,
                 fields.Importance,
                 fields.Timestamp);
@@ -569,11 +557,6 @@ namespace Microsoft.Build.Logging
             e.ProjectFile = fields.ProjectFile;
             return e;
         }
-
-        private string ReadAssemblyResolutionSearchTraceFormat(
-            AssemblyResolutionSearchTraceFormat usedFormats,
-            AssemblyResolutionSearchTraceFormat format)
-            => (usedFormats & format) != 0 ? ReadOptionalString() ?? string.Empty : string.Empty;
 
         private BuildEventArgs ReadProjectImportedEventArgs()
         {

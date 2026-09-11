@@ -521,16 +521,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         processorArchitecture: null,
                         logAssemblyFoldersEx: false),
                 ],
-                new AssemblyResolutionSearchTraceMessageFormats(
-                    "Search {0}",
-                    "Search {0} from {1}",
-                    "Searched AssemblyFoldersEx",
-                    "Missing {0}",
-                    "Found {1} at {0}, expected {2}",
-                    "No identity {0}",
-                    "Not in GAC {0}",
-                    "Not a file {0}",
-                    "Architecture {1} at {0}, expected {2}"),
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
                 DateTime.UtcNow);

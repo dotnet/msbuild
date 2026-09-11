@@ -606,19 +606,6 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.RequestedAssemblyName);
             WriteDeduplicatedString(e.TargetProcessorArchitecture);
 
-            AssemblyResolutionSearchTraceMessageFormats formats = e.MessageFormats!;
-            AssemblyResolutionSearchTraceFormat usedFormats = e.GetUsedFormats();
-            Write((int)usedFormats);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchPath, formats.SearchPath);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchPathAddedByParentAssembly, formats.SearchPathAddedByParentAssembly);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.SearchedAssemblyFoldersEx, formats.SearchedAssemblyFoldersEx);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.FileNotFound, formats.FileNotFound);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.FusionNamesDidNotMatch, formats.FusionNamesDidNotMatch);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.TargetHadNoFusionName, formats.TargetHadNoFusionName);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.NotInGac, formats.NotInGac);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.NotAFileNameOnDisk, formats.NotAFileNameOnDisk);
-            WriteAssemblyResolutionSearchTraceFormat(usedFormats, AssemblyResolutionSearchTraceFormat.ProcessorArchitectureDoesNotMatch, formats.ProcessorArchitectureDoesNotMatch);
-
             Write(e.SearchAttempts.Count);
             AssemblyResolutionSearchAttempt previous = null;
             for (int i = 0; i < e.SearchAttempts.Count; i++)
@@ -650,18 +637,6 @@ namespace Microsoft.Build.Logging
 
             return BinaryLogRecordKind.AssemblyResolutionSearchTrace;
         }
-
-        private void WriteAssemblyResolutionSearchTraceFormat(
-            AssemblyResolutionSearchTraceFormat usedFormats,
-            AssemblyResolutionSearchTraceFormat format,
-            string value)
-        {
-            if ((usedFormats & format) != 0)
-            {
-                WriteDeduplicatedString(value);
-            }
-        }
-
         private BinaryLogRecordKind Write(CriticalBuildMessageEventArgs e)
         {
             WriteMessageFields(e);
