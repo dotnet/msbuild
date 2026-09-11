@@ -376,11 +376,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 "MSIL",
                 [
                     new AssemblyResolutionSearchAttempt(
-                        "candidate.dll",
+                        "first.dll",
                         "search-path",
                         "parent.dll",
                         "Candidate, Version=2.0.0.0",
                         AssemblyResolutionSearchResult.FusionNamesDidNotMatch,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: true),
+                    new AssemblyResolutionSearchAttempt(
+                        "second.dll",
+                        "search-path",
+                        "parent.dll",
+                        assemblyName: null,
+                        AssemblyResolutionSearchResult.TargetHadNoFusionName,
                         processorArchitecture: null,
                         logAssemblyFoldersEx: true),
                 ],

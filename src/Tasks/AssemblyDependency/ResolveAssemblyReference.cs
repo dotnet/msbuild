@@ -1959,7 +1959,7 @@ namespace Microsoft.Build.Tasks
         {
             if (reference.AssembliesConsideredAndRejected is { Count: > 0 })
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
                 {
                     var attempts = new AssemblyResolutionSearchAttempt[reference.AssembliesConsideredAndRejected.Count];
                     for (int i = 0; i < attempts.Length; i++)
