@@ -4,9 +4,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+#if FEATURE_APPDOMAIN
+using System.Runtime.Remoting;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -26,6 +31,9 @@ namespace Microsoft.Build.Logging
     /// </summary>
     internal class BuildEventArgsWriter
     {
+        private const int StringReferenceCacheSize = 256; // Must remain a power of two.
+        private const int MaxCachedStringLength = 4096;
+
         private readonly Stream originalStream;
 
         /// <summary>
@@ -55,6 +63,11 @@ namespace Microsoft.Build.Logging
         private readonly BinaryWriter currentRecordWriter;
 
         /// <summary>
+        /// The binary writer around the nameValueListStream.
+        /// </summary>
+        private readonly BinaryWriter nameValueListWriter;
+
+        /// <summary>
         /// The binary writer we're currently using. Is pointing at the currentRecordWriter usually,
         /// but sometimes we repoint it to the originalBinaryWriter temporarily, when writing string
         /// and name-value records.
@@ -75,9 +88,24 @@ namespace Microsoft.Build.Logging
         private readonly Dictionary<HashKey, int> stringHashes = new Dictionary<HashKey, int>();
 
         /// <summary>
+        /// Avoid repeatedly hashing shared string instances without retaining the full string population.
+        /// </summary>
+        private readonly StringReferenceCacheEntry[] stringReferenceCache = new StringReferenceCacheEntry[StringReferenceCacheSize];
+
+        /// <summary>
         /// Hashtable used for deduplicating name-value lists. Same as strings.
         /// </summary>
         private readonly Dictionary<HashKey, int> nameValueListHashes = new Dictionary<HashKey, int>();
+
+        /// <summary>
+        /// Avoid repeatedly enumerating and hashing metadata dictionaries shared through copy-on-write item clones.
+        /// </summary>
+        private readonly ConditionalWeakTable<ImmutableDictionary<string, string>, StrongBox<int>> metadataRecordIds =
+            new ConditionalWeakTable<ImmutableDictionary<string, string>, StrongBox<int>>();
+
+#if DEBUG
+        internal int MetadataReferenceCacheHits { get; private set; }
+#endif
 
         /// <summary>
         /// Index 0 is null, Index 1 is the empty string.
@@ -131,6 +159,7 @@ namespace Microsoft.Build.Logging
             this.currentRecordStream = new MemoryStream(65536);
 
             this.nameValueListStream = new MemoryStream(256);
+            this.nameValueListWriter = new BinaryWriter(nameValueListStream);
 
             this.originalBinaryWriter = binaryWriter;
             this.currentRecordWriter = new BinaryWriter(currentRecordStream);
@@ -1142,25 +1171,67 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
-            // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
-            // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
-            // CopyOnWriteDictionary doesn't implement it properly.
-            foreach (var kvp in item.EnumerateMetadata())
+            ImmutableDictionary<string, string> backingMetadata = null;
+            IMetadataContainer metadataContainer = item as IMetadataContainer;
+            if (metadataContainer != null
+#if FEATURE_APPDOMAIN
+                && !RemotingServices.IsTransparentProxy(item)
+#endif
+                )
             {
-                nameValueListBuffer.Add(kvp);
+                SerializableMetadata serializableMetadata = metadataContainer.BackingMetadata;
+                if (serializableMetadata.HasValue)
+                {
+                    backingMetadata = serializableMetadata.Dictionary;
+                    if (backingMetadata.Count == 0)
+                    {
+                        Write((byte)0);
+                        return;
+                    }
+
+                    if (metadataRecordIds.TryGetValue(backingMetadata, out StrongBox<int> cachedRecord))
+                    {
+#if DEBUG
+                        MetadataReferenceCacheHits++;
+#endif
+                        Write(cachedRecord.Value);
+                        return;
+                    }
+
+                    foreach (KeyValuePair<string, string> kvp in backingMetadata)
+                    {
+                        nameValueListBuffer.Add(new KeyValuePair<string, string>(
+                            kvp.Key,
+                            EscapingUtilities.UnescapeAll(kvp.Value)));
+                    }
+                }
             }
 
-            // Don't sort metadata because we want the binary log to be fully roundtrippable
-            // and we need to preserve the original order.
-            // if (nameValueListBuffer.Count > 1)
-            // {
-            //    nameValueListBuffer.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
-            // }
+            if (backingMetadata == null)
+            {
+                if (item is TaskItemData taskItemData)
+                {
+                    WriteNameValueList(taskItemData.Metadata);
+                    return;
+                }
 
-            WriteNameValueList();
+                // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
+                // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
+                // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
+                // CopyOnWriteDictionary doesn't implement it properly.
+                foreach (var kvp in item.EnumerateMetadata())
+                {
+                    nameValueListBuffer.Add(kvp);
+                }
+            }
 
+            int metadataRecordId = WriteNameValueList();
             nameValueListBuffer.Clear();
+
+            if (backingMetadata != null)
+            {
+                metadataRecordIds.Add(backingMetadata, new StrongBox<int>(metadataRecordId));
+            }
         }
 
         private void WriteProperties(IEnumerable properties)
@@ -1214,15 +1285,32 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void WriteNameValueList()
+        private int WriteNameValueList()
         {
             if (nameValueListBuffer.Count == 0)
             {
                 Write((byte)0);
-                return;
+                return 0;
             }
 
             HashKey hash = HashAllStrings(nameValueListBuffer);
+            return WriteNameValueList(hash);
+        }
+
+        private int WriteNameValueList(IEnumerable<KeyValuePair<string, string>> nameValueList)
+        {
+            HashKey hash = HashAllStrings(nameValueList);
+            if (nameValueIndexListBuffer.Count == 0)
+            {
+                Write((byte)0);
+                return 0;
+            }
+
+            return WriteNameValueList(hash);
+        }
+
+        private int WriteNameValueList(HashKey hash)
+        {
             if (!nameValueListHashes.TryGetValue(hash, out var recordId))
             {
                 recordId = nameValueRecordId;
@@ -1234,6 +1322,7 @@ namespace Microsoft.Build.Logging
             }
 
             Write(recordId);
+            return recordId;
         }
 
         /// <summary>
@@ -1253,12 +1342,11 @@ namespace Microsoft.Build.Logging
             // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
             nameValueListStream.SetLength(0);
-            var nameValueListBw = new BinaryWriter(nameValueListStream);
 
-            using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
+            using (var _ = RedirectWritesToDifferentWriter(nameValueListWriter, binaryWriter))
             {
                 Write(nameValueIndexListBuffer.Count);
-                for (int i = 0; i < nameValueListBuffer.Count; i++)
+                for (int i = 0; i < nameValueIndexListBuffer.Count; i++)
                 {
                     var kvp = nameValueIndexListBuffer[i];
                     Write(kvp.Key);
@@ -1285,6 +1373,24 @@ namespace Microsoft.Build.Logging
             for (int i = 0; i < nameValueList.Count; i++)
             {
                 var kvp = nameValueList[i];
+                var (keyIndex, keyHash) = HashString(kvp.Key);
+                var (valueIndex, valueHash) = HashString(kvp.Value);
+                hash = hash.Add(keyHash);
+                hash = hash.Add(valueHash);
+                nameValueIndexListBuffer.Add(new KeyValuePair<int, int>(keyIndex, valueIndex));
+            }
+
+            return hash;
+        }
+
+        private HashKey HashAllStrings(IEnumerable<KeyValuePair<string, string>> nameValueList)
+        {
+            HashKey hash = new HashKey();
+
+            nameValueIndexListBuffer.Clear();
+
+            foreach (KeyValuePair<string, string> kvp in nameValueList)
+            {
                 var (keyIndex, keyHash) = HashString(kvp.Key);
                 var (valueIndex, valueHash) = HashString(kvp.Value);
                 hash = hash.Add(keyHash);
@@ -1363,6 +1469,18 @@ namespace Microsoft.Build.Logging
                 return (1, default);
             }
 
+            int referenceCacheIndex = -1;
+            if (text.Length <= MaxCachedStringLength)
+            {
+                int identityHash = RuntimeHelpers.GetHashCode(text);
+                referenceCacheIndex = (identityHash ^ (identityHash >> 16)) & (StringReferenceCacheSize - 1);
+                ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
+                if (ReferenceEquals(cachedEntry.Text, text))
+                {
+                    return (cachedEntry.RecordId, cachedEntry.Hash);
+                }
+            }
+
             var hash = new HashKey(text);
             if (!stringHashes.TryGetValue(hash, out var recordId))
             {
@@ -1372,6 +1490,14 @@ namespace Microsoft.Build.Logging
                 WriteStringRecord(text);
 
                 stringRecordId += 1;
+            }
+
+            if (referenceCacheIndex >= 0)
+            {
+                ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
+                cachedEntry.RecordId = recordId;
+                cachedEntry.Hash = hash;
+                cachedEntry.Text = text;
             }
 
             return (recordId, hash);
@@ -1434,6 +1560,13 @@ namespace Microsoft.Build.Logging
                 Write(extendedData.ExtendedMetadata);
                 WriteDeduplicatedString(extendedData.ExtendedData);
             }
+        }
+
+        private struct StringReferenceCacheEntry
+        {
+            internal string Text;
+            internal int RecordId;
+            internal HashKey Hash;
         }
 
         internal readonly struct HashKey : IEquatable<HashKey>
