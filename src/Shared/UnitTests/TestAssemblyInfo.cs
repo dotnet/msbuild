@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests
 
             // Use a process-specific debug path, nested under the ambient one (Arcade sets it build-wide)
             //  This is so multiple test projects can be run in parallel without sharing the same debug directory
-            string ambientDebugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+            string ambientDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
             if (!string.IsNullOrEmpty(ambientDebugPath))
             {
                 _testEnvironment.SetEnvironmentVariable(
