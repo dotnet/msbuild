@@ -13,7 +13,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Execution;
 
 /// <summary>
-/// Owns the process current directory during an opt-in strict build.
+/// Owns the process current directory during a strict multi-threaded build.
 /// </summary>
 internal sealed class MultiThreadedStrictModeScope
 {

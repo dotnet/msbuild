@@ -52,11 +52,9 @@ namespace Microsoft.Build.Framework
         public readonly bool EnableMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDENABLEMULTITHREADED") == "1";
 
         /// <summary>
-        /// Opt in to the multi-threaded "strict" diagnostic mode, equivalent to passing
-        /// -multiThreaded:strict / -mt:strict on the command line. Only takes effect when the build
-        /// actually runs multi-threaded. See <see href="https://github.com/dotnet/msbuild/issues/14794"/>.
+        /// Disable the default strict checks in multi-threaded builds without disabling multi-threading.
         /// </summary>
-        public readonly bool MultiThreadedStrict = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMULTITHREADEDSTRICT");
+        public readonly bool MultiThreadedNonStrict = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMTNONSTRICT");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern

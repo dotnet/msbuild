@@ -229,7 +229,7 @@ namespace Microsoft.Build.Execution
         private bool _multiThreaded;
 
         /// <summary>
-        /// When true, applies the multi-threaded strict diagnostic mode. Only honored when <see cref="_multiThreaded"/> is also true.
+        /// Whether strict checks are enabled for the active multi-threaded build.
         /// </summary>
         private bool _multiThreadedStrict;
 
@@ -583,6 +583,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enables running build in multiple in-proc nodes.
         /// </summary>
+        /// <remarks>
+        /// Multi-threaded builds use an empty sentinel current directory and check for process-directory
+        /// changes and unresolved relative-path writes. Set the MSBUILDMTNONSTRICT environment variable to
+        /// 1 or true to disable these checks without disabling multi-threading.
+        /// </remarks>
         public bool MultiThreaded
         {
             get => _multiThreaded;
@@ -590,17 +595,9 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Enables the multi-threaded strict diagnostic mode, which runs the build from an empty sentinel
-        /// current directory so that any code resolving a relative path against the process current directory
-        /// fails deterministically instead of silently resolving against whichever directory happened to be
-        /// current. Ignored unless <see cref="MultiThreaded"/> is also true.
+        /// Effective strict-mode state, captured by BuildManager from the MT setting and environment opt-out.
         /// </summary>
-        /// <remarks>
-        /// This is a diagnostic aid for migrating tasks to the multi-threaded execution model; it is opt-in and
-        /// is not intended to be enabled for production builds. See
-        /// <see href="https://github.com/dotnet/msbuild/issues/14794"/>.
-        /// </remarks>
-        public bool MultiThreadedStrict
+        internal bool MultiThreadedStrict
         {
             get => _multiThreadedStrict;
             set => _multiThreadedStrict = value;

@@ -114,9 +114,10 @@ Run a representative build with an MSBuild version that supports
 [strict mode](multithreaded-msbuild.md#strict-mode), and capture a binary log:
 
 ```powershell
-dotnet build .\MyProject.csproj -m -mt:strict -nr:false -bl:migration-strict.binlog "-warnAsError:MSB4286;MSB4287"
+dotnet build .\MyProject.csproj -m -mt -nr:false -bl:migration-strict.binlog "-warnAsError:MSB4286;MSB4287"
 ```
 
+Ensure `MSBUILDMTNONSTRICT` is unset so the default strict checks are active.
 Clean the relevant outputs or invoke the required targets so the migrated task actually
 runs. In the binlog, confirm that the expected task assembly was used and the task ran
 in-process, rather than being skipped or using a legacy copy in a TaskHost.

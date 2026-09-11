@@ -240,7 +240,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded[:true|false|strict]
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -251,12 +251,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      In case of multi-threaded mode on
                      and MSBUILDFORCEALLTASKSOUTOFPROC=1
                      maxCpuCount cannot be greater than 256.
-                     Use "strict" to additionally run the build from an empty
-                     sentinel current directory, so that any task resolving a
-                     relative path against the process current directory fails
-                     immediately instead of intermittently. This is a
-                     diagnostic aid for migrating tasks to multi-threaded mode
-                     and is not intended for production builds.
+                     Builds run from an empty sentinel current directory by
+                     default. Changes to the process directory and files written
+                     there are reported as task errors.
+                     Set MSBUILDMTNONSTRICT=1 to disable these checks while
+                     keeping multi-threaded execution enabled.
                      (Short form: -mt)
     </source>
         <target state="needs-review-translation">  -multithreaded[:true|false]
@@ -321,7 +320,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
     </note>
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
-        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. It must be one of "true", "false" or "strict". {0}</source>
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. It must be "true" or "false". {0}</source>
         <target state="needs-review-translation">MSBUILD : error MSB1072: el valor del modo multiproceso no es válido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}

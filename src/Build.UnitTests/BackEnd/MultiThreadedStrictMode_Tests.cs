@@ -20,35 +20,161 @@ using Xunit;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for the opt-in multi-threaded strict mode described in
+    /// Tests for the default multi-threaded strict checks described in
     /// https://github.com/dotnet/msbuild/issues/14794.
     /// </summary>
-    public class MultiThreadedStrictMode_Tests
+    public class MultiThreadedStrictMode_Tests : IDisposable
     {
         private readonly ITestOutputHelper _output;
+        private readonly TestEnvironment _env;
 
-        public MultiThreadedStrictMode_Tests(ITestOutputHelper output) => _output = output;
-
-        [Fact]
-        public void BuildParametersClonePreservesMultiThreadedStrict()
+        public MultiThreadedStrictMode_Tests(ITestOutputHelper output)
         {
-            BuildParameters parameters = new() { MultiThreaded = true, MultiThreadedStrict = true };
+            _output = output;
+            _env = TestEnvironment.Create(output);
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
+        }
+
+        public void Dispose() => _env.Dispose();
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BuildParametersClonePreservesMultiThreadedStrict(bool strict)
+        {
+            BuildParameters parameters = new() { MultiThreaded = true, MultiThreadedStrict = strict };
 
             BuildParameters clone = parameters.Clone();
 
-            clone.MultiThreadedStrict.ShouldBeTrue();
+            clone.MultiThreadedStrict.ShouldBe(strict);
         }
 
-        [Fact]
-        public void BuildParametersTranslationPreservesMultiThreadedStrict()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BuildParametersTranslationPreservesMultiThreadedStrict(bool strict)
         {
-            BuildParameters parameters = new() { MultiThreaded = true, MultiThreadedStrict = true };
+            BuildParameters parameters = new() { MultiThreaded = true, MultiThreadedStrict = strict };
 
             ((ITranslatable)parameters).Translate(TranslationHelpers.GetWriteTranslator());
             BuildParameters deserialized = BuildParameters.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             deserialized.MultiThreaded.ShouldBeTrue();
-            deserialized.MultiThreadedStrict.ShouldBeTrue();
+            deserialized.MultiThreadedStrict.ShouldBe(strict);
+        }
+
+        [Theory]
+        [InlineData(true, null, true)]
+        [InlineData(true, "", true)]
+        [InlineData(true, "0", true)]
+        [InlineData(true, "false", true)]
+        [InlineData(true, "False", true)]
+        [InlineData(true, "invalid", true)]
+        [InlineData(true, "1", false)]
+        [InlineData(true, "true", false)]
+        [InlineData(true, "TRUE", false)]
+        [InlineData(false, null, false)]
+        [InlineData(false, "0", false)]
+        [InlineData(false, "false", false)]
+        [InlineData(false, "1", false)]
+        [InlineData(false, "true", false)]
+        public void StrictChecksDependOnlyOnMtAndEnvironmentOptOut(bool multiThreaded, string? optOut, bool expectedStrict)
+        {
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = multiThreaded,
+                Loggers = [new MockLogger(_output)],
+            };
+            using BuildManager manager = new();
+            manager.BeginBuild(parameters);
+
+            try
+            {
+                ((IBuildComponentHost)manager).BuildParameters.MultiThreadedStrict.ShouldBe(expectedStrict);
+                (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(expectedStrict);
+                if (!expectedStrict)
+                {
+                    Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+                }
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+        }
+
+        [Fact]
+        public void ReusedBuildManagerDoesNotRetainPreviousStrictState()
+        {
+            using BuildManager manager = new();
+            string originalDirectory = Directory.GetCurrentDirectory();
+            BuildParameters parameters = new() { MultiThreaded = true };
+            bool[] optOutValues = [false, true, false];
+            foreach (bool optOut in optOutValues)
+            {
+                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? "1" : null);
+                parameters.Loggers = [new MockLogger(_output)];
+                manager.BeginBuild(parameters);
+                try
+                {
+                    ((IBuildComponentHost)manager).BuildParameters.MultiThreadedStrict.ShouldBe(!optOut);
+                    (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(!optOut);
+                }
+                finally
+                {
+                    manager.EndBuild();
+                }
+
+                Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ChangingOptOutDuringBuildDoesNotChangeTaskChecks(bool optOut)
+        {
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? "1" : null);
+            _env.SetCurrentDirectory(_env.CreateFolder().Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            string otherDirectory = _env.CreateFolder().Path;
+            var project = _env.CreateFile("change-opt-out.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask ChangeDirectoryOnExecute="true" OtherDirectory="{otherDirectory}" />
+                  </Target>
+                </Project>
+                """);
+            MockLogger logger = new(_output);
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            };
+            using BuildManager manager = new();
+            BuildResult result;
+            manager.BeginBuild(parameters);
+            try
+            {
+                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? null : "1");
+                result = manager.BuildRequest(new BuildRequestData(
+                    project.Path, new Dictionary<string, string?>(), null, ["Build"], null));
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            result.OverallResult.ShouldBe(optOut ? BuildResultCode.Success : BuildResultCode.Failure);
+            logger.Errors.Exists(e => e.Code == "MSB4286").ShouldBe(!optOut);
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
 
         /// <summary>
@@ -212,20 +338,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Strict mode is meaningless outside multi-threaded mode, so a build that is not multi-threaded must not
-        /// have the process moved out from under it even when the opt-in is present.
+        /// have the process moved out from under it when strict checks have not been opted out.
         /// </summary>
         [Fact]
         public void StrictModeIsIgnoredWhenBuildIsNotMultiThreaded()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", "1");
+            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
 
             string originalDirectory = Directory.GetCurrentDirectory();
 
             BuildParameters parameters = new()
             {
                 MultiThreaded = false,
-                MultiThreadedStrict = true,
                 Loggers = [new MockLogger(_output)],
             };
 
@@ -251,7 +376,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void MtBuildRestoresHostDirectory(bool strict, bool saveEnvironment)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", null);
+            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", strict ? null : "1");
             string startupDirectory = BuildParameters.StartupDirectory;
             var projectFolder = env.CreateFolder();
             env.CreateFile(projectFolder, "build.proj", """
@@ -268,7 +393,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
-                MultiThreadedStrict = strict,
                 SaveOperatingEnvironment = saveEnvironment,
                 ShutdownInProcNodeOnBuildFinish = true,
                 EnableNodeReuse = false,
@@ -284,10 +408,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void OrdinaryMtRespectsSaveOperatingEnvironment(bool saveEnvironment)
+        public void NonStrictMtRespectsSaveOperatingEnvironment(bool saveEnvironment)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", null);
+            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", "1");
             env.SetCurrentDirectory(env.CreateFolder().Path);
             string changedDirectory = Directory.GetCurrentDirectory();
             env.SetCurrentDirectory(env.CreateFolder().Path);
@@ -390,7 +514,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void OutputGetterViolationUsesTaskFailurePolicy(string violation, string continueOnError, bool succeeds)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", null);
+            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
             var directory = env.CreateFolder();
             var project = env.CreateFile("getter.proj", $"""
                 <Project>
@@ -575,7 +699,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CancellationDuringOutputGatheringPreservesEarlierDiagnostics(bool strict)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", null);
+            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", strict ? null : "1");
             var otherDirectory = env.CreateFolder();
             var project = env.CreateFile("cancel-getter.proj", $"""
                 <Project>
@@ -605,7 +729,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
-                MultiThreadedStrict = strict,
                 ShutdownInProcNodeOnBuildFinish = true,
                 EnableNodeReuse = false,
                 Loggers = [logger],
@@ -666,7 +789,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
-                MultiThreadedStrict = true,
                 ShutdownInProcNodeOnBuildFinish = true,
                 EnableNodeReuse = false,
                 Loggers = [new MockLogger(_output)],
@@ -697,7 +819,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
-                MultiThreadedStrict = true,
                 Loggers =
                 [
                     new MockLogger(_output),
@@ -727,7 +848,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
-                MultiThreadedStrict = true,
                 Loggers = [new MockLogger(_output)],
             };
             using ManualResetEventSlim callbackStarted = new();
@@ -798,7 +918,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
-                MultiThreadedStrict = true,
                 Loggers = [logger],
             };
             manager.BeginBuild(parameters);
@@ -826,7 +945,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
-                MultiThreadedStrict = true,
                 ShutdownInProcNodeOnBuildFinish = true,
                 EnableNodeReuse = false,
                 Loggers = [logger],

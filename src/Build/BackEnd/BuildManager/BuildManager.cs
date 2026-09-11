@@ -623,6 +623,8 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+                _buildParameters.MultiThreadedStrict = _buildParameters.MultiThreaded
+                    && !Traits.Instance.MultiThreadedNonStrict;
 
                 // MT nodes share the process directory, so restoration belongs to the build owner.
                 _savedCurrentDirectory = _buildParameters.MultiThreaded && _buildParameters.SaveOperatingEnvironment
@@ -766,9 +768,6 @@ namespace Microsoft.Build.Execution
 
                 // Enter strict mode last: everything above (loggers in particular) still resolves paths against
                 // the directory the build was launched from, and only project execution should see the sentinel.
-                // MSBUILDMULTITHREADEDSTRICT=1 is equivalent to -mt:strict for hosts that build through the API.
-                _buildParameters.MultiThreadedStrict = _buildParameters.MultiThreaded
-                    && (_buildParameters.MultiThreadedStrict || Traits.Instance.MultiThreadedStrict);
                 if (_buildParameters.MultiThreadedStrict)
                 {
                     try

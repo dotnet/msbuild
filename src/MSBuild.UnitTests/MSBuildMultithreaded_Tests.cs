@@ -150,6 +150,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _output = output;
             _env = TestEnvironment.Create(output);
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
         }
 
         public void Dispose()
@@ -161,6 +162,9 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData(true, "/m /nodereuse:false /mt")]
         [InlineData(false, "/m /nodereuse:false")]
         public void MSBuildTask_EnvironmentIsolation(bool isMultithreaded, string msbuildArgs)
+            => VerifyEnvironmentIsolation(isMultithreaded, msbuildArgs);
+
+        private void VerifyEnvironmentIsolation(bool isMultithreaded, string msbuildArgs)
         {
             string project = $@"
 <Project>
@@ -220,10 +224,13 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <summary>
         /// Strict mode must not disturb a build whose tasks resolve their paths correctly.
         /// </summary>
-        [Fact]
-        public void StrictMode_WellBehavedTaskStillSucceeds()
+        [Theory]
+        [InlineData("/mt")]
+        [InlineData("/mt:true")]
+        [InlineData("/multithreaded")]
+        public void StrictMode_WellBehavedTaskStillSucceeds(string mtArgument)
         {
-            string output = RunStrictModeProbe("Nothing", "/m /nodereuse:false /mt:strict", out bool success);
+            string output = RunStrictModeProbe("Nothing", $"/m /nodereuse:false {mtArgument}", out bool success);
 
             success.ShouldBeTrue(output);
         }
@@ -232,10 +239,13 @@ namespace Microsoft.Build.Engine.UnitTests
         /// A relative path that is never resolved against the project directory writes into the sentinel
         /// current directory, which strict mode detects and reports as MSB4287.
         /// </summary>
-        [Fact]
-        public void StrictMode_DetectsWriteThroughUnresolvedRelativePath()
+        [Theory]
+        [InlineData("/mt")]
+        [InlineData("/mt:true")]
+        [InlineData("/multithreaded")]
+        public void StrictMode_DetectsWriteThroughUnresolvedRelativePath(string mtArgument)
         {
-            string output = RunStrictModeProbe("WriteRelativeFile", "/m /nodereuse:false /mt:strict", out bool success);
+            string output = RunStrictModeProbe("WriteRelativeFile", $"/m /nodereuse:false {mtArgument}", out bool success);
 
             success.ShouldBeFalse(output);
             output.ShouldContain("MSB4287");
@@ -246,23 +256,26 @@ namespace Microsoft.Build.Engine.UnitTests
         /// Changing the process current directory corrupts path resolution for every project building in the
         /// process, so strict mode reports it as MSB4286.
         /// </summary>
-        [Fact]
-        public void StrictMode_DetectsCurrentDirectoryChange()
+        [Theory]
+        [InlineData("/mt")]
+        [InlineData("/mt:true")]
+        [InlineData("/multithreaded")]
+        public void StrictMode_DetectsCurrentDirectoryChange(string mtArgument)
         {
-            string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt:strict", out bool success);
+            string output = RunStrictModeProbe("ChangeCurrentDirectory", $"/m /nodereuse:false {mtArgument}", out bool success);
 
             success.ShouldBeFalse(output);
             output.ShouldContain("MSB4286");
         }
 
         /// <summary>
-        /// Without the opt-in, the same task must build exactly as before - the whole point of the switch is
-        /// that it changes nothing until it is asked for.
+        /// Non-MT builds retain their existing behavior.
         /// </summary>
         [Fact]
-        public void StrictMode_IsOptIn()
+        public void StrictMode_IsDisabledOutsideMultiThreadedMode()
         {
-            string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt", out bool success);
+            _env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt:false", out bool success);
 
             success.ShouldBeTrue(output);
             output.ShouldNotContain("MSB4286");
@@ -276,7 +289,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             string output = RunStrictModeProbe(
                 "Nothing",
-                "/m /nodereuse:false /mt:strict",
+                "/m /nodereuse:false /mt",
                 out bool success,
                 useRelativeProjectPath: true);
 
@@ -292,7 +305,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             string output = RunStrictModeProbe(
                 "WriteRelativeFile",
-                "/m /nodereuse:false /mt:strict",
+                "/m /nodereuse:false /mt",
                 out bool success,
                 continueOnError: true);
 
@@ -306,17 +319,65 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// The environment variable accepts "true" as well as "1", matching the other opt-in traits.
+        /// The opt-out does not disable MT itself or require a separate command-line switch.
         /// </summary>
-        [Fact]
-        public void StrictMode_EnvironmentVariableAcceptsTrue()
+        [Theory]
+        [InlineData("1")]
+        [InlineData("true")]
+        [InlineData("TRUE")]
+        public void StrictMode_EnvironmentOptOutPreservesMt(string optOut)
         {
-            _env.SetEnvironmentVariable("MSBUILDMULTITHREADEDSTRICT", "true");
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut);
 
-            string output = RunStrictModeProbe("WriteRelativeFile", "/m /nodereuse:false /mt", out bool success);
+            string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt", out bool success);
+
+            success.ShouldBeTrue(output);
+            output.ShouldNotContain("MSB4286");
+            VerifyEnvironmentIsolation(true, "/m /nodereuse:false /mt");
+        }
+
+        [Theory]
+        [InlineData("0")]
+        [InlineData("false")]
+        [InlineData("invalid")]
+        public void StrictMode_OnlyRecognizedOptOutValuesDisableChecks(string optOut)
+        {
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut);
+
+            string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt", out bool success);
 
             success.ShouldBeFalse(output);
-            output.ShouldContain("MSB4287");
+            output.ShouldContain("MSB4286");
+        }
+
+        [Fact]
+        public void StrictMode_ProjectPropertyCannotOptOut()
+        {
+            string output = RunStrictModeProbe(
+                "ChangeCurrentDirectory", "/m /nodereuse:false /mt /p:MSBUILDMTNONSTRICT=1", out bool success);
+
+            success.ShouldBeFalse(output);
+            output.ShouldContain("MSB4286");
+        }
+
+        [Theory]
+        [InlineData("MSBUILDENABLEMULTITHREADED", "", false)]
+        [InlineData("MSBUILDENABLEMULTITHREADED", "", true)]
+        [InlineData("MSBUILDFORCEMULTITHREADED", "", false)]
+        [InlineData("MSBUILDFORCEMULTITHREADED", "", true)]
+        [InlineData("MSBUILDFORCEMULTITHREADED", "/mt:false", false)]
+        [InlineData("MSBUILDFORCEMULTITHREADED", "/mt:false", true)]
+        public void StrictMode_EnvironmentSelectedMtHonorsOptOut(string mtVariable, string mtArgument, bool optOut)
+        {
+            _env.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+            _env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            _env.SetEnvironmentVariable(mtVariable, "1");
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? "1" : null);
+
+            string output = RunStrictModeProbe("ChangeCurrentDirectory", $"/m /nodereuse:false {mtArgument}", out bool success);
+
+            success.ShouldBe(optOut, output);
+            output.Contains("MSB4286").ShouldBe(!optOut, output);
         }
 
         private string RunStrictModeProbe(string behavior, string msbuildArgs, out bool success, bool useRelativeProjectPath = false, bool continueOnError = false)

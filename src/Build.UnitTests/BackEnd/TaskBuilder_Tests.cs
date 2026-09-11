@@ -131,6 +131,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             using (TestEnvironment env = TestEnvironment.Create(_testOutput))
             {
+                env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
                 BuildManager manager = new BuildManager();
                 ProjectCollection collection = new ProjectCollection();
 
@@ -160,7 +161,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var _parameters = new BuildParameters
                 {
                     MultiThreaded = strict,
-                    MultiThreadedStrict = strict,
                     ShutdownInProcNodeOnBuildFinish = true,
                     Loggers = new ILogger[] { logger },
                     EnableNodeReuse = false

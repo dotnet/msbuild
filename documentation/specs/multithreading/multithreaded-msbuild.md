@@ -246,15 +246,19 @@ To ease task authoring, we will provide a Roslyn analyzer that will check for kn
 
 ## Strict mode
 
-Strict mode is an opt-in aid for testing task migrations. It changes the process current directory
+Multi-threaded builds use strict checks by default. Strict mode changes the process current directory
 to a fresh, empty temporary directory (the sentinel) for the build. A task that uses an unresolved relative path
 then looks there instead of accidentally finding another project's files. Paths resolved through
 the injected `TaskEnvironment` still point to the project.
 
-Enable it with `-mt:strict` (`-multiThreaded:strict`), or set `MSBUILDMULTITHREADEDSTRICT=1`
-for an MT build. API hosts can set `BuildParameters.MultiThreadedStrict = true` together with
-`MultiThreaded = true`. Plain `-mt` does not enable strict mode. The environment setting applies
-even with `-mt:true`; clear it or set it to `0` to disable it.
+The checks apply to `-mt` / `-multiThreaded`, MT builds selected through
+`MSBUILDENABLEMULTITHREADED` or `MSBUILDFORCEMULTITHREADED`, and API builds with
+`BuildParameters.MultiThreaded = true`. Non-MT builds are unchanged.
+
+Set **`MSBUILDMTNONSTRICT=1`** (or `true`, case-insensitive) in the environment before starting
+MSBuild to opt out of strict checks without disabling MT. Unset the variable or set it to `0`
+or `false` to retain the default checks. Other values do not opt out. There is no separate
+strict-mode command-line switch, project property, or public API setting.
 
 MSBuild checks process state after task execution, output retrieval and task-factory cleanup:
 
@@ -281,8 +285,9 @@ are not isolated from this mode.
 
 Unannotated tasks retain their TaskHost working directory, but can still receive an incorrect
 absolute path from project or engine code. When constructing a nested task, pass the parent's
-`TaskEnvironment` to it. Child processes inherit the environment opt-in, not the `-mt:strict`
-command-line switch.
+`TaskEnvironment` to it. Child MSBuild processes also use strict checks when they run
+multi-threaded, unless they inherit the `MSBUILDMTNONSTRICT` opt-out. The opt-out does not
+itself enable MT in a child process.
 
 ## Interaction with `DisableInProcNode`
 
