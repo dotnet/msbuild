@@ -84,6 +84,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private const uint DefaultQueueCapacity = 200000;
 
+        private const int LoggingEventNotificationBatchSize = 64;
+        private const int LoggingEventNotificationDelayMilliseconds = 16;
+        private const int LoggingEventNotificationIdle = 0;
+        private const int LoggingEventNotificationScheduled = 1;
+        private const int LoggingEventNotificationActive = 2;
+
         /// <summary>
         /// Lock for the nextProjectId
         /// </summary>
@@ -277,6 +283,16 @@ namespace Microsoft.Build.BackEnd.Logging
         private AutoResetEvent _enqueueEvent;
 
         /// <summary>
+        /// Number of events queued since the logging queue was last observed empty.
+        /// </summary>
+        private int _loggingEventsSinceLastDrain;
+
+        /// <summary>
+        /// Whether the logging thread is idle, coalescing a batch, or draining.
+        /// </summary>
+        private int _loggingEventNotificationState;
+
+        /// <summary>
         /// CTS for stopping logging event processing.
         /// </summary>
         private CancellationTokenSource _loggingEventProcessingCancellation;
@@ -322,7 +338,6 @@ namespace Microsoft.Build.BackEnd.Logging
             _eventSinkDictionary = new Dictionary<int, IBuildEventSink>();
             _nodeId = nodeId;
             _configCache = new Lazy<IConfigCache>(() => (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache), LazyThreadSafetyMode.PublicationOnly);
-
             // Start the project context id count at the nodeId
             _nextProjectId = nodeId;
             _nextEvaluationId = nodeId;
@@ -934,6 +949,11 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
 
+                if (_logMode == LoggerMode.Asynchronous)
+                {
+                    WaitForLoggingToProcessEvents();
+                }
+
                 // Set the state to indicate we are starting the shutdown process.
                 _serviceState = LoggingServiceState.ShuttingDown;
 
@@ -1381,7 +1401,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     eventQueue.Enqueue(buildEvent);
-                    enqueueEvent.Set();
+                    NotifyLoggingEventProcessor(
+                        enqueueEvent,
+                        buildEvent);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -1407,14 +1429,33 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void WaitForLoggingToProcessEvents()
         {
-            while (_eventQueue?.IsEmpty == false)
+            ConcurrentQueue<object> eventQueue = _eventQueue;
+            AutoResetEvent enqueueEvent = _enqueueEvent;
+            ManualResetEvent emptyQueueEvent = _emptyQueueEvent;
+            Thread loggingEventProcessingThread = _loggingEventProcessingThread;
+            if (eventQueue is null ||
+                enqueueEvent is null ||
+                emptyQueueEvent is null ||
+                loggingEventProcessingThread is null ||
+                !loggingEventProcessingThread.IsAlive)
             {
-                _emptyQueueEvent?.WaitOne();
+                return;
             }
-            // To avoid race condition when last message has been removed from queue but
-            //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
-            //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
-            _emptyQueueEvent?.WaitOne();
+
+            try
+            {
+                RequestImmediateLoggingEventProcessing(enqueueEvent);
+
+                // Callbacks can enqueue more events, so wait for the entire queue and its last callback to finish.
+                while (loggingEventProcessingThread.IsAlive &&
+                       (!emptyQueueEvent.WaitOne(millisecondsTimeout: 50) || !eventQueue.IsEmpty))
+                {
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Shutdown disposed the wait handles after the local references were captured.
+            }
         }
 
         /// <summary>
@@ -1471,6 +1512,60 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private readonly record struct WarningsConfigKey(int InstanceId, int ContextId);
 
+        private static bool ShouldProcessLoggingEventImmediately(object loggingEvent)
+        {
+            BuildEventArgs buildEventArgs = loggingEvent switch
+            {
+                BuildEventArgs args => args,
+                KeyValuePair<int, BuildEventArgs> packet => packet.Value,
+                _ => null
+            };
+
+            return buildEventArgs is BuildErrorEventArgs
+                or BuildWarningEventArgs
+                or BuildStartedEventArgs
+                or BuildFinishedEventArgs
+                or BuildCanceledEventArgs
+                or CriticalBuildMessageEventArgs
+                or CustomBuildEventArgs;
+        }
+
+        private void NotifyLoggingEventProcessor(
+            AutoResetEvent enqueueEvent,
+            object loggingEvent)
+        {
+            int eventCount =
+                Interlocked.Increment(ref _loggingEventsSinceLastDrain);
+
+            if (eventCount >= LoggingEventNotificationBatchSize ||
+                ShouldProcessLoggingEventImmediately(loggingEvent))
+            {
+                RequestImmediateLoggingEventProcessing(enqueueEvent);
+                return;
+            }
+
+            if (Interlocked.CompareExchange(
+                    ref _loggingEventNotificationState,
+                    LoggingEventNotificationScheduled,
+                    LoggingEventNotificationIdle) ==
+                LoggingEventNotificationIdle)
+            {
+                enqueueEvent.Set();
+            }
+        }
+
+        private void RequestImmediateLoggingEventProcessing(
+            AutoResetEvent enqueueEvent)
+        {
+            if (Interlocked.Exchange(
+                    ref _loggingEventNotificationState,
+                    LoggingEventNotificationActive) !=
+                LoggingEventNotificationActive)
+            {
+                enqueueEvent.Set();
+            }
+        }
+
         /// <summary>
         /// Create a logging thread to process the logging queue.
         /// </summary>
@@ -1510,11 +1605,34 @@ namespace Microsoft.Build.BackEnd.Logging
                         else
                         {
                             emptyQueueEvent?.Set();
+                            Interlocked.Exchange(
+                                ref _loggingEventsSinceLastDrain,
+                                0);
+                            Interlocked.Exchange(
+                                ref _loggingEventNotificationState,
+                                LoggingEventNotificationIdle);
 
                             // Wait for next event, or finish.
                             if (!completeAdding.IsCancellationRequested && eventQueue.IsEmpty)
                             {
                                 WaitHandle.WaitAny(waitHandlesForNextEvent);
+
+                                if (!completeAdding.IsCancellationRequested &&
+                                    Volatile.Read(ref _loggingEventNotificationState) ==
+                                    LoggingEventNotificationScheduled)
+                                {
+                                    WaitHandle.WaitAny(
+                                        waitHandlesForNextEvent,
+                                        LoggingEventNotificationDelayMilliseconds);
+                                }
+                            }
+
+                            if (!eventQueue.IsEmpty ||
+                                completeAdding.IsCancellationRequested)
+                            {
+                                Interlocked.Exchange(
+                                    ref _loggingEventNotificationState,
+                                    LoggingEventNotificationActive);
                             }
 
                             emptyQueueEvent.Reset();
@@ -1559,6 +1677,9 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Capture pump task in local variable as cancelling event processing is nulling _loggingEventProcessingThread.
             var pumpTask = _loggingEventProcessingThread;
+            Interlocked.Exchange(
+                ref _loggingEventNotificationState,
+                LoggingEventNotificationActive);
             _loggingEventProcessingCancellation.Cancel();
             pumpTask.Join();
         }
