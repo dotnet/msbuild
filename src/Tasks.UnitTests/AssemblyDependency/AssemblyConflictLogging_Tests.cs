@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Globalization;
 using System.Linq;
 
 using Microsoft.Build.Framework;
@@ -87,7 +88,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        public void ConflictWarningIsStructuredAndTextMatchesLegacy()
+        public void ConflictWarningIsStructuredAndInvariant()
         {
             MockEngine structuredEngine = RunWithWaveState(waveEnabled: true, CreateWarningConflictTask);
             MockEngine legacyEngine = RunWithWaveState(waveEnabled: false, CreateWarningConflictTask);
@@ -95,12 +96,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             structuredEngine.Warnings.ShouldBe(1);
             legacyEngine.Warnings.ShouldBe(1);
 
-            // Verify that the structured event does not change the warning text.
-            structuredEngine.WarningEvents[0].Message.ShouldBe(legacyEngine.WarningEvents[0].Message);
-            structuredEngine.WarningEvents[0].Code.ShouldBe(legacyEngine.WarningEvents[0].Code);
-
             AssemblyConflictWarningEventArgs structuredWarning = structuredEngine.WarningEvents[0].ShouldBeOfType<AssemblyConflictWarningEventArgs>();
+            string expectedBody = AssemblyConflictMessageFormatter.FormatWarningBody(
+                structuredWarning.LossReason,
+                structuredWarning.Victor,
+                structuredWarning.Victim);
+            structuredWarning.Message.ShouldBe(
+                AssemblyConflictMessageFormatter.FormatWarningMessage(structuredWarning.SimpleAssemblyName, expectedBody));
+            structuredWarning.Code.ShouldBe(legacyEngine.WarningEvents[0].Code);
             structuredWarning.Code.ShouldBe("MSB3277");
+            structuredWarning.HelpKeyword.ShouldBe("MSBuild.ResolveAssemblyReference.FoundConflicts");
+            structuredWarning.HelpKeyword.ShouldBe(legacyEngine.WarningEvents[0].HelpKeyword);
             structuredWarning.SimpleAssemblyName.ShouldBe("D");
             structuredWarning.Victor.FusionName.ShouldContain("D, Version=1.0.0.0");
             structuredWarning.Victim.FusionName.ShouldContain("D, Version=2.0.0.0");
@@ -131,11 +137,60 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             errorEngine.Errors.ShouldBe(1);
             BuildErrorEventArgs error = errorEngine.ErrorEvents.ShouldHaveSingleItem();
             error.Code.ShouldBe("MSB3277");
-            error.Message.ShouldBe(warningEngine.WarningEvents[0].Message);
+            AssemblyConflictWarningEventArgs warning = warningEngine.WarningEvents[0].ShouldBeOfType<AssemblyConflictWarningEventArgs>();
+            CultureInfo culture = CultureInfo.CurrentUICulture;
+            string expectedBody = AssemblyConflictMessageFormatter.FormatWarningBody(
+                warning.LossReason,
+                warning.Victor,
+                warning.Victim,
+                culture);
+            error.Message.ShouldBe(AssemblyConflictMessageFormatter.FormatWarningMessage(warning.SimpleAssemblyName, expectedBody, culture));
         }
 
         [Fact]
-        public void ConflictDependencyDetailsMessageIsStructuredAndTextMatchesLegacy()
+        public void StructuredConflictLocalizesDisplayStringsButKeepsPayloadsInvariant()
+        {
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+            try
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+
+                MockEngine messageEngine = new(_output);
+                ResolveAssemblyReference messageTask = CreateMessageConflictTask(messageEngine);
+                messageTask.OutputUnresolvedAssemblyConflicts = true;
+
+                using TestEnvironment env = TestEnvironment.Create(_output);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+                ChangeWaves.ResetStateForTests();
+
+                Execute(messageTask).ShouldBeTrue();
+
+                messageEngine.MessageEvents.Any(message =>
+                    message is not AssemblyConflictDependencyDetailsMessageEventArgs
+                    && message.Message is not null
+                    && message.Message.StartsWith("Conflit existant entre", StringComparison.Ordinal)).ShouldBeTrue();
+                AssemblyConflictDependencyDetailsMessageEventArgs details = messageEngine.MessageEvents
+                    .OfType<AssemblyConflictDependencyDetailsMessageEventArgs>()
+                    .ShouldHaveSingleItem();
+                details.Message.ShouldStartWith("    References which depend on");
+                messageTask.UnresolvedAssemblyConflicts.ShouldHaveSingleItem()
+                    .GetMetadata("logMessage").ShouldStartWith("There was a conflict between");
+
+                MockEngine errorEngine = new(_output);
+                errorEngine.WarningsAsErrors.Add("MSB3277");
+                Execute(CreateWarningConflictTask(errorEngine), RARSimulationMode.BuildProject).ShouldBeFalse();
+                errorEngine.ErrorEvents.ShouldHaveSingleItem().Message
+                    .ShouldStartWith("détection de conflits non résolus");
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = originalUICulture;
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        [Fact]
+        public void ConflictDependencyDetailsMessageIsStructuredAndInvariant()
         {
             MockEngine structuredEngine = RunWithWaveState(waveEnabled: true, engine => CreateMessageConflictTask(engine));
             MockEngine legacyEngine = RunWithWaveState(waveEnabled: false, engine => CreateMessageConflictTask(engine));
@@ -156,14 +211,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             detailsEvent.Victor.Dependees.ShouldNotBeEmpty();
             detailsEvent.Victim.Dependees.ShouldNotBeEmpty();
 
-            // Identify the legacy message by the source-item text because RAR logs other low-importance messages.
-            // Verify that the structured event produces the same dependency-details text.
-            BuildMessageEventArgs legacyDetails = legacyEngine.MessageEvents
-                .Where(m => m.Importance == MessageImportance.Low
-                    && m.Message != null
-                    && m.Message.Contains("Project file item includes which caused reference"))
-                .ShouldHaveSingleItem();
-            detailsEvent.Message.ShouldBe(legacyDetails.Message);
+            detailsEvent.Message.ShouldBe(
+                AssemblyConflictMessageFormatter.FormatDependencyDetails(detailsEvent.Victor, detailsEvent.Victim));
 
             legacyEngine.MessageEvents.ShouldNotContain(m => m is AssemblyConflictDependencyDetailsMessageEventArgs);
         }
@@ -200,10 +249,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ITaskItem structuredConflict = structuredTask.UnresolvedAssemblyConflicts[0];
             ITaskItem legacyConflict = legacyTask.UnresolvedAssemblyConflicts[0];
+            AssemblyConflictWarningEventArgs structuredWarning = structuredEngine.WarningEvents[0].ShouldBeOfType<AssemblyConflictWarningEventArgs>();
 
             structuredConflict.ItemSpec.ShouldBe(legacyConflict.ItemSpec);
-            structuredConflict.GetMetadata("logMessage").ShouldBe(legacyConflict.GetMetadata("logMessage"));
-            structuredConflict.GetMetadata("logMessageDetails").ShouldBe(legacyConflict.GetMetadata("logMessageDetails"));
+            structuredConflict.GetMetadata("logMessage").ShouldBe(
+                AssemblyConflictMessageFormatter.FormatWarningBody(
+                    structuredWarning.LossReason,
+                    structuredWarning.Victor,
+                    structuredWarning.Victim));
+            structuredConflict.GetMetadata("logMessageDetails").ShouldBeEmpty();
             structuredConflict.GetMetadata("victorVersionNumber").ShouldBe(legacyConflict.GetMetadata("victorVersionNumber"));
             structuredConflict.GetMetadata("victimVersionNumber").ShouldBe(legacyConflict.GetMetadata("victimVersionNumber"));
         }
@@ -282,10 +336,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             BuildMessageEventArgs legacyDetails = legacyEngine.MessageEvents
                 .Where(message => message.Importance == MessageImportance.Low
                     && message.Message != null
-                    && message.Message.Contains("Project file item includes which caused reference"))
+                    && message.Message.Contains("A%2C Version=20.0.0.0"))
                 .ShouldHaveSingleItem();
 
-            structuredDetails.Message.ShouldBe(legacyDetails.Message);
+            structuredDetails.Message.ShouldBe(
+                AssemblyConflictMessageFormatter.FormatDependencyDetails(structuredDetails.Victor, structuredDetails.Victim));
+            legacyDetails.Message.ShouldContain("A%2C Version=20.0.0.0");
             structuredDetails.Message.ShouldContain("A%2C Version=20.0.0.0");
         }
     }

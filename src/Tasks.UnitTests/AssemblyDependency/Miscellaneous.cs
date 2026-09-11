@@ -5,10 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -3556,14 +3556,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
 
             bool result = Execute(t);
-            ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Strings", Assembly.GetExecutingAssembly());
-
             // Unresolved primary reference with itemspec "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null".
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnifiedReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_CDllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_V2_ADllPath);
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_UnifiedReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_CDllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_BDllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_V2_ADllPath));
         }
 
         /// <summary>
@@ -3604,11 +3602,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool result = Execute(t);
 
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null", String.Empty);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnifiedReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnResolvedPrimaryItemSpec", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null");
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_DDllPath);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null", String.Empty));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_UnifiedReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_UnResolvedPrimaryItemSpec", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null"));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_DDllPath));
+            engine.AssertLogContains(FormatInvariantResource("AssemblyConflict_PrimarySourceItemsForReference", s_regress444809_BDllPath));
         }
 
         /// <summary>
@@ -3650,9 +3648,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Check that we have a message identifying conflicts with "D"
             string warningMessage = e.WarningEvents[0].Message;
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "D", string.Empty));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
+            warningMessage.ShouldContain(FormatInvariantResourceStripCode("AssemblyConflict_FoundConflicts", "D", string.Empty));
+            warningMessage.ShouldContain(FormatInvariantResource("AssemblyConflict_ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
+            warningMessage.ShouldContain(FormatInvariantResource("ResolveAssemblyReference.FourSpaceIndent", FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
         }
 
         [Fact]
@@ -3726,14 +3724,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Check that we have both the expected messages
             string warningMessage = e.WarningEvents[0].Message;
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "D", string.Empty));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
+            warningMessage.ShouldContain(FormatInvariantResourceStripCode("AssemblyConflict_FoundConflicts", "D", string.Empty));
+            warningMessage.ShouldContain(FormatInvariantResource("AssemblyConflict_ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
+            warningMessage.ShouldContain(FormatInvariantResource("ResolveAssemblyReference.FourSpaceIndent", FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
 
             warningMessage = e.WarningEvents[1].Message;
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.FoundConflicts", "G", string.Empty));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "G, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "G, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
-            warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "G, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "G.dll"))));
+            warningMessage.ShouldContain(FormatInvariantResourceStripCode("AssemblyConflict_FoundConflicts", "G", string.Empty));
+            warningMessage.ShouldContain(FormatInvariantResource("AssemblyConflict_ConflictFound", "G, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "G, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
+            warningMessage.ShouldContain(FormatInvariantResource("ResolveAssemblyReference.FourSpaceIndent", FormatInvariantResource("AssemblyConflict_ReferenceDependsOn", "G, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "G.dll"))));
         }
 
         /// <summary>
@@ -7741,7 +7739,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             e.AssertLogContains(
-                String.Format(AssemblyResources.GetString("ResolveAssemblyReference.ConflictUnsolvable"), @"MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", "MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null"));
+                String.Format(AssemblyResources.GetString("AssemblyConflict_ConflictUnsolvable"), @"MyAssembly, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", "MyAssembly, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null"));
+            e.WarningEvents.Single(warning => warning.Code == "MSB3243").HelpKeyword
+                .ShouldBe("MSBuild.ResolveAssemblyReference.ConflictUnsolvable");
+        }
+
+        private static string FormatInvariantResource(string resourceName, params object[] args)
+            => string.Format(CultureInfo.InvariantCulture, AssemblyResources.GetString(resourceName, CultureInfo.InvariantCulture), args);
+
+        private static string FormatInvariantResourceStripCode(string resourceName, params object[] args)
+        {
+            const string codePrefix = "MSB3277: ";
+            string message = FormatInvariantResource(resourceName, args);
+            return message.StartsWith(codePrefix, StringComparison.Ordinal)
+                ? message.Substring(codePrefix.Length)
+                : message;
         }
 
         /// <summary>

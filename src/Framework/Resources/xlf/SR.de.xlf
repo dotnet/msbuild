@@ -267,6 +267,53 @@
         <target state="translated">"{0}" wurde betrachtet, das vorhanden war, jedoch die Prozessorarchitektur "{1}" enthielt, die nicht der als Ziel angegebenen Prozessorarchitektur "{2}" entspricht.</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictFound">
+        <source>There was a conflict between "{0}" and "{1}".</source>
+        <target state="translated">Konflikt zwischen {0} und {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictHigherVersionChosen">
+        <source>"{0}" was chosen because it had a higher version.</source>
+        <target state="translated">{0} wurde aufgrund der höheren Version ausgewählt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictPrimaryChosen">
+        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
+        <target state="translated">{0} wurde aufgrund der primären Eigenschaft {1} vorgezogen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictUnsolvable">
+        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
+        <target state="translated">MSB3243: Der Konflikt zwischen "{0}" und "{1}" kann nicht aufgelöst werden. Auswahl von "{0}" nach dem Zufallsprinzip.</target>
+        <note>{StrBegin="MSB3243: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_FoundConflicts">
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: Es wurden Konflikte zwischen verschiedenen Versionen von "{0}" gefunden, die nicht aufgelöst werden konnten.
+{1}</target>
+        <note>{StrBegin="MSB3277: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ReferenceDependsOn">
+        <source>References which depend on "{0}" [{1}].</source>
+        <target state="translated">Verweise, die von "{0}" abhängig sind [{1}].</target>
+        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">Verweise, die von „{0}“ [{1}] abhängen oder damit vereint wurden.</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnResolvedPrimaryItemSpec">
+        <source>Unresolved primary reference with an item include of "{0}".</source>
+        <target state="translated">Vereinheitlichter Primärverweis mit Elementinclude "{0}".</target>
+        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_PrimarySourceItemsForReference">
+        <source>Project file item includes which caused reference "{0}".</source>
+        <target state="translated">Elementincludes einer Projektdatei, die den Verweis "{0}" verursacht haben.</target>
+        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
