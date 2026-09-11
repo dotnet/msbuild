@@ -20,6 +20,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -2308,12 +2309,14 @@ namespace Microsoft.Build.Execution
                     projectGraph.ConstructionMetrics.EdgeCount));
 
             Dictionary<ProjectGraphNode, BuildResult>? resultsPerNode = null;
+            BuildResult? syntheticSolutionNodeResult = null;
 
             if (submission.BuildRequestData.GraphBuildOptions.Build)
             {
                 _projectCacheService!.InitializePluginsForGraph(projectGraph, submission.BuildRequestData.TargetNames, _executionCancellationTokenSource!.Token);
 
                 IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
+                ProjectGraphNode? syntheticSolutionNode = TryGetSyntheticSolutionEntryPointNode(projectGraph);
 
                 DumpGraph(projectGraph, targetsPerNode);
 
@@ -2322,10 +2325,21 @@ namespace Microsoft.Build.Execution
                 // the verification explicitly before the build even starts.
                 foreach (ProjectGraphNode entryPointNode in projectGraph.EntryPointNodes)
                 {
+                    if (ReferenceEquals(entryPointNode, syntheticSolutionNode))
+                    {
+                        continue;
+                    }
+
                     ProjectErrorUtilities.VerifyThrowInvalidProject(entryPointNode.ProjectInstance.Targets.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
                 }
 
-                resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
+                (resultsPerNode, syntheticSolutionNodeResult) = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData, syntheticSolutionNode);
+
+                // Add synthetic solution node result to resultsPerNode so it's included in GraphBuildResult.ResultsByNode
+                if (syntheticSolutionNode is not null && syntheticSolutionNodeResult is not null)
+                {
+                    resultsPerNode.Add(syntheticSolutionNode, syntheticSolutionNodeResult);
+                }
             }
             else
             {
@@ -2334,11 +2348,12 @@ namespace Microsoft.Build.Execution
 
             Assumed.Null(submission.BuildResult?.Exception, "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
 
+            var graphBuildResult = new GraphBuildResult(
+                submission.SubmissionId,
+                new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>()));
+
             // The overall submission is complete, so report it as complete
-            ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(
-                new GraphBuildResult(
-                    submission.SubmissionId,
-                    new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
+            ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(graphBuildResult);
 
             static void DumpGraph(ProjectGraph graph, IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>>? targetList = null)
             {
@@ -2353,11 +2368,25 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private static ProjectGraphNode? TryGetSyntheticSolutionEntryPointNode(ProjectGraph projectGraph)
+        {
+            if (projectGraph.Solution is null || projectGraph.EntryPointNodes.Count != 1)
+            {
+                return null;
+            }
+
+            ProjectGraphNode entryPointNode = projectGraph.EntryPointNodes.First();
+            return entryPointNode.ProjectInstance.GlobalProperties.ContainsKey(SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty)
+                ? entryPointNode
+                : null;
+        }
+
         [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
-        private Dictionary<ProjectGraphNode, BuildResult> BuildGraph(
+        private (Dictionary<ProjectGraphNode, BuildResult> ResultsPerNode, BuildResult? SyntheticSolutionNodeResult) BuildGraph(
             ProjectGraph projectGraph,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
-            GraphBuildRequestData graphBuildRequestData)
+            GraphBuildRequestData graphBuildRequestData,
+            ProjectGraphNode? syntheticSolutionNode = null)
         {
             // The handle is used within captured async scope. If error occurs during the build
             //  and we return from the function before async call signals - it causes unhandled ObjectDisposedException
@@ -2368,10 +2397,18 @@ namespace Microsoft.Build.Execution
             var graphBuildStateLock = new object();
 
             var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
-            var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
+            if (syntheticSolutionNode is not null)
+            {
+                blockedNodes.Add(syntheticSolutionNode);
+            }
+
+            var finishedNodes = new HashSet<ProjectGraphNode>(blockedNodes.Count);
             var buildingNodes = new Dictionary<BuildSubmissionBase, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
+            BuildResult? syntheticSolutionNodeResult = null;
             ExceptionDispatchInfo? submissionException = null;
+            int finishedProjectNodesCount = 0;
+            int projectNodesCount = projectGraph.ProjectNodes.Count - (syntheticSolutionNode is null ? 0 : 1);
 
             while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
             {
@@ -2387,7 +2424,9 @@ namespace Microsoft.Build.Execution
                 lock (graphBuildStateLock)
                 {
                     var unblockedNodes = blockedNodes
-                        .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
+                        .Where(node =>
+                            node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference))
+                            && (!IsSyntheticSolutionNode(node) || finishedProjectNodesCount == projectNodesCount))
                         .ToList();
                     foreach (var node in unblockedNodes)
                     {
@@ -2396,6 +2435,11 @@ namespace Microsoft.Build.Execution
                         {
                             // An empty target list here means "no targets" instead of "default targets", so don't even build it.
                             finishedNodes.Add(node);
+                            if (!IsSyntheticSolutionNode(node))
+                            {
+                                finishedProjectNodesCount++;
+                            }
+
                             blockedNodes.Remove(node);
 
                             waitHandle.Set();
@@ -2403,11 +2447,19 @@ namespace Microsoft.Build.Execution
                             continue;
                         }
 
-                        var request = new BuildRequestData(
-                            node.ProjectInstance,
-                            targetList.ToArray(),
-                            graphBuildRequestData.HostServices,
-                            graphBuildRequestData.Flags);
+                        BuildRequestData request = IsLegacySyntheticSolutionNode(node)
+                            ? new BuildRequestData(
+                                node.ProjectInstance.FullPath,
+                                node.ProjectInstance.GlobalProperties.ToDictionary(kvp => kvp.Key, kvp => (string?)kvp.Value),
+                                toolsVersion: null,
+                                targetList.ToArray(),
+                                graphBuildRequestData.HostServices,
+                                graphBuildRequestData.Flags)
+                            : new BuildRequestData(
+                                node.ProjectInstance,
+                                targetList.ToArray(),
+                                graphBuildRequestData.HostServices,
+                                graphBuildRequestData.Flags);
 
                         // TODO Tack onto the existing submission instead of pending a whole new submission for every node
                         // Among other things, this makes BuildParameters.DetailedSummary produce a summary for each node, which is not desirable.
@@ -2431,7 +2483,15 @@ namespace Microsoft.Build.Execution
                                 finishedNodes.Add(finishedNode);
                                 buildingNodes.Remove(finishedBuildSubmission);
 
-                                resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult!);
+                                if (IsSyntheticSolutionNode(finishedNode))
+                                {
+                                    syntheticSolutionNodeResult = finishedBuildSubmission.BuildResult;
+                                }
+                                else
+                                {
+                                    finishedProjectNodesCount++;
+                                    resultsPerNode.Add(finishedNode, finishedBuildSubmission.BuildResult!);
+                                }
                             }
 
                             waitHandle.Set();
@@ -2440,7 +2500,25 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            return resultsPerNode;
+            return (resultsPerNode, syntheticSolutionNodeResult);
+
+            bool IsSyntheticSolutionNode(ProjectGraphNode node) =>
+                syntheticSolutionNode is not null && ReferenceEquals(node, syntheticSolutionNode);
+
+            bool IsLegacySyntheticSolutionNode(ProjectGraphNode node)
+            {
+                if (!IsSyntheticSolutionNode(node))
+                {
+                    return false;
+                }
+
+                return !node.ProjectInstance.GlobalProperties.TryGetValue(
+                    SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty,
+                    out string? generatedSolutionProjectPath)
+                    || !FileUtilities.PathComparer.Equals(
+                        node.ProjectInstance.FullPath,
+                        generatedSolutionProjectPath);
+            }
         }
 
         /// <summary>
