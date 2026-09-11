@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
@@ -20,7 +21,7 @@ internal sealed class MultiThreadedStrictModeScope
     internal const string SentinelDirectoryName = "MSBuild-MT-Strict-Sentinel-CWD";
 
     // Serializes scope installation, restoration and directory repair. Never log under this lock.
-    private static readonly object s_stateLock = new();
+    private static readonly object s_stateLock = NativeMethodsShared.CurrentDirectoryLock;
     private static MultiThreadedStrictModeScope? s_activeScope;
 
     private readonly object _reportedEntriesLock = new();
@@ -42,22 +43,46 @@ internal sealed class MultiThreadedStrictModeScope
 
     internal static MultiThreadedStrictModeScope? ActiveScope => Volatile.Read(ref s_activeScope);
 
-    internal static MultiThreadedStrictModeScope Enter(int buildId)
+    internal static CurrentDirectorySnapshot CaptureCurrentDirectory()
+    {
+        lock (s_stateLock)
+        {
+            return new(Directory.GetCurrentDirectory(), s_activeScope);
+        }
+    }
+
+    internal static MultiThreadedStrictModeScope Enter(int buildId) => Enter(buildId, CaptureCurrentDirectory());
+
+    internal static MultiThreadedStrictModeScope Enter(int buildId, CurrentDirectorySnapshot directoryToRestore)
+        => Enter(buildId, directoryToRestore, Directory.SetCurrentDirectory);
+
+    internal static MultiThreadedStrictModeScope Enter(
+        int buildId,
+        CurrentDirectorySnapshot snapshot,
+        Action<string> setCurrentDirectory)
     {
         lock (s_stateLock)
         {
             ErrorUtilities.VerifyThrowInvalidOperation(s_activeScope is null, "MultiThreadedStrictModeAlreadyActive");
 
-            // Capture only after taking ownership. An exiting scope may still be restoring CWD.
-            string directoryToRestore = Directory.GetCurrentDirectory();
+            string directoryToRestore = snapshot.Directory;
             string temporaryDirectory = FileUtilities.GetTemporaryDirectory(createDirectory: false);
             string sentinelDirectory = Path.Combine(temporaryDirectory, SentinelDirectoryName);
-            Directory.CreateDirectory(sentinelDirectory);
-            Directory.SetCurrentDirectory(sentinelDirectory);
             try
             {
-                // Keep the actual spelling: entering a directory can resolve symlinks.
-                MultiThreadedStrictModeScope scope = new(buildId, Directory.GetCurrentDirectory(), directoryToRestore, temporaryDirectory);
+                Directory.CreateDirectory(sentinelDirectory);
+                // Resolve the owned path, never a mutable process CWD that another thread could replace.
+                sentinelDirectory = NativeMethodsShared.IsWindows
+                    ? NativeMethodsShared.GetLongFilePath(sentinelDirectory)
+                    : NativeMethodsShared.RealPath(sentinelDirectory) ?? throw new Win32Exception();
+                string canonicalTemporaryDirectory = NativeMethodsShared.IsWindows
+                    ? NativeMethodsShared.GetLongFilePath(temporaryDirectory)
+                    : NativeMethodsShared.RealPath(temporaryDirectory) ?? throw new Win32Exception();
+                Assumed.True(
+                    FileUtilities.PathComparer.Equals(Path.GetDirectoryName(sentinelDirectory), canonicalTemporaryDirectory),
+                    "The strict-mode sentinel must remain within its temporary directory.");
+                MultiThreadedStrictModeScope scope = new(buildId, sentinelDirectory, directoryToRestore, temporaryDirectory);
+                setCurrentDirectory(sentinelDirectory);
                 Volatile.Write(ref s_activeScope, scope);
                 return scope;
             }
@@ -74,6 +99,26 @@ internal sealed class MultiThreadedStrictModeScope
 
                 TryDelete(temporaryDirectory);
                 throw;
+            }
+        }
+    }
+
+    internal readonly struct CurrentDirectorySnapshot(string directory, MultiThreadedStrictModeScope? owner)
+    {
+        internal string Directory =>
+            owner is not null && FileUtilities.PathComparer.Equals(directory, owner.SentinelDirectory)
+                ? owner._directoryToRestore
+                : directory;
+
+        internal void Restore()
+        {
+            lock (s_stateLock)
+            {
+                // A saved sentinel expires with its owner; an unowned snapshot must not displace a new owner.
+                if (ReferenceEquals(owner, s_activeScope))
+                {
+                    NativeMethodsShared.SetCurrentDirectory(owner?.SentinelDirectory ?? directory);
+                }
             }
         }
     }

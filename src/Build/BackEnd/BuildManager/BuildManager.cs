@@ -274,7 +274,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private MultiThreadedStrictModeScope? _multiThreadedStrictModeScope;
 
-        private string? _savedCurrentDirectory;
+        private MultiThreadedStrictModeScope.CurrentDirectorySnapshot? _savedCurrentDirectory;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
@@ -623,12 +623,25 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+                string? nonStrictValue = null;
                 bool strictMode = _buildParameters.MultiThreaded
-                    && !Traits.MultiThreadedNonStrict;
+                    && !EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMTNONSTRICT", out nonStrictValue);
+                var buildEntryDirectory = strictMode || (_buildParameters.MultiThreaded && _buildParameters.SaveOperatingEnvironment)
+                    ? MultiThreadedStrictModeScope.CaptureCurrentDirectory()
+                    : default;
+
+                if (_buildParameters.MultiThreaded)
+                {
+                    _buildParameters.BuildProcessEnvironment.TryGetValue("MSBUILDMTNONSTRICT", out string? capturedValue);
+                    if (!string.Equals(capturedValue, nonStrictValue, StringComparison.Ordinal))
+                    {
+                        _buildParameters.SetBuildProcessEnvironmentVariable("MSBUILDMTNONSTRICT", nonStrictValue);
+                    }
+                }
 
                 // A strict scope owns its own restoration; rejected scope entry must not restore another build's CWD.
                 _savedCurrentDirectory = _buildParameters.MultiThreaded && !strictMode && _buildParameters.SaveOperatingEnvironment
-                    ? Directory.GetCurrentDirectory()
+                    ? buildEntryDirectory
                     : null;
 
                 // Initialize additional build parameters.
@@ -651,7 +664,9 @@ namespace Microsoft.Build.Execution
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
                 {
-                    _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
+                    _buildParameters.OutputResultsCacheFile = strictMode
+                        ? FileUtilities.NormalizePath(buildEntryDirectory.Directory, "msbuild-cache")
+                        : FileUtilities.NormalizePath("msbuild-cache");
                 }
 
                 // Launch the RAR node before the detoured launcher overrides the default node launcher.
@@ -775,15 +790,15 @@ namespace Microsoft.Build.Execution
                         // EndBuild serializes output caches before restoring CWD. Resolve their paths now.
                         if (_buildParameters.UsesOutputCache())
                         {
-                            _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(_buildParameters.OutputResultsCacheFile);
+                            _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(buildEntryDirectory.Directory, _buildParameters.OutputResultsCacheFile);
                         }
 
-                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter(_buildParameters.BuildId);
+                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter(_buildParameters.BuildId, buildEntryDirectory);
                         loggingService.LogComment(
                             BuildEventContext.Invalid,
                             MessageImportance.Low,
                             "MultiThreadedStrictModeEnabled",
-                            _multiThreadedStrictModeScope.SentinelDirectory);
+                            Directory.GetCurrentDirectory());
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -1263,7 +1278,7 @@ namespace Microsoft.Build.Execution
                     }
                     else if (nodesStopped && _savedCurrentDirectory is not null)
                     {
-                        NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
+                        _savedCurrentDirectory.Value.Restore();
                     }
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))

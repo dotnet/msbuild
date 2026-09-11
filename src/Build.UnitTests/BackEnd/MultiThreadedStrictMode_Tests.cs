@@ -143,6 +143,107 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        [Theory]
+        [InlineData(null, "true")]
+        [InlineData("1", null)]
+        [InlineData("true", "invalid")]
+        [InlineData("false", "TRUE")]
+        public void ReusedParametersTransferTheEntryTimeOptOut(string? initialValue, string? entryValue)
+        {
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", initialValue);
+            BuildParameters parameters = new() { MultiThreaded = true, Loggers = [new MockLogger(_output)] };
+            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", entryValue);
+            using BuildManager manager = new();
+            manager.BeginBuild(parameters);
+            try
+            {
+                var captured = ((IBuildComponentHost)manager).BuildParameters;
+                captured.BuildProcessEnvironment.TryGetValue("MSBUILDMTNONSTRICT", out string? actualValue);
+                actualValue.ShouldBe(entryValue);
+                parameters.BuildProcessEnvironment.TryGetValue("MSBUILDMTNONSTRICT", out string? originalValue);
+                originalValue.ShouldBe(initialValue);
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void StartupLoggerCannotChangeStrictRestorationOrCacheBase(bool saveEnvironment)
+        {
+            _env.SetCurrentDirectory(_env.CreateFolder().Path);
+            string originalDirectory = Directory.GetCurrentDirectory();
+            string loggerDirectory = _env.CreateFolder().Path;
+            var project = _env.CreateFile("startup-cwd.proj", """<Project><Target Name="Build" /></Project>""");
+            using BuildManager manager = new();
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                SaveOperatingEnvironment = saveEnvironment,
+                OutputResultsCacheFile = "startup.cache",
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [new MockLogger(_output), new InitializationCallbackLogger(() => Directory.SetCurrentDirectory(loggerDirectory))],
+            };
+
+            manager.Build(parameters, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
+                .ShouldHaveSucceeded();
+
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            File.Exists(Path.Combine(originalDirectory, "startup.cache")).ShouldBeTrue();
+            File.Exists(Path.Combine(loggerDirectory, "startup.cache")).ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        public void OverlappingMtBuildsPreserveTheCurrentScopeInEveryTeardownOrder(int strictIndex)
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            int[][] endOrders = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
+            foreach (int[] endOrder in endOrders)
+            {
+                using BuildManager first = new();
+                using BuildManager second = new();
+                using BuildManager third = new();
+                BuildManager[] managers = [first, second, third];
+                HashSet<int> active = [];
+                try
+                {
+                    for (int i = 0; i < managers.Length; i++)
+                    {
+                        _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", i == strictIndex ? null : "1");
+                        managers[i].BeginBuild(new BuildParameters
+                        {
+                            MultiThreaded = true,
+                            SaveOperatingEnvironment = true,
+                            Loggers = [new MockLogger(_output)],
+                        });
+                        active.Add(i);
+                    }
+
+                    string sentinel = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull().SentinelDirectory;
+                    foreach (int index in endOrder)
+                    {
+                        active.Remove(index);
+                        managers[index].EndBuild();
+                        Directory.GetCurrentDirectory().ShouldBe(active.Contains(strictIndex) ? sentinel : originalDirectory);
+                    }
+                }
+                finally
+                {
+                    foreach (int index in active)
+                    {
+                        managers[index].EndBuild();
+                    }
+                }
+            }
+        }
+
         [Fact]
         public void NonMtIsolationPreservesHostRelativeDeclarations()
         {
@@ -304,6 +405,52 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
             Directory.Exists(scope.SentinelDirectory).ShouldBeFalse();
             Directory.Exists(Path.GetDirectoryName(scope.SentinelDirectory)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void ScopeNeverAdoptsADirectoryChangedBeforePublication()
+        {
+            var foreignDirectory = _env.CreateFolder();
+            var protectedFile = _env.CreateFile(foreignDirectory, "keep.txt", "must not be deleted");
+            string? installedDirectory = null;
+            string? changedDirectory = null;
+            var scope = MultiThreadedStrictModeScope.Enter(0, MultiThreadedStrictModeScope.CaptureCurrentDirectory(), path =>
+            {
+                installedDirectory = path;
+                Directory.SetCurrentDirectory(path);
+                Directory.SetCurrentDirectory(foreignDirectory.Path);
+                changedDirectory = Directory.GetCurrentDirectory();
+            });
+            using var lifetime = new ScopeLifetime(scope);
+
+            scope.SentinelDirectory.ShouldBe(installedDirectory);
+            var otherSnapshot = MultiThreadedStrictModeScope.CaptureCurrentDirectory();
+            var violations = scope.DetectViolations();
+            violations.UnexpectedCurrentDirectory.ShouldBe(changedDirectory);
+            violations.UnresolvedPathWrites.ShouldBeNull();
+            File.ReadAllText(protectedFile.Path).ShouldBe("must not be deleted");
+            otherSnapshot.Restore();
+            Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
+        }
+
+        [Fact]
+        public void ScopeCleansItsRootWhenChangingDirectoryFails()
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            string? temporaryDirectory = null;
+            IOException failure = new("injected CWD switch failure");
+
+            Should.Throw<IOException>(() => MultiThreadedStrictModeScope.Enter(
+                0, MultiThreadedStrictModeScope.CaptureCurrentDirectory(), path =>
+                {
+                    temporaryDirectory = Path.GetDirectoryName(path);
+                    throw failure;
+                })).ShouldBeSameAs(failure);
+
+            temporaryDirectory.ShouldNotBeNull();
+            Directory.Exists(temporaryDirectory).ShouldBeFalse();
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
 
         /// <summary>
@@ -1079,10 +1226,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var first = MultiThreadedStrictModeScope.Enter(0);
             using var lifetime = new ScopeLifetime(first);
             using BuildManager manager = new();
+            using ManualResetEventSlim loggerInitializing = new();
+            using ManualResetEventSlim releaseLogger = new();
             BuildParameters parameters = new()
             {
                 MultiThreaded = true,
-                Loggers = [new MockLogger(_output)],
+                Loggers =
+                [
+                    new MockLogger(_output),
+                    new InitializationCallbackLogger(() =>
+                    {
+                        loggerInitializing.Set();
+                        releaseLogger.Wait();
+                    }),
+                ],
             };
             using ManualResetEventSlim callbackStarted = new();
             using ManualResetEventSlim releaseCallback = new();
@@ -1103,9 +1260,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
+                thread.Start();
+                loggerInitializing.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
                 lock (stateLock)
                 {
-                    thread.Start();
+                    releaseLogger.Set();
                     SpinWait.SpinUntil(() => queueField.GetValue(manager) is not null, TimeSpan.FromSeconds(10)).ShouldBeTrue();
                     queue = (ActionBlock<Action>)queueField.GetValue(manager)!;
                     queue.Post(() =>
@@ -1125,6 +1284,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             finally
             {
+                releaseLogger.Set();
                 releaseCallback.Set();
                 thread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue();
             }
@@ -1151,9 +1311,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
             owner.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
             using ManualResetEventSlim callbackStarted = new();
             using ManualResetEventSlim releaseCallback = new();
+            using ManualResetEventSlim loggerInitializing = new();
+            using ManualResetEventSlim releaseLogger = new();
             Exception? entryFailure = null;
             Thread thread = new(() => entryFailure = Record.Exception(() => rejected.BeginBuild(
-                new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] })));
+                new BuildParameters
+                {
+                    MultiThreaded = true,
+                    Loggers =
+                    [
+                        new MockLogger(_output),
+                        new InitializationCallbackLogger(() =>
+                        {
+                            loggerInitializing.Set();
+                            releaseLogger.Wait();
+                        }),
+                    ],
+                })));
             object stateLock = typeof(MultiThreadedStrictModeScope)
                 .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
             FieldInfo queueField = typeof(BuildManager).GetField("_workQueue", BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -1162,9 +1336,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
+                thread.Start();
+                loggerInitializing.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
                 lock (stateLock)
                 {
-                    thread.Start();
+                    releaseLogger.Set();
                     SpinWait.SpinUntil(() => queueField.GetValue(rejected) is not null, TimeSpan.FromSeconds(10)).ShouldBeTrue();
                     var queue = (ActionBlock<Action>)queueField.GetValue(rejected)!;
                     queue.Post(() =>
@@ -1184,6 +1360,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             finally
             {
+                releaseLogger.Set();
                 releaseCallback.Set();
                 thread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue();
                 if (!ownerEnded)
@@ -1257,6 +1434,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 inner.CleanupTask(task);
                 cleanup();
             }
+        }
+
+        private sealed class InitializationCallbackLogger(Action initialize) : ILogger
+        {
+            public LoggerVerbosity Verbosity { get; set; }
+            public string? Parameters { get; set; }
+            public void Initialize(IEventSource eventSource) => initialize();
+            public void Shutdown() { }
         }
 
         private sealed class ScopeLifetime(MultiThreadedStrictModeScope? scope) : IDisposable

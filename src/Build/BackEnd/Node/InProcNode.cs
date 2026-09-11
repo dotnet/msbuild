@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The current directory at the time the build is started.
         /// </summary>
-        private string _savedCurrentDirectory;
+        private MultiThreadedStrictModeScope.CurrentDirectorySnapshot _savedCurrentDirectory;
 
         /// <summary>
         /// The node logging context.
@@ -145,7 +145,7 @@ namespace Microsoft.Build.BackEnd
                 WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
                 // Get the current directory before doing work. We need this so we can restore the directory when the node shuts down.
-                _savedCurrentDirectory = Environment.CurrentDirectory;
+                _savedCurrentDirectory = MultiThreadedStrictModeScope.CaptureCurrentDirectory();
                 while (true)
                 {
                     int index = WaitHandle.WaitAny(waitHandles);
@@ -349,7 +349,7 @@ namespace Microsoft.Build.BackEnd
                 if (!_componentHost.BuildParameters.MultiThreaded)
                 {
                     // Restore the original current directory.
-                    NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
+                    _savedCurrentDirectory.Restore();
                 }
 
                 // Restore the original environment.
@@ -486,7 +486,7 @@ namespace Microsoft.Build.BackEnd
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
             // Save the current directory.
-            _savedCurrentDirectory = Environment.CurrentDirectory;
+            _savedCurrentDirectory = MultiThreadedStrictModeScope.CaptureCurrentDirectory();
 
             // Set the node id.
             _componentHost.BuildParameters.NodeId = configuration.NodeId;

@@ -252,6 +252,8 @@ To ease task authoring, we will provide a Roslyn analyzer that will check for kn
 
 ## Strict mode
 
+These defaults are part of experimental, opt-in MT, so they are not separately ChangeWave-gated.
+
 Multi-threaded builds use strict checks by default. Strict mode changes the process current directory
 to a fresh, empty temporary directory (the sentinel) for the build. A task that uses an unresolved relative path
 then looks there instead of accidentally finding another project's files. Paths resolved through
@@ -266,7 +268,8 @@ MSBuild to opt out of strict checks without disabling MT. Unset the variable or 
 or `false` to retain the default checks. Other values do not opt out. There is no separate
 strict-mode command-line switch, project property, or public API setting.
 API hosts can change the environment variable before a subsequent `BeginBuild`; its value is
-captured once for that build. Changing it during execution does not change the active checks.
+captured once for that build and copied into its child-process environment, including when reusing
+`BuildParameters`. Changing it during execution does not change the active checks.
 Use absolute entry-project paths in API builds, or construct relative-path `BuildRequestData`
 before `BeginBuild`, while the host's working directory is still active.
 
@@ -284,11 +287,15 @@ warnings. Do not also suppress these codes through `-nowarn` or `MSBuildWarnings
 normal warning-to-message suppression takes precedence over warning-to-error promotion.
 Existing task diagnostics keep their normal timing: `MSB4181` can appear alongside a strict
 diagnostic. Cancellation skips strict checks that have not run, but does not retract earlier diagnostics.
-The original process directory is restored when the build ends. Failures to enable strict
+The host directory captured before logger initialization is restored when the build ends; relative
+API output-cache paths also resolve from that directory. Failures to enable strict
 mode, check its state, or restore the directory fail the build; they do not silently disable checks.
 After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
 Locked leftovers are not reused by later builds. Cleanup is best-effort and does not replace
 the reported build result.
+The cleanup path is derived from the scope's unique temporary root, never from mutable process CWD.
+Late teardown of overlapping non-strict builds does not restore an expired sentinel or displace an
+active strict scope.
 
 Each independently observed CWD change is reported, even if an earlier task changed to the
 same directory. An undeletable sentinel entry is reported once while it remains present;
@@ -313,7 +320,9 @@ itself enable MT in a child process.
 
 We need to ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.
 
-This section describes the intended Visual Studio topology, not the current implementation invariant that multithreaded mode implies all worker nodes are in-proc.
+`MultiThreaded=true` with `DisableInProcNode=true` is not yet supported: the scheduler cannot
+allocate a worker and fails before task execution. This restriction is independent of strict
+checks; the topology below describes the intended implementation.
 
 ```mermaid
 sequenceDiagram
