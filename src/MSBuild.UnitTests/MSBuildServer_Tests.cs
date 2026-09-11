@@ -9,9 +9,11 @@ using System.Resources;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -135,6 +137,21 @@ namespace Microsoft.Build.Engine.UnitTests
             if (warmServer)
             {
                 launchClient.Execute(CancellationToken.None).MSBuildAppExitTypeString.ShouldBe("Success");
+                _env.WithTransientProcess(pidField.GetValue(launchClient).ShouldBeOfType<int>());
+
+                // The build result arrives before the server releases its busy mutex.
+                // Wait for admission before testing debugger behavior on that same resident.
+                ServerNodeHandshake handshake = new(CommunicationsUtilities.GetHandshakeOptions(
+                    taskHost: false,
+                    taskHostParameters: TaskHostParameters.Empty,
+                    architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+                string busyMutexName = $@"Global\msbuild-server-busy-{handshake.ComputeHash()}";
+                SpinWait.SpinUntil(() =>
+                {
+                    bool busy = Mutex.TryOpenExisting(busyMutexName, out Mutex? mutex);
+                    mutex?.Dispose();
+                    return !busy;
+                }, 10000).ShouldBeTrue("The warmup build must release the resident before the debugger request.");
             }
 
             _env.SetEnvironmentVariable("MSBUILDDEBUGONSTART", "5");
@@ -152,7 +169,10 @@ namespace Microsoft.Build.Engine.UnitTests
                 build = Task.Run(() => debugClient.Execute(CancellationToken.None));
                 SpinWait.SpinUntil(() => pidField.GetValue(launchClient) is int || build.IsCompleted, 10000).ShouldBeTrue();
                 int pid = pidField.GetValue(launchClient).ShouldBeOfType<int>();
-                _env.WithTransientProcess(pid);
+                if (!warmServer)
+                {
+                    _env.WithTransientProcess(pid);
+                }
                 server = Process.GetProcessById(pid);
                 SpinWait.SpinUntil(() =>
                 {
@@ -161,6 +181,12 @@ namespace Microsoft.Build.Engine.UnitTests
                         return output.ToString().Contains($"PID {pid}") || build.IsCompleted;
                     }
                 }, 10000).ShouldBeTrue();
+                if (build.IsCompleted)
+                {
+                    MSBuildClientExitResult result = await build;
+                    _output.WriteLine($"Debug request completed with {result.MSBuildClientExitType}: {result.MSBuildAppExitTypeString}");
+                    _output.WriteLine(output.ToString());
+                }
                 build.IsCompleted.ShouldBeFalse("the server must wait before evaluating the project");
                 lock (synchronizedOutput)
                 {
