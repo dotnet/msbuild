@@ -122,6 +122,26 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         }
 
         [Theory]
+        [InlineData("Text")]
+        [InlineData("text")]
+        [InlineData("TEXT")]
+        [InlineData("tExT")]
+        public void ReportsTaskParametersKeyedCaseInsensitively(string parameterName)
+        {
+            BuildProject("<Message Text='Hello'/>");
+
+            s_testCheck!.CheckData.Count.ShouldBe(1);
+            var data = s_testCheck.CheckData[0];
+
+            // Parameter names are MSBuild names, so a check must be able to look them up without
+            // knowing the casing the task author declared the property with.
+            data.Parameters.ContainsKey(parameterName).ShouldBeTrue();
+            data.Parameters.TryGetValue(parameterName, out var parameter).ShouldBeTrue();
+            parameter.ShouldNotBeNull().Value.ShouldBe("Hello");
+            data.Parameters[parameterName].Value.ShouldBe("Hello");
+        }
+
+        [Theory]
         [InlineData("<Output TaskParameter='CombinedPaths' ItemName='OutputDirectories' />")]
         [InlineData("<Output TaskParameter='CombinedPaths' PropertyName='OutputDirectories' />")]
         public void ReportsComplexTaskParameters(string outputElement)

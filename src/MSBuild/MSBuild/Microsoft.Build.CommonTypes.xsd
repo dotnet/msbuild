@@ -1198,31 +1198,6 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="Service" type="msb:SimpleItemType" substitutionGroup="msb:Item"/>
-    <xs:element name="MSBuildImportedProject" substitutionGroup="msb:Item">
-        <xs:annotation>
-            <xs:documentation><!-- _locID_text="MSBuildImportedProject" _locComment="" -->Synthesized by the engine when MSBuildProvideImportedProjects is true. Each item represents an imported project file.</xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-            <xs:complexContent>
-                <xs:extension base="msb:SimpleItemType">
-                    <xs:sequence minOccurs="0" maxOccurs="unbounded">
-                        <xs:choice>
-                            <xs:element name="ImportingProjectPath">
-                                <xs:annotation>
-                                    <xs:documentation><!-- _locID_text="MSBuildImportedProject_ImportingProjectPath" _locComment="" -->Full path of the project file that contains the Import element.</xs:documentation>
-                                </xs:annotation>
-                            </xs:element>
-                            <xs:element name="Sdk">
-                                <xs:annotation>
-                                    <xs:documentation><!-- _locID_text="MSBuildImportedProject_Sdk" _locComment="" -->The SDK name if this import was resolved via an SDK reference (e.g. "Microsoft.NET.Sdk"); empty otherwise.</xs:documentation>
-                                </xs:annotation>
-                            </xs:element>
-                        </xs:choice>
-                    </xs:sequence>
-                </xs:extension>
-            </xs:complexContent>
-        </xs:complexType>
-    </xs:element>
     <xs:element name="WebReferences" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="WebReferences" _locComment="" -->Name of Web References folder to display in user interface</xs:documentation>
