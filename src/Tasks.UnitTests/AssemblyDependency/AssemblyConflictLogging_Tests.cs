@@ -18,7 +18,7 @@ using Xunit;
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>
-    /// Tests RAR's structured assembly-conflict events behind <see cref="ChangeWaves.Wave18_11"/>.
+    /// Tests RAR's structured assembly-conflict events behind <see cref="ChangeWaves.Wave18_12"/>.
     /// The events replace large preformatted dependency-list strings.
     /// The events include the MSB3277 warning and the low-importance dependency details.
     /// </summary>
@@ -31,6 +31,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Reproduces the D1 primary-reference conflict with the D2 dependency of B.
+        /// A also depends on D1, so the victor is both primary and a dependency.
         /// The legacy <c>ConflictGeneratesMessageReferencingAssemblyName</c> test uses this scenario.
         /// This conflict produces the aggregated MSB3277 warning.
         /// </summary>
@@ -39,6 +40,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             BuildEngine = engine,
             Assemblies = new ITaskItem[]
             {
+                new TaskItem("A"),
                 new TaskItem("B"),
                 new TaskItem("D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"),
             },
@@ -74,8 +76,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private MockEngine RunWithWaveState(bool waveEnabled, Func<MockEngine, ResolveAssemblyReference> createTask)
         {
             MockEngine engine = new(_output);
-            using TestEnvironment env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", waveEnabled ? null : ChangeWaves.Wave18_11.ToString());
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", waveEnabled ? null : ChangeWaves.Wave18_12.ToString());
             ChangeWaves.ResetStateForTests();
 
             Execute(createTask(engine)).ShouldBeTrue();
@@ -102,6 +104,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             structuredWarning.SimpleAssemblyName.ShouldBe("D");
             structuredWarning.Victor.FusionName.ShouldContain("D, Version=1.0.0.0");
             structuredWarning.Victim.FusionName.ShouldContain("D, Version=2.0.0.0");
+            structuredWarning.Victor.PrimarySourceItemSpecs.ShouldNotBeEmpty();
             structuredWarning.Victor.Dependees.ShouldNotBeEmpty();
             structuredWarning.Victim.Dependees.ShouldNotBeEmpty();
 
@@ -117,7 +120,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             errorEngine.WarningsAsErrors.Add("MSB3277");
             ResolveAssemblyReference task = CreateWarningConflictTask(errorEngine);
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             ChangeWaves.ResetStateForTests();
 
@@ -146,6 +149,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 .OfType<AssemblyConflictDependencyDetailsMessageEventArgs>()
                 .ShouldHaveSingleItem();
             detailsEvent.Importance.ShouldBe(MessageImportance.Low);
+            detailsEvent.Victor.IsPrimary.ShouldBeTrue();
+            detailsEvent.Victor.IsResolved.ShouldBeFalse();
+            detailsEvent.Victor.UnresolvedPrimaryItemSpec.ShouldNotBeNullOrEmpty();
+            detailsEvent.Victor.PrimarySourceItemSpecs.ShouldBeEmpty();
             detailsEvent.Victor.Dependees.ShouldNotBeEmpty();
             detailsEvent.Victim.Dependees.ShouldNotBeEmpty();
 
@@ -168,7 +175,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference structuredTask = CreateWarningConflictTask(structuredEngine);
             structuredTask.OutputUnresolvedAssemblyConflicts = true;
 
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(_output))
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
                 ChangeWaves.ResetStateForTests();
@@ -180,9 +187,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference legacyTask = CreateWarningConflictTask(legacyEngine);
             legacyTask.OutputUnresolvedAssemblyConflicts = true;
 
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(_output))
             {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_12.ToString());
                 ChangeWaves.ResetStateForTests();
                 Execute(legacyTask).ShouldBeTrue();
                 ChangeWaves.ResetStateForTests();
@@ -207,7 +214,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             MockEngine engine = new(_output);
             ResolveAssemblyReference task = CreateMessageConflictTask(engine);
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             ChangeWaves.ResetStateForTests();
             Execute(task).ShouldBeTrue();
@@ -229,7 +236,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
             ResolveAssemblyReference task = CreateMessageConflictTask(engine);
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             ChangeWaves.ResetStateForTests();
             Execute(task).ShouldBeTrue();
@@ -248,7 +255,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference task = CreateMessageConflictTask(engine);
             task.OutputUnresolvedAssemblyConflicts = true;
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             ChangeWaves.ResetStateForTests();
             Execute(task).ShouldBeTrue();

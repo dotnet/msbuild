@@ -18,27 +18,27 @@ public enum AssemblyConflictLossReason
     /// The reference did not lose a conflict.
     /// This value represents the internal "no conflict" state and does not occur in logged conflict events.
     /// </summary>
-    DidNotLose,
+    DidNotLose = 0,
 
     /// <summary>
     /// The reference matched another assembly that had a higher version number.
     /// </summary>
-    HadLowerVersion,
+    HadLowerVersion = 1,
 
     /// <summary>
     /// The two assemblies cannot be reconciled.
     /// </summary>
-    InsolubleConflict,
+    InsolubleConflict = 2,
 
     /// <summary>
     /// This reference was a dependency. The other reference was a primary reference that the project specified directly.
     /// </summary>
-    WasNotPrimary,
+    WasNotPrimary = 3,
 
     /// <summary>
     /// The two references were equivalent according to fusion and also have the same version.
     /// </summary>
-    FusionEquivalentWithSameVersion,
+    FusionEquivalentWithSameVersion = 4,
 }
 
 /// <summary>
@@ -101,6 +101,7 @@ public sealed class AssemblyConflictReferenceDetails
         bool isPrimary,
         bool isResolved,
         string? unresolvedPrimaryItemSpec,
+        IReadOnlyList<string> primarySourceItemSpecs,
         IReadOnlyList<AssemblyConflictDependee> dependees)
     {
         FusionName = fusionName;
@@ -108,6 +109,7 @@ public sealed class AssemblyConflictReferenceDetails
         IsPrimary = isPrimary;
         IsResolved = isResolved;
         UnresolvedPrimaryItemSpec = unresolvedPrimaryItemSpec;
+        PrimarySourceItemSpecs = primarySourceItemSpecs;
         Dependees = dependees;
     }
 
@@ -140,10 +142,13 @@ public sealed class AssemblyConflictReferenceDetails
     public string? UnresolvedPrimaryItemSpec { get; }
 
     /// <summary>
+    /// Gets the project items that caused MSBuild to resolve this primary reference.
+    /// </summary>
+    public IReadOnlyList<string> PrimarySourceItemSpecs { get; }
+
+    /// <summary>
     /// Gets the dependee references that required this reference.
     /// Each entry also contains the project items that caused MSBuild to resolve the dependee.
-    /// If this reference is primary and resolved, the first entry contains this reference's project items.
-    /// This first entry preserves the legacy text.
     /// </summary>
     public IReadOnlyList<AssemblyConflictDependee> Dependees { get; }
 
@@ -154,6 +159,12 @@ public sealed class AssemblyConflictReferenceDetails
         writer.Write(IsPrimary);
         writer.Write(IsResolved);
         writer.WriteOptionalString(UnresolvedPrimaryItemSpec);
+        writer.Write7BitEncodedInt(PrimarySourceItemSpecs.Count);
+        for (int i = 0; i < PrimarySourceItemSpecs.Count; i++)
+        {
+            writer.WriteOptionalString(PrimarySourceItemSpecs[i]);
+        }
+
         writer.Write7BitEncodedInt(Dependees.Count);
         for (int i = 0; i < Dependees.Count; i++)
         {
@@ -169,9 +180,16 @@ public sealed class AssemblyConflictReferenceDetails
         bool isResolved = reader.ReadBoolean();
         string? unresolvedPrimaryItemSpec = reader.ReadOptionalString();
 
-        int count = reader.Read7BitEncodedInt();
-        var dependees = new AssemblyConflictDependee[count];
-        for (int i = 0; i < count; i++)
+        int primarySourceItemSpecCount = reader.Read7BitEncodedInt();
+        var primarySourceItemSpecs = new string[primarySourceItemSpecCount];
+        for (int i = 0; i < primarySourceItemSpecCount; i++)
+        {
+            primarySourceItemSpecs[i] = reader.ReadOptionalString() ?? string.Empty;
+        }
+
+        int dependeeCount = reader.Read7BitEncodedInt();
+        var dependees = new AssemblyConflictDependee[dependeeCount];
+        for (int i = 0; i < dependeeCount; i++)
         {
             dependees[i] = AssemblyConflictDependee.CreateFromStream(reader);
         }
@@ -182,6 +200,7 @@ public sealed class AssemblyConflictReferenceDetails
             isPrimary,
             isResolved,
             unresolvedPrimaryItemSpec,
+            primarySourceItemSpecs,
             dependees);
     }
 }
@@ -369,6 +388,15 @@ internal static class AssemblyConflictMessageFormatter
         if (details.IsPrimary && !details.IsResolved)
         {
             log.AppendLine().Append(EightSpaces).Append(Format(formats.UnresolvedPrimaryItemSpec, details.UnresolvedPrimaryItemSpec));
+        }
+        else if (details.IsPrimary && details.IsResolved)
+        {
+            log.AppendLine().Append(EightSpaces).AppendLine(details.FullPath);
+            log.Append(TenSpaces).Append(Format(formats.PrimarySourceItemsForReference, details.FullPath));
+            for (int i = 0; i < details.PrimarySourceItemSpecs.Count; i++)
+            {
+                log.AppendLine().Append(TwelveSpaces).Append(details.PrimarySourceItemSpecs[i]);
+            }
         }
 
         for (int i = 0; i < details.Dependees.Count; i++)

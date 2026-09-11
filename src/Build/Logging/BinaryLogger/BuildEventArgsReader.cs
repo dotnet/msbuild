@@ -584,9 +584,16 @@ namespace Microsoft.Build.Logging
             bool isResolved = ReadBoolean();
             string? unresolvedPrimaryItemSpec = ReadOptionalString();
 
-            int count = ReadInt32();
-            var dependees = new AssemblyConflictDependee[count];
-            for (int i = 0; i < count; i++)
+            int primarySourceItemSpecCount = ReadInt32();
+            var primarySourceItemSpecs = new string[primarySourceItemSpecCount];
+            for (int i = 0; i < primarySourceItemSpecCount; i++)
+            {
+                primarySourceItemSpecs[i] = ReadOptionalString() ?? string.Empty;
+            }
+
+            int dependeeCount = ReadInt32();
+            var dependees = new AssemblyConflictDependee[dependeeCount];
+            for (int i = 0; i < dependeeCount; i++)
             {
                 dependees[i] = ReadAssemblyConflictDependee();
             }
@@ -597,6 +604,7 @@ namespace Microsoft.Build.Logging
                 isPrimary,
                 isResolved,
                 unresolvedPrimaryItemSpec,
+                primarySourceItemSpecs,
                 dependees);
         }
 
