@@ -109,5 +109,21 @@ internal partial class Expander<P, I>
                 FileSystem,
                 LoggingContext);
         }
+
+        /// <summary>
+        /// Captures the value-independent part of the parse so it can be cached and reused by
+        /// later expansions of the same function body against the same receiver type.
+        /// </summary>
+        internal readonly PropertyFunctionDescriptor BuildDescriptor()
+        {
+            return new PropertyFunctionDescriptor(
+                ReceiverType,
+                Expression,
+                Receiver,
+                Name,
+                Arguments,
+                BindingFlags,
+                Remainder);
+        }
     }
 }

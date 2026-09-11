@@ -167,6 +167,31 @@ internal partial class Expander<P, I>
         }
 
         /// <summary>
+        /// Construct a function from a previously cached parse of the same function body, binding
+        /// it to the current expansion's context. Every expansion gets its own Function because
+        /// Execute mutates instance state (it augments the binding flags and may narrow the
+        /// receiver type); only the immutable parse result is shared.
+        /// </summary>
+        internal Function(
+            PropertyFunctionDescriptor descriptor,
+            PropertiesUseTracker propertiesUseTracker,
+            IFileSystem fileSystem,
+            LoggingContext loggingContext)
+            : this(
+                descriptor.ReceiverType,
+                descriptor.Expression,
+                descriptor.Receiver,
+                descriptor.MethodName,
+                descriptor.Arguments,
+                descriptor.BindingFlags,
+                descriptor.Remainder,
+                propertiesUseTracker,
+                fileSystem,
+                loggingContext)
+        {
+        }
+
+        /// <summary>
         /// Part of the extraction may result in the name of the property
         /// This accessor is used by the Expander
         /// Examples of expression root:
@@ -213,6 +238,18 @@ internal partial class Expander<P, I>
         {
             // Used to aggregate all the components needed for a Function
             FunctionBuilder functionBuilder = new FunctionBuilder { FileSystem = fileSystem, LoggingContext = loggingContext };
+
+            // Parsing a function body is a pure function of the body text and the receiver's runtime
+            // type, so the result can be reused across expansions and across evaluations. The receiver
+            // type is part of the key because it selects the parse branch below.
+            Type receiverTypeKey = propertyValue?.GetType();
+
+            if (PropertyFunctionDescriptorCache.TryGet(expressionFunction, receiverTypeKey, out PropertyFunctionDescriptor cachedDescriptor))
+            {
+                return cachedDescriptor is null
+                    ? null
+                    : new Function(cachedDescriptor, propertiesUseTracker, fileSystem, loggingContext);
+            }
 
             // By default the expression root is the whole function expression
             ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -294,6 +331,7 @@ internal partial class Expander<P, I>
                 if (methodStartIndex == -1)
                 {
                     // We don't have a function invocation in the expression root, return null
+                    PropertyFunctionDescriptorCache.Add(expressionFunction, receiverTypeKey, null);
                     return null;
                 }
 
@@ -321,6 +359,9 @@ internal partial class Expander<P, I>
 
                 ConstructFunction(elementLocation, expressionFunction, argumentStartIndex, methodStartIndex, ref functionBuilder);
             }
+
+            PropertyFunctionDescriptor descriptor = functionBuilder.BuildDescriptor();
+            PropertyFunctionDescriptorCache.Add(expressionFunction, receiverTypeKey, descriptor);
 
             return functionBuilder.Build();
         }
