@@ -260,4 +260,34 @@
             Normal should not be localized.
             Low should not be localized.</comment>
   </data>
+  <data name="AssemblyResolutionSearchTrace_SearchPath">
+    <value>For SearchPath "{0}".</value>
+  </data>
+  <data name="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">
+    <value>For SearchPath "{0}" (added by referencing assembly "{1}").</value>
+    <comment> {1} is the name of the parent assembly for which SearchPath was used.</comment>
+  </data>
+  <data name="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
+    <value>Considered AssemblyFoldersEx locations.</value>
+  </data>
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">
+    <value>Considered "{0}",
+			but its name "{1}"
+			didn't match the expected name "{2}".</value>
+  </data>
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile">
+    <value>Considered "{0}", but it didn't exist.</value>
+  </data>
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk">
+    <value>Considered treating "{0}" as a file name, but it didn't exist.</value>
+  </data>
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac">
+    <value>Considered "{0}", which was not found in the GAC.</value>
+  </data>
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
+    <value>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</value>
+  </data>
+  <data name="AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch">
+    <value>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</value>
+  </data>
 </root>

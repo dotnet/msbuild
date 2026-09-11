@@ -118,7 +118,7 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
             return;
         }
 
-        if (e.RawMessage is not null)
+        if (e is AssemblyResolutionSearchTraceEventArgs || e.RawMessage is not null)
         {
             BuildEventRedirector?.ForwardEvent(e);
         }
