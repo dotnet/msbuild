@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -13,6 +14,8 @@ using Microsoft.Build.Tasks;
 using Shouldly;
 
 using Xunit;
+
+using FrameworkSR = Microsoft.Build.Framework.Resources.SR;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 
@@ -64,7 +67,7 @@ public sealed class AssemblyResolutionSearchLogging_Tests
     }
 
     [Fact]
-    public async Task AggregatedMessageUsesInvariantCultureAndPreservesLegacyInvariantText()
+    public async Task AggregatedMessageSupportsInvariantAndLocalizedText()
     {
         const string requestedAssemblyName = "Requested, Version=1.0.0.0";
         const string targetProcessorArchitecture = "MSIL";
@@ -84,28 +87,48 @@ public sealed class AssemblyResolutionSearchLogging_Tests
             MessageImportance.Low,
             eventTimestamp: default);
 
-        string actualMessage = await Task.Run(() =>
+        CultureInfo frenchCulture = CultureInfo.GetCultureInfo("fr-FR");
+        string invariantMessage = await Task.Run(() =>
         {
-            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
-            CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+            CultureInfo.CurrentCulture = frenchCulture;
+            CultureInfo.CurrentUICulture = frenchCulture;
             return searchEvent.Message.ShouldNotBeNull();
         });
 
-        string[] expectedMessages =
+        string[] expectedInvariantMessages =
         [
-            FormatInvariantResource("ResolveAssemblyReference.SearchPath", "path"),
-            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile", "missing.dll"),
-            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName", "not-an-assembly.dll"),
-            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac", "not-in-gac.dll"),
-            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk", "not-a-file.dll"),
-            FormatInvariantResource("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch", "wrong-architecture.dll", "AMD64", targetProcessorArchitecture),
-            FormatInvariantResource("ResolveAssemblyReference.SearchPathAddedByParentAssembly", "parent-path", "parent.dll"),
-            FormatInvariantResource("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch", "wrong-name.dll", "Candidate, Version=2.0.0.0", requestedAssemblyName),
-            FormatInvariantResource("ResolveAssemblyReference.SearchPath", AssemblyResolutionConstants.assemblyFoldersExSentinel + "test"),
-            FormatInvariantResource("ResolveAssemblyReference.SearchedAssemblyFoldersEx"),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_SearchPath", "path"),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile", "missing.dll"),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName", "not-an-assembly.dll"),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac", "not-in-gac.dll"),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk", "not-a-file.dll"),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch", "wrong-architecture.dll", "AMD64", targetProcessorArchitecture),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly", "parent-path", "parent.dll"),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch", "wrong-name.dll", "Candidate, Version=2.0.0.0", requestedAssemblyName),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_SearchPath", AssemblyResolutionConstants.assemblyFoldersExSentinel + "test"),
+            FormatResource(CultureInfo.InvariantCulture, "AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx"),
         ];
 
-        actualMessage.ShouldBe(string.Join(System.Environment.NewLine, expectedMessages));
+        string[] expectedLocalizedMessages =
+        [
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_SearchPath", "path"),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile", "missing.dll"),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName", "not-an-assembly.dll"),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac", "not-in-gac.dll"),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk", "not-a-file.dll"),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch", "wrong-architecture.dll", "AMD64", targetProcessorArchitecture),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly", "parent-path", "parent.dll"),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch", "wrong-name.dll", "Candidate, Version=2.0.0.0", requestedAssemblyName),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_SearchPath", AssemblyResolutionConstants.assemblyFoldersExSentinel + "test"),
+            FormatResource(frenchCulture, "AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx"),
+        ];
+
+        invariantMessage.ShouldBe(string.Join(System.Environment.NewLine, expectedInvariantMessages));
+        string localizedMessage = searchEvent.FormatMessage(frenchCulture);
+        localizedMessage.ShouldBe(string.Join(System.Environment.NewLine, expectedLocalizedMessages));
+        searchEvent.FormatMessage(frenchCulture).ShouldBeSameAs(localizedMessage);
+        searchEvent.Message.ShouldBe(invariantMessage);
+        Should.Throw<ArgumentNullException>(() => searchEvent.FormatMessage(null!));
     }
 
     [Fact]
@@ -168,10 +191,10 @@ public sealed class AssemblyResolutionSearchLogging_Tests
         return engine;
     }
 
-    private static string FormatInvariantResource(string resourceName, params object[] arguments)
+    private static string FormatResource(CultureInfo culture, string resourceName, params object[] arguments)
         => string.Format(
-            CultureInfo.InvariantCulture,
-            "        " + AssemblyResources.GetString(resourceName, CultureInfo.InvariantCulture),
+            culture,
+            "        " + FrameworkSR.ResourceManager.GetString(resourceName, culture).ShouldNotBeNull(),
             arguments);
 
     private static Reference CreateReference()

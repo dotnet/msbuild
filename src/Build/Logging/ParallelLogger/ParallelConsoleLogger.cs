@@ -1269,7 +1269,11 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             string nonNullMessage = null;
 
-            if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
+            if (e is AssemblyResolutionSearchTraceEventArgs searchTrace)
+            {
+                nonNullMessage = searchTrace.FormatMessage(CultureInfo.CurrentUICulture);
+            }
+            else if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
             {
                 nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
             }

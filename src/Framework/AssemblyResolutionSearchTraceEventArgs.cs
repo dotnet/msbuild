@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 namespace Microsoft.Build.Framework;
 
@@ -195,24 +197,16 @@ public sealed class AssemblyResolutionSearchAttempt
 /// Describes all candidates considered while resolving one assembly reference.
 /// </summary>
 /// <remarks>
-/// The <see cref="BuildEventArgs.Message"/> is rendered in invariant English.
+/// The <see cref="BuildEventArgs.Message"/> is rendered using the invariant culture.
 /// </remarks>
 [Serializable]
 public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventArgs
 {
-    private const string SearchPathFormat = "        For SearchPath \"{0}\".";
-    private const string SearchPathAddedByParentAssemblyFormat = "        For SearchPath \"{0}\" (added by referencing assembly \"{1}\").";
-    private const string SearchedAssemblyFoldersExMessage = "        Considered AssemblyFoldersEx locations.";
-    private const string FileNotFoundFormat = "        Considered \"{0}\", but it didn't exist.";
-    private const string TargetHadNoFusionNameFormat = "        Considered \"{0}\", which existed but did not appear to be a valid .NET assembly.";
-    private const string NotInGacFormat = "        Considered \"{0}\", which was not found in the GAC.";
-    private const string NotAFileNameOnDiskFormat = "        Considered treating \"{0}\" as a file name, but it didn't exist.";
-    private const string ProcessorArchitectureDoesNotMatchFormat = "        Considered \"{0}\", which existed but had a processor architecture \"{1}\" which does not match the targeted processor architecture \"{2}\".";
-
-    private static readonly string s_fusionNamesDidNotMatchFormat = $"        Considered \"{{0}}\",{Environment.NewLine}\t\t\tbut its name \"{{1}}\"{Environment.NewLine}\t\t\tdidn't match the expected name \"{{2}}\".";
-
+    private static readonly ConditionalWeakTable<CultureInfo, MessageFormats> s_formatsByCulture = new();
     private IReadOnlyList<AssemblyResolutionSearchAttempt> _searchAttempts = [];
     private string? _formattedMessage;
+    [NonSerialized]
+    private LocalizedMessage? _localizedMessage;
 
     internal AssemblyResolutionSearchTraceEventArgs()
     {
@@ -249,7 +243,7 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
 
     /// <inheritdoc />
     public override string? Message
-        => _formattedMessage ??= FormatMessage();
+        => _formattedMessage ??= FormatMessage(CultureInfo.InvariantCulture);
 
     internal override void WriteToStream(BinaryWriter writer)
     {
@@ -286,8 +280,35 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
         _searchAttempts = attempts;
     }
 
-    private string FormatMessage()
+    /// <summary>
+    /// Formats the message using resources and argument formatting for the specified culture.
+    /// </summary>
+    /// <param name="culture">The culture to use when formatting the message.</param>
+    /// <returns>The formatted message.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="culture"/> is <see langword="null"/>.</exception>
+    public string FormatMessage(CultureInfo culture)
     {
+        ArgumentNullException.ThrowIfNull(culture);
+
+        if (culture.Equals(CultureInfo.InvariantCulture))
+        {
+            return _formattedMessage ??= FormatMessageCore(culture);
+        }
+
+        LocalizedMessage? localizedMessage = Volatile.Read(ref _localizedMessage);
+        if (localizedMessage is not null && localizedMessage.Culture.Equals(culture))
+        {
+            return localizedMessage.Message;
+        }
+
+        string message = FormatMessageCore(culture);
+        Volatile.Write(ref _localizedMessage, new LocalizedMessage(culture, message));
+        return message;
+    }
+
+    private string FormatMessageCore(CultureInfo culture)
+    {
+        MessageFormats formats = GetMessageFormats(culture);
         var builder = new StringBuilder();
         string? lastSearchPath = null;
 
@@ -300,29 +321,29 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
                 AppendMessage(
                     builder,
                     attempt.ParentAssembly is null
-                        ? Format(SearchPathFormat, attempt.SearchPath)
-                        : Format(SearchPathAddedByParentAssemblyFormat, attempt.SearchPath, attempt.ParentAssembly));
+                        ? Format(culture, formats.SearchPath, attempt.SearchPath)
+                        : Format(culture, formats.SearchPathAddedByParentAssembly, attempt.SearchPath, attempt.ParentAssembly));
 
                 if (attempt.IsAssemblyFoldersExSearch)
                 {
-                    AppendMessage(builder, SearchedAssemblyFoldersExMessage);
+                    AppendMessage(builder, formats.SearchedAssemblyFoldersEx);
                 }
             }
 
             string? message = attempt.Result switch
             {
                 AssemblyResolutionSearchResult.FileNotFound when !attempt.IsAssemblyFoldersExSearch
-                    => Format(FileNotFoundFormat, attempt.FileNameAttempted),
+                    => Format(culture, formats.FileNotFound, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.FusionNamesDidNotMatch
-                    => Format(s_fusionNamesDidNotMatchFormat, attempt.FileNameAttempted, attempt.AssemblyName, RequestedAssemblyName),
+                    => Format(culture, formats.FusionNamesDidNotMatch, attempt.FileNameAttempted, attempt.AssemblyName, RequestedAssemblyName),
                 AssemblyResolutionSearchResult.TargetHadNoFusionName
-                    => Format(TargetHadNoFusionNameFormat, attempt.FileNameAttempted),
+                    => Format(culture, formats.TargetHadNoFusionName, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.NotInGac
-                    => Format(NotInGacFormat, attempt.FileNameAttempted),
+                    => Format(culture, formats.NotInGac, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.NotAFileNameOnDisk when !attempt.IsAssemblyFoldersExSearch
-                    => Format(NotAFileNameOnDiskFormat, attempt.FileNameAttempted),
+                    => Format(culture, formats.NotAFileNameOnDisk, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch
-                    => Format(ProcessorArchitectureDoesNotMatchFormat, attempt.FileNameAttempted, attempt.ProcessorArchitecture, TargetProcessorArchitecture),
+                    => Format(culture, formats.ProcessorArchitectureDoesNotMatch, attempt.FileNameAttempted, attempt.ProcessorArchitecture, TargetProcessorArchitecture),
                 _ => null,
             };
 
@@ -335,8 +356,11 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
         return builder.ToString();
     }
 
-    private static string Format(string format, params object?[] arguments)
-        => string.Format(CultureInfo.InvariantCulture, format, arguments);
+    internal static MessageFormats GetMessageFormats(CultureInfo culture)
+        => s_formatsByCulture.GetValue(culture, static culture => new MessageFormats(culture));
+
+    private static string Format(CultureInfo culture, string format, params object?[] arguments)
+        => string.Format(culture, format, arguments);
 
     private static void AppendMessage(StringBuilder builder, string message)
     {
@@ -346,5 +370,43 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
         }
 
         builder.Append(message);
+    }
+
+    private sealed class LocalizedMessage(CultureInfo culture, string message)
+    {
+        internal CultureInfo Culture { get; } = culture;
+        internal string Message { get; } = message;
+    }
+
+    internal sealed class MessageFormats
+    {
+        private const string EightSpaces = "        ";
+
+        internal MessageFormats(CultureInfo culture)
+        {
+            SearchPath = GetResource("AssemblyResolutionSearchTrace_SearchPath", culture);
+            SearchPathAddedByParentAssembly = GetResource("AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly", culture);
+            SearchedAssemblyFoldersEx = GetResource("AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx", culture);
+            FileNotFound = GetResource("AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile", culture);
+            FusionNamesDidNotMatch = GetResource("AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch", culture);
+            TargetHadNoFusionName = GetResource("AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName", culture);
+            NotInGac = GetResource("AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac", culture);
+            NotAFileNameOnDisk = GetResource("AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk", culture);
+            ProcessorArchitectureDoesNotMatch = GetResource("AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch", culture);
+        }
+
+        internal string SearchPath { get; }
+        internal string SearchPathAddedByParentAssembly { get; }
+        internal string SearchedAssemblyFoldersEx { get; }
+        internal string FileNotFound { get; }
+        internal string FusionNamesDidNotMatch { get; }
+        internal string TargetHadNoFusionName { get; }
+        internal string NotInGac { get; }
+        internal string NotAFileNameOnDisk { get; }
+        internal string ProcessorArchitectureDoesNotMatch { get; }
+
+        private static string GetResource(string resourceName, CultureInfo culture)
+            => EightSpaces + (SR.ResourceManager.GetString(resourceName, culture)
+                ?? throw new InvalidOperationException($"Resource '{resourceName}' was not found for culture '{culture.Name}'."));
     }
 }
