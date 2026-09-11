@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Microsoft.Build.Globbing
 {
@@ -58,10 +57,21 @@ namespace Microsoft.Build.Globbing
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
-            // Threadpools are a scarce resource in Visual Studio, do not use them.
-            // return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
+            var context = new GlobMatchContext(stringToMatch);
+            return IsMatch(ref context);
+        }
 
-            return _globs.Any(static (glob, str) => glob.IsMatch(str), stringToMatch);
+        internal bool IsMatch(ref GlobMatchContext context)
+        {
+            foreach (IMSBuildGlob glob in _globs)
+            {
+                if (context.IsMatch(glob))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

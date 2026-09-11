@@ -71,7 +71,10 @@ namespace Microsoft.Build.Globbing
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
-            return MainGlob.IsMatch(stringToMatch) && !Gaps.IsMatch(stringToMatch);
+            var context = new GlobMatchContext(stringToMatch);
+            return IsMatch(ref context);
         }
+
+        internal bool IsMatch(ref GlobMatchContext context) => context.IsMatch(MainGlob) && !context.IsMatch(Gaps);
     }
 }

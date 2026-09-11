@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Globbing.Extensions;
 using Xunit;
@@ -168,6 +171,161 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             Assert.Same(glob1, composite.Globs.First());
             Assert.Same(glob2, composite.Globs.Skip(1).First());
             Assert.Equal(2, composite.Globs.Count());
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("File.cs")]
+        [InlineData("src/File.cs")]
+        [InlineData("src/../File.cs")]
+        [InlineData("../File.cs")]
+        [InlineData("obj/File.cs")]
+        [InlineData("src/File.vb")]
+        [InlineData("src/FILE.CS")]
+        [InlineData("src\\File.cs")]
+        [InlineData("src/./nested/../File.cs")]
+        [InlineData("src/\0File.cs")]
+        public void NestedMatchingPreservesIndependentNormalization(string input)
+        {
+            string root = Path.Combine(Path.GetTempPath(), "GlobRoot");
+            string otherRoot = Path.Combine(root, "other");
+            var glob = new CompositeGlob(
+                MSBuildGlob.Parse(root, "**/*.txt"),
+                new MSBuildGlobWithGaps(
+                    new CompositeGlob(
+                        MSBuildGlob.Parse(otherRoot, "**/*.vb"),
+                        MSBuildGlob.Parse(root, "**/*.cs")),
+                    MSBuildGlob.Parse(root, "**/obj/**"),
+                    MSBuildGlob.Parse(otherRoot, "**/bin/**")),
+                MSBuildGlob.Parse(root, "fallback/*"));
+
+            Assert.Equal(MatchIndependently(glob, input), glob.IsMatch(input));
+
+            if (input.IndexOf('\0') < 0)
+            {
+                string absoluteInput = Path.Combine(root, input);
+                Assert.Equal(MatchIndependently(glob, absoluteInput), glob.IsMatch(absoluteInput));
+            }
+        }
+
+        [Fact]
+        public void DifferentRootsDoNotShareNormalizedInput()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "GlobRoot");
+            string otherRoot = Path.Combine(root, "other");
+            var glob = new CompositeGlob(
+                MSBuildGlob.Parse(root, "**/*.txt"),
+                MSBuildGlob.Parse(otherRoot, Path.Combine(root, "*.cs")));
+
+            Assert.False(glob.IsMatch("File.cs"));
+            Assert.True(glob.IsMatch(Path.Combine(root, "File.cs")));
+        }
+
+        [Fact]
+        public void MatchContextReusesOnlyTheCurrentRootsNormalization()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "GlobRoot");
+            string otherRoot = Path.Combine(root, "other");
+            var context = new GlobMatchContext("File.cs");
+            string normalizedInput = context.GetNormalizedInput(root);
+
+            Assert.Same(normalizedInput, context.GetNormalizedInput(root));
+            Assert.Equal(Path.Combine(otherRoot, "File.cs"), context.GetNormalizedInput(otherRoot));
+            string normalizedAgain = context.GetNormalizedInput(root);
+            Assert.Equal(normalizedInput, normalizedAgain);
+
+            context.IsMatch(new CallbackGlob(_ => false));
+            Assert.NotSame(normalizedAgain, context.GetNormalizedInput(root));
+        }
+
+        [Fact]
+        public void CustomMatchersReceiveOriginalInputAndShortCircuit()
+        {
+            const string Input = "src/../File.cs";
+            string root = Path.Combine(Path.GetTempPath(), "GlobRoot");
+            var inputs = new List<string>();
+            var glob = new CompositeGlob(
+                MSBuildGlob.Parse(root, "**/*.txt"),
+                new CallbackGlob(input =>
+                {
+                    inputs.Add(input);
+                    return false;
+                }),
+                new MSBuildGlobWithGaps(
+                    MSBuildGlob.Parse(root, "**/*.cs"),
+                    new CallbackGlob(input =>
+                    {
+                        inputs.Add(input);
+                        return false;
+                    })),
+                new CallbackGlob(_ => throw new InvalidOperationException("Matching must short circuit.")));
+
+            Assert.True(glob.IsMatch(Input));
+            Assert.Equal(new[] { Input, Input }, inputs);
+        }
+
+        [Fact]
+        public void DerivedMatchersKeepTheirInterfaceImplementation()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "GlobRoot");
+            MSBuildGlob match = MSBuildGlob.Parse(root, "**/*.cs");
+            var glob = new CompositeGlob(
+                new CustomCompositeGlob(match),
+                new CustomGlobWithGaps(match));
+
+            Assert.False(glob.IsMatch("File.cs"));
+        }
+
+        [Fact]
+        public void EmptyCompositeDoesNotValidateInput()
+        {
+            Assert.False(new CompositeGlob().IsMatch(null));
+            Assert.True(new CompositeGlob(new CallbackGlob(input => input is null)).IsMatch(null));
+            Assert.Throws<ArgumentNullException>(() =>
+                new CompositeGlob(MSBuildGlob.Parse("*")).IsMatch(null));
+        }
+
+        [Fact]
+        public void MatchingDoesNotShareStateAcrossCalls()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "GlobRoot");
+            var glob = new MSBuildGlobWithGaps(
+                MSBuildGlob.Parse(root, "**/*.cs"),
+                MSBuildGlob.Parse(root, "**/obj/**"));
+            var composite = new CompositeGlob(glob, MSBuildGlob.Parse(root, "**/*.vb"));
+            string[] inputs = { "src/File.cs", "obj/File.cs", "src/File.txt", "src/File.vb", "" };
+            bool[] expected = inputs.Select(input => MatchIndependently(composite, input)).ToArray();
+
+            Parallel.For(0, 1000, i =>
+            {
+                int index = i % inputs.Length;
+                Assert.Equal(expected[index], composite.IsMatch(inputs[index]));
+            });
+        }
+
+        private static bool MatchIndependently(IMSBuildGlob glob, string input)
+        {
+            return glob switch
+            {
+                CompositeGlob composite => composite.Globs.Any(child => MatchIndependently(child, input)),
+                MSBuildGlobWithGaps gaps => MatchIndependently(gaps.MainGlob, input) && !MatchIndependently(gaps.Gaps, input),
+                _ => glob.IsMatch(input)
+            };
+        }
+
+        private sealed class CallbackGlob(Func<string, bool> callback) : IMSBuildGlob
+        {
+            public bool IsMatch(string input) => callback(input);
+        }
+
+        private sealed class CustomCompositeGlob(IMSBuildGlob glob) : CompositeGlob(glob), IMSBuildGlob
+        {
+            bool IMSBuildGlob.IsMatch(string input) => false;
+        }
+
+        private sealed class CustomGlobWithGaps(IMSBuildGlob glob) : MSBuildGlobWithGaps(glob), IMSBuildGlob
+        {
+            bool IMSBuildGlob.IsMatch(string input) => false;
         }
     }
 }
