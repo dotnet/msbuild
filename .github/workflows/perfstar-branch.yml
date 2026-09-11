@@ -1,0 +1,151 @@
+name: Queue PerfStar evaluation
+
+# This workflow has write access in the base repository so it can handle fork PRs.
+# Keep all PR interaction in the GitHub API; never check out or execute PR code.
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] - Fork PRs need base-repository write access; no PR code is checked out or executed.
+    types: [labeled, unlabeled, synchronize, closed]
+
+concurrency:
+  group: perfstar-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  create-perf-branch:
+    if: >-
+      (github.event.action == 'labeled' && github.event.label.name == 'PerfStar: Evaluate') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'PerfStar: Evaluate'))
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create PerfStar branch
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const pullRequest = context.payload.pull_request;
+            const branch = `perf/pr-${pullRequest.number}`;
+            const stagingBranch = `perfstar-staging/pr-${pullRequest.number}`;
+
+            async function upsertBranch(name, sha) {
+              const ref = `heads/${name}`;
+
+              try {
+                await github.rest.git.getRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref,
+                });
+
+                await github.rest.git.updateRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref,
+                  sha,
+                  force: true,
+                });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+
+                await github.rest.git.createRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `refs/${ref}`,
+                  sha,
+                });
+              }
+            }
+
+            async function deleteBranch(name) {
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${name}`,
+                });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
+            }
+
+            let kickoffSha;
+
+            try {
+              await upsertBranch(stagingBranch, pullRequest.head.sha);
+
+              const { data: merge } = await github.rest.repos.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: stagingBranch,
+                head: pullRequest.base.ref,
+                commit_message: `Merge ${pullRequest.base.ref} into ${branch} for PerfStar testing`,
+              });
+
+              const mergedSha = merge?.sha ?? pullRequest.head.sha;
+              const { data: mergedCommit } = await github.rest.git.getCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: mergedSha,
+              });
+              const { data: kickoffCommit } = await github.rest.git.createCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                message: `Queue PerfStar evaluation for #${pullRequest.number}`,
+                tree: mergedCommit.tree.sha,
+                parents: [mergedSha],
+              });
+
+              kickoffSha = kickoffCommit.sha;
+              await upsertBranch(branch, kickoffSha);
+            } finally {
+              await deleteBranch(stagingBranch);
+            }
+
+            const branchUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/tree/${branch}`;
+            core.notice(`Queued PerfStar evaluation from ${branch} at ${kickoffSha}`);
+            await core.summary
+              .addHeading('PerfStar evaluation queued')
+              .addLink(branch, branchUrl)
+              .addRaw(` now contains pull request #${pullRequest.number} at ${pullRequest.head.sha} with ${pullRequest.base.ref} merged in.`)
+              .write();
+
+  delete-perf-branch:
+    if: >-
+      (github.event.action == 'unlabeled' && github.event.label.name == 'PerfStar: Evaluate') ||
+      (github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'PerfStar: Evaluate'))
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete PerfStar branch
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const pullRequestNumber = context.payload.pull_request.number;
+            const branches = [
+              `perf/pr-${pullRequestNumber}`,
+              `perfstar-staging/pr-${pullRequestNumber}`,
+            ];
+
+            for (const branch of branches) {
+              try {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${branch}`,
+                });
+                core.notice(`Deleted PerfStar branch ${branch}`);
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+
+                core.notice(`PerfStar branch ${branch} was already deleted`);
+              }
+            }
