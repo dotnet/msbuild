@@ -267,6 +267,53 @@
         <target state="translated">Byl proveden pokus o použití existujícího sestavení {0} s architekturou procesoru {1}, která se však neshoduje s cílovou architekturou procesoru {2}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictFound">
+        <source>There was a conflict between "{0}" and "{1}".</source>
+        <target state="translated">Došlo ke konfliktu mezi sestavením {0} a sestavením {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictHigherVersionChosen">
+        <source>"{0}" was chosen because it had a higher version.</source>
+        <target state="translated">Bylo zvoleno sestavení {0}, protože mělo novější verzi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictPrimaryChosen">
+        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
+        <target state="translated">Bylo zvoleno sestavení {0}, protože bylo primární, zatímco sestavení {1} nebylo primární.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictUnsolvable">
+        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
+        <target state="translated">MSB3243: Neexistuje způsob, jak vyřešit konflikt mezi sestaveními {0} a {1}. Bude zvolena jedna z možností: {0}.</target>
+        <note>{StrBegin="MSB3243: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_FoundConflicts">
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: Našly se konflikty mezi různými verzemi {0}, které se nepovedlo přeložit.
+{1}</target>
+        <note>{StrBegin="MSB3277: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ReferenceDependsOn">
+        <source>References which depend on "{0}" [{1}].</source>
+        <target state="translated">Odkazy závislé na {0} [{1}].</target>
+        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">Reference, které jsou závislé na nebo byly sjednoceny s „{0}“ [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnResolvedPrimaryItemSpec">
+        <source>Unresolved primary reference with an item include of "{0}".</source>
+        <target state="translated">Nepřeložený primární odkaz se zahrnutím položky {0}</target>
+        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_PrimarySourceItemsForReference">
+        <source>Project file item includes which caused reference "{0}".</source>
+        <target state="translated">Jsou zahrnuty položky souboru projektu, které způsobily odkaz {0}.</target>
+        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

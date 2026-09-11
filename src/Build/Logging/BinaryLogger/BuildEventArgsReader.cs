@@ -608,50 +608,15 @@ namespace Microsoft.Build.Logging
                 dependees);
         }
 
-        private AssemblyConflictMessageFormats ReadAssemblyConflictMessageFormats(bool includeWarningFormats)
-        {
-            string referenceDependsOn = ReadOptionalString() ?? string.Empty;
-            string unifiedReferenceDependsOn = ReadOptionalString() ?? string.Empty;
-            string unresolvedPrimaryItemSpec = ReadOptionalString() ?? string.Empty;
-            string primarySourceItemsForReference = ReadOptionalString() ?? string.Empty;
-
-            string conflictFound = string.Empty;
-            string conflictHigherVersionChosen = string.Empty;
-            string conflictPrimaryChosen = string.Empty;
-            string conflictUnsolvable = string.Empty;
-            string foundConflicts = string.Empty;
-            if (includeWarningFormats)
-            {
-                conflictFound = ReadOptionalString() ?? string.Empty;
-                conflictHigherVersionChosen = ReadOptionalString() ?? string.Empty;
-                conflictPrimaryChosen = ReadOptionalString() ?? string.Empty;
-                conflictUnsolvable = ReadOptionalString() ?? string.Empty;
-                foundConflicts = ReadOptionalString() ?? string.Empty;
-            }
-
-            return new(
-                conflictFound,
-                conflictHigherVersionChosen,
-                conflictPrimaryChosen,
-                conflictUnsolvable,
-                referenceDependsOn,
-                unifiedReferenceDependsOn,
-                unresolvedPrimaryItemSpec,
-                primarySourceItemsForReference,
-                foundConflicts);
-        }
-
         private BuildEventArgs ReadAssemblyConflictDependencyDetailsMessageEventArgs()
         {
             BuildEventArgsFields fields = ReadBuildEventArgsFields(readImportance: true);
             AssemblyConflictReferenceDetails victor = ReadAssemblyConflictReferenceDetails();
             AssemblyConflictReferenceDetails victim = ReadAssemblyConflictReferenceDetails();
-            AssemblyConflictMessageFormats formats = ReadAssemblyConflictMessageFormats(includeWarningFormats: false);
 
             var e = new AssemblyConflictDependencyDetailsMessageEventArgs(
                 victor,
                 victim,
-                formats,
                 fields.SenderName ?? string.Empty,
                 fields.Importance,
                 fields.Timestamp)
@@ -671,14 +636,12 @@ namespace Microsoft.Build.Logging
             var lossReason = (AssemblyConflictLossReason)ReadInt32();
             AssemblyConflictReferenceDetails victor = ReadAssemblyConflictReferenceDetails();
             AssemblyConflictReferenceDetails victim = ReadAssemblyConflictReferenceDetails();
-            AssemblyConflictMessageFormats formats = ReadAssemblyConflictMessageFormats(includeWarningFormats: true);
 
             var e = new AssemblyConflictWarningEventArgs(
                 simpleAssemblyName,
                 lossReason,
                 victor,
                 victim,
-                formats,
                 fields.Code ?? string.Empty,
                 fields.File,
                 fields.LineNumber,

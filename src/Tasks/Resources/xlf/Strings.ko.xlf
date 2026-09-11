@@ -1834,21 +1834,6 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictFound">
-        <source>There was a conflict between "{0}" and "{1}".</source>
-        <target state="translated">"{0}"과(와) "{1}" 사이에 충돌이 발생했습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictHigherVersionChosen">
-        <source>"{0}" was chosen because it had a higher version.</source>
-        <target state="translated">"{0}"이(가) 버전이 더 높아 선택되었습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictPrimaryChosen">
-        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
-        <target state="translated">"{0}"이(가) 기본 항목이므로 선택되었습니다. "{1}"은(는) 기본 항목이 아닙니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConflictRedirectSuggestion">
         <source>Consider app.config remapping of assembly "{0}" from Version "{1}" [{2}] to Version "{3}" [{4}] to solve conflict and get rid of warning.</source>
         <target state="translated">충돌을 해결하고 경고 메시지가 표시되지 않게 하려면 app.config에서 "{0}" 어셈블리의 버전을 "{1}" [{2}]에서 "{3}" [{4}](으)로 다시 매핑하십시오.</target>
@@ -1913,11 +1898,6 @@
         <source>MSB3242: Conflict between mutually exclusive parameters. AutoUnify was 'true' and AppConfigFile was set.</source>
         <target state="translated">MSB3242: 함께 사용할 수 없는 매개 변수 사이에 충돌이 발생했습니다. AutoUnify가 'true'이고 AppConfigFile이 설정되었습니다.</target>
         <note>{StrBegin="MSB3242: "}</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictUnsolvable">
-        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
-        <target state="translated">MSB3243: "{0}"과(와) "{1}" 사이의 충돌을 해결할 수 없습니다. 임의로 "{0}"을(를) 선택합니다.</target>
-        <note>{StrBegin="MSB3243: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedToFindDependentFiles">
         <source>MSB3244: Could not find dependent files. {0}</source>
@@ -2059,11 +2039,6 @@
         <target state="translated">잘못된 PE 헤더를 찾았습니다. 구현 파일이 사용되지 않습니다.</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
-        <source>References which depend on or have been unified to "{0}" [{1}].</source>
-        <target state="translated">"{0}" [{1}]에 종속되거나 통합된 참조입니다.</target>
-        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: 알 수 없는 프로세서 아키텍처입니다. "{1}"에 대한 구현 파일 "{0}"의 ImageFileMachine 값이 "0x{2}"입니다. 이 구현 파일을 사용하려면 프로젝트의 "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" 속성을 "Warning" 또는 "None"으로 지정하세요.</target>
@@ -2083,13 +2058,6 @@
         <source>MSB3276: Found conflicts between different versions of the same dependent assembly. Please set the "AutoGenerateBindingRedirects" property to true in the project file. For more information, see http://go.microsoft.com/fwlink/?LinkId=294190.</source>
         <target state="translated">MSB3276: 같은 종속 어셈블리의 서로 다른 버전이 충돌합니다. 프로젝트 파일에서 "AutoGenerateBindingRedirects" 속성을 true로 설정하세요. 자세한 내용은 http://go.microsoft.com/fwlink/?LinkId=294190을 참조하세요.</target>
         <note>{StrBegin="MSB3276: "}</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
-{1}</source>
-        <target state="translated">MSB3277: 해결할 수 없는 "{0}"의 다른 버전 간 충돌이 발견되었습니다.
-{1}</target>
-        <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
         <source>{0} = '{1}'</source>
@@ -2173,21 +2141,6 @@
         <source>Required by "{0}".</source>
         <target state="translated">"{0}"에 필요합니다.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ReferenceDependsOn">
-        <source>References which depend on "{0}" [{1}].</source>
-        <target state="translated">"{0}"[{1}]에 종속되는 참조입니다.</target>
-        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
-        <source>Unresolved primary reference with an item include of "{0}".</source>
-        <target state="translated">항목 Include "{0}"이(가) 있는 확인되지 않은 기본 참조입니다.</target>
-        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.PrimarySourceItemsForReference">
-        <source>Project file item includes which caused reference "{0}".</source>
-        <target state="translated">"{0}" 참조를 발생시킨 프로젝트 파일 항목 Include입니다.</target>
-        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Resolved">
         <source>Resolved file path is "{0}".</source>

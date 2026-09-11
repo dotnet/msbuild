@@ -426,7 +426,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             => new(
                 CreateAssemblyConflictVictorDetails(),
                 CreateAssemblyConflictVictimDetails(),
-                AssemblyConflictTestData.MessageFormats,
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
                 DateTime.UtcNow);
@@ -440,7 +439,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
-                AssemblyConflictTestData.MessageFormats,
                 "MSB3277",
                 @"C:\foo\bar.proj",
                 42,

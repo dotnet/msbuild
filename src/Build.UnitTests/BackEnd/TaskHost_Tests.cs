@@ -560,7 +560,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
                 CreateConflictVictorDetails(),
                 CreateConflictVictimDetails(),
-                AssemblyConflictTestData.MessageFormats,
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
                 DateTime.UtcNow);
@@ -583,7 +582,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
-                AssemblyConflictTestData.MessageFormats,
                 "MSB3277",
                 @"C:\foo\bar.proj",
                 42,

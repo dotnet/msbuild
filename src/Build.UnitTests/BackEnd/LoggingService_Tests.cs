@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -883,6 +884,35 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.SenderName, actualBuildEvent.SenderName);
             Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Subcategory, actualBuildEvent.Subcategory);
             Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Timestamp, actualBuildEvent.Timestamp);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void StructuredConflictWarningTransformationUsesCurrentUICulture(bool treatAsError)
+        {
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+            try
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+                AssemblyConflictWarningEventArgs warning = AssemblyConflictLogger_Tests.CreateEvents().Item2;
+                var warnings = new HashSet<string> { warning.Code };
+
+                MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(
+                    warning,
+                    warningsAsErrors: treatAsError ? warnings : null,
+                    warningsAsMessages: treatAsError ? null : warnings);
+
+                BuildEventArgs transformedEvent = treatAsError
+                    ? logger.Errors.ShouldHaveSingleItem()
+                    : logger.BuildMessageEvents.ShouldHaveSingleItem();
+                transformedEvent.Message.ShouldStartWith("détection de conflits non résolus");
+                warning.IsMessageMaterialized.ShouldBeFalse();
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
         }
 
         /// <summary>

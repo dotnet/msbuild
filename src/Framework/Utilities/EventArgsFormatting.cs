@@ -15,6 +15,34 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class EventArgsFormatting
     {
+        internal static string GetLocalizedMessage(BuildEventArgs e)
+        {
+            CultureInfo culture = CultureInfo.CurrentUICulture;
+            if (culture.Equals(CultureInfo.InvariantCulture) || culture.TwoLetterISOLanguageName == "en")
+            {
+                return e.Message;
+            }
+
+            return e switch
+            {
+                AssemblyResolutionSearchTraceEventArgs searchTrace => searchTrace.FormatMessage(culture),
+                AssemblyConflictDependencyDetailsMessageEventArgs details
+                    when details.Victor is not null && details.Victim is not null =>
+                    AssemblyConflictMessageFormatter.FormatDependencyDetails(details.Victor, details.Victim, culture),
+                AssemblyConflictWarningEventArgs warning
+                    when warning.Victor is not null && warning.Victim is not null =>
+                    AssemblyConflictMessageFormatter.FormatWarningMessage(
+                        warning.SimpleAssemblyName,
+                        AssemblyConflictMessageFormatter.FormatWarningBody(
+                            warning.LossReason,
+                            warning.Victor,
+                            warning.Victim,
+                            culture),
+                        culture),
+                _ => e.Message
+            };
+        }
+
         /// <summary>
         /// Format the error event message and all the other event data into
         /// a single string.
@@ -40,7 +68,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildWarningEventArgs e, bool showProjectFile, string projectConfigurationDescription)
         {
-            return FormatEventMessage("warning", e.Subcategory, e.Message,
+            return FormatEventMessage("warning", e.Subcategory, GetLocalizedMessage(e),
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId, projectConfigurationDescription);
         }
@@ -56,7 +84,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile, string projectConfigurationDescription, string nonNullMessage = null)
         {
-            return FormatEventMessage("message", e.Subcategory, nonNullMessage ?? e.Message,
+            return FormatEventMessage("message", e.Subcategory, nonNullMessage ?? GetLocalizedMessage(e),
                             e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                             e.ColumnNumber, e.EndColumnNumber, e.ThreadId, projectConfigurationDescription);
         }
@@ -105,7 +133,7 @@ namespace Microsoft.Build.Shared
             ArgumentNullException.ThrowIfNull(e);
 
             // "warning" should not be localized
-            return FormatEventMessage("warning", e.Subcategory, e.Message,
+            return FormatEventMessage("warning", e.Subcategory, GetLocalizedMessage(e),
                 e.Code, e.File, null, e.LineNumber, e.EndLineNumber,
                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
@@ -122,7 +150,7 @@ namespace Microsoft.Build.Shared
             ArgumentNullException.ThrowIfNull(e);
 
             // "warning" should not be localized
-            return FormatEventMessage("warning", e.Subcategory, e.Message,
+            return FormatEventMessage("warning", e.Subcategory, GetLocalizedMessage(e),
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber,
                            e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
@@ -151,7 +179,7 @@ namespace Microsoft.Build.Shared
             ArgumentNullException.ThrowIfNull(e);
 
             // "message" should not be localized
-            return FormatEventMessage("message", e.Subcategory, nonNullMessage ?? e.Message,
+            return FormatEventMessage("message", e.Subcategory, nonNullMessage ?? GetLocalizedMessage(e),
                 e.Code, e.File, showProjectFile ? e.ProjectFile : null, e.LineNumber, e.EndLineNumber, e.ColumnNumber, e.EndColumnNumber, e.ThreadId, null);
         }
 

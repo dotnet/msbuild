@@ -267,6 +267,53 @@
         <target state="translated">已考虑使用“{0}”，它虽已存在，但其处理器架构“{1}”与目标处理器架构“{2}”不匹配。</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictFound">
+        <source>There was a conflict between "{0}" and "{1}".</source>
+        <target state="translated">“{0}”与“{1}”之间存在冲突。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictHigherVersionChosen">
+        <source>"{0}" was chosen because it had a higher version.</source>
+        <target state="translated">已选择“{0}”，因为它的版本更高。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictPrimaryChosen">
+        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
+        <target state="translated">已选择“{0}”，因为它是主版本而“{1}”不是。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictUnsolvable">
+        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
+        <target state="translated">MSB3243: 无法解决“{0}”与“{1}”之间的冲突。正在随意选择“{0}”。</target>
+        <note>{StrBegin="MSB3243: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_FoundConflicts">
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: 发现无法解析的“{0}”的不同版本之间存在冲突。
+{1}</target>
+        <note>{StrBegin="MSB3277: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ReferenceDependsOn">
+        <source>References which depend on "{0}" [{1}].</source>
+        <target state="translated">依赖于“{0}”[{1}]的引用。</target>
+        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">依赖于或已统一到“{0}”[{1}] 的引用。</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnResolvedPrimaryItemSpec">
+        <source>Unresolved primary reference with an item include of "{0}".</source>
+        <target state="translated">未能解析项 Include 特性为“{0}”的主引用。</target>
+        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_PrimarySourceItemsForReference">
+        <source>Project file item includes which caused reference "{0}".</source>
+        <target state="translated">导致引用“{0}”的项目文件项 Include 特性。</target>
+        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

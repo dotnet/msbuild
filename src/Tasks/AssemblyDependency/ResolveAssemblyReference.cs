@@ -14,7 +14,6 @@ using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -115,7 +114,6 @@ namespace Microsoft.Build.Tasks
             public static string UnificationByFrameworkRetarget;
             public static string UnifiedDependency;
             public static string UnifiedPrimaryReference;
-            public static AssemblyConflictMessageFormats AssemblyConflictFormats;
 
             private static volatile bool initialized;
             private static readonly LockType s_initializeLock = new();
@@ -175,18 +173,6 @@ namespace Microsoft.Build.Tasks
                     UnificationByFrameworkRetarget = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByFrameworkRetarget");
                     UnifiedDependency = GetResource("ResolveAssemblyReference.UnifiedDependency");
                     UnifiedPrimaryReference = GetResource("ResolveAssemblyReference.UnifiedPrimaryReference");
-
-                    string foundConflicts = GetResource("ResolveAssemblyReference.FoundConflicts");
-                    AssemblyConflictFormats = new(
-                        GetResource("ResolveAssemblyReference.ConflictFound"),
-                        GetResource("ResolveAssemblyReference.ConflictHigherVersionChosen"),
-                        GetResource("ResolveAssemblyReference.ConflictPrimaryChosen"),
-                        GetResource("ResolveAssemblyReference.ConflictUnsolvable"),
-                        GetResource("ResolveAssemblyReference.ReferenceDependsOn"),
-                        GetResource("ResolveAssemblyReference.UnifiedReferenceDependsOn"),
-                        GetResource("ResolveAssemblyReference.UnResolvedPrimaryItemSpec"),
-                        GetResource("ResolveAssemblyReference.PrimarySourceItemsForReference"),
-                        MessageParser.TryStripAnyCode(foundConflicts, out string strippedMessage) ? strippedMessage : foundConflicts);
 
                     initialized = true;
                 }
@@ -1324,7 +1310,11 @@ namespace Microsoft.Build.Tasks
                                 {
                                     // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
                                     // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
-                                    Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, output);
+                                    LogConflictWarningWithCodeFromResource(
+                                        "AssemblyConflict_FoundConflicts",
+                                        "ResolveAssemblyReference.FoundConflicts",
+                                        assemblyName.Name,
+                                        output);
                                 }
                                 else
                                 {
@@ -1523,7 +1513,7 @@ namespace Microsoft.Build.Tasks
             Assumed.NotNull(conflictCandidate);
             log.Append(Strings.FourSpaces);
 
-            string resource = referenceIsUnified ? "ResolveAssemblyReference.UnifiedReferenceDependsOn" : "ResolveAssemblyReference.ReferenceDependsOn";
+            string resource = referenceIsUnified ? "AssemblyConflict_UnifiedReferenceDependsOn" : "AssemblyConflict_ReferenceDependsOn";
 
             log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resource, fusionName, conflictCandidate.FullPath));
 
@@ -1538,7 +1528,7 @@ namespace Microsoft.Build.Tasks
                     log
                         .AppendLine()
                         .Append(Strings.EightSpaces)
-                        .Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.UnResolvedPrimaryItemSpec", conflictCandidate.PrimarySourceItem));
+                        .Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("AssemblyConflict_UnResolvedPrimaryItemSpec", conflictCandidate.PrimarySourceItem));
                 }
             }
 
@@ -1558,7 +1548,7 @@ namespace Microsoft.Build.Tasks
         {
             log.AppendLine().Append(Strings.EightSpaces).AppendLine(dependeeReference.FullPath);
 
-            log.Append(Strings.TenSpaces).Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.PrimarySourceItemsForReference", dependeeReference.FullPath));
+            log.Append(Strings.TenSpaces).Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("AssemblyConflict_PrimarySourceItemsForReference", dependeeReference.FullPath));
             foreach (ITaskItem sourceItem in dependeeReference.GetSourceItems())
             {
                 log.AppendLine().Append(Strings.TwelveSpaces).Append(sourceItem.ItemSpec);
@@ -2271,20 +2261,20 @@ namespace Microsoft.Build.Tasks
         /// <param name="log">StringBuilder holding information to be logged.</param>
         private void LogConflict(Reference reference, string fusionName, StringBuilder log)
         {
-            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", reference.ConflictVictorName, fusionName));
+            log.Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("AssemblyConflict_ConflictFound", reference.ConflictVictorName, fusionName));
             switch (reference.ConflictLossExplanation)
             {
                 case ConflictLossReason.HadLowerVersion:
                     {
                         Debug.Assert(!reference.IsPrimary, "A primary reference should never lose a conflict because of version. This is an insoluble conflict instead.");
-                        string message = Log.FormatResourceString("ResolveAssemblyReference.ConflictHigherVersionChosen", reference.ConflictVictorName);
+                        string message = Log.FormatResourceString("AssemblyConflict_ConflictHigherVersionChosen", reference.ConflictVictorName);
                         log.AppendLine().Append(Strings.FourSpaces).Append(message);
                         break;
                     }
 
                 case ConflictLossReason.WasNotPrimary:
                     {
-                        string message = Log.FormatResourceString("ResolveAssemblyReference.ConflictPrimaryChosen", reference.ConflictVictorName, fusionName);
+                        string message = Log.FormatResourceString("AssemblyConflict_ConflictPrimaryChosen", reference.ConflictVictorName, fusionName);
                         log.AppendLine().Append(Strings.FourSpaces).Append(message);
                         break;
                     }
@@ -2294,13 +2284,17 @@ namespace Microsoft.Build.Tasks
                     // so log a warning.
                     if (reference.IsPrimary)
                     {
-                        Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.ConflictUnsolvable", reference.ConflictVictorName, fusionName);
+                        LogConflictWarningWithCodeFromResource(
+                            "AssemblyConflict_ConflictUnsolvable",
+                            "ResolveAssemblyReference.ConflictUnsolvable",
+                            reference.ConflictVictorName,
+                            fusionName);
                     }
                     else
                     {
                         // For dependencies, adding an app.config entry could help. Log a comment, there will be
                         // a summary warning later on.
-                        log.AppendLine().Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictUnsolvable", reference.ConflictVictorName, fusionName));
+                        log.AppendLine().Append(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("AssemblyConflict_ConflictUnsolvable", reference.ConflictVictorName, fusionName));
                     }
                     break;
                 // Can happen if one of the references has a dependency with the same simplename, and version but no publickeytoken and the other does.
@@ -2327,7 +2321,11 @@ namespace Microsoft.Build.Tasks
             // Log a separate warning to preserve the legacy behavior.
             if (conflictCandidate.ConflictLossExplanation == ConflictLossReason.InsolubleConflict && conflictCandidate.IsPrimary)
             {
-                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.ConflictUnsolvable", conflictCandidate.ConflictVictorName, fusionName);
+                LogConflictWarningWithCodeFromResource(
+                    "AssemblyConflict_ConflictUnsolvable",
+                    "ResolveAssemblyReference.ConflictUnsolvable",
+                    conflictCandidate.ConflictVictorName,
+                    fusionName);
             }
 
             string output;
@@ -2342,8 +2340,16 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                output = AssemblyConflictMessageFormatter.FormatHeaderOnly(victorFusionName, fusionName, lossReason, conflictCandidate.IsPrimary, Strings.AssemblyConflictFormats);
-                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
+                string localizedHeader = AssemblyConflictMessageFormatter.FormatHeaderOnly(
+                    victorFusionName,
+                    fusionName,
+                    lossReason,
+                    conflictCandidate.IsPrimary,
+                    CultureInfo.CurrentUICulture);
+                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), localizedHeader);
+                output = OutputUnresolvedAssemblyConflicts
+                    ? AssemblyConflictMessageFormatter.FormatHeaderOnly(victorFusionName, fusionName, lossReason, conflictCandidate.IsPrimary)
+                    : string.Empty;
 
                 bool logDependencyDetails = Log.LogsMessagesOfImportance(MessageImportance.Low);
                 if (logDependencyDetails || OutputUnresolvedAssemblyConflicts)
@@ -2356,7 +2362,6 @@ namespace Microsoft.Build.Tasks
                         var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
                             victorDetails,
                             victimDetails,
-                            Strings.AssemblyConflictFormats,
                             GetType().Name,
                             MessageImportance.Low,
                             DateTime.UtcNow);
@@ -2371,8 +2376,7 @@ namespace Microsoft.Build.Tasks
                     {
                         details = AssemblyConflictMessageFormatter.FormatDependencyDetails(
                             victorDetails,
-                            victimDetails,
-                            Strings.AssemblyConflictFormats);
+                            victimDetails);
                     }
                 }
             }
@@ -2394,7 +2398,7 @@ namespace Microsoft.Build.Tasks
         /// Logs an error when the build treats MSB3277 as an error.
         /// </summary>
         /// <returns>
-        /// The conflict body when <paramref name="materializeMessage"/> is <see langword="true"/> or MSB3277 becomes an error.
+        /// The invariant conflict body when <paramref name="materializeMessage"/> is <see langword="true"/>.
         /// Otherwise, returns <see langword="null"/>.
         /// </returns>
         private string LogFoundConflictsWarning(
@@ -2407,7 +2411,7 @@ namespace Microsoft.Build.Tasks
             const string warningCode = FoundConflictsWarningCode;
             string helpKeyword = Log.HelpKeywordPrefix is null ? null : Log.HelpKeywordPrefix + "ResolveAssemblyReference.FoundConflicts";
             string body = materializeMessage
-                ? AssemblyConflictMessageFormatter.FormatWarningBody(lossReason, victorDetails, victimDetails, Strings.AssemblyConflictFormats)
+                ? AssemblyConflictMessageFormatter.FormatWarningBody(lossReason, victorDetails, victimDetails)
                 : null;
 
             if (BuildEngine is IBuildEngine8 buildEngine8 && buildEngine8.ShouldTreatWarningAsError(warningCode))
@@ -2416,11 +2420,16 @@ namespace Microsoft.Build.Tasks
                 // The logging thread promotes a directly logged warning asynchronously.
                 // Promote MSB3277 here to preserve the synchronous legacy behavior.
                 // This path is uncommon, so immediate formatting has a small performance effect.
-                body ??= AssemblyConflictMessageFormatter.FormatWarningBody(lossReason, victorDetails, victimDetails, Strings.AssemblyConflictFormats);
+                CultureInfo culture = CultureInfo.CurrentUICulture;
+                string localizedBody = AssemblyConflictMessageFormatter.FormatWarningBody(
+                    lossReason,
+                    victorDetails,
+                    victimDetails,
+                    culture);
                 string message = AssemblyConflictMessageFormatter.FormatWarningMessage(
                     simpleAssemblyName,
-                    body,
-                    Strings.AssemblyConflictFormats);
+                    localizedBody,
+                    culture);
                 Log.LogError(subcategory: null, errorCode: warningCode, helpKeyword: helpKeyword, helpLink: null, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: message);
                 return body;
             }
@@ -2430,7 +2439,6 @@ namespace Microsoft.Build.Tasks
                 lossReason,
                 victorDetails,
                 victimDetails,
-                Strings.AssemblyConflictFormats,
                 warningCode,
                 BuildEngine.ProjectFileOfTaskNode,
                 BuildEngine.LineNumberOfTaskNode,
@@ -2443,6 +2451,31 @@ namespace Microsoft.Build.Tasks
 
             // Preserve the legacy logMessage metadata, which contains the conflict body without the outer MSB3277 wrapper.
             return body;
+        }
+
+        private void LogConflictWarningWithCodeFromResource(
+            string resourceName,
+            string helpKeywordResourceName,
+            object arg0,
+            object arg1)
+        {
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                out string warningCode,
+                out _,
+                resourceName,
+                arg0,
+                arg1);
+            string helpKeyword = Log.HelpKeywordPrefix is null ? null : Log.HelpKeywordPrefix + helpKeywordResourceName;
+            Log.LogWarning(
+                subcategory: null,
+                warningCode,
+                helpKeyword,
+                file: null,
+                lineNumber: 0,
+                columnNumber: 0,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message);
         }
 
         /// <summary>

@@ -113,13 +113,14 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
             return;
         }
 
-        if ((e is AssemblyResolutionSearchTraceEventArgs || e.Message is not null) &&
+        if (
             // Never forward messages if the verbosity is quiet
             Verbosity != LoggerVerbosity.Quiet &&
             // High-priority messages are always collected by the central node
             (e.Importance == MessageImportance.High
             // Normmal-priority messages are only collected if the verbosity is more verbose than normal
-            || (e.Importance == MessageImportance.Normal && Verbosity > LoggerVerbosity.Normal)))
+            || (e.Importance == MessageImportance.Normal && Verbosity > LoggerVerbosity.Normal)) &&
+            e.Message is not null)
         {
             BuildEventRedirector?.ForwardEvent(e);
         }

@@ -1334,7 +1334,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 else
                 {
                     // Display messages reported by MSBuild, even if it's not tracked in _projects collection.
-                    RenderImmediateMessage(message);
+                    RenderImmediateMessage(EventArgsFormatting.GetLocalizedMessage(e));
                 }
             }
         }
@@ -1361,7 +1361,7 @@ public sealed partial class TerminalLogger : INodeLogger
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
         // auth provider messages are 'global' in nature and should be a) immediate reported, and b) not re-reported in the summary.
-        if (IsAuthProviderMessage(e.Message))
+        if (e is not AssemblyConflictWarningEventArgs && IsAuthProviderMessage(e.Message))
         {
             RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             return;
@@ -1633,7 +1633,7 @@ public sealed partial class TerminalLogger : INodeLogger
     private string FormatWarningMessage(BuildWarningEventArgs e, string indent) => FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
-                message: e.Message,
+                message: EventArgsFormatting.GetLocalizedMessage(e),
                 code: AnsiCodes.Colorize(CreateLink(GenerateLinkForWarning(e), e.Code), TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
@@ -1657,10 +1657,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 terminalWidth: Terminal.Width,
                 requireFileAndLinePortion: false);
 
-    private static string? GetMessage(BuildMessageEventArgs e)
-        => e is AssemblyResolutionSearchTraceEventArgs searchTrace
-            ? searchTrace.FormatMessage(CultureInfo.CurrentUICulture)
-            : e.Message;
+    private static string? GetMessage(BuildMessageEventArgs e) => EventArgsFormatting.GetLocalizedMessage(e);
 
     /// <summary>
     /// Renders message with just code/category/message data.

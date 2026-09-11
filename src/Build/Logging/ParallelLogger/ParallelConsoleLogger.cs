@@ -1269,11 +1269,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             string nonNullMessage = null;
 
-            if (e is AssemblyResolutionSearchTraceEventArgs searchTrace)
-            {
-                nonNullMessage = searchTrace.FormatMessage(CultureInfo.CurrentUICulture);
-            }
-            else if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
+            if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
             {
                 nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
             }
@@ -1285,7 +1281,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                nonNullMessage ??= e.Message ?? string.Empty;
+                nonNullMessage ??= EventArgsFormatting.GetLocalizedMessage(e) ?? string.Empty;
             }
 
             int prefixAdjustment = 0;

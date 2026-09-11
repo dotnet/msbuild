@@ -1072,6 +1072,27 @@ namespace Microsoft.Build.UnitTests
             warning.IsMessageMaterialized.ShouldBeTrue();
         }
 
+        [Fact]
+        public void AssemblyConflictMessagesAreInvariant()
+        {
+            CultureInfo originalCulture = CultureInfo.CurrentCulture;
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+
+                CreateAssemblyConflictDependencyDetailsEvent().Message.ShouldStartWith("    References which depend on");
+                CreateAssemblyConflictWarningEvent().Message.ShouldStartWith("Found conflicts between different versions");
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+        }
+
         /// <summary>
         /// Verifies a binary-log round trip for a large structured conflict event.
         /// The event contains many dependees and source items without one large preformatted string.
@@ -1117,7 +1138,6 @@ namespace Microsoft.Build.UnitTests
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
-                AssemblyConflictTestData.MessageFormats,
                 "MSB3277",
                 file: null,
                 lineNumber: 0,
@@ -1170,7 +1190,6 @@ namespace Microsoft.Build.UnitTests
             return new AssemblyConflictDependencyDetailsMessageEventArgs(
                 victor,
                 victim,
-                AssemblyConflictTestData.MessageFormats,
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
                 DateTime.UtcNow)
@@ -1204,7 +1223,6 @@ namespace Microsoft.Build.UnitTests
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
-                AssemblyConflictTestData.MessageFormats,
                 "MSB3277",
                 @"C:\foo\bar.proj",
                 42,
