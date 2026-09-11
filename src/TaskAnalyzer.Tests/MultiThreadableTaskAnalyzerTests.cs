@@ -40,9 +40,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        var diagnostic = diags.ShouldHaveSingleItem();
-        diagnostic.Id.ShouldBe(DiagnosticIds.CriticalError);
-        diagnostic.Severity.ShouldBe(DiagnosticSeverity.Info);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
@@ -63,7 +61,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(4);
+        AssertCriticalInfoDiagnostics(diags, 4);
     }
 
     [Fact]
@@ -81,7 +79,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
@@ -99,8 +97,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
-        diags.Length.ShouldBe(1);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
@@ -118,7 +115,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
@@ -137,7 +134,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
+        AssertCriticalInfoDiagnostics(diags, 2);
     }
 
     [Fact]
@@ -156,7 +153,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
+        AssertCriticalInfoDiagnostics(diags, 2);
     }
 
     [Fact]
@@ -174,7 +171,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
@@ -193,7 +190,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
+        AssertCriticalInfoDiagnostics(diags, 1);
     }
 
     [Fact]
@@ -212,7 +209,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
+        AssertCriticalInfoDiagnostics(diags, 2);
     }
 
     [Theory]
@@ -248,6 +245,18 @@ public class MultiThreadableTaskAnalyzerTests
             new DiagnosticResult(DiagnosticIds.CriticalError, expectedSeverity).WithLocation(0));
 
         await test.RunAsync();
+    }
+
+    private static void AssertCriticalInfoDiagnostics(
+        System.Collections.Generic.IEnumerable<Diagnostic> diagnostics,
+        int expectedCount)
+    {
+        Diagnostic[] criticalDiagnostics = diagnostics
+            .Where(d => d.Id == DiagnosticIds.CriticalError)
+            .ToArray();
+
+        criticalDiagnostics.Length.ShouldBe(expectedCount);
+        criticalDiagnostics.ShouldAllBe(d => d.Severity == DiagnosticSeverity.Info);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
