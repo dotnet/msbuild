@@ -980,7 +980,20 @@ namespace Microsoft.Build.Logging
                     WriteDeduplicatedString(itemData.EvaluatedInclude);
                     if (writeMetadata)
                     {
-                        Write(itemData.EnumerateMetadata());
+                        if (item is ProjectItem projectItem)
+                        {
+                            foreach (ProjectMetadata metadata in projectItem.Metadata)
+                            {
+                                nameValueListBuffer.Add(new KeyValuePair<string, string>(metadata.Name, projectItem.GetMetadataValue(metadata.Name)));
+                            }
+
+                            WriteNameValueList();
+                            nameValueListBuffer.Clear();
+                        }
+                        else
+                        {
+                            Write(itemData.EnumerateMetadata());
+                        }
                     }
                     else
                     {
@@ -1146,7 +1159,7 @@ namespace Microsoft.Build.Logging
             // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
             // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
             // CopyOnWriteDictionary doesn't implement it properly.
-            foreach (var kvp in item.EnumerateMetadata())
+            foreach (var kvp in item.EnumerateMetadataForLogging())
             {
                 nameValueListBuffer.Add(kvp);
             }

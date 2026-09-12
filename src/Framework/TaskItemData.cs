@@ -32,9 +32,17 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="original">An <see cref="ITaskItem"/> to clone</param>
         public TaskItemData(ITaskItem original)
+            : this(original, evaluateMetadata: false)
+        {
+        }
+
+        /// <summary>
+        /// Clone the task item and all metadata to create a snapshot.
+        /// </summary>
+        public TaskItemData(ITaskItem original, bool evaluateMetadata)
         {
             ItemSpec = original.ItemSpec;
-            var metadata = original.EnumerateMetadata();
+            var metadata = evaluateMetadata ? original.EnumerateMetadataForLogging() : original.EnumerateMetadata();
 
             // Can't preallocate capacity because we don't know how large it will get
             // without enumerating the enumerable

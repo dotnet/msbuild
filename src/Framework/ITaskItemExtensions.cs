@@ -64,5 +64,28 @@ namespace Microsoft.Build.Framework
 
             return list;
         }
+
+        /// <summary>
+        /// Enumerates custom metadata using the values exposed by scalar metadata reads.
+        /// </summary>
+        public static IEnumerable<KeyValuePair<string, string>> EnumerateMetadataForLogging(this ITaskItem taskItem)
+        {
+            foreach (KeyValuePair<string, string> metadata in taskItem.EnumerateMetadata())
+            {
+                string valueOrError;
+
+                try
+                {
+                    valueOrError = taskItem.GetMetadata(metadata.Key);
+                }
+                catch (Exception e)
+                {
+                    valueOrError = e.Message;
+                    Debug.Fail(e.ToString());
+                }
+
+                yield return new KeyValuePair<string, string>(metadata.Key, valueOrError);
+            }
+        }
     }
 }

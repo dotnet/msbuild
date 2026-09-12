@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -609,6 +610,76 @@ namespace Microsoft.Build.UnitTests
 </Project>";
 
             ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
+        }
+
+        [Fact]
+        public void ItemDefinitionBuiltInMetadataIsExpandedInBinaryLog()
+        {
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = $"LogFile={_logFile}"
+            };
+
+            const string project = """
+                <Project DefaultTargets="Build">
+                  <ItemDefinitionGroup>
+                    <AAA>
+                      <TargetPath>%(Filename)%(Extension)</TargetPath>
+                    </AAA>
+                    <BBB>
+                      <TargetPath>%(BBB.Filename)%(BBB.Extension)</TargetPath>
+                    </BBB>
+                  </ItemDefinitionGroup>
+                  <ItemGroup>
+                    <AAA Include="test1.txt" />
+                    <BBB Include="test2.txt" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <ItemGroup>
+                      <AAA Include="test3.txt" />
+                      <BBB Include="test4.txt" />
+                    </ItemGroup>
+                    <Error Condition="'@(AAA->'%(TargetPath)')' != 'test1.txt;test3.txt'" Text="Unexpected AAA TargetPath" />
+                    <Error Condition="'@(BBB->'%(TargetPath)')' != 'test2.txt;test4.txt'" Text="Unexpected BBB TargetPath" />
+                  </Target>
+                </Project>
+                """;
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
+
+            var replayedLog = new StringBuilder();
+            var replayLogger = new ParallelConsoleLogger(
+                LoggerVerbosity.Diagnostic,
+                text => replayedLog.Append(text),
+                colorSet: null,
+                colorReset: null);
+            var replay = new BinaryLogReplayEventSource();
+            List<DictionaryEntry> initialItems = [];
+            replay.AnyEventRaised += (_, args) =>
+            {
+                if (args is ProjectEvaluationFinishedEventArgs evaluationFinished)
+                {
+                    initialItems.AddRange(evaluationFinished.Items.Cast<DictionaryEntry>());
+                }
+            };
+            replayLogger.Initialize(replay);
+            replay.Replay(_logFile);
+            replayLogger.Shutdown();
+
+            ITaskItem initialAaa = initialItems
+                .Where(item => (string)item.Key == "AAA")
+                .Select(item => (ITaskItem)item.Value)
+                .First(item => item.ItemSpec == "test1.txt");
+            initialAaa.GetMetadata("TargetPath").ShouldBe("test1.txt");
+
+            ITaskItem initialBbb = initialItems
+                .Where(item => (string)item.Key == "BBB")
+                .Select(item => (ITaskItem)item.Value)
+                .First(item => item.ItemSpec == "test2.txt");
+            initialBbb.GetMetadata("TargetPath").ShouldBe("test2.txt");
+
+            replayedLog.ToString().ShouldContain("TargetPath=test3.txt");
+            replayedLog.ToString().ShouldContain("TargetPath=test4.txt");
         }
 
         /// <summary>
