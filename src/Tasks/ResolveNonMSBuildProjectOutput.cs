@@ -22,6 +22,7 @@ namespace Microsoft.Build.Tasks
     /// references (i.e. calling into specific targets of references to get the manifest file name)
     /// which would not be possible with a mixed list of MSBuild and non-MSBuild references.
     /// </remarks>
+    [MSBuildMultiThreadableTask]
     public class ResolveNonMSBuildProjectOutput : ResolveProjectBase
     {
         #region Constructors
