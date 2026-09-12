@@ -42,6 +42,7 @@ FreeEnvironmentStringsW
 FreeLibrary
 GET_FILEEX_INFO_LEVELS
 GetConsoleMode
+GetConsoleScreenBufferInfo
 GetCurrentProcessId
 GetEnvironmentStrings
 GetEnvironmentStringsW
