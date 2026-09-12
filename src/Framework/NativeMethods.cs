@@ -826,28 +826,32 @@ internal static class NativeMethods
 
     internal static bool MakeSymbolicLink(string newFileName, string existingFileName, ref string errorMessage)
     {
-        bool symbolicLinkCreated;
-#if FEATURE_WINDOWSINTEROP
-        if (IsWindows)
+#if NET
+        try
         {
-            Version osVersion = Environment.OSVersion.Version;
-            SYMBOLIC_LINK_FLAGS flags = 0; // File = 0 (no named constant)
-            if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
-            {
-                flags |= SYMBOLIC_LINK_FLAGS.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
-            }
-
-            symbolicLinkCreated = PInvoke.CreateSymbolicLink(newFileName, existingFileName, flags);
-            errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+            File.CreateSymbolicLink(newFileName, existingFileName);
+            errorMessage = null;
+            return true;
         }
-        else
-#endif
+        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
         {
-            symbolicLinkCreated = symlink(existingFileName, newFileName) == 0;
-            errorMessage = symbolicLinkCreated ? null : Marshal.GetLastWin32Error().ToString();
+            errorMessage = e.Message;
+            return false;
+        }
+#elif FEATURE_WINDOWSINTEROP
+        Version osVersion = Environment.OSVersion.Version;
+        SYMBOLIC_LINK_FLAGS flags = 0; // File = 0 (no named constant)
+        if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
+        {
+            flags |= SYMBOLIC_LINK_FLAGS.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
         }
 
+        bool symbolicLinkCreated = PInvoke.CreateSymbolicLink(newFileName, existingFileName, flags);
+        errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
         return symbolicLinkCreated;
+#else // This would be hit on .NET Standard under source build, but we are producing only a reference assembly there, so just return false.
+        return false;
+#endif
     }
 
     /// <summary>
@@ -1292,17 +1296,6 @@ internal static class NativeMethods
         }
 #endif
     }
-
-    [SupportedOSPlatform("linux")]
-    [DllImport("libc", SetLastError = true)]
-    internal static extern int chmod(string pathname, int mode);
-
-    [SupportedOSPlatform("linux")]
-    [DllImport("libc", SetLastError = true)]
-    internal static extern int mkdir(string path, int mode);
-
-    [DllImport("libc", SetLastError = true)]
-    internal static extern int symlink(string oldpath, string newpath);
 
 #if NET
     [DllImport("libc", EntryPoint = "realpath", SetLastError = true)]
