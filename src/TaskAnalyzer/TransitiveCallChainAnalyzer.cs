@@ -191,13 +191,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
                 
-                if (IsReportedByDirectAnalyzer(context, entry.Category, directAnalysisState))
+                DirectAnalyzerCoverage coverage = GetDirectAnalyzerCoverage(context, entry.Category, directAnalysisState);
+                if (coverage == DirectAnalyzerCoverage.Full)
                 {
                     return;
                 }
 
                 var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
-                var violation = new ViolationInfo(entry.Category, displayName, entry.Message, context.Operation.Syntax.GetLocation());
+                var violation = new ViolationInfo(
+                    entry.Category,
+                    displayName,
+                    entry.Message,
+                    context.Operation.Syntax.GetLocation(),
+                    coverage == DirectAnalyzerCoverage.Guidance);
                 directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                 return;
             }
@@ -208,10 +214,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var memberContainingType = referencedSymbol.ContainingType;
                 if (memberContainingType is not null && SymbolEqualityComparer.Default.Equals(memberContainingType, consoleType))
                 {
-                    if (IsReportedByDirectAnalyzer(
+                    if (GetDirectAnalyzerCoverage(
                         context,
                         BannedApiDefinitions.ApiCategory.CriticalError,
-                        directAnalysisState))
+                        directAnalysisState) == DirectAnalyzerCoverage.Full)
                     {
                         return;
                     }
@@ -234,40 +240,63 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 {
                     if (HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
                     {
-                        if (IsReportedByDirectAnalyzer(
+                        DirectAnalyzerCoverage coverage = GetDirectAnalyzerCoverage(
                             context,
                             BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute,
-                            directAnalysisState))
+                            directAnalysisState);
+                        if (coverage == DirectAnalyzerCoverage.Full)
                         {
                             return;
                         }
 
                         var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
-                        var violation = new ViolationInfo(BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute, displayName,
-                            "may resolve relative paths against the process working directory", context.Operation.Syntax.GetLocation());
+                        var violation = new ViolationInfo(
+                            BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute,
+                            displayName,
+                            "may resolve relative paths against the process working directory",
+                            context.Operation.Syntax.GetLocation(),
+                            coverage == DirectAnalyzerCoverage.Guidance);
                         directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                     }
                 }
             }
         }
 
-        private static bool IsReportedByDirectAnalyzer(
+        /// <summary>
+        /// Describes how the direct analyzer already covers a call, so the call-chain analyzer does not
+        /// duplicate it.
+        /// </summary>
+        private enum DirectAnalyzerCoverage
+        {
+            /// <summary>The call is outside the direct analyzer's scope.</summary>
+            None,
+
+            /// <summary>The direct analyzer reports the call as migration guidance only.</summary>
+            Guidance,
+
+            /// <summary>The direct analyzer reports the call at its full severity.</summary>
+            Full,
+        }
+
+        private static DirectAnalyzerCoverage GetDirectAnalyzerCoverage(
             OperationAnalysisContext context,
             BannedApiDefinitions.ApiCategory category,
             DirectAnalysisState directAnalysisState)
         {
             // A regular task can also be a helper for an MT task. Keep its MT migration violations
-            // for call-chain analysis when the direct analyzer suppresses them.
+            // for call-chain analysis even though the direct analyzer only reports them as guidance.
             if (!directAnalysisState.IsDirectlyAnalyzed)
             {
-                return false;
+                return DirectAnalyzerCoverage.None;
             }
 
-            return AppliesToRegularTasks(category) ||
+            bool reportedAtFullSeverity = AppliesToRegularTasks(category) ||
                 directAnalysisState.AnalyzeAsMultiThreadable ||
                 ReadAnalyzeAllTasksOption(
                     context.Options.AnalyzerConfigOptionsProvider,
                     context.Operation.Syntax.SyntaxTree);
+
+            return reportedAtFullSeverity ? DirectAnalyzerCoverage.Full : DirectAnalyzerCoverage.Guidance;
         }
 
         /// <summary>
@@ -383,12 +412,25 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             foreach (var v in violations)
                             {
-                                if (isMultiThreadableTask ||
+                                // A transitive MT migration violation reached from a task that is not
+                                // MT-scoped is reported as migration guidance rather than a warning.
+                                bool enforceAsMultiThreadable =
+                                    isMultiThreadableTask ||
                                     AppliesToRegularTasks(v) ||
-                                    ShouldReportMtMigrationViolation(context, v, analyzeAllTasksByTree))
+                                    ShouldReportMtMigrationViolation(context, v, analyzeAllTasksByTree);
+
+                                if (!enforceAsMultiThreadable && v.IsCoveredByDirectGuidance)
                                 {
-                                    ReportTransitiveViolation(context, method, v, chain, reportedViolations);
+                                    continue;
                                 }
+
+                                ReportTransitiveViolation(
+                                    context,
+                                    method,
+                                    v,
+                                    chain,
+                                    enforceAsMultiThreadable,
+                                    reportedViolations);
                             }
                         }
 
@@ -510,6 +552,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             IMethodSymbol taskMethod,
             ViolationInfo violation,
             List<string> chain,
+            bool enforceAsMultiThreadable,
             HashSet<(string ApiDisplayName, Location Location)> reportedPerTaskImplementation)
         {
             var taskMethodLocation = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
@@ -534,10 +577,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 ? ImmutableArray.Create(taskMethodLocation)
                 : ImmutableArray<Location>.Empty;
 
-            context.ReportDiagnostic(Diagnostic.Create(
+            context.ReportDiagnostic(CreateWithContextualSeverity(
                 DiagnosticDescriptors.TransitiveUnsafeCall,
                 location,
                 additionalLocations,
+                enforceAsMultiThreadable,
                 FormatMethodFull(taskMethod),
                 violation.ApiDisplayName,
                 chainStr));
@@ -614,16 +658,25 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             /// </summary>
             public Location Location { get; }
 
+            /// <summary>
+            /// True when the direct analyzer already reports this call as migration guidance. The call chain
+            /// still matters for an MT-scoped caller, which reports it at the full MSBuildTask0005 severity,
+            /// but repeating it as guidance on the very same call site would only duplicate the direct report.
+            /// </summary>
+            public bool IsCoveredByDirectGuidance { get; }
+
             public ViolationInfo(
                 BannedApiDefinitions.ApiCategory category,
                 string apiDisplayName,
                 string message,
-                Location location)
+                Location location,
+                bool isCoveredByDirectGuidance = false)
             {
                 Category = category;
                 ApiDisplayName = apiDisplayName;
                 Message = message;
                 Location = location;
+                IsCoveredByDirectGuidance = isCoveredByDirectGuidance;
             }
         }
 

@@ -38,6 +38,45 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 enabled;
         }
 
+        /// <summary>
+        /// The severity used for MT migration diagnostics reported on code that is not MT-scoped.
+        /// The guidance stays visible in the IDE as a suggestion without affecting command-line builds.
+        /// </summary>
+        internal const DiagnosticSeverity MigrationGuidanceSeverity = DiagnosticSeverity.Info;
+
+        /// <summary>
+        /// Creates a diagnostic whose severity depends on the task context it was found in: the descriptor's
+        /// own severity for MT-scoped code, and <see cref="MigrationGuidanceSeverity"/> elsewhere. An explicit
+        /// <c>dotnet_diagnostic.&lt;ID&gt;.severity</c> setting still overrides the value chosen here, because
+        /// the compiler applies analyzer configuration after the diagnostic is reported.
+        /// </summary>
+        internal static Diagnostic CreateWithContextualSeverity(
+            DiagnosticDescriptor descriptor,
+            Location location,
+            bool enforceAsMultiThreadable,
+            params object?[] messageArgs)
+            => CreateWithContextualSeverity(
+                descriptor,
+                location,
+                ImmutableArray<Location>.Empty,
+                enforceAsMultiThreadable,
+                messageArgs);
+
+        /// <inheritdoc cref="CreateWithContextualSeverity(DiagnosticDescriptor, Location, bool, object?[])"/>
+        internal static Diagnostic CreateWithContextualSeverity(
+            DiagnosticDescriptor descriptor,
+            Location location,
+            ImmutableArray<Location> additionalLocations,
+            bool enforceAsMultiThreadable,
+            params object?[] messageArgs)
+            => Diagnostic.Create(
+                descriptor,
+                location,
+                enforceAsMultiThreadable ? descriptor.DefaultSeverity : MigrationGuidanceSeverity,
+                additionalLocations,
+                properties: ImmutableDictionary<string, string?>.Empty,
+                messageArgs);
+
         internal static bool IsMtAnalysisOptIn(
             INamedTypeSymbol type,
             out bool hasAnalyzedAttribute)

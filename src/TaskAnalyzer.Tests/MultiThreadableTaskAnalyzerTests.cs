@@ -2089,7 +2089,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Task_WithoutMultiThreadableOptIn_DoesNotGetMtMigrationRulesByDefault()
+    public async Task Task_WithoutMultiThreadableOptIn_GetsMtMigrationRulesAsSuggestionsByDefault()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -2105,12 +2105,14 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
-        diags.ShouldNotContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
-    public async Task Task_WithOnlyMultiThreadableInterface_DoesNotGetMtMigrationRulesByDefault()
+    public async Task Task_WithOnlyMultiThreadableInterface_GetsMtMigrationRulesAsSuggestionsByDefault()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -2128,8 +2130,10 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
-        diags.ShouldNotContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -2247,7 +2251,7 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task DefaultConfiguration_PlainTask_DoesNotGetEnvironmentOrPathDiagnostics()
+    public async Task DefaultConfiguration_PlainTask_GetsEnvironmentAndPathDiagnosticsAsSuggestions()
     {
         var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
@@ -2262,8 +2266,10 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
-        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBeEmpty();
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -2380,7 +2386,7 @@ public class MultiThreadableTaskAnalyzerTests
                 {
                     public override bool Execute()
                     {
-                        var value = Environment.GetEnvironmentVariable("KEY");
+                        var value = {|#0:Environment.GetEnvironmentVariable("KEY")|};
                         return true;
                     }
                 }
@@ -2398,6 +2404,8 @@ public class MultiThreadableTaskAnalyzerTests
             [*.cs]
             msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = false
             """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Info).WithLocation(0));
 
         await test.RunAsync();
     }
@@ -2413,7 +2421,7 @@ public class MultiThreadableTaskAnalyzerTests
                 {
                     public override bool Execute()
                     {
-                        var value = Environment.GetEnvironmentVariable("KEY");
+                        var value = {|#0:Environment.GetEnvironmentVariable("KEY")|};
                         return true;
                     }
                 }
@@ -2427,6 +2435,8 @@ public class MultiThreadableTaskAnalyzerTests
             [*.cs]
             msbuild_task_analyzer.run_mt_analyzers_on_all_tasks = unrecognized
             """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Info).WithLocation(0));
 
         await test.RunAsync();
     }
@@ -2506,7 +2516,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task DefaultConfiguration_IneffectiveAttributeOnAbstractTask_DoesNotAnalyzeBase()
+    public async Task DefaultConfiguration_IneffectiveAttributeOnAbstractTask_AnalyzesBaseAsSuggestionOnly()
     {
         var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
             using System;
@@ -2529,7 +2539,8 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -2599,7 +2610,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task RunMtAnalyzersOnAllTasks_False_PlainTaskHasNoDiagnostic()
+    public async Task RunMtAnalyzersOnAllTasks_False_PlainTaskGetsSuggestion()
     {
         var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
             using System;
@@ -2613,7 +2624,8 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """, enabled: false);
 
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -2635,5 +2647,152 @@ public class MultiThreadableTaskAnalyzerTests
             """, enabled: false);
 
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldNotBeEmpty();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Contextual severity tests
+    // ═══════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task ContextualSeverity_MultiThreadableTask_ReportsMigrationRulesAtFullSeverity()
+    {
+        var diags = await GetDiagnosticsWithDefaultConfigurationAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    var value = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Warning);
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Warning);
+    }
+
+    [Fact]
+    public async Task ContextualSeverity_AllTaskMigrationMode_ReportsPlainTaskAtFullSeverity()
+    {
+        var diags = await GetDiagnosticsWithAllTasksOptionAsync("""
+            using System;
+            using System.IO;
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var value = Environment.GetEnvironmentVariable("KEY");
+                    return File.Exists("relative.txt");
+                }
+            }
+            """, enabled: true);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Warning);
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldHaveSingleItem()
+            .Severity.ShouldBe(DiagnosticSeverity.Warning);
+    }
+
+    [Fact]
+    public async Task ContextualSeverity_PlainTask_ExplicitSeverityOverridesSuggestion()
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        var value = {|#0:Environment.GetEnvironmentVariable("KEY")|};
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0002.severity = error
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Error).WithLocation(0));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task ContextualSeverity_MultiThreadableTask_ExplicitSeverityOverridesWarning()
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                using Microsoft.Build.Framework;
+                [MSBuildMultiThreadableTask]
+                public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public override bool Execute()
+                    {
+                        var value = {|#0:Environment.GetEnvironmentVariable("KEY")|};
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0002.severity = suggestion
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Info).WithLocation(0));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
+    public async Task ContextualSeverity_PlainTask_ExplicitNoneSuppressesSuggestion()
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                using System.IO;
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        var value = Environment.GetEnvironmentVariable("KEY");
+                        return File.Exists("relative.txt");
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0002.severity = none
+            dotnet_diagnostic.MSBuildTask0003.severity = none
+            """));
+
+        await test.RunAsync();
     }
 }
