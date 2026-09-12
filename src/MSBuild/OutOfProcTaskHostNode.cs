@@ -191,7 +191,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The file accesses reported by the most recently completed task.
         /// </summary>
-        private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
+        private List<TaskHostFileAccessData> _fileAccessData = new List<TaskHostFileAccessData>();
 #endif
 
         /// <summary>
@@ -774,7 +774,21 @@ namespace Microsoft.Build.CommandLine
             /// <param name="fileAccessData">The file access to report.</param>
             public void ReportFileAccess(FileAccessData fileAccessData)
             {
-                _taskHost._fileAccessData.Add(fileAccessData);
+                _taskHost._fileAccessData.Add(
+                    new TaskHostFileAccessData(
+                        (int)fileAccessData.Operation,
+                        (int)fileAccessData.RequestedAccess,
+                        fileAccessData.ProcessId,
+                        fileAccessData.Id,
+                        fileAccessData.CorrelationId,
+                        fileAccessData.Error,
+                        (uint)fileAccessData.DesiredAccess,
+                        (uint)fileAccessData.FlagsAndAttributes,
+                        fileAccessData.Path,
+                        fileAccessData.ProcessArgs,
+                        fileAccessData.IsAnAugmentedFileAccess,
+                        fileAccessData.EnumeratePattern,
+                        (uint)fileAccessData.OpenedFileOrDirectoryAttributes));
             }
 #endif
         }
@@ -1545,7 +1559,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
 #endif
-                    taskConfiguration.HostServices,
+                    CreateHostServices(taskConfiguration.HostServices),
                     taskParams);
             }
             catch (ThreadAbortException)
@@ -1618,7 +1632,7 @@ namespace Microsoft.Build.CommandLine
                 finally
                 {
 #if FEATURE_REPORTFILEACCESSES
-                    _fileAccessData = new List<FileAccessData>();
+                    _fileAccessData = new List<TaskHostFileAccessData>();
 #endif
 
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
@@ -1645,6 +1659,28 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
             }
+        }
+
+        private static HostServices CreateHostServices(TaskHostConfigurationHostServices data)
+        {
+            if (data is null)
+            {
+                return null;
+            }
+
+            var hostServices = new HostServices();
+
+            if (data.HostObjects is not null)
+            {
+                foreach (TaskHostConfigurationHostServices.HostObject hostObject in data.HostObjects)
+                {
+#pragma warning disable CA1416 // Registration only stores the moniker; resolving it remains Windows-only.
+                    hostServices.RegisterHostObject(hostObject.ProjectFile, hostObject.TargetName, hostObject.TaskName, hostObject.MonikerName);
+#pragma warning restore CA1416
+                }
+            }
+
+            return hostServices;
         }
 
         /// <summary>

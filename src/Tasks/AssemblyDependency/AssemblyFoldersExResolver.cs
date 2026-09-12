@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using AssemblyFoldersEx = Microsoft.Build.Shared.AssemblyFoldersEx<Microsoft.Build.Utilities.AssemblyFoldersExInfo>;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable
@@ -170,7 +171,17 @@ namespace Microsoft.Build.Tasks
 
                     if (_assemblyFoldersCache == null)
                     {
-                        AssemblyFoldersEx assemblyFolders = new AssemblyFoldersEx(_registryKeyRoot, _targetRuntimeVersion, _registryKeySuffix, _osVersion, _platform, _getRegistrySubKeyNames, _getRegistrySubKeyDefaultValue, this.targetProcessorArchitecture, _openBaseKey);
+                        AssemblyFoldersEx assemblyFolders = new AssemblyFoldersEx(
+                            _registryKeyRoot,
+                            _targetRuntimeVersion,
+                            _registryKeySuffix,
+                            _osVersion,
+                            _platform,
+                            _getRegistrySubKeyNames,
+                            _getRegistrySubKeyDefaultValue,
+                            targetProcessorArchitecture,
+                            _openBaseKey,
+                            static (hive, view, key, path, version) => new AssemblyFoldersExInfo(hive, view, key, path, version));
                         _assemblyFoldersCache = new AssemblyFoldersExCache(assemblyFolders, fileExists, taskEnvironment);
                         if (useCache)
                         {

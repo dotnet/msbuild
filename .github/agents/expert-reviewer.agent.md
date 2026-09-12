@@ -552,7 +552,6 @@ Use this to prioritize dimensions based on changed files.
 | `src/Build/Instance/` | API Surface, Performance, Correctness | `TaskRegistry.cs`, `ProjectInstance.cs` |
 | `src/Build/Resources/` | Error Messages, Compat, ChangeWave | `Strings.resx` |
 | `src/Tasks/` | Target Conventions, Cross-Platform, Compat | — |
-| `src/Shared/` | Performance, Cross-Platform, File I/O | — |
 | `src/MSBuild/` | Error Messages, Compat, Logging | — |
 | `src/Framework/` | API Surface, Compat, Cross-Platform | — |
 | `documentation/` | Documentation Accuracy, Design | specs |

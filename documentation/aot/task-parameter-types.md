@@ -23,7 +23,7 @@ the by-name `Type.GetType` there or in the broader task parameter-binding path.
 
 ## 1. The allowed parameter type set (precise)
 
-The single source of truth is [`TaskParameterTypeVerifier`](../../src/Shared/TaskParameterTypeVerifier.cs).
+The single source of truth is [`TaskParameterTypeVerifier`](../../src/Framework/BackEnd/TaskParameterTypeVerifier.cs).
 A declared parameter type is validated by `IsValidInputParameter` or `IsValidOutputParameter`
 depending on whether the parameter is `Output="true"`. The predicates are:
 

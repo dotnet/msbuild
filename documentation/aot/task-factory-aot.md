@@ -339,7 +339,7 @@ much as the residue of by-name type handling; listed for completeness.
 | `Instance/TaskRegistry.cs` ~1741, ~1743, ~1851 | IL2057, IL2096 |
 | `Evaluation/Expander.cs` ~3828, 3987, 4250, 4300, 4433, 4435 | IL2072/2074/2096/2026 (property-function dispatch) |
 | `Logging/LoggerDescription.cs` ~261, ~275 | IL2070 (`IsLoggerClass`/`IsForwardingLoggerClass` filters) |
-| `src/Shared/TaskLoader.cs` ~37 | IL2070 (`IsTaskClass` filter) |
+| `src/Framework/Loader/TaskLoader.cs` ~37 | IL2070 (`IsTaskClass` filter) |
 
 ### D. Pre-existing suppressions in other assemblies - Backlog
 

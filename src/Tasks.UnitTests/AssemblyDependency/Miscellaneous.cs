@@ -14,6 +14,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
+using AssemblyFoldersEx = Microsoft.Build.Shared.AssemblyFoldersEx<object>;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;

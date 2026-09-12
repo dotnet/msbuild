@@ -45,7 +45,7 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="NuGet.Config" />
-    <File Path="src/Shared/UnitTests/xunit.runner.json" />
+    <File Path="src/UnitTests.Shared/TestAssets/xunit.runner.json" />
     <File Path="testenvironments.json" />
   </Folder>
   <Project Path="src/Build.OM.UnitTests/Microsoft.Build.Engine.OM.UnitTests.csproj">

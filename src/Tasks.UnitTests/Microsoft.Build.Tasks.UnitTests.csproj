@@ -45,21 +45,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
-      <Link>NativeMethodsShared_Tests.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <EmbeddedResource Include="SampleResx" />
     <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />
 
-    <None Include="..\Shared\UnitTests\App.config">
+    <None Include="..\UnitTests.Shared\TestAssets\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
+    <None Include="..\UnitTests.Shared\TestAssets\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestResources\CustomCulture\**">

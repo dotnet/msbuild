@@ -92,7 +92,7 @@ Windows-only files are excluded via `<Compile Remove>` instead — no `#if` insi
 
 **Namespace imports** must be inside `#if FEATURE_WINDOWSINTEROP`. WDK APIs use `Windows.Wdk` namespace.
 
-**Files**: `src/Framework/Windows/` (CsWin32 partials), `src/Shared/Win32/` (COM helpers), `src/Framework/Utilities/Wmi/` (.NET-only COM structs).
+**Files**: `src/Framework/Windows/` (CsWin32 partials and COM helpers), `src/Framework/Utilities/Wmi/` (.NET-only COM structs).
 
 ### Constant Replacements
 

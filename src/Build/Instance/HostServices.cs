@@ -303,6 +303,27 @@ namespace Microsoft.Build.Execution
             return hostObjects;
         }
 
+        internal TaskHostConfigurationHostServices GetTaskHostConfigurationHostServices()
+        {
+            var data = new TaskHostConfigurationHostServices();
+
+            if (_hostObjectMap is not null)
+            {
+                foreach (KeyValuePair<string, HostObjects> project in _hostObjectMap)
+                {
+                    foreach (KeyValuePair<HostObjects.TargetTaskKey, MonikerNameOrITaskHost> hostObject in project.Value._hostObjects)
+                    {
+                        if (hostObject.Value.IsMoniker)
+                        {
+                            data.Add(project.Key, hostObject.Key._targetName, hostObject.Key._taskName, hostObject.Value.MonikerName);
+                        }
+                    }
+                }
+            }
+
+            return data;
+        }
+
         void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.ReadFromStream)

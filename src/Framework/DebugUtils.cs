@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Globalization;
 using System.IO;
 
 #nullable disable
@@ -10,6 +11,9 @@ namespace Microsoft.Build.Framework
 {
     internal static class FrameworkDebugUtils
     {
+        private static string s_debugDumpPath;
+        private static string s_dumpFileName;
+
 #pragma warning disable CA1810 // Intentional: static constructor catches exceptions to prevent TypeInitializationException
         static FrameworkDebugUtils()
 #pragma warning restore CA1810
@@ -128,6 +132,67 @@ namespace Microsoft.Build.Framework
         public static readonly bool ShouldDebugCurrentProcess;
 
         public static string DebugPath { get; private set; }
+
+        internal static string DebugDumpPath
+        {
+            get
+            {
+                if (s_debugDumpPath is null)
+                {
+                    lock (typeof(FrameworkDebugUtils))
+                    {
+                        s_debugDumpPath ??= GetDebugDumpPath();
+                    }
+                }
+
+                return s_debugDumpPath;
+            }
+        }
+
+        internal static string DumpFilePath => s_dumpFileName;
+
+        internal static void ResetDebugDumpPath()
+        {
+            lock (typeof(FrameworkDebugUtils))
+            {
+                s_debugDumpPath = null;
+                s_dumpFileName = null;
+            }
+        }
+
+        internal static void DumpExceptionToFile(Exception exception)
+        {
+            try
+            {
+                // This method historically used MethodImplOptions.Synchronized, which locked on its declaring type.
+                lock (typeof(FrameworkDebugUtils))
+                {
+                    if (s_dumpFileName is null)
+                    {
+                        Directory.CreateDirectory(DebugDumpPath);
+                        s_dumpFileName = Path.Combine(
+                            DebugDumpPath,
+                            $"MSBuild_pid-{EnvironmentUtilities.CurrentProcessId}_{Guid.NewGuid():n}.failure.txt");
+
+                        using StreamWriter headerWriter = FileUtilities.OpenWrite(s_dumpFileName, append: true);
+                        headerWriter.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", EnvironmentUtilities.CurrentProcessId);
+                        headerWriter.WriteLine("=====================");
+                    }
+
+                    using StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true);
+                    writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
+                    writer.WriteLine(exception.ToString());
+                    writer.WriteLine("===================");
+                }
+            }
+            // Dumping diagnostics is best effort and must not replace the original failure.
+            catch
+            {
+            }
+        }
+
+        private static string GetDebugDumpPath()
+            => !string.IsNullOrEmpty(DebugPath) ? DebugPath : FileUtilities.TempFileDirectory;
         
         /// <summary>
         /// Returns true if the current process is an out-of-proc TaskHost node.

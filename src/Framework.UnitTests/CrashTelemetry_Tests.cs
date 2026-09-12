@@ -412,7 +412,7 @@ public class CrashTelemetry_Tests
     [InlineData("ErrorUtilities.VerifyThrowInternalError(")]
     [InlineData("ErrorUtilities.ThrowInternalErrorUnreachable(")]
     [InlineData("ErrorUtilities.VerifyThrowInternalNull(")]
-    [InlineData("ErrorUtilities.ThrowInvalidOperation(")]
+    [InlineData("ErrorUtilitiesImpl`1.ThrowInvalidOperation(")]
     [InlineData("ErrorUtilities.VerifyThrow(")]
     public void ExtractStackCaller_RecognizesAllThrowHelpers(string helperMethod)
     {

@@ -327,7 +327,7 @@ namespace Microsoft.Build.BackEnd
                             (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
                             _buildComponentHost.BuildParameters.Culture,
                             _buildComponentHost.BuildParameters.UICulture,
-                            _hostServices,
+                            _hostServices?.GetTaskHostConfigurationHostServices(),
 #if FEATURE_APPDOMAIN
                             _appDomainSetup,
 #endif
@@ -578,9 +578,24 @@ namespace Microsoft.Build.BackEnd
             if (taskHostTaskComplete.FileAccessData?.Count > 0)
             {
                 IFileAccessManager fileAccessManager = ((IFileAccessManager)_buildComponentHost.GetComponent(BuildComponentType.FileAccessManager));
-                foreach (FileAccessData fileAccessData in taskHostTaskComplete.FileAccessData)
+                foreach (TaskHostFileAccessData fileAccessData in taskHostTaskComplete.FileAccessData)
                 {
-                    fileAccessManager.ReportFileAccess(fileAccessData, _buildComponentHost.BuildParameters.NodeId);
+                    fileAccessManager.ReportFileAccess(
+                        new FileAccessData(
+                            (ReportedFileOperation)fileAccessData.Operation,
+                            (RequestedAccess)fileAccessData.RequestedAccess,
+                            fileAccessData.ProcessId,
+                            fileAccessData.Id,
+                            fileAccessData.CorrelationId,
+                            fileAccessData.Error,
+                            (DesiredAccess)fileAccessData.DesiredAccess,
+                            (FlagsAndAttributes)fileAccessData.FlagsAndAttributes,
+                            fileAccessData.Path,
+                            fileAccessData.ProcessArgs,
+                            fileAccessData.IsAnAugmentedFileAccess,
+                            fileAccessData.EnumeratePattern,
+                            (FlagsAndAttributes)fileAccessData.OpenedFileOrDirectoryAttributes),
+                        _buildComponentHost.BuildParameters.NodeId);
                 }
             }
 #endif

@@ -96,6 +96,11 @@
           PackagePath="buildTransitive\net10.0\Microsoft.Build.Framework.targets" />
 
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
+    <!-- TypeLoader is internal and used only by Microsoft.Build/MSBuild, which carry this runtime dependency.
+         Keep it private so Framework-only package consumers do not acquire reflection-loading dependencies. -->
+    <PackageReference Include="System.Reflection.MetadataLoadContext"
+                      Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'"
+                      PrivateAssets="all" />
 
     <!-- Display files included by the Microsoft.CodeAnalysis.Contracts source package in a 'SourcePackages\Contracts' folder -->
     <Content Update="@(Content)">
@@ -129,6 +134,8 @@
     <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
+    <Compile Remove="Loader\TaskEngineAssemblyResolver.cs" />
+    <Compile Remove="Loader\TypeLoader.cs" />
   </ItemGroup>
 
   <ItemGroup>

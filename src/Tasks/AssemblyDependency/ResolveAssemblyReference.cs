@@ -1449,7 +1449,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (r is AssemblyFoldersExResolver assemblyFoldersExResolver)
                     {
-                        AssemblyFoldersEx assemblyFoldersEx = assemblyFoldersExResolver.AssemblyFoldersExLocations;
+                        var assemblyFoldersEx = assemblyFoldersExResolver.AssemblyFoldersExLocations;
 
                         if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
                         {
