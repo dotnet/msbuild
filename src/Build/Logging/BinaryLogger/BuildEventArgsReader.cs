@@ -411,6 +411,12 @@ namespace Microsoft.Build.Logging
 
                 foreach (var entry in zipArchive.Entries/*.OrderBy(e => e.LastWriteTime)*/)
                 {
+                    // Guard against path traversal ("zip-slip"): legitimate binlog imports are stored
+                    // as normalized paths (Windows drive colons removed, slashes unified) and never
+                    // contain ".." segments, so any traversal segment indicates a maliciously crafted
+                    // log meant to escape an extraction directory. Fail fast on it.
+                    ThrowIfPathTraversal(entry.FullName);
+
                     var file = ArchiveStream.From(entry);
                     ArchiveFileEventArgs archiveFileEventArgs = new(file);
                     // ArchiveFileEventArgs is not IDisposable as we do not want to clutter exposed API
@@ -458,6 +464,45 @@ namespace Microsoft.Build.Logging
             else
             {
                 SkipBytes(length);
+            }
+        }
+
+        /// <summary>
+        /// Detects whether an embedded-archive entry path attempts to traverse out of the
+        /// extraction directory (a ".." segment in either slash style). Legitimate binlog
+        /// imports are stored as normalized paths (Windows drive colons removed, slashes
+        /// unified) and never contain ".." segments.
+        /// </summary>
+        internal static bool IsPathTraversal(string? entryPath)
+        {
+            if (string.IsNullOrEmpty(entryPath))
+            {
+                return false;
+            }
+
+            // Scan the path segment-by-segment without allocating an intermediate string[].
+            ReadOnlySpan<char> span = entryPath.AsSpan();
+            while (!span.IsEmpty)
+            {
+                int slash = span.IndexOfAny('/', '\\');
+                ReadOnlySpan<char> segment = slash < 0 ? span : span.Slice(0, slash);
+                if (segment.SequenceEqual("..".AsSpan()))
+                {
+                    return true;
+                }
+
+                span = slash < 0 ? default : span.Slice(slash + 1);
+            }
+
+            return false;
+        }
+
+        private void ThrowIfPathTraversal(string? entryPath)
+        {
+            if (IsPathTraversal(entryPath))
+            {
+                throw new InvalidDataException(
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_PathTraversalInEmbeddedFile", entryPath));
             }
         }
 
