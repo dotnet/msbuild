@@ -1197,63 +1197,74 @@ namespace Microsoft.Build.Execution
                 {
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
 
-                    if (loggingService != null)
+                    try
                     {
-                        // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
-                        if (exceptionsThrownInEndBuild ||
-                            (_overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId)))
+                        if (loggingService != null)
                         {
-                            _overallBuildSuccess = false;
-                        }
-
-                        loggingService.LogBuildFinished(_overallBuildSuccess);
-
-                        if (_buildTelemetry != null)
-                        {
-                            _buildTelemetry.FinishedAt = DateTime.UtcNow;
-                            _buildTelemetry.BuildSuccess = _overallBuildSuccess;
-                            _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
-                            _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
-                            _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
-
-                            // Populate error categorization data from the logging service
-                            if (!_overallBuildSuccess)
+                            // Override the build success if the user specified /warnaserror and any errors were logged outside of a build submission.
+                            if (exceptionsThrownInEndBuild ||
+                                (_overallBuildSuccess && loggingService.HasBuildSubmissionLoggedErrors(BuildEventContext.InvalidSubmissionId)))
                             {
-                                loggingService.PopulateBuildTelemetryWithErrors(_buildTelemetry);
+                                _overallBuildSuccess = false;
                             }
 
-                            string? host = BuildEnvironmentState.GetHostName();
+                            loggingService.LogBuildFinished(_overallBuildSuccess);
 
-                            _buildTelemetry.BuildEngineHost = host;
-
-                            _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
-                            _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
-                            var sacState = NativeMethodsShared.GetSACState();
-                            // The Enforcement would lead to build crash - but let's have the check for completeness sake.
-                            _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
-
-                            loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-
-                            // Emit per-task execution details as a separate "build/tasks/details" event.
-                            // The SDK merges these into the aggregated build/tasks telemetry event,
-                            // providing parity with the Activity-based path used by VS telemetry.
-                            if (!Traits.Instance.ExcludeTasksDetailsFromTelemetry)
+                            if (_buildTelemetry != null)
                             {
-                                Dictionary<string, string>? tasksDetailsProperties = _telemetryConsumingLogger?.WorkerNodeTelemetryData.GetTasksDetailsProperties();
-                                if (tasksDetailsProperties is not null)
+                                _buildTelemetry.FinishedAt = DateTime.UtcNow;
+                                _buildTelemetry.BuildSuccess = _overallBuildSuccess;
+                                _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
+                                _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
+                                _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
+
+                                // Populate error categorization data from the logging service
+                                if (!_overallBuildSuccess)
                                 {
-                                    loggingService.LogTelemetry(buildEventContext: null, TasksDetailsTelemetry.TasksDetailsEventName, tasksDetailsProperties);
+                                    loggingService.PopulateBuildTelemetryWithErrors(_buildTelemetry);
                                 }
+
+                                string? host = BuildEnvironmentState.GetHostName();
+
+                                _buildTelemetry.BuildEngineHost = host;
+
+                                _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
+                                _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
+                                var sacState = NativeMethodsShared.GetSACState();
+                                // The Enforcement would lead to build crash - but let's have the check for completeness sake.
+                                _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
+
+                                loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
+
+                                // Emit per-task execution details as a separate "build/tasks/details" event.
+                                // The SDK merges these into the aggregated build/tasks telemetry event,
+                                // providing parity with the Activity-based path used by VS telemetry.
+                                if (!Traits.Instance.ExcludeTasksDetailsFromTelemetry)
+                                {
+                                    Dictionary<string, string>? tasksDetailsProperties = _telemetryConsumingLogger?.WorkerNodeTelemetryData.GetTasksDetailsProperties();
+                                    if (tasksDetailsProperties is not null)
+                                    {
+                                        loggingService.LogTelemetry(buildEventContext: null, TasksDetailsTelemetry.TasksDetailsEventName, tasksDetailsProperties);
+                                    }
+                                }
+
+                                EndBuildTelemetry();
+
+                                // Clean telemetry to make it ready for next build submission.
+                                _buildTelemetry = null;
                             }
-
-                            EndBuildTelemetry();
-
-                            // Clean telemetry to make it ready for next build submission.
-                            _buildTelemetry = null;
                         }
                     }
-
-                    ShutdownLoggingService(loggingService);
+                    finally
+                    {
+                        // Shutting the logging service down is what releases logger-owned resources - notably the
+                        // BinaryLogger's file handle. It must happen even when LogBuildFinished or the telemetry
+                        // block above throws (a misbehaving logger reacting to BuildFinished is the common case),
+                        // otherwise those resources leak for the lifetime of the process. That is fatal in a
+                        // long-lived MSBuild Server node, where the leaked handle wedges the log file for every
+                        // subsequent build the node serves.
+                        ShutdownLoggingService(loggingService);
+                    }
                 }
                 finally
                 {

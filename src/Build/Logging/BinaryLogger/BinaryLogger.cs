@@ -503,6 +503,22 @@ namespace Microsoft.Build.Logging
             Traits.Instance.EscapeHatches.LogProjectImports = _initialLogImports;
             Traits.Instance.EnableTargetOutputLogging = _initialTargetOutputLogging;
 
+            try
+            {
+                ShutdownCore();
+            }
+            finally
+            {
+                // Flushing the import archive and copying the log to its additional destinations is best-effort,
+                // but releasing the log file handle is not: if it is skipped the handle survives for the lifetime
+                // of the process, which in a long-lived MSBuild Server node wedges the log file for every
+                // subsequent build. Close it on every path.
+                CloseStream();
+            }
+        }
+
+        private void ShutdownCore()
+        {
             if (projectImportsCollector != null)
             {
                 // Write the build check editorconfig file paths to the log
@@ -544,15 +560,7 @@ namespace Microsoft.Build.Logging
                 }
             }
 
-            if (stream != null)
-            {
-                // It's hard to determine whether we're at the end of decoding GZipStream
-                // so add an explicit 0 at the end to signify end of file
-                stream.WriteByte((byte)BinaryLogRecordKind.EndOfFile);
-                stream.Flush();
-                stream.Dispose();
-                stream = null;
-            }
+            CloseStream();
 
             // Copy the binlog file to additional destinations if specified
             if (AdditionalFilePaths != null && AdditionalFilePaths.Count > 0)
@@ -583,6 +591,30 @@ namespace Microsoft.Build.Logging
                         Console.Error.WriteLine(message);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Writes the end-of-file marker and releases the log file handle. Safe to call more than once.
+        /// </summary>
+        private void CloseStream()
+        {
+            if (stream == null)
+            {
+                return;
+            }
+
+            try
+            {
+                // It's hard to determine whether we're at the end of decoding GZipStream
+                // so add an explicit 0 at the end to signify end of file
+                stream.WriteByte((byte)BinaryLogRecordKind.EndOfFile);
+                stream.Flush();
+            }
+            finally
+            {
+                stream.Dispose();
+                stream = null;
             }
         }
 

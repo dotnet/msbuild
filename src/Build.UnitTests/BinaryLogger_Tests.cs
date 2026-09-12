@@ -16,6 +16,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
@@ -1182,6 +1183,132 @@ namespace Microsoft.Build.UnitTests
             replayed.Importance.ShouldBe(MessageImportance.Low);
             replayed.Message.ShouldBe("MSBuild Server node started for this build (process ID 1234).");
         }
+
+        public void Dispose()
+        {
+            _env.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Covers the lifetime of the binary log file handle across a build.
+    /// </summary>
+    public class BinaryLoggerFileHandleTests : IDisposable
+    {
+        private readonly TestEnvironment _env;
+        private readonly string _logFile;
+
+        public BinaryLoggerFileHandleTests(ITestOutputHelper output)
+        {
+            _env = TestEnvironment.Create(output);
+            _env.WithEnvironmentInvariant();
+            _logFile = _env.ExpectFile(".binlog").Path;
+        }
+
+        /// <summary>
+        /// A logger that throws from its <see cref="IEventSource.BuildFinished"/> handler, i.e. from inside
+        /// <c>BuildManager.EndBuild</c>'s teardown.
+        /// </summary>
+        private sealed class ThrowOnBuildFinishedLogger : ILogger
+        {
+            public LoggerVerbosity Verbosity { get; set; }
+
+            public string Parameters { get; set; }
+
+            public void Initialize(IEventSource eventSource)
+                => eventSource.BuildFinished += (_, _) => throw new InvalidOperationException("Logger failed on BuildFinished.");
+
+            public void Shutdown()
+            {
+            }
+        }
+
+        /// <summary>
+        /// The binary log file handle must not outlive the build that opened it, even when another logger fails
+        /// while BuildFinished is raised. The handle is released by <see cref="ProjectCollection.Dispose"/>, but
+        /// only once <c>EndBuild</c> has shut its logging service down and thereby detached the build-time event
+        /// source from the wrapping ReusableLogger. If that shutdown is skipped, the wrapped BinaryLogger is
+        /// silently never shut down and keeps the file handle for the lifetime of the process - which permanently
+        /// wedges the log file in a long-lived MSBuild Server node that serves many builds.
+        /// </summary>
+        [Fact]
+        public void BinaryLogFileHandleIsReleasedWhenAnotherLoggerThrowsDuringShutdown()
+        {
+            // The failing logger is reported through the unhandled-exception dump; remove whatever it writes so it
+            // does not trip the ambient build-failure-file invariant.
+            string[] dumpFilesBefore = GetExceptionDumpFiles();
+            BuildManager buildManager = null;
+
+            try
+            {
+                string projectFile = _env.CreateFile(".proj", """
+                    <Project>
+                       <Target Name='Build'>
+                          <Message Text='Hello' />
+                       </Target>
+                    </Project>
+                    """).Path;
+
+                using (ProjectCollection projectCollection = new(
+                    null,
+                    [new BinaryLogger { Parameters = _logFile }, new ThrowOnBuildFinishedLogger()],
+                    ToolsetDefinitionLocations.Default))
+                {
+                    BuildParameters parameters = new(projectCollection)
+                    {
+                        Loggers = projectCollection.Loggers,
+
+                        // Match the command line, which logs synchronously. That is what makes the failing logger
+                        // surface on the thread running EndBuild rather than on the async logging thread.
+                        UseSynchronousLogging = true,
+                    };
+
+                    // Deliberately not disposed inside this scope: MSBuild Server reuses
+                    // BuildManager.DefaultBuildManager across builds and never disposes it
+                    // (XMake: "if (!s_isServerNode) BuildManager.DefaultBuildManager.Dispose()").
+                    // Disposing here would shut the logging service down as a side effect and hide the leak.
+                    buildManager = new BuildManager();
+                    buildManager.BeginBuild(parameters);
+
+                    try
+                    {
+                        buildManager
+                            .PendBuildRequest(new BuildRequestData(projectFile, new Dictionary<string, string>(), null, ["Build"], null))
+                            .Execute();
+
+                        buildManager.EndBuild();
+                    }
+                    catch (Exception)
+                    {
+                        // The failing logger is expected to surface here. This test is about the file handle.
+                    }
+                }
+
+                File.Exists(_logFile).ShouldBeTrue($"Expected '{_logFile}' to have been created.");
+
+                // An exclusive open is the assertion: it fails if any handle to the file is still open.
+                Should.NotThrow(
+                    () =>
+                    {
+                        using FileStream _ = new(_logFile, FileMode.Open, System.IO.FileAccess.ReadWrite, FileShare.None);
+                    },
+                    $"The log file '{_logFile}' is still held open after the build that created it completed.");
+            }
+            finally
+            {
+                buildManager?.Dispose();
+
+                foreach (string dumpFile in GetExceptionDumpFiles().Except(dumpFilesBefore))
+                {
+                    File.Delete(dumpFile);
+                }
+            }
+        }
+
+        private static string[] GetExceptionDumpFiles()
+            => Directory.Exists(DebugUtils.DebugDumpPath)
+                ? Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt")
+                : [];
 
         public void Dispose()
         {
