@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         [Fact]
         public void Serialization()
         {
-            TaskItem item = new TaskItem("foo", "bar.proj");
+            TaskItem item = new TaskItem("foo", "bar.proj", sourceLineNumber: 12, sourceColumnNumber: 34);
             item.SetMetadata("a", "b");
 
             TranslationHelpers.GetWriteTranslator().Translate(ref item, TaskItem.FactoryForDeserialization);
@@ -61,6 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal(item.MetadataCount, deserializedItem.MetadataCount);
             Assert.Equal(item.GetMetadata("a"), deserializedItem.GetMetadata("a"));
             Assert.Equal(item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath), deserializedItem.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
+            Assert.Equal(item.Location, deserializedItem.Location);
         }
 
         /// <summary>

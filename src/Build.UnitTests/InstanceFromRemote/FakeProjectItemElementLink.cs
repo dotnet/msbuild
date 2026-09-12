@@ -18,11 +18,13 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
     internal sealed class FakeProjectItemElementLink : ProjectItemElementLink
     {
         private readonly string _filePath;
+        private readonly ElementLocation _location;
 
         public FakeProjectItemElementLink(string elementName, string filePath)
         {
             ElementName = elementName ?? throw new ArgumentNullException(nameof(elementName));
             _filePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
+            _location = ElementLocation.Create(filePath, 1, 1);
         }
 
         public override int Count => throw new NotImplementedException();
@@ -45,7 +47,7 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 
         public override ProjectElement NextSibling => throw new NotImplementedException();
 
-        public override ElementLocation Location => throw new NotImplementedException();
+        public override ElementLocation Location => _location;
 
         public override IReadOnlyCollection<XmlAttributeLink> Attributes => throw new NotImplementedException();
 

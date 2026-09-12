@@ -1801,7 +1801,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // The common case -- all items involved are Microsoft.Build.Execution.ProjectItemInstance.TaskItems.
                                 // Furthermore, because that is true, we know by definition that they also implement ITaskItem2.
-                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped);
+                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped, parameterLocation.Line, parameterLocation.Column);
 
                                 newItem.SetMetadata(outputAsProjectItem.MetadataCollection); // copy-on-write!
                             }
@@ -1810,7 +1810,7 @@ namespace Microsoft.Build.BackEnd
                                 if (output is ITaskItem2 outputAsITaskItem2)
                                 {
                                     // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping.
-                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
+                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped, parameterLocation.Line, parameterLocation.Column);
 
                                     // If found, directly pass the backing copy-on-write dictionary.
                                     // Otherwise, retrieve a cloned dictionary from the task item.
@@ -1830,7 +1830,7 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     // Not a ProjectItemInstance.TaskItem or even a ITaskItem2, so we have to fake it.
                                     // Setting an item spec expects the escaped value, as does setting metadata.
-                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
+                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped, parameterLocation.Line, parameterLocation.Column);
 
                                     newItem.SetMetadataOnTaskOutput(EnumerateMetadata(output.CloneCustomMetadata()));
 
@@ -1948,7 +1948,7 @@ namespace Microsoft.Build.BackEnd
                         // attempting to put an empty string into an item is a no-op.
                         if (output?.Length > 0)
                         {
-                            _batchBucket.Lookup.AddNewItem(new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output), EscapingUtilities.Escape(parameterLocation.File)));
+                            _batchBucket.Lookup.AddNewItem(new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output), EscapingUtilities.Escape(parameterLocation.File), parameterLocation.Line, parameterLocation.Column));
                         }
                     }
 

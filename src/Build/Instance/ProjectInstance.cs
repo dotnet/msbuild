@@ -3537,7 +3537,9 @@ namespace Microsoft.Build.Execution
                 directMetadata,
                 inheritedItemDefinitions,
                 item.Xml.ContainingProject.EscapedFullPath,
-                useItemDefinitionsWithoutModification: false);
+                useItemDefinitionsWithoutModification: false,
+                item.Xml.Location.Line,
+                item.Xml.Location.Column);
 
             return instance;
         }
@@ -3597,7 +3599,9 @@ namespace Microsoft.Build.Execution
                 directMetadata,
                 inheritedItemDefinitions,
                 item.Xml.ContainingProject.EscapedFullPath,
-                useItemDefinitionsWithoutModification: true);
+                useItemDefinitionsWithoutModification: true,
+                item.Xml.Location.Line,
+                item.Xml.Location.Column);
             return instance;
         }
 

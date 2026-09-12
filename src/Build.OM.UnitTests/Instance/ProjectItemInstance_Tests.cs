@@ -79,6 +79,37 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.False(item.Metadata.GetEnumerator().MoveNext());
         }
 
+        [Fact]
+        public void LocationTracksOriginatingItemElement()
+        {
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                """
+                <Project>
+                  <ItemGroup>
+                    <i Include="i1" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            ProjectRootElement xml = projectRootElementFromString.Project;
+            ProjectItemElement itemElement = xml.Items.Single();
+            ProjectItemInstance item = new ProjectInstance(xml).GetItems("i").Single();
+
+            TaskItemLocation? itemLocation = item.Location;
+            Assert.True(itemLocation.HasValue);
+            TaskItemLocation location = itemLocation.Value;
+            Assert.Equal(itemElement.Location.File, location.File);
+            Assert.Equal(itemElement.Location.Line, location.Line);
+            Assert.Equal(itemElement.Location.Column, location.Column);
+            Assert.Equal(location, ((ITaskItem3)item).Location.Value);
+
+            var copiedItem = new Utilities.TaskItem(item);
+            TaskItemLocation copiedLocation = copiedItem.Location.Value;
+            Assert.Equal(location.File, copiedLocation.File);
+            Assert.Equal(location.Line, copiedLocation.Line);
+            Assert.Equal(location.Column, copiedLocation.Column);
+        }
+
         /// <summary>
         /// Basic ProjectItemInstance with metadata
         /// </summary>
