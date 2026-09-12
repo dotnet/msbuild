@@ -189,11 +189,19 @@ namespace Microsoft.Build.UnitTests
 
     public class MSBuildTestPipelineStartup : ITestPipelineStartup
     {
+        private readonly string _assemblyDebugPath;
         private bool _disposed;
         private TestEnvironment _testEnvironment;
 
         public MSBuildTestPipelineStartup()
         {
+            // Give this test assembly its own MSBuild debug dump directory before anything can read the path.
+            // Test assemblies run concurrently as separate processes, and without this a node crash caused by
+            // one assembly could be observed - and blamed on - a test in another assembly.
+            // Note that this only selects the location of debug/crash files; tracing stays gated on
+            // MSBuildDebugEngine/MSBUILDDEBUGENGINE and MSBUILDDEBUGCOMM.
+            _assemblyDebugPath = TestEnvironment.UseIsolatedDebugPath(Assembly.GetExecutingAssembly().GetName().Name);
+
             // Set field to indicate tests are running in the TestInfo class in Microsoft.Build.Framework.
             //  See the comments on the TestInfo class for an explanation of why it works this way.
             var frameworkAssembly = typeof(ITask).Assembly;
@@ -287,6 +295,10 @@ namespace Microsoft.Build.UnitTests
             if (!_disposed)
             {
                 _testEnvironment.Dispose();
+
+                // Crash dumps have already been reported and deleted by BuildFailureLogInvariant, so this
+                // only removes the (normally empty) directory instead of leaking one per test run.
+                FileUtilities.DeleteDirectoryNoThrow(_assemblyDebugPath, recursive: true);
 
                 _disposed = true;
             }

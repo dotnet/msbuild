@@ -46,6 +46,42 @@ namespace Microsoft.Build.UnitTests
         public TransientTestFolder DefaultTestDirectory => _defaultTestDirectory.Value;
 
         /// <summary>
+        /// The MSBuild debug dump directory dedicated to the currently running test assembly, or null if
+        /// <see cref="UseIsolatedDebugPath"/> has not been called.
+        /// </summary>
+        /// <remarks>
+        /// Captured once per process so that <see cref="BuildFailureLogInvariant"/> keeps looking at the right
+        /// place even if an individual test temporarily repoints <see cref="FrameworkDebugUtils.DebugPath"/>.
+        /// </remarks>
+        public static string AssemblyDebugPath { get; private set; }
+
+        /// <summary>
+        /// Gives the current process its own MSBuild debug dump directory, so that test assemblies running
+        /// concurrently as separate processes cannot observe each other's crash dumps. Out of proc nodes
+        /// inherit MSBUILDDEBUGPATH when they are spawned, so their dumps land in the owning assembly's directory.
+        /// </summary>
+        /// <remarks>
+        /// This only selects the location of debug/crash files. Tracing stays off - it is gated separately on
+        /// MSBuildDebugEngine/MSBUILDDEBUGENGINE and MSBUILDDEBUGCOMM (see <see cref="Framework.Traits"/>).
+        /// </remarks>
+        /// <param name="assemblyName">Name of the test assembly, used to make the directory human readable.</param>
+        /// <returns>The path of the created directory.</returns>
+        public static string UseIsolatedDebugPath(string assemblyName)
+        {
+            string debugPath = Path.Combine(Path.GetTempPath(), "MSBuildTests", $"{assemblyName}_{EnvironmentUtilities.CurrentProcessId}");
+            Directory.CreateDirectory(debugPath);
+            Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath);
+
+            // Both of these are cached and may already have been initialized - FrameworkDebugUtils in particular is
+            // touched very early, e.g. while preparing MemberData for data driven tests - so force them to re-read.
+            FrameworkDebugUtils.SetDebugPath();
+            DebugUtils.ResetDebugDumpPathInRunningTests = true;
+
+            AssemblyDebugPath = debugPath;
+            return debugPath;
+        }
+
+        /// <summary>
         /// Creates a new test environment with optional configuration for test output handling,
         /// build error monitoring, and .NET environment setup.
         /// </summary>
@@ -558,13 +594,19 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            try
+            // The debug dump directory dedicated to this test assembly. Scanned in addition to
+            // FrameworkDebugUtils.DebugPath because a test may temporarily repoint the latter.
+            debugPath = TestEnvironment.AssemblyDebugPath;
+            if (debugPath != null)
             {
-                files.AddRange(Directory.GetFiles(Path.GetTempPath(), MSBuildLogFiles));
-            }
-            catch (DirectoryNotFoundException)
-            {
-                // Temp folder might have been deleted by other TestEnvironment logic
+                try
+                {
+                    files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // Debug folder might have been deleted by other TestEnvironment logic
+                }
             }
 
             return files.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
@@ -742,7 +784,11 @@ namespace Microsoft.Build.UnitTests
             if (enabled)
             {
                 Environment.SetEnvironmentVariable("MSBuildDebugEngine", "1");
-                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", FileUtilities.TempFileDirectory);
+
+                // Keep writing into this test assembly's own debug dump directory (see
+                // TestEnvironment.UseIsolatedDebugPath) so processes started by the test do not drop crash
+                // dumps where a concurrently running test assembly would pick them up.
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", FrameworkDebugUtils.DebugPath ?? FileUtilities.TempFileDirectory);
             }
             else
             {
