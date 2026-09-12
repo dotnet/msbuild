@@ -68,6 +68,11 @@
         <target state="translated">Архив импортируемых файлов превысил ограничение в 2 ГБ и не внедрен.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_InvalidGZipHeader">
+        <source>The binary log stream does not use the supported GZip compression format. Expected header bytes 1F 8B 08.</source>
+        <target state="new">The binary log stream does not use the supported GZip compression format. Expected header bytes 1F 8B 08.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
         <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
         <target state="translated">Подписка на RecoverableReadError обязательна во время прямого совместимого чтения.</target>
