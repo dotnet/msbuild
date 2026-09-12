@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 #endif
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -74,6 +75,25 @@ namespace Microsoft.Build.Construction
         /// The Special Target name which when <see cref="_batchProjectTargets"/> is enabled, all P2P references will just execute this target.
         /// </summary>
         internal const string SolutionProjectReferenceAllTargets = "SlnProjectResolveProjectReference";
+
+        /// <summary>
+        /// Graph solution compatibility phase property used to split before/after solution imports.
+        /// </summary>
+        internal const string GraphBuildSolutionCompatibilityPhasePropertyName = "_MSBuildGraphSolutionCompatibilityPhase";
+
+        internal enum GraphBuildSolutionCompatibilityPhase
+        {
+            Before,
+            After,
+        }
+
+        internal static string GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase phase)
+            => phase switch
+            {
+                GraphBuildSolutionCompatibilityPhase.Before => nameof(GraphBuildSolutionCompatibilityPhase.Before),
+                GraphBuildSolutionCompatibilityPhase.After => nameof(GraphBuildSolutionCompatibilityPhase.After),
+                _ => throw new InvalidEnumArgumentException(nameof(phase), (int)phase, typeof(GraphBuildSolutionCompatibilityPhase)),
+            };
 
         /// <summary>
         /// A known list of target names to create.  This is for backwards compatibility.
@@ -933,11 +953,13 @@ namespace Microsoft.Build.Construction
             // Add our global extensibility points to the project representing the solution:
             // Imported at the top:  $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportBefore\*
             // Imported at the bottom:  $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter\*
+            string graphBuildSolutionCompatibilityAfterPhaseValue = GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase.After);
+            string graphBuildSolutionCompatibilityBeforePhaseValue = GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase.Before);
             ProjectImportElement importBefore = traversalProject.CreateImportElement(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportBefore\*");
-            importBefore.Condition = @"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportBefore')"; // Avoids wildcard perf problem
+            importBefore.Condition = $@"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportBefore') and '$({GraphBuildSolutionCompatibilityPhasePropertyName})' != '{graphBuildSolutionCompatibilityAfterPhaseValue}'"; // Avoids wildcard perf problem
 
             ProjectImportElement importAfter = traversalProject.CreateImportElement(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter\*");
-            importAfter.Condition = @"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter')"; // Avoids wildcard perf problem
+            importAfter.Condition = $@"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter') and '$({GraphBuildSolutionCompatibilityPhasePropertyName})' != '{graphBuildSolutionCompatibilityBeforePhaseValue}'"; // Avoids wildcard perf problem
 
             /* The code below adds the following XML:
 
@@ -1079,13 +1101,15 @@ namespace Microsoft.Build.Construction
             }
 
             string escapedSolutionDirectory = EscapingUtilities.Escape(_solutionFile.SolutionFileDirectory);
+            string graphBuildSolutionCompatibilityAfterPhaseValue = GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase.After);
+            string graphBuildSolutionCompatibilityBeforePhaseValue = GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase.Before);
             string localFile = Path.Combine(escapedSolutionDirectory, $"before.{escapedSolutionFileName}.targets");
             ProjectImportElement importBeforeLocal = traversalProject.CreateImportElement(localFile);
-            importBeforeLocal.Condition = $"exists('{localFile}')";
+            importBeforeLocal.Condition = $"exists('{localFile}') and '$({GraphBuildSolutionCompatibilityPhasePropertyName})' != '{graphBuildSolutionCompatibilityAfterPhaseValue}'";
 
             localFile = Path.Combine(escapedSolutionDirectory, $"after.{escapedSolutionFileName}.targets");
             ProjectImportElement importAfterLocal = traversalProject.CreateImportElement(localFile);
-            importAfterLocal.Condition = $"exists('{localFile}')";
+            importAfterLocal.Condition = $"exists('{localFile}') and '$({GraphBuildSolutionCompatibilityPhasePropertyName})' != '{graphBuildSolutionCompatibilityBeforePhaseValue}'";
 
             return (importBeforeLocal, importAfterLocal);
         }
@@ -1421,13 +1445,17 @@ namespace Microsoft.Build.Construction
             // Add the task to build the actual project.
             AddProjectBuildTask(traversalProject, projectConfiguration, target, targetName, EscapingUtilities.Escape(project.AbsolutePath), String.Empty, outputItem);
         }
+        private const string NotGraphBuildCondition = "'$(IsGraphBuild)' != 'true'";
 
         /// <summary>
         /// Adds an MSBuild task to a real project.
         /// </summary>
         private static void AddProjectBuildTask(ProjectInstance traversalProject, ProjectConfigurationInSolution projectConfiguration, ProjectTargetInstance target, string targetToBuild, string sourceItems, string condition, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", condition, String.Empty);
+            // Graph compatibility execution should keep the traversal targets and imports alive while
+            // suppressing this direct project-dispatch task because the graph scheduler already built the node.
+            string combinedCondition = string.IsNullOrEmpty(condition) ? NotGraphBuildCondition : $"({condition}) and {NotGraphBuildCondition}";
+            ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", sourceItems);
             if (targetToBuild != null)
             {
@@ -1458,7 +1486,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddMetaprojectBuildTask(ProjectInSolution project, ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'"), String.Empty);
+            // Graph compatibility execution should also suppress metaproject dispatch. This pass exists
+            // only to run solution-level extensibility hooks, not to re-enter project or metaproject builds.
+            string projectMatchCondition = Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'");
+            string combinedCondition = string.IsNullOrEmpty(projectMatchCondition) ? NotGraphBuildCondition : $"({projectMatchCondition}) and {NotGraphBuildCondition}";
+            ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", "@(ProjectReference)");
 
             if (targetToBuild != null)
@@ -2061,7 +2093,9 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddReferencesBuildTask(ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", String.Empty, String.Empty);
+            // In graph compatibility mode the surrounding target should 
+            // still execute, but this inner MSBuild task should be skipped.
+            ProjectTaskInstance task = target.AddTask("MSBuild", NotGraphBuildCondition, String.Empty);
             if (String.Equals(targetToBuild, "Clean", StringComparison.OrdinalIgnoreCase))
             {
                 task.SetParameter("Projects", "@(ProjectReference->Reverse())");
