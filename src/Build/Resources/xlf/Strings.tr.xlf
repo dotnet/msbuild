@@ -286,6 +286,16 @@
         <target state="translated">İndirmeler klasörü, proje oluşturma için güvenilir değil.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_MessageFmt">
+        <source>The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</source>
+        <target state="new">The 'WriteLinesToFile' task in project {0} does not specify the 'Overwrite' parameter. Set it explicitly to 'true' to overwrite the file or 'false' to append to it.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_Title">
+        <source>The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</source>
+        <target state="new">The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
         <target state="translated">"{1}" sn'de {0} oluşturun</target>
