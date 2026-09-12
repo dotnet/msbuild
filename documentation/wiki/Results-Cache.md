@@ -4,6 +4,10 @@ MSBuild uses caching to speed up builds. It does this by remembering the outcome
 
 ![MSBuild Cache Flow](CacheFlow.png)
 
+The experimental [task invocation cache](Task-Cache.md) is a separate persistent
+cache. Unlike the in-memory structures described below, its entries survive
+build completion and process exit.
+
 ## `ResultsCache` (The Core Cache Component)
 
 `ResultsCache` is the primary storage mechanism where MSBuild keeps the outcomes of its build targets.

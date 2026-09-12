@@ -227,6 +227,24 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Orders item metadata for stable fingerprints without changing ordinary IPC serialization.
+        /// </summary>
+        internal void CanonicalizeMetadata()
+        {
+            if (_wrappedParameter is TaskParameterTaskItem item)
+            {
+                item.CanonicalizeMetadata();
+            }
+            else if (_parameterType == TaskParameterType.ITaskItemArray && _wrappedParameter is ITaskItem[] items)
+            {
+                foreach (TaskParameterTaskItem element in items)
+                {
+                    element?.CanonicalizeMetadata();
+                }
+            }
+        }
+
+        /// <summary>
         /// Serialize / deserialize this item.
         /// </summary>
         public void Translate(ITranslator translator)
@@ -949,6 +967,27 @@ namespace Microsoft.Build.BackEnd
             void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue)
             {
                 SetMetadata(metadataName, EscapingUtilities.Escape(metadataValue));
+            }
+
+            /// <summary>
+            /// Orders the copied metadata without modifying the original task item.
+            /// </summary>
+            internal void CanonicalizeMetadata()
+            {
+                if (_customEscapedMetadata is null || _customEscapedMetadata.Count < 2)
+                {
+                    return;
+                }
+
+                List<string> names = new(_customEscapedMetadata.Keys);
+                names.Sort(StringComparer.Ordinal);
+                Dictionary<string, string> ordered = new(names.Count, MSBuildNameIgnoreCaseComparer.Default);
+                foreach (string name in names)
+                {
+                    ordered.Add(name, _customEscapedMetadata[name]);
+                }
+
+                _customEscapedMetadata = ordered;
             }
 
             /// <summary>

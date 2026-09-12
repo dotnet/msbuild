@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
+    <IsPackable Condition="'$(DotNetBuildSourceOnly)' != 'true'">true</IsPackable>
+    <IsPackable Condition="'$(DotNetBuildSourceOnly)' == 'true'">false</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnablePackageValidation>false</EnablePackageValidation>
+    <PackageDescription>Optional BuildXL-backed MSBuild task cache runtime with Windows, Linux, and macOS x64 native libraries. This package has no compile-time API surface.</PackageDescription>
+    <NoWarn>$(NoWarn);NU5104</NoWarn>
+    <TargetsForTfmSpecificContentInPackage Condition="'$(DotNetBuildSourceOnly)' != 'true'">$(TargetsForTfmSpecificContentInPackage);CollectBundledTaskCacheRuntime</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+  <ItemGroup>
+    <_TaskCacheEngineProject Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="@(_TaskCacheEngineProject)" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Microsoft.Build.Engine.UnitTests" Key="002400000480000094000000060200000024000052534131000400000100010015c01ae1f50e8cc09ba9eac9147cf8fd9fce2cfe9f8dce4f7301c4132ca9fb50ce8cbf1df4dc18dd4d210e4345c744ecb3365ed327efdbc52603faa5e21daa11234c8c4a73e51f03bf192544581ebe107adee3a34928e39d04e524a9ce729d5090bfd7dad9d10c722c0def9ccc08ff0a03790e48bcd1f9b6c476063e1966a1c4" />
+    <None Include="buildTransitive\Microsoft.Build.TaskCache.targets" Pack="true" PackagePath="buildTransitive\Microsoft.Build.TaskCache.targets" />
+  </ItemGroup>
+  <Target Name="ResolveTaskCacheCompileReferences" BeforeTargets="ResolveAssemblyReferences"
+          Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <MSBuild Projects="@(_TaskCacheEngineProject)" Targets="GetTaskCacheCompileReferences"
+             Properties="TargetFramework=$(TargetFramework);BuildProjectReferences=false"
+             BuildInParallel="false">
+      <Output TaskParameter="TargetOutputs" ItemName="Reference" />
+    </MSBuild>
+  </Target>
+  <Target Name="CollectBundledTaskCacheRuntime" Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <!-- Query the engine's restored graph so bundled versions match its compilation. -->
+    <MSBuild Projects="@(_TaskCacheEngineProject)"
+             Targets="CollectTaskCachePackageContents"
+             Properties="TargetFramework=$(TargetFramework);TaskCacheRuntimeAssembly=$(TargetPath)"
+             BuildInParallel="false">
+      <Output TaskParameter="TargetOutputs" ItemName="TfmSpecificPackageFile" />
+    </MSBuild>
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(RepositoryEngineeringDir)_._" PackagePath="ref/$(TargetFramework)/_._" />
+    </ItemGroup>
+  </Target>
+  <Target Name="DeduplicateTaskCacheNativeAssets" BeforeTargets="_GetPackageFiles"
+          Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <ItemGroup>
+      <_TaskCacheNativeFiles Include="@(_PackageFiles->WithMetadataValue('TaskCacheNativeAsset', 'true'))" />
+      <_PackageFiles Remove="@(_TaskCacheNativeFiles)" />
+    </ItemGroup>
+    <RemoveDuplicates Inputs="@(_TaskCacheNativeFiles)">
+      <Output TaskParameter="Filtered" ItemName="_PackageFiles" />
+    </RemoveDuplicates>
+  </Target>
+</Project>

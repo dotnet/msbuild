@@ -136,6 +136,8 @@
 
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
+  <Import Project="$(RepoRoot)eng\TaskCacheDependencies.props" />
+
   <!-- Manually download this library for RoslynCodeTaskFactory.
            See target AddRefAssemblies below. -->
   <ItemGroup>
@@ -155,6 +157,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Build.TaskCache\Microsoft.Build.TaskCache.csproj" Condition="'$(DotNetBuildSourceOnly)' != 'true'" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" PrivateAssets="All" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
   </ItemGroup>

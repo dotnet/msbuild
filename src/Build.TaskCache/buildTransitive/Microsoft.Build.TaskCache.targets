@@ -1,0 +1,12 @@
+<Project>
+  <ItemGroup>
+    <!-- RocksDbSharp's loader probes native/amd64 rather than .NET's native asset directories. -->
+    <None Include="$(MSBuildThisFileDirectory)../runtimes/win-x64/native/rocksdb.dll;
+                   $(MSBuildThisFileDirectory)../runtimes/linux-x64/native/librocksdb.so;
+                   $(MSBuildThisFileDirectory)../runtimes/osx-x64/native/librocksdb.dylib"
+          Link="native/amd64/%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest"
+          CopyToPublishDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
+</Project>

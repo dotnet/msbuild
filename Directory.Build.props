@@ -2,6 +2,10 @@
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <DefineConstants>$(DefineConstants);FEATURE_BUILDXL_TASK_CACHE</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
     <Copyright>$(CopyrightNetFoundation)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

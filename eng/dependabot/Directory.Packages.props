@@ -28,6 +28,10 @@
     <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20260612.4" />
     <PackageVersion Update="Microsoft.BuildXL.Processes" Condition="'$(BuildXLProcessesVersion)' != ''" Version="$(BuildXLProcessesVersion)" />
 
+    <PackageVersion Include="Microsoft.BuildXL.Cache.MemoizationStore.Library" Version="0.1.0-20250207.7.2" />
+    <PackageVersion Include="RocksDbNative" Version="8.1.1-20241011.2" />
+    <PackageVersion Include="protobuf-net.Grpc" Version="1.1.1" />
+
     <PackageVersion Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.8.2112" />
     <PackageVersion Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(MicrosoftVisualStudioSetupConfigurationInteropVersion)' != ''" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" />
 

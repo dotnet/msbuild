@@ -6,6 +6,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -17,6 +18,9 @@ using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
+#if NETFRAMEWORK
+using OperatingSystem = Microsoft.Build.Framework.OperatingSystem;
+#endif
 
 #nullable disable
 
@@ -333,6 +337,9 @@ namespace Microsoft.Build.Execution
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
             Question = other.Question;
+            _taskCache = other._taskCache;
+            _buildCacheDirectory = other._buildCacheDirectory;
+            TaskCacheBackend = other.TaskCacheBackend;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
@@ -918,6 +925,62 @@ namespace Microsoft.Build.Execution
             set => _question = value;
         }
 
+        private bool _taskCache;
+        private string _buildCacheDirectory;
+
+        /// <summary>
+        /// Gets or sets whether eligible task invocations are cached by content.
+        /// Normal target incrementality is preserved.
+        /// </summary>
+        public bool TaskCache
+        {
+            get => _taskCache;
+            set => _taskCache = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the build-wide cache directory. Null or whitespace selects
+        /// the platform default. Reading the property resolves relative paths against
+        /// the current directory; BeginBuild captures that resolved value for the build.
+        /// Project properties and environment variables do not configure this value.
+        /// </summary>
+        public string BuildCacheDirectory
+        {
+            get => ResolveBuildCacheDirectory(_buildCacheDirectory);
+            set => _buildCacheDirectory = value;
+        }
+
+        internal TaskCacheBackend TaskCacheBackend { get; set; }
+
+        internal static string ResolveBuildCacheDirectory(string configured = null)
+        {
+            if (!String.IsNullOrWhiteSpace(configured))
+            {
+                return Path.GetFullPath(configured);
+            }
+
+            string root;
+            if (OperatingSystem.IsWindows())
+            {
+                root = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Caches");
+            }
+            else
+            {
+                root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".cache");
+            }
+
+            if (String.IsNullOrEmpty(root) || !Path.IsPathRooted(root))
+            {
+                throw new InvalidOperationException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskCache.NoCacheDirectory"));
+            }
+
+            return Path.GetFullPath(Path.Combine(root, "msbuild-cache"));
+        }
+
         /// <summary>
         /// Gets or sets an indication of build check enablement.
         /// </summary>
@@ -1013,6 +1076,8 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
             translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
+            translator.Translate(ref _taskCache);
+            translator.Translate(ref _buildCacheDirectory);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

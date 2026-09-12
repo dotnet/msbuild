@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+    <ProjectReference Include="..\MSBuild\MSBuild.csproj" OutputItemType="_BootstrapMSBuildTargetPath" />
 
     <!-- Direct project references needed here to avoid NuGet version conflict errors -->
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
@@ -30,7 +30,7 @@
 
     <!-- As of 17.5, NuGet.Build.Tasks and Microsoft.Build.NuGetSdkResolver depends on Newtonsoft.Json version 13.0.1,
          causing it to be downloaded and flagged by component governance -->
-    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Newtonsoft.Json" GeneratePathProperty="true" />
 
     <!-- Add this explicitly since it's marked as Private in MSBuild.csproj, but we need these at runtime to be like VS. -->
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />

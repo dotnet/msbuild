@@ -226,7 +226,16 @@ internal enum NodePacketType : byte
     /// </summary>
     RarNodeBufferedLogEvents, // 0x16
 
-    // Packet types 0x17-0x1F reserved for future core functionality
+    /// <summary>Build-scoped task cache storage request.</summary>
+    TaskCacheRequest = 0x18,
+
+    /// <summary>Correlated task cache storage response.</summary>
+    TaskCacheResponse = 0x19,
+
+    /// <summary>Cancellation of a task cache storage request.</summary>
+    TaskCacheCancel = 0x1A,
+
+    // Packet types 0x1B-0x1F reserved for future core functionality
 
     #region TaskHost callback packets (0x20-0x27)
     // These support bidirectional callbacks from TaskHost to parent for IBuildEngine implementations

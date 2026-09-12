@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <_TaskCacheNewtonsoftVersion>@(PackageVersion->WithMetadataValue('Identity', 'Newtonsoft.Json')->'%(Version)')</_TaskCacheNewtonsoftVersion>
+  </PropertyGroup>
+
+  <UsingTask TaskName="GetTaskCachePackageContents"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
+             TaskFactory="RoslynCodeTaskFactory"
+             Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <Task>
+      <Reference Include="$(NuGetPackageRoot)newtonsoft.json/$(_TaskCacheNewtonsoftVersion)/lib/netstandard2.0/Newtonsoft.Json.dll" />
+      <Code Source="$(MSBuildThisFileDirectory)..\src\MSBuild.Bootstrap.Utils\Tasks\GetTaskCachePackageContents.cs" Language="cs" />
+    </Task>
+  </UsingTask>
+
+  <Target Name="GetTaskCacheCompileReferences" DependsOnTargets="ResolvePackageAssets"
+          Returns="@(ResolvedCompileFileDefinitions)" Condition="'$(DotNetBuildSourceOnly)' != 'true'" />
+
+  <Target Name="CollectTaskCachePackageContents" Returns="@(_TaskCachePackageFiles)"
+          Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <GetTaskCachePackageContents AssetsFile="$(ProjectAssetsFile)"
+                                TargetFramework="$(TargetFramework)"
+                                FrameworkMoniker="$(TargetFrameworkMoniker)"
+                                RuntimeGraphFile="$(RuntimeIdentifierGraphPath)"
+                                RuntimeAssembly="$(TaskCacheRuntimeAssembly)"
+                                CacheRoots="@(_TaskCachePackageReference)">
+      <Output TaskParameter="PackageFiles" ItemName="_TaskCachePackageFiles" />
+    </GetTaskCachePackageContents>
+  </Target>
+</Project>
