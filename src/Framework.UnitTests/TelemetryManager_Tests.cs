@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NETFRAMEWORK
 using System;
+#if NETFRAMEWORK
 using System.Reflection;
 using System.Runtime.Serialization;
 #endif
@@ -92,7 +92,20 @@ public class TelemetryManager_Tests
             TelemetryManager.ResetForTest();
         }
     }
+
 #endif
+
+    [Fact]
+    public void ReleaseCanaryPropertiesContainOnlyExpectedIdentity()
+    {
+        Guid canaryId = Guid.NewGuid();
+
+        var properties = TelemetryManager.CreateReleaseCanaryProperties(canaryId, "18.9.0-test");
+
+        properties.Count.ShouldBe(2);
+        properties["VS.MSBuild.CanaryId"].ShouldBe(canaryId.ToString("N"));
+        properties["VS.MSBuild.BuildEngineVersion"].ShouldBe("18.9.0-test");
+    }
 
     [Fact]
     public void ResetForTestClearsDisposedState()
