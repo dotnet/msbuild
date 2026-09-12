@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.NetCore.Extensions;
@@ -80,6 +81,59 @@ namespace Microsoft.Build.UnitTests
 
             var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path, basePath));
             exception.Message.ShouldStartWith("The value cannot be an empty string.");
+        }
+
+        [Theory]
+        [InlineData(" ")]
+        [InlineData("\t")]
+        [InlineData("\r\n")]
+        [InlineData(" \t\r\n")]
+        public void AbsolutePath_WhitespaceOnlyWithBasePath_ShouldExplainHowToFixTheValue(string path)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
+            var exception = Should.Throw<WhitespaceOnlyPathException>(() => new AbsolutePath(path, GetTestBasePath()));
+
+            exception.ParamName.ShouldBe(nameof(path));
+        }
+
+        [Theory]
+        [InlineData(" ")]
+        [InlineData("\t")]
+        public void AbsolutePath_WhitespaceOnlyWithoutBasePath_ShouldExplainHowToFixTheValue(string path)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
+            var exception = Should.Throw<WhitespaceOnlyPathException>(() => new AbsolutePath(path));
+
+            exception.ParamName.ShouldBe(nameof(path));
+        }
+
+        [Fact]
+        public void ValueTypeParser_ShouldPreserveWhitespaceOnlyPathException()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
+            Should.Throw<WhitespaceOnlyPathException>(() => ValueTypeParser.Parse(" ", typeof(AbsolutePath)));
+        }
+
+        [Fact]
+        public void AbsolutePath_WhitespaceOnlyWithBasePath_ShouldBeAcceptedWhenWaveIsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            const string path = "   ";
+            AbsolutePath absolutePath = new(path, GetTestBasePath());
+
+            absolutePath.OriginalValue.ShouldBe(path);
         }
 
         [Theory]
