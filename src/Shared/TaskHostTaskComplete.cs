@@ -126,7 +126,7 @@ namespace Microsoft.Build.BackEnd
                 _taskOutputParameters = new Dictionary<string, TaskParameter>(StringComparer.OrdinalIgnoreCase);
                 foreach (KeyValuePair<string, object> parameter in result.FinalParameterValues)
                 {
-                    _taskOutputParameters[parameter.Key] = new TaskParameter(parameter.Value);
+                    _taskOutputParameters[parameter.Key] = parameter.Value as TaskParameter ?? new TaskParameter(parameter.Value);
                 }
             }
 

@@ -196,6 +196,21 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal static TaskParameter CreateForTaskOutput(object wrappedParameter, Type declaredType)
+        {
+            Type elementType = declaredType.IsArray ? declaredType.GetElementType() : declaredType;
+            if (wrappedParameter is null
+                && !elementType.IsValueType
+                && typeof(ITaskItem).IsAssignableFrom(elementType))
+            {
+                var parameter = new TaskParameter();
+                parameter._parameterType = TaskParameterType.ITaskItem;
+                return parameter;
+            }
+
+            return new TaskParameter(wrappedParameter);
+        }
+
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>
@@ -507,9 +522,9 @@ namespace Microsoft.Build.BackEnd
         /// Serializes or deserializes the array instance wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
         /// <remarks>
-        /// The array is assumed to be non-null. Each element is converted to a string on the write side
+        /// The array is assumed to be non-null. Each non-null element is converted to a string on the write side
         /// using <see cref="TaskParameterValueStringConverter.ToString"/>, the same canonical conversion the in-process engine
-        /// uses when gathering task outputs.
+        /// uses when gathering task outputs. Null elements use the translator's nullable-string marker.
         /// </remarks>
         private void TranslateValueTypeArray(ITranslator translator)
         {
@@ -522,7 +537,8 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < length; i++)
                 {
-                    string valueString = TaskParameterValueStringConverter.ToString(array.GetValue(i));
+                    object value = array.GetValue(i);
+                    string valueString = value is null ? null : TaskParameterValueStringConverter.ToString(value);
                     translator.Translate(ref valueString);
                 }
             }

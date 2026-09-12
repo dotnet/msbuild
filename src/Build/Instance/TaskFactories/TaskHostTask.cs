@@ -157,6 +157,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly TaskEnvironment _taskEnvironment;
 
+        private readonly bool _supportsParameterConversion;
+
+        internal bool IsNetTaskHost =>
+            string.Equals(_taskHostParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase);
+
+        internal bool SupportsParameterConversion => _supportsParameterConversion;
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -190,6 +197,8 @@ namespace Microsoft.Build.BackEnd
             _hostServices = hostServices;
             _projectFile = projectFile;
             _taskHostParameters = taskHostParameters;
+            _supportsParameterConversion = IsNetTaskHost
+                && NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(_taskHostParameters);
             _useSidecarTaskHost = useSidecarTaskHost;
             _taskEnvironment = taskEnvironment;
 
@@ -255,6 +264,11 @@ namespace Microsoft.Build.BackEnd
         {
             if (_setParameters.TryGetValue(property.Name, out object value))
             {
+                if (value is TaskParameter taskParameter)
+                {
+                    value = taskParameter.WrappedParameter;
+                }
+
                 // If we returned an exception, then we want to throw it when we
                 // do the get.
                 if (value is Exception ex)
@@ -269,6 +283,22 @@ namespace Microsoft.Build.BackEnd
                 PropertyInfo parameter = _taskType.Type.GetProperty(property.Name, BindingFlags.Instance | BindingFlags.Public);
                 return parameter.GetValue(this, null);
             }
+        }
+
+        internal bool IsTaskItemOutput(string parameterName)
+        {
+            if (!_setParameters.TryGetValue(parameterName, out object value)
+                || value is not TaskParameter taskParameter)
+            {
+                return false;
+            }
+
+            if (taskParameter.WrappedParameter is Exception exception)
+            {
+                throw exception;
+            }
+
+            return taskParameter.ParameterType is TaskParameterType.ITaskItem or TaskParameterType.ITaskItemArray;
         }
 
         /// <summary>
@@ -363,7 +393,7 @@ namespace Microsoft.Build.BackEnd
                             nodeReuse: effectiveNodeReuse,
                             taskHostParameters: _taskHostParameters);
 
-                        _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId);
+                        _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId, _supportsParameterConversion);
                         _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
                             _taskHostNodeKey,
                             this,
@@ -639,7 +669,7 @@ namespace Microsoft.Build.BackEnd
             // Set the output parameters for later
             foreach (KeyValuePair<string, TaskParameter> outputParam in taskHostTaskComplete.TaskOutputParameters)
             {
-                _setParameters[outputParam.Key] = outputParam.Value?.WrappedParameter;
+                _setParameters[outputParam.Key] = outputParam.Value;
             }
         }
 
