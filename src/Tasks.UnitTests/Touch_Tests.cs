@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Globalization;
 using System.IO;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -16,6 +18,10 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class Touch_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public Touch_Tests(ITestOutputHelper output) => _output = output;
+
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
         internal static Microsoft.Build.Shared.FileCreate fileCreate = new Microsoft.Build.Shared.FileCreate(FileCreate);
         internal static Microsoft.Build.Tasks.GetAttributes fileGetAttributes = new Microsoft.Build.Tasks.GetAttributes(GetAttributes);
@@ -416,6 +422,34 @@ namespace Microsoft.Build.UnitTests
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),
                 engine.Log);
+        }
+
+        /// <summary>
+        /// Touching a file that another reader has open without sharing write access should succeed,
+        /// because updating timestamps only requires FILE_WRITE_ATTRIBUTES, not write access to the content.
+        /// </summary>
+        [Fact]
+        public void TouchFileHeldOpenByReader()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFile file = env.CreateFile("touchme.txt", "contents");
+
+            // Mimics how ProjectImportsCollector opens files it embeds in a binary log.
+            using FileStream reader = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+
+            MockEngine engine = new MockEngine(_output);
+            Touch t = new Touch
+            {
+                BuildEngine = engine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                Time = "2005-12-31T13:34:56",
+                Files = [new TaskItem(file.Path)],
+            };
+
+            t.Execute().ShouldBeTrue(engine.Log);
+
+            t.TouchedFiles.Length.ShouldBe(1);
+            File.GetLastWriteTime(file.Path).ShouldBe(DateTime.Parse("2005-12-31T13:34:56", CultureInfo.InvariantCulture));
         }
     }
 }
