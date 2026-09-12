@@ -1,0 +1,145 @@
+let lookback = 21d;
+let freshness = 2d;
+let minBaselineRuns = 4;
+let minRegressionPercent = 5.0;
+let minRegressionMs = 250.0;
+let productionRuns =
+    PerfStarDataRaw
+    | where Timestamp >= ago(lookback)
+    | where SourceBranch == "refs/heads/main"
+    | where RunKind in ("Gold", "Hosted")
+    | where Backend in ("Gold", "Hosted") and Os in ("Windows", "Linux")
+    | where Backend == RunKind
+    | where Stage == "build-time" and isfinite(ValueMs) and ValueMs > 0
+    | extend IsMt = Scenario contains "-mt-" or Scenario endswith "-mt"
+    | extend ScenarioPair = case(
+        Scenario contains "-mt-", replace_string(Scenario, "-mt-", "-"),
+        Scenario endswith "-mt", substring(Scenario, 0, strlen(Scenario) - 3),
+        Scenario)
+    | summarize
+        RunMedianMs = percentile(ValueMs, 50),
+        SampleCount = count(),
+        RunTimestamp = max(Timestamp),
+        BuildNumber = take_any(BuildNumber)
+      by BuildId, Backend, Os, ScenarioPair, Scenario, IsMt;
+let mtRuns =
+    productionRuns
+    | where IsMt
+    | project
+        BuildId,
+        Backend,
+        Os,
+        ScenarioPair,
+        MtScenario = Scenario,
+        MtMedianMs = RunMedianMs,
+        MtSamples = SampleCount,
+        MtTimestamp = RunTimestamp,
+        BuildNumber;
+let nonMtRuns =
+    productionRuns
+    | where not(IsMt)
+    | project
+        BuildId,
+        Backend,
+        Os,
+        ScenarioPair,
+        NonMtScenario = Scenario,
+        NonMtMedianMs = RunMedianMs,
+        NonMtSamples = SampleCount,
+        NonMtTimestamp = RunTimestamp;
+let pairedRuns =
+    mtRuns
+    | join kind=inner nonMtRuns on BuildId, Backend, Os, ScenarioPair
+    | extend
+        RunTimestamp = max_of(MtTimestamp, NonMtTimestamp),
+        MtVsNonMtDeltaMs = MtMedianMs - NonMtMedianMs;
+let current =
+    pairedRuns
+    | summarize arg_max(RunTimestamp, *) by Backend, Os, ScenarioPair
+    | where RunTimestamp >= ago(freshness);
+let baselineRuns =
+    pairedRuns
+    | join kind=leftanti (
+        current
+        | project BuildId, Backend, Os, ScenarioPair)
+      on BuildId, Backend, Os, ScenarioPair;
+let baseline =
+    baselineRuns
+    | summarize
+        BaselineRunCount = dcount(BuildId),
+        BaselineMtMedianMs = percentile(MtMedianMs, 50),
+        BaselineMtP90Ms = percentile(MtMedianMs, 90),
+        BaselineNonMtMedianMs = percentile(NonMtMedianMs, 50),
+        BaselineDeltaMedianMs = percentile(MtVsNonMtDeltaMs, 50),
+        BaselineDeltaP90Ms = percentile(MtVsNonMtDeltaMs, 90),
+        BaselineFirstTimestamp = min(RunTimestamp),
+        BaselineLastTimestamp = max(RunTimestamp)
+      by Backend, Os, ScenarioPair;
+let healthyBaseline =
+    baselineRuns
+    | join kind=inner baseline on Backend, Os, ScenarioPair
+    | where MtMedianMs <= BaselineMtP90Ms and MtVsNonMtDeltaMs <= BaselineDeltaP90Ms
+    | summarize arg_max(RunTimestamp, *) by Backend, Os, ScenarioPair
+    | project
+        Backend,
+        Os,
+        ScenarioPair,
+        HealthyBuildId = BuildId,
+        HealthyBuildNumber = BuildNumber,
+        HealthyTimestamp = RunTimestamp,
+        HealthyMtMedianMs = round(MtMedianMs, 1),
+        HealthyNonMtMedianMs = round(NonMtMedianMs, 1),
+        HealthyMtVsNonMtDeltaMs = round(MtVsNonMtDeltaMs, 1);
+current
+| join kind=inner baseline on Backend, Os, ScenarioPair
+| join kind=leftouter healthyBaseline on Backend, Os, ScenarioPair
+| extend
+    MtRegressionMs = MtMedianMs - BaselineMtMedianMs,
+    MtRegressionPercent = 100.0 * (MtMedianMs - BaselineMtMedianMs) / BaselineMtMedianMs,
+    NonMtRegressionMs = NonMtMedianMs - BaselineNonMtMedianMs,
+    DifferentialRegressionMs = MtVsNonMtDeltaMs - BaselineDeltaMedianMs
+| where BaselineRunCount >= minBaselineRuns
+| where MtRegressionMs >= minRegressionMs and MtRegressionPercent >= minRegressionPercent
+| where MtMedianMs > BaselineMtP90Ms
+| where DifferentialRegressionMs >= minRegressionMs and MtVsNonMtDeltaMs > BaselineDeltaP90Ms
+| extend
+    Severity = case(
+        MtRegressionPercent >= 15.0 and DifferentialRegressionMs >= 1000.0, "high",
+        MtRegressionPercent >= 10.0, "medium",
+        "low"),
+    BuildUrl = strcat("https://dev.azure.com/devdiv/DevDiv/_build/results?buildId=", BuildId)
+| project
+    Severity,
+    Backend,
+    Os,
+    ScenarioPair,
+    MtScenario,
+    NonMtScenario,
+    CurrentBuildId = BuildId,
+    CurrentBuildNumber = BuildNumber,
+    CurrentTimestamp = RunTimestamp,
+    CurrentMtMedianMs = round(MtMedianMs, 1),
+    CurrentNonMtMedianMs = round(NonMtMedianMs, 1),
+    CurrentMtSamples = MtSamples,
+    CurrentNonMtSamples = NonMtSamples,
+    CurrentMtVsNonMtDeltaMs = round(MtVsNonMtDeltaMs, 1),
+    BaselineRunCount,
+    BaselineMtMedianMs = round(BaselineMtMedianMs, 1),
+    BaselineMtP90Ms = round(BaselineMtP90Ms, 1),
+    BaselineNonMtMedianMs = round(BaselineNonMtMedianMs, 1),
+    BaselineDeltaMedianMs = round(BaselineDeltaMedianMs, 1),
+    BaselineDeltaP90Ms = round(BaselineDeltaP90Ms, 1),
+    MtRegressionMs = round(MtRegressionMs, 1),
+    MtRegressionPercent = round(MtRegressionPercent, 1),
+    NonMtRegressionMs = round(NonMtRegressionMs, 1),
+    DifferentialRegressionMs = round(DifferentialRegressionMs, 1),
+    HealthyBuildId,
+    HealthyBuildNumber,
+    HealthyTimestamp,
+    HealthyMtMedianMs,
+    HealthyNonMtMedianMs,
+    HealthyMtVsNonMtDeltaMs,
+    BaselineFirstTimestamp,
+    BaselineLastTimestamp,
+    BuildUrl
+| order by DifferentialRegressionMs desc, MtRegressionPercent desc
