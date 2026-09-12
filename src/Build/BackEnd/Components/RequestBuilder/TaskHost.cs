@@ -12,6 +12,7 @@ using System.Runtime.Remoting.Lifetime;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
@@ -428,6 +429,13 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
+                // Observe the raw error before either serialization rejection or
+                // ContinueOnError can turn it into an apparently replayable warning.
+                if (_taskLoggingContext.LoggingService is ITaskCacheDiagnosticSource diagnosticSource)
+                {
+                    diagnosticSource.RecordTaskError(_taskLoggingContext.BuildEventContext);
+                }
+
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
                 // also log a warning if the event is not serializable and drop the logging message.
@@ -533,6 +541,13 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     return;
+                }
+
+                // Transport filtering can replace an unsupported event with a standard warning.
+                // Observe the original type first so the replacement cannot make it cacheable.
+                if (_taskLoggingContext.LoggingService is ITaskCacheDiagnosticSource diagnosticSource)
+                {
+                    diagnosticSource.RecordUnsupportedTaskWarning(_taskLoggingContext.BuildEventContext, e);
                 }
 
                 // If we are in building across process we need the events to be serializable. This method will

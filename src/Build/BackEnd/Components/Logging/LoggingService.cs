@@ -1351,6 +1351,12 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             Assumed.NotNull(buildEvent, "buildEvent is null");
+            TaskCacheDiagnosticCapture[] captures = Volatile.Read(ref _taskDiagnosticCaptures);
+            if (captures is not null)
+            {
+                RecordTaskDiagnostic(buildEvent, captures);
+            }
+
             if (_logMode == LoggerMode.Asynchronous)
             {
                 // Capture local references to prevent race with CleanLoggingEventProcessing

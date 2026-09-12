@@ -14,6 +14,9 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" VersionOverride="0.16.0-preview.1" />
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" VersionOverride="0.16.0-preview.1" />
+    <!-- This project disables central version management. Keep the engine cache's
+         dependency floor so restore does not request the unavailable older mirror. -->
+    <PackageReference Include="protobuf-net.Grpc" VersionOverride="1.1.1" Condition="'$(DotNetBuildSourceOnly)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">

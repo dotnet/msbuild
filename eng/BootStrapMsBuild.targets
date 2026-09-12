@@ -305,6 +305,12 @@
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
           DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+    <!-- Use the resolved CLI output, including project-reference platform/output overrides. -->
+    <AddBootstrapTaskCacheDependencies
+        Condition="'$(DotNetBuildSourceOnly)' != 'true'"
+        SourceDepsFile="@(_BootstrapMSBuildTargetPath->'%(RootDir)%(Directory)%(Filename).deps.json')"
+        TargetDepsFiles="$([MSBuild]::NormalizePath('$(InstallDir)', 'sdk', '$(BootstrapSdkVersion)', 'MSBuild.deps.json'));$([MSBuild]::NormalizePath('$(InstallDir)', 'sdk', '$(BootstrapSdkVersion)', 'dotnet.deps.json'))" />
+
     <!--
       The .NET SDK layout keeps some of MSBuild's own props/targets under sdk\<ver>\Current\ rather than at the
       SDK root, because they are imported through $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\... and
@@ -370,5 +376,15 @@
     <Exec Command="codesign --force --sign - &quot;$(InstallDir)dotnet&quot;"
           Condition="$([MSBuild]::IsOSPlatform('osx'))" />
   </Target>
+
+  <UsingTask TaskName="AddBootstrapTaskCacheDependencies"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
+             TaskFactory="RoslynCodeTaskFactory"
+             Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <Task>
+      <Reference Include="$(PkgNewtonsoft_Json)/lib/netstandard2.0/Newtonsoft.Json.dll" />
+      <Code Source="$(MSBuildThisFileDirectory)..\src\MSBuild.Bootstrap.Utils\Tasks\AddBootstrapTaskCacheDependencies.cs" Language="cs" />
+    </Task>
+  </UsingTask>
 
 </Project>

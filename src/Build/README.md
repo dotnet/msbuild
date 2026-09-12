@@ -8,6 +8,11 @@ This package contains `Microsoft.Build.dll`, which defines MSBuild's API, includ
 
 Developers should reference this package to write applications that create, edit, evaluate, or build MSBuild projects.
 
+Task caching is opt-in. API hosts enabling `BuildParameters.TaskCache` can add
+`Microsoft.Build.TaskCache` for the optional managed and native cache runtime.
+Ordinary use of `Microsoft.Build`
+does not require the cache package or a cache-specific NuGet feed.
+
 To create or edit an MSBuild project, use the [Microsoft.Build.Construction.ProjectRootElement](https://docs.microsoft.com/dotnet/api/microsoft.build.construction.projectrootelement) class and call the
 [Create](https://docs.microsoft.com/dotnet/api/microsoft.build.construction.projectrootelement.create) or
 [Open](https://docs.microsoft.com/dotnet/api/microsoft.build.construction.projectrootelement.open) method.

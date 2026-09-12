@@ -1,0 +1,9 @@
+#nullable enable
+Microsoft.Build.Framework.MSBuildDeclaredIOInputAttribute
+Microsoft.Build.Framework.MSBuildDeclaredIOInputAttribute.MSBuildDeclaredIOInputAttribute(string! parameterName) -> void
+Microsoft.Build.Framework.MSBuildDeclaredIOInputAttribute.ParameterName.get -> string!
+Microsoft.Build.Framework.MSBuildDeclaredIOOutputAttribute
+Microsoft.Build.Framework.MSBuildDeclaredIOOutputAttribute.MSBuildDeclaredIOOutputAttribute(string! parameterName) -> void
+Microsoft.Build.Framework.MSBuildDeclaredIOOutputAttribute.ParameterName.get -> string!
+Microsoft.Build.Framework.MSBuildDeclaredIOTaskAttribute
+Microsoft.Build.Framework.MSBuildDeclaredIOTaskAttribute.MSBuildDeclaredIOTaskAttribute() -> void

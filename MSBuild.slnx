@@ -57,6 +57,9 @@
   <Project Path="src/Build/Microsoft.Build.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="src/Build.TaskCache/Microsoft.Build.TaskCache.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="src/BuildCheck.UnitTests/Microsoft.Build.BuildCheck.UnitTests.csproj">
     <Platform Solution="*|ARM64" Project="arm64" />
     <Platform Solution="*|x64" Project="x64" />
