@@ -2132,6 +2132,11 @@ namespace Microsoft.Build.BackEnd
                 taskHostParameters,
                 taskLoadedType,
                 useSidecarTaskHost: true,
+                forwardConsoleOutput:
+                    taskFactoryEngineContext.IsMultiThreadedBuild &&
+                    !taskFactoryEngineContext.ForceOutOfProcessExecution &&
+                    XMakeAttributes.RuntimeValuesMatch(taskIdentityParameters.Runtime, XMakeAttributes.GetCurrentMSBuildRuntime()) &&
+                    XMakeAttributes.ArchitectureValuesMatch(taskIdentityParameters.Architecture, XMakeAttributes.GetCurrentMSBuildArchitecture()),
                 _projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,

@@ -243,6 +243,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion;
 
+        private RedirectConsoleWriter _consoleOutWriter;
+
+        private RedirectConsoleWriter _consoleErrorWriter;
+
+        private TextWriter _originalConsoleOut;
+
+        private TextWriter _originalConsoleError;
+
         /// <summary>
         /// Gets the effective configuration for the current task thread.
         /// Uses the per-task context first, falling back to <see cref="_currentConfiguration"/>.
@@ -277,6 +285,7 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConsoleConfiguration, TaskHostConsoleConfiguration.FactoryForDeserialization, this);
             EngineServices = new EngineServicesImpl(this);
         }
 
@@ -945,6 +954,9 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
+                case NodePacketType.TaskHostConsoleConfiguration:
+                    InitializeConsoleRedirection();
+                    break;
 
                 // Callback response packets - route to pending request
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
@@ -1261,6 +1273,8 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active && _taskCompletePacket is not null)
             {
+                _consoleOutWriter?.Flush();
+                _consoleErrorWriter?.Flush();
                 _nodeEndpoint.SendData(_taskCompletePacket);
                 _taskCompletePacket = null;
             }
@@ -1357,6 +1371,8 @@ namespace Microsoft.Build.CommandLine
                 kvp.Value.ExecutingThread?.Join();
             }
 
+            ShutdownConsoleRedirection();
+
             using StreamWriter debugWriter = _debugCommunications
                     ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
                     : null;
@@ -1398,6 +1414,40 @@ namespace Microsoft.Build.CommandLine
             _taskCancelledEvent.Dispose();
 
             return _shutdownReason;
+        }
+
+        private void InitializeConsoleRedirection()
+        {
+            if (_parentPacketVersion < NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion)
+            {
+                return;
+            }
+
+            _originalConsoleOut = Console.Out;
+            _originalConsoleError = Console.Error;
+            _consoleOutWriter = new RedirectConsoleWriter(
+                text => _nodeEndpoint.SendData(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard)));
+            _consoleErrorWriter = new RedirectConsoleWriter(
+                text => _nodeEndpoint.SendData(new ServerNodeConsoleWrite(text, ConsoleOutput.Error)));
+            Console.SetOut(_consoleOutWriter);
+            Console.SetError(_consoleErrorWriter);
+        }
+
+        private void ShutdownConsoleRedirection()
+        {
+            if (_consoleOutWriter is null)
+            {
+                return;
+            }
+
+            _consoleOutWriter.Dispose();
+            _consoleErrorWriter.Dispose();
+            Console.SetOut(_originalConsoleOut);
+            Console.SetError(_originalConsoleError);
+            _consoleOutWriter = null;
+            _consoleErrorWriter = null;
+            _originalConsoleOut = null;
+            _originalConsoleError = null;
         }
 
         /// <summary>

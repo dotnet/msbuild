@@ -226,12 +226,10 @@
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ProjectWriter.cs" />
-    <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
     <Compile Include="BackEnd\Node\ServerNamedMutex.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildCancel.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildCommand.cs" />
-    <Compile Include="BackEnd\Node\ServerNodeConsoleWrite.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildResult.cs" />
     <Compile Include="BackEnd\Node\OutOfProcServerNode.cs" />
     <Compile Include="Logging\ConsoleConfiguration.cs" />
