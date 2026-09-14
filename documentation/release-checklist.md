@@ -174,10 +174,10 @@ See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamen
 Steps are **sequential**.
 
 **Telemetry evidence procedure (steps 4.0 and 4.4a):**
-- For each Visual Studio or SDK path actually shipping in this release, use the telemetry team's sanctioned saved query and ordinary authorized access to check normal MSBuild `build` events. The code-level routes are `VS/MSBuild/Build` for Visual Studio and `dotnet/cli/msbuild/build` for SDK forwarding; the sanctioned query defines their current backend representation.
+- For each Visual Studio or SDK path actually shipping in this release, use [the queries documented in the internal MSBuild telemetry wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/45184/Telemetry) and ordinary authorized access to check normal MSBuild `build` events. The code-level routes are `VS/MSBuild/Build` for Visual Studio and `dotnet/cli/msbuild/build` for SDK forwarding; the wiki documents backend query examples and access prerequisites.
 - Identify each candidate by an immutable build-specific identity supported by that query (for example, official build ID plus source commit or artifact identity) and record its exact MSBuild version; a broad release-version family is not sufficient.
 - Use a bounded UTC window that accounts for normal ingestion delay—valid positive evidence can be reviewed as soon as it appears—and record the query link, path, candidate identity/version, aggregate count, first/last timestamps, limitations, and the named release owner's decision.
-- If a sanctioned query, access, identity field, or data is unavailable, record verification as **pending**. Missing data or query failure is not proof of a product regression; the owner must explicitly document whether to hold, defer, or proceed with rationale.
+- If a documented query, access, identity field, or data is unavailable, record verification as **pending**. Missing data or query failure is not proof of a product regression; the owner must explicitly document whether to hold, defer, or proceed with rationale.
 
 This is a human release check, not an official-build, artifact-publishing, or automated-promotion dependency.
 
