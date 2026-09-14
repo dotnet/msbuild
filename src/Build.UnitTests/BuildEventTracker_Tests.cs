@@ -19,18 +19,19 @@ public class BuildEventTracker_Tests
     {
         var eventSource = new MockBuildEventSink(0);
         var tracker = new BuildEventTracker();
-        var correlatedProjects = new List<BuildEventTracker.ProjectSnapshot?>();
+        var correlatedContexts = new List<BuildEventTracker.ProjectContextKey?>();
         BuildEventTracker.ProjectSnapshot? startedProject = null;
+        BuildEventTracker.ProjectSnapshot? finishedProject = null;
 
         tracker.ProjectStartedTracked += project => startedProject = project;
-        tracker.ProjectFinishedTracked += (project, _) => correlatedProjects.Add(project);
-        tracker.TargetStartedTracked += (project, _) => correlatedProjects.Add(project);
-        tracker.TargetFinishedTracked += (project, _) => correlatedProjects.Add(project);
-        tracker.TaskStartedTracked += (project, _) => correlatedProjects.Add(project);
-        tracker.TaskFinishedTracked += (project, _) => correlatedProjects.Add(project);
-        tracker.MessageTracked += (project, _) => correlatedProjects.Add(project);
-        tracker.WarningTracked += (project, _) => correlatedProjects.Add(project);
-        tracker.ErrorTracked += (project, _) => correlatedProjects.Add(project);
+        tracker.ProjectFinishedTracked += (project, _) => finishedProject = project;
+        tracker.TargetStartedTracked += (context, _) => correlatedContexts.Add(context);
+        tracker.TargetFinishedTracked += (context, _) => correlatedContexts.Add(context);
+        tracker.TaskStartedTracked += (context, _) => correlatedContexts.Add(context);
+        tracker.TaskFinishedTracked += (context, _) => correlatedContexts.Add(context);
+        tracker.MessageTracked += (context, _) => correlatedContexts.Add(context);
+        tracker.WarningTracked += (context, _) => correlatedContexts.Add(context);
+        tracker.ErrorTracked += (context, _) => correlatedContexts.Add(context);
         tracker.Attach(eventSource);
 
         BuildEventContext context = CreateContext(evaluationId: 2, projectContextId: 3, nodeId: 4);
@@ -74,8 +75,10 @@ public class BuildEventTracker_Tests
         projectStartedSnapshot.EvaluationProjectFile.ShouldBe("evaluated.proj");
         projectStartedSnapshot.TargetFramework.ShouldBe("net11.0");
         projectStartedSnapshot.RuntimeIdentifier.ShouldBe("win-x64");
-        correlatedProjects.Count.ShouldBe(8);
-        correlatedProjects.ShouldAllBe(project => project.HasValue && project.Value.ContextKey == projectStartedSnapshot.ContextKey);
+        correlatedContexts.Count.ShouldBe(7);
+        correlatedContexts.ShouldAllBe(context => context == projectStartedSnapshot.ContextKey);
+        finishedProject.ShouldNotBeNull();
+        finishedProject.Value.ContextKey.ShouldBe(projectStartedSnapshot.ContextKey);
     }
 
     [Fact]
@@ -83,9 +86,9 @@ public class BuildEventTracker_Tests
     {
         var eventSource = new MockBuildEventSink(0);
         var tracker = new BuildEventTracker();
-        var correlatedProjects = new List<BuildEventTracker.ProjectSnapshot?>();
+        var correlatedContexts = new List<BuildEventTracker.ProjectContextKey?>();
 
-        tracker.WarningTracked += (project, _) => correlatedProjects.Add(project);
+        tracker.WarningTracked += (context, _) => correlatedContexts.Add(context);
         tracker.Attach(eventSource);
 
         BuildEventContext context = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
@@ -108,7 +111,43 @@ public class BuildEventTracker_Tests
         eventSource.InvokeBuildStarted(new BuildStartedEventArgs(string.Empty, string.Empty));
         eventSource.InvokeWarningRaised(warning);
 
-        correlatedProjects.ShouldBe([null, null]);
+        correlatedContexts.ShouldBe([null, null]);
+    }
+
+    [Fact]
+    public void MessageTracked_UnknownProjectContext_ReportsEventContextKeyWithoutTrackedState()
+    {
+        var eventSource = new MockBuildEventSink(0);
+        var tracker = new BuildEventTracker();
+        BuildEventTracker.ProjectContextKey? reportedContext = null;
+        BuildEventContext context = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
+
+        tracker.MessageTracked += (contextKey, _) => reportedContext = contextKey;
+        tracker.Attach(eventSource);
+
+        eventSource.InvokeMessageRaised(new BuildMessageEventArgs("message", null, null, MessageImportance.Low)
+        {
+            BuildEventContext = context,
+        });
+
+        reportedContext.ShouldNotBeNull();
+        reportedContext.Value.ShouldBe(new BuildEventTracker.ProjectContextKey(context));
+        tracker.TryGetProjectSnapshot(reportedContext.Value, out _).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void MessageTracked_NullBuildEventContext_ReportsNullContextKey()
+    {
+        var eventSource = new MockBuildEventSink(0);
+        var tracker = new BuildEventTracker();
+        BuildEventTracker.ProjectContextKey? reportedContext = new(1, 2);
+
+        tracker.MessageTracked += (contextKey, _) => reportedContext = contextKey;
+        tracker.Attach(eventSource);
+
+        eventSource.InvokeMessageRaised(new BuildMessageEventArgs("message", null, null, MessageImportance.Low));
+
+        reportedContext.ShouldBeNull();
     }
 
     [Fact]
@@ -118,7 +157,12 @@ public class BuildEventTracker_Tests
         var tracker = new BuildEventTracker();
         var correlatedProjectFiles = new List<string?>();
 
-        tracker.WarningTracked += (project, _) => correlatedProjectFiles.Add(project?.ProjectFile);
+        tracker.WarningTracked += (context, _) =>
+        {
+            context.ShouldNotBeNull();
+            tracker.TryGetProjectSnapshot(context.Value, out BuildEventTracker.ProjectSnapshot project).ShouldBeTrue();
+            correlatedProjectFiles.Add(project.ProjectFile);
+        };
         tracker.Attach(eventSource);
 
         BuildEventContext firstContext = CreateContext(evaluationId: 1, projectContextId: 7, nodeId: 1);
@@ -184,9 +228,24 @@ public class BuildEventTracker_Tests
         BuildEventTracker.ProjectSnapshot? finishedProject = null;
 
         tracker.ProjectStartedTracked += project => startedProject = project;
-        tracker.TargetStartedTracked += (project, _) => targetStartedProject = project;
-        tracker.WarningTracked += (project, _) => warningProject = project;
-        tracker.ErrorTracked += (project, _) => errorProject = project;
+        tracker.TargetStartedTracked += (context, _) =>
+        {
+            context.ShouldNotBeNull();
+            tracker.TryGetProjectSnapshot(context.Value, out BuildEventTracker.ProjectSnapshot project).ShouldBeTrue();
+            targetStartedProject = project;
+        };
+        tracker.WarningTracked += (context, _) =>
+        {
+            context.ShouldNotBeNull();
+            tracker.TryGetProjectSnapshot(context.Value, out BuildEventTracker.ProjectSnapshot project).ShouldBeTrue();
+            warningProject = project;
+        };
+        tracker.ErrorTracked += (context, _) =>
+        {
+            context.ShouldNotBeNull();
+            tracker.TryGetProjectSnapshot(context.Value, out BuildEventTracker.ProjectSnapshot project).ShouldBeTrue();
+            errorProject = project;
+        };
         tracker.ProjectFinishedTracked += (project, _) => finishedProject = project;
         tracker.Attach(eventSource);
 
@@ -232,6 +291,99 @@ public class BuildEventTracker_Tests
         startedProject.Value.Succeeded.ShouldBeNull();
         startedProject.Value.WarningCount.ShouldBe(0);
         startedProject.Value.ErrorCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public void TryGetProjectSnapshot_UnknownContext_ReturnsFalse()
+    {
+        var tracker = new BuildEventTracker();
+
+        tracker.TryGetProjectSnapshot(new BuildEventTracker.ProjectContextKey(1, 2), out _).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void BuildFinished_StateIsAvailableDuringCallbackAndClearedWhenCallbackThrows()
+    {
+        var eventSource = new MockBuildEventSink(0);
+        var tracker = new BuildEventTracker();
+        BuildEventContext context = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
+        BuildEventTracker.ProjectContextKey contextKey = new(context);
+
+        tracker.BuildFinishedTracked += _ =>
+        {
+            tracker.TryGetProjectSnapshot(contextKey, out BuildEventTracker.ProjectSnapshot snapshot).ShouldBeTrue();
+            snapshot.Succeeded.ShouldBe(true);
+            snapshot.WarningCount.ShouldBe(1);
+            throw new InvalidOperationException("Consumer failure");
+        };
+        tracker.Attach(eventSource);
+
+        eventSource.InvokeBuildStarted(new BuildStartedEventArgs(string.Empty, string.Empty));
+        eventSource.InvokeProjectStarted(CreateProjectStartedEvent("built.proj", context));
+        eventSource.InvokeWarningRaised(CreateWarningEvent(context));
+        eventSource.InvokeProjectFinished(new ProjectFinishedEventArgs(null, null, "built.proj", true)
+        {
+            BuildEventContext = context,
+        });
+
+        Should.Throw<InvalidOperationException>(() =>
+            eventSource.InvokeBuildFinished(new BuildFinishedEventArgs(string.Empty, string.Empty, true)));
+
+        tracker.TryGetProjectSnapshot(contextKey, out _).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void BuildFinished_ClearsEvaluationState()
+    {
+        var eventSource = new MockBuildEventSink(0);
+        var tracker = new BuildEventTracker();
+        var startedProjects = new List<BuildEventTracker.ProjectSnapshot>();
+        BuildEventContext firstContext = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
+        BuildEventContext secondContext = CreateContext(evaluationId: 1, projectContextId: 4, nodeId: 3);
+
+        tracker.ProjectStartedTracked += startedProjects.Add;
+        tracker.Attach(eventSource);
+
+        eventSource.InvokeBuildStarted(new BuildStartedEventArgs(string.Empty, string.Empty));
+        eventSource.InvokeStatusEventRaised(CreateEvaluationFinishedEvent("evaluated.proj", firstContext));
+        eventSource.InvokeProjectStarted(CreateProjectStartedEvent("first.proj", firstContext));
+        eventSource.InvokeBuildFinished(new BuildFinishedEventArgs(string.Empty, string.Empty, true));
+        eventSource.InvokeProjectStarted(CreateProjectStartedEvent("second.proj", secondContext));
+
+        startedProjects.Count.ShouldBe(2);
+        startedProjects[1].EvaluationProjectFile.ShouldBeNull();
+        startedProjects[1].TargetFramework.ShouldBeNull();
+        startedProjects[1].RuntimeIdentifier.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Detach_ClearsProjectAndEvaluationState()
+    {
+        var eventSource = new MockBuildEventSink(0);
+        var tracker = new BuildEventTracker();
+        var startedProjects = new List<BuildEventTracker.ProjectSnapshot>();
+        BuildEventContext firstContext = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
+        BuildEventContext secondContext = CreateContext(evaluationId: 1, projectContextId: 4, nodeId: 3);
+        BuildEventTracker.ProjectContextKey firstContextKey = new(firstContext);
+
+        tracker.ProjectStartedTracked += startedProjects.Add;
+        tracker.Attach(eventSource);
+        eventSource.InvokeStatusEventRaised(CreateEvaluationFinishedEvent("evaluated.proj", firstContext));
+        eventSource.InvokeProjectStarted(CreateProjectStartedEvent("first.proj", firstContext));
+
+        tracker.TryGetProjectSnapshot(firstContextKey, out _).ShouldBeTrue();
+
+        tracker.Detach();
+
+        tracker.TryGetProjectSnapshot(firstContextKey, out _).ShouldBeFalse();
+
+        tracker.Attach(eventSource);
+        eventSource.InvokeProjectStarted(CreateProjectStartedEvent("second.proj", secondContext));
+
+        startedProjects.Count.ShouldBe(2);
+        startedProjects[1].EvaluationProjectFile.ShouldBeNull();
+        startedProjects[1].TargetFramework.ShouldBeNull();
+        startedProjects[1].RuntimeIdentifier.ShouldBeNull();
     }
 
     [Fact]
@@ -321,11 +473,11 @@ public class BuildEventTracker_Tests
         var tracker = new BuildEventTracker();
         int projectStartedCount = 0;
         int statusEventCount = 0;
-        BuildEventTracker.ProjectSnapshot? warningProject = null;
+        BuildEventTracker.ProjectContextKey? warningContext = null;
 
         tracker.ProjectStartedTracked += _ => projectStartedCount++;
         tracker.StatusEventTracked += _ => statusEventCount++;
-        tracker.WarningTracked += (project, _) => warningProject = project;
+        tracker.WarningTracked += (context, _) => warningContext = context;
         tracker.Attach(eventSource);
 
         eventSource.InvokeStatusEventRaised(new ProjectEvaluationFinishedEventArgs
@@ -354,7 +506,7 @@ public class BuildEventTracker_Tests
 
         projectStartedCount.ShouldBe(0);
         statusEventCount.ShouldBe(1);
-        warningProject.ShouldBeNull();
+        warningContext.ShouldBeNull();
     }
 
     private static void RaiseAllTrackedEvents(

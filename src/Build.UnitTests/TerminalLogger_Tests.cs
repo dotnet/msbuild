@@ -13,6 +13,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using VerifyTests;
@@ -536,6 +537,25 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void AuthenticationAndOrdinaryWarnings_OnlyOrdinaryWarningAffectsSummary()
+        {
+            const string authenticationWarning = "[CredentialProvider] Authentication required.";
+            const string ordinaryWarning = "Ordinary warning.";
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs(authenticationWarning));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs(ordinaryWarning));
+            });
+
+            string output = _outputWriter.ToString();
+            output.Split([authenticationWarning], StringSplitOptions.None).Length.ShouldBe(2);
+            output.ShouldContain(ordinaryWarning);
+            output.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_SucceededWithWarnings", 1));
+            output.ShouldNotContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_SucceededWithWarnings", 2));
+        }
+
+        [Fact]
         public Task PrintCopyTaskRetryWarningAsImmediateMessage_Failed()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
@@ -987,6 +1007,42 @@ namespace Microsoft.Build.UnitTests
             stopwatch.IsStarted.ShouldBeFalse();
 
             _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "MSBuild", true, context));
+            stopwatch.IsStarted.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void TaskEvents_MixedCaseMSBuild_AreTreatedAsMSBuild()
+        {
+            var stopwatch = new MockStopwatch();
+            _terminallogger._createStopwatch = () => stopwatch;
+
+            BuildEventContext context = MakeBuildEventContext();
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs(context));
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: context));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, buildEventContext: context));
+
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "msbuild", context));
+            stopwatch.IsStarted.ShouldBeFalse();
+
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "MsBuIlD", true, context));
+            stopwatch.IsStarted.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void ForwardedTaskEvents_MixedCaseMSBuild_AreTreatedAsMSBuild()
+        {
+            var stopwatch = new MockStopwatch();
+            _terminallogger._createStopwatch = () => stopwatch;
+
+            BuildEventContext context = MakeBuildEventContext(nodeId: 1);
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs(context));
+            _remoteNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: context));
+            _remoteNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, buildEventContext: context));
+
+            _remoteNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "msbuild", context));
+            stopwatch.IsStarted.ShouldBeFalse();
+
+            _remoteNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "MsBuIlD", true, context));
             stopwatch.IsStarted.ShouldBeTrue();
         }
 

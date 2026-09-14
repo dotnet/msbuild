@@ -3,18 +3,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Build.Logging;
 
 /// <summary>
-/// Represents a project being built.
+/// Holds Terminal Logger presentation state for a project correlated by
+/// <see cref="BuildEventTracker"/>.
 /// </summary>
 internal sealed class TerminalProjectInfo
 {
     private List<TerminalBuildMessage>? _buildMessages;
-    private int _errorCount;
-    private int _warningCount;
+    private BuildEventTracker.ProjectSnapshot _projectSnapshot;
+    private int _warningsExcludedFromSummaryCount;
 
     /// <summary>
     /// Initializes a new <see cref="TerminalProjectInfo"/> for the tracked project.
@@ -23,23 +25,15 @@ internal sealed class TerminalProjectInfo
     /// <param name="stopwatch">The stopwatch used for terminal rendering.</param>
     public TerminalProjectInfo(BuildEventTracker.ProjectSnapshot project, StopwatchAbstraction stopwatch)
     {
-        Id = project.ProjectContextId;
-        ProjectFile = project.EvaluationProjectFile;
-        TargetFramework = project.TargetFramework;
-        RuntimeIdentifier = project.RuntimeIdentifier;
+        _projectSnapshot = project;
         Stopwatch = stopwatch;
         Stopwatch.Start();
     }
 
     /// <summary>
-    /// The int value of the ProjectContext id of this project execution.
-    /// </summary>
-    public int Id { get; }
-
-    /// <summary>
     /// The full path to the project file.
     /// </summary>
-    public string? ProjectFile { get; }
+    public string? ProjectFile => _projectSnapshot.EvaluationProjectFile;
 
     /// <summary>
     /// A stopwatch to time the build of the project.
@@ -49,32 +43,39 @@ internal sealed class TerminalProjectInfo
     /// <summary>
     /// The target framework of the project or null if not multi-targeting.
     /// </summary>
-    public string? TargetFramework { get; }
+    public string? TargetFramework => _projectSnapshot.TargetFramework;
 
     /// <summary>
     /// The runtime identifier of the project or null if platform-agnostic.
     /// </summary>
-    public string? RuntimeIdentifier { get; }
+    public string? RuntimeIdentifier => _projectSnapshot.RuntimeIdentifier;
 
     /// <summary>
     /// True if the project built successfully; otherwise false.
     /// </summary>
-    public bool Succeeded { get; private set; }
+    public bool Succeeded => _projectSnapshot.Succeeded == true;
 
     /// <summary>
     /// The number of errors included in the terminal summary.
     /// </summary>
-    public int ErrorCount => _errorCount;
+    public int SummaryErrorCount => _projectSnapshot.ErrorCount;
 
     /// <summary>
     /// The number of warnings included in the terminal summary.
     /// </summary>
-    public int WarningCount => _warningCount;
+    public int SummaryWarningCount
+    {
+        get
+        {
+            Debug.Assert(_projectSnapshot.WarningCount >= _warningsExcludedFromSummaryCount);
+            return _projectSnapshot.WarningCount - _warningsExcludedFromSummaryCount;
+        }
+    }
 
     /// <summary>
     /// True when the project has error or warning build messages; otherwise false.
     /// </summary>
-    public bool HasErrorsOrWarnings => ErrorCount > 0 || WarningCount > 0;
+    public bool HasSummaryDiagnostics => SummaryErrorCount > 0 || SummaryWarningCount > 0;
 
     /// <summary>
     /// Full path to the primary output of the project, if known.
@@ -108,23 +109,21 @@ internal sealed class TerminalProjectInfo
     {
         _buildMessages ??= [];
         _buildMessages.Add(new TerminalBuildMessage(severity, message));
-
-        switch (severity)
-        {
-            case TerminalMessageSeverity.Error:
-                _errorCount++;
-                break;
-            case TerminalMessageSeverity.Warning:
-                _warningCount++;
-                break;
-        }
     }
 
-    internal void Finish(bool succeeded)
+    internal void Complete(BuildEventTracker.ProjectSnapshot projectSnapshot)
     {
-        Succeeded = succeeded;
+        UpdateSnapshot(projectSnapshot);
         Stopwatch.Stop();
     }
+
+    internal void UpdateSnapshot(BuildEventTracker.ProjectSnapshot projectSnapshot)
+    {
+        Debug.Assert(projectSnapshot.ContextKey == _projectSnapshot.ContextKey);
+        _projectSnapshot = projectSnapshot;
+    }
+
+    internal void ExcludeWarningFromSummary() => _warningsExcludedFromSummaryCount++;
 
     internal void ResumeTiming() => Stopwatch.Start();
 
