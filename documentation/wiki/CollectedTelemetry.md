@@ -100,7 +100,7 @@ Expressed and collected via [BuildTelemetry type](https://github.com/dotnet/msbu
 | >= 9.0.100   | Indication of enablement of BuildCheck feature. |
 | >= 9.0.100   | Indication of Smart App Control being in evaluation mode on machine executing the build. |
 | >= 10.0.100  | Indication if the build was run in multithreaded mode. |
-| Next release | `TaskHostConsoleOutputForwarded`: whether non-empty stdout or stderr was actually forwarded from an eligible primary `-mt` task host in this build. This is a per-build Boolean, not an enablement flag; it records no console text or task identity. |
+| 11.0.1xx    | `TaskHostConsoleOutputForwarded`: whether non-empty stdout or stderr was actually forwarded from an eligible primary `-mt` task host in this build. This is a per-build Boolean, not an enablement flag; it records no console text or task identity. |
 | >= 10.0.200  | Primary failure category when BuildSuccess = false (one of: "Compiler", "MSBuildEngine", "Tasks", "SDK", "NuGet", "BuildCheck", "Other"). |
 | >= 10.0.200  | Count of compiler errors encountered during the build. |
 | >= 10.0.200  | Count of MSBuild engine errors encountered during the build. |
