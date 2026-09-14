@@ -149,6 +149,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData(4)]
         [InlineData(5)]
+        [InlineData(6)]
         public void LegacyTaskHostsAreNotTreatedAsPersistentConnections(byte version)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

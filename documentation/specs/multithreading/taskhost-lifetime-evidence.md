@@ -75,7 +75,25 @@ The first expert review found three additional gaps: terminal notification could
 
 The second review found that a late callback reply still used a reusable node key and could reach a replacement TaskHost. Each task now keeps the exact connection it acquired for callback replies, cancellation and detachment. The nested-crash regression above passed on both runtimes.
 
-The third expert review found **no remaining substantive PR defects**. It checked the connection-bound sends, attachment/termination synchronization, handler cleanup, idle-only shutdown, protocol gating, provider lifetime, sender cleanup and cancellation context. This is a source-review result, not a claim that the full test suite is green.
+The third expert review found **no remaining substantive PR defects at that point**. It checked the connection-bound sends, attachment/termination synchronization, handler cleanup, idle-only shutdown, protocol gating, provider lifetime, sender cleanup and cancellation context. The later cleanup-ordering investigation below supersedes that verdict; none of these reviews establishes a green full test suite.
+
+## Cleanup completion policy, 14 September 2026
+
+The earlier process observations used protocol 6. Protocol 7 now waits for disposal when retaining a sidecar, but retires it asynchronously when node reuse is disabled. The child echoes the existing `NodeBuildComplete` after reset; no new packet type is needed. Version-6 parents retain their unacknowledged reset, and current parents use legacy pooling with older children.
+
+`EndBuildWaitsForDisposalOnlyWhenReusing` registers a build-lifetime disposable that waits on a release file. All six cases passed on both .NET and Framework:
+
+| Case | Observed |
+|---|---|
+| Retained sidecar, direct or worker owner | Disposal started, but `EndBuild()` did not return until the gate was released. The next build used the same TaskHost PID. |
+| Retiring sidecar, direct or worker owner | `EndBuild()` returned while disposal was still blocked. After release, disposal finished and the TaskHost exited. |
+| Sidecar killed during retained cleanup, direct or worker owner | Connection loss released the parent's wait instead of hanging `EndBuild()`. |
+
+Provider tests also verify that a retiring connection cannot be acquired, its late notifications cannot remove a replacement, its sender stops after shutdown is sent, and a version-6 peer keeps the previous shutdown wait. The focused review found that abort-time retirement must preserve attached task handlers until the real terminal notification. Both retirement cases failed before that correction and now verify exactly one notification to the old handler without notifying the replacement.
+
+The final focused engine tests, including configuration/result serialization and transport cases, passed 69 cases on .NET with one expected platform skip, and 73 on Framework. Fourteen selected CLI cases passed across both runtimes. The Release build, bootstrap sample and CLI help checks passed. These results do not resolve the previously reported CI failures.
+
+Released MSBuild 18.9.6 also passed protocol **4 -> 7** reconnection with TaskHost **34144**, and **7 -> 4** with TaskHost **2116**. Each pair reused one child and observed the changed environment value on the second build. Records are `cleanup-protocol4-to7` and `cleanup-protocol7-to4` in the session's `files\lifetime-e2e` directory.
 
 ## Limits and remaining validation
 

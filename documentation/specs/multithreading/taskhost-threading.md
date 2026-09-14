@@ -195,17 +195,19 @@ Each new `TaskHostConfiguration` carries a full environment snapshot, task param
 
 When the owning worker node sends `NodeBuildComplete`, `HandleNodeBuildComplete()` decides whether to exit or stay alive:
 
-With Change Wave 18.12 enabled, a parent that negotiates packet version 6 or later sends an explicit `NodeBuildCompleteAction.ReuseWithConnection` to its reusable **sidecar** TaskHosts. They keep their named-pipe connections and reset in place via `PrepareForNextBuild()`. `NodeBuildCompleteAction.Shutdown` terminates the TaskHost, including one that is already idle.
+With Change Wave 18.12 enabled, a parent that negotiates packet version 7 or later sends an explicit `NodeBuildCompleteAction.ReuseWithConnection` to its reusable **sidecar** TaskHosts. They keep their named-pipe connections and reset in place via `PrepareForNextBuild()`. `NodeBuildCompleteAction.Shutdown` terminates the TaskHost, including one that is already idle.
 
 Legacy completion packets retain their original behavior: a TaskHost launched with node reuse disconnects for pooling. A TaskHost launched without node reuse exits unless both `PrepareForReuse` and `Traits.Instance.EscapeHatches.ReuseTaskHostNodes` allow reuse. Explicit `TaskHostFactory` requests are launched without node reuse.
 
-A sidecar sends nothing back to report the reset. Its owner already knows the node is idle -- a build cannot complete while one of its tasks is still outstanding, which `HandleNodeBuildComplete()` asserts on receipt -- and it does not need to be told when the reset has finished, because the reset is ordered behind `NodeBuildComplete` on the same pipe and runs on the packet-processing thread, so the next build's `TaskHostConfiguration` cannot overtake it. The owner therefore retires the still-connected sidecar from its active set locally at the point it sends `NodeBuildComplete`.
+A retained sidecar echoes `NodeBuildComplete` after disposal and reset. Its owner keeps it in the active set until that reply arrives, so `EndBuild()` waits for build-scoped cleanup without disconnecting the sidecar. Connection failure also releases the wait and removes the failed connection.
+
+When node reuse is disabled, current same-runtime, same-architecture TaskHosts are retired locally before shutdown is queued. `EndBuild()` does not wait for their disposal or process exit. The sender drains the shutdown request, and the reader closes when the child replies or exits. A retiring host cannot be acquired by the next build, and its late notifications cannot remove a replacement. Attached tasks still receive the terminal notification if retirement occurs during build abort. Legacy and compatibility hosts keep their existing shutdown waits.
 
 The reset releases the build's working directory while the sidecar is idle, so Windows does not keep that directory open. Each task's configuration sets its working directory and environment again before execution.
 
 Because a sidecar stays connected, its owner exiting -- normally, via `dotnet build-server shutdown`, or by crashing -- breaks the pipe, and the `LinkStatus.Failed` handler terminates it. Reaping a sidecar therefore requires no shutdown cascade and no process enumeration: it is reachable through the connection it already holds. A sidecar has no idle timeout; it waits indefinitely on its owner's connection.
 
-Disposing a `BuildManager` shuts down its connected TaskHosts even when the hosting process continues. A worker node instead keeps its provider across builds and shuts its TaskHosts down when the worker terminates. Connection closure also stops the parent's packet sender. Active task code must still return before the TaskHost can finish its shutdown.
+Disposing a `BuildManager` requests shutdown of its connected TaskHosts even when the hosting process continues. A worker node instead keeps its provider across builds and requests TaskHost shutdown when the worker terminates. A retiring TaskHost may remain alive briefly while it disposes its state. Connection closure also stops the parent's packet sender. Active task code must still return before the TaskHost can finish its shutdown.
 
 #### Lifetime change
 
@@ -218,7 +220,7 @@ Before [#14584](https://github.com/dotnet/msbuild/pull/14584), sidecar TaskHosts
 
 TaskHosts required for a different runtime or architecture are unchanged. Reusable ones continue to disconnect so another compatible process can claim them. CLR2 TaskHosts are never node-reused, and TaskHosts created by an explicit `TaskFactory="TaskHostFactory"` request are deliberately launched without node reuse; both exit at the end of the build. Keeping reusable cross-runtime or cross-architecture TaskHosts connected would cost one idle process per worker node for a task that only ever runs in one of them at a time: with ten projects of which one needs an `Architecture="x86"` TaskHost, under `-m:4` and reordered so the scheduler places it on a different worker each build, staying connected left three idle TaskHosts (~153 MB) where disconnecting leaves one (~51 MB).
 
-A sidecar runs the same runtime and architecture as its launcher, so sharing across processes is less helpful. Packet version 6 adds an action to `NodeBuildComplete` without changing its legacy reuse flag. The parent selects ownership only when the child supports these actions. Older parents can send `PrepareForReuse=true`, so that flag alone never establishes ownership.
+A sidecar runs the same runtime and architecture as its launcher, so sharing across processes is less helpful. Packet version 6 adds an action to `NodeBuildComplete` without changing its legacy reuse flag. Version 7 adds the cleanup reply. Current parents select ownership only when the child supports that reply; a version-6 parent can still use its original, unacknowledged reset with a newer child. Older parents can send `PrepareForReuse=true`, so that flag alone never establishes ownership.
 
 A sidecar is therefore never shared across launcher processes. Reuse within one launcher's lifetime -- including consecutive command-line invocations handled by the same MSBuild server or any long-lived `BuildManager` -- is unchanged, which is where it pays off.
 

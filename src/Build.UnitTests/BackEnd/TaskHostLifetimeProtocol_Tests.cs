@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
@@ -16,12 +17,15 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd;
 
-public sealed class TaskHostLifetimeProtocol_Tests
+public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
 {
+    private readonly ITestOutputHelper _output = output;
+
     [Theory]
     [InlineData(4)]
     [InlineData(5)]
     [InlineData(6)]
+    [InlineData(7)]
     public void CompletionActionRequiresNegotiatedSupport(byte version)
     {
         using MemoryStream stream = new();
@@ -53,6 +57,7 @@ public sealed class TaskHostLifetimeProtocol_Tests
     [Theory]
     [InlineData(5, false)]
     [InlineData(6, true)]
+    [InlineData(7, true)]
     public void Clr4CompletionUsesVersionedLifetimeActions(byte version, bool extended)
     {
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
@@ -124,6 +129,144 @@ public sealed class TaskHostLifetimeProtocol_Tests
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ReusedConnectionWaitsForCleanupOrFailure(bool failConnection)
+    {
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream pipe = new();
+        using ManualResetEventSlim terminated = new();
+        NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+        NodeProviderOutOfProcBase.NodeContext context = new(
+            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
+            NodePacketTypeExtensions.PacketVersion, connectionPersistsAcrossBuilds: true);
+        TaskHostNodeKey key = new(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse, 1);
+        provider.NodeContextCreated(context, key);
+        Task shutdown = Task.Run(() => provider.ShutdownConnectedNodes(enableReuse: true));
+
+        try
+        {
+            pipe.PacketWritten.Wait(10_000).ShouldBeTrue();
+            shutdown.Wait(100).ShouldBeFalse("sending the reset is not proof that disposal finished");
+
+            if (failConnection)
+            {
+                pipe.CompleteRead();
+            }
+            else
+            {
+                provider.PacketReceived(1, new NodeBuildComplete(true, NodeBuildCompleteAction.ReuseWithConnection));
+            }
+
+            shutdown.Wait(10_000).ShouldBeTrue();
+            provider.ConnectedNodes.ContainsKey(key).ShouldBe(!failConnection);
+        }
+        finally
+        {
+            pipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            shutdown.Wait(10_000).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RetiredConnectionCannotAffectItsReplacement(bool previouslyReused)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+        ChangeWaves.ResetStateForTests();
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream pipe = new();
+        using ControlledReadStream replacementPipe = new();
+        using ManualResetEventSlim terminated = new();
+        using ManualResetEventSlim replacementTerminated = new();
+        NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+        HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, TaskHostParameters.Empty, nodeReuse: previouslyReused);
+        TaskHostNodeKey key = new(options, 1);
+        NodeProviderOutOfProcBase.NodeContext context = new(
+            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
+            NodePacketTypeExtensions.PacketVersion, options, previouslyReused);
+        NodeProviderOutOfProcBase.NodeContext replacement = new(
+            2, process, replacementPipe, provider, id => { provider.NodeContextTerminated(id); replacementTerminated.Set(); },
+            NodePacketTypeExtensions.PacketVersion, options, previouslyReused);
+        provider.NodeContextCreated(context, key);
+        RecordingHandler retiringHandler = new();
+        RecordingHandler replacementHandler = new();
+        provider.TryAttachTaskHandler(context, retiringHandler).ShouldBeTrue();
+        Task shutdown = Task.Run(() => provider.ShutdownConnectedNodes(enableReuse: false));
+        bool replacementReadStarted = false;
+
+        try
+        {
+            shutdown.Wait(10_000).ShouldBeTrue("retirement must not wait for the child's disposal");
+            pipe.PacketWritten.Wait(10_000).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+            provider.ConnectedNodes.ShouldBeEmpty();
+            provider.TryAttachTaskHandler(context, new RecordingHandler()).ShouldBeFalse();
+            provider.TaskHandlerRegistrationCount.ShouldBe(1, "an aborted task must still receive its connection's terminal notification");
+            retiringHandler.ShutdownCount.ShouldBe(0);
+
+            provider.NodeContextCreated(replacement, key);
+            replacementReadStarted = true;
+            provider.TryAttachTaskHandler(replacement, replacementHandler).ShouldBeTrue();
+            provider.PacketReceived(1, new NodeBuildComplete(true, NodeBuildCompleteAction.ReuseWithConnection));
+            provider.PacketReceived(1, new NodeShutdown(NodeShutdownReason.Requested));
+            pipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            provider.NodeContextTerminated(1);
+            retiringHandler.ShutdownCount.ShouldBe(1);
+            replacementHandler.ShutdownCount.ShouldBe(0);
+            provider.ConnectedNodes[key].ShouldBeSameAs(replacement);
+        }
+        finally
+        {
+            if (!replacementReadStarted)
+            {
+                replacement.BeginAsyncPacketRead();
+            }
+            pipe.CompleteRead();
+            replacementPipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            replacementTerminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+            replacement.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+    }
+
+    [Fact]
+    public void OlderTaskHostStillWaitsForShutdown()
+    {
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream pipe = new();
+        using ManualResetEventSlim terminated = new();
+        NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+        HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, TaskHostParameters.Empty, nodeReuse: false);
+        NodeProviderOutOfProcBase.NodeContext context = new(
+            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); }, 6, options);
+        provider.NodeContextCreated(context, new TaskHostNodeKey(options, 1));
+        Task shutdown = Task.Run(() => provider.ShutdownConnectedNodes(enableReuse: false));
+
+        try
+        {
+            pipe.PacketWritten.Wait(10_000).ShouldBeTrue();
+            shutdown.Wait(100).ShouldBeFalse();
+        }
+        finally
+        {
+            pipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            shutdown.Wait(10_000).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+    }
+
     private sealed class RecordingHandler : INodePacketHandler
     {
         public int ShutdownCount { get; private set; }
@@ -137,7 +280,10 @@ public sealed class TaskHostLifetimeProtocol_Tests
     private sealed class ControlledReadStream : MemoryStream
     {
         private readonly TaskCompletionSource<int> _read = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource<bool> _packetWritten = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public Task PacketWritten => _packetWritten.Task;
         public void CompleteRead() => _read.TrySetResult(0);
+        public override void Write(byte[] buffer, int offset, int count) => _packetWritten.TrySetResult(true);
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => _read.Task;
 #if NET
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) => new(_read.Task);

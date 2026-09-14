@@ -217,13 +217,16 @@ namespace Microsoft.Build.BackEnd
         /// different runtime or architecture remain pooled so other processes can use them.
         ///
         /// Behind <see cref="ChangeWaves.Wave18_12"/>: opting out pools every reusable task host.
-        /// Both endpoints must support explicit TaskHost lifetime actions. A legacy reuse flag
-        /// alone does not establish ownership.
+        /// Both endpoints must support cleanup acknowledgments. A legacy reuse flag alone does
+        /// not establish ownership.
         /// </remarks>
         protected override bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion)
+            => SupportsSidecarLifetime(handshakeOptions, negotiatedVersion)
+                && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
+
+        private static bool SupportsSidecarLifetime(HandshakeOptions handshakeOptions, byte negotiatedVersion)
             => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
-                && negotiatedVersion >= NodePacketTypeExtensions.TaskHostOwnershipMinVersion
-                && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse)
+                && negotiatedVersion >= NodePacketTypeExtensions.TaskHostCleanupMinVersion
                 && !ExistsOnlyForCompatibility(handshakeOptions);
 
         /// <summary>
@@ -283,30 +286,26 @@ namespace Microsoft.Build.BackEnd
             // across every build the process serves, so this would otherwise accumulate.
             ClearProcessesToIgnore();
 
-            // Task hosts do not share the worker node send loop. A worker node treats "not reused"
-            // as "about to exit" and waits for the process to go away; a pooled task host does not
-            // exit, it disconnects and goes back to listening, so waiting for it would burn the full
-            // exit timeout on every build.
-            bool anyNodeWillDisconnect = false;
+            bool waitForCleanup = false;
 
-            // Register idle connections for retirement before sending a terminal packet.
+            // Retire terminal sidecars before sending shutdown, so a new build cannot acquire them.
             lock (_activeNodes)
             {
                 foreach (NodeContext context in contextsToShutDown)
                 {
-                    if (!_nodeIdToNodeKey.ContainsKey(context.NodeId))
+                    if (!_nodeIdToNodeKey.TryGetValue(context.NodeId, out TaskHostNodeKey nodeKey))
                     {
                         continue;
                     }
 
-                    if (enableReuse && context.ConnectionPersistsAcrossBuilds)
+                    if (!enableReuse && SupportsSidecarLifetime(nodeKey.HandshakeOptions, context.NegotiatedPacketVersion))
                     {
-                        _activeNodes.Remove(context.NodeId);
+                        RetireNode(context.NodeId);
                     }
                     else
                     {
                         _activeNodes.Add(context.NodeId);
-                        anyNodeWillDisconnect = true;
+                        waitForCleanup = true;
                     }
                 }
 
@@ -330,7 +329,7 @@ namespace Microsoft.Build.BackEnd
                 context.SendData(new NodeBuildComplete(enableReuse, action));
             }
 
-            if (anyNodeWillDisconnect)
+            if (waitForCleanup)
             {
                 _noNodesActiveEvent.WaitOne();
             }
@@ -402,6 +401,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
 
             // Register callback request packet types so we can deserialize them when
             // they arrive from TaskHost processes. These are forwarded to the current
@@ -493,6 +493,21 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
+            if (packet is NodeBuildComplete buildComplete)
+            {
+                Assumed.True(buildComplete.PrepareForReuse);
+                Assumed.Equal(buildComplete.Action, NodeBuildCompleteAction.ReuseWithConnection);
+                lock (_activeNodes)
+                {
+                    _activeNodes.Remove(node);
+                    if (_activeNodes.Count == 0)
+                    {
+                        _noNodesActiveEvent.Set();
+                    }
+                }
+                return;
+            }
+
             if (packet.Type == NodePacketType.NodeShutdown)
             {
                 INodePacketHandler[] handlers = [];
@@ -1108,11 +1123,20 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_activeNodes)
             {
+                RetireNode(nodeId);
+                _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
+            }
+        }
+
+        // Stop acquisition and shutdown waits, but keep handlers until the connection notifies them.
+        private void RetireNode(int nodeId)
+        {
+            lock (_activeNodes)
+            {
                 if (_nodeIdToNodeKey.TryRemove(nodeId, out TaskHostNodeKey nodeKey))
                 {
                     _nodeContexts.TryRemove(nodeKey, out _);
                 }
-                _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
                 _activeNodes.Remove(nodeId);
 
                 if (_activeNodes.Count == 0)

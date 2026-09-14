@@ -1399,6 +1399,10 @@ namespace Microsoft.Build.CommandLine
                 // The parent gates ownership on its change wave. A pooled child may have been
                 // launched under a different wave, so its cached wave cannot override this action.
                 PrepareForNextBuild();
+                if (_nodeEndpoint.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskHostCleanupMinVersion)
+                {
+                    _nodeEndpoint.SendData(buildComplete);
+                }
                 return;
             }
 

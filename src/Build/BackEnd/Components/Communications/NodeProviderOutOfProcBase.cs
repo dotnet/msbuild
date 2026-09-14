@@ -1129,6 +1129,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public bool ConnectionPersistsAcrossBuilds => _connectionPersistsAcrossBuilds;
 
+            internal byte NegotiatedPacketVersion => _negotiatedPacketVersion;
+
             internal bool WaitForSendCompletion(int millisecondsTimeout) => _drainPacketQueueThread.Join(millisecondsTimeout);
 
             /// <summary>

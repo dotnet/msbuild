@@ -375,7 +375,7 @@ public sealed class HostingLifetimeProbe : Microsoft.Build.Utilities.Task
         child.ShouldNotBeNull().WaitForExit(10_000).ShouldBeTrue();
     }
 
-    private sealed class RetainingWorkerProvider : NodeProviderOutOfProc
+    internal sealed class RetainingWorkerProvider : NodeProviderOutOfProc
     {
         protected override int GetNodeReuseThreshold() => int.MaxValue;
     }
