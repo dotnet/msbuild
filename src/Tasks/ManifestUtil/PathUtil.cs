@@ -165,7 +165,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static bool IsPEFile(string path)
         {
             byte[] buffer = new byte[2];
+            // TODO: Native manifest references can remain drive-relative after Manifest.ResolvePath.
+            // Tracked by https://github.com/dotnet/msbuild/issues/13196.
+#pragma warning disable MSBuildTask0005
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+#pragma warning restore MSBuildTask0005
             {
                 s.ReadExactly(buffer, 0, 2);
             }

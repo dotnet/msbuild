@@ -641,6 +641,10 @@ Its warnings are not demoted through `WarningsNotAsErrors`, so under `/warnaserr
 passes in CI) a new finding breaks the build. Suppress a verified safe use at the call site with
 `#pragma warning disable`, and always state in the comment which invariant makes that call safe.
 
+Existing unresolved findings are baselined separately with narrow call-site pragmas and `TODO`
+comments describing the unsafe behavior or unverified safety assumption. These suppressions
+keep builds working; they do not fix the underlying issues or establish that the calls are MT-safe.
+
 ## Example
 
 **Before** (unsafe):

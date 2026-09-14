@@ -145,7 +145,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         try
                         {
+                            // TODO: XML identity names can override logPath with a drive-relative path or collide across projects.
+                            // Known opt-in VSPLOG risk: https://github.com/dotnet/msbuild/issues/13645.
+#pragma warning disable MSBuildTask0005
                             File.Copy(temp, Path.Combine(Util.logPath, n + ".trust-file.xml"), true);
+#pragma warning restore MSBuildTask0005
                         }
                         catch (IOException)
                         {
