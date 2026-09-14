@@ -365,7 +365,14 @@ internal sealed partial class CoordinatorClient : IDisposable
                     Assumed.Equal(grantOwnership, GrantOwnership.Root, "Nested coordinator grant joins should not wait for global resources.");
 
                     output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
-                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
+
+                    loggingService?.LogBuildEvent(new Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs(
+                        AssemblyResources.GetString("CoordinatorWaitingForNodes"),
+                        senderName: "MSBuild",
+                        MessageImportance.High)
+                    {
+                        BuildEventContext = BuildEventContext.Invalid,
+                    });
 
                     CoordinatorClient? deferredClient = WaitForDeferredGrant(connection, settings, output, loggingService);
                     if (deferredClient is not null)

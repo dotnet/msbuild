@@ -12,6 +12,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -365,6 +366,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             }
+        }
+
+        [Fact]
+        public void CoordinatorWaitingForNodesEventRoundTripsAsExtendedMessage()
+        {
+            BuildEventContext context = new BuildEventContext(1, 2, 3, 4, 5, 6, 7);
+            var buildEvent = new Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs(
+                "Waiting for coordinator.",
+                "MSBuild",
+                MessageImportance.High)
+            {
+                BuildEventContext = context,
+                ExtendedData = "data",
+                ExtendedMetadata = new Dictionary<string, string> { ["key"] = "value" },
+            };
+
+            LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, buildEvent));
+            ((ITranslatable)packet).Translate(TranslationHelpers.GetWriteTranslator());
+
+            LogMessagePacket deserializedPacket = (LogMessagePacket)LogMessagePacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            ExtendedBuildMessageEventArgs deserializedEvent = deserializedPacket.NodeBuildEvent.Value.Value.ShouldBeOfType<ExtendedBuildMessageEventArgs>();
+
+            deserializedEvent.Message.ShouldBe(buildEvent.Message);
+            deserializedEvent.SenderName.ShouldBe(buildEvent.SenderName);
+            deserializedEvent.Importance.ShouldBe(buildEvent.Importance);
+            deserializedEvent.BuildEventContext.ShouldBe(context);
+            deserializedEvent.ExtendedType.ShouldBe(Microsoft.Build.Framework.Coordinator.Constants.WaitingForNodesEventType);
+            deserializedEvent.ExtendedData.ShouldBe(buildEvent.ExtendedData);
+            deserializedEvent.ExtendedMetadata.ShouldBe(buildEvent.ExtendedMetadata);
         }
 
         /// <summary>
