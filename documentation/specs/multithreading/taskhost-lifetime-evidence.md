@@ -95,6 +95,12 @@ The final focused engine tests, including configuration/result serialization and
 
 Released MSBuild 18.9.6 also passed protocol **4 -> 7** reconnection with TaskHost **34144**, and **7 -> 4** with TaskHost **2116**. Each pair reused one child and observed the changed environment value on the second build. Records are `cleanup-protocol4-to7` and `cleanup-protocol7-to4` in the session's `files\lifetime-e2e` directory.
 
+### Worker coverage consolidation
+
+The older `HostedSidecarsExitWhenTheirOwnerReleasesThem("worker-shutdown")` duplicated the worker case above, but only controlled the parent-side process-count threshold. A Unix worker can independently decline reuse when its inherited priority does not match its handshake. That fixture did not record the priority or shutdown reason, so its macOS failures did not establish why the worker exited.
+
+Worker identity and exit assertions now live in `EndBuildWaitsForDisposalOnlyWhenReusing`. It sets matching low priority for the launcher and worker, verifies and logs the worker's actual priority, pins the retention threshold, and requires the same worker and sidecar PIDs across builds. It also requires both to exit after shutdown. The duplicate scenario and its helper were removed; the lifetime assertions were retained.
+
 ## Limits and remaining validation
 
 - The first full Release run inherited `MSBUILDDISABLENODEREUSE=1`; tests requiring reuse failed. Removing that override restored the server and coexistence tests. The portable-task test also needs desktop `MSBuild.exe` on `PATH`; it passed when that prerequisite was supplied.

@@ -74,7 +74,6 @@ public sealed class TaskHostOwnerLifetime_Tests(ITestOutputHelper output)
     [InlineData("dispose")]
     [InlineData("reuse-off")]
     [InlineData("shutdown-all")]
-    [InlineData("worker-shutdown")]
     [InlineData("active-shutdown")]
     [InlineData("active-child-crash")]
     public void HostedSidecarsExitWhenTheirOwnerReleasesThem(string scenario)
@@ -128,15 +127,8 @@ public sealed class HostingLifetimeProbe : Microsoft.Build.Utilities.Task
     {
         using Process owner = Process.GetCurrentProcess();
         List<Process> children = [];
-        string? originalForceOutOfProc = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
         try
         {
-            bool useWorker = Scenario == "worker-shutdown";
-            if (useWorker)
-            {
-                Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
-            }
-
             for (int round = 0; round < 3; round++)
             {
                 if (Scenario is "active-shutdown" or "active-child-crash")
@@ -144,12 +136,6 @@ public sealed class HostingLifetimeProbe : Microsoft.Build.Utilities.Task
                     RunActiveScenario(children);
                     continue;
                 }
-                if (useWorker)
-                {
-                RunWorkerScenario(children);
-                continue;
-                }
-
                 Process child;
                 using (BuildManager manager = new())
                 {
@@ -195,7 +181,6 @@ public sealed class HostingLifetimeProbe : Microsoft.Build.Utilities.Task
                             .OverallResult.ShouldBe(BuildResultCode.Success);
                         break;
                     case "shutdown-all":
-                    case "worker-shutdown":
                         manager.ShutdownAllNodes();
                         break;
                     default:
@@ -220,7 +205,6 @@ public sealed class HostingLifetimeProbe : Microsoft.Build.Utilities.Task
         }
         finally
         {
-            Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalForceOutOfProc);
             foreach (Process child in children)
             {
                 if (!child.HasExited)
@@ -229,95 +213,6 @@ public sealed class HostingLifetimeProbe : Microsoft.Build.Utilities.Task
                     child.WaitForExit();
                 }
                 child.Dispose();
-            }
-        }
-    }
-
-    private void RunWorkerScenario(List<Process> children)
-    {
-        using BuildManager manager = new();
-        ((IBuildComponentHost)manager).RegisterFactory(
-            BuildComponentType.OutOfProcNodeProvider, _ => new RetainingWorkerProvider());
-        MockLogger logger = new();
-        BuildParameters parameters = new()
-        {
-            MultiThreaded = false,
-            DisableInProcNode = true,
-            MaxNodeCount = 1,
-            EnableNodeReuse = true,
-            Loggers = [logger]
-        };
-        Process? worker = null;
-        Process? child = null;
-        try
-        {
-            for (int build = 0; build < 2; build++)
-            {
-                string readyFile = Path.Combine(Path.GetDirectoryName(Project)!, Guid.NewGuid().ToString("N") + ".ready");
-                string releaseFile = readyFile + ".release";
-                manager.BeginBuild(parameters);
-                try
-                {
-                    BuildSubmission submission = manager.PendBuildRequest(new BuildRequestData(
-                        Project, new Dictionary<string, string?> { ["ReadyFile"] = readyFile, ["ReleaseFile"] = releaseFile }, null, ["Hold"], null));
-                    submission.ExecuteAsync(null, null);
-                    SpinWait.SpinUntil(() => File.Exists(readyFile) || submission.WaitHandle.WaitOne(0), 30_000).ShouldBeTrue();
-                    File.Exists(readyFile).ShouldBeTrue("the task must be active before observing its processes");
-                    using FileStream readyStream = new(readyFile, FileMode.Open, System.IO.FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                    using StreamReader readyReader = new(readyStream);
-                    int childPid = int.Parse(readyReader.ReadToEnd(), CultureInfo.InvariantCulture);
-                    if (child is null)
-                    {
-                        child = Process.GetProcessById(childPid);
-                        children.Add(child);
-                    }
-                    else
-                    {
-                        childPid.ShouldBe(child.Id, "the recreated worker node must retain its sidecar provider");
-                    }
-
-                    foreach (Process process in manager.GetWorkerProcesses())
-                    {
-                        if (worker is null)
-                        {
-                            worker = Process.GetProcessById(process.Id);
-                        }
-                        else
-                        {
-                            process.Id.ShouldBe(worker.Id);
-                        }
-                    }
-                    worker.ShouldNotBeNull();
-                    Log.LogMessage(MessageImportance.High, "HostedSidecar Owner={0} Child={1} Scenario=worker-shutdown Build={2}", worker.Id, childPid, build);
-                    File.WriteAllText(releaseFile, "release");
-                    submission.WaitHandle.WaitOne(30_000).ShouldBeTrue();
-                    submission.BuildResult.ShouldNotBeNull().OverallResult.ShouldBe(BuildResultCode.Success);
-                }
-                finally
-                {
-                    File.WriteAllText(releaseFile, "release");
-                    manager.EndBuild();
-                }
-
-                worker.ShouldNotBeNull();
-                worker.HasExited.ShouldBeFalse("this scenario pins worker reuse independently of machine-wide process counts");
-            }
-
-            manager.ShutdownAllNodes();
-            Log.LogMessage(MessageImportance.High, "WorkerRetainedAfterBuild=True");
-            worker!.WaitForExit(10_000).ShouldBeTrue();
-            child!.WaitForExit(10_000).ShouldBeTrue("the sidecar must exit when its worker exits");
-        }
-        finally
-        {
-            if (worker is not null)
-            {
-                if (!worker.HasExited)
-                {
-                    worker.Kill();
-                    worker.WaitForExit();
-                }
-                worker.Dispose();
             }
         }
     }
@@ -373,11 +268,6 @@ public sealed class HostingLifetimeProbe : Microsoft.Build.Utilities.Task
         }
 
         child.ShouldNotBeNull().WaitForExit(10_000).ShouldBeTrue();
-    }
-
-    internal sealed class RetainingWorkerProvider : NodeProviderOutOfProc
-    {
-        protected override int GetNodeReuseThreshold() => int.MaxValue;
     }
 }
 

@@ -93,7 +93,7 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
         if (UseWorker)
         {
             ((IBuildComponentHost)manager).RegisterFactory(
-                BuildComponentType.OutOfProcNodeProvider, _ => new HostingLifetimeProbe.RetainingWorkerProvider());
+                BuildComponentType.OutOfProcNodeProvider, _ => new RetainingWorkerProvider());
         }
         MockLogger logger = new();
         BuildParameters parameters = new()
@@ -107,6 +107,7 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
         };
         Task? endBuild = null;
         Process? child = null;
+        Process? worker = null;
         bool buildStarted = false;
         bool shutdownRequested = false;
         try
@@ -116,6 +117,13 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
             BuildResult result = manager.PendBuildRequest(CreateRequest(registerObject: true)).Execute();
             result.OverallResult.ShouldBe(BuildResultCode.Success, logger.FullLog);
             child = Process.GetProcessById(int.Parse(result.ResultsByTarget["Build"].Items[0].ItemSpec, CultureInfo.InvariantCulture));
+            if (UseWorker)
+            {
+                worker = Process.GetProcessById(manager.GetWorkerProcesses().ShouldHaveSingleItem().Id);
+                Log.LogMessage(MessageImportance.High, "WorkerPid={0}; WorkerPriority={1}; RequestedLowPriority={2}",
+                    worker.Id, worker.PriorityClass, parameters.LowPriority);
+                worker.PriorityClass.ShouldBe(ProcessPriorityClass.BelowNormal, "the worker's actual priority must match its reuse handshake");
+            }
             endBuild = Task.Run(manager.EndBuild);
 
             SpinWait.SpinUntil(() => File.Exists(Gate + ".entered") || endBuild.IsFaulted, 30_000).ShouldBeTrue();
@@ -145,16 +153,30 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
 
             if (Reuse && !CrashDuringCleanup)
             {
-                BuildResult next = manager.Build(parameters, CreateRequest(registerObject: false));
+                worker?.HasExited.ShouldBeFalse("the worker must remain available for the next build");
+                manager.BeginBuild(parameters);
+                buildStarted = true;
+                endBuild = null;
+                BuildResult next = manager.PendBuildRequest(CreateRequest(registerObject: false)).Execute();
                 next.OverallResult.ShouldBe(BuildResultCode.Success, logger.FullLog);
                 next.ResultsByTarget["Build"].Items[0].ItemSpec.ShouldBe(child.Id.ToString(CultureInfo.InvariantCulture));
+                if (worker is not null)
+                {
+                    manager.GetWorkerProcesses().ShouldHaveSingleItem().Id.ShouldBe(worker.Id, "the recreated node must use the same worker process");
+                }
+                manager.EndBuild();
+                buildStarted = false;
+                worker?.HasExited.ShouldBeFalse("the reused worker must stay alive until shutdown");
+                child.HasExited.ShouldBeFalse("the reused sidecar must stay alive with its owner");
             }
 
             manager.ShutdownAllNodes();
             shutdownRequested = true;
             manager.Dispose();
+            worker?.WaitForExit(10_000).ShouldBeTrue("the worker must exit when shutdown is requested");
             child.WaitForExit(10_000).ShouldBeTrue("the sidecar must still exit after asynchronous retirement");
-            Log.LogMessage(MessageImportance.High, "CleanupPolicyVerified Reuse={0} Worker={1} Crash={2}", Reuse, UseWorker, CrashDuringCleanup);
+            Log.LogMessage(MessageImportance.High, "CleanupPolicyVerified Reuse={0} Worker={1} Crash={2} WorkerPid={3} SidecarPid={4}",
+                Reuse, UseWorker, CrashDuringCleanup, worker?.Id, child.Id);
             return true;
         }
         finally
@@ -187,6 +209,15 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
                     }
                     child.Dispose();
                 }
+                if (worker is not null)
+                {
+                    if (!worker.HasExited)
+                    {
+                        worker.Kill();
+                        worker.WaitForExit();
+                    }
+                    worker.Dispose();
+                }
             }
         }
     }
@@ -201,6 +232,11 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
         null,
         ["Build"],
         null);
+
+    private sealed class RetainingWorkerProvider : NodeProviderOutOfProc
+    {
+        protected override int GetNodeReuseThreshold() => int.MaxValue;
+    }
 }
 
 public sealed class RegisterGatedTaskObject : Microsoft.Build.Utilities.Task
