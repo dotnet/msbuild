@@ -2016,6 +2016,7 @@ $@"
                 </Project>
                 """);
 
+            // Graph-layer test only; duplicate references may fail for other reasons in a full build.
             string outerReference = $"""<ProjectReference Include="{child.Path}"{outerTargetsMetadata} />""";
             string explicitReference = $"""
                 <ProjectReference Include="{child.Path}"
