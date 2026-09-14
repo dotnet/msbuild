@@ -19,16 +19,19 @@ By default, MT migration rules MSBuildTask0002 and MSBuildTask0003 apply only to
 MT-scoped code includes these types:
 
 - A task with `[MSBuildMultiThreadableTask]` applied directly.
+- A task that declares `IMultiThreadableTask` in its own base list.
 - A helper with `[MSBuildMultiThreadableTaskAnalyzed]` applied directly.
 - A source base class that contributes implementation code to one of these tasks.
 
-`IMultiThreadableTask` only enables `TaskEnvironment` injection. It does not route a task to the MT environment and does not enable MT migration rules by itself.
+A **directly declared** `IMultiThreadableTask` is an *analyzer* signal of migration intent only. It does not change runtime routing: `[MSBuildMultiThreadableTask]` remains the attribute that routes a task to the MT environment, and `IMultiThreadableTask` on its own only enables `TaskEnvironment` injection.
+
+Inheriting `IMultiThreadableTask` from a base class does not make a task MT-scoped. `ToolTask` implements the interface, so every `ToolTask`-derived task in the ecosystem satisfies it without its author having declared anything. Detection therefore inspects the interfaces declared directly on the task (`INamedTypeSymbol.Interfaces`), never the inherited set (`AllInterfaces`).
 
 ### Default rule matrix
 
 | ID | Rule | Default state | Severity | Reported for by default |
 |---|---|---|---|---|
-| **MSBuildTask0001** | API is never safe in an MSBuild task | Enabled | Error | All task implementations and MT-scoped helpers |
+| **MSBuildTask0001** | API is never safe in an MSBuild task | Enabled | Info | All task implementations and MT-scoped helpers |
 | **MSBuildTask0002** | API requires a `TaskEnvironment` alternative | Enabled | Warning | MT-scoped code only |
 | **MSBuildTask0003** | File system API requires an absolute path | Enabled | Warning | MT-scoped code only |
 | **MSBuildTask0004** | API requires review for MT execution | Enabled | Warning | All task implementations and MT-scoped helpers |
@@ -36,8 +39,8 @@ MT-scoped code includes these types:
 | **MSBuildTask0006** | Prefer a typed path property | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
 | **MSBuildTask0007** | Prefer `ITaskItem<T>` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
 | **MSBuildTask0008** | Initialize a relative path default in `Execute()` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
-| **MSBuildTask0009** | `ITaskItem<T>` uses an unsupported type | Enabled | Warning | All task implementations that use an unsupported `ITaskItem<T>` type |
-| **MSBuildTask0010** | `ITaskItem<T>` uses culture-sensitive conversion | Enabled | Warning | All task implementations that use culture-sensitive `ITaskItem<T>` conversion |
+| **MSBuildTask0009** | `ITaskItem<T>` uses an unsupported type | Enabled | Info | All task implementations that use an unsupported `ITaskItem<T>` type |
+| **MSBuildTask0010** | `ITaskItem<T>` uses culture-sensitive conversion | Enabled | Info | All task implementations that use culture-sensitive `ITaskItem<T>` conversion |
 | **MSBuildTask0011** | Prefer `TaskEnvironment` constructor injection | Enabled | Info | Concrete `IMultiThreadableTask` implementations without constructor injection |
 | **MSBuildTask0012** | MSBuild does not assign the `TaskEnvironment` property | Enabled | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` and an unassigned `TaskEnvironment` property |
 | **MSBuildTask0013** | The task does not have `[MSBuildMultiThreadableTask]` | **Disabled** | Info | Concrete tasks that declare `IMultiThreadableTask` directly but do not have `[MSBuildMultiThreadableTask]` |
@@ -105,9 +108,9 @@ The migration option and severity configuration have different purposes:
 
 ## Diagnostic Rule Details
 
-### MSBuildTask0001 — Critical: No Safe Alternative
+### MSBuildTask0001 — No Safe Alternative
 
-These APIs affect the entire process or interfere with build infrastructure. They are **errors** and should never appear in any MSBuild task.
+These APIs affect the entire process or interfere with build infrastructure and should never appear in any MSBuild task. The rule defaults to Info to avoid breaking builds that consume a newer analyzer package. Repositories can enforce it as a warning or error through `dotnet_diagnostic.MSBuildTask0001.severity`.
 
 | API | Why it's banned |
 |---|---|
@@ -358,19 +361,19 @@ For a reference-typed target (`FileInfo`/`DirectoryInfo`) the guard is a null-co
 
 ### MSBuildTask0009 — Unsupported `ITaskItem<T>` Type Argument
 
-When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, a **Warning** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
+When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, an **Info** diagnostic is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter. Raise the rule with `dotnet_diagnostic.MSBuildTask0009.severity = warning` to have it break a `TreatWarningsAsErrors` build.
 
 **Directly parsed type arguments:** `string`, `bool`, `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
 
 The binder also accepts `char`, numeric primitives, `decimal`, and `DateTime`, but MSBuildTask0010 rejects those types because they rely on `Convert.ChangeType`.
 
 ```csharp
-// ⚠️ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
+// ℹ️ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
 public class MyTask : Task
 {
-    public ITaskItem<System.Guid> Id { get; set; }       // warning
-    public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
-    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 warning
+    public ITaskItem<System.Guid> Id { get; set; }       // MSBuildTask0009
+    public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // MSBuildTask0009
+    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010
 }
 ```
 
@@ -380,13 +383,13 @@ No code fix is offered for MSBuildTask0009 — the resolution depends on the int
 
 ### MSBuildTask0010 — Culture-Sensitive `ITaskItem<T>` Conversion
 
-MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports a **Warning** whenever one of these types is used.
+MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports an **Info** diagnostic whenever one of these types is used. Raise the rule with `dotnet_diagnostic.MSBuildTask0010.severity = warning` when a codebase wants it enforced.
 
 ```csharp
 public class MyTask : Task
 {
-    public ITaskItem<int> Count { get; set; }       // warning
-    public ITaskItem<DateTime>[] Dates { get; set; } // warning
+    public ITaskItem<int> Count { get; set; }       // MSBuildTask0010
+    public ITaskItem<DateTime>[] Dates { get; set; } // MSBuildTask0010
 }
 ```
 
@@ -520,19 +523,20 @@ A concrete task that MSBuild cannot construct — no public parameterless constr
 
 See [Default Rules and Configuration](#default-rules-and-configuration) for the default-state matrix and copy-ready configuration.
 
-By default, MT migration warnings do not affect regular tasks. The analyzer recognizes `[MSBuildMultiThreadableTask]` as the task routing opt-in and `[MSBuildMultiThreadableTaskAnalyzed]` as an analyzer-only opt-in.
+By default, MT migration warnings do not affect regular tasks. The analyzer recognizes `[MSBuildMultiThreadableTask]` as the task routing opt-in, `[MSBuildMultiThreadableTaskAnalyzed]` as an analyzer-only opt-in, and a directly declared `IMultiThreadableTask` interface as a declaration of migration intent. Only the attribute affects runtime routing; the other two signals are read by the analyzer alone.
 
 | Type | Rules Applied |
 |---|---|
 | Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations |
 | Concrete `ITask` class with `[MSBuildMultiThreadableTask]` applied directly | MSBuildTask0001–MSBuildTask0010; MSBuildTask0011 and MSBuildTask0012 apply only when their conditions match |
-| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0011, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations; MSBuildTask0013 is available but disabled by default |
+| Class that declares `IMultiThreadableTask` directly, without the attribute | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0011; MSBuildTask0006–MSBuildTask0008 still require the attribute, and MSBuildTask0013 is available but disabled by default |
+| Class that only inherits `IMultiThreadableTask` from a base class | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0011, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations — inheriting the interface is not migration intent |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` | Direct MSBuildTask0001–MSBuildTask0004 analysis; MSBuildTask0005 reports only when a task reaches the helper |
 | Regular class (no task interface or attribute) | Not analyzed |
 | Class with `[MSBuildMultiThreadableTask]` that does not implement `ITask` | MSBuildTask0014 |
 | Abstract class with `[MSBuildMultiThreadableTask]` | MSBuildTask0014 |
 
-Base classes of an `ITask` with `[MSBuildMultiThreadableTask]` or `[MSBuildMultiThreadableTaskAnalyzed]` applied directly are analyzed as part of that task's implementation.
+Base classes of an `ITask` that is MT-scoped — through `[MSBuildMultiThreadableTask]`, `[MSBuildMultiThreadableTaskAnalyzed]`, or a directly declared `IMultiThreadableTask` — are analyzed as part of that task's implementation.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
@@ -542,9 +546,9 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 ### Severity Levels
 
-- **MSBuildTask0001** has a default severity of **Error**. These APIs are never safe in an MSBuild task.
-- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, MSBuildTask0010, MSBuildTask0012, and MSBuildTask0014** have a default severity of **Warning**.
-- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** have a default severity of **Info**.
+- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0012, and MSBuildTask0014** have a default severity of **Warning**.
+- **MSBuildTask0001 and MSBuildTask0006–MSBuildTask0011** have a default severity of **Info**. MSBuildTask0001, MSBuildTask0009, and MSBuildTask0010 default to **Info** rather than a stronger severity to avoid breaking builds that consume a newer analyzer package.
+- Any of these defaults can be raised or lowered with `dotnet_diagnostic.<ID>.severity` in an .editorconfig.
 - **MSBuildTask0013** has a severity of **Info**, but the rule is disabled by default.
 
 ## Code Fixes
