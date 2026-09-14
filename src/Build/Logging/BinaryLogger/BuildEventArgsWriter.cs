@@ -98,7 +98,7 @@ namespace Microsoft.Build.Logging
         private readonly Dictionary<HashKey, int> nameValueListHashes = new Dictionary<HashKey, int>();
 
         /// <summary>
-        /// Avoid repeatedly enumerating and hashing metadata dictionaries shared through copy-on-write item clones.
+        /// Avoid repeatedly enumerating and hashing metadata dictionaries shared across items (because they're copy-on-write and frequently unmodified).
         /// </summary>
         private readonly ConditionalWeakTable<ImmutableDictionary<string, string>, StrongBox<int>> metadataRecordIds =
             new ConditionalWeakTable<ImmutableDictionary<string, string>, StrongBox<int>>();
