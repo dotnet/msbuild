@@ -38,8 +38,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 enabled;
         }
 
+        /// <summary>
+        /// Reports whether the type opts into MT migration analysis, through
+        /// <c>[MSBuildMultiThreadableTask]</c>, <c>[MSBuildMultiThreadableTaskAnalyzed]</c>, or by declaring
+        /// <c>IMultiThreadableTask</c> in its own base list.
+        /// <para>
+        /// The declared interface is a migration-intent signal for the analyzer only. It does not change
+        /// runtime routing: <c>[MSBuildMultiThreadableTask]</c> remains the attribute that routes a task to
+        /// the MT environment.
+        /// </para>
+        /// </summary>
         internal static bool IsMtAnalysisOptIn(
             INamedTypeSymbol type,
+            INamedTypeSymbol? multiThreadableTaskType,
             out bool hasAnalyzedAttribute)
         {
             bool hasMultiThreadableAttribute = false;
@@ -66,18 +77,53 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return hasMultiThreadableAttribute ||
-                hasAnalyzedAttribute;
+                hasAnalyzedAttribute ||
+                DeclaresMultiThreadableTaskInterface(type, multiThreadableTaskType);
+        }
+
+        /// <summary>
+        /// Reports whether the type opts into <c>IMultiThreadableTask</c> in its own base list, rather
+        /// than merely inheriting it.
+        /// <para>
+        /// <c>ToolTask</c> implements <c>IMultiThreadableTask</c>, so every <c>ToolTask</c>-derived task in
+        /// the ecosystem satisfies the interface without its author having declared anything. Treating an
+        /// inherited implementation as intent would report thousands of untouched tasks, which is the same
+        /// reason <c>TaskRouter</c> cannot use the interface as a routing signal. Detection therefore
+        /// inspects <see cref="INamedTypeSymbol.Interfaces"/> and never
+        /// <see cref="INamedTypeSymbol.AllInterfaces"/>.
+        /// </para>
+        /// </summary>
+        internal static bool DeclaresMultiThreadableTaskInterface(
+            INamedTypeSymbol type,
+            INamedTypeSymbol? multiThreadableTaskType)
+        {
+            if (multiThreadableTaskType is null)
+            {
+                return false;
+            }
+
+            foreach (INamedTypeSymbol declaredInterface in type.Interfaces)
+            {
+                if (SymbolEqualityComparer.Default.Equals(declaredInterface.OriginalDefinition, multiThreadableTaskType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         internal static bool IsDirectlyAnalyzedType(
             INamedTypeSymbol type,
             INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? multiThreadableTaskType,
             ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
             out bool analyzeAsMultiThreadable)
         {
             bool isTask = ImplementsInterface(type, iTaskType);
             bool hasMultiThreadableOptIn = IsMtAnalysisOptIn(
                 type,
+                multiThreadableTaskType,
                 out bool hasAnalyzedAttribute);
             bool contributesToMultiThreadableTask =
                 contributingMultiThreadableTaskBaseTypes.Contains(type.OriginalDefinition);
@@ -88,20 +134,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         internal static ImmutableHashSet<INamedTypeSymbol> FindContributingMultiThreadableTaskBaseTypes(
             Compilation compilation,
-            INamedTypeSymbol iTaskType)
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? multiThreadableTaskType)
         {
             var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             CollectContributingMultiThreadableTaskBaseTypes(
                 compilation.Assembly.GlobalNamespace,
                 builder,
-                iTaskType);
+                iTaskType,
+                multiThreadableTaskType);
             return builder.ToImmutable();
         }
 
         private static void CollectContributingMultiThreadableTaskBaseTypes(
             INamespaceOrTypeSymbol container,
             ImmutableHashSet<INamedTypeSymbol>.Builder result,
-            INamedTypeSymbol iTaskType)
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? multiThreadableTaskType)
         {
             foreach (ISymbol member in container.GetMembers())
             {
@@ -110,7 +159,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     CollectContributingMultiThreadableTaskBaseTypes(
                         childNamespace,
                         result,
-                        iTaskType);
+                        iTaskType,
+                        multiThreadableTaskType);
                     continue;
                 }
 
@@ -122,6 +172,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 if (ImplementsInterface(type, iTaskType) &&
                     IsMtAnalysisOptIn(
                         type,
+                        multiThreadableTaskType,
                         out bool hasAnalyzedAttribute) &&
                     (!type.IsAbstract || hasAnalyzedAttribute))
                 {
@@ -136,7 +187,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 CollectContributingMultiThreadableTaskBaseTypes(
                     type,
                     result,
-                    iTaskType);
+                    iTaskType,
+                    multiThreadableTaskType);
             }
         }
 
