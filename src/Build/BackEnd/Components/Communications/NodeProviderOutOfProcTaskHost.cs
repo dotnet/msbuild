@@ -132,6 +132,8 @@ namespace Microsoft.Build.BackEnd
 
         private readonly LockType _consoleForwardingLock = new();
 
+        private bool _consoleOutputForwarded;
+
         private bool _isShutDown;
 
         /// <summary>
@@ -178,6 +180,17 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 throw new NotImplementedException("This property is not implemented because available nodes are unlimited.");
+            }
+        }
+
+        internal bool ConsoleOutputForwarded
+        {
+            get
+            {
+                lock (_consoleForwardingLock)
+                {
+                    return _consoleOutputForwarded;
+                }
             }
         }
 
@@ -405,6 +418,7 @@ namespace Microsoft.Build.BackEnd
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
             _consoleForwardingNodeIds = [];
+            _consoleOutputForwarded = false;
             _activeNodes = [];
             _nextNodeId = 0;
             _isShutDown = false;
@@ -451,6 +465,7 @@ namespace Microsoft.Build.BackEnd
             lock (_consoleForwardingLock)
             {
                 _consoleForwardingNodeIds.Clear();
+                _consoleOutputForwarded = false;
             }
         }
 
@@ -587,6 +602,8 @@ namespace Microsoft.Build.BackEnd
                                 InternalError.Throw($"Unexpected console output type {consoleWrite.OutputType}");
                                 break;
                         }
+
+                        _consoleOutputForwarded |= !string.IsNullOrEmpty(consoleWrite.Text);
                     }
                 }
 
