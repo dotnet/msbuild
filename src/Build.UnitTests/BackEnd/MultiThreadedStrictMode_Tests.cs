@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 logger.AssertNoErrors();
                 logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
                 MultiThreadedStrictModeScope.ActiveScope.ShouldBeSameAs(scope);
-                scope.DetectViolations().UnresolvedPathWrites.ShouldBe("late-output.txt");
+                scope.DetectUnresolvedPathWrites().ShouldBe("late-output.txt");
             }
             finally
             {
@@ -425,9 +425,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             scope.SentinelDirectory.ShouldBe(installedDirectory);
             var otherSnapshot = MultiThreadedStrictModeScope.CaptureCurrentDirectory();
-            var violations = scope.DetectViolations();
-            violations.UnexpectedCurrentDirectory.ShouldBe(changedDirectory);
-            violations.UnresolvedPathWrites.ShouldBeNull();
+            scope.DetectCurrentDirectoryViolation().ShouldBe(changedDirectory);
+            scope.DetectUnresolvedPathWrites().ShouldBeNull();
             File.ReadAllText(protectedFile.Path).ShouldBe("must not be deleted");
             otherSnapshot.Restore();
             Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
@@ -489,18 +488,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                scope.DetectViolations().Any.ShouldBeFalse();
+                scope.DetectUnresolvedPathWrites().ShouldBeNull();
 
                 // A relative path resolves against the process current directory, which is the whole defect.
                 File.WriteAllText("unresolved.txt", "probe");
 
-                MultiThreadedStrictModeScope.Violations violations = scope.DetectViolations();
-                violations.UnresolvedPathWrites.ShouldBe("unresolved.txt");
-                violations.UnexpectedCurrentDirectory.ShouldBeNull();
+                scope.DetectUnresolvedPathWrites().ShouldBe("unresolved.txt");
+                scope.DetectCurrentDirectoryViolation().ShouldBeNull();
 
                 // Removed, so that it cannot satisfy a later task's unresolved read, and not reported again.
                 File.Exists(Path.Combine(scope.SentinelDirectory, "unresolved.txt")).ShouldBeFalse();
-                scope.DetectViolations().Any.ShouldBeFalse();
+                scope.DetectUnresolvedPathWrites().ShouldBeNull();
             }
             finally
             {
@@ -524,7 +522,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     string name = $"stray{i}.txt";
                     File.WriteAllText(name, "probe");
 
-                    scope.DetectViolations().UnresolvedPathWrites.ShouldBe(name, $"iteration {i}");
+                    scope.DetectUnresolvedPathWrites().ShouldBe(name, $"iteration {i}");
                 }
             }
             finally
@@ -541,15 +539,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             const string Name = "reused.txt";
             using (FileStream held = new(Name, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.Read))
             {
-                scope.DetectViolations().UnresolvedPathWrites.ShouldBe(Name);
+                scope.DetectUnresolvedPathWrites().ShouldBe(Name);
                 File.Exists(Name).ShouldBeTrue();
             }
 
             File.Delete(Name);
-            scope.DetectViolations().Any.ShouldBeFalse();
+            scope.DetectUnresolvedPathWrites().ShouldBeNull();
             File.WriteAllText(Name, "new output");
 
-            scope.DetectViolations().UnresolvedPathWrites.ShouldBe(Name);
+            scope.DetectUnresolvedPathWrites().ShouldBe(Name);
             File.Exists(Name).ShouldBeFalse();
         }
 
@@ -561,11 +559,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             const string Name = "unlocked.txt";
             using (FileStream held = new(Name, FileMode.Create, System.IO.FileAccess.ReadWrite, FileShare.Read))
             {
-                scope.DetectViolations().UnresolvedPathWrites.ShouldBe(Name);
-                scope.DetectViolations().Any.ShouldBeFalse();
+                scope.DetectUnresolvedPathWrites().ShouldBe(Name);
+                scope.DetectUnresolvedPathWrites().ShouldBeNull();
             }
 
-            scope.DetectViolations().Any.ShouldBeFalse();
+            scope.DetectUnresolvedPathWrites().ShouldBeNull();
             File.Exists(Name).ShouldBeFalse();
         }
 
@@ -584,11 +582,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 File.WriteAllText(expected[i], "probe");
             }
 
-            string? reported = scope.DetectViolations().UnresolvedPathWrites;
+            string? reported = scope.DetectUnresolvedPathWrites();
             reported.ShouldNotBeNull();
             reported!.Split([", "], StringSplitOptions.None).ShouldBe(expected, ignoreOrder: true);
             Directory.EnumerateFileSystemEntries(scope.SentinelDirectory).ShouldBeEmpty();
-            scope.DetectViolations().Any.ShouldBeFalse();
+            scope.DetectUnresolvedPathWrites().ShouldBeNull();
         }
 
         [Fact]
@@ -602,14 +600,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Directory.SetCurrentDirectory(originalDirectory);
 
-                MultiThreadedStrictModeScope.Violations violations = scope.DetectViolations();
-                violations.UnexpectedCurrentDirectory.ShouldNotBeNull();
+                scope.DetectCurrentDirectoryViolation().ShouldNotBeNull();
 
                 // Repaired, so the rest of the build keeps the protection it asked for.
                 Path.GetFileName(Directory.GetCurrentDirectory())
                     .ShouldBe(MultiThreadedStrictModeScope.SentinelDirectoryName);
 
-                scope.DetectViolations().Any.ShouldBeFalse();
+                scope.DetectCurrentDirectoryViolation().ShouldBeNull();
             }
             finally
             {
@@ -629,9 +626,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             for (int i = 0; i < 2; i++)
             {
                 Directory.SetCurrentDirectory(originalDirectory);
-                scope.DetectViolations().UnexpectedCurrentDirectory.ShouldBe(originalDirectory);
+                scope.DetectCurrentDirectoryViolation().ShouldBe(originalDirectory);
                 Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
-                scope.DetectViolations().Any.ShouldBeFalse();
+                scope.DetectCurrentDirectoryViolation().ShouldBeNull();
             }
         }
 
@@ -644,7 +641,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.CreateDirectory(sibling);
             Directory.SetCurrentDirectory(sibling);
 
-            scope.DetectViolations().UnexpectedCurrentDirectory.ShouldBe(sibling);
+            scope.DetectCurrentDirectoryViolation().ShouldBe(sibling);
             Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
         }
 
@@ -835,7 +832,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             second.SentinelDirectory.ShouldNotBe(first.SentinelDirectory);
             File.Exists(file).ShouldBeTrue();
             File.Exists(Path.Combine(second.SentinelDirectory, "locked.txt")).ShouldBeFalse();
-            second.DetectViolations().Any.ShouldBeFalse();
+            second.DetectUnresolvedPathWrites().ShouldBeNull();
         }
 
         [Fact]
@@ -888,11 +885,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData("Write", "ErrorAndStop", false)]
         [InlineData("Write", "ErrorAndContinue", false)]
-        [InlineData("Write", "WarnAndContinue", true)]
+        [InlineData("Write", "WarnAndContinue", false)]
         [InlineData("ChangeDirectory", "ErrorAndStop", false)]
         [InlineData("ChangeDirectory", "ErrorAndContinue", false)]
         [InlineData("ChangeDirectory", "WarnAndContinue", true)]
-        public void OutputGetterViolationUsesTaskFailurePolicy(string violation, string continueOnError, bool succeeds)
+        public void OutputGetterViolationUsesItsBoundaryFailurePolicy(string violation, string continueOnError, bool succeeds)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
@@ -913,8 +910,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.OverallResult.ShouldBe(succeeds ? BuildResultCode.Success : BuildResultCode.Failure);
             logger.AssertLogContains(violation == "Write" ? "MSB4287" : "MSB4286");
             logger.AssertLogDoesntContain("MSB4181");
-            logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictLifetimeTask))!.Succeeded.ShouldBeFalse();
-            if (continueOnError == "ErrorAndStop")
+            logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictLifetimeTask))!.Succeeded.ShouldBe(violation == "Write");
+            if (violation == "Write")
+            {
+                logger.AssertLogContains("AFTER:true:value");
+            }
+            else if (continueOnError == "ErrorAndStop")
             {
                 logger.AssertLogDoesntContain("AFTER:");
             }
@@ -922,6 +923,204 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 logger.AssertLogContains("AFTER:false:value");
             }
+        }
+
+        [Fact]
+        public void RelativeWriteIsLeftUntilProjectCompletion()
+        {
+            var project = _env.CreateFile("deferred-write.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask Violation="Write" ContinueOnError="WarnAndContinue">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                    <StrictLifetimeTask>
+                      <Output TaskParameter="RelativeFileExists" PropertyName="FileExists" />
+                    </StrictLifetimeTask>
+                    <Message Text="BEFORE_PROJECT_END:$(FileExists):$(MSBuildLastTaskResult)" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+            MockLogger logger = new(_output);
+
+            BuildStrictProject(project.Path, logger).ShouldHaveFailed();
+
+            logger.AssertLogContains("BEFORE_PROJECT_END:True:true", "MSB4287");
+            logger.TaskFinishedEvents.ShouldAllBe(e => e.Succeeded);
+            logger.ProjectFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
+            logger.Errors.ShouldHaveSingleItem().BuildEventContext!.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
+        }
+
+        [Fact]
+        public void SentinelScanLockDoesNotBlockTaskCompletion()
+        {
+            var project = _env.CreateFile("scan-boundary.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask Violation="Write">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                  </Target>
+                </Project>
+                """);
+            using ManualResetEventSlim taskFinished = new();
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.BeginBuild(new BuildParameters
+            {
+                MultiThreaded = true,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers =
+                [
+                    logger,
+                    new InitializationCallbackLogger(() => { }, source =>
+                        source.TaskFinished += (_, _) => taskFinished.Set()),
+                ],
+            });
+            var scope = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull();
+            object scanLock = typeof(MultiThreadedStrictModeScope)
+                .GetField("_reportedEntriesLock", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(scope)!;
+            try
+            {
+                BuildSubmission submission = manager.PendBuildRequest(
+                    new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null));
+                lock (scanLock)
+                {
+                    submission.ExecuteAsync(null, null);
+                    taskFinished.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                    submission.WaitHandle.WaitOne(0).ShouldBeFalse();
+                    File.Exists(Path.Combine(scope.SentinelDirectory, "late-output.txt")).ShouldBeTrue();
+                }
+
+                submission.WaitHandle.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                submission.BuildResult!.ShouldHaveFailed();
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+        }
+
+        [Fact]
+        public void WriteRemovedBeforeProjectCompletionIsNotReported()
+        {
+            var project = _env.CreateFile("transient-write.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask Violation="Write">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                    <StrictLifetimeTask Violation="Delete">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                  </Target>
+                </Project>
+                """);
+            MockLogger logger = new(_output);
+
+            BuildStrictProject(project.Path, logger).ShouldHaveSucceeded();
+
+            logger.AssertNoErrors();
+            logger.TaskFinishedEvents.Count.ShouldBe(2);
+            logger.TaskFinishedEvents.ShouldAllBe(e => e.Succeeded);
+        }
+
+        [Fact]
+        public void ProjectWriteFailureIsRetainedInCachedResults()
+        {
+            var project = _env.CreateFile("cached-write.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask Violation="Write">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                  </Target>
+                </Project>
+                """);
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.BeginBuild(new BuildParameters
+            {
+                MultiThreaded = true,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            });
+            try
+            {
+                BuildRequestData request = new(project.Path, new Dictionary<string, string?>(), null, ["Build"], null);
+                for (int i = 0; i < 2; i++)
+                {
+                    BuildResult result = manager.BuildRequest(request);
+                    result.ShouldHaveFailed();
+                    result.Exception.ShouldBeOfType<InvalidProjectFileException>().ErrorCode.ShouldBe("MSB4287");
+                }
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void FinalBuildSweepReportsLateWritesBeforeSerializingCaches(bool writeFromProjectFinished)
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var project = _env.CreateFile("late-write.proj", """<Project><Target Name="Build" /></Project>""");
+            string outputCache = Path.Combine(_env.CreateFolder().Path, "results.cache");
+            string? sentinel = null;
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            manager.BeginBuild(new BuildParameters
+            {
+                MultiThreaded = true,
+                OutputResultsCacheFile = outputCache,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers =
+                [
+                    logger,
+                    new InitializationCallbackLogger(() => { }, source =>
+                    {
+                        if (writeFromProjectFinished)
+                        {
+                            source.ProjectFinished += (_, _) => File.WriteAllText(Path.Combine(sentinel!, "late.txt"), "late output");
+                        }
+                    }),
+                ],
+            });
+            sentinel = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull().SentinelDirectory;
+            manager.BuildRequest(new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
+                .ShouldHaveSucceeded();
+            if (!writeFromProjectFinished)
+            {
+                File.WriteAllText(Path.Combine(sentinel, "late.txt"), "late output");
+            }
+
+            Should.Throw<InvalidProjectFileException>(() => manager.EndBuild()).ErrorCode.ShouldBe("MSB4287");
+
+            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
+            File.Exists(outputCache).ShouldBeFalse();
+            Directory.Exists(sentinel).ShouldBeFalse();
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
+
+            manager.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
+            manager.EndBuild();
         }
 
         [Theory]
@@ -949,11 +1148,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.Errors.Count.ShouldBe(returnFalse ? 2 : 1);
             logger.Errors[0].Code.ShouldBe(returnFalse ? "MSB4181" : strictDiagnostic);
             logger.Errors[logger.Errors.Count - 1].Code.ShouldBe(strictDiagnostic);
-            logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictLifetimeTask))!.Succeeded.ShouldBeFalse();
+            logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictLifetimeTask))!.Succeeded
+                .ShouldBe(violation == "Write" && !returnFalse);
         }
 
         [WindowsFullFrameworkOnlyFact]
-        public void StaOutputViolationUsesCompletedTaskResult()
+        public void StaOutputWriteIsDetectedAtProjectCompletion()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var project = env.CreateFile("sta-getter.proj", $"""
@@ -973,11 +1173,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new OutputCallbackHost(() => observedApartment = Thread.CurrentThread.GetApartmentState()));
             MockLogger logger = new(_output);
 
-            BuildStrictProject(project.Path, logger, hostServices: hostServices).ShouldHaveSucceeded();
+            BuildStrictProject(project.Path, logger, hostServices: hostServices).ShouldHaveFailed();
 
             observedApartment.ShouldBe(ApartmentState.STA);
-            logger.AssertLogContains("MSB4287", "STA_RESULT:false:value");
-            logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictStaLifetimeTask))!.Succeeded.ShouldBeFalse();
+            logger.AssertLogContains("STA_RESULT:true:value", "MSB4287");
+            logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictStaLifetimeTask))!.Succeeded.ShouldBeTrue();
         }
 
         [Theory]
@@ -1008,14 +1208,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData("Write", "ErrorAndStop", false)]
         [InlineData("Write", "ErrorAndContinue", false)]
-        [InlineData("Write", "WarnAndContinue", true)]
+        [InlineData("Write", "WarnAndContinue", false)]
         [InlineData("ChangeDirectory", "ErrorAndStop", false)]
         [InlineData("ChangeDirectory", "ErrorAndContinue", false)]
         [InlineData("ChangeDirectory", "WarnAndContinue", true)]
         [InlineData("Throw", "ErrorAndStop", false)]
         [InlineData("Throw", "ErrorAndContinue", false)]
         [InlineData("Throw", "WarnAndContinue", false)]
-        public void CleanupViolationUsesTaskFailurePolicy(string violation, string continueOnError, bool succeeds)
+        public void CleanupViolationUsesItsBoundaryFailurePolicy(string violation, string continueOnError, bool succeeds)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var otherDirectory = env.CreateFolder();
@@ -1070,7 +1270,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(violation switch { "Write" => "MSB4287", "ChangeDirectory" => "MSB4286", _ => "cleanup-failure" });
             logger.AssertLogDoesntContain("MSB4181");
             logger.TaskFinishedEvents.Count.ShouldBe(1);
-            logger.TaskFinishedEvents[0].Succeeded.ShouldBeFalse();
+            logger.TaskFinishedEvents[0].Succeeded.ShouldBe(violation == "Write");
             logger.ErrorCount.ShouldBe(succeeds ? 0 : 1);
         }
 
@@ -1100,6 +1300,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             HostServices hostServices = new();
             hostServices.RegisterHostObject(project.Path, "Build", nameof(StrictLifetimeTask), new OutputCallbackHost(() =>
             {
+                if (MultiThreadedStrictModeScope.ActiveScope is { } scope)
+                {
+                    File.WriteAllText(Path.Combine(scope.SentinelDirectory, "canceled-write.txt"), "canceled");
+                }
                 manager.CancelAllSubmissions();
                 var token = (CancellationToken)typeof(TaskBuilder)
                     .GetField("_cancellationToken", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(builder)!;
@@ -1153,7 +1357,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.SetCurrentDirectory(originalDirectory);
             Directory.Delete(scope.SentinelDirectory);
 
-            Should.Throw<DirectoryNotFoundException>(() => scope.DetectViolations());
+            Should.Throw<DirectoryNotFoundException>(() => scope.DetectCurrentDirectoryViolation());
+            Should.Throw<DirectoryNotFoundException>(() => scope.DetectUnresolvedPathWrites());
         }
 
         [Fact]
@@ -1436,11 +1641,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        private sealed class InitializationCallbackLogger(Action initialize) : ILogger
+        private sealed class InitializationCallbackLogger(Action initialize, Action<IEventSource>? subscribe = null) : ILogger
         {
             public LoggerVerbosity Verbosity { get; set; }
             public string? Parameters { get; set; }
-            public void Initialize(IEventSource eventSource) => initialize();
+            public void Initialize(IEventSource eventSource)
+            {
+                initialize();
+                subscribe?.Invoke(eventSource);
+            }
             public void Shutdown() { }
         }
 
@@ -1460,6 +1669,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public bool ChangeDirectoryOnExecute { get; set; }
 
         [Output]
+        public bool RelativeFileExists => File.Exists("late-output.txt");
+
+        [Output]
         public string Value
         {
             get
@@ -1474,6 +1686,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 if (Violation == "Write")
                 {
                     File.WriteAllText("late-output.txt", "value");
+                }
+                else if (Violation == "Delete")
+                {
+                    File.Delete("late-output.txt");
                 }
                 else if (Violation == "ChangeDirectory")
                 {

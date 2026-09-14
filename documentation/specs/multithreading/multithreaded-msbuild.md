@@ -273,20 +273,26 @@ captured once for that build and copied into its child-process environment, incl
 Use absolute entry-project paths in API builds, or construct relative-path `BuildRequestData`
 before `BeginBuild`, while the host's working directory is still active.
 
-After task execution, output retrieval and task-factory cleanup return, MSBuild checks process
-state unless cancellation has been requested:
+After task execution, output retrieval and task-factory cleanup return, MSBuild checks and repairs
+process CWD. The more expensive sentinel-directory scan runs after a project's requested targets
+finish, before its result is reported, and once more at build completion. Cancellation skips these checks.
 
-| Diagnostic | Meaning |
-|---|---|
-| `MSB4286` | The process current directory changed. MSBuild resets it to the sentinel. |
-| `MSB4287` | Files or directories were created in the sentinel. MSBuild attempts to remove them. |
+| Diagnostic | Check boundary | Meaning |
+|---|---|---|
+| `MSB4286` | Task completion | The process current directory changed. MSBuild resets it to the sentinel. |
+| `MSB4287` | Project or build completion | Files or directories remain in the sentinel. MSBuild attempts to remove them. |
 
-These diagnostics fail the task and follow `ContinueOnError`. For a CI gate, use
-`"-warnAsError:MSB4286;MSB4287"` to prevent `ContinueOnError` from turning them into passing
-warnings. Do not also suppress these codes through `-nowarn` or `MSBuildWarningsAsMessages`;
+`MSB4286` fails the task and follows `ContinueOnError`. For a CI gate, use
+`"-warnAsError:MSB4286"` to prevent `ContinueOnError` from turning it into a passing warning.
+Do not also suppress that code through `-nowarn` or `MSBuildWarningsAsMessages`;
 normal warning-to-message suppression takes precedence over warning-to-error promotion.
+`MSB4287` is a project/build error, not a failure of the task that happened to write the file.
+The writing task and its target can finish successfully, and that task's `ContinueOnError`
+does not downgrade the later error. Project results, including cached failures, reflect the violation.
 Existing task diagnostics keep their normal timing: `MSB4181` can appear alongside a strict
-diagnostic. Cancellation skips strict checks that have not run, but does not retract earlier diagnostics.
+diagnostic. Cancellation does not retract earlier diagnostics.
+For otherwise-successful builds, the final directory scan runs after node and project-cache
+cleanup and logging callbacks, before output caches are serialized; a late violation fails `EndBuild`.
 The host directory captured before logger initialization is restored when the build ends; relative
 API output-cache paths also resolve from that directory. Failures to enable strict
 mode, check its state, or restore the directory fail the build; they do not silently disable checks.
@@ -305,10 +311,13 @@ For migration sign-off, also [capture a binlog and search for sentinel-path leak
 A successful build alone does not establish that the migration is correct.
 
 Strict mode is not complete file-access tracking. A missing-file probe or a swallowed exception
-can still leave the build green. Changes made and undone within a task can escape detection.
-Concurrent tasks, loggers and host code share the process, so the task named by a diagnostic
-is not necessarily the writer. Use a dedicated process; concurrent API builds in that process
-are not isolated from this mode.
+can still leave the build green. CWD changes undone within a task can escape detection.
+Files created and removed before the next project/build scan also escape detection, and a later
+task can consume a stray file before that scan removes it. This delayed observation avoids
+serialized directory enumeration after every task.
+Concurrent projects, tasks, loggers and host code share the process; the task or project observing
+a violation is not necessarily its originator. Use a dedicated process; concurrent API builds
+in that process are not isolated from this mode.
 
 Unannotated tasks retain their TaskHost working directory, but can still receive an incorrect
 absolute path from project or engine code. When constructing a nested task, pass the parent's

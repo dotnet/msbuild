@@ -3,7 +3,9 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -125,6 +127,14 @@ namespace Microsoft.Build.Engine.UnitTests
                     // Deliberately unresolved against the project directory: this is the defect strict mode
                     // is designed to surface.
                     File.WriteAllText("strict-mode-probe.txt", "probe");
+                    break;
+
+                case "ReadRelativeFile":
+                    Log.LogMessage(MessageImportance.High, $"STRICT-MODE-PROBE-CONTENTS={File.ReadAllText("strict-mode-probe.txt")}");
+                    break;
+
+                case "DeleteRelativeFile":
+                    File.Delete("strict-mode-probe.txt");
                     break;
 
                 case "ChangeCurrentDirectory":
@@ -267,7 +277,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
         /// <summary>
         /// A relative path that is never resolved against the project directory writes into the sentinel
-        /// current directory, which strict mode detects and reports as MSB4287.
+        /// current directory. Even a last-task write must be reported as MSB4287 at project completion.
         /// </summary>
         [Theory]
         [InlineData("/mt")]
@@ -327,25 +337,123 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// A task that declares ContinueOnError has its errors reported as warnings, and strict mode must follow
-        /// that contract - otherwise the log claims "Build succeeded" next to an error count.
+        /// Sentinel contents are checked at project completion, outside the writing task's error policy.
+        /// </summary>
+        [Fact]
+        public void StrictMode_ProjectCompletionErrorIsNotDowngradedByContinueOnError()
+        {
+            TransientTestFile binlog = _env.CreateFile(".binlog");
+            string output = RunStrictModeProbe(
+                "WriteRelativeFile",
+                $"/m:1 /nodereuse:false /mt /bl:\"{binlog.Path}\"",
+                out bool success,
+                continueOnError: true);
+
+            success.ShouldBeFalse(output);
+            MockLogger logger = ReadBinlog(binlog.Path);
+            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            AssertProjectCompletionError(logger);
+        }
+
+        /// <summary>
+        /// Current-directory changes are still detected after each task and honor its ContinueOnError policy.
         /// </summary>
         [Fact]
         public void StrictMode_HonorsContinueOnError()
         {
+            TransientTestFile binlog = _env.CreateFile(".binlog");
             string output = RunStrictModeProbe(
-                "WriteRelativeFile",
-                "/m /nodereuse:false /mt",
+                "ChangeCurrentDirectory",
+                $"/m:1 /nodereuse:false /mt /bl:\"{binlog.Path}\"",
                 out bool success,
                 continueOnError: true);
 
             success.ShouldBeTrue(output);
-            output.ShouldContain("MSB4287");
-            output.ShouldContain("0 Error(s)");
-
-            // The engine failed the task, so the "task returned false but did not log an error" diagnostic must
-            // not also fire - the task returned true.
+            MockLogger logger = ReadBinlog(binlog.Path);
+            logger.Errors.ShouldBeEmpty();
+            BuildWarningEventArgs warning = logger.Warnings.ShouldHaveSingleItem();
+            warning.Code.ShouldBe("MSB4286");
+            TaskFinishedEventArgs taskFinished = logger.TaskFinishedEvents.ShouldHaveSingleItem();
+            BuildEventContext warningContext = warning.BuildEventContext.ShouldNotBeNull();
+            BuildEventContext taskContext = taskFinished.BuildEventContext.ShouldNotBeNull();
+            warningContext.TaskId.ShouldBe(taskContext.TaskId);
+            warningContext.TaskId.ShouldNotBe(BuildEventContext.InvalidTaskId);
+            logger.ProjectFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
             output.ShouldNotContain("MSB4181");
+        }
+
+        [Fact]
+        public void StrictMode_ReportsFilesAfterFollowingTargetsRun()
+        {
+            TransientTestFile binlog = _env.CreateFile(".binlog");
+            TransientTestFile project = _env.CreateFile("deferred-file-check.proj", $"""
+                <Project DefaultTargets="Observe">
+                  <UsingTask TaskName="StrictModeProbeTask" AssemblyFile="{typeof(StrictModeProbeTask).Assembly.Location}" />
+                  <Target Name="Write">
+                    <StrictModeProbeTask Behavior="WriteRelativeFile" />
+                  </Target>
+                  <Target Name="Observe" DependsOnTargets="Write">
+                    <StrictModeProbeTask Behavior="ReadRelativeFile" />
+                    <Message Text="STRICT-MODE-FOLLOWING-TASK" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{project.Path}\" /m:1 /mt /nr:false /bl:\"{binlog.Path}\"",
+                out bool success, false, _output);
+
+            success.ShouldBeFalse(output);
+            output.ShouldContain("STRICT-MODE-PROBE-CONTENTS=probe");
+            output.ShouldContain("STRICT-MODE-FOLLOWING-TASK");
+            MockLogger logger = ReadBinlog(binlog.Path);
+            logger.TaskFinishedEvents.Select(task => task.TaskName)
+                .ShouldBe([nameof(StrictModeProbeTask), nameof(StrictModeProbeTask), "Message"]);
+            logger.TaskFinishedEvents.ShouldAllBe(task => task.Succeeded);
+            logger.TargetFinishedEvents.Select(target => target.TargetName).ShouldBe(["Write", "Observe"]);
+            logger.TargetFinishedEvents.ShouldAllBe(target => target.Succeeded);
+            AssertProjectCompletionError(logger);
+        }
+
+        /// <summary>
+        /// Files removed before project completion intentionally escape the deferred sentinel-content scan.
+        /// </summary>
+        [Fact]
+        public void StrictMode_AllowsFilesDeletedBeforeProjectCompletion()
+        {
+            TransientTestFile binlog = _env.CreateFile(".binlog");
+            TransientTestFile project = _env.CreateFile("deleted-before-completion.proj", $"""
+                <Project DefaultTargets="CleanUp">
+                  <UsingTask TaskName="StrictModeProbeTask" AssemblyFile="{typeof(StrictModeProbeTask).Assembly.Location}" />
+                  <Target Name="Write">
+                    <StrictModeProbeTask Behavior="WriteRelativeFile" />
+                  </Target>
+                  <Target Name="CleanUp" DependsOnTargets="Write">
+                    <StrictModeProbeTask Behavior="ReadRelativeFile" />
+                    <StrictModeProbeTask Behavior="DeleteRelativeFile" />
+                    <Message Text="STRICT-MODE-FILE-DELETED" Importance="high" />
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{project.Path}\" /m:1 /mt /nr:false /bl:\"{binlog.Path}\"",
+                out bool success, false, _output);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("STRICT-MODE-PROBE-CONTENTS=probe");
+            output.ShouldContain("STRICT-MODE-FILE-DELETED");
+            MockLogger logger = ReadBinlog(binlog.Path);
+            logger.Errors.ShouldBeEmpty();
+            logger.Warnings.ShouldBeEmpty();
+            logger.TaskFinishedEvents.Select(task => task.TaskName)
+                .ShouldBe([nameof(StrictModeProbeTask), nameof(StrictModeProbeTask), nameof(StrictModeProbeTask), "Message"]);
+            logger.TaskFinishedEvents.ShouldAllBe(task => task.Succeeded);
+            logger.ProjectFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
         }
 
         /// <summary>
@@ -467,6 +575,43 @@ namespace Microsoft.Build.Engine.UnitTests
 
             success.ShouldBeFalse(output);
             output.ShouldContain("MSB4286");
+        }
+
+        private MockLogger ReadBinlog(string binlogPath)
+        {
+            var logger = new MockLogger(_output);
+            var replay = new BinaryLogReplayEventSource();
+            logger.Initialize(replay);
+            replay.Replay(binlogPath);
+            logger.Shutdown();
+            return logger;
+        }
+
+        private static void AssertProjectCompletionError(MockLogger logger)
+        {
+            BuildErrorEventArgs error = logger.Errors.ShouldHaveSingleItem();
+            error.Code.ShouldBe("MSB4287");
+            string message = error.Message.ShouldNotBeNull();
+            message.ShouldContain("strict-mode-probe.txt");
+            message.ShouldContain("MSBuild-MT-Strict-Sentinel-CWD");
+            message.ShouldNotContain(nameof(StrictModeProbeTask));
+            BuildEventContext errorContext = error.BuildEventContext.ShouldNotBeNull();
+            errorContext.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
+            errorContext.TargetId.ShouldBe(BuildEventContext.InvalidTargetId);
+            logger.Warnings.ShouldBeEmpty();
+
+            ProjectFinishedEventArgs projectFinished = logger.ProjectFinishedEvents.ShouldHaveSingleItem();
+            projectFinished.Succeeded.ShouldBeFalse();
+            BuildEventContext projectContext = projectFinished.BuildEventContext.ShouldNotBeNull();
+            errorContext.ProjectContextId.ShouldBe(projectContext.ProjectContextId);
+            errorContext.NodeId.ShouldBe(projectContext.NodeId);
+            BuildFinishedEventArgs buildFinished = logger.BuildFinishedEvents.ShouldHaveSingleItem();
+            buildFinished.Succeeded.ShouldBeFalse();
+
+            int errorIndex = logger.AllBuildEvents.IndexOf(error);
+            errorIndex.ShouldBeGreaterThan(logger.AllBuildEvents.IndexOf(logger.TargetFinishedEvents.Last()));
+            errorIndex.ShouldBeLessThan(logger.AllBuildEvents.IndexOf(projectFinished));
+            logger.AllBuildEvents.IndexOf(projectFinished).ShouldBeLessThan(logger.AllBuildEvents.IndexOf(buildFinished));
         }
 
         private string RunStrictModeProbe(string behavior, string msbuildArgs, out bool success, bool useRelativeProjectPath = false, bool continueOnError = false)

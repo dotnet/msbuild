@@ -143,7 +143,9 @@ lines, or file-access errors shows that process-relative state has leaked into t
 Trace each leak back to the task, its helpers, or the project expression that produced it.
 Fix the path resolution and repeat the build and search. **A successful build alone is
 not enough:** a swallowed exception or an output containing a wrong absolute path can
-leave the build green without MSB4286/MSB4287. A clean search only covers the code paths
+leave the build green without MSB4286/MSB4287. CWD is checked after each task, but sentinel
+contents are scanned at project/build completion: a relative file written and deleted by
+different tasks before that scan can escape detection. A clean search only covers the code paths
 and logged values exercised by that build; retain the migration's unit tests and call-chain audit.
 
 ## TaskEnvironment API

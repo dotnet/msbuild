@@ -145,40 +145,34 @@ internal sealed class MultiThreadedStrictModeScope
         TryDelete(_temporaryDirectory);
     }
 
-    internal bool VerifyAndReportProcessState(
+    internal bool VerifyAndReportCurrentDirectory(
         TaskLoggingContext taskLoggingContext,
         string taskName,
         ElementLocation taskLocation,
         bool convertErrorsToWarnings)
     {
-        Violations violations = DetectViolations();
-        if (violations.UnexpectedCurrentDirectory is not null)
+        string? unexpectedDirectory = DetectCurrentDirectoryViolation();
+        if (unexpectedDirectory is null)
         {
-            Report("MultiThreadedStrictModeCurrentDirectoryChanged", taskName, violations.UnexpectedCurrentDirectory, SentinelDirectory);
+            return false;
         }
 
-        if (violations.UnresolvedPathWrites is not null)
+        if (convertErrorsToWarnings)
         {
-            Report("MultiThreadedStrictModeUnresolvedPathWrite", taskName, violations.UnresolvedPathWrites, SentinelDirectory);
+            taskLoggingContext.LogWarning(null, new BuildEventFileInfo(taskLocation),
+                "MultiThreadedStrictModeCurrentDirectoryChanged", taskName, unexpectedDirectory, SentinelDirectory);
+            taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+        }
+        else
+        {
+            taskLoggingContext.LogError(new BuildEventFileInfo(taskLocation),
+                "MultiThreadedStrictModeCurrentDirectoryChanged", taskName, unexpectedDirectory, SentinelDirectory);
         }
 
-        return violations.Any;
-
-        void Report(string resourceName, params object[] arguments)
-        {
-            if (convertErrorsToWarnings)
-            {
-                taskLoggingContext.LogWarning(null, new BuildEventFileInfo(taskLocation), resourceName, arguments);
-                taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
-            }
-            else
-            {
-                taskLoggingContext.LogError(new BuildEventFileInfo(taskLocation), resourceName, arguments);
-            }
-        }
+        return true;
     }
 
-    internal Violations DetectViolations()
+    internal string? DetectCurrentDirectoryViolation()
     {
         string? unexpectedDirectory = null;
         string currentDirectory = Directory.GetCurrentDirectory();
@@ -199,10 +193,20 @@ internal sealed class MultiThreadedStrictModeScope
             }
         }
 
-        return new Violations(unexpectedDirectory, TakeUnreportedSentinelDirectoryEntries());
+        return unexpectedDirectory;
     }
 
-    private string? TakeUnreportedSentinelDirectoryEntries()
+    internal void VerifyUnresolvedPathWrites(ElementLocation location)
+    {
+        string? entries = DetectUnresolvedPathWrites();
+        if (entries is not null)
+        {
+            ProjectErrorUtilities.ThrowInvalidProject(location,
+                "MultiThreadedStrictModeUnresolvedPathWrite", entries, SentinelDirectory);
+        }
+    }
+
+    internal string? DetectUnresolvedPathWrites()
     {
         lock (_reportedEntriesLock)
         {
@@ -219,8 +223,7 @@ internal sealed class MultiThreadedStrictModeScope
                     (entries ??= []).Add(name);
                 }
 
-                // Remove stray outputs so they cannot satisfy later unresolved reads.
-                // Retry locked leftovers without repeatedly blaming subsequent tasks.
+                // Remove stray outputs at project/build boundaries and retry locked leftovers without duplicate diagnostics.
                 if (TryDelete(entry))
                 {
                     _reportedEntries.Remove(name);
@@ -255,12 +258,5 @@ internal sealed class MultiThreadedStrictModeScope
         {
             return false;
         }
-    }
-
-    internal readonly struct Violations(string? unexpectedCurrentDirectory, string? unresolvedPathWrites)
-    {
-        internal string? UnexpectedCurrentDirectory { get; } = unexpectedCurrentDirectory;
-        internal string? UnresolvedPathWrites { get; } = unresolvedPathWrites;
-        internal bool Any => UnexpectedCurrentDirectory is not null || UnresolvedPathWrites is not null;
     }
 }

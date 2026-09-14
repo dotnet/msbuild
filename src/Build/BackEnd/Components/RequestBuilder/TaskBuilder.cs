@@ -485,7 +485,7 @@ namespace Microsoft.Build.BackEnd
                                 bool violation;
                                 try
                                 {
-                                    violation = scope.VerifyAndReportProcessState(
+                                    violation = scope.VerifyAndReportCurrentDirectory(
                                         taskLoggingContext, _taskNode.Name, _targetChildInstance.Location,
                                         convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue);
                                 }

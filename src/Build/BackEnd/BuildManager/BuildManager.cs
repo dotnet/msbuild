@@ -20,6 +20,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -1214,6 +1215,23 @@ namespace Microsoft.Build.Execution
 
                 Assumed.Zero(_buildSubmissions.Count, "All submissions not yet complete.");
                 Assumed.Zero(_activeNodes.Count, "All nodes not yet shut down.");
+
+                if (_multiThreadedStrictModeScope is not null && _overallBuildSuccess)
+                {
+                    // Normal node shutdown also cancels the execution token. Check otherwise-successful builds,
+                    // after callbacks finish and before persisting caches; canceled/failed builds already failed.
+                    projectCacheDispose.Wait();
+                    WaitForAllLoggingServiceEventsToBeProcessed();
+                    try
+                    {
+                        _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation);
+                    }
+                    catch (InvalidProjectFileException e)
+                    {
+                        ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(BuildEventContext.Invalid, e);
+                        throw;
+                    }
+                }
 
                 if (_buildParameters!.UsesOutputCache())
                 {
