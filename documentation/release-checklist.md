@@ -173,6 +173,15 @@ See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamen
 
 Steps are **sequential**.
 
+**Telemetry evidence procedure (steps 4.0 and 4.4a):**
+- For each Visual Studio or SDK path actually shipping in this release, use the telemetry team's sanctioned saved query and ordinary authorized access to check normal MSBuild `build` events. The code-level routes are `VS/MSBuild/Build` for Visual Studio and `dotnet/cli/msbuild/build` for SDK forwarding; the sanctioned query defines their current backend representation.
+- Identify each candidate by an immutable build-specific identity supported by that query (for example, official build ID plus source commit or artifact identity) and record its exact MSBuild version; a broad release-version family is not sufficient.
+- Use a bounded UTC window that accounts for normal ingestion delay—valid positive evidence can be reviewed as soon as it appears—and record the query link, path, candidate identity/version, aggregate count, first/last timestamps, limitations, and the named release owner's decision.
+- If a sanctioned query, access, identity field, or data is unavailable, record verification as **pending**. Missing data or query failure is not proof of a product regression; the owner must explicitly document whether to hold, defer, or proceed with rationale.
+
+This is a human release check, not an official-build, artifact-publishing, or automated-promotion dependency.
+
+- [ ] **4.0** Before final branding and Insiders promotion, use the telemetry evidence procedure to confirm recent ordinary telemetry from relevant canary builds for each path shipping in this release: {{CANARY_TELEMETRY_EVIDENCE_AND_DECISION}}
 - [ ] **4.1** Promote public API on `vs{{THIS_RELEASE_VERSION}}` branch: \
 Move contents of `PublicAPI.Unshipped.txt` → `PublicAPI.Shipped.txt` for all projects with API changes. See [release.md](./release.md) for details.
 - [ ] **4.2** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. **If the Phase 3.3 hardcoded `OptProfBaselineDrop` was kept current, the auto-triggered build should already pick it up (`.vsts-dotnet.yml` seeds `OptProfDrop` from it on `vs*` branches) and this step is a no-op.** Only if the official build still fails for lack of OptProf data (e.g. the baseline was stale/empty at branch-cut):
@@ -182,6 +191,8 @@ Move contents of `PublicAPI.Unshipped.txt` → `PublicAPI.Shipped.txt` for all p
 _**Only required if we are behind the VS schedule** — i.e. the insertion didn't land in VS `main` before `{{INSIDERS_SNAP_DATE}}` (4.4 was missed) and a milestone-gate approval is now needed. If the insertion made the schedule, **skip this step**._
 - [ ] **4.4** Babysit the VS insertion PR from `vs{{THIS_RELEASE_VERSION}}` into VS `main` (auto-generated at https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests). The inserted bits must be in VS `main` **before** `{{INSIDERS_SNAP_DATE}}` so they are included when VS snaps to `rel/insiders`: {{URL_OF_VS_INSERTION}} \
 The insertion PR contains the inserted package versions — useful for the nuget.org publishing step.
+
+- [ ] **4.4a** After Insiders snap and before stable promotion/GA, use the telemetry evidence procedure to confirm ordinary telemetry attributable to the actual final/Insiders candidate for each path shipping in this release. Check Visual Studio and SDK separately because they can carry different MSBuild versions: {{FINAL_TELEMETRY_EVIDENCE_AND_DECISION}}
 
 **After insiders snap** (only if a backport to insiders is needed):
 
@@ -224,7 +235,7 @@ Steps are **mostly parallel** unless noted.
     - **If SDK-coupled: the SDK is the source of truth** — look up the MSBuild version baked into the shipped SDK build of that band. It wins over VS `rel/stable`.
     - **Otherwise**, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). Extract just the **numeric `VersionPrefix`** from that string — drop the `-servicing-NNNNN-NN+<sha>` suffix — and use it as `{{THIS_RELEASE_EXACT_VERSION}}` (e.g. `18.7.1`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
     - _Worked example (18.9): the Phase 4.4 insertion PR said `18.9.0`, VS `rel/stable` said `18.9.1`, branch HEAD was already `18.9.8` — and the correct answer was `18.9.6`, from the coupled .NET 10.0.4xx SDK._
-  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). Take the latest build that produced the matching versioned artifacts. Confirm its **Release Telemetry Canary** stage succeeded. A missing canary blocks publication by default; for a confirmed telemetry-infrastructure outage, rerun manually with **Allow release telemetry canary failure** enabled and record the reason in the release tracking issue.
+  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). Take the latest build that produced the matching versioned artifacts.
   - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`PackageArtifacts/Release`** drop. Verify the **Release** folder contains all of:
     - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
