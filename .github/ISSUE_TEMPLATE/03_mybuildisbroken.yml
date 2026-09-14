@@ -48,5 +48,15 @@ body:
       required: true
   - type: textarea
     attributes:
+      label: Versions & Configurations
+      description: |
+        Include what you know; "unknown" or "not tested" is fine.
+        * The tool that invokes the build and its version (Visual Studio, dotnet CLI, etc.). Run `dotnet --info` for dotnet builds or `msbuild -version` for MSBuild.exe builds in the same environment as the failing build.
+        * OS and architecture.
+        * Relevant settings such as `-m`, `-mt`, `-graphBuild`, node reuse and MSBuild Server use, including response-file or environment overrides if known.
+        * Whether this happens on the first build or only on repeated builds.
+        * The last known working SDK/MSBuild/Visual Studio version, if applicable.
+  - type: textarea
+    attributes:
       label: Ask us questions
       description: We ask that you first browse the above links, as your question may already have been answered. Be as detailed as you can with these questions.

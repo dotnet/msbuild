@@ -17,27 +17,181 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     internal static class SharedAnalyzerHelpers
     {
         /// <summary>
-        /// The .editorconfig key controlling analysis scope.
-        /// Values: "all" (default) | "multithreadable_only"
+        /// The analyzer configuration key that enables MT migration diagnostics for all tasks.
         /// </summary>
-        internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
-        internal const string ScopeAll = "all";
-        internal const string ScopeMultiThreadableOnly = "multithreadable_only";
+        internal const string AnalyzeAllTasksOptionKey = "msbuild_task_analyzer.run_mt_analyzers_on_all_tasks";
 
         /// <summary>
-        /// Reads the scope option from the analyzer config options provider.
-        /// Returns true if all tasks should be analyzed; false if only multithreadable tasks.
+        /// Reads the effective option for a source tree from the analyzer config options provider.
+        /// Returns true only when all-task migration analysis is explicitly enabled.
         /// </summary>
-        internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
+        internal static bool ReadAnalyzeAllTasksOption(
+            AnalyzerConfigOptionsProvider optionsProvider,
+            SyntaxTree? syntaxTree)
         {
-            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
-                optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
+            AnalyzerConfigOptions options = syntaxTree is null
+                ? optionsProvider.GlobalOptions
+                : optionsProvider.GetOptions(syntaxTree);
+
+            return options.TryGetValue(AnalyzeAllTasksOptionKey, out string? optionValue) &&
+                bool.TryParse(optionValue, out bool enabled) &&
+                enabled;
+        }
+
+        /// <summary>
+        /// Reports whether the type opts into MT migration analysis, through
+        /// <c>[MSBuildMultiThreadableTask]</c>, <c>[MSBuildMultiThreadableTaskAnalyzed]</c>, or by declaring
+        /// <c>IMultiThreadableTask</c> in its own base list.
+        /// <para>
+        /// The declared interface is a migration-intent signal for the analyzer only. It does not change
+        /// runtime routing: <c>[MSBuildMultiThreadableTask]</c> remains the attribute that routes a task to
+        /// the MT environment.
+        /// </para>
+        /// </summary>
+        internal static bool IsMtAnalysisOptIn(
+            INamedTypeSymbol type,
+            INamedTypeSymbol? multiThreadableTaskType,
+            out bool hasAnalyzedAttribute)
+        {
+            bool hasMultiThreadableAttribute = false;
+            hasAnalyzedAttribute = false;
+
+            foreach (AttributeData attribute in type.GetAttributes())
             {
-                return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
+                string? attributeName = attribute.AttributeClass?.ToDisplayString();
+                if (string.Equals(
+                    attributeName,
+                    WellKnownTypeNames.MultiThreadableTaskAttributeFullName,
+                    StringComparison.Ordinal))
+                {
+                    hasMultiThreadableAttribute = true;
+                }
+
+                if (string.Equals(
+                    attributeName,
+                    WellKnownTypeNames.AnalyzedAttributeFullName,
+                    StringComparison.Ordinal))
+                {
+                    hasAnalyzedAttribute = true;
+                }
             }
 
-            return true; // default: analyze all tasks
+            return hasMultiThreadableAttribute ||
+                hasAnalyzedAttribute ||
+                DeclaresMultiThreadableTaskInterface(type, multiThreadableTaskType);
         }
+
+        /// <summary>
+        /// Reports whether the type opts into <c>IMultiThreadableTask</c> in its own base list, rather
+        /// than merely inheriting it.
+        /// <para>
+        /// <c>ToolTask</c> implements <c>IMultiThreadableTask</c>, so every <c>ToolTask</c>-derived task in
+        /// the ecosystem satisfies the interface without its author having declared anything. Treating an
+        /// inherited implementation as intent would report thousands of untouched tasks, which is the same
+        /// reason <c>TaskRouter</c> cannot use the interface as a routing signal. Detection therefore
+        /// inspects <see cref="INamedTypeSymbol.Interfaces"/> and never
+        /// <see cref="INamedTypeSymbol.AllInterfaces"/>.
+        /// </para>
+        /// </summary>
+        internal static bool DeclaresMultiThreadableTaskInterface(
+            INamedTypeSymbol type,
+            INamedTypeSymbol? multiThreadableTaskType)
+        {
+            if (multiThreadableTaskType is null)
+            {
+                return false;
+            }
+
+            foreach (INamedTypeSymbol declaredInterface in type.Interfaces)
+            {
+                if (SymbolEqualityComparer.Default.Equals(declaredInterface.OriginalDefinition, multiThreadableTaskType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        internal static bool IsDirectlyAnalyzedType(
+            INamedTypeSymbol type,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? multiThreadableTaskType,
+            ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
+            out bool analyzeAsMultiThreadable)
+        {
+            bool isTask = ImplementsInterface(type, iTaskType);
+            bool hasMultiThreadableOptIn = IsMtAnalysisOptIn(
+                type,
+                multiThreadableTaskType,
+                out bool hasAnalyzedAttribute);
+            bool contributesToMultiThreadableTask =
+                contributingMultiThreadableTaskBaseTypes.Contains(type.OriginalDefinition);
+
+            analyzeAsMultiThreadable = hasMultiThreadableOptIn || contributesToMultiThreadableTask;
+            return isTask || hasAnalyzedAttribute || contributesToMultiThreadableTask;
+        }
+
+        internal static ImmutableHashSet<INamedTypeSymbol> FindContributingMultiThreadableTaskBaseTypes(
+            Compilation compilation,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? multiThreadableTaskType)
+        {
+            var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+            CollectContributingMultiThreadableTaskBaseTypes(
+                compilation.Assembly.GlobalNamespace,
+                builder,
+                iTaskType,
+                multiThreadableTaskType);
+            return builder.ToImmutable();
+        }
+
+        private static void CollectContributingMultiThreadableTaskBaseTypes(
+            INamespaceOrTypeSymbol container,
+            ImmutableHashSet<INamedTypeSymbol>.Builder result,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol? multiThreadableTaskType)
+        {
+            foreach (ISymbol member in container.GetMembers())
+            {
+                if (member is INamespaceSymbol childNamespace)
+                {
+                    CollectContributingMultiThreadableTaskBaseTypes(
+                        childNamespace,
+                        result,
+                        iTaskType,
+                        multiThreadableTaskType);
+                    continue;
+                }
+
+                if (member is not INamedTypeSymbol type)
+                {
+                    continue;
+                }
+
+                if (ImplementsInterface(type, iTaskType) &&
+                    IsMtAnalysisOptIn(
+                        type,
+                        multiThreadableTaskType,
+                        out bool hasAnalyzedAttribute) &&
+                    (!type.IsAbstract || hasAnalyzedAttribute))
+                {
+                    for (INamedTypeSymbol? baseType = type.BaseType;
+                         baseType is not null && baseType.SpecialType != SpecialType.System_Object;
+                         baseType = baseType.BaseType)
+                    {
+                        result.Add(baseType.OriginalDefinition);
+                    }
+                }
+
+                CollectContributingMultiThreadableTaskBaseTypes(
+                    type,
+                    result,
+                    iTaskType,
+                    multiThreadableTaskType);
+            }
+        }
+
         /// <summary>
         /// Represents a resolved banned API entry for O(1) lookup during analysis.
         /// </summary>
@@ -111,6 +265,45 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Recognizes the normalization operation used by AbsolutePath.GetCanonicalForm and its polyfills.
+        /// Unlike arbitrary strings, AbsolutePath.Value is already fully qualified.
+        /// </summary>
+        internal static bool IsAbsolutePathCanonicalization(IOperation operation, INamedTypeSymbol? absolutePathType)
+        {
+            if (absolutePathType is null ||
+                operation is not IInvocationOperation invocation ||
+                invocation.TargetMethod.Name != "GetFullPath" ||
+                invocation.TargetMethod.ReturnType.SpecialType != SpecialType.System_String ||
+                invocation.Arguments.Length != 1)
+            {
+                return false;
+            }
+
+            var argument = invocation.Arguments[0].Value;
+            while (argument is IConversionOperation { Conversion.IsIdentity: true } conversion)
+            {
+                argument = conversion.Operand;
+            }
+
+            if (argument is not IPropertyReferenceOperation
+                {
+                    Property: { Name: "Value", IsStatic: false, Type.SpecialType: SpecialType.System_String } property
+                })
+            {
+                return false;
+            }
+
+            if (!SymbolEqualityComparer.Default.Equals(property.ContainingType, absolutePathType))
+            {
+                return false;
+            }
+
+            // Resolve Path from the intrinsic string's assembly, not a source or referenced lookalike.
+            var pathType = invocation.TargetMethod.ReturnType.ContainingAssembly?.GetTypeByMetadataName("System.IO.Path");
+            return SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, pathType);
         }
 
         /// <summary>
@@ -194,7 +387,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Check: Path.GetFullPath(safe) — safe only when input is already absolute.
                 // If input is relative, GetFullPath resolves against CWD (wrong in MT).
-                // The GetFullPath call itself is still flagged by MSBuildTask0002 regardless.
+                // Only the specific AbsolutePath.Value normalization also exempts the GetFullPath call.
+                if (IsAbsolutePathCanonicalization(invocation, absolutePathType))
+                {
+                    return true;
+                }
+
                 if (invocation.TargetMethod.Name == "GetFullPath" &&
                     invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
                     invocation.Arguments.Length >= 1 &&

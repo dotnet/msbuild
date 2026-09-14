@@ -12,6 +12,15 @@ namespace Microsoft.Build.Evaluation
     {
         public bool LoadProjectsReadOnly { get; protected set; }
 
+        public ParserIgnoreConfiguration ParserIgnoreConfiguration { get; protected set; }
+
+        /// <summary>
+        /// Whether <see cref="SetParserIgnoreConfiguration"/> has already been applied to this cache. A null
+        /// <see cref="ParserIgnoreConfiguration"/> is a legitimate configuration - it is what the escape hatch
+        /// produces - so it cannot itself stand for "never set".
+        /// </summary>
+        private bool _parserIgnoreConfigurationInitialized;
+
         /// <summary>
         /// Handler for which project root element just got added to the cache
         /// </summary>
@@ -69,6 +78,26 @@ namespace Microsoft.Build.Evaluation
         internal abstract void DiscardImplicitReferences();
 
         internal abstract void DiscardAnyWeakReference(ProjectRootElement projectRootElement);
+
+        internal void SetParserIgnoreConfiguration(ParserIgnoreConfiguration configuration)
+        {
+            if (ParserIgnoreConfiguration.Equals(ParserIgnoreConfiguration, configuration))
+            {
+                return;
+            }
+
+            // Entries parsed under the previous configuration may have skipped - or refused to skip - unknown
+            // attributes and elements that the new one treats differently, so they must be reparsed. A cache that
+            // has not had a configuration applied yet holds nothing parsed under a different one, so on that first
+            // initialization - which happens once per newly created cache - there is nothing to invalidate.
+            if (_parserIgnoreConfigurationInitialized)
+            {
+                DiscardImplicitReferences();
+            }
+
+            _parserIgnoreConfigurationInitialized = true;
+            ParserIgnoreConfiguration = configuration;
+        }
 
         /// <summary>
         /// Raises the <see cref="ProjectRootElementDirtied"/> event.

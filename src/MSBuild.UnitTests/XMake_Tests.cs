@@ -3316,11 +3316,120 @@ EndGlobal
             // even when the -multiThreaded / -mt switch is not passed on the command line.
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
 
             CommandLineSwitches switches = new CommandLineSwitches();
             switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded).ShouldBeFalse();
 
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("/mt", null, true)]
+        [InlineData("/mt:true", null, true)]
+        [InlineData("/mt:false", null, false)]
+        [InlineData("/mt:false", "/mt", true)]
+        [InlineData("/mt", "/mt:false", false)]
+        [InlineData("/mt:false", "/mt:true", true)]
+        [InlineData("/mt:true", "/mt:false", false)]
+        public void MultiThreadedSwitchUsesLatestValue(string firstArgument, string secondArgument, bool expected)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(
+                secondArgument is null ? [firstArgument] : [firstArgument, secondArgument],
+                switches);
+
+            switches.HaveErrors().ShouldBeFalse();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableOverridesSwitch()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(["/mt:false"], switches);
+
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void MSBuildEnableMultiThreadedEnvironmentVariableEnablesMultiThreadedModeByDefault()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", "1");
+
+            MSBuildApp.IsMultiThreadedEnabled(new CommandLineSwitches()).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void MultiThreadedSwitchOverridesEnableEnvironmentVariable()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", "1");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(["/mt:false"], switches);
+
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
+        }
+
+        [Theory]
+        // Auto-response-file value, command-line value, expected result. The command line has higher
+        // priority, so its value must win regardless of what the response file supplied.
+        [InlineData("/mt", "/mt:false", false)]
+        [InlineData("/mt:true", "/mt:false", false)]
+        [InlineData("/mt:false", "/mt", true)]
+        [InlineData("/mt:false", "/mt:true", true)]
+        public void MultiThreadedSwitchFromCommandLineWinsOverResponseFile(string responseFileArgument, string commandLineArgument, bool expected)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+
+            CommandLineParser parser = new CommandLineParser();
+
+            CommandLineSwitches switchesFromAutoResponseFile = new CommandLineSwitches();
+            parser.GatherCommandLineSwitches([responseFileArgument], switchesFromAutoResponseFile);
+
+            CommandLineSwitches switchesNotFromAutoResponseFile = new CommandLineSwitches();
+            parser.GatherCommandLineSwitches([commandLineArgument], switchesNotFromAutoResponseFile);
+
+            // Uses the production merge so a regression in response-file priority is caught here.
+            CommandLineSwitches combined = MSBuildApp.CombineSwitchesRespectingPriority(
+                switchesFromAutoResponseFile,
+                switchesNotFromAutoResponseFile,
+                string.Empty);
+
+            MSBuildApp.IsMultiThreadedEnabled(combined).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void MultiThreadedSwitchRejectsInvalidBooleanValue()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(["/mt:invalid"], switches);
+
+            CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
+                () => MSBuildApp.IsMultiThreadedEnabled(switches));
+            exception.Message.ShouldContain("MSB1072");
         }
 
         [Fact]
@@ -3329,6 +3438,7 @@ EndGlobal
             // When the env var is not set and the switch is not passed, IsMultiThreadedEnabled should return false.
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
 
             CommandLineSwitches switches = new CommandLineSwitches();
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
@@ -3340,6 +3450,7 @@ EndGlobal
             // The env var is only honored when set to exactly "1", matching other MSBUILDFORCE* flags.
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "true");
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
 
             CommandLineSwitches switches = new CommandLineSwitches();
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();

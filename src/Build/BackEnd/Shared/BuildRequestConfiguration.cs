@@ -126,6 +126,11 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<string, int> _activelyBuildingTargets;
 
         /// <summary>
+        /// The number of operations currently using the in-memory project state.
+        /// </summary>
+        private int _projectInstanceUsageCount;
+
+        /// <summary>
         /// The node where this configuration's master results are stored.
         /// </summary>
         private int _resultsNodeId = Scheduler.InvalidNodeId;
@@ -159,6 +164,57 @@ namespace Microsoft.Build.BackEnd
         /// The target names that were requested to execute.
         /// </summary>
         internal IReadOnlyCollection<string> RequestedTargets => _requestedTargets;
+
+        /// <summary>
+        /// Computes the set of top-level targets that a cross-project reference is allowed to be satisfied from the results
+        /// cache for in a strictly isolated build, or null if no such restriction applies.
+        /// </summary>
+        /// <remarks>
+        /// In an isolated static graph build the presence of a result in the cache is the de-facto validation of the
+        /// ProjectReferenceTargets protocol: the graph pre-builds each node with its declared entry targets, so only those
+        /// results land in the engine cache. However, target results produced merely as a dependency (via DependsOnTargets)
+        /// also accumulate in a node's local results cache and, for in-proc or same-node builds, can satisfy a cross-project
+        /// reference to an undeclared target. That makes the build result depend on node scheduling. Restricting cache
+        /// satisfaction to the referenced configuration's explicitly requested (graph-declared) targets makes the isolation
+        /// check fire deterministically regardless of scheduling.
+        /// </remarks>
+        internal static IReadOnlyCollection<string> GetIsolationAllowedTopLevelTargets(
+            ProjectIsolationMode projectIsolationMode,
+            BuildRequestConfiguration parentConfig,
+            BuildRequestConfiguration requestConfig,
+            BuildRequest request)
+        {
+            // Only enforce for strict isolation. Non-isolated and message-only modes keep their existing behavior.
+            // Gated behind a change wave so builds that relied on the previous (scheduling-dependent) behavior can opt out.
+            // Requests that opt into SkipNonexistentTargets are exempted so their existing cache-satisfaction semantics
+            // (handled by the isolation constraint check) are preserved and never turned into a rebuild.
+            //
+            // INVARIANT: the exemption conditions below must stay the mirror image of the allow-conditions in
+            // Scheduler.CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot. A forced cache miss produced here is
+            // expected to route to that check and surface MSB4252; if the two drift, a gated miss could instead be silently
+            // rebuilt, violating isolation without any diagnostic. Keep both in sync.
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                || projectIsolationMode != ProjectIsolationMode.True
+                || parentConfig == null
+                || request.IsRootRequest
+                || request.SkipStaticGraphIsolationConstraints
+                || (request.BuildRequestDataFlags & BuildRequestDataFlags.SkipNonexistentTargets) == BuildRequestDataFlags.SkipNonexistentTargets)
+            {
+                return null;
+            }
+
+            // Allow self references (a project building itself, potentially with different global properties) without restriction.
+            if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            IReadOnlyCollection<string> requestedTargets = requestConfig.RequestedTargets;
+
+            // If the referenced configuration has no explicitly requested targets recorded, do not restrict; preserve
+            // existing behavior for this edge case (graph nodes are always requested with explicit targets).
+            return requestedTargets != null && requestedTargets.Count > 0 ? requestedTargets : null;
+        }
 
         /// <summary>
         /// Initializes a configuration from a BuildRequestData structure.  Used by the BuildManager.
@@ -640,6 +696,48 @@ namespace Microsoft.Build.BackEnd
                                                                       new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
+        /// Keeps the <see cref="ProjectInstance"/> in memory while the caller uses it, preventing a concurrent
+        /// memory-pressure cache sweep. Retrieves the project first if it was already cached.
+        /// </summary>
+        /// <remarks>
+        /// The usage count belongs to this configuration. A shallow clone that shares the same
+        /// <see cref="ProjectInstance"/> has independent synchronization and usage tracking.
+        /// </remarks>
+        internal ProjectInstanceUsageScope AcquireProjectInstanceUsage() => new(this);
+
+        /// <summary>
+        /// Tracks one active <see cref="ProjectInstance"/> consumer. Consume with <see langword="using"/>;
+        /// do not dispose copies.
+        /// </summary>
+        internal readonly struct ProjectInstanceUsageScope : IDisposable
+        {
+            private readonly BuildRequestConfiguration _configuration;
+
+            internal ProjectInstanceUsageScope(BuildRequestConfiguration configuration)
+            {
+                _configuration = configuration;
+
+                lock (_configuration._syncLock)
+                {
+                    _configuration.RetrieveFromCache();
+                    Assumed.False(_configuration.IsCached, "Configuration could not be retrieved before accessing the project.");
+                    _configuration._projectInstanceUsageCount++;
+                }
+            }
+
+            public void Dispose()
+            {
+                Assumed.NotNull(_configuration, "ProjectInstance usage scope was not initialized.");
+
+                lock (_configuration._syncLock)
+                {
+                    Assumed.True(_configuration._projectInstanceUsageCount > 0, "No active ProjectInstance usage to complete.");
+                    _configuration._projectInstanceUsageCount--;
+                }
+            }
+        }
+
+        /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
         public FrozenDictionary<string, string> SavedEnvironmentVariables
@@ -725,7 +823,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_syncLock)
             {
-                if (IsActivelyBuilding || IsCached || !IsLoaded || !IsCacheable)
+                if (_projectInstanceUsageCount > 0 || IsActivelyBuilding || IsCached || !IsLoaded || !IsCacheable)
                 {
                     return;
                 }
@@ -984,6 +1082,13 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectTargets);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.Translate(ref _projectEvaluationId);
+
+            // Persist the explicitly-requested (graph-declared) top-level targets so the strict-isolation allow-list in
+            // GetIsolationAllowedTopLevelTargets remains enforceable when a configuration is round-tripped through an
+            // input/output cache. Without this, RequestedTargets would come back empty and the deterministic MSB4252 gate
+            // (see GetIsolationAllowedTopLevelTargets / ResultsCache.SatisfyRequest) would be silently bypassed for
+            // undeclared cross-project targets satisfied from a persisted cache.
+            translator.Translate(ref _requestedTargets);
         }
 
         /// <summary>

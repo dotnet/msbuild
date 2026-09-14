@@ -738,6 +738,24 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
+        /// The telemetry session is process wide and is owned by whoever initialized it (the MSBuild entry
+        /// point or the host). Disposing a <see cref="BuildManager"/> must not tear it down, otherwise the
+        /// rest of the process - including crash telemetry - is left with a disposed session.
+        /// </summary>
+        [Fact]
+        public void BuildManagerDisposeDoesNotDisposeProcessWideTelemetry()
+        {
+            TelemetryManager.ResetForTest();
+
+            BuildManager buildManager = new();
+            buildManager.Dispose();
+
+            TelemetryManager.IsDisposed.ShouldBeFalse();
+
+            TelemetryManager.ResetForTest();
+        }
+
+        /// <summary>
         /// <see cref="MockLoggingService"/> that records all <see cref="ILoggingService.LogBuildEvent"/> calls
         /// so tests can inspect emitted build events.
         /// </summary>

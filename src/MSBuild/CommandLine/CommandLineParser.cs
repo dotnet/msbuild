@@ -274,9 +274,9 @@ namespace Microsoft.Build.CommandLine.Experimental
                             }
                         }
 
-                        // Special case: for the switches "/m" (or "/maxCpuCount") and "/bl" (or "/binarylogger") we wish to pretend we saw a default argument
-                        // This allows a subsequent /m:n on the command line to override it.
-                        // We could create a new kind of switch with optional parameters, but it's a great deal of churn for this single case.
+                        // Special case: for switches with an optional parameter, pretend we saw their default argument.
+                        // This allows a subsequent explicit value on the command line to override it.
+                        // We could create a new kind of switch with optional parameters, but it would cause significant churn.
                         // Note that if no "/m" or "/maxCpuCount" switch -- either with or without parameters -- is present, then we still default to 1 cpu
                         // for backwards compatibility.
                         if (string.IsNullOrEmpty(switchParameters))
@@ -298,6 +298,11 @@ namespace Microsoft.Build.CommandLine.Experimental
                                      string.Equals(switchName, "profileevaluation", StringComparison.OrdinalIgnoreCase))
                             {
                                 switchParameters = ":no-file";
+                            }
+                            else if (string.Equals(switchName, "mt", StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(switchName, "multithreaded", StringComparison.OrdinalIgnoreCase))
+                            {
+                                switchParameters = ":true";
                             }
                         }
 
