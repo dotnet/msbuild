@@ -19,6 +19,37 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
 {
     private readonly ITestOutputHelper _output = output;
 
+    [Fact]
+    public void ReportsTelemetryForRepeatedAsynchronousBuilds()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", "1");
+        env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", "1");
+        using BuildManager buildManager = new();
+        string projectFile = env.CreateFile("empty.proj", """
+            <Project>
+                <Target Name="Build" />
+            </Project>
+            """).Path;
+
+        for (int iteration = 0; iteration < 100; iteration++)
+        {
+            MockLogger logger = new(_output);
+            BuildResult result = buildManager.Build(
+                new BuildParameters
+                {
+                    MaxNodeCount = 1,
+                    EnableNodeReuse = false,
+                    UseSynchronousLogging = false,
+                    Loggers = [logger],
+                },
+                CreateRequest(projectFile, standardError: false, text: string.Empty));
+
+            result.ShouldHaveSucceeded();
+            AssertTelemetry(logger, expected: false);
+        }
+    }
+
     [Theory]
     [InlineData(false, false, false, "stdout", false)]
     [InlineData(true, false, false, "", false)]

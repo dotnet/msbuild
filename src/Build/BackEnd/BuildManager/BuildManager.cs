@@ -1251,6 +1251,9 @@ namespace Microsoft.Build.Execution
 
                             EndBuildTelemetry();
 
+                            // Telemetry is logged after BuildFinished; drain it before forwarding loggers shut down.
+                            WaitForAllLoggingServiceEventsToBeProcessed();
+
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
