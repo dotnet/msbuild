@@ -180,7 +180,7 @@ Each new `TaskHostConfiguration` carries a full environment snapshot, task param
 **Reset per task:** `_currentConfiguration`, `_debugCommunications`, `_updateEnvironment`, `_warningsAsErrors`/`_warningsNotAsErrors`/`_warningsAsMessages`, `_fileAccessData`, per-task `TaskExecutionContext`
 
 **Persists across tasks (within a single build):**
-- `s_mismatchedEnvironmentValues` (static) -- environment variable fixups for bitness differences, computed once per process
+- `s_mismatchedEnvironmentValues` (static) -- environment variable fixups for bitness differences, computed once per process. Starting with Change Wave 18.12, only the documented Windows WOW64 variables (`PROCESSOR_ARCHITECTURE`, `PROCESSOR_ARCHITEW6432`, `ProgramFiles`, `ProgramW6432`, `CommonProgramFiles`, and `CommonProgramW6432`) are reconciled. Unix task hosts do not apply these Windows-specific fixups. Other variables come from the task's environment, including additions, replacements, and removals that differ from process startup. They also pass back to the parent without reverse fixups, so an earlier task or build cannot overwrite later virtualized state through this table. Opting out of Wave 18.12 restores the legacy behavior of reconciling all startup differences.
 - `_registeredTaskObjectCache` -- task object cache with `Build` lifetime scope, disposed at end of each build (in `HandleShutdown()`), recreated fresh on the next `Run()` call
 - `_pendingCallbackRequests` / `_nextCallbackRequestId` -- callback tracking (should be empty between tasks)
 

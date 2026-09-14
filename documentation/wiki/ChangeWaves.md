@@ -36,6 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.12
+- [Task hosts preserve ordinary task-environment variables instead of undoing them as startup differences; Windows architecture-specific variables retain their bitness adjustments. This prevents coordinator/static-graph restore deadlocks in multithreaded builds. Opting out restores the legacy reconciliation and can reintroduce the deadlock.](https://github.com/dotnet/msbuild/issues/14986)
 - [Events that a task logs from a TaskHost - extended errors, warnings and messages, critical messages, telemetry, and any other event kind the router did not enumerate - reach the parent process instead of being dropped.](https://github.com/dotnet/msbuild/pull/14876)
 
 ### 18.11
