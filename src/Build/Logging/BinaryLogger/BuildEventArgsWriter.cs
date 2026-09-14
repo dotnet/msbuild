@@ -1472,8 +1472,10 @@ namespace Microsoft.Build.Logging
             int referenceCacheIndex = -1;
             if (text.Length <= MaxCachedStringLength)
             {
+                // The CLR caches the identity hash, so reference-cache hits avoid
+                // recomputing the content hash by scanning the string.
                 int identityHash = RuntimeHelpers.GetHashCode(text);
-                referenceCacheIndex = (identityHash ^ (identityHash >> 16)) & (StringReferenceCacheSize - 1);
+                referenceCacheIndex = identityHash & (StringReferenceCacheSize - 1);
                 ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
                 if (ReferenceEquals(cachedEntry.Text, text))
                 {
