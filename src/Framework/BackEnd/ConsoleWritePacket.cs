@@ -3,7 +3,7 @@
 
 namespace Microsoft.Build.BackEnd
 {
-    internal sealed class ServerNodeConsoleWrite : INodePacket
+    internal sealed class ConsoleWritePacket : INodePacket
     {
         private string _text = default!;
         private ConsoleOutput _outputType = default!;
@@ -11,7 +11,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Packet type.
         /// </summary>
-        public NodePacketType Type => NodePacketType.ServerNodeConsoleWrite;
+        public NodePacketType Type => NodePacketType.ConsoleWrite;
 
         public string Text => _text;
 
@@ -23,9 +23,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Private constructor for deserialization
         /// </summary>
-        private ServerNodeConsoleWrite() { }
+        private ConsoleWritePacket() { }
 
-        public ServerNodeConsoleWrite(string text, ConsoleOutput outputType)
+        public ConsoleWritePacket(string text, ConsoleOutput outputType)
         {
             _text = text;
             _outputType = outputType;
@@ -39,10 +39,10 @@ namespace Microsoft.Build.BackEnd
 
         internal static INodePacket FactoryForDeserialization(ITranslator translator)
         {
-            ServerNodeConsoleWrite command = new();
-            command.Translate(translator);
+            ConsoleWritePacket packet = new();
+            packet.Translate(translator);
 
-            return command;
+            return packet;
         }
     }
 }

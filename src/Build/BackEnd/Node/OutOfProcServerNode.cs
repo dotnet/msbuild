@@ -476,8 +476,8 @@ namespace Microsoft.Build.Server
                 }
 
                 // Dispose must be called before the server sends ServerNodeBuildResult packet
-                using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
-                using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+                using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ConsoleWritePacket(text, ConsoleOutput.Standard))))
+                using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ConsoleWritePacket(text, ConsoleOutput.Error))))
                 {
                     Console.SetOut(outWriter);
                     Console.SetError(errWriter);

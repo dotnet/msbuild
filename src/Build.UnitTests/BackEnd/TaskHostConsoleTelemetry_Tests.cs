@@ -109,7 +109,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
             NodeProviderOutOfProcTaskHost provider = ((IBuildComponentHost)buildManager)
                 .GetComponent<NodeProviderOutOfProcTaskHost>(BuildComponentType.OutOfProcTaskHostNodeProvider);
             provider.ConsoleOutputForwarded.ShouldBeFalse();
-            provider.PacketReceived(1, new ServerNodeConsoleWrite("late output", ConsoleOutput.Standard));
+            provider.PacketReceived(1, new ConsoleWritePacket("late output", ConsoleOutput.Standard));
             provider.ConsoleOutputForwarded.ShouldBeFalse();
         }
     }

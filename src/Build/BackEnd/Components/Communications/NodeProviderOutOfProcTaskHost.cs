@@ -430,7 +430,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
-            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ConsoleWrite, ConsoleWritePacket.FactoryForDeserialization, this);
 
             // Register callback request packet types so we can deserialize them when
             // they arrive from TaskHost processes. These are forwarded to the current
@@ -584,7 +584,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            if (packet is ServerNodeConsoleWrite consoleWrite)
+            if (packet is ConsoleWritePacket consoleWrite)
             {
                 lock (_consoleForwardingLock)
                 {

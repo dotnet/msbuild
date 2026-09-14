@@ -39,7 +39,7 @@ The server node uses same IPC approach as current worker nodes - named pipes. Th
 2. Initiate handshake
 2. Issue build command with `ServerNodeBuildCommand` packet
 3. Read packets from pipe
-   - Write content to the appropriate output stream (respecting coloring) with the `ServerNodeConsoleWrite` packet
+   - Write content to the appropriate output stream (respecting coloring) with the `ConsoleWritePacket` packet
    - After the build completes, the `ServerNodeBuildResult` packet indicates the exit code
 
 ### Pipe name convention & handshake
@@ -63,7 +63,7 @@ Server requires to introduce new packet types for IPC.
 | UICulture                | CultureInfo                  | The UI culture value for current build |
 | ConsoleConfiguration     | TargetConsoleConfiguration   | Console configuration of target Console at which the output will be rendered |
 
-`ServerNodeConsoleWrite` contains information for console output.
+`ConsoleWritePacket` contains information for console output. It is shared with `-mt` task hosts, which use it to forward console output to their connected node.
 
 | Property name            | Type          | Description |
 |---|---|---|

@@ -1554,9 +1554,9 @@ namespace Microsoft.Build.CommandLine
             _originalConsoleOut = Console.Out;
             _originalConsoleError = Console.Error;
             _consoleOutWriter = new RedirectConsoleWriter(
-                text => _nodeEndpoint.SendData(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard)));
+                text => _nodeEndpoint.SendData(new ConsoleWritePacket(text, ConsoleOutput.Standard)));
             _consoleErrorWriter = new RedirectConsoleWriter(
-                text => _nodeEndpoint.SendData(new ServerNodeConsoleWrite(text, ConsoleOutput.Error)));
+                text => _nodeEndpoint.SendData(new ConsoleWritePacket(text, ConsoleOutput.Error)));
             Console.SetOut(_consoleOutWriter);
             Console.SetError(_consoleErrorWriter);
         }

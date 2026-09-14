@@ -284,9 +284,9 @@ internal enum NodePacketType : byte
     ServerNodeBuildResult = 0x3D,
 
     /// <summary>
-    /// Info about server console activity.
+    /// Console output from a server or task-host node.
     /// </summary>
-    ServerNodeConsoleWrite = 0x3E,
+    ConsoleWrite = 0x3E,
 
     /// <summary>
     /// Command to cancel ongoing build.
