@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -32,8 +33,11 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Mapping of manager-produced node IDs to the provider hosting the node.
+        /// Cache replies and provider shutdown notifications can access this map
+        /// independently of scheduler-driven node creation. Collection operations
+        /// must finish before invoking providers or packet handlers.
         /// </summary>
-        private readonly Dictionary<int, INodeProvider> _nodeIdToProvider;
+        private readonly ConcurrentDictionary<int, INodeProvider> _nodeIdToProvider;
 
         /// <summary>
         /// The packet factory used to translate and route packets
@@ -74,7 +78,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private NodeManager()
         {
-            _nodeIdToProvider = new Dictionary<int, INodeProvider>();
+            _nodeIdToProvider = new ConcurrentDictionary<int, INodeProvider>();
             _packetFactory = new NodePacketFactory();
             _nextNodeId = _inprocNodeId + 1;
         }
@@ -290,8 +294,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void RemoveNodeFromMapping(int nodeId)
         {
-            _nodeIdToProvider.Remove(nodeId);
-            if (_nodeIdToProvider.Count == 0)
+            _nodeIdToProvider.TryRemove(nodeId, out _);
+            if (_nodeIdToProvider.IsEmpty)
             {
                 // The inproc node is always 1 therefore when new nodes are requested we need to start at 2
                 _nextNodeId = _inprocNodeId + 1;
@@ -334,7 +338,8 @@ namespace Microsoft.Build.BackEnd
 
             foreach (NodeInfo node in nodes)
             {
-                _nodeIdToProvider.Add(node.NodeId, nodeProvider);
+                // Keep duplicate node IDs an error, rather than replacing a route.
+                ((IDictionary<int, INodeProvider>)_nodeIdToProvider).Add(node.NodeId, nodeProvider);
             }
 
             return nodes;

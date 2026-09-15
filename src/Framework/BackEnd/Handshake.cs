@@ -98,7 +98,10 @@ internal class Handshake
         // connection and the parent starts a fresh node instead. Task hosts are excluded, see GetChangeWaveSalt.
         string changeWaveSalt = GetChangeWaveSalt();
 
-        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}{changeWaveSalt}");
+        // BuildParameters is sent only to same-version workers, not to task hosts.
+        // Version its layout here: task-host packet negotiation does not apply to workers.
+        string workerProtocolSalt = IsTaskHost ? string.Empty : "|BuildParameters:4|TaskCacheRpc:1";
+        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}{changeWaveSalt}{workerProtocolSalt}");
 
         // The .NET task host parent (.NET Framework MSBuild, e.g. Visual Studio) and child
         // (.NET SDK MSBuild) compute this salt independently from different sources, and on Windows

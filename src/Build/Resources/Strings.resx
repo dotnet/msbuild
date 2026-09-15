@@ -2649,4 +2649,79 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="UnrecognizedSolutionComment" xml:space="preserve">
     <value>Unrecognized solution version "{0}", attempting to continue.</value>
   </data>
+  <data name="TaskCache.Rejected" xml:space="preserve">
+    <value>MSB4287: Task "{0}" will execute without caching: {1} Use a supported task invocation or disable -taskCache to suppress this warning.</value>
+    <comment>{StrBegin="MSB4287: "}{0} is the task name; {1} is a localized rejection reason. Do not translate -taskCache.</comment>
+  </data>
+  <data name="TaskCache.Unavailable" xml:space="preserve">
+    <value>MSB4288: Inputs for task "{0}" could not be captured for caching: {1} Execution will continue without caching. Use supported task parameter values or disable -taskCache.</value>
+    <comment>{StrBegin="MSB4288: "}{0} is the task name; {1} is an exception message. Do not translate -taskCache.</comment>
+  </data>
+  <data name="TaskCache.RestoreFailed" xml:space="preserve">
+    <value>MSB4289: Restoring cached task "{0}" failed: {1} Outputs may be partially replaced. Fix the filesystem problem, then clean and rebuild.</value>
+    <comment>{StrBegin="MSB4289: "}{0} is the task name; {1} is an exception message. Do not translate -taskCache.</comment>
+  </data>
+  <data name="TaskCache.Hit" xml:space="preserve">
+    <value>Task-cache hit for "{0}": restored file artifacts and raw task outputs.</value>
+    <comment>{0} is the task name.</comment>
+  </data>
+  <data name="TaskCache.Miss" xml:space="preserve">
+    <value>No matching task-cache entry for "{0}"; executing the task.</value>
+    <comment>{0} is the task name.</comment>
+  </data>
+  <data name="TaskCache.ReadWriteOverlap" xml:space="preserve">
+    <value>The task reads and writes the same file. Declare disjoint normalized input and output file paths.</value>
+  </data>
+  <data name="TaskCache.InputsChanged" xml:space="preserve">
+    <value>MSB4291: Task "{0}" was not cached because its inputs changed during execution. Ensure that tasks do not modify each other's inputs while running.</value>
+    <comment>{StrBegin="MSB4291: "}{0} is the task name.</comment>
+  </data>
+  <data name="TaskCache.OperationFailed" xml:space="preserve">
+    <value>MSB4292: The cache operation for task "{0}" failed: {1} Check the cache directory, available disk space, and file permissions. Fix the problem, then clean and rebuild.</value>
+    <comment>{StrBegin="MSB4292: "}{0} is the task name; {1} is an exception message.</comment>
+  </data>
+  <!-- Next engine message code: MSB4293. -->
+  <data name="TaskCache.NoCacheDirectory" xml:space="preserve">
+    <value>The user cache directory could not be determined. Set BuildCacheDirectory or supply -buildCacheDirectory with an absolute directory path.</value>
+    <comment>Do not translate BuildCacheDirectory or -buildCacheDirectory.</comment>
+  </data>
+  <data name="TaskCache.IncompatibleParameters" xml:space="preserve">
+    <value>TaskCache cannot be combined with Question, InputResultsCacheFiles, or OutputResultsCacheFile. Disable TaskCache or remove the conflicting build parameter.</value>
+    <comment>Do not translate property names.</comment>
+  </data>
+  <data name="TaskCache.StorageUnavailable" xml:space="preserve">
+    <value>Task invocation caching has no supported storage backend in this MSBuild distribution or process architecture. Disable TaskCache or use a distribution with a supported task-cache backend.</value>
+    <comment>Do not translate TaskCache or MSBuild.</comment>
+  </data>
+  <data name="TaskCache.DeclaredIOStructure" xml:space="preserve">
+    <value>The task requires a standard assembly task factory, no host object or separate task-host process, supported primitive or item parameters, and literal requested output parameter names.</value>
+  </data>
+  <data name="TaskCache.DeclaredIOMarkerRequired" xml:space="preserve">
+    <value>The task must have a class-level MSBuildDeclaredIOTask annotation. This annotation is the task author's promise that the file I/O declarations are complete and that the task has no undeclared side effects.</value>
+    <comment>Do not translate MSBuildDeclaredIOTask.</comment>
+  </data>
+  <data name="TaskCache.DeclaredIOOptOut" xml:space="preserve">
+    <value>This task exposes the optional Boolean MSBuildTaskCacheEnabled parameter but did not explicitly receive true. To enable caching for this task, pass MSBuildTaskCacheEnabled=true and satisfy the task's validation requirements.</value>
+    <comment>Do not translate MSBuildTaskCacheEnabled or true.</comment>
+  </data>
+  <data name="TaskCache.DeclaredIOInvalid" xml:space="preserve">
+    <value>The task's file I/O annotations are invalid or name unsupported parameter types. Use unconditional class-level declarations naming string or ITaskItem parameters, or arrays of those types.</value>
+    <comment>Do not translate string or ITaskItem.</comment>
+  </data>
+  <data name="TaskCache.DeclaredIOUnbound" xml:space="preserve">
+    <value>Declared file parameter "{0}" is missing or is not explicitly supplied to the task. Supply the path before task execution, or an empty value for an unused optional file.</value>
+    <comment>{0} is a task parameter name.</comment>
+  </data>
+  <data name="TaskCache.RuntimeUnavailable" xml:space="preserve">
+    <value>The optional task cache runtime could not be loaded. Reference Microsoft.Build.TaskCache or use an MSBuild distribution that includes the cache runtime.</value>
+    <comment>Do not translate Microsoft.Build.TaskCache or MSBuild.</comment>
+  </data>
+  <data name="TaskCache.OwnershipUnavailable" xml:space="preserve">
+    <value>Cannot acquire build cache ownership at "{0}". Another build may own this directory. Use a different -buildCacheDirectory or BuildParameters.BuildCacheDirectory, or retry after that build ends.</value>
+    <comment>{0} is the cache directory. Do not translate -buildCacheDirectory or BuildParameters.BuildCacheDirectory.</comment>
+  </data>
+  <data name="TaskCache.Diagnostics" xml:space="preserve">
+    <value>Task "{0}" was not cached because it logged an error, emitted a non-replayable diagnostic, or synchronous diagnostic capture was unavailable.</value>
+    <comment>{0} is the task name.</comment>
+  </data>
 </root>

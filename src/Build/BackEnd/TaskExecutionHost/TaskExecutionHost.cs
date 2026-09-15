@@ -63,7 +63,7 @@ namespace Microsoft.Build.BackEnd
     /// reflection, and executing the task in the appropriate context.The TaskExecutionHost does not deal with any part of the task declaration or
     /// XML.
     /// </summary>
-    internal class TaskExecutionHost : IDisposable
+    internal partial class TaskExecutionHost : IDisposable
     {
         /// <summary>
         /// Time interval in miliseconds to wait between receiving a cancelation signal and emitting the first warning that a non-cancelable task has not finished
@@ -296,6 +296,7 @@ namespace Microsoft.Build.BackEnd
             _projectFile = projectFile;
             _taskLocation = taskLocation;
             _cancellationTokenRegistration = cancellationToken.Register(Cancel);
+            _taskCacheCancellationToken = cancellationToken;
             _taskHost = taskHost;
             _taskExecutionIdle.Set();
 #if FEATURE_APPDOMAIN
@@ -569,6 +570,12 @@ namespace Microsoft.Build.BackEnd
 
             ArgumentNullException.ThrowIfNull(parameters);
 
+            _taskCache = null;
+            _taskCacheInputs = _buildComponentHost?.BuildParameters?.TaskCache == true
+                && TaskInvocationCache.HasDeclaredIO(_taskFactoryWrapper.TaskFactoryLoadedType.Type)
+                ? new Dictionary<string, byte[]>(MSBuildNameIgnoreCaseComparer.Default)
+                : null;
+
             bool taskInitialized = true;
 
             // Get the properties that exist on this task.  We need to gather all of the ones that are marked
@@ -741,17 +748,35 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Cleans up after running a batch.
         /// </summary>
-        public void CleanupForBatch()
+        public void CleanupForBatch(bool publishCache = false, TaskCacheDiagnosticCapture diagnostics = null)
         {
             try
             {
-                if (_taskFactoryWrapper != null && TaskInstance != null)
+                try
                 {
-                    _taskFactoryWrapper.TaskFactory.CleanupTask(TaskInstance);
+                    if (publishCache)
+                    {
+                        CaptureTaskCacheOutputs(diagnostics);
+                    }
+                }
+                finally
+                {
+                    diagnostics?.EndReplayablePhase();
+                    if (_taskFactoryWrapper != null && TaskInstance != null)
+                    {
+                        _taskFactoryWrapper.TaskFactory.CleanupTask(TaskInstance);
+                    }
+                }
+
+                if (publishCache)
+                {
+                    PublishTaskCache(diagnostics);
                 }
             }
             finally
             {
+                _taskCache = null;
+                _taskCacheInputs = null;
                 TaskInstance = null;
             }
         }
@@ -1118,7 +1143,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ITaskItem[] GetItemOutputs(TaskPropertyInfo parameter)
         {
-            object outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
+            object outputs = GetTaskOutputValue(parameter);
 
             if (outputs is ITaskItem[] taskItemOutputs)
             {
@@ -1151,7 +1176,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string[] GetValueOutputs(TaskPropertyInfo parameter)
         {
-            object outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
+            object outputs = GetTaskOutputValue(parameter);
 
             Array convertibleOutputs = parameter.PropertyType.IsArray ? (Array)outputs : new[] { outputs };
 
@@ -1742,6 +1767,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+                CaptureTaskCacheInput(parameter, parameterValue);
                 _taskFactoryWrapper.SetPropertyValue(TaskInstance, parameter, parameterValue);
                 success = true;
             }

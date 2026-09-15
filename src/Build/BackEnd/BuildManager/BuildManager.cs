@@ -20,6 +20,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -528,6 +529,21 @@ namespace Microsoft.Build.Execution
         [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public void BeginBuild(BuildParameters parameters)
         {
+            ValidateTaskCacheParameters(parameters);
+
+            static void ValidateTaskCacheParameters(BuildParameters? parameters)
+            {
+                if (parameters?.TaskCache == true && !TaskCacheStore.IsSupported)
+                {
+                    throw new ArgumentException(ResourceUtilities.GetResourceString("TaskCache.StorageUnavailable"), nameof(parameters));
+                }
+
+                if (parameters?.TaskCache == true && (parameters.Question || parameters.UsesCachedResults()))
+                {
+                    throw new ArgumentException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskCache.IncompatibleParameters"), nameof(parameters));
+                }
+            }
+
 #if NETFRAMEWORK
             // Collect telemetry unless explicitly opted out via environment variable.
             // The decision to send telemetry is made at EndBuild to avoid eager loading of telemetry assemblies.
@@ -614,6 +630,12 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+                if (_buildParameters.TaskCache)
+                {
+                    _buildParameters.BuildCacheDirectory = BuildParameters.ResolveBuildCacheDirectory(_buildParameters.BuildCacheDirectory);
+                    _buildParameters.ResetCaches = true;
+                    _buildParameters.DiscardBuildResults = true;
+                }
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
@@ -754,6 +776,59 @@ namespace Microsoft.Build.Execution
 
                 _noActiveSubmissionsEvent!.Set();
                 _noNodesActiveEvent!.Set();
+
+                if (_buildParameters.TaskCache)
+                {
+                    try
+                    {
+                        TaskCacheOwner owner = new(_buildParameters.BuildCacheDirectory,
+                            (node, packet) => _nodeManager.SendData(node, packet), _executionCancellationTokenSource.Token,
+                            reportFailure: OnLoggingThreadException);
+                        _buildParameters.TaskCacheBackend = owner;
+                        _nodeManager.RegisterPacketHandler(NodePacketType.TaskCacheRequest, TaskCachePacket.ReadRequest, owner);
+                        _nodeManager.RegisterPacketHandler(NodePacketType.TaskCacheCancel, TaskCachePacket.ReadCancel, owner);
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            _buildParameters.TaskCacheBackend?.Dispose();
+                        }
+                        catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                        {
+                            // Preserve the cache initialization failure.
+                        }
+                        finally
+                        {
+                            _buildParameters.TaskCacheBackend = null;
+                            try
+                            {
+                                _coordinatorClient?.Dispose();
+                            }
+                            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                            {
+                                // Cleanup must not replace the initialization failure.
+                            }
+                            finally
+                            {
+                                _coordinatorClient = null;
+                                try
+                                {
+                                    ShutdownLoggingService(loggingService);
+                                }
+                                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                                {
+                                    // Cleanup must not replace the initialization failure.
+                                }
+                                finally
+                                {
+                                    _buildManagerState = BuildManagerState.Idle;
+                                }
+                            }
+                        }
+                        throw;
+                    }
+                }
             }
 
             ILoggingService InitializeLoggingService()
@@ -1145,6 +1220,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 projectCacheDispose.Wait();
+                _buildParameters.TaskCacheBackend?.Dispose();
 
 #if DEBUG
                 if (_projectStartedEvents.Count != 0)
@@ -1195,6 +1271,22 @@ namespace Microsoft.Build.Execution
             {
                 try
                 {
+                    try
+                    {
+                        _buildParameters?.TaskCacheBackend?.Dispose();
+                    }
+                    catch (Exception e) when (exceptionsThrownInEndBuild && !ExceptionHandling.IsCriticalException(e))
+                    {
+                        // The original build/shutdown failure remains authoritative.
+                    }
+                    finally
+                    {
+                        if (_buildParameters is not null)
+                        {
+                            _buildParameters.TaskCacheBackend = null;
+                        }
+                    }
+
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
 
                     if (loggingService != null)
@@ -1640,7 +1732,7 @@ namespace Microsoft.Build.Execution
                     }
 
                     // Create/Retrieve a configuration for each request
-                    var buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion);
+                    var buildRequestConfiguration = new BuildRequestConfiguration(submission.BuildRequestData, _buildParameters.DefaultToolsVersion, _buildParameters.TaskCache);
                     var matchingConfiguration = _configCache!.GetMatchingConfiguration(buildRequestConfiguration);
                     resolvedConfiguration = ResolveConfiguration(
                         buildRequestConfiguration,
@@ -2264,8 +2356,30 @@ namespace Microsoft.Build.Execution
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
+                IEnumerable<ProjectGraphEntryPoint>? entryPoints = submission.BuildRequestData.ProjectGraphEntryPoints;
+                if (_buildParameters!.TaskCache)
+                {
+                    // Set the mode before graph construction so evaluation and graph
+                    // identity use the same globals, without modifying caller data.
+                    List<ProjectGraphEntryPoint> cacheEntryPoints = [];
+                    foreach (ProjectGraphEntryPoint entryPoint in entryPoints!)
+                    {
+                        Dictionary<string, string> globals = new(MSBuildNameIgnoreCaseComparer.Default);
+                        if (entryPoint.GlobalProperties is not null)
+                        {
+                            foreach (KeyValuePair<string, string> property in entryPoint.GlobalProperties)
+                            {
+                                globals[property.Key] = property.Value;
+                            }
+                        }
+                        globals[MSBuildConstants.MSBuildTaskCacheEnabled] = "true";
+                        cacheEntryPoints.Add(new ProjectGraphEntryPoint(entryPoint.ProjectFile, globals));
+                    }
+                    entryPoints = cacheEntryPoints;
+                }
+
                 projectGraph = new ProjectGraph(
-                    submission.BuildRequestData.ProjectGraphEntryPoints,
+                    entryPoints,
                     ProjectCollection.GlobalProjectCollection,
                     (path, properties, collection) =>
                     {

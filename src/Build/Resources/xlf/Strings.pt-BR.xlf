@@ -1110,6 +1110,101 @@ Erros: {3}</target>
         <target state="translated">O assembly da tarefa foi carregado de "{0}" enquanto o local desejado era "{1}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskCache.DeclaredIOInvalid">
+        <source>The task's file I/O annotations are invalid or name unsupported parameter types. Use unconditional class-level declarations naming string or ITaskItem parameters, or arrays of those types.</source>
+        <target state="new">The task's file I/O annotations are invalid or name unsupported parameter types. Use unconditional class-level declarations naming string or ITaskItem parameters, or arrays of those types.</target>
+        <note>Do not translate string or ITaskItem.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.DeclaredIOMarkerRequired">
+        <source>The task must have a class-level MSBuildDeclaredIOTask annotation. This annotation is the task author's promise that the file I/O declarations are complete and that the task has no undeclared side effects.</source>
+        <target state="new">The task must have a class-level MSBuildDeclaredIOTask annotation. This annotation is the task author's promise that the file I/O declarations are complete and that the task has no undeclared side effects.</target>
+        <note>Do not translate MSBuildDeclaredIOTask.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.DeclaredIOOptOut">
+        <source>This task exposes the optional Boolean MSBuildTaskCacheEnabled parameter but did not explicitly receive true. To enable caching for this task, pass MSBuildTaskCacheEnabled=true and satisfy the task's validation requirements.</source>
+        <target state="new">This task exposes the optional Boolean MSBuildTaskCacheEnabled parameter but did not explicitly receive true. To enable caching for this task, pass MSBuildTaskCacheEnabled=true and satisfy the task's validation requirements.</target>
+        <note>Do not translate MSBuildTaskCacheEnabled or true.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.DeclaredIOStructure">
+        <source>The task requires a standard assembly task factory, no host object or separate task-host process, supported primitive or item parameters, and literal requested output parameter names.</source>
+        <target state="new">The task requires a standard assembly task factory, no host object or separate task-host process, supported primitive or item parameters, and literal requested output parameter names.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskCache.DeclaredIOUnbound">
+        <source>Declared file parameter "{0}" is missing or is not explicitly supplied to the task. Supply the path before task execution, or an empty value for an unused optional file.</source>
+        <target state="new">Declared file parameter "{0}" is missing or is not explicitly supplied to the task. Supply the path before task execution, or an empty value for an unused optional file.</target>
+        <note>{0} is a task parameter name.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.Diagnostics">
+        <source>Task "{0}" was not cached because it logged an error, emitted a non-replayable diagnostic, or synchronous diagnostic capture was unavailable.</source>
+        <target state="new">Task "{0}" was not cached because it logged an error, emitted a non-replayable diagnostic, or synchronous diagnostic capture was unavailable.</target>
+        <note>{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.Hit">
+        <source>Task-cache hit for "{0}": restored file artifacts and raw task outputs.</source>
+        <target state="new">Task-cache hit for "{0}": restored file artifacts and raw task outputs.</target>
+        <note>{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.IncompatibleParameters">
+        <source>TaskCache cannot be combined with Question, InputResultsCacheFiles, or OutputResultsCacheFile. Disable TaskCache or remove the conflicting build parameter.</source>
+        <target state="new">TaskCache cannot be combined with Question, InputResultsCacheFiles, or OutputResultsCacheFile. Disable TaskCache or remove the conflicting build parameter.</target>
+        <note>Do not translate property names.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.InputsChanged">
+        <source>MSB4291: Task "{0}" was not cached because its inputs changed during execution. Ensure that tasks do not modify each other's inputs while running.</source>
+        <target state="new">MSB4291: Task "{0}" was not cached because its inputs changed during execution. Ensure that tasks do not modify each other's inputs while running.</target>
+        <note>{StrBegin="MSB4291: "}{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.Miss">
+        <source>No matching task-cache entry for "{0}"; executing the task.</source>
+        <target state="new">No matching task-cache entry for "{0}"; executing the task.</target>
+        <note>{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.NoCacheDirectory">
+        <source>The user cache directory could not be determined. Set BuildCacheDirectory or supply -buildCacheDirectory with an absolute directory path.</source>
+        <target state="new">The user cache directory could not be determined. Set BuildCacheDirectory or supply -buildCacheDirectory with an absolute directory path.</target>
+        <note>Do not translate BuildCacheDirectory or -buildCacheDirectory.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.OperationFailed">
+        <source>MSB4292: The cache operation for task "{0}" failed: {1} Check the cache directory, available disk space, and file permissions. Fix the problem, then clean and rebuild.</source>
+        <target state="new">MSB4292: The cache operation for task "{0}" failed: {1} Check the cache directory, available disk space, and file permissions. Fix the problem, then clean and rebuild.</target>
+        <note>{StrBegin="MSB4292: "}{0} is the task name; {1} is an exception message.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.OwnershipUnavailable">
+        <source>Cannot acquire build cache ownership at "{0}". Another build may own this directory. Use a different -buildCacheDirectory or BuildParameters.BuildCacheDirectory, or retry after that build ends.</source>
+        <target state="new">Cannot acquire build cache ownership at "{0}". Another build may own this directory. Use a different -buildCacheDirectory or BuildParameters.BuildCacheDirectory, or retry after that build ends.</target>
+        <note>{0} is the cache directory. Do not translate -buildCacheDirectory or BuildParameters.BuildCacheDirectory.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.ReadWriteOverlap">
+        <source>The task reads and writes the same file. Declare disjoint normalized input and output file paths.</source>
+        <target state="new">The task reads and writes the same file. Declare disjoint normalized input and output file paths.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskCache.Rejected">
+        <source>MSB4287: Task "{0}" will execute without caching: {1} Use a supported task invocation or disable -taskCache to suppress this warning.</source>
+        <target state="new">MSB4287: Task "{0}" will execute without caching: {1} Use a supported task invocation or disable -taskCache to suppress this warning.</target>
+        <note>{StrBegin="MSB4287: "}{0} is the task name; {1} is a localized rejection reason. Do not translate -taskCache.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.RestoreFailed">
+        <source>MSB4289: Restoring cached task "{0}" failed: {1} Outputs may be partially replaced. Fix the filesystem problem, then clean and rebuild.</source>
+        <target state="new">MSB4289: Restoring cached task "{0}" failed: {1} Outputs may be partially replaced. Fix the filesystem problem, then clean and rebuild.</target>
+        <note>{StrBegin="MSB4289: "}{0} is the task name; {1} is an exception message. Do not translate -taskCache.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.RuntimeUnavailable">
+        <source>The optional task cache runtime could not be loaded. Reference Microsoft.Build.TaskCache or use an MSBuild distribution that includes the cache runtime.</source>
+        <target state="new">The optional task cache runtime could not be loaded. Reference Microsoft.Build.TaskCache or use an MSBuild distribution that includes the cache runtime.</target>
+        <note>Do not translate Microsoft.Build.TaskCache or MSBuild.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.StorageUnavailable">
+        <source>Task invocation caching has no supported storage backend in this MSBuild distribution or process architecture. Disable TaskCache or use a distribution with a supported task-cache backend.</source>
+        <target state="new">Task invocation caching has no supported storage backend in this MSBuild distribution or process architecture. Disable TaskCache or use a distribution with a supported task-cache backend.</target>
+        <note>Do not translate TaskCache or MSBuild.</note>
+      </trans-unit>
+      <trans-unit id="TaskCache.Unavailable">
+        <source>MSB4288: Inputs for task "{0}" could not be captured for caching: {1} Execution will continue without caching. Use supported task parameter values or disable -taskCache.</source>
+        <target state="new">MSB4288: Inputs for task "{0}" could not be captured for caching: {1} Execution will continue without caching. Use supported task parameter values or disable -taskCache.</target>
+        <note>{StrBegin="MSB4288: "}{0} is the task name; {1} is an exception message. Do not translate -taskCache.</note>
+      </trans-unit>
       <trans-unit id="TaskHostDetails">
         <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
         <target state="translated">A tarefa "{0}" foi executada no processo TaskHost {1}, gerado pelo processo chamador {2}. Novo TaskHost gerado para esta invocação: {3}. TaskHost é um sidecar reutilizável: {4}. Reutilização do nó: {5}.</target>

@@ -1837,8 +1837,44 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1073.
+        Next error code should be MSB1079.
 
         Don't forget to update this comment after using the new code.
   -->
+  <data name="HelpMessage_TaskCache" xml:space="preserve">
+    <value>  -taskCache[:True|False]
+                     Cache eligible task invocations by content. Normal target
+                     incrementality is preserved. Use
+                     -buildCacheDirectory:path to change storage.
+                     Cannot be combined with -question or results cache
+                     switches.</value>
+    <comment>Do not translate switch names.</comment>
+  </data>
+  <data name="InvalidTaskCacheValue" xml:space="preserve">
+    <value>MSBUILD : error MSB1074: The taskCache switch requires a Boolean value. Use -taskCache, -taskCache:true, or -taskCache:false.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1074: "}Do not translate switch names.</comment>
+  </data>
+  <data name="TaskCacheIncompatibleSwitches" xml:space="preserve">
+    <value>MSBUILD : error MSB1075: Task caching cannot be combined with -question, -inputResultsCaches, or -outputResultsCache. Remove the conflicting switch or disable -taskCache.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1075: "}Do not translate switch names.</comment>
+  </data>
+  <data name="InvalidBuildCacheDirectory" xml:space="preserve">
+    <value>MSBUILD : error MSB1076: The build cache directory could not be opened: {0} Supply -buildCacheDirectory with an available, writable directory, or retry after its owning build ends.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1076: "}{0} is an exception message. Do not translate -buildCacheDirectory.</comment>
+  </data>
+  <data name="HelpMessage_BuildCacheDirectory" xml:space="preserve">
+    <value>  -buildCacheDirectory:&lt;path&gt;
+                     Set the build cache directory. Relative paths are resolved
+                     from the command-line working directory. This switch does
+                     not enable caching; use -taskCache to enable task caching.</value>
+    <comment>Do not translate switch names.</comment>
+  </data>
+  <data name="MissingBuildCacheDirectoryError" xml:space="preserve">
+    <value>MSBUILD : error MSB1078: A directory path must be specified for -buildCacheDirectory. Use -buildCacheDirectory:&lt;path&gt;.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1078: "}Do not translate -buildCacheDirectory.</comment>
+  </data>
+  <data name="TaskCacheStorageUnavailable" xml:space="preserve">
+    <value>MSBUILD : error MSB1077: Task invocation caching has no supported storage backend in this MSBuild distribution or process architecture. Remove -taskCache or use a distribution with a supported task-cache backend.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1077: "}Do not translate -taskCache or MSBuild.</comment>
+  </data>
 </root>

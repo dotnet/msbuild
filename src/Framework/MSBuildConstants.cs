@@ -20,6 +20,11 @@ namespace Microsoft.Build.Shared
         internal const string ToolsPath = "MSBuildToolsPath";
 
         /// <summary>
+        /// Global property and explicit task parameter identifying task-cache execution.
+        /// </summary>
+        internal const string MSBuildTaskCacheEnabled = nameof(MSBuildTaskCacheEnabled);
+
+        /// <summary>
         /// Name of the property that indicates the X64 tools path
         /// </summary>
         internal const string ToolsPath64 = "MSBuildToolsPath64";
