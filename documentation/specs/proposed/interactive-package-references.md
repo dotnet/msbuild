@@ -6,7 +6,7 @@ It is inspired by the golang modules design - where a standalone dependency (mod
 
 # North Star / Longer-term vision
 
-We envision the 'packages sourcing' to be a first-class-citizen within nuget client (and hence [`dotnet restore`](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-restore)). Via denoting specific metadata on `PackageReference` it would be possible to perform specific mode of restore operation for the particular package reference - by pointing to a local sources, or letting the command to figure out and fetch apropriate sources:
+We envision the 'packages sourcing' to be a first-class-citizen within nuget client (and hence [`dotnet restore`](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-restore)). Via denoting specific metadata on `PackageReference` it would be possible to perform specific mode of restore operation for the particular package reference - by pointing to a local sources, or letting the command to figure out and fetch appropriate sources:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
