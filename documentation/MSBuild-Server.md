@@ -70,6 +70,8 @@ Server requires to introduce new packet types for IPC.
 | Text                     | String        | The text that is written to the output stream. It includes ANSI escape codes for formatting. |
 | OutputType               | Byte          | Identification of the output stream (1 = standard output, 2 = error output) |
 
+Task-host console forwarding requires protocol v7. Owned sidecars can retain their connection across builds using the lifetime protocol introduced in v6, but console writers are disposed during per-build cleanup and forwarding is enabled again for the next build. Writers cached by a previous build remain inert.
+
 `ServerNodeBuildResult` indicates how the build finished.
 
 | Property name            | Type          | Description |

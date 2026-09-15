@@ -946,9 +946,8 @@ namespace Microsoft.Build.BackEnd
                         nodeKey.ForwardConsoleOutput &&
                         nodeKey.NodeId == NodeManager.FirstMultiThreadedNodeId &&
                         context.NegotiatedPacketVersion >= NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion &&
-                        wasNewlyCreated)
+                        _consoleForwardingNodeIds.Add(context.NodeId))
                     {
-                        _consoleForwardingNodeIds.Add(context.NodeId);
                         context.SendData(new TaskHostConsoleConfiguration());
                     }
                 }

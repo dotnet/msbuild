@@ -25,6 +25,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     [InlineData(4)]
     [InlineData(5)]
     [InlineData(6)]
+    [InlineData(7)]
     public void CompletionActionRequiresNegotiatedSupport(byte version)
     {
         using MemoryStream stream = new();
@@ -56,6 +57,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     [Theory]
     [InlineData(5, false)]
     [InlineData(6, true)]
+    [InlineData(7, true)]
     public void Clr4CompletionUsesVersionedLifetimeActions(byte version, bool extended)
     {
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
@@ -64,6 +66,19 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
             HandshakeOptions.TaskHost, NodePacketType.TaskHostConfiguration, out _, version).ShouldBeFalse(
                 "CLR4 task configuration keeps its AppDomain-compatible format");
+    }
+
+    [Fact]
+    public void ConsoleForwardingRequiresANewerProtocolThanOwnership()
+    {
+        NodePacketTypeExtensions.TaskHostOwnershipMinVersion.ShouldBe((byte)6);
+        NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion.ShouldBe((byte)7);
+        NodePacketTypeExtensions.GetNegotiatedPacketVersion(6)
+            .ShouldBeLessThan(NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion);
+        NodePacketTypeExtensions.GetNegotiatedPacketVersion(7)
+            .ShouldBe(NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion);
+        ((byte)new TaskHostConsoleConfiguration().Type).ShouldBe((byte)0x26);
+        ((byte)new ConsoleWritePacket(string.Empty, ConsoleOutput.Standard).Type).ShouldBe((byte)0x3E);
     }
 
     [Fact]

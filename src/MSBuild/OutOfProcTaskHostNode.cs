@@ -1466,6 +1466,9 @@ namespace Microsoft.Build.CommandLine
             // stays alive; a node that exited at the end of a build did it in HandleShutdown.
             _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
 
+            // The connection can survive this build, but cached console writers must not.
+            ShutdownConsoleRedirection();
+
             // A cancellation that arrived as the build was ending would otherwise still be signalled
             // and would spin the next build's wait loop.
             _taskCancelledEvent.Reset();

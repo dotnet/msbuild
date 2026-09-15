@@ -91,14 +91,20 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void ResetsBetweenBuildsWithReusedTaskHost(bool standardError)
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void ResetsBetweenBuildsWithReusedTaskHost(bool standardError, bool retainConnection)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
+        ChangeWaves.ResetStateForTests();
         using BuildManager buildManager = new();
         string projectFile = CreateProject(env, explicitTaskHost: false);
         int? firstProcessId = null;
+        NodeProviderOutOfProcBase.NodeContext? firstConnection = null;
 
         (string Text, bool UseCachedWriter, bool Expected)[] builds =
         [
@@ -139,6 +145,18 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
 
             NodeProviderOutOfProcTaskHost provider = ((IBuildComponentHost)buildManager)
                 .GetComponent<NodeProviderOutOfProcTaskHost>(BuildComponentType.OutOfProcTaskHostNodeProvider);
+            if (retainConnection)
+            {
+                NodeProviderOutOfProcBase.NodeContext connection = provider.ConnectedNodes.Values.ShouldHaveSingleItem();
+                connection.ConnectionPersistsAcrossBuilds.ShouldBeTrue();
+                firstConnection ??= connection;
+                connection.ShouldBeSameAs(firstConnection);
+            }
+            else
+            {
+                provider.ConnectedNodes.ShouldBeEmpty();
+            }
+
             provider.ConsoleOutputForwarded.ShouldBeFalse();
             provider.PacketReceived(1, new ConsoleWritePacket("late output", ConsoleOutput.Standard));
             provider.ConsoleOutputForwarded.ShouldBeFalse();

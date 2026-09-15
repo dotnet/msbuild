@@ -321,14 +321,27 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldNotContain("EXPLICIT-TASKHOST-STDERR");
         }
 
-        [Fact]
-        public void ReusedTaskHostDiscardsOutputFromCachedWriter()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReusedTaskHostDiscardsOutputFromCachedWriter(bool retainConnection)
         {
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
+#if NET
+            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(_env);
+#endif
             string project = $"""
                 <Project>
                     <UsingTask TaskName="CachedConsoleWriterTestTask" AssemblyFile="{typeof(CachedConsoleWriterTestTask).Assembly.Location}" />
+                    <UsingTask TaskName="ProcessIdTask" AssemblyFile="{typeof(ProcessIdTask).Assembly.Location}" />
 
                     <Target Name="Build">
+                        <ProcessIdTask>
+                            <Output TaskParameter="Pid" PropertyName="OwnerPid" />
+                        </ProcessIdTask>
+                        <Message Importance="High" Text="OwnerProcessId=$(OwnerPid);" />
                         <CachedConsoleWriterTestTask ExpectedExecutionCount="$(ExpectedExecutionCount)" />
                     </Target>
                 </Project>
@@ -346,7 +359,9 @@ namespace Microsoft.Build.Engine.UnitTests
             firstBuildSucceeded.ShouldBeTrue(firstOutput);
             firstOutput.ShouldContain("ExecutionCount=1");
             firstOutput.ShouldContain("Output through current writer 1");
-            int taskHostProcessId = ParseTaskHostProcessId(firstOutput);
+            int ownerProcessId = ParseProcessId(firstOutput, "OwnerProcessId=");
+            _env.WithTransientProcess(ownerProcessId);
+            int taskHostProcessId = ParseProcessId(firstOutput, "TaskHostProcessId=");
             _env.WithTransientProcess(taskHostProcessId);
 
             string secondOutput = RunnerUtilities.ExecMSBuild(
@@ -360,12 +375,12 @@ namespace Microsoft.Build.Engine.UnitTests
             secondOutput.ShouldContain("ExecutionCount=2");
             secondOutput.ShouldContain("Output through current writer 2");
             secondOutput.ShouldNotContain("Output through stale cached writer");
-            ParseTaskHostProcessId(secondOutput).ShouldBe(taskHostProcessId);
+            ParseProcessId(secondOutput, "TaskHostProcessId=").ShouldBe(taskHostProcessId);
+            ParseProcessId(secondOutput, "OwnerProcessId=").ShouldBe(ownerProcessId);
         }
 
-        private static int ParseTaskHostProcessId(string output)
+        private static int ParseProcessId(string output, string prefix)
         {
-            const string prefix = "TaskHostProcessId=";
             int processIdStart = output.IndexOf(prefix, StringComparison.Ordinal);
             processIdStart.ShouldBeGreaterThanOrEqualTo(0);
             processIdStart += prefix.Length;

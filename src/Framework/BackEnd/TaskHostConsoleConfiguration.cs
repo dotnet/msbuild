@@ -3,6 +3,9 @@
 
 namespace Microsoft.Build.BackEnd
 {
+    /// <summary>
+    /// Enables task-host console forwarding for the current build.
+    /// </summary>
     internal sealed class TaskHostConsoleConfiguration : INodePacket
     {
         public NodePacketType Type => NodePacketType.TaskHostConsoleConfiguration;
