@@ -671,7 +671,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Handle logged messages from the task host.
         /// </summary>
-        private void HandleLoggedMessage(LogMessagePacket logMessagePacket)
+        internal void HandleLoggedMessage(LogMessagePacket logMessagePacket)
         {
             // Before Wave18_12 the switch below enumerated only these five event kinds and had no default case,
             // so every other kind - extended events, critical messages, telemetry - was dropped without a trace.
