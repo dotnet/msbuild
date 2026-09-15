@@ -7,7 +7,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.Experimental.FileAccess;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
@@ -735,5 +739,80 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var outputItems = projectInstance.GetItems("OutputItems");
             outputItems.Count.ShouldBe(3, "Null elements should be filtered from the string array");
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Regression coverage for https://github.com/dotnet/msbuild/issues/14826.
+        /// </summary>
+        [WindowsFullFrameworkOnlyFact]
+        public void TaskHostIgnoresReportedFileAccessesWhenReportingIsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string projectContents = $"""
+                <Project>
+                    <UsingTask TaskName="{nameof(ReportFileAccessTask)}" AssemblyFile="{AssemblyLocation}" TaskFactory="TaskHostFactory" />
+                    <Target Name="Build">
+                        <{nameof(ReportFileAccessTask)} />
+                    </Target>
+                </Project>
+                """;
+            TransientTestFile project = env.CreateFile("fileAccessProject.proj", projectContents);
+            MockLogger logger = new(_output);
+
+            BuildResult result = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { Loggers = [logger], ReportFileAccesses = false },
+                new BuildRequestData(project.Path, new Dictionary<string, string>(), null, ["Build"], null));
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            logger.AssertNoErrors();
+        }
+
+        [Theory]
+        [InlineData(false, 1, false)]
+        [InlineData(true, 0, false)]
+        [InlineData(true, 1, true)]
+        public void TaskHostFileAccessReplayHonorsReportingConfiguration(
+            bool reportFileAccesses,
+            int fileAccessCount,
+            bool expected)
+        {
+            List<FileAccessData> fileAccesses = [];
+            for (int i = 0; i < fileAccessCount; i++)
+            {
+                fileAccesses.Add(default);
+            }
+
+            TaskHostTask.ShouldReplayFileAccesses(reportFileAccesses, fileAccesses).ShouldBe(expected);
+        }
+#endif
     }
+
+#if FEATURE_REPORTFILEACCESSES
+    public sealed class ReportFileAccessTask : Microsoft.Build.Utilities.Task
+    {
+        public const string ReportedPath = @"C:\repo\input.txt";
+
+        public override bool Execute()
+        {
+            EngineServices engineServices = ((IBuildEngine10)BuildEngine).EngineServices;
+            engineServices.GetType().GetMethod("ReportFileAccess").Invoke(
+                engineServices,
+                [
+                    new FileAccessData(
+                        ReportedFileOperation.CreateFile,
+                        RequestedAccess.Read,
+                        processId: 123,
+                        id: 1,
+                        correlationId: 0,
+                        error: 0,
+                        DesiredAccess.GENERIC_READ,
+                        FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
+                        ReportedPath,
+                        processArgs: null,
+                        isAnAugmentedFileAccess: true),
+                ]);
+            return true;
+        }
+    }
+#endif
 }

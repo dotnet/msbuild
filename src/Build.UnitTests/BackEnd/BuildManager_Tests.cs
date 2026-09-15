@@ -4715,6 +4715,27 @@ $@"<Project InitialTargets=`Sleep`>
             _logger.AssertLogContains("MSB4040");
         }
 
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Ensures programmatic callers receive an actionable failure for the unsupported combination from
+        /// https://github.com/dotnet/msbuild/issues/14825.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedAndReportFileAccessesAreRejectedBeforeBuildStarts()
+        {
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                ReportFileAccesses = true,
+            };
+
+            InvalidOperationException exception = Should.Throw<InvalidOperationException>(
+                () => _buildManager.BeginBuild(parameters));
+
+            exception.Message.ShouldContain("File-access reporting cannot be used with multi-threaded mode.");
+        }
+#endif
+
         /// <summary>
         /// Verifies that MT mode builds with multiple projects referencing the same dependency
         /// with different target sets do not crash with "Results for configuration X were not

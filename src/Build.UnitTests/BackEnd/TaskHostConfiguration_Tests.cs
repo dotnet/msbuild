@@ -911,7 +911,37 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserializedConfig.BuildProcessEnvironment["PATH"].ShouldBe(@"c:\windows");
         }
 
-        private TaskHostConfiguration CreateConfigurationWithGlobalProperties(Dictionary<string, string> globalProperties)
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Regression coverage for https://github.com/dotnet/msbuild/issues/14826.
+        /// </summary>
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData(0, true)]
+        [InlineData(5, false)]
+        [InlineData(6, true)]
+        public void ReportFileAccessesHonorsTaskHostProtocolVersion(int? packetVersion, bool expected)
+        {
+            TaskHostConfiguration config = CreateConfigurationWithGlobalProperties(
+                new Dictionary<string, string>(),
+                reportFileAccesses: true);
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = (byte?)packetVersion;
+            ((ITranslatable)config).Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = (byte?)packetVersion;
+            TaskHostConfiguration deserialized = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
+
+            deserialized.ReportFileAccesses.ShouldBe(expected);
+        }
+
+#endif
+
+        private TaskHostConfiguration CreateConfigurationWithGlobalProperties(
+            Dictionary<string, string> globalProperties,
+            bool reportFileAccesses = false)
         {
             return new TaskHostConfiguration(
                 nodeId: 1,
@@ -936,7 +966,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 globalParameters: globalProperties,
                 warningsAsErrors: null,
                 warningsNotAsErrors: null,
-                warningsAsMessages: null);
+                warningsAsMessages: null,
+                reportFileAccesses: reportFileAccesses);
         }
 
         private TaskHostConfiguration CreateConfigurationWithEnvironment(Dictionary<string, string> environment)

@@ -320,6 +320,12 @@ namespace Microsoft.Build.BackEnd
                     taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
                 }
 
+#if FEATURE_REPORTFILEACCESSES
+                bool reportFileAccesses = _buildComponentHost.BuildParameters.ReportFileAccesses;
+#else
+                const bool reportFileAccesses = false;
+#endif
+
                 TaskHostConfiguration hostConfiguration =
                     new TaskHostConfiguration(
                             _buildComponentHost.BuildParameters.NodeId,
@@ -344,7 +350,8 @@ namespace Microsoft.Build.BackEnd
                             GetGlobalPropertiesForTaskHost(),
                             _taskLoggingContext.GetWarningsAsErrors(),
                             _taskLoggingContext.GetWarningsNotAsErrors(),
-                            _taskLoggingContext.GetWarningsAsMessages());
+                            _taskLoggingContext.GetWarningsAsMessages(),
+                            reportFileAccesses);
 
                 try
                 {
@@ -575,7 +582,9 @@ namespace Microsoft.Build.BackEnd
         private void HandleTaskHostTaskComplete(TaskHostTaskComplete taskHostTaskComplete)
         {
 #if FEATURE_REPORTFILEACCESSES
-            if (taskHostTaskComplete.FileAccessData?.Count > 0)
+            if (ShouldReplayFileAccesses(
+                _buildComponentHost.BuildParameters.ReportFileAccesses,
+                taskHostTaskComplete.FileAccessData))
             {
                 IFileAccessManager fileAccessManager = ((IFileAccessManager)_buildComponentHost.GetComponent(BuildComponentType.FileAccessManager));
                 foreach (FileAccessData fileAccessData in taskHostTaskComplete.FileAccessData)
@@ -642,6 +651,11 @@ namespace Microsoft.Build.BackEnd
                 _setParameters[outputParam.Key] = outputParam.Value?.WrappedParameter;
             }
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        internal static bool ShouldReplayFileAccesses(bool reportFileAccesses, IReadOnlyCollection<FileAccessData> fileAccessData)
+            => reportFileAccesses && fileAccessData?.Count > 0;
+#endif
 
         /// <summary>
         /// The task host node failed for some reason
