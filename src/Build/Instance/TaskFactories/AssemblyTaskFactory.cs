@@ -352,12 +352,11 @@ namespace Microsoft.Build.BackEnd
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
                 mergedParameters = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
-                // Sidecar here means that the task host is launched with /nodeReuse:true and doesn't terminate
-                // after the task execution. This improves performance for tasks that run multiple times in a build.
-                // If the task host factory is explicitly requested, do not act as a sidecar task host.
-                // This is important as customers use task host factories for short lived tasks to release
-                // potential locks.
-                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
+                // Launching with /nodeReuse:true keeps the task host alive after the task finishes,
+                // which improves performance for tasks that run multiple times in a build. An
+                // explicitly requested task host factory is deliberately excluded: customers use it
+                // for short lived tasks precisely so the process exits and releases its locks.
+                bool allowNodeReuse = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
@@ -365,7 +364,7 @@ namespace Microsoft.Build.BackEnd
                     buildComponentHost,
                     mergedParameters,
                     _loadedType,
-                    useSidecarTaskHost: useSidecarTaskHost,
+                    allowNodeReuse: allowNodeReuse,
                     projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
