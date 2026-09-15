@@ -1256,6 +1256,14 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+                if (!_cancellationTokenSource.IsCancellationRequested
+                    && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
+                    && scope.BuildId == _componentHost.BuildParameters.BuildId)
+                {
+                    // Throw through the normal project-error path so cached and returned results retain the failure.
+                    scope.VerifyUnresolvedPathWrites(_requestEntry.RequestConfiguration.Project.ProjectFileLocation);
+                }
+
                 // Populate the evaluation ID from the configuration for sending to the central node.
                 result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
 

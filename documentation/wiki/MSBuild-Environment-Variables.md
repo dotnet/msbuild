@@ -40,5 +40,7 @@ Some of the env variables listed here are unsupported, meaning there is no guara
   - Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build). This overrides and ignores any `-multiThreaded` / `-mt` command-line switch.
 - `MSBUILDENABLEMULTITHREADED=1`
   - Enable multi-threaded mode by default while allowing an explicit `-multiThreaded:false` / `-mt:false` command-line switch to disable it.
+- `MSBUILDMTNONSTRICT=1`
+  - Opt out of the default strict checks in multi-threaded builds without disabling MT. Accepts `1` or `true` (case-insensitive); unset, `0`, `false`, and other values leave the checks enabled. Set this in the environment before starting MSBuild. Applies to CLI and API MT builds; non-MT builds are unaffected. See [Multithreaded MSBuild](../specs/multithreading/multithreaded-msbuild.md#strict-mode).
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
   - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system.

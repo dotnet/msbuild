@@ -530,17 +530,29 @@ namespace Microsoft.Build.BackEnd
 
             InitializeProject(componentHost.BuildParameters, () =>
             {
+                // Strict mode pins the process current directory to a sentinel directory for the whole build so
+                // that unresolved relative paths fail deterministically. Resetting it here would silently undo
+                // that, for this build or for a strict build running concurrently in the same process, so the
+                // installed scope is honored regardless of which build is loading the project. This is
+                // process-scoped on purpose: another build in this process may own the scope.
+                // Outside strict mode the legacy reset is preserved exactly as before.
                 if (componentHost.BuildParameters.SaveOperatingEnvironment)
                 {
-                    try
+                    lock (NativeMethodsShared.CurrentDirectoryLock)
                     {
-                        NativeMethodsShared.SetCurrentDirectory(BuildParameters.StartupDirectory);
-                    }
-                    catch (DirectoryNotFoundException)
-                    {
-                        // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
-                        NativeMethodsShared.SetCurrentDirectory(
-                            BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+                        if (MultiThreadedStrictModeScope.ActiveScope is null)
+                        {
+                            try
+                            {
+                                NativeMethodsShared.SetCurrentDirectory(BuildParameters.StartupDirectory);
+                            }
+                            catch (DirectoryNotFoundException)
+                            {
+                                // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
+                                NativeMethodsShared.SetCurrentDirectory(
+                                    BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+                            }
+                        }
                     }
                 }
 

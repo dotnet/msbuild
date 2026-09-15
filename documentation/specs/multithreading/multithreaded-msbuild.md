@@ -250,11 +250,88 @@ In the initial phase of development of multithreaded execution mode, all tasks w
 
 To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the `TaskEnvironment` object (for tasks that also implement `IMultiThreadableTask`).
 
+## Strict mode
+
+These defaults are part of experimental, opt-in MT, so they are not separately ChangeWave-gated.
+
+Multi-threaded builds use strict checks by default. Strict mode changes the process current directory
+to a fresh, empty temporary directory (the sentinel) for the build. A task that uses an unresolved relative path
+then looks there instead of accidentally finding another project's files. Paths resolved through
+the injected `TaskEnvironment` still point to the project.
+
+The checks apply to `-mt` / `-multiThreaded`, MT builds selected through
+`MSBUILDENABLEMULTITHREADED` or `MSBUILDFORCEMULTITHREADED`, and API builds with
+`BuildParameters.MultiThreaded = true`. Non-MT builds are unchanged.
+
+Set **`MSBUILDMTNONSTRICT=1`** (or `true`, case-insensitive) in the environment before starting
+MSBuild to opt out of strict checks without disabling MT. Unset the variable or set it to `0`
+or `false` to retain the default checks. Other values do not opt out. There is no separate
+strict-mode command-line switch, project property, or public API setting.
+API hosts can change the environment variable before a subsequent `BeginBuild`; its value is
+captured once for that build and copied into its child-process environment, including when reusing
+`BuildParameters`. Changing it during execution does not change the active checks.
+Use absolute entry-project paths in API builds, or construct relative-path `BuildRequestData`
+before `BeginBuild`, while the host's working directory is still active.
+
+After task execution, output retrieval and task-factory cleanup return, MSBuild checks and repairs
+process CWD. The more expensive sentinel-directory scan runs after a project's requested targets
+finish, before its result is reported, and once more at build completion. Cancellation skips these checks.
+
+| Diagnostic | Check boundary | Meaning |
+|---|---|---|
+| `MSB4286` | Task completion | The process current directory changed. MSBuild resets it to the sentinel. |
+| `MSB4287` | Project or build completion | Files or directories remain in the sentinel. MSBuild attempts to remove them. |
+
+`MSB4286` fails the task and follows `ContinueOnError`. For a CI gate, use
+`"-warnAsError:MSB4286"` to prevent `ContinueOnError` from turning it into a passing warning.
+Do not also suppress that code through `-nowarn` or `MSBuildWarningsAsMessages`;
+normal warning-to-message suppression takes precedence over warning-to-error promotion.
+`MSB4287` is a project/build error, not a failure of the task that happened to write the file.
+The writing task and its target can finish successfully, and that task's `ContinueOnError`
+does not downgrade the later error. Project results, including cached failures, reflect the violation.
+Existing task diagnostics keep their normal timing: `MSB4181` can appear alongside a strict
+diagnostic. Cancellation does not retract earlier diagnostics.
+For otherwise-successful builds, the final directory scan runs after node and project-cache
+cleanup and logging callbacks, before output caches are serialized; a late violation fails `EndBuild`.
+The host directory captured before logger initialization is restored when the build ends; relative
+API output-cache paths also resolve from that directory. Failures to enable strict
+mode, check its state, or restore the directory fail the build; they do not silently disable checks.
+After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
+Locked leftovers are not reused by later builds. Cleanup is best-effort and does not replace
+the reported build result.
+The cleanup path is derived from the scope's unique temporary root, never from mutable process CWD.
+Late teardown of overlapping non-strict builds does not restore an expired sentinel or displace an
+active strict scope.
+
+Each independently observed CWD change is reported, even if an earlier task changed to the
+same directory. An undeletable sentinel entry is reported once while it remains present;
+later checks retry removal and retire its remembered name when it is no longer observed.
+
+For migration sign-off, also [capture a binlog and search for sentinel-path leaks](thread-safe-tasks.md#validate-a-task-migration).
+A successful build alone does not establish that the migration is correct.
+
+Strict mode is not complete file-access tracking. A missing-file probe or a swallowed exception
+can still leave the build green. CWD changes undone within a task can escape detection.
+Files created and removed before the next project/build scan also escape detection, and a later
+task can consume a stray file before that scan removes it. This delayed observation avoids
+serialized directory enumeration after every task.
+Concurrent projects, tasks, loggers and host code share the process; the task or project observing
+a violation is not necessarily its originator. Use a dedicated process; concurrent API builds
+in that process are not isolated from this mode.
+
+Unannotated tasks retain their TaskHost working directory, but can still receive an incorrect
+absolute path from project or engine code. When constructing a nested task, pass the parent's
+`TaskEnvironment` to it. Child MSBuild processes also use strict checks when they run
+multi-threaded, unless they inherit the `MSBUILDMTNONSTRICT` opt-out. The opt-out does not
+itself enable MT in a child process.
+
 ## Interaction with `DisableInProcNode`
 
 We need to ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.
 
-This section describes the intended Visual Studio topology, not the current implementation invariant that multithreaded mode implies all worker nodes are in-proc.
+`MultiThreaded=true` with `DisableInProcNode=true` is not yet supported: the scheduler cannot
+allocate a worker and fails before task execution. This restriction is independent of strict
+checks; the topology below describes the intended implementation.
 
 ```mermaid
 sequenceDiagram

@@ -1185,7 +1185,18 @@ internal static class NativeMethods
     }
 #endif
 
+    // Acquire after BuildManager's lock; never call user code while holding this lock.
+    internal static object CurrentDirectoryLock { get; } = new();
+
     internal static bool SetCurrentDirectory(string path)
+    {
+        lock (CurrentDirectoryLock)
+        {
+            return SetCurrentDirectoryCore(path);
+        }
+    }
+
+    private static bool SetCurrentDirectoryCore(string path)
     {
 #if FEATURE_WINDOWSINTEROP
         if (IsWindows)

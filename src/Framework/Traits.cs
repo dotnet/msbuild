@@ -52,6 +52,11 @@ namespace Microsoft.Build.Framework
         public readonly bool EnableMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDENABLEMULTITHREADED") == "1";
 
         /// <summary>
+        /// Disable the default strict checks in multi-threaded builds without disabling multi-threading.
+        /// </summary>
+        public static bool MultiThreadedNonStrict => EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMTNONSTRICT");
+
+        /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
