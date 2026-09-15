@@ -255,7 +255,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (metadataContainer is ITaskItem taskItem)
             {
-                var metadata = taskItem.EnumerateMetadata();
+                var metadata = taskItem.EnumerateMetadataForLogging();
 
                 if (reusablePropertyList == null)
                 {

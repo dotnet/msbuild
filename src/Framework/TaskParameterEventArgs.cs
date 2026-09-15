@@ -246,7 +246,7 @@ namespace Microsoft.Build.Framework
             // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
             // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
             // CopyOnWriteDictionary doesn't implement it properly.
-            foreach (var kvp in taskItem.EnumerateMetadata())
+            foreach (var kvp in taskItem.EnumerateMetadataForLogging())
             {
                 reusableMetadataList.Add(kvp);
             }

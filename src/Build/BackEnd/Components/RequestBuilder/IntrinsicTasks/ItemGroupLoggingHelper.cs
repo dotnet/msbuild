@@ -193,33 +193,22 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                var customMetadata = item.CloneCustomMetadata();
-                int count = customMetadata.Count;
+                foreach (KeyValuePair<string, string> metadata in item.EnumerateMetadataForLogging())
+                {
+                    // need to initialize the thread static on each new thread
+                    if (keyValuePairList == null)
+                    {
+                        keyValuePairList = new List<KeyValuePair<string, string>>();
+                    }
+
+                    keyValuePairList.Add(metadata);
+                }
+
+                int count = keyValuePairList?.Count ?? 0;
 
                 if (count > 0)
                 {
                     sb.Append('\n');
-
-                    // need to initialize the thread static on each new thread
-                    if (keyValuePairList == null)
-                    {
-                        keyValuePairList = new List<KeyValuePair<string, string>>(count);
-                    }
-
-                    if (customMetadata is IDictionary<string, string> customMetadataDictionary)
-                    {
-                        foreach (KeyValuePair<string, string> kvp in customMetadataDictionary)
-                        {
-                            keyValuePairList.Add(kvp);
-                        }
-                    }
-                    else
-                    {
-                        foreach (DictionaryEntry kvp in customMetadata)
-                        {
-                            keyValuePairList.Add(new KeyValuePair<string, string>((string)kvp.Key, (string)kvp.Value));
-                        }
-                    }
 
                     if (count > 1)
                     {
@@ -359,7 +348,7 @@ namespace Microsoft.Build.BackEnd
                 var item = items[i];
                 if (item is ITaskItem taskItem)
                 {
-                    cloned[i] = new TaskItemData(taskItem);
+                    cloned[i] = new TaskItemData(taskItem, evaluateMetadata: true);
                 }
                 else
                 {
