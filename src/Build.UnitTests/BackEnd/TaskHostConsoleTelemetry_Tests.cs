@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
@@ -91,11 +92,13 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
     }
 
     [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(true, true)]
-    public void ResetsBetweenBuildsWithReusedTaskHost(bool standardError, bool retainConnection)
+    [InlineData(false, false, false)]
+    [InlineData(true, false, false)]
+    [InlineData(false, true, false)]
+    [InlineData(true, true, false)]
+    [InlineData(false, false, true)]
+    [InlineData(true, false, true)]
+    public void ResetsBetweenBuildsWithReusedTaskHost(bool standardError, bool retainConnection, bool replacePooledProcess)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
@@ -104,6 +107,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         using BuildManager buildManager = new();
         string projectFile = CreateProject(env, explicitTaskHost: false);
         int? firstProcessId = null;
+        HashSet<int> processIds = [];
         NodeProviderOutOfProcBase.NodeContext? firstConnection = null;
 
         (string Text, bool UseCachedWriter, bool Expected)[] builds =
@@ -131,17 +135,28 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
             result.ShouldHaveSucceeded();
             int processId = int.Parse(result.ProjectStateAfterBuild!.GetPropertyValue("TaskHostProcessId"));
             processId.ShouldNotBe(EnvironmentUtilities.CurrentProcessId);
+            bool firstUseOfProcess = processIds.Add(processId);
+            if (firstUseOfProcess)
+            {
+                env.WithTransientProcess(processId);
+            }
+
             if (firstProcessId is null)
             {
                 firstProcessId = processId;
-                env.WithTransientProcess(processId);
             }
-            else
+            else if (retainConnection)
             {
                 processId.ShouldBe(firstProcessId.Value);
             }
 
-            AssertTelemetry(logger, build.Expected);
+            if (replacePooledProcess)
+            {
+                firstUseOfProcess.ShouldBeTrue();
+            }
+
+            // Pool reuse is best-effort; a fresh process has no stale cached writer.
+            AssertTelemetry(logger, build.Expected || (build.UseCachedWriter && firstUseOfProcess));
 
             NodeProviderOutOfProcTaskHost provider = ((IBuildComponentHost)buildManager)
                 .GetComponent<NodeProviderOutOfProcTaskHost>(BuildComponentType.OutOfProcTaskHostNodeProvider);
@@ -160,6 +175,13 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
             provider.ConsoleOutputForwarded.ShouldBeFalse();
             provider.PacketReceived(1, new ConsoleWritePacket("late output", ConsoleOutput.Standard));
             provider.ConsoleOutputForwarded.ShouldBeFalse();
+
+            if (replacePooledProcess)
+            {
+                using Process process = Process.GetProcessById(processId);
+                process.Kill();
+                process.WaitForExit(10_000).ShouldBeTrue();
+            }
         }
     }
 
