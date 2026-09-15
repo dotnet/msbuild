@@ -53,6 +53,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         void ClearPerBuildState();
 
+        /// <summary>
+        /// Removes a node from the manager's bookkeeping after it has shut down: drops the node-to-provider
+        /// mapping and the owning provider's node context. This must be called on the BuildManager work-queue
+        /// thread (under its sync lock) in response to a NodeShutdown packet, so that node teardown is serialized
+        /// with scheduling and never races a concurrent SendData. See dotnet/msbuild#12438.
+        /// </summary>
+        /// <param name="nodeId">The node to remove.</param>
+        void RemoveNode(int nodeId);
+
         IEnumerable<Process> GetProcesses();
         #endregion
     }

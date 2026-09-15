@@ -200,6 +200,15 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// No-op for the task host provider. Task host nodes are not registered in the build NodeManager's
+        /// node-to-provider map, so this is never invoked via NodeManager.RemoveNode; task host node contexts
+        /// are torn down by their own shutdown path. Present only to satisfy <see cref="INodeProvider"/>.
+        /// </summary>
+        public void RemoveNodeContext(int nodeId)
+        {
+        }
+
+        /// <summary>
         /// Sends data to the specified task host node.
         /// </summary>
         /// <param name="nodeKey">The task host node key identifying the target node.</param>
