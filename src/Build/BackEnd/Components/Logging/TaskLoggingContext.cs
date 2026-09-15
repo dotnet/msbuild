@@ -101,6 +101,9 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
+        /// <inheritdoc />
+        internal override string ProjectFullPath => _targetLoggingContext?.ProjectFullPath;
+
         /// <summary>
         /// Retrieves the task node.
         /// </summary>
