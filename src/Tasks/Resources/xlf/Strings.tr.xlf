@@ -314,6 +314,11 @@
         <target state="translated">MSB3893: "{0}" dosyasını "{1}" yoluna kopyalama bağlantısı kullanılamadı.</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.LinkedDestinationNotDeleted">
+        <source>MSB3897: Could not copy to "{0}" because the existing file is a hard or symbolic link that could not be deleted first. Overwriting it in place would modify the file it is linked to.</source>
+        <target state="new">MSB3897: Could not copy to "{0}" because the existing file is a hard or symbolic link that could not be deleted first. Overwriting it in place would modify the file it is linked to.</target>
+        <note>{StrBegin="MSB3897: "} LOCALIZATION: {0} is a path.</note>
+      </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
         <source>The {0} library call failed with the following error code: {1}.</source>
         <target state="translated">Kitaplık çağrısı {0} şu hata koduyla başarısız oldu: {1}.</target>

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1105,6 +1105,120 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(destination2);
                 FileUtilities.DeleteWithoutTrailingBackslash(destinationFolder, true);
             }
+        }
+
+
+        /// <summary>
+        /// Regression test for silent corruption of a hard-linked source file.
+        ///
+        /// The Copy task deletes an existing destination before copying, so that it replaces the
+        /// directory entry instead of writing through a hard/symbolic link (fix for #8273). That
+        /// delete uses FileUtilities.DeleteNoThrow, whose failure is swallowed, and the subsequent
+        /// File.Copy(..., overwrite: true) then writes *through* the surviving link.
+        ///
+        /// If the destination is a hard link into the NuGet global packages folder, this silently
+        /// rewrites the package file while the build still reports success.
+        ///
+        /// A process holding the destination open with FileShare.ReadWrite (which does NOT imply
+        /// FileShare.Delete) is enough to make the delete fail while leaving the copy possible.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void DoNotWriteThroughHardLinkWhenDestinationCannotBeDeleted()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            string linkedFile = Path.Combine(folder.Path, "linked.dll");   // stands in for the NuGet cache file
+            string destination = Path.Combine(folder.Path, "destination.dll");
+            string source = Path.Combine(folder.Path, "source.dll");
+
+            const string LinkedContents = "This file is shared with the NuGet cache.";
+            const string SourceContents = "This is a completely different file.";
+
+            File.WriteAllText(linkedFile, LinkedContents);
+            File.WriteAllText(source, SourceContents);
+
+            var task = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = new MockEngine(_testOutputHelper),
+                RetryDelayMilliseconds = 1, // speed up tests!
+                Retries = 0,
+                SourceFiles = new ITaskItem[] { new TaskItem(source) },
+                DestinationFiles = new ITaskItem[] { new TaskItem(destination) },
+            };
+
+            string linkError = string.Empty;
+            if (!Tasks.NativeMethods.MakeHardLink(destination, linkedFile, ref linkError, task.Log))
+            {
+                // Hard links are not available here (e.g. non-NTFS volume); nothing to verify.
+                return;
+            }
+
+            // Someone else is holding the destination open. FileShare.ReadWrite does not include
+            // FileShare.Delete, so DeleteFile on the destination fails with a sharing violation
+            // while CopyFile onto it still succeeds.
+            using (File.Open(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                task.Execute();
+            }
+
+            // Whatever the task decided to do, it must not have modified the file that the
+            // destination was hard linked to.
+            File.ReadAllText(linkedFile).ShouldBe(
+                LinkedContents,
+                "Copy overwrote the destination in place and corrupted the file it was hard linked to.");
+        }
+
+
+        /// <summary>
+        /// The guard added for #14956 is behind Change Wave 18.12, so disabling that wave must
+        /// restore the previous behavior: the copy goes through and writes into the linked file.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void WriteThroughHardLinkWhenWave18_12Disabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+            // TODO: Remove test when Wave18_12 rotates out
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_12.ToString());
+
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            string linkedFile = Path.Combine(folder.Path, "linked.dll");
+            string destination = Path.Combine(folder.Path, "destination.dll");
+            string source = Path.Combine(folder.Path, "source.dll");
+
+            const string LinkedContents = "This file is shared with the NuGet cache.";
+            const string SourceContents = "This is a completely different file.";
+
+            File.WriteAllText(linkedFile, LinkedContents);
+            File.WriteAllText(source, SourceContents);
+
+            var task = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = new MockEngine(_testOutputHelper),
+                RetryDelayMilliseconds = 1, // speed up tests!
+                Retries = 0,
+                SourceFiles = new ITaskItem[] { new TaskItem(source) },
+                DestinationFiles = new ITaskItem[] { new TaskItem(destination) },
+            };
+
+            string linkError = string.Empty;
+            if (!Tasks.NativeMethods.MakeHardLink(destination, linkedFile, ref linkError, task.Log))
+            {
+                return;
+            }
+
+            using (File.Open(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                task.Execute().ShouldBeTrue();
+            }
+
+            // Pre-wave behavior: the copy wrote through the hard link.
+            File.ReadAllText(linkedFile).ShouldBe(SourceContents);
+
+            ChangeWaves.ResetStateForTests();
         }
 
         /*

@@ -36,6 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.12
+- [The Copy task no longer overwrites an existing destination in place when it could not be deleted first and is still a hard or symbolic link, so a copy can no longer write through the link and modify its target (e.g. a file in the NuGet global packages folder).](https://github.com/dotnet/msbuild/issues/14956) Such a copy now fails with MSB3897 instead of silently corrupting the linked file.
 - [Events that a task logs from a TaskHost - extended errors, warnings and messages, critical messages, telemetry, and any other event kind the router did not enumerate - reach the parent process instead of being dropped.](https://github.com/dotnet/msbuild/pull/14876)
 
 ### 18.11
