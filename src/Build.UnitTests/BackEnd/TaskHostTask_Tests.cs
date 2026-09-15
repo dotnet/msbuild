@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     AssemblyLoadInfo.Create(typeof(TestTask).Assembly.FullName, null),
                     typeof(TestTask).Assembly,
                     typeof(ITaskItem)),
-                useSidecarTaskHost: false,
+                allowNodeReuse: false,
                 projectFile: null,
 #if FEATURE_APPDOMAIN
                 appDomainSetup: null,
