@@ -1223,7 +1223,10 @@ namespace Microsoft.Build.BackEnd
                     // This is an output item.
                     // Expand only with properties first, so that expressions like Include="@(foo)" will transfer the metadata of the "foo" items as well, not just their item specs.
                     var outputItemSpecs = bucket.Expander.ExpandIntoStringListLeaveEscaped(taskParameterAttribute, ExpanderOptions.ExpandPropertiesAndMetadata, taskItemInstance.TaskParameterLocation);
-                    ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(_buildRequestEntry.RequestConfiguration.Project, itemName);
+                    ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(_buildRequestEntry.RequestConfiguration.Project, itemName)
+                    {
+                        SourceLocation = taskItemInstance.Location,
+                    };
 
                     foreach (string outputItemSpec in outputItemSpecs)
                     {
