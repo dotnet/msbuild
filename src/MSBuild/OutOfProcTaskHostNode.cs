@@ -251,6 +251,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion;
 
+        private RedirectConsoleWriter _consoleOutWriter;
+
+        private RedirectConsoleWriter _consoleErrorWriter;
+
+        private TextWriter _originalConsoleOut;
+
+        private TextWriter _originalConsoleError;
+
         /// <summary>
         /// Gets the effective configuration for the current task thread.
         /// Uses the per-task context first, falling back to <see cref="_currentConfiguration"/>.
@@ -285,6 +293,7 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConsoleConfiguration, TaskHostConsoleConfiguration.FactoryForDeserialization, this);
             EngineServices = new EngineServicesImpl(this);
         }
 
@@ -967,6 +976,9 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
+                case NodePacketType.TaskHostConsoleConfiguration:
+                    InitializeConsoleRedirection();
+                    break;
 
                 // Callback response packets - route to pending request
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
@@ -1292,6 +1304,8 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active && _taskCompletePacket is not null)
             {
+                _consoleOutWriter?.Flush();
+                _consoleErrorWriter?.Flush();
                 _nodeEndpoint.SendData(_taskCompletePacket);
                 _taskCompletePacket = null;
             }
@@ -1450,7 +1464,7 @@ namespace Microsoft.Build.CommandLine
 
             // Build-lifetime objects registered by tasks. Nothing else disposes these while the node
             // stays alive; a node that exited at the end of a build did it in HandleShutdown.
-            _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
+            DisposeBuildScopedResources();
 
             // A cancellation that arrived as the build was ending would otherwise still be signalled
             // and would spin the next build's wait loop.
@@ -1485,14 +1499,14 @@ namespace Microsoft.Build.CommandLine
                 kvp.Value.ExecutingThread?.Join();
             }
 
+            DisposeBuildScopedResources();
+            _registeredTaskObjectCache = null;
+
             using StreamWriter debugWriter = _debugCommunications
                     ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
                     : null;
 
             debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
-
-            _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
-            _registeredTaskObjectCache = null;
 
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
@@ -1526,6 +1540,60 @@ namespace Microsoft.Build.CommandLine
             _taskCancelledEvent.Dispose();
 
             return _shutdownReason;
+        }
+
+        private void InitializeConsoleRedirection()
+        {
+            if (_nodeEndpoint.NegotiatedPacketVersion < NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion)
+            {
+                return;
+            }
+
+            _originalConsoleOut = Console.Out;
+            _originalConsoleError = Console.Error;
+            _consoleOutWriter = new RedirectConsoleWriter(
+                text => _nodeEndpoint.SendData(new ConsoleWritePacket(text, ConsoleOutput.Standard)));
+            _consoleErrorWriter = new RedirectConsoleWriter(
+                text => _nodeEndpoint.SendData(new ConsoleWritePacket(text, ConsoleOutput.Error)));
+            Console.SetOut(_consoleOutWriter);
+            Console.SetError(_consoleErrorWriter);
+        }
+
+        private void ShutdownConsoleRedirection()
+        {
+            if (_consoleOutWriter is null)
+            {
+                return;
+            }
+
+            try
+            {
+                using (_consoleErrorWriter)
+                {
+                    _consoleOutWriter.Dispose();
+                }
+            }
+            finally
+            {
+                Console.SetOut(_originalConsoleOut);
+                Console.SetError(_originalConsoleError);
+                _consoleOutWriter = null;
+                _consoleErrorWriter = null;
+                _originalConsoleOut = null;
+                _originalConsoleError = null;
+            }
+        }
+
+        private void DisposeBuildScopedResources()
+        {
+            try
+            {
+                _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
+            }
+            finally
+            {
+                ShutdownConsoleRedirection();
+            }
         }
 
         /// <summary>
