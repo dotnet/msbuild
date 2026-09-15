@@ -25,7 +25,6 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     [InlineData(4)]
     [InlineData(5)]
     [InlineData(6)]
-    [InlineData(7)]
     public void CompletionActionRequiresNegotiatedSupport(byte version)
     {
         using MemoryStream stream = new();
@@ -57,7 +56,6 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     [Theory]
     [InlineData(5, false)]
     [InlineData(6, true)]
-    [InlineData(7, true)]
     public void Clr4CompletionUsesVersionedLifetimeActions(byte version, bool extended)
     {
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
@@ -249,7 +247,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         provider.InitializeComponent(new MockHost());
         HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, TaskHostParameters.Empty, nodeReuse: false);
         NodeProviderOutOfProcBase.NodeContext context = new(
-            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); }, 6, options);
+            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); }, 5, options);
         provider.NodeContextCreated(context, new TaskHostNodeKey(options, 1));
         Task shutdown = Task.Run(() => provider.ShutdownConnectedNodes(enableReuse: false));
 

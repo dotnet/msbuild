@@ -226,7 +226,7 @@ namespace Microsoft.Build.BackEnd
 
         private static bool SupportsSidecarLifetime(HandshakeOptions handshakeOptions, byte negotiatedVersion)
             => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
-                && negotiatedVersion >= NodePacketTypeExtensions.TaskHostCleanupMinVersion
+                && negotiatedVersion >= NodePacketTypeExtensions.TaskHostOwnershipMinVersion
                 && !ExistsOnlyForCompatibility(handshakeOptions);
 
         /// <summary>

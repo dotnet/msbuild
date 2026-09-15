@@ -195,7 +195,7 @@ Each new `TaskHostConfiguration` carries a full environment snapshot, task param
 
 When the owning worker node sends `NodeBuildComplete`, `HandleNodeBuildComplete()` decides whether to exit or stay alive:
 
-With Change Wave 18.12 enabled, a parent that negotiates packet version 7 or later sends an explicit `NodeBuildCompleteAction.ReuseWithConnection` to its reusable **sidecar** TaskHosts. They keep their named-pipe connections and reset in place via `PrepareForNextBuild()`. `NodeBuildCompleteAction.Shutdown` terminates the TaskHost, including one that is already idle.
+With Change Wave 18.12 enabled, a parent that negotiates packet version 6 or later sends an explicit `NodeBuildCompleteAction.ReuseWithConnection` to its reusable **sidecar** TaskHosts. They keep their named-pipe connections and reset in place via `PrepareForNextBuild()`. `NodeBuildCompleteAction.Shutdown` terminates the TaskHost, including one that is already idle.
 
 Legacy completion packets retain their original behavior: a TaskHost launched with node reuse disconnects for pooling. A TaskHost launched without node reuse exits unless both `PrepareForReuse` and `Traits.Instance.EscapeHatches.ReuseTaskHostNodes` allow reuse. Explicit `TaskHostFactory` requests are launched without node reuse.
 
@@ -220,7 +220,7 @@ Before [#14584](https://github.com/dotnet/msbuild/pull/14584), sidecar TaskHosts
 
 TaskHosts required for a different runtime or architecture are unchanged. Reusable ones continue to disconnect so another compatible process can claim them. CLR2 TaskHosts are never node-reused, and TaskHosts created by an explicit `TaskFactory="TaskHostFactory"` request are deliberately launched without node reuse; both exit at the end of the build. Keeping reusable cross-runtime or cross-architecture TaskHosts connected would cost one idle process per worker node for a task that only ever runs in one of them at a time: with ten projects of which one needs an `Architecture="x86"` TaskHost, under `-m:4` and reordered so the scheduler places it on a different worker each build, staying connected left three idle TaskHosts (~153 MB) where disconnecting leaves one (~51 MB).
 
-A sidecar runs the same runtime and architecture as its launcher, so sharing across processes is less helpful. Packet version 6 adds an action to `NodeBuildComplete` without changing its legacy reuse flag. Version 7 adds the cleanup reply. Current parents select ownership only when the child supports that reply; a version-6 parent can still use its original, unacknowledged reset with a newer child. Older parents can send `PrepareForReuse=true`, so that flag alone never establishes ownership.
+A sidecar runs the same runtime and architecture as its launcher, so sharing across processes is less helpful. Packet version 6 adds explicit actions and the cleanup reply to `NodeBuildComplete` without changing its legacy reuse flag. The parent selects ownership only when the child supports this protocol. Older parents can send `PrepareForReuse=true`, so that flag alone never establishes ownership.
 
 A sidecar is therefore never shared across launcher processes. Reuse within one launcher's lifetime -- including consecutive command-line invocations handled by the same MSBuild server or any long-lived `BuildManager` -- is unchanged, which is where it pays off.
 

@@ -8,6 +8,7 @@ namespace Microsoft.Build.BackEnd
 {
     internal enum NodeBuildCompleteAction
     {
+        // Use the original pooling-or-exit behavior without retaining the connection.
         Legacy,
         ReuseWithConnection,
         Shutdown
@@ -16,7 +17,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// The NodeBuildComplete packet is used to indicate to a node that it should clean up its current build and
     /// possibly prepare for node reuse.
-    /// A retained TaskHost using packet version 7 or later echoes it after cleanup.
+    /// A retained TaskHost echoes it after cleanup.
     /// </summary>
     internal class NodeBuildComplete : INodePacket
     {
