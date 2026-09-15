@@ -8,8 +8,14 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Logging;
 
 /// <summary>
-/// Correlates build events with immutable project lifecycle snapshots.
+/// Correlates build events and stores presentation-neutral project state.
 /// </summary>
+/// <remarks>
+/// The tracker owns mutable project lifecycle and diagnostic state.
+/// Lifecycle callbacks receive immutable snapshots.
+/// Other callbacks receive context keys so consumers can filter events before they request snapshots.
+/// Tracked state remains available during <see cref="BuildFinishedTracked"/> callbacks and is cleared afterward.
+/// </remarks>
 internal sealed class BuildEventTracker
 {
     private readonly record struct EvalProjectInfo(
@@ -226,6 +232,9 @@ internal sealed class BuildEventTracker
         ClearState();
     }
 
+    /// <summary>
+    /// Creates an immutable snapshot of the current state for a tracked project.
+    /// </summary>
     internal bool TryGetProjectSnapshot(ProjectContextKey contextKey, out ProjectSnapshot snapshot)
     {
         if (_projects.TryGetValue(contextKey, out TrackedProjectState? project))
@@ -330,6 +339,7 @@ internal sealed class BuildEventTracker
 
     private void OnMessageRaised(object sender, BuildMessageEventArgs e)
     {
+        // Consumers can filter high-volume messages before they request a project snapshot.
         MessageTracked?.Invoke(GetProjectContextKey(e), e);
     }
 

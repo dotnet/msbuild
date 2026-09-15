@@ -12,6 +12,10 @@ namespace Microsoft.Build.Logging;
 /// Holds Terminal Logger presentation state for a project correlated by
 /// <see cref="BuildEventTracker"/>.
 /// </summary>
+/// <remarks>
+/// Build facts remain in <see cref="BuildEventTracker"/>.
+/// This type stores terminal timing, formatted output, and summary exclusions.
+/// </remarks>
 internal sealed class TerminalProjectInfo
 {
     private List<TerminalBuildMessage>? _buildMessages;
