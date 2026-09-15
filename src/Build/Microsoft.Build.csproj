@@ -203,6 +203,7 @@
     <Compile Include="Evaluation\Expander.PropertyExpander.cs" />
     <Compile Include="Evaluation\Expander.SpanBasedConcatenator.cs" />
     <Compile Include="Evaluation\ExpanderOptions.cs" />
+    <Compile Include="Evaluation\PropertyFunctionDescriptor.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\IntrinsicFunctionOverload.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
