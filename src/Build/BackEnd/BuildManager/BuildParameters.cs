@@ -314,6 +314,8 @@ namespace Microsoft.Build.Execution
             DetailedSummary = other.DetailedSummary;
             _shutdownInProcNodeOnBuildFinish = other._shutdownInProcNodeOnBuildFinish;
             ProjectRootElementCache = other.ProjectRootElementCache;
+            ProjectInstanceSnapshotCache = other.ProjectInstanceSnapshotCache;
+            EvaluationCacheConfiguration = other.EvaluationCacheConfiguration;
             ResetCaches = other.ResetCaches;
             LegacyThreadingSemantics = other.LegacyThreadingSemantics;
             SaveOperatingEnvironment = other.SaveOperatingEnvironment;
@@ -816,6 +818,18 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectRootElementCacheBase ProjectRootElementCache { get; set; }
 
+        /// <summary>
+        /// The main BuildManager-owned project instance snapshot cache, when enabled.
+        /// This reference is intentionally available only to in-process nodes.
+        /// </summary>
+        internal ProjectInstanceSnapshotCache ProjectInstanceSnapshotCache { get; set; }
+
+        /// <summary>
+        /// Effective evaluation-cache mode for this in-process build.
+        /// This is intentionally not transmitted to workers because the cache is owned by the main BuildManager.
+        /// </summary>
+        internal EvaluationCacheConfiguration? EvaluationCacheConfiguration { get; set; }
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Information for configuring child AppDomains.
@@ -1021,6 +1035,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
 
             // ProjectRootElementCache is not transmitted.
+            // ProjectInstanceSnapshotCache is not transmitted.
             // ResetCaches is not transmitted.
             // LegacyThreadingSemantics is not transmitted.
             // InputResultsCacheFiles and OutputResultsCacheFile are not transmitted, as they are only used by the BuildManager

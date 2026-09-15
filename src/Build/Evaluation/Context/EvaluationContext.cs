@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.FileSystem;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -56,19 +57,30 @@ namespace Microsoft.Build.Evaluation.Context
         internal FileMatcher FileMatcher { get; }
 
         /// <summary>
+        /// Records the inputs of the evaluation this context was created for; null when recording is off.
+        /// </summary>
+        internal EvaluationInputRecorder InputRecorder { get; private init; }
+
+        /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
         private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
         private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ISdkResolverService sdkResolverService = null,
-            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null)
+            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null, Action<string> directoryTraversed = null)
         {
             Policy = policy;
 
             SdkResolverService = sdkResolverService ?? new CachingSdkResolverService();
             FileEntryExpansionCache = fileEntryExpansionCache ?? new ConcurrentDictionary<string, IReadOnlyList<string>>();
             FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
-            FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);
+            // Only a shared cache outlives the evaluation, so only there is it worth storing the directories an expansion
+            // depends on for the recorders of later evaluations.
+            FileMatcher = new FileMatcher(
+                FileSystem,
+                FileEntryExpansionCache,
+                directoryTraversed: directoryTraversed,
+                cacheTraversedDirectories: policy == SharingPolicy.Shared && Traits.Instance.RecordEvaluationInputs);
         }
 
         /// <summary>
@@ -138,12 +150,17 @@ namespace Microsoft.Build.Evaluation.Context
         /// Creates a copy of this <see cref="EvaluationContext"/> with a given <see cref="IFileSystem"/> swapped in.
         /// </summary>
         /// <param name="fileSystem">The file system to use by the new evaluation context.</param>
+        /// <param name="inputRecorder">
+        /// Recorder for the evaluation the copy serves, or null. A recording copy shares the glob expansion cache; its
+        /// matcher reports every directory a glob traverses, replaying the cached record when the expansion is reused.
+        /// </param>
         /// <returns>The new evaluation context.</returns>
-        internal EvaluationContext ContextWithFileSystem(IFileSystem fileSystem)
+        internal EvaluationContext ContextWithFileSystem(IFileSystem fileSystem, EvaluationInputRecorder inputRecorder = null)
         {
-            return new EvaluationContext(Policy, fileSystem, SdkResolverService, FileEntryExpansionCache)
+            return new EvaluationContext(Policy, fileSystem, SdkResolverService, FileEntryExpansionCache, inputRecorder is null ? null : inputRecorder.RecordPath)
             {
                 _used = 1,
+                InputRecorder = inputRecorder,
             };
         }
     }

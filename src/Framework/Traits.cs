@@ -5,6 +5,85 @@ using System;
 
 namespace Microsoft.Build.Framework
 {
+    internal enum EvaluationCacheMode
+    {
+        Disabled,
+        Record,
+        SnapshotUnsafe,
+        SnapshotFileSystem,
+    }
+
+    internal enum EvaluationCacheValidationPolicy
+    {
+        None,
+        Reject,
+        Unsafe,
+        FileSystem,
+    }
+
+    internal readonly record struct EvaluationCacheConfiguration(
+        EvaluationCacheMode Mode,
+        bool ConfigurationValid,
+        bool HasExplicitMode,
+        bool RecordInputs,
+        bool EnableSnapshotCache,
+        EvaluationCacheValidationPolicy ValidationPolicy)
+    {
+        internal const string ModeEnvironmentVariable = "MSBUILDEVALUATIONCACHEMODE";
+        internal string? InvalidValue { get; init; }
+
+        internal bool IsConfigured => HasExplicitMode || RecordInputs || EnableSnapshotCache;
+
+        internal static EvaluationCacheConfiguration FromEnvironment()
+        {
+            string? configuredMode = Environment.GetEnvironmentVariable(ModeEnvironmentVariable);
+            bool legacyRecord =
+                Environment.GetEnvironmentVariable("MSBUILDRECORDEVALUATIONINPUTS") == "1";
+            bool legacySnapshot = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDENABLEPROJECTINSTANCESNAPSHOTCACHE");
+
+            if (configuredMode is null)
+            {
+                return new EvaluationCacheConfiguration(
+                    legacyRecord ? EvaluationCacheMode.Record : EvaluationCacheMode.Disabled,
+                    ConfigurationValid: true,
+                    HasExplicitMode: false,
+                    RecordInputs: legacyRecord,
+                    EnableSnapshotCache: legacySnapshot,
+                    legacySnapshot
+                        ? EvaluationCacheValidationPolicy.Reject
+                        : EvaluationCacheValidationPolicy.None);
+            }
+
+            if (!Enum.TryParse(configuredMode, ignoreCase: true, out EvaluationCacheMode mode)
+                || !configuredMode.Equals(mode.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                return new EvaluationCacheConfiguration(
+                    EvaluationCacheMode.Disabled,
+                    ConfigurationValid: false,
+                    HasExplicitMode: true,
+                    RecordInputs: false,
+                    EnableSnapshotCache: false,
+                    EvaluationCacheValidationPolicy.None)
+                {
+                    InvalidValue = configuredMode,
+                };
+            }
+
+            return mode switch
+            {
+                EvaluationCacheMode.Disabled => new(
+                    mode, true, true, false, false, EvaluationCacheValidationPolicy.None),
+                EvaluationCacheMode.Record => new(
+                    mode, true, true, true, false, EvaluationCacheValidationPolicy.None),
+                EvaluationCacheMode.SnapshotUnsafe => new(
+                    mode, true, true, true, true, EvaluationCacheValidationPolicy.Unsafe),
+                EvaluationCacheMode.SnapshotFileSystem => new(
+                    mode, true, true, true, true, EvaluationCacheValidationPolicy.FileSystem),
+                _ => throw new InvalidOperationException($"Unexpected evaluation cache mode {mode}."),
+            };
+        }
+    }
+
     /// <summary>
     ///     Represents toggleable features of the MSBuild engine.
     /// </summary>
@@ -58,6 +137,11 @@ namespace Microsoft.Build.Framework
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
         public readonly bool ThrowOnDriveEnumeratingWildcard = Environment.GetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD") == "1";
         public readonly bool UseLegacyCultureSensitiveFileGlobs = Environment.GetEnvironmentVariable("MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS") == "1";
+
+        /// <summary>
+        /// Record the inputs each project evaluation consumes so an evaluation cache can validate them.
+        /// </summary>
+        public bool RecordEvaluationInputs => EvaluationCache.RecordInputs;
 
         /// <summary>
         /// Cache file existence for the entire process
@@ -181,6 +265,19 @@ namespace Microsoft.Build.Framework
         /// Name of environment variables used to enable MSBuild server.
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
+
+        /// <summary>
+        /// Name of the opt-in environment variable for project instance snapshot caching.
+        /// </summary>
+        public const string EnableProjectInstanceSnapshotCacheEnvVarName = "MSBUILDENABLEPROJECTINSTANCESNAPSHOTCACHE";
+
+        internal EvaluationCacheConfiguration EvaluationCache { get; } =
+            EvaluationCacheConfiguration.FromEnvironment();
+
+        internal static bool? ProjectInstanceSnapshotCacheEnabledOverride { get; set; }
+
+        public bool EnableProjectInstanceSnapshotCache =>
+            ProjectInstanceSnapshotCacheEnabledOverride ?? EvaluationCache.EnableSnapshotCache;
 
         /// <summary>
         /// Name of environment variable for logging arguments (e.g., -bl, -check).

@@ -103,6 +103,116 @@ dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*"
 ```
 dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
 ```
+
+## Evaluation Input Recording
+
+The integrated evaluation-cache experiment uses
+`MSBUILDEVALUATIONCACHEMODE` with one of four values:
+
+| Mode | Behavior |
+| --- | --- |
+| `Disabled` | Normal evaluation with no recorder or snapshot cache. |
+| `Record` | Records evaluation inputs but never looks up or stores snapshots. |
+| `SnapshotUnsafe` | Records and caches successfully frozen snapshots, including those marked non-cacheable for validated reuse, and accepts hits without validation. This is an explicit benchmark ceiling only. |
+| `SnapshotFileSystem` | Records and caches snapshots, validating recorded file and directory metadata before reuse. |
+
+An explicitly supplied mode overrides the legacy
+`MSBUILDRECORDEVALUATIONINPUTS` and
+`MSBUILDENABLEPROJECTINSTANCESNAPSHOTCACHE` switches. Without the new variable,
+the legacy recording switch retains observation behavior and the legacy
+snapshot switch retains its reject-all validator. Invalid values fail closed to
+`Disabled` and produce a configuration diagnostic.
+
+Each explicitly configured or legacy-opted-in build logs one low-importance, versioned
+`EvaluationCacheExperimentStatus|` record. It contains the effective mode,
+configuration validity, process and main-`BuildManager` identities, build
+count, and—outside Disabled mode—cumulative evaluation, cache, validation,
+materialization, eviction, and fallback counters. Consumers must compare
+consecutive records from equivalent untimed submissions rather than infer a
+hit by subtracting an extra diagnostic build.
+With no explicit mode and neither legacy switch set, normal builds create no
+experiment identity or status record. Explicit `Disabled` still emits the
+baseline record required by the comparison harness.
+
+`SnapshotFileSystem` remains experimental. Its metadata comparison does not
+detect same-size/same-timestamp content changes and does not yet revalidate
+recorded environment, registry, or SDK-resolver results. It rejects reuse when
+the selected project or a recorded import is retained in the XML cache with
+unsaved changes or without authoritative file provenance.
+
+The backend constructs the request identity before evaluation for Record and
+both snapshot modes. It uses the effective project-file/explicit toolset,
+subtoolset, parser settings, directories, cultures, node count, environment,
+global-property values, and command-line provenance. Snapshot materialization
+retains the same recorded-input manifest for diagnostics; only
+SnapshotFileSystem requires that manifest to be cacheable before admission.
+
+Two findings are deferred for the controlled Phase A measurement pilot:
+
+- The admission-size estimate does not account for all retained registry
+  arrays/strings, SDK payloads, environment values, and diagnostic details.
+  Monitor actual process memory; the configured 256 MiB estimate is not a hard
+  retained-memory bound. Account for these payloads before memory-pressure or
+  eviction results are used to draw conclusions.
+- SDK observations retain mutable resolver-result payloads. Deep immutable
+  capture is deferred to Phase B, before those observations are used for SDK
+  validation. The current filesystem validator does not validate SDK results.
+
+`EvaluationInputRecordingBenchmark` measures what recording evaluation inputs
+(`MSBUILDRECORDEVALUATIONINPUTS=1`) adds to an evaluation, in an isolated and in a shared evaluation
+context. `EvaluationInputValidationBenchmark` separately measures checks of recorded files and
+directories: unchanged, and after a project file, an import, or a glob directory changed.
+Its evaluation and input capture happen outside the timed operations.
+
+Both use the same synthetic project and any restored projects listed in
+`MSBUILD_EVALUATION_INPUTS_BENCHMARK_PROJECTS` (path-separator
+delimited). SDK-style projects also need `MSBUILD_EXE_PATH`, `MSBuildSDKsPath`, and
+`DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR` pointing at the bootstrap SDK, passed to the benchmark process
+with `--envVars` as the shared fixture remarks describe. A project that is not cacheable fails setup with the
+reason.
+
+Run the observation cases or unchanged validation independently:
+
+```powershell
+.\src\MSBuild.Benchmarks\Run-Benchmarks.ps1 -Framework net11.0 -Filter '*EvaluationInputRecordingBenchmark.*'
+.\src\MSBuild.Benchmarks\Run-Benchmarks.ps1 -Framework net11.0 -Filter '*EvaluationInputValidationBenchmark.ValidateUnchanged'
+```
+
+The two classes produce separate reports. To express validation cost relative to fresh evaluation,
+compare `EvaluationInputValidationBenchmark.ValidateUnchanged` with
+`EvaluationInputRecordingBenchmark.Evaluate` for the same project and run settings.
+The stale-validation cases mutate files or directory membership; use synthetic or disposable workloads.
+
+Validation compares path existence, file/directory kind, last-write timestamp, and length.
+Glob membership is checked through the timestamps of the directories traversed.
+Environment reads, SDK results, and registry reads remain recorded but are not revalidated, and the request key
+is not compared. A successful filesystem check alone does not establish that an evaluation result
+can be reused. Incomplete/non-cacheable recording and failed filesystem checks still reject validation.
+
+Registry reads through `$(Registry:...)`, `[MSBuild]::GetRegistryValue`, and
+`[MSBuild]::GetRegistryValueFromView` are retained in `EvaluationInputs.RegistryReads`.
+Each observation contains the decoded key, value name (empty for the default value),
+returned value, and the string view tokens the intrinsic considers (not ignored non-string arguments).
+The key may be null for an accepted no-view request. Values are captured from the
+existing call, not by rereading the registry; missing values remain `null`, while an intrinsic
+that returns a supplied fallback records that fallback. Repeated reads are kept in order.
+Binary, multi-string, and character arrays are copied into immutable arrays before further expansion.
+Scalar string, primitive, enum, decimal, date/time, timespan, and GUID fallbacks are also supported.
+Other fallback objects mark recording non-cacheable instead of retaining a mutable reference.
+Registry access alone no longer stops recording. These are logical requests/results, not a
+trace of each internal view probe or of resolver/toolset-internal registry accesses.
+The comparison summary prints only the registry-read count, not potentially sensitive values.
+
+To compare the recorded inputs with every path the process touched, build with
+`-p:EnableEvaluationInputDetours=true` on Windows x64 and run the comparison instead of a benchmark.
+It prints a summary line, then every touched path the recording does not explain: `DETOURS_ONLY|` for
+probes and enumerations, `DETOURS_ONLY_READ|` for content reads, and `RECORDED_ONLY|` for recorded
+paths the sandbox never saw.
+
+```
+dotnet run -c Release -f net11.0 -p:EnableEvaluationInputDetours=true -- --evaluation-input-detours --project <path> [--global-property Name=Value]
+```
+
 ## Command-Line Options
 
 ### Custom Options

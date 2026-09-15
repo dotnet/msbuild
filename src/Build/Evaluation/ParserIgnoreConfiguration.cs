@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.NET.StringTools;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -67,6 +68,36 @@ namespace Microsoft.Build.Evaluation
         }
 
         internal IReadOnlyCollection<string> LoadedConfigFiles => _loadedConfigFiles;
+
+        /// <summary>
+        /// Hash of the loaded files and every allowed name, independent of enumeration order. Two configurations that
+        /// skip the same elements and attributes have the same fingerprint, so an evaluation cache can key on it.
+        /// </summary>
+        internal long ComputeFingerprint()
+        {
+            long fingerprint = _loadedConfigFiles.Count;
+            foreach (string file in _loadedConfigFiles)
+            {
+                fingerprint ^= FowlerNollVo1aHash.ComputeHash64Fast(file);
+            }
+
+            return fingerprint ^ HashEntries(_allowedAttributes, 1) ^ HashEntries(_allowedChildren, 2);
+
+            static long HashEntries(Dictionary<string, HashSet<string>> entries, long salt)
+            {
+                long hash = 0;
+                foreach (KeyValuePair<string, HashSet<string>> entry in entries)
+                {
+                    long element = FowlerNollVo1aHash.ComputeHash64Fast(entry.Key);
+                    foreach (string name in entry.Value)
+                    {
+                        hash ^= FowlerNollVo1aHash.Combine64(salt, FowlerNollVo1aHash.Combine64(element, FowlerNollVo1aHash.ComputeHash64Fast(name)));
+                    }
+                }
+
+                return hash;
+            }
+        }
 
         internal static ParserIgnoreConfiguration Empty { get; } = new ParserIgnoreConfiguration();
 

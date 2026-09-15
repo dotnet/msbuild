@@ -152,9 +152,11 @@ internal partial class Expander<P, I>
                 List<TransformEntry> output,
                 string[] arguments,
                 string functionName,
-                IElementLocation elementLocation)
+                IElementLocation elementLocation,
+                IFileSystem fileSystem)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
+                fileSystem ??= FileSystems.Default;
 
                 foreach (TransformEntry item in input)
                 {
@@ -191,7 +193,7 @@ internal partial class Expander<P, I>
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Value, e.Message);
                     }
 
-                    if (FileSystems.Default.FileOrDirectoryExists(rootedPath))
+                    if (fileSystem.FileOrDirectoryExists(rootedPath))
                     {
                         output.Add(item);
                     }
