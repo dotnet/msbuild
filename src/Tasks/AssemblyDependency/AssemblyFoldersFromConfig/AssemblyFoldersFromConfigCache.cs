@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using AssemblyFoldersFromConfigCollection = Microsoft.Build.Shared.AssemblyFoldersFromConfig.AssemblyFoldersFromConfig<Microsoft.Build.Utilities.AssemblyFoldersFromConfigInfo>;
 
 #nullable disable
 
@@ -35,7 +36,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <summary>
         /// Constructor
         /// </summary>
-        internal AssemblyFoldersFromConfigCache(AssemblyFoldersFromConfig assemblyFoldersFromConfig, FileExists fileExists, TaskEnvironment taskEnvironment)
+        internal AssemblyFoldersFromConfigCache(AssemblyFoldersFromConfigCollection assemblyFoldersFromConfig, FileExists fileExists, TaskEnvironment taskEnvironment)
         {
             AssemblyFoldersFromConfig = assemblyFoldersFromConfig;
             _fileExists = fileExists;
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <summary>
         /// AssemblyfoldersEx object which contains the set of directories in assmblyfoldersFromConfig
         /// </summary>
-        internal AssemblyFoldersFromConfig AssemblyFoldersFromConfig { get; }
+        internal AssemblyFoldersFromConfigCollection AssemblyFoldersFromConfig { get; }
 
         /// <summary>
         ///  Fast file exists for AssemblyFoldersFromConfig.

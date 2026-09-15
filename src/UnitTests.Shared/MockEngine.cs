@@ -504,7 +504,9 @@ namespace Microsoft.Build.UnitTests
         {
         }
 
-        public bool ShouldTreatWarningAsError(string warningCode) => false;
+        public bool TreatWarningsAsErrors { get; set; }
+
+        public bool ShouldTreatWarningAsError(string warningCode) => TreatWarningsAsErrors;
 
         public override bool LogsMessagesOfImportance(MessageImportance importance)
             => importance <= MinimumMessageImportance;

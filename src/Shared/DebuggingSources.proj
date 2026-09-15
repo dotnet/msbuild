@@ -1,7 +1,0 @@
-<Project>
-    <ItemGroup>
-      <Compile Include="$(MSBuildThisFileDirectory)Debugging\*.cs">
-        <Link>Debugging\%(Filename).cs</Link>
-      </Compile>
-    </ItemGroup>
-</Project>

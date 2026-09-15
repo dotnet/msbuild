@@ -1,0 +1,164 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Collections.Generic;
+#if DEBUG
+using System.IO;
+#endif
+using System.Runtime.CompilerServices;
+using Microsoft.Build.Framework;
+using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
+
+#nullable disable
+
+namespace Microsoft.Build.Shared.Debugging
+{
+    /// <summary>
+    ///     A class to help with printline debugging in difficult environments like CI, or when debugging msbuild through other
+    ///     tools like VS or CLI.
+    ///     See example usages in PrintLineDebugger_Tests
+    /// </summary>
+    internal sealed class PrintLineDebugger : IDisposable
+    {
+        public static Lazy<PrintLineDebugger> Default =
+            new Lazy<PrintLineDebugger>(() => Create(null, null, false));
+
+        public static Lazy<PrintLineDebugger> DefaultWithProcessInfo =
+            new Lazy<PrintLineDebugger>(() => Create(null, null, true));
+
+#if DEBUG
+        private readonly string _id;
+#endif
+
+        private readonly CommonWriterType _writerSetByThisInstance;
+
+        public PrintLineDebugger(string id, CommonWriterType writer)
+        {
+#if DEBUG
+            _id = id ?? string.Empty;
+#endif
+
+            if (writer != null)
+            {
+                SetWriter(writer);
+
+                // we wrap the original writer with a locking writer in SetWriter, so get the actual writer that was set
+                _writerSetByThisInstance = GetStaticWriter();
+            }
+        }
+
+        public void Dispose()
+        {
+            ReleaseUnmanagedResources();
+            GC.SuppressFinalize(this);
+        }
+
+        public static CommonWriterType GetStaticWriter()
+        {
+            // CommonWriter is defined in Microsoft.Build.Framework and shared with this assembly via
+            // InternalsVisibleTo. Referencing it directly (rather than reflecting over it) keeps the
+            // single canonical writer instance while remaining trimming- and Native AOT-safe.
+            return CommonWriter.Writer;
+        }
+
+        // this setter is not thread safe because the assumption is that a writer is set once for the duration of the process (or multiple times from different tests which do not run in parallel).
+        public static void SetWriter(CommonWriterType writer)
+        {
+#if DEBUG
+            var currentWriter = GetStaticWriter();
+
+            Assumed.Null(currentWriter, "Cannot set a new writer over an old writer. Remove the old one first");
+
+            // wrap with a lock so multi threaded logging does not break messages apart
+            CommonWriter.Writer = LockWrappedWriter;
+
+            void LockWrappedWriter(string id, string callsite, IEnumerable<string> message)
+            {
+                lock (writer)
+                {
+                    writer.Invoke(id, callsite, message);
+                }
+            }
+#endif
+        }
+
+        public static void UnsetWriter()
+        {
+#if DEBUG
+            var currentWriter = GetStaticWriter();
+
+            Assumed.NotNull(currentWriter, "Cannot unset an already null writer");
+
+            CommonWriter.Writer = null;
+#endif
+        }
+
+        public static PrintLineDebugger Create(
+            CommonWriterType writer = null,
+            string id = null,
+            bool prependProcessInfo = false)
+        {
+            return new PrintLineDebugger(
+                prependProcessInfo
+                    ? $"{FrameworkDebugUtils.ProcessInfoString}_{id}"
+                    : id,
+                writer);
+        }
+
+        public CommonWriterType GetWriter()
+        {
+            return _writerSetByThisInstance ?? GetStaticWriter();
+        }
+
+        public void Log(
+            string message,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+        {
+#if DEBUG
+            var writer = GetWriter();
+
+            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), [message]);
+#endif
+        }
+
+        public void Log(
+            IEnumerable<string> args,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+        {
+#if DEBUG
+            var writer = GetWriter();
+
+            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), args);
+#endif
+        }
+
+#if DEBUG
+        private static string CallsiteString(string sourceFilePath, string memberName, int sourceLineNumber)
+        {
+            return $"@{Path.GetFileNameWithoutExtension(sourceFilePath)}.{memberName}({sourceLineNumber})";
+        }
+#endif
+
+        private void ReleaseUnmanagedResources()
+        {
+            if (_writerSetByThisInstance != null)
+            {
+                var staticWriter = GetStaticWriter();
+
+                Assumed.Equal(staticWriter, _writerSetByThisInstance, $"The writer from this {nameof(PrintLineDebugger)} instance differs from the static writer.");
+
+                UnsetWriter();
+            }
+        }
+
+        ~PrintLineDebugger()
+        {
+            ReleaseUnmanagedResources();
+        }
+    }
+}

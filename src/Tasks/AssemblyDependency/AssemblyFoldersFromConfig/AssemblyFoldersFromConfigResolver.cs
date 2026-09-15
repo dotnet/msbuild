@@ -9,6 +9,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using AssemblyFoldersFromConfigCollection = Microsoft.Build.Shared.AssemblyFoldersFromConfig.AssemblyFoldersFromConfig<Microsoft.Build.Utilities.AssemblyFoldersFromConfigInfo>;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable
@@ -67,7 +68,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <summary>
         /// If it is not initialized then just return the null object, that would mean the resolver was not called.
         /// </summary>
-        internal AssemblyFoldersFromConfig AssemblyFoldersExLocations => _assemblyFoldersCache?.AssemblyFoldersFromConfig;
+        internal AssemblyFoldersFromConfigCollection AssemblyFoldersExLocations => _assemblyFoldersCache?.AssemblyFoldersFromConfig;
 
         /// <summary>
         /// Construct.
@@ -131,7 +132,11 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 
                         try
                         {
-                            AssemblyFoldersFromConfig assemblyFolders = new AssemblyFoldersFromConfig(_assemblyFolderConfigFile, _targetRuntimeVersion, targetProcessorArchitecture);
+                            AssemblyFoldersFromConfigCollection assemblyFolders = new AssemblyFoldersFromConfigCollection(
+                                _assemblyFolderConfigFile,
+                                _targetRuntimeVersion,
+                                targetProcessorArchitecture,
+                                static (path, version) => new AssemblyFoldersFromConfigInfo(path, version));
                             _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists, taskEnvironment);
                             if (useCache)
                             {

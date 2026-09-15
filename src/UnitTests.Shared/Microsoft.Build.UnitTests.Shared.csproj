@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\IsExternalInit.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
+    <Compile Remove="TestAssemblyInfo.cs" />
   </ItemGroup>
 
   <Import Project="..\..\eng\BootStrapMsBuild.props" />

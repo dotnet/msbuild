@@ -866,7 +866,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         "ErrorUtilities.ThrowInternalErrorUnreachable(",
         "ErrorUtilities.VerifyThrowInternalErrorUnreachable(",
         "ErrorUtilities.VerifyThrowInternalNull(",
-        "ErrorUtilities.ThrowInvalidOperation(",
+        ".ThrowInvalidOperation(",
         "ErrorUtilities.VerifyThrow(",
     ];
 

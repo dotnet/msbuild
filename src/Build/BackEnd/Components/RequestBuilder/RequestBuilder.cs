@@ -828,7 +828,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else if (ex is InternalLoggerException)
                 {
-                    string realMessage = TaskLoggingHelper.GetInnerExceptionMessageString(ex);
+                    string realMessage = ExceptionUtilities.GetInnerExceptionMessageString(ex);
                     LoggingContext loggingContext = ((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext;
                     loggingContext.LogError(
                         BuildEventFileInfo.Empty,

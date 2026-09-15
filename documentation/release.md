@@ -46,6 +46,6 @@ That is a new step in our release process for each formal release (including pat
 
 Update major version of VS in
 
-- [BuildEnvironmentHelper.cs](../src/Shared/BuildEnvironmentHelper.cs)
-- [Constants.cs](../src/Shared/Constants.cs)
+- [BuildEnvironmentHelper.cs](../src/Framework/BuildEnvironmentHelper.cs)
+- [Constants.cs](../src/Framework/Constants.cs)
 - [TelemetryConstants.cs](../src/Framework/Telemetry/TelemetryConstants.cs)

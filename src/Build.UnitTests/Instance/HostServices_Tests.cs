@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.Versioning;
 using System.Xml;
 
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -29,6 +30,42 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public HostServices_Tests()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+        }
+
+        [WindowsOnlyFact]
+        [SupportedOSPlatform("windows")]
+        public void TaskHostTransportPreservesHostServicesWireFormat()
+        {
+            var hostServices = new HostServices();
+            hostServices.RegisterHostObject("project1", "target1", "task1", "moniker1");
+            hostServices.RegisterHostObject("project2", "target2", "task2", "moniker2");
+
+            using var hostServicesStream = new MemoryStream();
+            ITranslator hostServicesTranslator = BinaryTranslator.GetWriteTranslator(hostServicesStream);
+            hostServicesTranslator.Translate(ref hostServices);
+
+            TaskHostConfigurationHostServices transport = hostServices.GetTaskHostConfigurationHostServices();
+            using var transportStream = new MemoryStream();
+            ITranslator transportTranslator = BinaryTranslator.GetWriteTranslator(transportStream);
+            transportTranslator.Translate(ref transport);
+
+            transportStream.ToArray().ShouldBe(hostServicesStream.ToArray());
+
+            transportStream.Position = 0;
+            TaskHostConfigurationHostServices roundTripped = null;
+            BinaryTranslator.GetReadTranslator(transportStream, InterningBinaryReader.PoolingBuffer).Translate(ref roundTripped);
+
+            roundTripped.HostObjects.Count.ShouldBe(2);
+            roundTripped.HostObjects.ShouldContain(
+                hostObject => hostObject.ProjectFile == "project1"
+                    && hostObject.TargetName == "target1"
+                    && hostObject.TaskName == "task1"
+                    && hostObject.MonikerName == "moniker1");
+            roundTripped.HostObjects.ShouldContain(
+                hostObject => hostObject.ProjectFile == "project2"
+                    && hostObject.TargetName == "target2"
+                    && hostObject.TaskName == "task2"
+                    && hostObject.MonikerName == "moniker2");
         }
 
         /// <summary>

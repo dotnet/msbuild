@@ -12,6 +12,11 @@ namespace Microsoft.Build.Shared;
 /// </summary>
 internal static class AssemblyResources
 {
+    internal readonly struct Provider : IStringResourceProvider
+    {
+        public string GetString(string name) => AssemblyResources.GetString(name);
+    }
+
     /// <summary>
     ///  Gets the assembly's primary resources, i.e. the resources exclusively owned by this assembly.
     /// </summary>

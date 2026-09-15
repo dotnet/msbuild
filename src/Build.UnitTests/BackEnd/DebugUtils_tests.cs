@@ -35,8 +35,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 FrameworkDebugUtils.SetDebugPath();
-                DebugUtils.ResetDebugDumpPathInRunningTests = true;
-                _ = DebugUtils.DebugDumpPath;
+                DebugUtils.ResetDebugDumpPath();
 
                 DebugUtils.DumpExceptionToFile(new Exception("hello world"));
                 string[] exceptionFiles = Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt");
@@ -51,8 +50,7 @@ namespace Microsoft.Build.UnitTests
                 transientDebugPath.Revert();
                 FrameworkDebugUtils.SetDebugPath();
 
-                DebugUtils.ResetDebugDumpPathInRunningTests = true;
-                _ = DebugUtils.DebugDumpPath;
+                DebugUtils.ResetDebugDumpPath();
             }
         }
 

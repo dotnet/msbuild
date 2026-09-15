@@ -7,7 +7,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -145,7 +144,7 @@ namespace Microsoft.Build.Logging
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    InvokeFileIOErrorEvent(filePath, TaskLoggingHelper.GetInnerExceptionMessageString(e));
+                    InvokeFileIOErrorEvent(filePath, ExceptionUtilities.GetInnerExceptionMessageString(e));
                 }
 
                 return false;
