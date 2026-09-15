@@ -56,6 +56,11 @@
         <target state="translated">ArchiveFile을 가져왔지만 마지막으로 편집한 버전이 설정되지 않았습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrew">
+        <source>The binary log event filter threw an exception.</source>
+        <target state="new">The binary log event filter threw an exception.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">파일 형식 버전 {0}에 대해 상위 호환 읽기가 지원되지 않습니다(18 이상 필요).</target>
