@@ -41,7 +41,7 @@ The primary telemetry event capturing overall build information.
 | `FailureCategory` | string | Primary failure category when build fails (see Error Categorization) |
 | `ErrorCounts` | object | Breakdown of errors by category (see Error Categorization) |
 
-`TaskHostConsoleOutputForwarded` measures actual use of console forwarding, not whether forwarding was enabled. It is emitted once per build and resets between builds, including when a task-host process is reused. Empty packets, rejected packets, and output discarded by stale cached writers do not set it. No console text or task identity is collected by this property.
+`TaskHostConsoleOutputForwarded` records actual use, not enablement, and contains no console text or task identity.
 
 ---
 

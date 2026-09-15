@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -24,12 +25,32 @@ internal sealed class RedirectConsoleWriter : TextWriter
     public RedirectConsoleWriter(Action<string> writeCallback)
     {
         _writeCallback = writeCallback;
-        _bufferWriter = new StringWriter();
+        _bufferWriter = new StringWriter(formatProvider: null);
         _destination = _bufferWriter;
         _timer = new Timer(TimerCallback, null, 0, 40);
     }
 
     public override Encoding Encoding => _bufferWriter.Encoding;
+
+    [AllowNull]
+    public override string NewLine
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return base.NewLine;
+            }
+        }
+        set
+        {
+            lock (_lock)
+            {
+                base.NewLine = value;
+                _bufferWriter.NewLine = value;
+            }
+        }
+    }
 
     public override void Flush()
     {
@@ -324,9 +345,12 @@ internal sealed class RedirectConsoleWriter : TextWriter
 
     private void TimerCallback(object? state)
     {
-        if (_bufferWriter.GetStringBuilder().Length > 0)
+        lock (_lock)
         {
-            Flush();
+            if (!_disposed)
+            {
+                FlushInternal(flushIncompleteSurrogate: false);
+            }
         }
     }
 
@@ -357,16 +381,30 @@ internal sealed class RedirectConsoleWriter : TextWriter
         base.Dispose(disposing);
     }
 
-    private void FlushInternal()
+    private void FlushInternal(bool flushIncompleteSurrogate = true)
     {
         StringBuilder buffer = _bufferWriter.GetStringBuilder();
-        if (buffer.Length == 0)
+        int length = buffer.Length;
+        // Each packet is encoded independently; a periodic flush must not split a surrogate pair.
+        if (length > 0 && char.IsHighSurrogate(buffer[length - 1]))
+        {
+            if (flushIncompleteSurrogate)
+            {
+                buffer[length - 1] = '\uFFFD';
+            }
+            else
+            {
+                length--;
+            }
+        }
+
+        if (length == 0)
         {
             return;
         }
 
-        string captured = buffer.ToString();
-        buffer.Clear();
+        string captured = buffer.ToString(0, length);
+        buffer.Remove(0, length);
 
         _writeCallback(captured);
         _bufferWriter.Flush();

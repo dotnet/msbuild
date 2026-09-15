@@ -1464,10 +1464,7 @@ namespace Microsoft.Build.CommandLine
 
             // Build-lifetime objects registered by tasks. Nothing else disposes these while the node
             // stays alive; a node that exited at the end of a build did it in HandleShutdown.
-            _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
-
-            // The connection can survive this build, but cached console writers must not.
-            ShutdownConsoleRedirection();
+            DisposeBuildScopedResources();
 
             // A cancellation that arrived as the build was ending would otherwise still be signalled
             // and would spin the next build's wait loop.
@@ -1502,16 +1499,14 @@ namespace Microsoft.Build.CommandLine
                 kvp.Value.ExecutingThread?.Join();
             }
 
-            ShutdownConsoleRedirection();
+            DisposeBuildScopedResources();
+            _registeredTaskObjectCache = null;
 
             using StreamWriter debugWriter = _debugCommunications
                     ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
                     : null;
 
             debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
-
-            _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
-            _registeredTaskObjectCache = null;
 
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
@@ -1549,7 +1544,7 @@ namespace Microsoft.Build.CommandLine
 
         private void InitializeConsoleRedirection()
         {
-            if (_parentPacketVersion < NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion)
+            if (_nodeEndpoint.NegotiatedPacketVersion < NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion)
             {
                 return;
             }
@@ -1571,14 +1566,34 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            _consoleOutWriter.Dispose();
-            _consoleErrorWriter.Dispose();
-            Console.SetOut(_originalConsoleOut);
-            Console.SetError(_originalConsoleError);
-            _consoleOutWriter = null;
-            _consoleErrorWriter = null;
-            _originalConsoleOut = null;
-            _originalConsoleError = null;
+            try
+            {
+                using (_consoleErrorWriter)
+                {
+                    _consoleOutWriter.Dispose();
+                }
+            }
+            finally
+            {
+                Console.SetOut(_originalConsoleOut);
+                Console.SetError(_originalConsoleError);
+                _consoleOutWriter = null;
+                _consoleErrorWriter = null;
+                _originalConsoleOut = null;
+                _originalConsoleError = null;
+            }
+        }
+
+        private void DisposeBuildScopedResources()
+        {
+            try
+            {
+                _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
+            }
+            finally
+            {
+                ShutdownConsoleRedirection();
+            }
         }
 
         /// <summary>

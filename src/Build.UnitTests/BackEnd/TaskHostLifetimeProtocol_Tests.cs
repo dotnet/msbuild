@@ -81,6 +81,19 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         ((byte)new ConsoleWritePacket(string.Empty, ConsoleOutput.Standard).Type).ShouldBe((byte)0x3E);
     }
 
+    [Theory]
+    [InlineData(6, false)]
+    [InlineData(7, true)]
+    public void Clr4ConsoleConfigurationCarriesItsNegotiatedVersion(byte version, bool extended)
+    {
+        NodePacketTypeExtensions.TryCreateExtendedHeaderType(
+            HandshakeOptions.TaskHost, NodePacketType.TaskHostConsoleConfiguration, out byte rawType, version).ShouldBe(extended);
+        NodePacketTypeExtensions.HasExtendedHeader(rawType).ShouldBe(extended);
+        NodePacketTypeExtensions.GetNodePacketType(rawType).ShouldBe(NodePacketType.TaskHostConsoleConfiguration);
+        NodePacketTypeExtensions.TryCreateExtendedHeaderType(
+            HandshakeOptions.TaskHost, NodePacketType.TaskHostConfiguration, out _, version).ShouldBeFalse();
+    }
+
     [Fact]
     public void ClosingAnIdleConnectionStopsItsSender()
     {

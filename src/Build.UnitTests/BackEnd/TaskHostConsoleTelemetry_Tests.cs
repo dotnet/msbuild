@@ -21,6 +21,55 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
     private readonly ITestOutputHelper _output = output;
 
     [Fact]
+    public void ConsoleSetupUsesNegotiatedVersionBeforeTaskConfiguration()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+        using BuildManager buildManager = new();
+        StaleStartupVersionNodeLauncher launcher = new();
+        ((IBuildComponentHost)buildManager).RegisterFactory(BuildComponentType.NodeLauncher, _ => launcher);
+        MockLogger logger = new(_output);
+
+        BuildResult result = buildManager.Build(
+            new BuildParameters
+            {
+                MultiThreaded = true,
+                MaxNodeCount = 1,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            },
+            CreateRequest(CreateProject(env, explicitTaskHost: false), standardError: false, text: "first task output"));
+
+        result.ShouldHaveSucceeded();
+        launcher.LaunchedTaskHost.ShouldBeTrue();
+        int.Parse(result.ProjectStateAfterBuild!.GetPropertyValue("TaskHostProcessId"))
+            .ShouldNotBe(EnvironmentUtilities.CurrentProcessId);
+        AssertTelemetry(logger, expected: true);
+    }
+
+    private sealed class StaleStartupVersionNodeLauncher : INodeLauncher, IBuildComponent
+    {
+        private readonly NodeLauncher _launcher = new();
+
+        public bool LaunchedTaskHost { get; private set; }
+
+        public void InitializeComponent(IBuildComponentHost host) => _launcher.InitializeComponent(host);
+
+        public void ShutdownComponent() => _launcher.ShutdownComponent();
+
+        public Process Start(NodeLaunchData launchData, int nodeId)
+        {
+            string currentVersionArgument = $"/parentpacketversion:{NodePacketTypeExtensions.PacketVersion}";
+            launchData.CommandLineArgs.ShouldContain("/nodemode:2");
+            launchData.CommandLineArgs.ShouldContain(currentVersionArgument);
+            LaunchedTaskHost = true;
+            return _launcher.Start(launchData with
+            {
+                CommandLineArgs = launchData.CommandLineArgs.Replace(currentVersionArgument, "/parentpacketversion:6"),
+            }, nodeId);
+        }
+    }
+    [Fact]
     public void ReportsTelemetryForRepeatedAsynchronousBuilds()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
@@ -49,6 +98,35 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
             result.ShouldHaveSucceeded();
             AssertTelemetry(logger, expected: false);
         }
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public void ForwardsConsoleOutputFromBuildObjectDisposal(bool standardError, bool retainConnection)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
+        ChangeWaves.ResetStateForTests();
+        using BuildManager buildManager = new();
+        MockLogger logger = new(_output);
+
+        BuildResult result = buildManager.Build(
+            new BuildParameters
+            {
+                MultiThreaded = true,
+                MaxNodeCount = 1,
+                EnableNodeReuse = true,
+                Loggers = [logger],
+            },
+            CreateRequest(CreateProject(env, explicitTaskHost: false), standardError, string.Empty, writeOnDispose: true));
+
+        result.ShouldHaveSucceeded();
+        env.WithTransientProcess(int.Parse(result.ProjectStateAfterBuild!.GetPropertyValue("TaskHostProcessId")));
+        AssertTelemetry(logger, expected: true);
     }
 
     [Theory]
@@ -193,7 +271,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
                            AssemblyFile="{typeof(ConsoleForwardingTelemetryTask).Assembly.Location}"
                            {(explicitTaskHost ? """TaskFactory="TaskHostFactory" """ : "")} />
                 <Target Name="Build">
-                    <ConsoleForwardingTelemetryTask Text="$(Text)" StandardError="$(StandardError)" UseCachedWriter="$(UseCachedWriter)">
+                    <ConsoleForwardingTelemetryTask Text="$(Text)" StandardError="$(StandardError)" UseCachedWriter="$(UseCachedWriter)" WriteOnDispose="$(WriteOnDispose)">
                         <Output TaskParameter="ProcessId" PropertyName="TaskHostProcessId" />
                     </ConsoleForwardingTelemetryTask>
                 </Target>
@@ -201,7 +279,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
             """).Path;
     }
 
-    private static BuildRequestData CreateRequest(string projectFile, bool standardError, string text, bool useCachedWriter = false)
+    private static BuildRequestData CreateRequest(string projectFile, bool standardError, string text, bool useCachedWriter = false, bool writeOnDispose = false)
     {
         return new BuildRequestData(
             projectFile,
@@ -210,6 +288,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
                 ["Text"] = text,
                 ["StandardError"] = standardError.ToString(),
                 ["UseCachedWriter"] = useCachedWriter.ToString(),
+                ["WriteOnDispose"] = writeOnDispose.ToString(),
             },
             null,
             ["Build"],
@@ -234,15 +313,30 @@ public class ConsoleForwardingTelemetryTask : Utilities.Task
 
     public bool UseCachedWriter { get; set; }
 
+    public bool WriteOnDispose { get; set; }
+
     [Output]
     public int ProcessId { get; set; }
 
     public override bool Execute()
     {
         ProcessId = EnvironmentUtilities.CurrentProcessId;
+        if (WriteOnDispose)
+        {
+#pragma warning disable CA2000 // MSBuild disposes the registered build-lifetime object.
+            ((IBuildEngine4)BuildEngine).RegisterTaskObject(
+                nameof(ConsoleOnDispose), new ConsoleOnDispose(StandardError), RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
+#pragma warning restore CA2000
+        }
+
         TextWriter currentWriter = StandardError ? Console.Error : Console.Out;
         s_firstWriter ??= currentWriter;
         (UseCachedWriter ? s_firstWriter : currentWriter).Write(Text);
         return true;
+    }
+
+    private sealed class ConsoleOnDispose(bool standardError) : IDisposable
+    {
+        public void Dispose() => (standardError ? Console.Error : Console.Out).WriteLine("cleanup output");
     }
 }
