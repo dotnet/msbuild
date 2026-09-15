@@ -97,7 +97,7 @@ internal sealed class MultiThreadedStrictModeScope
                     throw new AggregateException(entryFailure, restorationFailure);
                 }
 
-                TryDelete(temporaryDirectory);
+                FileUtilities.TryDeleteFileOrDirectory(temporaryDirectory);
                 throw;
             }
         }
@@ -142,7 +142,7 @@ internal sealed class MultiThreadedStrictModeScope
             }
         }
 
-        TryDelete(_temporaryDirectory);
+        FileUtilities.TryDeleteFileOrDirectory(_temporaryDirectory);
     }
 
     internal bool VerifyAndReportCurrentDirectory(
@@ -224,7 +224,7 @@ internal sealed class MultiThreadedStrictModeScope
                 }
 
                 // Remove stray outputs at project/build boundaries and retry locked leftovers without duplicate diagnostics.
-                if (TryDelete(entry))
+                if (FileUtilities.TryDeleteFileOrDirectory(entry))
                 {
                     _reportedEntries.Remove(name);
                 }
@@ -236,27 +236,6 @@ internal sealed class MultiThreadedStrictModeScope
             }
 
             return entries is null ? null : string.Join(", ", entries);
-        }
-    }
-
-    private static bool TryDelete(string entry)
-    {
-        try
-        {
-            if (Directory.Exists(entry))
-            {
-                Directory.Delete(entry, recursive: true);
-            }
-            else
-            {
-                File.Delete(entry);
-            }
-
-            return true;
-        }
-        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-        {
-            return false;
         }
     }
 }

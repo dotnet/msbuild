@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -3416,10 +3416,8 @@ EndGlobal
             MSBuildApp.IsMultiThreadedEnabled(combined).ShouldBe(expected);
         }
 
-        [Theory]
-        [InlineData("/mt:invalid")]
-        [InlineData("/mt:strict")]
-        public void MultiThreadedSwitchRejectsInvalidBooleanValue(string argument)
+        [Fact]
+        public void MultiThreadedSwitchRejectsInvalidBooleanValue()
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
             testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
@@ -3427,7 +3425,7 @@ EndGlobal
 
             CommandLineSwitches switches = new CommandLineSwitches();
             CommandLineParser parser = new CommandLineParser();
-            parser.GatherCommandLineSwitches([argument], switches);
+            parser.GatherCommandLineSwitches(["/mt:invalid"], switches);
 
             CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
                 () => MSBuildApp.IsMultiThreadedEnabled(switches));

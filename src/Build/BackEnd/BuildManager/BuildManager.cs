@@ -624,9 +624,12 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
-                string? nonStrictValue = null;
+                string? nonStrictValue = _buildParameters.MultiThreaded
+                    ? Environment.GetEnvironmentVariable("MSBUILDMTNONSTRICT")
+                    : null;
                 bool strictMode = _buildParameters.MultiThreaded
-                    && !EnvironmentUtilities.IsValueOneOrTrue("MSBUILDMTNONSTRICT", out nonStrictValue);
+                    && nonStrictValue != "1"
+                    && !string.Equals(nonStrictValue, "true", StringComparison.OrdinalIgnoreCase);
                 var buildEntryDirectory = strictMode || (_buildParameters.MultiThreaded && _buildParameters.SaveOperatingEnvironment)
                     ? MultiThreadedStrictModeScope.CaptureCurrentDirectory()
                     : default;

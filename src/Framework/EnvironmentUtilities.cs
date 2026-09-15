@@ -156,13 +156,11 @@ internal static partial class EnvironmentUtilities
     ///  <see langword="true"/> if the environment variable value is <c>"1"</c> or <c>"true"</c>
     ///  (case-insensitive); otherwise, <see langword="false"/>.
     /// </returns>
-    internal static bool IsValueOneOrTrue(string name) => IsValueOneOrTrue(name, out _);
-
-    internal static bool IsValueOneOrTrue(string name, out string? value)
+    internal static bool IsValueOneOrTrue(string name)
     {
-        value = Environment.GetEnvironmentVariable(name);
+        string? value = Environment.GetEnvironmentVariable(name);
 
-        return value is not null &&
+        return value != null &&
               (value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase));
     }
 }
