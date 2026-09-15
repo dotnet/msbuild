@@ -673,6 +673,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static void HandleLoggedMessage(IBuildEngine buildEngine, LogMessagePacket logMessagePacket)
         {
+            // Before Wave18_12, TaskHostTask dropped event kinds that its switch did not enumerate.
+            // Disabling the wave restores that behavior because forwarding a warning can fail /warnAsError builds.
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                && logMessagePacket.EventType is not (LoggingEventType.BuildErrorEvent
+                    or LoggingEventType.BuildWarningEvent
+                    or LoggingEventType.TaskCommandLineEvent
+                    or LoggingEventType.BuildMessageEvent
+                    or LoggingEventType.CustomEvent))
+            {
+                return;
+            }
+
             BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent.Value.Value;
             switch (buildEvent)
             {
