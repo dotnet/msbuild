@@ -373,5 +373,45 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             logger.AssertLogContains("i1%2ai2");
         }
+
+        /// <summary>
+        /// Regression test for the ObjectDisposedException race rooted in returning a
+        /// `yield return` iterator from EnumerateMetadata over an ImmutableDictionary.
+        /// See dotnet/runtime#92290 and the EnumerateMetadataEager rationale comment.
+        ///
+        /// The intent of the fix is that callers always receive a materialized snapshot
+        /// (an array), never a compiler-generated state-machine iterator that parks a
+        /// copy of the ImmutableDictionary.Enumerator struct across yield boundaries.
+        /// Asserting on the runtime type makes a future revert of the fix observable.
+        /// </summary>
+        [Fact]
+        public void EnumerateMetadata_ReturnsMaterializedSnapshot_NotYieldIterator()
+        {
+            ProjectItemInstance.TaskItem item = new("foo", "test.proj");
+            item.SetMetadata("a", "1");
+            item.SetMetadata("b", "2");
+
+            IEnumerable<KeyValuePair<string, string>> result = ((IMetadataContainer)item).EnumerateMetadata();
+
+            // Type-level invariant: result must be a materialized array, not a compiler-generated
+            // yield-return state machine that parks a copy of the ImmutableDictionary.Enumerator
+            // struct across yield boundaries.
+            result.ShouldBeOfType<KeyValuePair<string, string>[]>();
+
+            // Behavioural invariant: the snapshot must not observe later mutations of the item.
+            // A streaming iterator would re-enumerate _directMetadata on iteration, exposing
+            // mutations made after EnumerateMetadata returned.
+            item.SetMetadata("a", "changed-after-snapshot");
+            item.SetMetadata("c", "added-after-snapshot");
+            result.ShouldBe(new[]
+            {
+                new KeyValuePair<string, string>("a", "1"),
+                new KeyValuePair<string, string>("b", "2"),
+            }, ignoreOrder: true);
+
+            // No-custom-metadata case short-circuits to Array.Empty<>.
+            ProjectItemInstance.TaskItem empty = new("bar", "test.proj");
+            ((IMetadataContainer)empty).EnumerateMetadata().ShouldBeEmpty();
+        }
     }
 }
