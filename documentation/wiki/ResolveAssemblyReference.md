@@ -90,6 +90,14 @@ Referenced assemblies are added to the closure iteratively until no more new ref
 
 Direct references that we started with are called Primary references. Indirect assemblies that were added to closure because of a transitive reference are called Dependency. Each indirect assembly remembers all the primary ("root") items that led to its inclusion and their corresponding metadata.
 
+### Cancellation
+
+In-process RAR implements `ICancelableTask`, allowing MSBuild to stop assembly resolution when a build is canceled. Cancellation is cooperative: RAR checks for cancellation while resolving references, traversing dependencies, and producing results. An in-progress synchronous file operation must finish before cancellation can be observed.
+
+A canceled invocation returns `false` without reporting cancellation as an assembly resolution error. This does not cancel an invocation already running in an out-of-process RAR node.
+
+Cancellation is checked before writing the state file, not during serialization. Successfully read assembly metadata remains reusable by later tasks; dependency remapping is kept task-local rather than modifying the shared raw metadata.
+
 ## Results
 
 RAR is just as rich at logging results as it is for inputs:
