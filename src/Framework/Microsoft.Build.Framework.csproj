@@ -113,6 +113,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- Promote CompilerServices.Unsafe from the old version we get from System.Memory on net472. -->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
+    <PackageReference Include="System.Reflection.Metadata" />
     <Reference Include="System.Xaml" />
     <PackageReference Include="System.Text.Json" />
     <!-- Telemetry in Visual Studio scenarios -->
