@@ -1429,15 +1429,6 @@
   <data name="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
     <value>AssemblyFoldersEx location: "{0}"</value>
   </data>
-    <data name="ResolveAssemblyReference.ConflictFound">
-    <value>There was a conflict between "{0}" and "{1}".</value>
-  </data>
-  <data name="ResolveAssemblyReference.ConflictHigherVersionChosen">
-    <value>"{0}" was chosen because it had a higher version.</value>
-  </data>
-  <data name="ResolveAssemblyReference.ConflictPrimaryChosen">
-    <value>"{0}" was chosen because it was primary and "{1}" was not.</value>
-  </data>
   <data name="ResolveAssemblyReference.ConflictRedirectSuggestion">
     <value>Consider app.config remapping of assembly "{0}" from Version "{1}" [{2}] to Version "{3}" [{4}] to solve conflict and get rid of warning.</value>
     <comment>
@@ -1480,10 +1471,6 @@
   <data name="ResolveAssemblyReference.ConflictBetweenAppConfigAndAutoUnify">
     <value>MSB3242: Conflict between mutually exclusive parameters. AutoUnify was 'true' and AppConfigFile was set.</value>
     <comment>{StrBegin="MSB3242: "}</comment>
-  </data>
-  <data name="ResolveAssemblyReference.ConflictUnsolvable">
-    <value>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</value>
-    <comment>{StrBegin="MSB3243: "}</comment>
   </data>
   <data name="ResolveAssemblyReference.FailedToFindDependentFiles">
     <value>MSB3244: Could not find dependent files. {0}</value>
@@ -1612,11 +1599,6 @@
     <value>MSB3276: Found conflicts between different versions of the same dependent assembly. Please set the "AutoGenerateBindingRedirects" property to true in the project file. For more information, see http://go.microsoft.com/fwlink/?LinkId=294190.</value>
     <comment>{StrBegin="MSB3276: "}</comment>
   </data>
-  <data name="ResolveAssemblyReference.FoundConflicts">
-    <value>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
-{1}</value>
-    <comment>{StrBegin="MSB3277: "}</comment>
-  </data>
   <data name="ResolveAssemblyReference.LogAttributeFormat">
     <value>{0} = '{1}'</value>
   </data>
@@ -1688,22 +1670,6 @@
   </data>
   <data name="ResolveAssemblyReference.RequiredBy">
     <value>Required by "{0}".</value>
-  </data>
-  <data name="ResolveAssemblyReference.ReferenceDependsOn">
-    <value>References which depend on "{0}" [{1}].</value>
-    <comment> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
-  </data>
-  <data name="ResolveAssemblyReference.UnifiedReferenceDependsOn">
-    <value>References which depend on or have been unified to "{0}" [{1}].</value>
-    <comment> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
-  </data>
-  <data name="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
-    <value>Unresolved primary reference with an item include of "{0}".</value>
-    <comment> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</comment>
-  </data>
-  <data name="ResolveAssemblyReference.PrimarySourceItemsForReference">
-    <value>Project file item includes which caused reference "{0}".</value>
-    <comment> This will look like, Project file item includes which caused reference "a.dll".</comment>
   </data>
    <data name="ResolveAssemblyReference.Resolved">
     <value>Resolved file path is "{0}".</value>

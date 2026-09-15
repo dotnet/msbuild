@@ -115,6 +115,10 @@ namespace Microsoft.Build.Logging
         //    - new record kind: MSBuildServerLifecycleEventArgs (reports how a build related to the MSBuild Server node)
         // version 28:
         //    - new record kind: AssemblyResolutionSearchTraceEventArgs
+        //    - new record kinds: AssemblyConflictDependencyDetailsMessageEventArgs, AssemblyConflictWarningEventArgs
+        //    (RAR conflict dependency-list details and MSB3277 warning, structured behind ChangeWave 18.12)
+        //    Forward-compatible readers older than version 28 skip these unknown record kinds.
+        //    Strict readers reject the newer file format.
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.

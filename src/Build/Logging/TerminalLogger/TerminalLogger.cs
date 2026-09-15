@@ -1693,7 +1693,7 @@ public sealed partial class TerminalLogger : INodeLogger
     private string FormatWarningMessage(BuildWarningEventArgs e, string? message, string indent) => FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
-                message: message,
+                message: e is AssemblyConflictWarningEventArgs ? EventArgsFormatting.GetLocalizedMessage(e) : message,
                 code: AnsiCodes.Colorize(CreateLink(GenerateLinkForWarning(e), e.Code), TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
