@@ -647,19 +647,31 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
             _projectsByInstanceId[buildEventContext.ProjectInstanceId] = projectFullPath;
 
-            if (_deferredEvalDiagnostics.TryGetValue(buildEventContext.EvaluationId, out var list))
+            // Take the deferred diagnostics out of the dictionary atomically - so that a concurrent
+            //  StartProjectRequest for the same evaluation id doesn't dispatch them as well, and so that
+            //  a concurrent ReportResult cannot append to the list while it is being enumerated.
+            List<BuildEventArgs>? list;
+            lock (_deferredEvalDiagnosticsLock)
             {
+                if (_deferredEvalDiagnostics.TryGetValue(buildEventContext.EvaluationId, out list))
+                {
+                    _deferredEvalDiagnostics.Remove(buildEventContext.EvaluationId);
+                }
+            }
+
+            if (list is not null)
+            {
+                // Dispatching re-enters the logging service - so it needs to happen outside of the lock.
                 foreach (BuildEventArgs deferredArgs in list)
                 {
                     deferredArgs.BuildEventContext = deferredArgs.BuildEventContext!.WithInstanceIdAndContextId(buildEventContext);
                     checkContext.DispatchBuildEvent(deferredArgs);
                 }
-                list.Clear();
-                _deferredEvalDiagnostics.Remove(buildEventContext.EvaluationId);
             }
         }
 
         private readonly Dictionary<int, List<BuildEventArgs>> _deferredEvalDiagnostics = new();
+        private readonly object _deferredEvalDiagnosticsLock = new();
 
         /// <summary>
         /// Registers the logic import by a project file.
@@ -696,13 +708,16 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             // This is evaluation - so we need to defer it until we know the instance id and context id
 
-            if (!_deferredEvalDiagnostics.TryGetValue(eventArgs.BuildEventContext.EvaluationId, out var list))
+            lock (_deferredEvalDiagnosticsLock)
             {
-                list = [];
-                _deferredEvalDiagnostics[eventArgs.BuildEventContext.EvaluationId] = list;
-            }
+                if (!_deferredEvalDiagnostics.TryGetValue(eventArgs.BuildEventContext.EvaluationId, out var list))
+                {
+                    list = [];
+                    _deferredEvalDiagnostics[eventArgs.BuildEventContext.EvaluationId] = list;
+                }
 
-            list.Add(eventArgs);
+                list.Add(eventArgs);
+            }
         }
 
         public void EndProjectRequest(
