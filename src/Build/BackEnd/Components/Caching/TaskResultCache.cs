@@ -69,22 +69,33 @@ namespace Microsoft.Build.BackEnd.Components.Caching
     {
         internal const string CacheDirectoryPropertyName = "MSBuildTaskCacheDirectory";
         internal const string CacheEnabledPropertyName = "MSBuildTaskCacheEnabled";
+        internal const string CacheSizeMBPropertyName = "MSBuildTaskCacheSizeMB";
 
+        private const long BytesPerMB = 1024 * 1024;
+        private const long DefaultCacheSizeMB = 10_000;
         private const string ManifestFileName = "manifest.bin";
         private const string ManifestMagic = "MSBuild Task Result Cache";
         private const int MaximumEventCount = 1_000_000;
+        private const string TrimLockFileName = ".trim.lock";
+        private static readonly TimeSpan s_trimInterval = TimeSpan.FromMinutes(1);
 
+        private readonly string _cacheDirectory;
         private readonly string _entryDirectory;
         private readonly string _key;
+        private readonly long _maximumCacheSizeBytes;
         private readonly IReadOnlyList<string> _outputPaths;
 
         private TaskResultCacheSession(
+            string cacheDirectory,
             string entryDirectory,
             string key,
+            long maximumCacheSizeBytes,
             IReadOnlyList<string> outputPaths)
         {
+            _cacheDirectory = cacheDirectory;
             _entryDirectory = entryDirectory;
             _key = key;
+            _maximumCacheSizeBytes = maximumCacheSizeBytes;
             _outputPaths = outputPaths;
         }
 
@@ -130,9 +141,17 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             string projectFullPath,
             string projectDirectory,
             string cacheDirectory,
+            string cacheSizeMB,
             TaskResultCacheFileDigestCache fileDigestCache,
             CancellationToken cancellationToken)
         {
+            if (!TryResolveCacheSizeBytes(cacheSizeMB, out long maximumCacheSizeBytes))
+            {
+                return new TaskResultCacheOpenResponse(
+                    TaskResultCacheOpenResult.Unavailable,
+                    reason: $"The {CacheSizeMBPropertyName} property must be a non-negative integer.");
+            }
+
             TaskResultCacheKeyResponse keyResponse = await TryCreateKeyAsync(
                     task,
                     parameterNames,
@@ -166,8 +185,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 keyResponse.Key.Substring(0, 2),
                 keyResponse.Key.Substring(2));
             var session = new TaskResultCacheSession(
+                normalizedCacheDirectory,
                 entryDirectory,
                 keyResponse.Key,
+                maximumCacheSizeBytes,
                 keyResponse.OutputPaths);
 
             if (!Directory.Exists(entryDirectory))
@@ -182,6 +203,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
             if (restoreResponse.Success)
             {
+                session.TouchEntryBestEffort();
                 return new TaskResultCacheOpenResponse(
                     TaskResultCacheOpenResult.Hit,
                     session,
@@ -273,6 +295,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 {
                 }
 
+                TrimCacheBestEffort();
                 return new TaskResultCacheStoreResponse(success: true);
             }
             catch (Exception e) when (IsExpectedCacheException(e))
@@ -282,6 +305,36 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             finally
             {
                 DeleteDirectoryBestEffort(temporaryDirectory);
+            }
+        }
+
+        internal static bool TryResolveCacheSizeBytes(string configuredSizeMB, out long maximumCacheSizeBytes)
+        {
+            long sizeMB;
+            if (String.IsNullOrWhiteSpace(configuredSizeMB))
+            {
+                sizeMB = DefaultCacheSizeMB;
+            }
+            else if (!long.TryParse(
+                         configuredSizeMB,
+                         NumberStyles.Integer,
+                         CultureInfo.InvariantCulture,
+                         out sizeMB) ||
+                     sizeMB < 0)
+            {
+                maximumCacheSizeBytes = 0;
+                return false;
+            }
+
+            try
+            {
+                maximumCacheSizeBytes = checked(sizeMB * BytesPerMB);
+                return true;
+            }
+            catch (OverflowException)
+            {
+                maximumCacheSizeBytes = 0;
+                return false;
             }
         }
 
@@ -876,6 +929,165 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             return Path.Combine(entryDirectory, index.ToString(CultureInfo.InvariantCulture) + ".bin");
         }
 
+        private void TouchEntryBestEffort()
+        {
+            try
+            {
+                File.SetLastWriteTimeUtc(
+                    Path.Combine(_entryDirectory, ManifestFileName),
+                    DateTime.UtcNow);
+            }
+            catch (Exception e) when (IsExpectedCacheException(e))
+            {
+            }
+        }
+
+        private void TrimCacheBestEffort()
+        {
+            if (_maximumCacheSizeBytes == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                using var trimLock = new FileStream(
+                    Path.Combine(_cacheDirectory, TrimLockFileName),
+                    FileMode.OpenOrCreate,
+                    FileAccess.ReadWrite,
+                    FileShare.None);
+                long nowTicks = DateTime.UtcNow.Ticks;
+                if (trimLock.Length == sizeof(long))
+                {
+                    using var reader = new BinaryReader(trimLock, Encoding.UTF8, leaveOpen: true);
+                    if (reader.ReadInt64() > nowTicks)
+                    {
+                        return;
+                    }
+                }
+
+                TrimCache();
+
+                trimLock.Position = 0;
+                using var writer = new BinaryWriter(trimLock, Encoding.UTF8, leaveOpen: true);
+                writer.Write(DateTime.UtcNow.Add(s_trimInterval).Ticks);
+                trimLock.SetLength(sizeof(long));
+            }
+            catch (Exception e) when (IsExpectedCacheException(e))
+            {
+            }
+        }
+
+        private void TrimCache()
+        {
+            var entries = new List<CacheEntry>();
+            long totalSize = 0;
+            foreach (string shardDirectory in Directory.EnumerateDirectories(_cacheDirectory))
+            {
+                if (!IsHexName(Path.GetFileName(shardDirectory), expectedLength: 2))
+                {
+                    continue;
+                }
+
+                foreach (string entryDirectory in Directory.EnumerateDirectories(shardDirectory))
+                {
+                    string name = Path.GetFileName(entryDirectory);
+                    if (IsHexName(name, expectedLength: 62))
+                    {
+                        if (TryGetCacheEntry(entryDirectory, out CacheEntry entry))
+                        {
+                            entries.Add(entry);
+                            totalSize += entry.Size;
+                        }
+                    }
+                    else if (IsDeletionTombstone(name))
+                    {
+                        DeleteDirectoryBestEffort(entryDirectory);
+                    }
+                }
+            }
+
+            if (totalSize <= _maximumCacheSizeBytes)
+            {
+                return;
+            }
+
+            entries.Sort(static (left, right) =>
+            {
+                int comparison = left.LastAccessTimeUtc.CompareTo(right.LastAccessTimeUtc);
+                return comparison != 0
+                    ? comparison
+                    : StringComparer.Ordinal.Compare(left.Path, right.Path);
+            });
+            for (int i = 0; i < entries.Count && totalSize > _maximumCacheSizeBytes; i++)
+            {
+                CacheEntry entry = entries[i];
+                string tombstoneDirectory =
+                    entry.Path + ".evict-" + Guid.NewGuid().ToString("N");
+                try
+                {
+                    Directory.Move(entry.Path, tombstoneDirectory);
+                }
+                catch (Exception e) when (IsExpectedCacheException(e))
+                {
+                    continue;
+                }
+
+                totalSize -= entry.Size;
+                DeleteDirectoryBestEffort(tombstoneDirectory);
+            }
+        }
+
+        private static bool TryGetCacheEntry(string entryDirectory, out CacheEntry entry)
+        {
+            try
+            {
+                long size = 0;
+                foreach (string file in Directory.EnumerateFiles(entryDirectory))
+                {
+                    size += new FileInfo(file).Length;
+                }
+
+                entry = new CacheEntry(
+                    entryDirectory,
+                    size,
+                    File.GetLastWriteTimeUtc(Path.Combine(entryDirectory, ManifestFileName)));
+                return true;
+            }
+            catch (Exception e) when (IsExpectedCacheException(e))
+            {
+                entry = default;
+                return false;
+            }
+        }
+
+        private static bool IsDeletionTombstone(string name) =>
+            name.Length > 62 &&
+            IsHexName(name.AsSpan(0, 62), expectedLength: 62) &&
+            (name.AsSpan(62).StartsWith(".bad-", StringComparison.Ordinal) ||
+             name.AsSpan(62).StartsWith(".evict-", StringComparison.Ordinal));
+
+        private static bool IsHexName(string name, int expectedLength) =>
+            name is not null && IsHexName(name.AsSpan(), expectedLength);
+
+        private static bool IsHexName(ReadOnlySpan<char> name, int expectedLength)
+        {
+            if (name.Length != expectedLength)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < name.Length; i++)
+            {
+                if (name[i] is not (>= '0' and <= '9') and not (>= 'a' and <= 'f'))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private bool QuarantineEntryBestEffort()
         {
             string tombstoneDirectory =
@@ -1003,6 +1215,18 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             internal FileAttributes Attributes { get; }
 
             internal int UnixFileMode { get; }
+        }
+
+        private readonly struct CacheEntry(
+            string path,
+            long size,
+            DateTime lastAccessTimeUtc)
+        {
+            internal string Path { get; } = path;
+
+            internal long Size { get; } = size;
+
+            internal DateTime LastAccessTimeUtc { get; } = lastAccessTimeUtc;
         }
     }
 }
