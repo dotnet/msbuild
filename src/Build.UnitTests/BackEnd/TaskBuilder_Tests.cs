@@ -197,6 +197,89 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .ShouldBe(TaskResultCacheSession.GetDefaultCacheDirectory());
         }
 
+        [Theory]
+        [InlineData("", true, 10_485_760_000)]
+        [InlineData("0", true, 0)]
+        [InlineData("1", true, 1_048_576)]
+        [InlineData("-1", false, 0)]
+        [InlineData("invalid", false, 0)]
+        [InlineData("9223372036854775807", false, 0)]
+        public void TaskResultCacheSizeResolution(
+            string configuredSizeMB,
+            bool expectedSuccess,
+            long expectedSize)
+        {
+            TaskResultCacheSession.TryResolveCacheSizeBytes(
+                configuredSizeMB,
+                out long size).ShouldBe(expectedSuccess);
+            size.ShouldBe(expectedSize);
+        }
+
+        [Fact]
+        public void DeclaredIOResultCacheEvictsLeastRecentlyUsedEntries()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+            string inputPath = Path.Combine(projectFolder.Path, "input.txt");
+            string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+            string cachePath = Path.Combine(projectFolder.Path, "cache");
+            string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+            File.WriteAllText(
+                projectPath,
+                $"""
+                <Project>
+                  <PropertyGroup>
+                    <WorkspaceRoot>true</WorkspaceRoot>
+                    <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+                    <MSBuildTaskCacheSizeMB>1</MSBuildTaskCacheSizeMB>
+                  </PropertyGroup>
+                  <UsingTask
+                      TaskName="{typeof(TaskResultCacheTestTask).FullName}"
+                      AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
+                  <ItemGroup>
+                    <CacheInput Include="input.txt" />
+                    <CacheOutput Include="output.txt" />
+                  </ItemGroup>
+                  <Target Name="Build">
+                    <TaskResultCacheTestTask
+                        Input="@(CacheInput)"
+                        OutputFile="@(CacheOutput)"
+                        DeclaredInputs="@(CacheInput)"
+                        DeclaredOutputs="@(CacheOutput)" />
+                  </Target>
+                </Project>
+                """);
+
+            string firstContents = new('a', 700_000);
+            File.WriteAllText(inputPath, firstContents);
+            MockLogger firstLogger = BuildCacheProject(projectPath);
+            firstLogger.AssertNoErrors();
+            firstLogger.FullLog.ShouldContain("Task result cache miss");
+
+            string firstManifest = Directory.GetFiles(
+                cachePath,
+                "manifest.bin",
+                SearchOption.AllDirectories).ShouldHaveSingleItem();
+            string firstEntryDirectory = Path.GetDirectoryName(firstManifest);
+            File.SetLastWriteTimeUtc(firstManifest, DateTime.UtcNow.AddHours(-1));
+            File.Delete(Path.Combine(cachePath, ".trim.lock"));
+
+            File.WriteAllText(inputPath, new string('b', 700_001));
+            File.Delete(outputPath);
+            MockLogger secondLogger = BuildCacheProject(projectPath);
+            secondLogger.AssertNoErrors();
+            secondLogger.FullLog.ShouldContain("Task result cache miss");
+            Directory.Exists(firstEntryDirectory).ShouldBeFalse();
+            Directory.GetFiles(cachePath, "manifest.bin", SearchOption.AllDirectories)
+                .ShouldHaveSingleItem();
+
+            File.WriteAllText(inputPath, firstContents);
+            File.Delete(outputPath);
+            MockLogger thirdLogger = BuildCacheProject(projectPath);
+            thirdLogger.AssertNoErrors();
+            thirdLogger.FullLog.ShouldContain("Task result cache miss");
+        }
+
         [Fact]
         public void DeclaredIOResultCacheRestoresAbsentOutputsAndRecoversFromCorruption()
         {

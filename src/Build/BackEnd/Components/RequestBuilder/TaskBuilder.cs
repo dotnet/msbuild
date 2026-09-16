@@ -853,6 +853,7 @@ namespace Microsoft.Build.BackEnd
                                     _projectFullPath,
                                     _buildRequestEntry.ProjectRootDirectory,
                                     cacheDirectory,
+                                    project.GetPropertyValue(TaskResultCacheSession.CacheSizeMBPropertyName),
                                     _taskResultCacheFileDigestCache,
                                     _cancellationToken);
                             cacheOpenResult = cacheOpenResponse.Result;
