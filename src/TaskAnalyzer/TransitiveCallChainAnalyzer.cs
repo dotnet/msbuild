@@ -28,12 +28,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class TransitiveCallChainAnalyzer : DiagnosticAnalyzer
     {
-        /// <summary>
-        /// Maximum BFS depth. The visited set already prevents cycles, but this limits
-        /// exploration of very deep non-cyclic call chains for performance.
-        /// </summary>
-        private const int MaxCallChainDepth = 20;
-
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(DiagnosticDescriptors.TransitiveUnsafeCall);
 
@@ -340,13 +334,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var taskMethods = new List<IMethodSymbol>();
                 var taskMethodKeys = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
 
-                foreach (ISymbol member in taskType.GetMembers())
+                for (INamedTypeSymbol? currentType = taskType;
+                     currentType is not null && currentType.SpecialType != SpecialType.System_Object;
+                     currentType = currentType.BaseType)
                 {
-                    if (member is IMethodSymbol method &&
-                        !method.IsImplicitlyDeclared &&
-                        taskMethodKeys.Add(method.OriginalDefinition))
+                    foreach (ISymbol member in currentType.GetMembers())
                     {
-                        taskMethods.Add(method);
+                        if (member is IMethodSymbol { IsImplicitlyDeclared: false } method &&
+                            taskMethodKeys.Add(method.OriginalDefinition))
+                        {
+                            taskMethods.Add(method);
+                        }
                     }
                 }
 
@@ -383,6 +381,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                     while (queue.Count > 0)
                     {
+                        context.CancellationToken.ThrowIfCancellationRequested();
+
                         var (current, chain) = queue.Dequeue();
 
                         // Check if this method has direct violations (from source scan)
@@ -397,11 +397,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                                     ReportTransitiveViolation(context, method, v, chain, reportedViolations);
                                 }
                             }
-                        }
-
-                        if (chain.Count >= MaxCallChainDepth)
-                        {
-                            continue;
                         }
 
                         // Try source-level call graph first
