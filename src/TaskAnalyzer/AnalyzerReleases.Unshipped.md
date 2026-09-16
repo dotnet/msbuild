@@ -1,3 +1,4 @@
 ### New Rules
 
-No new unshipped analyzer rules for the initial shipping release.
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
