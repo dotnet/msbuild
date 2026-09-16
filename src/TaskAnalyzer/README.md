@@ -2,7 +2,7 @@
 
 A Roslyn analyzer that detects unsafe API usage in MSBuild task implementations. It guides task authors toward thread-safe patterns required for MSBuild's multithreaded task execution mode, where multiple tasks may run concurrently in the same process.
 
-The shipping delivery model is the `Microsoft.Build.Framework` package under `analyzers/dotnet/cs`, so consuming projects do not need a direct analyzer package reference. The direct-package examples below are primarily for local validation, automation, and partner-repo testing.
+The shipping delivery model is a standalone `Microsoft.Build.TaskAuthoring.Analyzer` package. `Microsoft.Build.Framework` references that package so analyzer updates can ship independently of the framework API version. Direct-package references remain useful for local validation, automation, and partner-repo testing.
 
 The package also includes a Roslyn diagnostic suppressor for nullable warning `CS8618` on task properties marked with `Microsoft.Build.Framework.RequiredAttribute`, since MSBuild guarantees those inputs are initialized before task execution.
 

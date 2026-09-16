@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <PackageId>Microsoft.Build.TaskAuthoring.Analyzer</PackageId>
+    <PackageDescription>Provides analyzer guidance for MSBuild task authoring and multithreaded task safety.</PackageDescription>
     <AssemblyName>Microsoft.Build.TaskAuthoring.Analyzer</AssemblyName>
     <RootNamespace>Microsoft.Build.TaskAuthoring.Analyzer</RootNamespace>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
