@@ -325,7 +325,9 @@ namespace Microsoft.Build.BackEnd
             {
                 while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
                 {
-                    CommunicationsUtilities.Trace($"Trying to connect to existing process {nodeToReuse.ProcessName} with id {nodeToReuse.Id} to establish node {nodeId}...");
+                    // Use the name we searched for rather than nodeToReuse.ProcessName: the candidate list is a
+                    // snapshot, and Process.ProcessName throws InvalidOperationException once the process exits.
+                    CommunicationsUtilities.Trace($"Trying to connect to existing process {expectedProcessName} with id {nodeToReuse.Id} to establish node {nodeId}...");
                     if (nodeToReuse.Id == currentProcessId)
                     {
                         continue;
