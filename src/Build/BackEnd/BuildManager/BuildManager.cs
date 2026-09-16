@@ -2115,8 +2115,7 @@ namespace Microsoft.Build.Execution
         {
             lock (_syncLock)
             {
-                if (_shuttingDown &&
-                    packet.Type is not NodePacketType.NodeShutdown)
+                if (_shuttingDown && packet.Type != NodePacketType.NodeShutdown)
                 {
                     // Console.WriteLine("Discarding packet {0} from node {1} because we are shutting down.", packet.Type, node);
                     return;
