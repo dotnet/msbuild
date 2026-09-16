@@ -10,7 +10,6 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
 #endif
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Collections;
@@ -35,7 +34,7 @@ namespace Microsoft.Build.BackEnd
     /// The task host object which allows tasks to interface with the rest of the build system.
     /// Implementation of IBuildEngineX is thread-safe, so, for example, tasks can log concurrently on multiple threads.
     /// </summary>
-    internal class TaskHost :
+    internal partial class TaskHost :
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
@@ -80,8 +79,6 @@ namespace Microsoft.Build.BackEnd
         /// This reference type is used to block access to a single entry methods of the interface
         /// </summary>
         private object _callbackMonitor;
-
-        private TaskResultCacheEventCollector _taskResultCacheEventCollector;
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -131,41 +128,6 @@ namespace Microsoft.Build.BackEnd
             _callbackMonitor = new object();
             _disableInprocNode = Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode;
             EngineServices = new EngineServicesImpl(this);
-        }
-
-        internal IDisposable BeginTaskResultCacheEventCapture(
-            TaskResultCacheEventCollector eventCollector)
-        {
-            lock (_callbackMonitor)
-            {
-                Assumed.Null(_taskResultCacheEventCollector);
-                _taskResultCacheEventCollector = eventCollector;
-            }
-
-            return new TaskResultCacheEventCapture(this, eventCollector);
-        }
-
-        private void EndTaskResultCacheEventCapture(
-            TaskResultCacheEventCollector eventCollector)
-        {
-            lock (_callbackMonitor)
-            {
-                Assumed.True(ReferenceEquals(eventCollector, _taskResultCacheEventCollector));
-                _taskResultCacheEventCollector = null;
-            }
-        }
-
-        private sealed class TaskResultCacheEventCapture(
-            TaskHost taskHost,
-            TaskResultCacheEventCollector eventCollector) : IDisposable
-        {
-            private TaskHost _taskHost = taskHost;
-
-            public void Dispose()
-            {
-                TaskHost currentTaskHost = Interlocked.Exchange(ref _taskHost, null);
-                currentTaskHost?.EndTaskResultCacheEventCapture(eventCollector);
-            }
         }
 
         /// <summary>
@@ -471,7 +433,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _taskResultCacheEventCollector?.MarkUnsupported();
+                CaptureTaskResultCacheEvent(e);
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -580,7 +542,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _taskResultCacheEventCollector?.Record(e);
+                CaptureTaskResultCacheEvent(e);
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -623,7 +585,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _taskResultCacheEventCollector?.Record(e);
+                CaptureTaskResultCacheEvent(e);
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -666,7 +628,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _taskResultCacheEventCollector?.MarkUnsupported();
+                CaptureTaskResultCacheEvent(e);
 
                 // If we are in building across process we need the events to be serializable. This method will
                 // check to see if we are building with multiple process and if the event is serializable. It will
@@ -759,7 +721,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                _taskResultCacheEventCollector?.MarkUnsupported();
+                MarkTaskResultCacheEventCaptureUnsupported();
                 _taskLoggingContext.LoggingService.LogTelemetry(_taskLoggingContext.BuildEventContext, eventName, properties);
             }
         }
