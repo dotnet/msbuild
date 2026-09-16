@@ -8,8 +8,8 @@ The items in this namespace are primarily base-level classes and interfaces shar
 ### netstandard2.0 target
 The `netstandard2.0` target of this build is configured only to output reference assemblies; at runtime MSBuild will be `net11.0` or `net472`. Please use the `net11.0`-targeted assemblies for .NET 11+ scenarios.
 
-### TaskAnalyzer in Microsoft.Build.Framework
-`Microsoft.Build.Framework` also includes the TaskAnalyzer under `analyzers/dotnet/cs` for projects that consume the package directly. This is the supported shipping path for the analyzer; no additional package reference is required.
+### TaskAnalyzer package
+The TaskAnalyzer ships as a separate `Microsoft.Build.TaskAuthoring.Analyzer` package, and `Microsoft.Build.Framework` references that package so analyzer updates can move independently from the MSBuild API version. This keeps compatibility scenarios working for projects that target older MSBuild hosts while still receiving newer analyzer fixes.
 
 The shipped analyzer defaults to the safe MT-only scope: regular task implementations do not receive new default warnings or errors. Migration mode remains available through the supported analyzer option:
 
@@ -31,6 +31,6 @@ dotnet_diagnostic.MSBuildTask0004.severity = none
 dotnet_diagnostic.MSBuildTask0001.severity = error
 ```
 
-For more detail, see the TaskAnalyzer README in the repository or the bundled rule documentation in the shipping release notes.
+For more detail, see the TaskAnalyzer README in the repository or the release notes for the analyzer package.
 
 For context, see https://github.com/dotnet/msbuild/pull/6148
