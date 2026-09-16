@@ -306,19 +306,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     {
                         throw new InvalidDataException("The cached output paths do not match the invocation.");
                     }
-
-                    if (!output.Present)
-                    {
-                        continue;
-                    }
-                    string payloadPath = GetPayloadPath(_entryDirectory, i);
-                    (byte[] hash, long length) =
-                        await HashFileAsync(payloadPath, cancellationToken);
-                    if (length != output.Length ||
-                        !HashesEqual(hash, output.Hash))
-                    {
-                        throw new InvalidDataException("A cached output payload is missing or corrupt.");
-                    }
                 }
 
                 var temporaryFiles = new string[outputs.Count];
@@ -340,11 +327,16 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
                         string temporaryFile =
                             output.Path + "." + Guid.NewGuid().ToString("N") + ".msbuild-cache";
-                        await CopyFileAsync(
+                        temporaryFiles[i] = temporaryFile;
+                        (byte[] hash, long length) = await CopyAndHashAsync(
                             GetPayloadPath(_entryDirectory, i),
                             temporaryFile,
                             cancellationToken);
-                        temporaryFiles[i] = temporaryFile;
+                        if (length != output.Length ||
+                            !HashesEqual(hash, output.Hash))
+                        {
+                            throw new InvalidDataException("A cached output payload is missing or corrupt.");
+                        }
                     }
 
                     for (int i = 0; i < outputs.Count; i++)
@@ -832,41 +824,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             using var hashStream = new CryptoStream(destination, hash, CryptoStreamMode.Write);
             await source.CopyToAsync(hashStream, 81920, cancellationToken);
             hashStream.FlushFinalBlock();
-            return (hash.Hash, source.Length);
-        }
-
-        private static async ValueTask<(byte[] Hash, long Length)> HashFileAsync(
-            string path,
-            CancellationToken cancellationToken)
-        {
-            using SHA256 hash = SHA256.Create();
-            using var stream = CreateAsyncFileStream(
-                path,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read);
-            using var hashStream = new CryptoStream(Stream.Null, hash, CryptoStreamMode.Write);
-            await stream.CopyToAsync(hashStream, 81920, cancellationToken);
-            hashStream.FlushFinalBlock();
-            return (hash.Hash, stream.Length);
-        }
-
-        private static async ValueTask CopyFileAsync(
-            string sourcePath,
-            string destinationPath,
-            CancellationToken cancellationToken)
-        {
-            using var source = CreateAsyncFileStream(
-                sourcePath,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read);
-            using var destination = CreateAsyncFileStream(
-                destinationPath,
-                FileMode.CreateNew,
-                FileAccess.Write,
-                FileShare.None);
-            await source.CopyToAsync(destination, 81920, cancellationToken);
+            return (hash.Hash, source.Position);
         }
 
         private static FileStream CreateAsyncFileStream(
