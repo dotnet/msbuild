@@ -2393,7 +2393,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildComponentHost: null,
                 taskHostParameters: taskHostParameters,
                 taskType: _host._UNITTESTONLY_TaskFactoryWrapper.TaskFactoryLoadedType,
-                useSidecarTaskHost: false,
+                allowNodeReuse: false,
                 projectFile: "proj.proj",
 #if FEATURE_APPDOMAIN
                 appDomainSetup: null,

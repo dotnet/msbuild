@@ -1587,6 +1587,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        // Defer conversion to the task host, where the task's actual types are available;
+        // their defining assemblies may not be loadable in the parent runtime.
         private static bool RequiresHostConversion(Type parameterType)
         {
             Type elementType = parameterType.IsArray ? parameterType.GetElementType() : parameterType;
