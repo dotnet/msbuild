@@ -30,6 +30,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     typeof(TestTask).Assembly,
                     typeof(ITaskItem)),
                 allowNodeReuse: false,
+                forwardConsoleOutput: false,
                 projectFile: null,
 #if FEATURE_APPDOMAIN
                 appDomainSetup: null,
