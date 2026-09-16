@@ -210,12 +210,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     restoreResponse.Events);
             }
 
-            if (!session.QuarantineEntryBestEffort())
-            {
-                return new TaskResultCacheOpenResponse(
-                    TaskResultCacheOpenResult.Unavailable,
-                    reason: restoreResponse.Reason);
-            }
+            TryDeleteEntryBestEffort(session._entryDirectory);
 
             return new TaskResultCacheOpenResponse(
                 TaskResultCacheOpenResult.Miss,
@@ -1006,19 +1001,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             for (int i = 0; i < entries.Count && totalSize > _maximumCacheSizeBytes; i++)
             {
                 CacheEntry entry = entries[i];
-                string tombstoneDirectory =
-                    entry.Path + ".evict-" + Guid.NewGuid().ToString("N");
-                try
+                if (TryDeleteEntryBestEffort(entry.Path))
                 {
-                    Directory.Move(entry.Path, tombstoneDirectory);
+                    totalSize -= entry.Size;
                 }
-                catch (Exception e) when (IsExpectedCacheException(e))
-                {
-                    continue;
-                }
-
-                totalSize -= entry.Size;
-                DeleteDirectoryBestEffort(tombstoneDirectory);
             }
         }
 
@@ -1045,14 +1031,13 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             }
         }
 
+        private static bool IsHexName(string name, int expectedLength) =>
+            name is not null && IsHexName(name.AsSpan(), expectedLength);
+
         private static bool IsDeletionTombstone(string name) =>
             name.Length > 62 &&
             IsHexName(name.AsSpan(0, 62), expectedLength: 62) &&
-            (name.AsSpan(62).StartsWith(".bad-", StringComparison.Ordinal) ||
-             name.AsSpan(62).StartsWith(".evict-", StringComparison.Ordinal));
-
-        private static bool IsHexName(string name, int expectedLength) =>
-            name is not null && IsHexName(name.AsSpan(), expectedLength);
+            name.AsSpan(62).StartsWith(".delete-", StringComparison.Ordinal);
 
         private static bool IsHexName(ReadOnlySpan<char> name, int expectedLength)
         {
@@ -1072,20 +1057,19 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             return true;
         }
 
-        private bool QuarantineEntryBestEffort()
+        private static bool TryDeleteEntryBestEffort(string path)
         {
-            string tombstoneDirectory =
-                _entryDirectory + ".bad-" + Guid.NewGuid().ToString("N");
+            string deletionPath = path + ".delete-" + Guid.NewGuid().ToString("N");
             try
             {
-                Directory.Move(_entryDirectory, tombstoneDirectory);
+                Directory.Move(path, deletionPath);
             }
             catch (Exception e) when (IsExpectedCacheException(e))
             {
                 return false;
             }
 
-            DeleteDirectoryBestEffort(tombstoneDirectory);
+            DeleteDirectoryBestEffort(deletionPath);
             return true;
         }
 
