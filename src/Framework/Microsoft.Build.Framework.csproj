@@ -95,6 +95,15 @@
           Pack="true"
           PackagePath="buildTransitive\net10.0\Microsoft.Build.Framework.targets" />
 
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
+
+    <!-- Ship the TaskAnalyzer alongside the framework package so consumers receive it without a direct analyzer package reference. -->
+    <None Include="$(ArtifactsBinDir)TaskAnalyzer\$(Configuration)\netstandard2.0\Microsoft.Build.TaskAuthoring.Analyzer.dll"
+          Pack="true"
+          PackagePath="analyzers\dotnet\cs\Microsoft.Build.TaskAuthoring.Analyzer.dll" />
+
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
 
     <!-- Display files included by the Microsoft.CodeAnalysis.Contracts source package in a 'SourcePackages\Contracts' folder -->
