@@ -660,8 +660,8 @@
         <note />
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
-        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code.</source>
-        <target state="new">MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code.</target>
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
+        <target state="new">MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</target>
         <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeEnabled">

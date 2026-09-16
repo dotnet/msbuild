@@ -624,24 +624,11 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
-                string? nonStrictValue = _buildParameters.MultiThreaded
-                    ? Environment.GetEnvironmentVariable("MSBUILDMTNONSTRICT")
-                    : null;
                 bool strictMode = _buildParameters.MultiThreaded
-                    && nonStrictValue != "1"
-                    && !string.Equals(nonStrictValue, "true", StringComparison.OrdinalIgnoreCase);
+                    && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12);
                 var buildEntryDirectory = strictMode || (_buildParameters.MultiThreaded && _buildParameters.SaveOperatingEnvironment)
                     ? MultiThreadedStrictModeScope.CaptureCurrentDirectory()
                     : default;
-
-                if (_buildParameters.MultiThreaded)
-                {
-                    _buildParameters.BuildProcessEnvironment.TryGetValue("MSBUILDMTNONSTRICT", out string? capturedValue);
-                    if (!string.Equals(capturedValue, nonStrictValue, StringComparison.Ordinal))
-                    {
-                        _buildParameters.SetBuildProcessEnvironmentVariable("MSBUILDMTNONSTRICT", nonStrictValue);
-                    }
-                }
 
                 // A strict scope owns its own restoration; rejected scope entry must not restore another build's CWD.
                 _savedCurrentDirectory = _buildParameters.MultiThreaded && !strictMode && _buildParameters.SaveOperatingEnvironment

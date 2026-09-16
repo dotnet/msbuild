@@ -1621,15 +1621,14 @@ namespace Microsoft.Build.CommandLine
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
-            if (multiThreaded && !Traits.MultiThreadedNonStrict)
+            if (multiThreaded && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
             {
-                // Strict mode moves the process current directory to a sentinel directory for the duration of the
-                // build, so every path the engine would otherwise resolve against it has to be made absolute here,
-                // while the process is still sitting in the directory the user launched from.
+                // Requests are created after BeginBuild enters the sentinel, so resolve the project path now.
                 projectFile = FileUtilities.NormalizePath(projectFile);
 
                 if (!string.IsNullOrWhiteSpace(outputResultsCache))
                 {
+                    // Anchor CLI output before evaluation loggers initialize; BeginBuild captures CWD later.
                     outputResultsCache = FileUtilities.NormalizePath(outputResultsCache);
                 }
             }

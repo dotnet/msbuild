@@ -8,6 +8,9 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
@@ -32,7 +35,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             _output = output;
             _env = TestEnvironment.Create(output);
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
+            SetStrictMode(_env, enabled: true);
         }
 
         public void Dispose() => _env.Dispose();
@@ -41,22 +44,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [Theory]
         [InlineData(true, null, true)]
-        [InlineData(true, "", true)]
-        [InlineData(true, "0", true)]
-        [InlineData(true, "false", true)]
-        [InlineData(true, "False", true)]
-        [InlineData(true, "invalid", true)]
-        [InlineData(true, "1", false)]
-        [InlineData(true, "true", false)]
-        [InlineData(true, "TRUE", false)]
+        [InlineData(true, "18.12", false)]
+        [InlineData(true, "18.11", false)]
+        [InlineData(true, "999.999", true)]
         [InlineData(false, null, false)]
-        [InlineData(false, "0", false)]
-        [InlineData(false, "false", false)]
-        [InlineData(false, "1", false)]
-        [InlineData(false, "true", false)]
-        public void StrictChecksDependOnlyOnMtAndEnvironmentOptOut(bool multiThreaded, string? optOut, bool expectedStrict)
+        [InlineData(false, "18.12", false)]
+        public void StrictChecksDependOnMtAndChangeWave(bool multiThreaded, string? disabledWave, bool expectedStrict)
         {
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
+            ChangeWaves.ResetStateForTests();
             string originalDirectory = Directory.GetCurrentDirectory();
             BuildParameters parameters = new()
             {
@@ -91,16 +87,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             using BuildManager manager = new();
             string originalDirectory = Directory.GetCurrentDirectory();
-            BuildParameters parameters = new() { MultiThreaded = true };
-            bool[] optOutValues = [false, true, false];
-            foreach (bool optOut in optOutValues)
+            BuildParameters parameters = new();
+            bool[] modes = [true, false, true];
+            foreach (bool multiThreaded in modes)
             {
-                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? "1" : null);
+                parameters.MultiThreaded = multiThreaded;
                 parameters.Loggers = [new MockLogger(_output)];
                 manager.BeginBuild(parameters);
                 try
                 {
-                    (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(!optOut);
+                    (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(multiThreaded);
                 }
                 finally
                 {
@@ -111,61 +107,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
-        public void ProductionApiBuildRecapturesStrictOptOut()
-        {
-            bool runningTests = BuildEnvironmentState.s_runningTests;
-            try
-            {
-                Traits.UpdateFromEnvironment();
-                BuildEnvironmentState.s_runningTests = false;
-                using BuildManager manager = new();
-                string?[] optOutValues = [null, "1", null];
-                foreach (string? optOut in optOutValues)
-                {
-                    _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut);
-                    manager.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
-                    try
-                    {
-                        (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(optOut is null);
-                    }
-                    finally
-                    {
-                        manager.EndBuild();
-                    }
-                }
-            }
-            finally
-            {
-                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
-                BuildEnvironmentState.s_runningTests = runningTests;
-                Traits.UpdateFromEnvironment();
-            }
-        }
-
         [Theory]
-        [InlineData(null, "true")]
-        [InlineData("1", null)]
-        [InlineData("true", "invalid")]
-        [InlineData("false", "TRUE")]
-        public void ReusedParametersTransferTheEntryTimeOptOut(string? initialValue, string? entryValue)
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ChangeWaveIsRetainedForTheProcess(bool enabled)
         {
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", initialValue);
-            BuildParameters parameters = new() { MultiThreaded = true, Loggers = [new MockLogger(_output)] };
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", entryValue);
+            SetStrictMode(_env, enabled);
             using BuildManager manager = new();
-            manager.BeginBuild(parameters);
-            try
+            for (int i = 0; i < 2; i++)
             {
-                var captured = ((IBuildComponentHost)manager).BuildParameters;
-                captured.BuildProcessEnvironment.TryGetValue("MSBUILDMTNONSTRICT", out string? actualValue);
-                actualValue.ShouldBe(entryValue);
-                parameters.BuildProcessEnvironment.TryGetValue("MSBUILDMTNONSTRICT", out string? originalValue);
-                originalValue.ShouldBe(initialValue);
-            }
-            finally
-            {
-                manager.EndBuild();
+                manager.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
+                try
+                {
+                    (MultiThreadedStrictModeScope.ActiveScope is not null).ShouldBe(enabled);
+                }
+                finally
+                {
+                    manager.EndBuild();
+                }
+
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
+                    enabled ? ChangeWaves.Wave18_12.ToString() : null);
             }
         }
 
@@ -201,7 +163,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(2)]
-        public void OverlappingMtBuildsPreserveTheCurrentScopeInEveryTeardownOrder(int strictIndex)
+        public void OverlappingBuildsPreserveTheCurrentScopeInEveryTeardownOrder(int strictIndex)
         {
             string originalDirectory = Directory.GetCurrentDirectory();
             int[][] endOrders = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
@@ -216,10 +178,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     for (int i = 0; i < managers.Length; i++)
                     {
-                        _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", i == strictIndex ? null : "1");
                         managers[i].BeginBuild(new BuildParameters
                         {
-                            MultiThreaded = true,
+                            MultiThreaded = i == strictIndex,
                             SaveOperatingEnvironment = true,
                             Loggers = [new MockLogger(_output)],
                         });
@@ -287,9 +248,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void ChangingOptOutDuringBuildDoesNotChangeTaskChecks(bool optOut)
+        public void ChangingWaveEnvironmentDuringBuildDoesNotChangeTaskChecks(bool optOut)
         {
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? "1" : null);
+            SetStrictMode(_env, enabled: !optOut);
             _env.SetCurrentDirectory(_env.CreateFolder().Path);
             string originalDirectory = Directory.GetCurrentDirectory();
             string otherDirectory = _env.CreateFolder().Path;
@@ -314,7 +275,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             manager.BeginBuild(parameters);
             try
             {
-                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? null : "1");
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
+                    optOut ? null : ChangeWaves.Wave18_12.ToString());
                 result = manager.BuildRequest(new BuildRequestData(
                     project.Path, new Dictionary<string, string?>(), null, ["Build"], null));
             }
@@ -328,10 +290,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void TaskChecksOnlyUseTheirOwnBuildsScope(bool multiThreaded)
+        [Fact]
+        public void NonMtTaskChecksDoNotUseAnotherBuildsScope()
         {
             var project = _env.CreateFile("foreign-scope.proj", $"""
                 <Project>
@@ -349,12 +309,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 var scope = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull();
-                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", "1");
                 MockLogger logger = new(_output);
                 using BuildManager other = new();
                 BuildParameters parameters = new()
                 {
-                    MultiThreaded = multiThreaded,
+                    MultiThreaded = false,
                     SaveOperatingEnvironment = false,
                     ShutdownInProcNodeOnBuildFinish = true,
                     EnableNodeReuse = false,
@@ -450,6 +409,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.Exists(temporaryDirectory).ShouldBeFalse();
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+        }
+
+        [Theory]
+        [InlineData("Empty")]
+        [InlineData("Write")]
+        [InlineData("Missing")]
+        public void DirectoryScansEmitPairedPerformanceEvents(string state)
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var scope = MultiThreadedStrictModeScope.Enter(42);
+            using var lifetime = new ScopeLifetime(scope);
+            if (state == "Write")
+            {
+                File.WriteAllText("scan-event.txt", "content");
+            }
+            else if (state == "Missing")
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                Directory.Delete(scope.SentinelDirectory);
+            }
+
+            using EventSourceTestHelper listener = new();
+            Exception? exception = Record.Exception(() => scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation));
+            if (state == "Write")
+            {
+                exception.ShouldBeOfType<InvalidProjectFileException>().ErrorCode.ShouldBe("MSB4287");
+            }
+            else if (state == "Missing")
+            {
+                exception.ShouldBeOfType<DirectoryNotFoundException>();
+            }
+            else
+            {
+                exception.ShouldBeNull();
+            }
+
+            var events = listener.GetEvents();
+            events.ShouldNotContain(e => e.EventId == 0);
+            var scans = events.FindAll(e => e.EventName is
+                nameof(MSBuildEventSource.StrictModeDirectoryScanStart) or
+                nameof(MSBuildEventSource.StrictModeDirectoryScanStop));
+            scans.Count.ShouldBe(2);
+            scans[0].EventName.ShouldBe(nameof(MSBuildEventSource.StrictModeDirectoryScanStart));
+            scans[1].EventName.ShouldBe(nameof(MSBuildEventSource.StrictModeDirectoryScanStop));
+            foreach (var scan in scans)
+            {
+                var payload = scan.Payload.ShouldNotBeNull();
+                payload[0].ShouldBe(42);
+                payload[1].ShouldBe(string.Empty);
+            }
         }
 
         /// <summary>
@@ -637,7 +646,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             var scope = MultiThreadedStrictModeScope.Enter(0);
             using var lifetime = new ScopeLifetime(scope);
-            string sibling = Path.Combine(Path.GetDirectoryName(scope.SentinelDirectory)!, "msbuild-mt-strict-sentinel-cwd");
+            string sibling = Path.Combine(Path.GetDirectoryName(scope.SentinelDirectory)!, "mt-sentinel-cwd");
             Directory.CreateDirectory(sibling);
             Directory.SetCurrentDirectory(sibling);
 
@@ -722,7 +731,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void StrictModeIsIgnoredWhenBuildIsNotMultiThreaded()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
+            SetStrictMode(env, enabled: true);
 
             string originalDirectory = Directory.GetCurrentDirectory();
 
@@ -754,7 +763,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void MtBuildRestoresHostDirectory(bool strict, bool saveEnvironment)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", strict ? null : "1");
+            SetStrictMode(env, enabled: strict);
             string startupDirectory = BuildParameters.StartupDirectory;
             var projectFolder = env.CreateFolder();
             env.CreateFile(projectFolder, "build.proj", """
@@ -789,7 +798,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void NonStrictMtRespectsSaveOperatingEnvironment(bool saveEnvironment)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", "1");
+            SetStrictMode(env, enabled: false);
             env.SetCurrentDirectory(env.CreateFolder().Path);
             string changedDirectory = Directory.GetCurrentDirectory();
             env.SetCurrentDirectory(env.CreateFolder().Path);
@@ -892,7 +901,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void OutputGetterViolationUsesItsBoundaryFailurePolicy(string violation, string continueOnError, bool succeeds)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
+            SetStrictMode(env, enabled: true);
             var directory = env.CreateFolder();
             var project = env.CreateFile("getter.proj", $"""
                 <Project>
@@ -1280,7 +1289,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void CancellationDuringOutputGatheringPreservesEarlierDiagnostics(bool strict)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", strict ? null : "1");
+            SetStrictMode(env, enabled: strict);
             var otherDirectory = env.CreateFolder();
             var project = env.CreateFile("cancel-getter.proj", $"""
                 <Project>
@@ -1604,6 +1613,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             parameters.Loggers = [new MockLogger(_output)];
             manager.BeginBuild(parameters);
             manager.EndBuild();
+        }
+
+        private static void SetStrictMode(TestEnvironment environment, bool enabled)
+        {
+            environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
+                enabled ? null : ChangeWaves.Wave18_12.ToString());
+            ChangeWaves.ResetStateForTests();
         }
 
         private static BuildResult BuildStrictProject(

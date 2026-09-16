@@ -163,6 +163,14 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    public class ChangeCurrentDirectoryOnInitializeLogger : Logger
+    {
+        public override void Initialize(IEventSource eventSource)
+        {
+            Directory.SetCurrentDirectory(Parameters);
+        }
+    }
+
     /// <summary>
     /// Test task that deliberately performs the unresolved-path operations that multi-threaded strict mode
     /// exists to detect.
@@ -201,7 +209,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 case "DeleteSentinel":
                     string sentinel = Directory.GetCurrentDirectory();
-                    if (Path.GetFileName(sentinel) != "MSBuild-MT-Strict-Sentinel-CWD")
+                    if (Path.GetFileName(sentinel) != "MT-sentinel-CWD")
                     {
                         throw new InvalidOperationException("The probe must run in the strict sentinel directory.");
                     }
@@ -218,11 +226,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 case "CaseDistinctDirectory":
                     string currentDirectory = Directory.GetCurrentDirectory();
-                    if (Path.GetFileName(currentDirectory) != "MSBuild-MT-Strict-Sentinel-CWD")
+                    if (Path.GetFileName(currentDirectory) != "MT-sentinel-CWD")
                     {
                         throw new InvalidOperationException("The probe must run in the strict sentinel directory.");
                     }
-                    string sibling = Path.Combine(Path.GetDirectoryName(currentDirectory)!, "msbuild-mt-strict-sentinel-cwd");
+                    string sibling = Path.Combine(Path.GetDirectoryName(currentDirectory)!, "mt-sentinel-cwd");
                     Directory.CreateDirectory(sibling);
                     Directory.SetCurrentDirectory(sibling);
                     break;
@@ -246,7 +254,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _output = output;
             _env = TestEnvironment.Create(output);
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
         }
 
@@ -593,6 +601,31 @@ namespace Microsoft.Build.Engine.UnitTests
             success.ShouldBeTrue(output);
         }
 
+        [Fact]
+        public void StrictMode_OutputCachePathIsAnchoredBeforeLoggerInitialization()
+        {
+            TransientTestFolder launchDirectory = _env.CreateFolder();
+            TransientTestFolder loggerDirectory = _env.CreateFolder();
+            _env.CreateFile(launchDirectory, "main.proj", """
+                <Project>
+                    <Target Name="Build" />
+                </Project>
+                """);
+            _env.SetCurrentDirectory(launchDirectory.Path);
+            Type loggerType = typeof(ChangeCurrentDirectoryOnInitializeLogger);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"main.proj /m:1 /mt /nr:false /orc:out.cache /logger:{loggerType.FullName},\"{loggerType.Assembly.Location}\";\"{loggerDirectory.Path}\"",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue(output);
+            File.Exists(Path.Combine(launchDirectory.Path, "out.cache")).ShouldBeTrue(output);
+            File.Exists(Path.Combine(loggerDirectory.Path, "out.cache")).ShouldBeFalse(output);
+        }
+
         /// <summary>
         /// Sentinel contents are checked at project completion, outside the writing task's error policy.
         /// </summary>
@@ -714,65 +747,41 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// The opt-out does not disable MT itself or require a separate command-line switch.
+        /// Disabling wave 18.12 turns off strict checks without disabling MT itself.
         /// </summary>
         [Theory]
-        [InlineData("1")]
-        [InlineData("true")]
-        [InlineData("TRUE")]
-        public void StrictMode_EnvironmentOptOutPreservesMt(string optOut)
+        [InlineData(null, true)]
+        [InlineData("18.12", false)]
+        [InlineData("999.999", true)]
+        public void StrictMode_ChangeWaveControlsChecksAndPreservesMt(string? disabledWave, bool strictModeEnabled)
         {
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
 
             string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt", out bool success);
 
-            success.ShouldBeTrue(output);
-            output.ShouldNotContain("MSB4286");
+            success.ShouldBe(!strictModeEnabled, output);
+            output.Contains("MSB4286").ShouldBe(strictModeEnabled, output);
             VerifyEnvironmentIsolation(true, "/m /nodereuse:false /mt");
         }
 
         [Theory]
-        [InlineData("0")]
-        [InlineData("false")]
-        [InlineData("invalid")]
-        public void StrictMode_OnlyRecognizedOptOutValuesDisableChecks(string optOut)
-        {
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut);
-
-            string output = RunStrictModeProbe("ChangeCurrentDirectory", "/m /nodereuse:false /mt", out bool success);
-
-            success.ShouldBeFalse(output);
-            output.ShouldContain("MSB4286");
-        }
-
-        [Fact]
-        public void StrictMode_ProjectPropertyCannotOptOut()
-        {
-            string output = RunStrictModeProbe(
-                "ChangeCurrentDirectory", "/m /nodereuse:false /mt /p:MSBUILDMTNONSTRICT=1", out bool success);
-
-            success.ShouldBeFalse(output);
-            output.ShouldContain("MSB4286");
-        }
-
-        [Theory]
-        [InlineData("MSBUILDENABLEMULTITHREADED", "", false)]
-        [InlineData("MSBUILDENABLEMULTITHREADED", "", true)]
-        [InlineData("MSBUILDFORCEMULTITHREADED", "", false)]
-        [InlineData("MSBUILDFORCEMULTITHREADED", "", true)]
-        [InlineData("MSBUILDFORCEMULTITHREADED", "/mt:false", false)]
-        [InlineData("MSBUILDFORCEMULTITHREADED", "/mt:false", true)]
-        public void StrictMode_EnvironmentSelectedMtHonorsOptOut(string mtVariable, string mtArgument, bool optOut)
+        [InlineData("MSBUILDENABLEMULTITHREADED", "", null, true)]
+        [InlineData("MSBUILDENABLEMULTITHREADED", "", "18.12", false)]
+        [InlineData("MSBUILDFORCEMULTITHREADED", "", null, true)]
+        [InlineData("MSBUILDFORCEMULTITHREADED", "", "18.12", false)]
+        [InlineData("MSBUILDFORCEMULTITHREADED", "/mt:false", null, true)]
+        [InlineData("MSBUILDFORCEMULTITHREADED", "/mt:false", "18.12", false)]
+        public void StrictMode_EnvironmentSelectedMtHonorsChangeWave(string mtVariable, string mtArgument, string? disabledWave, bool strictModeEnabled)
         {
             _env.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
             _env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
             _env.SetEnvironmentVariable(mtVariable, "1");
-            _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? "1" : null);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
 
             string output = RunStrictModeProbe("ChangeCurrentDirectory", $"/m /nodereuse:false {mtArgument}", out bool success);
 
-            success.ShouldBe(optOut, output);
-            output.Contains("MSB4286").ShouldBe(!optOut, output);
+            success.ShouldBe(!strictModeEnabled, output);
+            output.Contains("MSB4286").ShouldBe(strictModeEnabled, output);
         }
 
         [Fact]
@@ -809,7 +818,7 @@ namespace Microsoft.Build.Engine.UnitTests
             string output = RunStrictModeProbe("DeleteSentinel", "/m /mt /nr:false", out bool success, continueOnError: continueOnError);
 
             success.ShouldBeFalse(output);
-            output.ShouldContain("MSBuild-MT-Strict-Sentinel-CWD");
+            output.ShouldContain("MT-sentinel-CWD");
         }
 
         [Fact]
@@ -850,7 +859,7 @@ namespace Microsoft.Build.Engine.UnitTests
             error.Code.ShouldBe("MSB4287");
             string message = error.Message.ShouldNotBeNull();
             message.ShouldContain("strict-mode-probe.txt");
-            message.ShouldContain("MSBuild-MT-Strict-Sentinel-CWD");
+            message.ShouldContain("MT-sentinel-CWD");
             message.ShouldNotContain(nameof(StrictModeProbeTask));
             BuildEventContext errorContext = error.BuildEventContext.ShouldNotBeNull();
             errorContext.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);

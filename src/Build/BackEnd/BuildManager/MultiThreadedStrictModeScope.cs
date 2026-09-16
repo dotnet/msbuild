@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -18,7 +19,7 @@ namespace Microsoft.Build.Execution;
 /// </summary>
 internal sealed class MultiThreadedStrictModeScope
 {
-    internal const string SentinelDirectoryName = "MSBuild-MT-Strict-Sentinel-CWD";
+    internal const string SentinelDirectoryName = "MT-sentinel-CWD";
 
     // Serializes scope installation, restoration and directory repair. Never log under this lock.
     private static readonly LockType s_stateLock = NativeMethodsShared.CurrentDirectoryLock;
@@ -198,7 +199,25 @@ internal sealed class MultiThreadedStrictModeScope
 
     internal void VerifyUnresolvedPathWrites(ElementLocation location)
     {
-        string? entries = DetectUnresolvedPathWrites();
+        bool trace = MSBuildEventSource.Log.IsEnabled();
+        if (trace)
+        {
+            MSBuildEventSource.Log.StrictModeDirectoryScanStart(BuildId, location.File);
+        }
+
+        string? entries;
+        try
+        {
+            entries = DetectUnresolvedPathWrites();
+        }
+        finally
+        {
+            if (trace)
+            {
+                MSBuildEventSource.Log.StrictModeDirectoryScanStop(BuildId, location.File);
+            }
+        }
+
         if (entries is not null)
         {
             ProjectErrorUtilities.ThrowInvalidProject(location,

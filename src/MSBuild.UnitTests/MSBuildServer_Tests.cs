@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
@@ -127,10 +128,11 @@ namespace Microsoft.Build.Engine.UnitTests
         public void Dispose() => _env.Dispose();
 
         [Fact]
-        public void ReusedServerHonorsStrictOptOutPerRequest()
+        public void ServersAreIsolatedByResolvedChangeWave()
         {
             _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
             var project = _env.CreateFile("strict-server.proj", $"""
                 <Project>
                   <UsingTask TaskName="ProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
@@ -144,25 +146,35 @@ namespace Microsoft.Build.Engine.UnitTests
                   </Target>
                 </Project>
                 """);
-            int? serverPid = null;
-            bool[] optOutValues = [false, true, false];
-            foreach (bool optOut in optOutValues)
+            Dictionary<int, bool> strictModeByServerPid = [];
+            // Unset and 999.999 resolve identically, so the last request may reuse the first server.
+            (string? DisabledWave, bool StrictModeEnabled)[] requests =
+            [
+                (null, true),
+                ("18.12", false),
+                ("999.999", true),
+            ];
+            foreach ((string? disabledWave, bool strictModeEnabled) in requests)
             {
-                _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", optOut ? "1" : null);
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
                 string output = RunnerUtilities.ExecMSBuild(
                     BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
                     $"\"{project.Path}\" -m:1 -mt -nr:true", out bool success, false, _output);
                 int pid = ParseNumber(output, "Server ID is ");
-                if (serverPid != pid)
+                if (strictModeByServerPid.TryGetValue(pid, out bool previousStrictModeEnabled))
+                {
+                    strictModeEnabled.ShouldBe(previousStrictModeEnabled,
+                        "Requests with different resolved change waves must not reuse the same server process.");
+                }
+                else
                 {
                     _env.WithTransientProcess(pid);
+                    strictModeByServerPid.Add(pid, strictModeEnabled);
                 }
-                serverPid ??= pid;
 
-                pid.ShouldBe(serverPid.Value);
                 pid.ShouldNotBe(ParseNumber(output, "Process ID is "));
-                success.ShouldBe(optOut, output);
-                output.Contains("MSB4286").ShouldBe(!optOut, output);
+                success.ShouldBe(!strictModeEnabled, output);
+                output.Contains("MSB4286").ShouldBe(strictModeEnabled, output);
             }
         }
 

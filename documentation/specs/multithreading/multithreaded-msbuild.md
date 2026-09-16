@@ -252,24 +252,15 @@ To ease task authoring, we will provide a Roslyn analyzer that will check for kn
 
 ## Strict mode
 
-These defaults are part of experimental, opt-in MT, so they are not separately ChangeWave-gated.
-
-Multi-threaded builds use strict checks by default. Strict mode changes the process current directory
+Multi-threaded builds use strict checks by default when [change wave 18.12](../../wiki/ChangeWaves.md#1812)
+is enabled. Strict mode changes the process current directory
 to a fresh, empty temporary directory (the sentinel) for the build. A task that uses an unresolved relative path
 then looks there instead of accidentally finding another project's files. Paths resolved through
 the injected `TaskEnvironment` still point to the project.
 
-The checks apply to `-mt` / `-multiThreaded`, MT builds selected through
-`MSBUILDENABLEMULTITHREADED` or `MSBUILDFORCEMULTITHREADED`, and API builds with
-`BuildParameters.MultiThreaded = true`. Non-MT builds are unchanged.
-
-Set **`MSBUILDMTNONSTRICT=1`** (or `true`, case-insensitive) in the environment before starting
-MSBuild to opt out of strict checks without disabling MT. Unset the variable or set it to `0`
-or `false` to retain the default checks. Other values do not opt out. There is no separate
-strict-mode command-line switch, project property, or public API setting.
-API hosts can change the environment variable before a subsequent `BeginBuild`; its value is
-captured once for that build and copied into its child-process environment, including when reusing
-`BuildParameters`. Changing it during execution does not change the active checks.
+Set **`MSBUILDDISABLEFEATURESFROMVERSION=18.12`** before starting MSBuild to temporarily disable
+these checks and the other features in that wave. Change-wave selection is cached per process;
+API hosts must restart the process to change it. There is no separate strict-mode opt-out.
 Use absolute entry-project paths in API builds, or construct relative-path `BuildRequestData`
 before `BeginBuild`, while the host's working directory is still active.
 
@@ -281,6 +272,10 @@ finish, before its result is reported, and once more at build completion. Cancel
 |---|---|---|
 | `MSB4286` | Task completion | The process current directory changed. MSBuild resets it to the sentinel. |
 | `MSB4287` | Project or build completion | Files or directories remain in the sentinel. MSBuild attempts to remove them. |
+
+The `Microsoft-Build` EventSource emits paired `StrictModeDirectoryScanStart` and
+`StrictModeDirectoryScanStop` events around scans, including lock wait and filesystem work.
+Their build ID and project-file payloads identify the caller; build-end scans have an empty project file.
 
 `MSB4286` fails the task and follows `ContinueOnError`. For a CI gate, use
 `"-warnAsError:MSB4286"` to prevent `ContinueOnError` from turning it into a passing warning.
@@ -322,8 +317,7 @@ in that process are not isolated from this mode.
 Unannotated tasks retain their TaskHost working directory, but can still receive an incorrect
 absolute path from project or engine code. When constructing a nested task, pass the parent's
 `TaskEnvironment` to it. Child MSBuild processes also use strict checks when they run
-multi-threaded, unless they inherit the `MSBUILDMTNONSTRICT` opt-out. The opt-out does not
-itself enable MT in a child process.
+multi-threaded and change wave 18.12 is enabled. A change-wave setting does not itself enable MT.
 
 ## Interaction with `DisableInProcNode`
 

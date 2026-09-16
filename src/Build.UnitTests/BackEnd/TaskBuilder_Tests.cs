@@ -131,7 +131,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             using (TestEnvironment env = TestEnvironment.Create(_testOutput))
             {
-                env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+                ChangeWaves.ResetStateForTests();
                 BuildManager manager = new BuildManager();
                 ProjectCollection collection = new ProjectCollection();
 

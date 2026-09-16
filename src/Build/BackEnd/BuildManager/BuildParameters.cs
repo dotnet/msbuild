@@ -579,8 +579,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <remarks>
         /// Multi-threaded builds use an empty sentinel current directory and check for process-directory
-        /// changes and unresolved relative-path writes. Set the MSBUILDMTNONSTRICT environment variable to
-        /// 1 or true to disable these checks without disabling multi-threading.
+        /// changes and unresolved relative-path writes when change wave 18.12 is enabled.
         /// </remarks>
         public bool MultiThreaded
         {

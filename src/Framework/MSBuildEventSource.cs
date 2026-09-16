@@ -830,5 +830,17 @@ namespace Microsoft.Build.Eventing
             WriteEvent(112, taskName, succeeded);
         }
         #endregion
+
+        [Event(113, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void StrictModeDirectoryScanStart(int buildId, string projectFile)
+        {
+            WriteEvent(113, buildId, projectFile);
+        }
+
+        [Event(114, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void StrictModeDirectoryScanStop(int buildId, string projectFile)
+        {
+            WriteEvent(114, buildId, projectFile);
+        }
     }
 }
