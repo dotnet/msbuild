@@ -271,18 +271,27 @@ namespace Microsoft.Build.BackEnd
             string expectedProcessName = null;
             ConcurrentQueue<Process> possibleRunningNodes = null;
 
-            // Try to connect to idle nodes if node reuse is enabled.
+            // Try to connect to idle nodes if node reuse is enabled. Scanning the machine for candidates is
+            // best effort: if it fails we simply have nothing to reuse and fall back to launching new nodes.
             if (nodeReuseRequested)
             {
-                IList<Process> possibleRunningNodesList;
-                MSBuildEventSource.Log.NodeReuseScanStart();
-                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
-                MSBuildEventSource.Log.NodeReuseScanStop(possibleRunningNodesList.Count);
-                possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
-
-                if (possibleRunningNodesList.Count > 0)
+                try
                 {
-                    CommunicationsUtilities.Trace($"Attempting to connect to {possibleRunningNodesList.Count} existing processes '{expectedProcessName}'...");
+                    IList<Process> possibleRunningNodesList;
+                    MSBuildEventSource.Log.NodeReuseScanStart();
+                    (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
+                    MSBuildEventSource.Log.NodeReuseScanStop(possibleRunningNodesList.Count);
+                    possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
+
+                    if (possibleRunningNodesList.Count > 0)
+                    {
+                        CommunicationsUtilities.Trace($"Attempting to connect to {possibleRunningNodesList.Count} existing processes '{expectedProcessName}'...");
+                    }
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    CommunicationsUtilities.Trace($"Failed to scan for reusable nodes, will launch new nodes instead: {ex}");
+                    possibleRunningNodes = null;
                 }
             }
 
@@ -325,39 +334,50 @@ namespace Microsoft.Build.BackEnd
             {
                 while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
                 {
-                    CommunicationsUtilities.Trace($"Trying to connect to existing process {nodeToReuse.ProcessName} with id {nodeToReuse.Id} to establish node {nodeId}...");
-                    if (nodeToReuse.Id == currentProcessId)
+                    try
                     {
-                        continue;
-                    }
-
-                    // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
-                    string nodeLookupKey = GetProcessesToIgnoreKey(nodeLaunchData.Handshake, nodeToReuse.Id);
-                    if (_processesToIgnore.ContainsKey(nodeLookupKey))
-                    {
-                        continue;
-                    }
-
-                    // We don't need to check this again
-                    _processesToIgnore.TryAdd(nodeLookupKey, default);
-
-                    // Attempt to connect to each process in turn.
-                    MSBuildEventSource.Log.NodePipeConnectStart(nodeId, nodeToReuse.Id);
-                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out HandshakeResult result);
-                    MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuse.Id, succeeded: nodeStream != null);
-                    if (nodeStream != null)
-                    {
-                        // Connection successful, use this node.
-                        CommunicationsUtilities.Trace($"Successfully connected to existing node {nodeId} which is PID {nodeToReuse.Id}");
-                        string msg = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeReused", nodeId, nodeToReuse.Id);
-                        _componentHost.LoggingService.LogBuildEvent(new BuildMessageEventArgs(msg, null, null, MessageImportance.Low)
+                        CommunicationsUtilities.Trace($"Trying to connect to existing process {nodeToReuse.ProcessName} with id {nodeToReuse.Id} to establish node {nodeId}...");
+                        if (nodeToReuse.Id == currentProcessId)
                         {
-                            BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
-                        });
+                            continue;
+                        }
 
-                        CreateNodeContext(nodeId, nodeToReuse, nodeStream, result.NegotiatedPacketVersion);
-                        MSBuildEventSource.Log.NodeConnectStop(nodeId, nodeToReuse.Id, isReused: true);
-                        return true;
+                        // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
+                        string nodeLookupKey = GetProcessesToIgnoreKey(nodeLaunchData.Handshake, nodeToReuse.Id);
+                        if (_processesToIgnore.ContainsKey(nodeLookupKey))
+                        {
+                            continue;
+                        }
+
+                        // We don't need to check this again
+                        _processesToIgnore.TryAdd(nodeLookupKey, default);
+
+                        // Attempt to connect to each process in turn.
+                        MSBuildEventSource.Log.NodePipeConnectStart(nodeId, nodeToReuse.Id);
+                        Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out HandshakeResult result);
+                        MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuse.Id, succeeded: nodeStream != null);
+                        if (nodeStream != null)
+                        {
+                            // Connection successful, use this node.
+                            CommunicationsUtilities.Trace($"Successfully connected to existing node {nodeId} which is PID {nodeToReuse.Id}");
+                            string msg = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeReused", nodeId, nodeToReuse.Id);
+                            _componentHost.LoggingService.LogBuildEvent(new BuildMessageEventArgs(msg, null, null, MessageImportance.Low)
+                            {
+                                BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
+                            });
+
+                            CreateNodeContext(nodeId, nodeToReuse, nodeStream, result.NegotiatedPacketVersion);
+                            MSBuildEventSource.Log.NodeConnectStop(nodeId, nodeToReuse.Id, isReused: true);
+                            return true;
+                        }
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        // Reuse is best effort. A candidate belongs to another build and may exit, be killed,
+                        // hit its idle timeout, or refuse a handshake at any moment, so probing it is inherently
+                        // racy. Skip this candidate and keep looking rather than failing the build; the remaining
+                        // candidates stay usable and StartNewNode is still available as the fallback.
+                        CommunicationsUtilities.Trace($"Failed to probe existing process with id {nodeToReuse.Id} while establishing node {nodeId}, skipping it: {ex}");
                     }
                 }
 
