@@ -225,12 +225,7 @@ internal enum NodePacketType : byte
     /// </summary>
     RarNodeBufferedLogEvents, // 0x16
 
-    /// <summary>
-    /// Cumulative declared-I/O task result cache statistics reported by a worker node.
-    /// </summary>
-    TaskResultCacheStatistics = 0x18,
-
-    // Packet types 0x19-0x1F reserved for future core functionality
+    // Packet types 0x18-0x1F reserved for future core functionality
 
     #region TaskHost callback packets (0x20-0x27)
     // These support bidirectional callbacks from TaskHost to parent for IBuildEngine implementations

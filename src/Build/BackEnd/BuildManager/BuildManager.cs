@@ -736,7 +736,6 @@ namespace Microsoft.Build.Execution
                 _nodeManager.RegisterPacketHandler(NodePacketType.FileAccessReport, FileAccessReport.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ProcessReport, ProcessReport.FactoryForDeserialization, this);
-                _nodeManager.RegisterPacketHandler(NodePacketType.TaskResultCacheStatistics, TaskResultCacheStatisticsPacket.FactoryForDeserialization, this);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResolveSdkRequest, SdkResolverRequest.FactoryForDeserialization, SdkResolverService as INodePacketHandler);
                 _nodeManager.RegisterPacketHandler(NodePacketType.ResourceRequest, ResourceRequest.FactoryForDeserialization, this);
 
@@ -1208,6 +1207,10 @@ namespace Microsoft.Build.Execution
                             _overallBuildSuccess = false;
                         }
 
+                        ((TaskResultCacheStatistics)_componentFactories.GetComponent(
+                            BuildComponentType.TaskResultCacheStatistics)).LogAndReset(
+                                loggingService,
+                                BuildEventContext.Invalid);
                         loggingService.LogBuildFinished(_overallBuildSuccess);
 
                         if (_buildTelemetry != null)
@@ -1964,8 +1967,7 @@ namespace Microsoft.Build.Execution
             lock (_syncLock)
             {
                 if (_shuttingDown &&
-                    packet.Type is not NodePacketType.NodeShutdown and
-                    not NodePacketType.TaskResultCacheStatistics)
+                    packet.Type is not NodePacketType.NodeShutdown)
                 {
                     // Console.WriteLine("Discarding packet {0} from node {1} because we are shutting down.", packet.Type, node);
                     return;
@@ -2007,12 +2009,6 @@ namespace Microsoft.Build.Execution
                     case NodePacketType.ProcessReport:
                         ProcessReport processReport = ExpectPacketType<ProcessReport>(packet, NodePacketType.ProcessReport);
                         HandleProcessReport(node, processReport);
-                        break;
-
-                    case NodePacketType.TaskResultCacheStatistics:
-                        TaskResultCacheStatisticsPacket cacheStatistics =
-                            ExpectPacketType<TaskResultCacheStatisticsPacket>(packet, NodePacketType.TaskResultCacheStatistics);
-                        TaskResultCacheStatistics.Merge(cacheStatistics.Snapshot);
                         break;
 
                     default:
@@ -2518,6 +2514,7 @@ namespace Microsoft.Build.Execution
         private void Reset()
         {
             _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheFileDigestCache);
+            _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheStatistics);
 
             _nodeManager?.UnregisterPacketHandler(NodePacketType.BuildRequestBlocker);
             _nodeManager?.UnregisterPacketHandler(NodePacketType.BuildRequestConfiguration);
