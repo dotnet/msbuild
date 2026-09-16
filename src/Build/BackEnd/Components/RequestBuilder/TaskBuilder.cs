@@ -887,7 +887,6 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                using TaskResultCacheSession cacheSessionLease = cacheSession;
                 using IDisposable cacheEventCapture = eventCollector is null
                     ? null
                     : taskHost.BeginTaskResultCacheEventCapture(eventCollector);

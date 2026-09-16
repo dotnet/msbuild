@@ -65,33 +65,27 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         internal string Reason { get; }
     }
 
-    internal sealed class TaskResultCacheSession : IDisposable
+    internal sealed class TaskResultCacheSession
     {
         internal const string CacheDirectoryPropertyName = "MSBuildTaskCacheDirectory";
         internal const string CacheEnabledPropertyName = "MSBuildTaskCacheEnabled";
 
         private const string ManifestFileName = "manifest.bin";
         private const string ManifestMagic = "MSBuild Task Result Cache";
-        private const int ManifestVersion = 4;
         private const int MaximumEventCount = 1_000_000;
-        private const int LockRetryCount = 300;
-        private const int LockRetryDelayMilliseconds = 100;
 
         private readonly string _entryDirectory;
         private readonly string _key;
         private readonly IReadOnlyList<string> _outputPaths;
-        private readonly FileStream _lockStream;
 
         private TaskResultCacheSession(
             string entryDirectory,
             string key,
-            IReadOnlyList<string> outputPaths,
-            FileStream lockStream)
+            IReadOnlyList<string> outputPaths)
         {
             _entryDirectory = entryDirectory;
             _key = key;
             _outputPaths = outputPaths;
-            _lockStream = lockStream;
         }
 
         internal string Key => _key;
@@ -130,10 +124,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             return Path.Combine(userCacheDirectory, "msbuild", "task-result-cache");
         }
 
-        [SuppressMessage(
-            "Reliability",
-            "CA2000:Dispose objects before losing scope",
-            Justification = "A successful response transfers ownership of the cache session to the caller.")]
         internal static async ValueTask<TaskResultCacheOpenResponse> TryOpenAsync(
             ITask task,
             ICollection<string> parameterNames,
@@ -175,31 +165,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 normalizedCacheDirectory,
                 keyResponse.Key.Substring(0, 2),
                 keyResponse.Key.Substring(2));
-            string lockPath = entryDirectory + ".lock";
-
-            FileStream lockStream = null;
-            TaskResultCacheSession session;
-            try
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(entryDirectory));
-                lockStream = await AcquireLockAsync(lockPath, cancellationToken);
-                session = new TaskResultCacheSession(
-                    entryDirectory,
-                    keyResponse.Key,
-                    keyResponse.OutputPaths,
-                    lockStream);
-                lockStream = null;
-            }
-            catch (Exception e) when (IsExpectedCacheException(e))
-            {
-                return new TaskResultCacheOpenResponse(
-                    TaskResultCacheOpenResult.Unavailable,
-                    reason: e.Message);
-            }
-            finally
-            {
-                lockStream?.Dispose();
-            }
+            var session = new TaskResultCacheSession(
+                entryDirectory,
+                keyResponse.Key,
+                keyResponse.OutputPaths);
 
             if (!Directory.Exists(entryDirectory))
             {
@@ -208,16 +177,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     session);
             }
 
-            TaskResultCacheRestoreResponse restoreResponse;
-            try
-            {
-                restoreResponse = await session.TryRestoreAsync(cancellationToken);
-            }
-            catch
-            {
-                session.Dispose();
-                throw;
-            }
+            TaskResultCacheRestoreResponse restoreResponse =
+                await session.TryRestoreAsync(cancellationToken);
 
             if (restoreResponse.Success)
             {
@@ -227,7 +188,13 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     restoreResponse.Events);
             }
 
-            session.DeleteEntryBestEffort();
+            if (!session.QuarantineEntryBestEffort())
+            {
+                return new TaskResultCacheOpenResponse(
+                    TaskResultCacheOpenResult.Unavailable,
+                    reason: restoreResponse.Reason);
+            }
+
             return new TaskResultCacheOpenResponse(
                 TaskResultCacheOpenResult.Miss,
                 session,
@@ -242,13 +209,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
             try
             {
-                if (Directory.Exists(_entryDirectory))
-                {
-                    return new TaskResultCacheStoreResponse(
-                        success: false,
-                        "A corrupt cache entry could not be removed.");
-                }
-
                 Directory.CreateDirectory(temporaryDirectory);
                 var outputs = new List<CachedOutput>(_outputPaths.Count);
                 for (int i = 0; i < _outputPaths.Count; i++)
@@ -305,7 +265,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     outputs,
                     events,
                     cancellationToken);
-                Directory.Move(temporaryDirectory, _entryDirectory);
+                try
+                {
+                    Directory.Move(temporaryDirectory, _entryDirectory);
+                }
+                catch (IOException) when (Directory.Exists(_entryDirectory))
+                {
+                }
+
                 return new TaskResultCacheStoreResponse(success: true);
             }
             catch (Exception e) when (IsExpectedCacheException(e))
@@ -316,11 +283,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             {
                 DeleteDirectoryBestEffort(temporaryDirectory);
             }
-        }
-
-        public void Dispose()
-        {
-            _lockStream.Dispose();
         }
 
         private async ValueTask<TaskResultCacheRestoreResponse> TryRestoreAsync(
@@ -349,13 +311,11 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     {
                         continue;
                     }
-
                     string payloadPath = GetPayloadPath(_entryDirectory, i);
-                    if (!File.Exists(payloadPath) ||
-                        new FileInfo(payloadPath).Length != output.Length ||
-                        !HashesEqual(
-                            await HashFileAsync(payloadPath, cancellationToken),
-                            output.Hash))
+                    (byte[] hash, long length) =
+                        await HashFileAsync(payloadPath, cancellationToken);
+                    if (length != output.Length ||
+                        !HashesEqual(hash, output.Hash))
                     {
                         throw new InvalidDataException("A cached output payload is missing or corrupt.");
                     }
@@ -471,9 +431,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 using var hashStream = new CryptoStream(Stream.Null, hash, CryptoStreamMode.Write);
                 using var writer = new BinaryWriter(hashStream, Encoding.UTF8, leaveOpen: true);
 
-                writer.Write(ManifestVersion);
                 writer.Write(taskType.AssemblyQualifiedName);
-                writer.Write(typeof(TaskResultCacheSession).Assembly.GetName().Version.ToString());
+                writer.Write(typeof(Microsoft.Build.Execution.BuildManager).Module.ModuleVersionId.ToByteArray());
                 writer.Write(RuntimeInformation.FrameworkDescription);
                 writer.Write(RuntimeInformation.OSArchitecture.ToString());
                 writer.Write(RuntimeInformation.ProcessArchitecture.ToString());
@@ -729,32 +688,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             return true;
         }
 
-        private static async ValueTask<FileStream> AcquireLockAsync(
-            string lockPath,
-            CancellationToken cancellationToken)
-        {
-            IOException lastException = null;
-            for (int retry = 0; retry < LockRetryCount; retry++)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                try
-                {
-                    return new FileStream(
-                        lockPath,
-                        FileMode.OpenOrCreate,
-                        FileAccess.ReadWrite,
-                        FileShare.None);
-                }
-                catch (IOException e)
-                {
-                    lastException = e;
-                    await Task.Delay(LockRetryDelayMilliseconds, cancellationToken);
-                }
-            }
-
-            throw lastException ?? new IOException("Could not acquire the cache entry lock.");
-        }
-
         private async ValueTask WriteManifestAsync(
             string manifestPath,
             IReadOnlyList<CachedOutput> outputs,
@@ -764,7 +697,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             using var buffer = new MemoryStream();
             using var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true);
             writer.Write(ManifestMagic);
-            writer.Write(ManifestVersion);
             writer.Write(_key);
             writer.Write(outputs.Count);
             for (int i = 0; i < outputs.Count; i++)
@@ -811,7 +743,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             buffer.Position = 0;
             using var reader = new BinaryReader(buffer, Encoding.UTF8, leaveOpen: false);
             if (!String.Equals(reader.ReadString(), ManifestMagic, StringComparison.Ordinal) ||
-                reader.ReadInt32() != ManifestVersion ||
                 !String.Equals(reader.ReadString(), _key, StringComparison.Ordinal))
             {
                 throw new InvalidDataException("The cache manifest header is invalid.");
@@ -904,7 +835,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             return (hash.Hash, source.Length);
         }
 
-        private static async ValueTask<byte[]> HashFileAsync(
+        private static async ValueTask<(byte[] Hash, long Length)> HashFileAsync(
             string path,
             CancellationToken cancellationToken)
         {
@@ -917,7 +848,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             using var hashStream = new CryptoStream(Stream.Null, hash, CryptoStreamMode.Write);
             await stream.CopyToAsync(hashStream, 81920, cancellationToken);
             hashStream.FlushFinalBlock();
-            return hash.Hash;
+            return (hash.Hash, stream.Length);
         }
 
         private static async ValueTask CopyFileAsync(
@@ -987,9 +918,21 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             return Path.Combine(entryDirectory, index.ToString(CultureInfo.InvariantCulture) + ".bin");
         }
 
-        private void DeleteEntryBestEffort()
+        private bool QuarantineEntryBestEffort()
         {
-            DeleteDirectoryBestEffort(_entryDirectory);
+            string tombstoneDirectory =
+                _entryDirectory + ".bad-" + Guid.NewGuid().ToString("N");
+            try
+            {
+                Directory.Move(_entryDirectory, tombstoneDirectory);
+            }
+            catch (Exception e) when (IsExpectedCacheException(e))
+            {
+                return false;
+            }
+
+            DeleteDirectoryBestEffort(tombstoneDirectory);
+            return true;
         }
 
         private static void DeleteDirectoryBestEffort(string path)

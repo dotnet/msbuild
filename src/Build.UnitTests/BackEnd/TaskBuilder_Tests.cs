@@ -324,7 +324,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public async Task DeclaredIOResultCacheCoalescesConcurrentWriters()
+        public async Task DeclaredIOResultCacheAllowsConcurrentMissesAndStoresValidEntry()
         {
             string originalCurrentDirectory = Directory.GetCurrentDirectory();
             using TestEnvironment env = TestEnvironment.Create(_testOutput);
@@ -333,6 +333,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
                 string inputPath = Path.Combine(projectFolder.Path, "input.txt");
                 string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+                string synchronizationDirectory = Path.Combine(projectFolder.Path, "synchronization");
                 string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
                 File.WriteAllText(inputPath, "input");
                 File.WriteAllText(
@@ -354,7 +355,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         <TaskResultCacheTestTask
                             Input="@(CacheInput)"
                             OutputFile="@(CacheOutput)"
-                            CreateOutputOnly="true"
+                            SynchronizationDirectory="{SecurityElement.Escape(synchronizationDirectory)}"
                             DeclaredInputs="@(CacheInput)"
                             DeclaredOutputs="@(CacheOutput)" />
                       </Target>
@@ -365,70 +366,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Task<MockLogger> secondBuild = Task.Run(() => BuildCacheProject(projectPath));
                 MockLogger[] loggers = await Task.WhenAll(firstBuild, secondBuild);
 
+                loggers[0].AssertNoErrors();
+                loggers[1].AssertNoErrors();
                 File.ReadAllText(outputPath).ShouldBe("input");
-                int missCount =
-                    (loggers[0].FullLog.Contains("Task result cache miss", StringComparison.Ordinal) ? 1 : 0) +
-                    (loggers[1].FullLog.Contains("Task result cache miss", StringComparison.Ordinal) ? 1 : 0);
-                int hitCount =
-                    (loggers[0].FullLog.Contains("Task result cache hit", StringComparison.Ordinal) ? 1 : 0) +
-                    (loggers[1].FullLog.Contains("Task result cache hit", StringComparison.Ordinal) ? 1 : 0);
-                missCount.ShouldBe(1);
-                hitCount.ShouldBe(1);
+
+                File.Delete(outputPath);
+                MockLogger thirdLogger = BuildCacheProject(projectPath);
+
+                thirdLogger.AssertNoErrors();
+                thirdLogger.FullLog.ShouldContain("Task result cache hit");
+                File.ReadAllText(outputPath).ShouldBe("input");
             }
             finally
             {
                 Directory.SetCurrentDirectory(originalCurrentDirectory);
             }
-        }
-
-        [Fact]
-        public async Task DeclaredIOResultCacheLockWaitHonorsCancellation()
-        {
-            using TestEnvironment env = TestEnvironment.Create(_testOutput);
-            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
-            string inputPath = Path.Combine(projectFolder.Path, "input.txt");
-            string outputPath = Path.Combine(projectFolder.Path, "output.txt");
-            File.WriteAllText(inputPath, "input");
-
-            var input = new Microsoft.Build.Utilities.TaskItem(inputPath);
-            var output = new Microsoft.Build.Utilities.TaskItem(outputPath);
-            var task = new TaskResultCacheTestTask
-            {
-                Input = input,
-                OutputFile = output,
-                DeclaredInputs = [input],
-                DeclaredOutputs = [output],
-            };
-            string[] parameterNames =
-            [
-                nameof(TaskResultCacheTestTask.Input),
-                nameof(TaskResultCacheTestTask.OutputFile),
-                nameof(TaskResultCacheTestTask.DeclaredInputs),
-                nameof(TaskResultCacheTestTask.DeclaredOutputs),
-            ];
-
-            TaskResultCacheOpenResponse firstOpen = await TaskResultCacheSession.TryOpenAsync(
-                task,
-                parameterNames,
-                Path.Combine(projectFolder.Path, "cache.proj"),
-                projectFolder.Path,
-                "cache",
-                new TaskResultCacheFileDigestCache(),
-                CancellationToken.None);
-            firstOpen.Result.ShouldBe(TaskResultCacheOpenResult.Miss);
-            using TaskResultCacheSession firstSession = firstOpen.Session;
-            using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(50));
-            var fileDigestCache = new TaskResultCacheFileDigestCache();
-
-            await Should.ThrowAsync<OperationCanceledException>(async () =>
-                await TaskResultCacheSession.TryOpenAsync(
-                    task,
-                    parameterNames,
-                    Path.Combine(projectFolder.Path, "cache.proj"),
-                    projectFolder.Path,
-                    "cache",
-                    fileDigestCache,
-                    cancellation.Token));
         }
 
         [Fact]
@@ -1708,7 +1660,7 @@ namespace ClassLibrary2
 
         public bool WriteOutput { get; set; } = true;
 
-        public bool CreateOutputOnly { get; set; }
+        public string SynchronizationDirectory { get; set; }
 
         public bool UncacheableMode { get; set; }
 
@@ -1720,27 +1672,65 @@ namespace ClassLibrary2
         {
             Log.LogMessage(MessageImportance.Normal, "task-result-cache-test-message");
             Log.LogWarning("task-result-cache-test-warning");
+            string synchronizationMarker = null;
+            if (!String.IsNullOrEmpty(SynchronizationDirectory))
+            {
+                Directory.CreateDirectory(SynchronizationDirectory);
+                synchronizationMarker =
+                    Path.Combine(SynchronizationDirectory, Guid.NewGuid().ToString("N") + ".ready");
+                File.WriteAllText(
+                    synchronizationMarker,
+                    String.Empty);
+                if (!SpinWait.SpinUntil(
+                        () => Directory.GetFiles(
+                            SynchronizationDirectory,
+                            "*.ready",
+                            SearchOption.TopDirectoryOnly).Length >= 2,
+                        TimeSpan.FromSeconds(10)))
+                {
+                    Log.LogError("Concurrent task execution did not start.");
+                    return false;
+                }
+
+                string[] markers = Directory.GetFiles(
+                    SynchronizationDirectory,
+                    "*.ready",
+                    SearchOption.TopDirectoryOnly);
+                Array.Sort(markers, StringComparer.Ordinal);
+                string firstMarker = markers[0];
+                if (!String.Equals(synchronizationMarker, firstMarker, StringComparison.Ordinal) &&
+                    !SpinWait.SpinUntil(
+                        () => File.Exists(firstMarker + ".done"),
+                        TimeSpan.FromSeconds(10)))
+                {
+                    Log.LogError("Concurrent task execution did not make progress.");
+                    return false;
+                }
+            }
+
             if (WriteOutput)
             {
                 string contents = File.ReadAllText(Input.ItemSpec) + Marker;
-                if (CreateOutputOnly)
-                {
-                    using var stream = new FileStream(
-                        OutputFile.ItemSpec,
-                        FileMode.CreateNew,
-                        FileAccess.Write,
-                        FileShare.None);
-                    using var writer = new StreamWriter(stream);
-                    writer.Write(contents);
-                }
-                else
-                {
-                    File.WriteAllText(OutputFile.ItemSpec, contents);
-                }
+                File.WriteAllText(OutputFile.ItemSpec, contents);
             }
             else
             {
                 File.Delete(OutputFile.ItemSpec);
+            }
+
+            if (synchronizationMarker is not null)
+            {
+                File.WriteAllText(synchronizationMarker + ".done", String.Empty);
+                if (!SpinWait.SpinUntil(
+                        () => Directory.GetFiles(
+                            SynchronizationDirectory,
+                            "*.done",
+                            SearchOption.TopDirectoryOnly).Length >= 2,
+                        TimeSpan.FromSeconds(10)))
+                {
+                    Log.LogError("Concurrent task execution did not finish.");
+                    return false;
+                }
             }
 
             return true;
