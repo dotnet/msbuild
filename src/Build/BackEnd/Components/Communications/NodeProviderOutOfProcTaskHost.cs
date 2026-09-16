@@ -32,12 +32,15 @@ namespace Microsoft.Build.BackEnd
     /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
     /// its own task host, so the node ID is used to distinguish them.
     /// </param>
+    /// <param name="ForwardConsoleOutput">
+    /// Whether the task host forwards console output. Hosts with different forwarding behavior must not share a connection.
+    /// </param>
     /// <param name="SupportsParameterConversion">Whether the host can convert deferred parameter values.</param>
     internal readonly record struct TaskHostNodeKey(
         HandshakeOptions HandshakeOptions,
         int NodeId,
+        bool ForwardConsoleOutput = false,
         bool SupportsParameterConversion = false);
-
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
@@ -132,6 +135,17 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
 
         /// <summary>
+        /// Communication node IDs explicitly enabled for console forwarding.
+        /// </summary>
+        private HashSet<int> _consoleForwardingNodeIds;
+
+        private readonly LockType _consoleForwardingLock = new();
+
+        private bool _consoleOutputForwarded;
+
+        private bool _isShutDown;
+
+        /// <summary>
         /// Keeps track of the set of node IDs for which we have not yet received shutdown notification.
         /// </summary>
         private HashSet<int> _activeNodes;
@@ -175,6 +189,17 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 throw new NotImplementedException("This property is not implemented because available nodes are unlimited.");
+            }
+        }
+
+        internal bool ConsoleOutputForwarded
+        {
+            get
+            {
+                lock (_consoleForwardingLock)
+                {
+                    return _consoleOutputForwarded;
+                }
             }
         }
 
@@ -401,8 +426,11 @@ namespace Microsoft.Build.BackEnd
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
+            _consoleForwardingNodeIds = [];
+            _consoleOutputForwarded = false;
             _activeNodes = [];
             _nextNodeId = 0;
+            _isShutDown = false;
 
             _noNodesActiveEvent = new ManualResetEvent(true);
             _localPacketFactory = new NodePacketFactory();
@@ -411,6 +439,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ConsoleWrite, ConsoleWritePacket.FactoryForDeserialization, this);
 
             // Register callback request packet types so we can deserialize them when
             // they arrive from TaskHost processes. These are forwarded to the current
@@ -425,9 +454,27 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
+            lock (_consoleForwardingLock)
+            {
+                _isShutDown = !_processWide;
+                _consoleForwardingNodeIds.Clear();
+            }
+
             if (!_processWide)
             {
                 ShutdownConnectedNodes(enableReuse: false);
+            }
+        }
+
+        /// <summary>
+        /// Prevents packets from task hosts belonging to the completed build from reaching a later build's console.
+        /// </summary>
+        internal void ClearPerBuildState()
+        {
+            lock (_consoleForwardingLock)
+            {
+                _consoleForwardingNodeIds.Clear();
+                _consoleOutputForwarded = false;
             }
         }
 
@@ -543,6 +590,32 @@ namespace Microsoft.Build.BackEnd
                 {
                     handler.PacketReceived(node, packet);
                 }
+                return;
+            }
+
+            if (packet is ConsoleWritePacket consoleWrite)
+            {
+                lock (_consoleForwardingLock)
+                {
+                    if (!_isShutDown && _consoleForwardingNodeIds.Contains(node))
+                    {
+                        switch (consoleWrite.OutputType)
+                        {
+                            case ConsoleOutput.Standard:
+                                Console.Out.Write(consoleWrite.Text);
+                                break;
+                            case ConsoleOutput.Error:
+                                Console.Error.Write(consoleWrite.Text);
+                                break;
+                            default:
+                                InternalError.Throw($"Unexpected console output type {consoleWrite.OutputType}");
+                                break;
+                        }
+
+                        _consoleOutputForwarded |= !string.IsNullOrEmpty(consoleWrite.Text);
+                    }
+                }
+
                 return;
             }
 
@@ -935,6 +1008,18 @@ namespace Microsoft.Build.BackEnd
 
                 // Configure the node.
                 connection = context;
+                lock (_consoleForwardingLock)
+                {
+                    if (!_isShutDown &&
+                        nodeKey.ForwardConsoleOutput &&
+                        nodeKey.NodeId == NodeManager.FirstMultiThreadedNodeId &&
+                        context.NegotiatedPacketVersion >= NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion &&
+                        _consoleForwardingNodeIds.Add(context.NodeId))
+                    {
+                        context.SendData(new TaskHostConsoleConfiguration());
+                    }
+                }
+
                 context.SendData(configuration);
                 return true;
             }
@@ -1189,6 +1274,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void NodeContextTerminated(int nodeId)
         {
+            lock (_consoleForwardingLock)
+            {
+                _consoleForwardingNodeIds.Remove(nodeId);
+            }
+
             lock (_activeNodes)
             {
                 RetireNode(nodeId);

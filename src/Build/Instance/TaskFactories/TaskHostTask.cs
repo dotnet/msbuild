@@ -150,6 +150,13 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         private bool _allowNodeReuse = false;
 
+        /// <summary>
+        /// Whether console output should be forwarded because this task was moved out of process solely for multi-threaded compatibility.
+        /// </summary>
+        private readonly bool _forwardConsoleOutput;
+
+        internal bool ForwardConsoleOutput => _forwardConsoleOutput;
+
         private readonly HostServices _hostServices;
 
         /// <summary>
@@ -179,6 +186,7 @@ namespace Microsoft.Build.BackEnd
             TaskHostParameters taskHostParameters,
             LoadedType taskType,
             bool allowNodeReuse,
+            bool forwardConsoleOutput,
             string projectFile,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
@@ -205,6 +213,7 @@ namespace Microsoft.Build.BackEnd
             _supportsParameterConversion = IsNetTaskHost
                 && NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(_taskHostParameters);
             _allowNodeReuse = allowNodeReuse;
+            _forwardConsoleOutput = forwardConsoleOutput;
             _taskEnvironment = taskEnvironment;
 
             _packetFactory = new NodePacketFactory();
@@ -398,7 +407,11 @@ namespace Microsoft.Build.BackEnd
                             nodeReuse: effectiveNodeReuse,
                             taskHostParameters: _taskHostParameters);
 
-                        _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId, _supportsParameterConversion);
+                        _taskHostNodeKey = new TaskHostNodeKey(
+                            _requiredContext,
+                            _scheduledNodeId,
+                            ForwardConsoleOutput: _forwardConsoleOutput,
+                            SupportsParameterConversion: _supportsParameterConversion);
                         _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
                             _taskHostNodeKey,
                             this,

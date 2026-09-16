@@ -135,6 +135,11 @@ namespace Microsoft.Build.Framework.Telemetry
         public bool? MultiThreadedModeEnabled { get; set; }
 
         /// <summary>
+        /// True if non-empty stdout or stderr was forwarded from an eligible task host during this build.
+        /// </summary>
+        public bool? TaskHostConsoleOutputForwarded { get; set; }
+
+        /// <summary>
         /// True if Smart Application Control was enabled.
         /// </summary>
         public bool? SACEnabled { get; set; }
@@ -190,6 +195,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildEngineVersion);
             AddIfNotNull(BuildCheckEnabled);
             AddIfNotNull(MultiThreadedModeEnabled);
+            AddIfNotNull(TaskHostConsoleOutputForwarded);
             AddIfNotNull(SACEnabled);
             AddIfNotNull(CoordinatorWaitDurationMs);
             AddIfNotNull(IsStandaloneExecution);
@@ -223,6 +229,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildSuccess?.ToString(), nameof(BuildSuccess));
             AddIfNotNull(BuildCheckEnabled?.ToString(), nameof(BuildCheckEnabled));
             AddIfNotNull(MultiThreadedModeEnabled?.ToString(), nameof(MultiThreadedModeEnabled));
+            AddIfNotNull(TaskHostConsoleOutputForwarded?.ToString(), nameof(TaskHostConsoleOutputForwarded));
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
             AddIfNotNull(CoordinatorWaitDurationMs?.ToString(CultureInfo.InvariantCulture), nameof(CoordinatorWaitDurationMs));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));

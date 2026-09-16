@@ -5,8 +5,13 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
@@ -34,6 +39,132 @@ namespace Microsoft.Build.UnitTests
         public OutOfProcTaskHostNode_Tests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CleanupRestoresConsoleWhenBuildObjectDisposalThrows(bool retainConnection)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            StringBuilder output = new();
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(text => output.Append(text), text => output.Append(text)));
+#pragma warning disable CA2000 // The task-host cache owns the registered object.
+            state.Node.RegisterTaskObject(nameof(ThrowingBuildObject), new ThrowingBuildObject(), RegisteredTaskObjectLifetime.Build, false);
+#pragma warning restore CA2000
+
+            Action cleanup = retainConnection ? state.Node.PrepareForNextBuild : state.Shutdown;
+            Should.Throw<CriticalTaskException>(cleanup);
+
+            Console.Out.ShouldBeSameAs(state.OriginalOut);
+            Console.Error.ShouldBeSameAs(state.OriginalError);
+            string completedOutput = output.ToString();
+            state.OutWriter.WriteLine("stale stdout");
+            state.ErrorWriter.WriteLine("stale stderr");
+            state.OutWriter.Flush();
+            state.ErrorWriter.Flush();
+            output.ToString().ShouldBe(completedOutput);
+        }
+
+        [Fact]
+        public void ConsoleShutdownRestoresBothStreamsWhenStdoutFlushThrows()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            StringBuilder errorOutput = new();
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(
+                _ => throw new IOException("stdout callback failed"), text => errorOutput.Append(text)));
+            state.OutWriter.Write("pending stdout");
+            state.ErrorWriter.Write("pending stderr");
+
+            Should.Throw<IOException>(state.ShutdownConsole);
+
+            Console.Out.ShouldBeSameAs(state.OriginalOut);
+            Console.Error.ShouldBeSameAs(state.OriginalError);
+            errorOutput.ToString().ShouldBe("pending stderr");
+            Should.NotThrow(() => state.OutWriter.WriteLine("stale stdout"));
+            state.ErrorWriter.WriteLine("stale stderr");
+            state.ErrorWriter.Flush();
+            errorOutput.ToString().ShouldBe("pending stderr");
+        }
+
+        [Fact]
+        public void ShutdownRestoresConsoleBeforeCreatingDebugFile()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.SetField("_debugCommunications", true);
+            env.CreateFolder(Path.Combine(FileUtilities.TempFileDirectory, $"MSBuild_NodeShutdown_{EnvironmentUtilities.CurrentProcessId}.txt"));
+
+            Should.Throw<UnauthorizedAccessException>(state.Shutdown);
+
+            Console.Out.ShouldBeSameAs(state.OriginalOut);
+            Console.Error.ShouldBeSameAs(state.OriginalError);
+        }
+
+        private sealed class ThrowingBuildObject : IDisposable
+        {
+            public void Dispose()
+            {
+                Console.Write("cleanup output");
+                throw new CriticalTaskException(new InvalidOperationException("disposal failed"));
+            }
+        }
+
+        private sealed class RedirectedNodeState : TransientTestState
+        {
+            private const BindingFlags InstanceMembers = BindingFlags.Instance | BindingFlags.NonPublic;
+
+            internal OutOfProcTaskHostNode Node { get; } = new();
+            internal TextWriter OriginalOut { get; } = Console.Out;
+            internal TextWriter OriginalError { get; } = Console.Error;
+            internal RedirectConsoleWriter OutWriter { get; }
+            internal RedirectConsoleWriter ErrorWriter { get; }
+
+            internal RedirectedNodeState(Action<string> output, Action<string> error)
+            {
+                OutWriter = new RedirectConsoleWriter(output);
+                ErrorWriter = new RedirectConsoleWriter(error);
+                StopTimer(OutWriter);
+                StopTimer(ErrorWriter);
+                SetField("_originalConsoleOut", OriginalOut);
+                SetField("_originalConsoleError", OriginalError);
+                SetField("_consoleOutWriter", OutWriter);
+                SetField("_consoleErrorWriter", ErrorWriter);
+                Console.SetOut(OutWriter);
+                Console.SetError(ErrorWriter);
+            }
+
+            internal void Shutdown() => ((Func<NodeEngineShutdownReason>)typeof(OutOfProcTaskHostNode)
+                .GetMethod("HandleShutdown", InstanceMembers)!.CreateDelegate(typeof(Func<NodeEngineShutdownReason>), Node))();
+
+            internal void ShutdownConsole() => ((Action)typeof(OutOfProcTaskHostNode)
+                .GetMethod("ShutdownConsoleRedirection", InstanceMembers)!.CreateDelegate(typeof(Action), Node))();
+
+            public override void Revert()
+            {
+                Console.SetOut(OriginalOut);
+                Console.SetError(OriginalError);
+                using (ErrorWriter)
+                {
+                    OutWriter.Dispose();
+                }
+                string[] fields = ["_packetReceivedEvent", "_shutdownEvent", "_taskCompleteEvent", "_taskCancelledEvent"];
+                foreach (string field in fields)
+                {
+                    ((WaitHandle)typeof(OutOfProcTaskHostNode).GetField(field, InstanceMembers)!.GetValue(Node)!).Dispose();
+                }
+            }
+
+            internal void SetField(string name, object value) =>
+                typeof(OutOfProcTaskHostNode).GetField(name, InstanceMembers)!.SetValue(Node, value);
+
+            private static void StopTimer(RedirectConsoleWriter writer)
+            {
+                using ManualResetEvent disposed = new(false);
+                Timer timer = (Timer)typeof(RedirectConsoleWriter).GetField("_timer", InstanceMembers)!.GetValue(writer)!;
+                timer.Dispose(disposed).ShouldBeTrue();
+                disposed.WaitOne(10_000).ShouldBeTrue();
+            }
         }
 
         [Theory]
