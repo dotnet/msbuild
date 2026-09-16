@@ -40,18 +40,6 @@ namespace Microsoft.Build.UnitTests
                 typeof(X).GetMember("TestValue", BindingFlags.NonPublic | BindingFlags.Static)[0].GetCustomAttribute<RequiredAttribute>();
             attribute.ShouldNotBeNull();
         }
-
-        [Fact]
-        public void DeclaredIOAttributes()
-        {
-            MSBuildDeclaredIOTaskAttribute taskAttribute =
-                typeof(DeclaredIOTask).GetCustomAttribute<MSBuildDeclaredIOTaskAttribute>();
-            MSBuildDeclaredIORequiresUnsetAttribute requiresUnsetAttribute =
-                typeof(DeclaredIOTask).GetCustomAttribute<MSBuildDeclaredIORequiresUnsetAttribute>();
-
-            taskAttribute.ShouldNotBeNull();
-            requiresUnsetAttribute.ParameterName.ShouldBe("UncacheableMode");
-        }
     }
 
     /// <summary>
@@ -78,8 +66,4 @@ namespace Microsoft.Build.UnitTests
             }
         }
     }
-
-    [MSBuildDeclaredIOTask]
-    [MSBuildDeclaredIORequiresUnset("UncacheableMode")]
-    internal sealed class DeclaredIOTask;
 }

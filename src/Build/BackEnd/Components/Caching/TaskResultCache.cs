@@ -76,7 +76,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private const string ManifestMagic = "MSBuild Task Result Cache";
         private const int MaximumEventCount = 1_000_000;
         private const string TrimLockFileName = ".trim.lock";
-        private static readonly TimeSpan s_trimInterval = TimeSpan.FromMinutes(1);
+        private static readonly TimeSpan s_trimInterval = TimeSpan.FromHours(1);
 
         private readonly string _cacheDirectory;
         private readonly string _entryDirectory;

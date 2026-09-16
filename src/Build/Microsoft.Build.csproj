@@ -170,6 +170,8 @@
     <Compile Include="BackEnd\Components\Caching\TaskResultCache.cs" />
     <Compile Include="BackEnd\Components\Caching\TaskResultCacheEvent.cs" />
     <Compile Include="BackEnd\Components\Caching\TaskResultCacheFileDigestCache.cs" />
+    <Compile Include="BackEnd\Components\Caching\TaskResultCacheInvocation.cs" />
+    <Compile Include="BackEnd\Components\Caching\TaskHost.TaskResultCache.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\Experimental\*.cs" />

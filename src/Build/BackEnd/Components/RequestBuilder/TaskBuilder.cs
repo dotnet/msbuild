@@ -75,8 +75,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private IBuildComponentHost _componentHost;
 
-        private TaskResultCacheFileDigestCache _taskResultCacheFileDigestCache;
-
         /// <summary>
         /// The original target child instance
         /// </summary>
@@ -224,8 +222,6 @@ namespace Microsoft.Build.BackEnd
             {
                 Assumed.NotNull(_taskExecutionHost, "taskExecutionHost not initialized.");
                 _componentHost = null;
-                _taskResultCacheFileDigestCache = null;
-
                 IDisposable disposable = _taskExecutionHost as IDisposable;
                 disposable?.Dispose();
 
@@ -777,115 +773,22 @@ namespace Microsoft.Build.BackEnd
             {
                 bool taskReturned = false;
                 Exception taskException = null;
-                TaskResultCacheOpenResult cacheOpenResult = TaskResultCacheOpenResult.Ineligible;
-                TaskResultCacheSession cacheSession = null;
-                IReadOnlyList<TaskResultCacheEvent> cachedEvents = null;
-                TaskResultCacheEventCollector eventCollector = null;
-
-                if (_taskNode.Outputs.Count == 0 &&
-                    taskExecutionHost.TaskInstance is not TaskHostTask &&
-                    taskExecutionHost.TaskLoadedType is not null &&
-                    taskExecutionHost.TaskLoadedType.HasMSBuildDeclaredIOTaskAttribute)
-                {
-                    ProjectInstance project = _buildRequestEntry.RequestConfiguration.Project;
-                    string cacheDirectory = TaskResultCacheSession.ResolveCacheDirectory(
-                        project.GetPropertyValue(TaskResultCacheSession.CacheDirectoryPropertyName),
-                        project.GetPropertyValue(TaskResultCacheSession.CacheEnabledPropertyName));
-                    if (cacheDirectory is not null)
-                    {
-                        _taskResultCacheFileDigestCache ??=
-                            (TaskResultCacheFileDigestCache)_componentHost.GetComponent(BuildComponentType.TaskResultCacheFileDigestCache);
-
-                        if (!IsTaskResultCacheInvocationEligible(
-                                taskExecutionHost.TaskLoadedType,
-                                _taskNode.ParametersForBuild.Keys,
-                                out string cacheReason))
-                        {
-                            taskLoggingContext.LogComment(
-                                MessageImportance.Low,
-                                "TaskResultCacheFailure",
-                                _taskNode.Name,
-                                cacheReason);
-                        }
-                        else
-                        {
-                            TaskResultCacheOpenResponse cacheOpenResponse =
-                                await TaskResultCacheSession.TryOpenAsync(
-                                    taskExecutionHost.TaskInstance,
-                                    _taskNode.ParametersForBuild.Keys,
-                                    _projectFullPath,
-                                    _buildRequestEntry.ProjectRootDirectory,
-                                    cacheDirectory,
-                                    project.GetPropertyValue(TaskResultCacheSession.CacheSizeMBPropertyName),
-                                    _taskResultCacheFileDigestCache,
-                                    _cancellationToken);
-                            cacheOpenResult = cacheOpenResponse.Result;
-                            cacheSession = cacheOpenResponse.Session;
-                            cachedEvents = cacheOpenResponse.Events;
-                            cacheReason = cacheOpenResponse.Reason;
-
-                            switch (cacheOpenResult)
-                            {
-                                case TaskResultCacheOpenResult.Hit:
-                                    taskLoggingContext.LogComment(
-                                        MessageImportance.Low,
-                                        "TaskResultCacheHit",
-                                        _taskNode.Name,
-                                        cacheSession.Key);
-                                    break;
-
-                                case TaskResultCacheOpenResult.Miss:
-                                    if (!String.IsNullOrEmpty(cacheReason))
-                                    {
-                                        taskLoggingContext.LogComment(
-                                            MessageImportance.Low,
-                                            "TaskResultCacheFailure",
-                                            _taskNode.Name,
-                                            cacheReason);
-                                    }
-
-                                    taskLoggingContext.LogComment(
-                                        MessageImportance.Low,
-                                        "TaskResultCacheMiss",
-                                        _taskNode.Name,
-                                        cacheSession.Key);
-                                    eventCollector = new TaskResultCacheEventCollector();
-                                    break;
-
-                                case TaskResultCacheOpenResult.Ineligible:
-                                    taskLoggingContext.LogComment(
-                                        MessageImportance.Low,
-                                        "TaskResultCacheFailure",
-                                        _taskNode.Name,
-                                        cacheReason);
-                                    break;
-
-                                case TaskResultCacheOpenResult.Unavailable:
-                                    taskLoggingContext.LogComment(
-                                        MessageImportance.Low,
-                                        "TaskResultCacheFailure",
-                                        _taskNode.Name,
-                                        cacheReason);
-                                    break;
-                            }
-                        }
-                    }
-                }
-
-                using IDisposable cacheEventCapture = eventCollector is null
-                    ? null
-                    : taskHost.BeginTaskResultCacheEventCapture(eventCollector);
+                TaskResultCacheInvocation cacheInvocation =
+                    await TaskResultCacheInvocation.TryOpenAsync(
+                        taskExecutionHost,
+                        _taskNode,
+                        _buildRequestEntry,
+                        _componentHost,
+                        taskLoggingContext,
+                        _cancellationToken);
+                using IDisposable cacheEventCapture =
+                    cacheInvocation?.BeginEventCapture(taskHost);
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
                 try
                 {
-                    if (cacheOpenResult == TaskResultCacheOpenResult.Hit)
+                    if (cacheInvocation?.TryReplay(taskHost) == true)
                     {
-                        for (int i = 0; i < cachedEvents.Count; i++)
-                        {
-                            cachedEvents[i].Replay(taskHost);
-                        }
-
                         taskResult = true;
                     }
                     else if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
@@ -1128,34 +1031,12 @@ namespace Microsoft.Build.BackEnd
                     taskResult = GatherTaskOutputs(taskExecutionHost, howToExecuteTask, bucket) && taskResult;
                 }
 
-                if (cacheOpenResult == TaskResultCacheOpenResult.Miss &&
-                    cacheSession is not null &&
-                    taskReturned &&
-                    taskResult &&
-                    !taskLoggingContext.HasLoggedErrors)
-                {
-                    if (!eventCollector.IsSupported)
-                    {
-                        taskLoggingContext.LogComment(
-                            MessageImportance.Low,
-                            "TaskResultCacheFailure",
-                            _taskNode.Name,
-                            "the task emitted an event type that the cache cannot replay");
-                    }
-                    else
-                    {
-                        TaskResultCacheStoreResponse storeResponse =
-                            await cacheSession.TryStoreAsync(eventCollector.Events, _cancellationToken);
-                        if (!storeResponse.Success)
-                        {
-                            taskLoggingContext.LogComment(
-                                MessageImportance.Low,
-                                "TaskResultCacheFailure",
-                                _taskNode.Name,
-                                storeResponse.Reason);
-                        }
-                    }
-                }
+                await TaskResultCacheInvocation.TryStoreAsync(
+                    cacheInvocation,
+                    taskReturned,
+                    taskResult,
+                    taskLoggingContext.HasLoggedErrors,
+                    _cancellationToken);
 
                 // If the taskResults are false look at ContinueOnError.  If ContinueOnError=false (default)
                 // mark the taskExecutedSuccessfully=false.  Otherwise let the task succeed but log a normal
@@ -1192,50 +1073,6 @@ namespace Microsoft.Build.BackEnd
             WorkUnitResult result = new WorkUnitResult(resultCode, actionCode, null);
 
             return result;
-        }
-
-        private static bool IsTaskResultCacheInvocationEligible(
-            LoadedType taskType,
-            ICollection<string> parameterNames,
-            out string reason)
-        {
-            if (!taskType.HasValidMSBuildDeclaredIOAttributes)
-            {
-                reason = "the task has an invalid declared-I/O annotation";
-                return false;
-            }
-
-            if (!ContainsParameter(parameterNames, "DeclaredInputs") ||
-                !ContainsParameter(parameterNames, "DeclaredOutputs"))
-            {
-                reason = "the task invocation must explicitly supply DeclaredInputs and DeclaredOutputs";
-                return false;
-            }
-
-            foreach (string requiredUnsetParameter in taskType.DeclaredIORequiredUnsetParameters)
-            {
-                if (ContainsParameter(parameterNames, requiredUnsetParameter))
-                {
-                    reason = $"the task parameter \"{requiredUnsetParameter}\" must be unset";
-                    return false;
-                }
-            }
-
-            reason = null;
-            return true;
-        }
-
-        private static bool ContainsParameter(ICollection<string> parameterNames, string expectedName)
-        {
-            foreach (string parameterName in parameterNames)
-            {
-                if (MSBuildNameIgnoreCaseComparer.Default.Equals(parameterName, expectedName))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private List<string> GetUndeclaredProjects(MSBuild msbuildTask)
