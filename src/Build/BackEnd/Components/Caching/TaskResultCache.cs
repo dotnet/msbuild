@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -476,7 +475,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             {
                 using SHA256 hash = SHA256.Create();
                 using var hashStream = new CryptoStream(Stream.Null, hash, CryptoStreamMode.Write);
-                using var writer = new BinaryWriter(hashStream, Encoding.UTF8, leaveOpen: true);
+                using ITranslator translator = BinaryTranslator.GetWriteTranslator(hashStream);
+                BinaryWriter writer = translator.Writer;
 
                 writer.Write(taskType.AssemblyQualifiedName!);
                 writer.Write(typeof(Microsoft.Build.Execution.BuildManager).Module.ModuleVersionId.ToByteArray());
@@ -498,7 +498,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     fileDigestCache,
                     cancellationToken);
 
-                if (!TryWriteTaskParameters(writer, task, parameterNames, out reason))
+                if (!TryWriteTaskParameters(translator, task, parameterNames, out reason))
                 {
                     return new TaskResultCacheKeyResponse(Success: false, Reason: reason);
                 }
@@ -555,11 +555,12 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             "IL2075",
             Justification = "Declared-IO cache binding reflects only over task types, which are already rooted by task loading.")]
         private static bool TryWriteTaskParameters(
-            BinaryWriter writer,
+            ITranslator translator,
             ITask task,
             ICollection<string> parameterNames,
             out string? reason)
         {
+            BinaryWriter writer = translator.Writer;
             reason = null;
             Type taskType = task.GetType();
             PropertyInfo[] properties = taskType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -588,7 +589,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
                 writer.Write(parameterName);
                 writer.Write(property.PropertyType.AssemblyQualifiedName!);
-                if (!TryWriteValue(writer, property.GetValue(task), out reason))
+                if (!TryWriteValue(translator, property.GetValue(task), out reason))
                 {
                     reason = $"Task parameter \"{parameterName}\" cannot be cached: {reason}";
                     return false;
@@ -599,10 +600,11 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         }
 
         private static bool TryWriteValue(
-            BinaryWriter writer,
+            ITranslator translator,
             object? value,
             out string? reason)
         {
+            BinaryWriter writer = translator.Writer;
             reason = null;
             if (value is null)
             {
@@ -620,7 +622,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
                 case ITaskItem taskItem:
                     writer.Write((byte)2);
-                    WriteTaskItem(writer, taskItem);
+                    new TaskParameter(taskItem).Translate(translator);
                     return true;
 
                 case Array array:
@@ -628,7 +630,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     writer.Write(array.Length);
                     for (int i = 0; i < array.Length; i++)
                     {
-                        if (!TryWriteValue(writer, array.GetValue(i), out reason))
+                        if (!TryWriteValue(translator, array.GetValue(i), out reason))
                         {
                             return false;
                         }
@@ -670,26 +672,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 default:
                     reason = $"value type \"{value.GetType().FullName}\" is unsupported.";
                     return false;
-            }
-        }
-
-        private static void WriteTaskItem(BinaryWriter writer, ITaskItem taskItem)
-        {
-            writer.Write(taskItem.ItemSpec ?? String.Empty);
-            IDictionary metadata = taskItem.CloneCustomMetadata();
-            var metadataNames = new List<string>(metadata.Count);
-            foreach (DictionaryEntry entry in metadata)
-            {
-                metadataNames.Add((string)entry.Key);
-            }
-
-            metadataNames.Sort(StringComparer.OrdinalIgnoreCase);
-            writer.Write(metadataNames.Count);
-            for (int i = 0; i < metadataNames.Count; i++)
-            {
-                string metadataName = metadataNames[i];
-                writer.Write(metadataName);
-                writer.Write(Convert.ToString(metadata[metadataName], CultureInfo.InvariantCulture) ?? String.Empty);
             }
         }
 
