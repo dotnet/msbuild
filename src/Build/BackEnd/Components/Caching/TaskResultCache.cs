@@ -180,16 +180,17 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     reason: e.Message);
             }
 
+            string key = keyResponse.Key!;
             string entryDirectory = Path.Combine(
                 normalizedCacheDirectory,
-                keyResponse.Key.Substring(0, 2),
-                keyResponse.Key.Substring(2));
+                key.Substring(0, 2),
+                key.Substring(2));
             var session = new TaskResultCacheSession(
                 normalizedCacheDirectory,
                 entryDirectory,
-                keyResponse.Key,
+                key,
                 maximumCacheSizeBytes,
-                keyResponse.OutputPaths);
+                keyResponse.OutputPaths!);
 
             if (!Directory.Exists(entryDirectory))
             {
@@ -247,11 +248,11 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     {
                         outputs.Add(new CachedOutput(
                             outputPath,
-                            present: false,
-                            length: 0,
-                            hash: null,
-                            attributes: 0,
-                            unixFileMode: 0));
+                            Present: false,
+                            Length: 0,
+                            Hash: null,
+                            Attributes: 0,
+                            UnixFileMode: 0));
                         continue;
                     }
 
@@ -275,11 +276,11 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         await CopyAndHashAsync(outputPath, payloadPath, cancellationToken);
                     outputs.Add(new CachedOutput(
                         outputPath,
-                        present: true,
-                        length,
-                        hash,
-                        attributes,
-                        unixFileMode));
+                        Present: true,
+                        Length: length,
+                        Hash: hash,
+                        Attributes: attributes,
+                        UnixFileMode: unixFileMode));
                 }
 
                 await WriteManifestAsync(
@@ -427,12 +428,12 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 }
 
                 return new TaskResultCacheRestoreResponse(
-                    success: true,
+                    Success: true,
                     manifest.Events);
             }
             catch (Exception e) when (IsExpectedCacheException(e))
             {
-                return new TaskResultCacheRestoreResponse(success: false, reason: e.Message);
+                return new TaskResultCacheRestoreResponse(Success: false, Reason: e.Message);
             }
         }
 
@@ -449,8 +450,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             if (String.IsNullOrEmpty(taskAssemblyPath) || !File.Exists(taskAssemblyPath))
             {
                 return new TaskResultCacheKeyResponse(
-                    success: false,
-                    reason: "The task assembly does not have a readable file location.");
+                    Success: false,
+                    Reason: "The task assembly does not have a readable file location.");
             }
 
             if (!TryGetDeclaredPaths(
@@ -468,7 +469,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     out IReadOnlyList<string>? outputPaths,
                     out reason))
             {
-                return new TaskResultCacheKeyResponse(success: false, reason: reason);
+                return new TaskResultCacheKeyResponse(Success: false, Reason: reason);
             }
 
             try
@@ -499,7 +500,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
                 if (!TryWriteTaskParameters(writer, task, parameterNames, out reason))
                 {
-                    return new TaskResultCacheKeyResponse(success: false, reason: reason);
+                    return new TaskResultCacheKeyResponse(Success: false, Reason: reason);
                 }
 
                 writer.Write(outputPaths.Count);
@@ -516,8 +517,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     if (Directory.Exists(inputPath))
                     {
                         return new TaskResultCacheKeyResponse(
-                            success: false,
-                            reason: $"Declared input \"{inputPath}\" is a directory.");
+                            Success: false,
+                            Reason: $"Declared input \"{inputPath}\" is a directory.");
                     }
 
                     if (!File.Exists(inputPath))
@@ -537,15 +538,15 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 writer.Flush();
                 hashStream.FlushFinalBlock();
                 return new TaskResultCacheKeyResponse(
-                    success: true,
+                    Success: true,
                     ToHex(hash.Hash!),
                     outputPaths);
             }
             catch (Exception e) when (IsExpectedCacheException(e) || e is TargetInvocationException)
             {
                 return new TaskResultCacheKeyResponse(
-                    success: false,
-                    reason: e.InnerException?.Message ?? e.Message);
+                    Success: false,
+                    Reason: e.InnerException?.Message ?? e.Message);
             }
         }
 
@@ -816,10 +817,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     : new CachedOutput(
                         path,
                         present,
-                        length: 0,
-                        hash: null,
-                        attributes: 0,
-                        unixFileMode: 0);
+                        Length: 0,
+                        Hash: null,
+                        Attributes: 0,
+                        UnixFileMode: 0);
                 if (present && outputs[i].Hash?.Length != 32)
                 {
                     throw new InvalidDataException("The cache manifest contains an invalid output hash.");
@@ -1130,106 +1131,37 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 NotSupportedException;
         }
 
-        private readonly struct TaskResultCacheKeyResponse
-        {
-            internal TaskResultCacheKeyResponse(
-                bool success,
-                string? key = null,
-                IReadOnlyList<string>? outputPaths = null,
-                string? reason = null)
-            {
-                Success = success;
-                Key = key;
-                OutputPaths = outputPaths;
-                Reason = reason;
-            }
+        private readonly record struct TaskResultCacheKeyResponse(
+            bool Success,
+            string? Key = null,
+            IReadOnlyList<string>? OutputPaths = null,
+            string? Reason = null
+        );
 
-            [MemberNotNullWhen(true, nameof(Key))]
-            [MemberNotNullWhen(true, nameof(OutputPaths))]
-            internal bool Success { get; }
+        private readonly record struct TaskResultCacheRestoreResponse(
+            bool Success,
+            IReadOnlyList<TaskResultCacheEvent>? Events = null,
+            string? Reason = null
+        );
 
-            internal string? Key { get; }
+        private readonly record struct TaskResultCacheManifest(
+            IReadOnlyList<CachedOutput> Outputs,
+            IReadOnlyList<TaskResultCacheEvent> Events
+        );
 
-            internal IReadOnlyList<string>? OutputPaths { get; }
+        private readonly record struct CachedOutput(
+            string Path,
+            bool Present,
+            long Length,
+            byte[]? Hash,
+            FileAttributes Attributes,
+            int UnixFileMode
+        );
 
-            internal string? Reason { get; }
-        }
-
-        private readonly struct TaskResultCacheRestoreResponse
-        {
-            internal TaskResultCacheRestoreResponse(
-                bool success,
-                IReadOnlyList<TaskResultCacheEvent>? events = null,
-                string? reason = null)
-            {
-                Success = success;
-                Events = events;
-                Reason = reason;
-            }
-
-            internal bool Success { get; }
-
-            internal IReadOnlyList<TaskResultCacheEvent>? Events { get; }
-
-            internal string? Reason { get; }
-        }
-
-        private readonly struct TaskResultCacheManifest
-        {
-            internal TaskResultCacheManifest(
-                IReadOnlyList<CachedOutput> outputs,
-                IReadOnlyList<TaskResultCacheEvent> events)
-            {
-                Outputs = outputs;
-                Events = events;
-            }
-
-            internal IReadOnlyList<CachedOutput> Outputs { get; }
-
-            internal IReadOnlyList<TaskResultCacheEvent> Events { get; }
-        }
-
-        private sealed class CachedOutput
-        {
-            internal CachedOutput(
-                string path,
-                bool present,
-                long length,
-                byte[]? hash,
-                FileAttributes attributes,
-                int unixFileMode)
-            {
-                Path = path;
-                Present = present;
-                Length = length;
-                Hash = hash;
-                Attributes = attributes;
-                UnixFileMode = unixFileMode;
-            }
-
-            internal string Path { get; }
-
-            internal bool Present { get; }
-
-            internal long Length { get; }
-
-            internal byte[]? Hash { get; }
-
-            internal FileAttributes Attributes { get; }
-
-            internal int UnixFileMode { get; }
-        }
-
-        private readonly struct CacheEntry(
-            string path,
-            long size,
-            DateTime lastAccessTimeUtc)
-        {
-            internal string Path { get; } = path;
-
-            internal long Size { get; } = size;
-
-            internal DateTime LastAccessTimeUtc { get; } = lastAccessTimeUtc;
-        }
+        private readonly record struct CacheEntry(
+            string Path,
+            long Size,
+            DateTime LastAccessTimeUtc
+        );
     }
 }
