@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                 hostServices: null,
                 scheduledNodeId: 1,
-                TaskEnvironmentHelper.CreateForTest())
+                taskEnvironment: TaskEnvironmentHelper.CreateForTest())
             {
                 BuildEngine = buildEngine,
             };
