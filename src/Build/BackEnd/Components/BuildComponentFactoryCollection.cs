@@ -86,7 +86,6 @@ namespace Microsoft.Build.BackEnd
             _componentEntriesByType[BuildComponentType.TaskBuilder] = new BuildComponentEntry(BuildComponentType.TaskBuilder, TaskBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.RegisteredTaskObjectCache] = new BuildComponentEntry(BuildComponentType.RegisteredTaskObjectCache, RegisteredTaskObjectCache.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.TaskResultCacheFileDigestCache] = new BuildComponentEntry(BuildComponentType.TaskResultCacheFileDigestCache, TaskResultCacheFileDigestCache.CreateComponent, CreationPattern.Singleton);
-            _componentEntriesByType[BuildComponentType.TaskResultCacheStatistics] = new BuildComponentEntry(BuildComponentType.TaskResultCacheStatistics, TaskResultCacheStatistics.CreateComponent, CreationPattern.Singleton);
 
             // SDK resolution
             _componentEntriesByType[BuildComponentType.SdkResolverService] = new BuildComponentEntry(BuildComponentType.SdkResolverService, MainNodeSdkResolverService.CreateComponent, CreationPattern.Singleton);

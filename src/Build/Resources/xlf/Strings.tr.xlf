@@ -1146,13 +1146,6 @@ Hatalar: {3}</target>
       LOCALIZATION: {0} is an MSBuild task name. {1} is a hexadecimal content hash and should not be localized.
     </note>
       </trans-unit>
-      <trans-unit id="TaskResultCacheStatistics">
-        <source>Task result cache statistics: hits={0}, misses={1}, hit rate={2:P2}, average hit time={3:F2} ms, average miss time={4:F2} ms.</source>
-        <target state="new">Task result cache statistics: hits={0}, misses={1}, hit rate={2:P2}, average hit time={3:F2} ms, average miss time={4:F2} ms.</target>
-        <note>
-      LOCALIZATION: Per-node task result cache statistics. {0} is the hit count. {1} is the miss count. {2} is the hit rate. {3} is the average hit lookup time in milliseconds. {4} is the average miss lookup time in milliseconds.
-    </note>
-      </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
         <target state="translated">MSB4181: "{0}" görevi false değerini döndürdü ancak günlüğe hata kaydetmedi.</target>

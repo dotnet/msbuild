@@ -18,7 +18,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
@@ -1207,10 +1206,6 @@ namespace Microsoft.Build.Execution
                             _overallBuildSuccess = false;
                         }
 
-                        ((TaskResultCacheStatistics)_componentFactories.GetComponent(
-                            BuildComponentType.TaskResultCacheStatistics)).LogAndReset(
-                                loggingService,
-                                BuildEventContext.Invalid);
                         loggingService.LogBuildFinished(_overallBuildSuccess);
 
                         if (_buildTelemetry != null)
@@ -2514,7 +2509,6 @@ namespace Microsoft.Build.Execution
         private void Reset()
         {
             _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheFileDigestCache);
-            _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheStatistics);
 
             _nodeManager?.UnregisterPacketHandler(NodePacketType.BuildRequestBlocker);
             _nodeManager?.UnregisterPacketHandler(NodePacketType.BuildRequestConfiguration);

@@ -140,7 +140,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             firstLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("first!");
             firstLogger.FullLog.ShouldContain("Task result cache miss");
-            firstLogger.FullLog.ShouldContain("Task result cache statistics: hits=0, misses=1");
 
             File.Delete(outputPath);
 
@@ -149,7 +148,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             secondLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("first!");
             secondLogger.FullLog.ShouldContain("Task result cache hit");
-            secondLogger.FullLog.ShouldContain("Task result cache statistics: hits=1, misses=0");
 
             File.WriteAllText(
                 projectPath,
@@ -1535,8 +1533,6 @@ namespace ClassLibrary2
 
             private TaskResultCacheFileDigestCache _taskResultCacheFileDigestCache;
 
-            private TaskResultCacheStatistics _taskResultCacheStatistics;
-
             /// <summary>
             /// The request builder
             /// </summary>
@@ -1580,9 +1576,6 @@ namespace ClassLibrary2
 
                 _taskResultCacheFileDigestCache = new TaskResultCacheFileDigestCache();
                 _taskResultCacheFileDigestCache.InitializeComponent(this);
-
-                _taskResultCacheStatistics = new TaskResultCacheStatistics();
-                _taskResultCacheStatistics.InitializeComponent(this);
 
                 _requestBuilder = new RequestBuilder();
                 ((IBuildComponent)_requestBuilder).InitializeComponent(this);
@@ -1651,7 +1644,6 @@ namespace ClassLibrary2
                     BuildComponentType.LoggingService => (IBuildComponent)_loggingService,
                     BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                     BuildComponentType.TaskResultCacheFileDigestCache => _taskResultCacheFileDigestCache,
-                    BuildComponentType.TaskResultCacheStatistics => _taskResultCacheStatistics,
                     BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                     BuildComponentType.TargetBuilder => (IBuildComponent)_targetBuilder,
                     BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,

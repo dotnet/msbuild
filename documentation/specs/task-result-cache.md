@@ -21,7 +21,7 @@ Cache entries contain the declared output files and supported task messages and 
 
 Cache key hashing, payload validation and restoration, and cache storage use cancellation-aware asynchronous I/O. During a build, each node retains input-file digests and performs a fast length and last-write-time check on every cache request. Previously seen files with unchanged metadata reuse their digest; the first request for a new or changed file computes its digest while concurrent requests wait for that same operation. The digest table is discarded at build completion. Filesystem metadata operations without asynchronous platform APIs remain synchronous.
 
-Task-cache hits, misses, and failures are logged at low importance and captured in binary logs. At the end of each build, every node also logs its hit count, miss count, hit rate, average hit lookup time, and average miss lookup time. The per-node summaries can be combined to obtain whole-build statistics without a dedicated statistics transport.
+Task-cache hits, misses, and failures are logged at low importance and captured in binary logs.
 
 The cache remains outside the task implementation. On a miss, the task executes through its ordinary mechanism, including an out-of-process tool or compiler server when the task's declared-I/O contract permits it. Operational execution choices must not change the declared outputs, and every executable or assembly that can affect those outputs must participate in the declared inputs.
 
