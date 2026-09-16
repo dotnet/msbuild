@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -105,6 +107,62 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    public class ConsoleOutputTestTask : Task
+    {
+        public bool ShouldRunInTaskHost { get; set; }
+
+        public override bool Execute()
+        {
+            bool isTaskHost = Environment.CommandLine.IndexOf("/nodemode:2", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (isTaskHost != ShouldRunInTaskHost)
+            {
+                Log.LogError($"Expected task host: {ShouldRunInTaskHost}; actual: {isTaskHost}");
+                return false;
+            }
+
+            Log.LogMessage(MessageImportance.High, "ConsoleOutputTestTask executed");
+            Console.WriteLine("ConsoleOutputTestTask output");
+            Console.Error.WriteLine("ConsoleOutputTestTask error output");
+            return true;
+        }
+    }
+
+    public class CachedConsoleWriterTestTask : Task
+    {
+        // Models Spectre.Console caching Console.Out for the lifetime of a reused task-host process.
+        private static TextWriter? s_firstConsoleOut;
+        private static int s_executionCount;
+
+        public override bool Execute()
+        {
+            int executionCount = Interlocked.Increment(ref s_executionCount);
+            Log.LogMessage(MessageImportance.High, $"TaskHostProcessId={EnvironmentUtilities.CurrentProcessId}; ExecutionCount={executionCount}");
+
+            if (s_firstConsoleOut is null)
+            {
+                s_firstConsoleOut = Console.Out;
+            }
+            else
+            {
+                s_firstConsoleOut.WriteLine("Output through stale cached writer");
+            }
+
+            Console.WriteLine($"Output through current writer {executionCount}");
+            return true;
+        }
+    }
+
+    public class ExplicitTaskHostConsoleOutputTestTask : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, "ExplicitTaskHostConsoleOutputTestTask executed");
+            Console.WriteLine("EXPLICIT-TASKHOST-STDOUT");
+            Console.Error.WriteLine("EXPLICIT-TASKHOST-STDERR");
+            return true;
+        }
+    }
+
     /// <summary>
     /// Test task that deliberately performs the unresolved-path operations that multi-threaded strict mode
     /// exists to detect.
@@ -189,6 +247,7 @@ namespace Microsoft.Build.Engine.UnitTests
             _output = output;
             _env = TestEnvironment.Create(output);
             _env.SetEnvironmentVariable("MSBUILDMTNONSTRICT", null);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
         }
 
         public void Dispose()
@@ -224,6 +283,204 @@ namespace Microsoft.Build.Engine.UnitTests
                 _output);
 
             success.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData(false, "/m:2 /nodereuse:false")]
+        [InlineData(true, "/m:2 /nodereuse:false /mt")]
+        public void TaskConsoleOutputIsVisible(bool shouldRunInTaskHost, string msbuildArgs)
+        {
+            string project = $"""
+                <Project>
+                    <UsingTask TaskName="ConsoleOutputTestTask" AssemblyFile="{typeof(ConsoleOutputTestTask).Assembly.Location}" />
+
+                    <Target Name="Build">
+                        <ConsoleOutputTestTask ShouldRunInTaskHost="{shouldRunInTaskHost}" />
+                    </Target>
+                </Project>
+                """;
+            TransientTestFile projectFile = _env.CreateFile("console-output.proj", project);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{projectFile.Path}\" {msbuildArgs}",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("ConsoleOutputTestTask output");
+            output.ShouldContain("ConsoleOutputTestTask error output");
+        }
+
+        [Fact]
+        public void ConsoleOutputFromExplicitTaskHostIsNotForwarded()
+        {
+            string project = $"""
+                <Project>
+                    <UsingTask
+                        TaskName="ConsoleOutputTestTask"
+                        AssemblyFile="{typeof(ConsoleOutputTestTask).Assembly.Location}"
+                        TaskFactory="TaskHostFactory"
+                        Runtime="{XMakeAttributes.GetCurrentMSBuildRuntime()}"
+                        Architecture="{XMakeAttributes.GetCurrentMSBuildArchitecture()}" />
+
+                    <Target Name="Build">
+                        <ConsoleOutputTestTask ShouldRunInTaskHost="true" />
+                    </Target>
+                </Project>
+                """;
+            TransientTestFile projectFile = _env.CreateFile("explicit-taskhost-console-output.proj", project);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{projectFile.Path}\" /m:2 /nodereuse:false /mt",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("ConsoleOutputTestTask executed");
+            output.ShouldNotContain("ConsoleOutputTestTask output");
+            output.ShouldNotContain("ConsoleOutputTestTask error output");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ConsoleForwardingDoesNotLeakBetweenSharedTaskHostConfigurations(bool explicitTaskRunsFirst)
+        {
+            string tasks = explicitTaskRunsFirst
+                ? """
+                    <ExplicitTaskHostConsoleOutputTestTask />
+                    <ConsoleOutputTestTask ShouldRunInTaskHost="true" />
+                    """
+                : """
+                    <ConsoleOutputTestTask ShouldRunInTaskHost="true" />
+                    <ExplicitTaskHostConsoleOutputTestTask />
+                    """;
+            string project = $"""
+                <Project>
+                    <UsingTask TaskName="ConsoleOutputTestTask" AssemblyFile="{typeof(ConsoleOutputTestTask).Assembly.Location}" />
+                    <UsingTask
+                        TaskName="ExplicitTaskHostConsoleOutputTestTask"
+                        AssemblyFile="{typeof(ExplicitTaskHostConsoleOutputTestTask).Assembly.Location}"
+                        TaskFactory="TaskHostFactory"
+                        Runtime="{XMakeAttributes.GetCurrentMSBuildRuntime()}"
+                        Architecture="{XMakeAttributes.GetCurrentMSBuildArchitecture()}" />
+
+                    <Target Name="Build">
+                        {tasks}
+                    </Target>
+                </Project>
+                """;
+            TransientTestFile projectFile = _env.CreateFile("mixed-taskhost-console-output.proj", project);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{projectFile.Path}\" /m:2 /nodereuse:false /mt",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("ConsoleOutputTestTask output");
+            output.ShouldContain("ConsoleOutputTestTask error output");
+            output.ShouldContain("ExplicitTaskHostConsoleOutputTestTask executed");
+            output.ShouldNotContain("EXPLICIT-TASKHOST-STDOUT");
+            output.ShouldNotContain("EXPLICIT-TASKHOST-STDERR");
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void ReusedTaskHostDiscardsOutputFromCachedWriter(bool retainConnection, bool replacePooledProcess)
+        {
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
+#if NET
+            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(_env);
+#endif
+            string project = $"""
+                <Project>
+                    <UsingTask TaskName="CachedConsoleWriterTestTask" AssemblyFile="{typeof(CachedConsoleWriterTestTask).Assembly.Location}" />
+                    <UsingTask TaskName="ProcessIdTask" AssemblyFile="{typeof(ProcessIdTask).Assembly.Location}" />
+
+                    <Target Name="Build">
+                        <ProcessIdTask>
+                            <Output TaskParameter="Pid" PropertyName="OwnerPid" />
+                        </ProcessIdTask>
+                        <Message Importance="High" Text="OwnerProcessId=$(OwnerPid);" />
+                        <CachedConsoleWriterTestTask />
+                    </Target>
+                </Project>
+                """;
+            TransientTestFile projectFile = _env.CreateFile("cached-console-writer.proj", project);
+            string arguments = $"\"{projectFile.Path}\" /m:2 /mt /nodereuse:true";
+
+            string firstOutput = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                arguments,
+                out bool firstBuildSucceeded,
+                false,
+                _output);
+
+            firstBuildSucceeded.ShouldBeTrue(firstOutput);
+            firstOutput.ShouldContain("ExecutionCount=1");
+            firstOutput.ShouldContain("Output through current writer 1");
+            int ownerProcessId = ParseProcessId(firstOutput, "OwnerProcessId=");
+            _env.WithTransientProcess(ownerProcessId);
+            int taskHostProcessId = ParseProcessId(firstOutput, "TaskHostProcessId=");
+            _env.WithTransientProcess(taskHostProcessId);
+
+            if (replacePooledProcess)
+            {
+                using Process process = Process.GetProcessById(taskHostProcessId);
+                process.Kill();
+                process.WaitForExit(10_000).ShouldBeTrue();
+            }
+
+            string secondOutput = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                arguments,
+                out bool secondBuildSucceeded,
+                false,
+                _output);
+
+            secondBuildSucceeded.ShouldBeTrue(secondOutput);
+            int secondTaskHostProcessId = ParseProcessId(secondOutput, "TaskHostProcessId=");
+            if (secondTaskHostProcessId != taskHostProcessId)
+            {
+                _env.WithTransientProcess(secondTaskHostProcessId);
+            }
+
+            if (retainConnection)
+            {
+                secondTaskHostProcessId.ShouldBe(taskHostProcessId);
+            }
+
+            if (replacePooledProcess)
+            {
+                secondTaskHostProcessId.ShouldNotBe(taskHostProcessId);
+            }
+
+            int expectedExecutionCount = secondTaskHostProcessId == taskHostProcessId ? 2 : 1;
+            secondOutput.ShouldContain($"ExecutionCount={expectedExecutionCount}");
+            secondOutput.ShouldContain($"Output through current writer {expectedExecutionCount}");
+            secondOutput.ShouldNotContain("Output through stale cached writer");
+            ParseProcessId(secondOutput, "OwnerProcessId=").ShouldBe(ownerProcessId);
+        }
+
+        private static int ParseProcessId(string output, string prefix)
+        {
+            int processIdStart = output.IndexOf(prefix, StringComparison.Ordinal);
+            processIdStart.ShouldBeGreaterThanOrEqualTo(0);
+            processIdStart += prefix.Length;
+            int processIdEnd = output.IndexOf(';', processIdStart);
+            processIdEnd.ShouldBeGreaterThan(processIdStart);
+            return int.Parse(output.Substring(processIdStart, processIdEnd - processIdStart));
         }
 
         /// <summary>

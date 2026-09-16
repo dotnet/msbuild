@@ -32,6 +32,7 @@ The primary telemetry event capturing overall build information.
 | `BuildEngineFrameworkName` | string | Runtime framework name |
 | `BuildCheckEnabled` | bool | Whether BuildCheck (static analysis) was enabled |
 | `MultiThreadedModeEnabled` | bool | Whether multi-threaded build mode was enabled |
+| `TaskHostConsoleOutputForwarded` | bool | Whether the parent received and forwarded non-empty stdout or stderr from an eligible primary `-mt` task host during this build |
 | `SACEnabled` | bool | Whether Smart Application Control was enabled |
 | `IsStandaloneExecution` | bool | True if MSBuild runs from command line |
 | `InitialMSBuildServerState` | string | Server state before build: "cold", "hot", or null |
@@ -39,6 +40,8 @@ The primary telemetry event capturing overall build information.
 | `ProjectPath` | string | Path to the project file being built |
 | `FailureCategory` | string | Primary failure category when build fails (see Error Categorization) |
 | `ErrorCounts` | object | Breakdown of errors by category (see Error Categorization) |
+
+`TaskHostConsoleOutputForwarded` records actual use, not enablement, and contains no console text or task identity.
 
 ---
 

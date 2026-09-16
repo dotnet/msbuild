@@ -860,8 +860,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             });
 
             // Hold the actual ownership lock so the entrant must wait until the first scope exits.
-            object stateLock = typeof(MultiThreadedStrictModeScope)
-                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+            LockType stateLock = typeof(MultiThreadedStrictModeScope)
+                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null).ShouldBeOfType<LockType>();
             bool blocked;
             lock (stateLock)
             {
@@ -1456,8 +1456,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 entryFailure = Record.Exception(() => manager.BeginBuild(parameters));
                 returned.Set();
             });
-            object stateLock = typeof(MultiThreadedStrictModeScope)
-                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+            LockType stateLock = typeof(MultiThreadedStrictModeScope)
+                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null).ShouldBeOfType<LockType>();
             FieldInfo queueField = typeof(BuildManager).GetField("_workQueue", BindingFlags.Instance | BindingFlags.NonPublic)!;
             FieldInfo buildState = typeof(BuildManager).GetField("_buildManagerState", BindingFlags.Instance | BindingFlags.NonPublic)!;
             ActionBlock<Action>? queue = null;
@@ -1533,8 +1533,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         }),
                     ],
                 })));
-            object stateLock = typeof(MultiThreadedStrictModeScope)
-                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+            LockType stateLock = typeof(MultiThreadedStrictModeScope)
+                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null).ShouldBeOfType<LockType>();
             FieldInfo queueField = typeof(BuildManager).GetField("_workQueue", BindingFlags.Instance | BindingFlags.NonPublic)!;
             FieldInfo buildState = typeof(BuildManager).GetField("_buildManagerState", BindingFlags.Instance | BindingFlags.NonPublic)!;
             bool ownerEnded = false;

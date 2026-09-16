@@ -21,7 +21,7 @@ internal sealed class MultiThreadedStrictModeScope
     internal const string SentinelDirectoryName = "MSBuild-MT-Strict-Sentinel-CWD";
 
     // Serializes scope installation, restoration and directory repair. Never log under this lock.
-    private static readonly LockObject s_stateLock = NativeMethodsShared.CurrentDirectoryLock;
+    private static readonly LockType s_stateLock = NativeMethodsShared.CurrentDirectoryLock;
     private static MultiThreadedStrictModeScope? s_activeScope;
 
     private readonly object _reportedEntriesLock = new();

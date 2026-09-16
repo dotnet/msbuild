@@ -1352,6 +1352,9 @@ namespace Microsoft.Build.Execution
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
                             _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
+                            _buildTelemetry.TaskHostConsoleOutputForwarded = ((IBuildComponentHost)this)
+                                .GetComponent<NodeProviderOutOfProcTaskHost>(BuildComponentType.OutOfProcTaskHostNodeProvider)
+                                .ConsoleOutputForwarded;
                             var sacState = NativeMethodsShared.GetSACState();
                             // The Enforcement would lead to build crash - but let's have the check for completeness sake.
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
@@ -1371,6 +1374,9 @@ namespace Microsoft.Build.Execution
                             }
 
                             EndBuildTelemetry();
+
+                            // Telemetry is logged after BuildFinished; drain it before forwarding loggers shut down.
+                            WaitForAllLoggingServiceEventsToBeProcessed();
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
@@ -2646,6 +2652,7 @@ namespace Microsoft.Build.Execution
 
             _nodeManager?.ClearPerBuildState();
             _nodeManager = null;
+            _taskHostNodeManager?.ClearPerBuildState();
 
             _shuttingDown = false;
             _executionCancellationTokenSource?.Dispose();
