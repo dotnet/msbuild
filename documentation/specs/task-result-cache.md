@@ -9,7 +9,7 @@ A cacheable task type must have `Microsoft.Build.Framework.MSBuildDeclaredIOTask
 The cache key includes:
 
 - The task type and task assembly contents.
-- MSBuild, runtime, operating-system, architecture, and culture identity.
+- The MSBuild engine module, runtime, operating-system, architecture, and culture identity.
 - The project path and execution directory.
 - Every explicitly bound task parameter, including ordered task items and metadata.
 - Declared output paths.
@@ -17,7 +17,7 @@ The cache key includes:
 
 Cache entries contain the declared output files and supported task messages and warnings. A hit restores outputs and replays diagnostics while retaining normal task start and finish events. Failed tasks, out-of-process tasks, directory outputs, unsupported task events, corrupt entries, and cache I/O failures fall back to ordinary execution.
 
-Cache key hashing, entry-lock waits, payload validation and restoration, and cache storage use cancellation-aware asynchronous I/O. During a build, each node retains input-file digests and performs a fast length and last-write-time check on every cache request. Previously seen files with unchanged metadata reuse their digest; the first request for a new or changed file computes its digest while concurrent requests wait for that same operation. The digest table is discarded at build completion. Filesystem metadata operations without asynchronous platform APIs remain synchronous.
+Cache key hashing, payload validation and restoration, and cache storage use cancellation-aware asynchronous I/O. During a build, each node retains input-file digests and performs a fast length and last-write-time check on every cache request. Previously seen files with unchanged metadata reuse their digest; the first request for a new or changed file computes its digest while concurrent requests wait for that same operation. The digest table is discarded at build completion. Filesystem metadata operations without asynchronous platform APIs remain synchronous.
 
 When a build runs in the resident MSBuild server, the server accumulates task-cache statistics in memory across builds. `-taskCacheStats` queries and prints the current server snapshot, and `-resetTaskCacheStats` resets it. No statistics file is written. Builds that do not use the resident server do not contribute to the cumulative snapshot.
 
