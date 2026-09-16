@@ -19,7 +19,7 @@ The cache key includes:
 
 Cache entries contain the declared output files and supported task messages and warnings. A hit restores outputs and replays diagnostics while retaining normal task start and finish events. Failed tasks, out-of-process tasks, directory outputs, unsupported task events, corrupt entries, and cache I/O failures fall back to ordinary execution.
 
-Cache key hashing, payload validation and restoration, and cache storage use cancellation-aware asynchronous I/O. During a build, each node retains input-file digests and performs a fast length and last-write-time check on every cache request. Previously seen files with unchanged metadata reuse their digest; the first request for a new or changed file computes its digest while concurrent requests wait for that same operation. The digest table is discarded at build completion. Filesystem metadata operations without asynchronous platform APIs remain synchronous.
+Cache key hashing and manifest I/O use cancellation-aware asynchronous I/O. Payloads are copied once and validated by length before staged files replace declared outputs. During a build, each node retains input-file digests and performs a fast length and last-write-time check on every cache request. Previously seen files with unchanged metadata reuse their digest; the first request for a new or changed file computes its digest while concurrent requests wait for that same operation. The digest table is discarded at build completion. Filesystem operations without asynchronous platform APIs remain synchronous.
 
 Task-cache hits, misses, and failures are logged at low importance and captured in binary logs.
 
