@@ -109,6 +109,7 @@ namespace Microsoft.Build.BackEnd
         /// True if currently connected to the task host; false otherwise.
         /// </summary>
         private bool _connectedToTaskHost = false;
+        private NodeProviderOutOfProcBase.NodeContext _taskHostConnection;
 
         /// <summary>
         /// The provider for task host nodes.
@@ -137,13 +138,17 @@ namespace Microsoft.Build.BackEnd
         private bool _taskExecutionSucceeded = false;
 
         /// <summary>
-        /// If true TaskHostFactory expects the TaskHost not will NOT expire after build (until it timeouts or is killed).
-        /// This is relevant for the next cases:
-        /// 1) TaskHostFactory is NOT explicitly requested (we always disable node reuse due to the transient nature of task host factory hosts).
-        /// 2) Runtime="NET" is specified in UsingTask.
-        /// 3) Environment variable MSBUILDFORCEALLTASKSOUTOFPROC is set.
+        /// Whether this task host may be launched with node reuse, so that it does not exit at the
+        /// end of the build. False only when <c>TaskFactory="TaskHostFactory"</c> was explicitly
+        /// requested, where the caller wants a short-lived process that releases its assembly locks.
         /// </summary>
-        private bool _useSidecarTaskHost = false;
+        /// <remarks>
+        /// This says nothing about whether the resulting task host is a sidecar. It is also true for
+        /// a task host of a different runtime or architecture, which is reusable but stays pooled;
+        /// <see cref="NodeProviderOutOfProcTaskHost.DoesConnectionPersistAcrossBuilds"/> makes that
+        /// distinction.
+        /// </remarks>
+        private bool _allowNodeReuse = false;
 
         private readonly HostServices _hostServices;
 
@@ -173,7 +178,7 @@ namespace Microsoft.Build.BackEnd
             IBuildComponentHost buildComponentHost,
             TaskHostParameters taskHostParameters,
             LoadedType taskType,
-            bool useSidecarTaskHost,
+            bool allowNodeReuse,
             string projectFile,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
@@ -199,7 +204,7 @@ namespace Microsoft.Build.BackEnd
             _taskHostParameters = taskHostParameters;
             _supportsParameterConversion = IsNetTaskHost
                 && NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(_taskHostParameters);
-            _useSidecarTaskHost = useSidecarTaskHost;
+            _allowNodeReuse = allowNodeReuse;
             _taskEnvironment = taskEnvironment;
 
             _packetFactory = new NodePacketFactory();
@@ -312,7 +317,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
                     {
-                        _taskHostProvider.SendData(_taskHostNodeKey, new TaskHostTaskCancelled());
+                        _taskHostConnection.SendData(new TaskHostTaskCancelled());
                     }
                 }
 
@@ -384,7 +389,7 @@ namespace Microsoft.Build.BackEnd
 
                     lock (_taskHostLock)
                     {
-                        effectiveNodeReuse = _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost;
+                        effectiveNodeReuse = _buildComponentHost.BuildParameters.EnableNodeReuse && _allowNodeReuse;
 
                         _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
                             taskHost: true,
@@ -401,7 +406,8 @@ namespace Microsoft.Build.BackEnd
                             hostConfiguration,
                             _taskHostParameters,
                             out hostProcessId,
-                            out wasNewlyCreated);
+                            out wasNewlyCreated,
+                            out _taskHostConnection);
                     }
 
                     if (_connectedToTaskHost)
@@ -413,7 +419,7 @@ namespace Microsoft.Build.BackEnd
                             hostProcessId,
                             Process.GetCurrentProcess().Id,
                             wasNewlyCreated,
-                            _useSidecarTaskHost,
+                            _allowNodeReuse,
                             effectiveNodeReuse);
 
                         try
@@ -440,8 +446,9 @@ namespace Microsoft.Build.BackEnd
                         {
                             lock (_taskHostLock)
                             {
-                                _taskHostProvider.DisconnectFromHost(_taskHostNodeKey);
+                                _taskHostProvider.DisconnectFromHost(_taskHostConnection, this);
                                 _connectedToTaskHost = false;
+                                _taskHostConnection = null;
                             }
                         }
                     }
@@ -779,7 +786,7 @@ namespace Microsoft.Build.BackEnd
         {
             bool result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
             var response = new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result);
-            _taskHostProvider.SendData(_taskHostNodeKey, response);
+            _taskHostConnection.SendData(response);
         }
 
         /// <summary>
@@ -809,7 +816,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
-            _taskHostProvider.SendData(_taskHostNodeKey, response);
+            _taskHostConnection.SendData(response);
         }
 
         /// <summary>
@@ -867,7 +874,7 @@ namespace Microsoft.Build.BackEnd
                 // Exceptions propagate to TaskBuilder which handles them identically
                 // to the in-proc TaskHost path (CircularDependencyException, etc.).
                 response ??= new TaskHostBuildResponse(request.RequestId, false, null);
-                _taskHostProvider.SendData(_taskHostNodeKey, response);
+                _taskHostConnection.SendData(response);
             }
         }
 

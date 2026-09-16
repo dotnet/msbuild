@@ -2233,7 +2233,7 @@ namespace Microsoft.Build.BackEnd
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                useSidecarTaskHost: true,
+                allowNodeReuse: true,
                 _projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,

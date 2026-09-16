@@ -13,10 +13,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     {
         internal enum ApiCategory
         {
-            /// <summary>MSBuildTask0001: Critical errors - no safe alternative.</summary>
+            /// <summary>MSBuildTask0001: Never-safe APIs - no safe alternative.</summary>
             CriticalError,
             /// <summary>MSBuildTask0002: Requires TaskEnvironment replacement.</summary>
             TaskEnvironment,
+            /// <summary>MSBuildTask0003: File APIs require absolute paths.</summary>
+            FilePathRequiresAbsolute,
             /// <summary>MSBuildTask0004: Potential issue - review required.</summary>
             PotentialIssue,
         }
@@ -43,7 +45,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             return ImmutableArray.Create(
                 // ══════════════════════════════════════════════════════════════
-                // MSBuildTask0001: Critical errors - no safe alternative
+                // MSBuildTask0001: Never-safe APIs - no safe alternative
                 // Console.* is handled at the TYPE level in the analyzer.
                 // ══════════════════════════════════════════════════════════════
 
