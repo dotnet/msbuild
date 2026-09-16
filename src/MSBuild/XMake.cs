@@ -1625,12 +1625,6 @@ namespace Microsoft.Build.CommandLine
             {
                 // Requests are created after BeginBuild enters the sentinel, so resolve the project path now.
                 projectFile = FileUtilities.NormalizePath(projectFile);
-
-                if (!string.IsNullOrWhiteSpace(outputResultsCache))
-                {
-                    // Anchor CLI output before evaluation loggers initialize; BeginBuild captures CWD later.
-                    outputResultsCache = FileUtilities.NormalizePath(outputResultsCache);
-                }
             }
 
             bool success = true;

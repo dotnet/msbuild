@@ -288,8 +288,10 @@ Existing task diagnostics keep their normal timing: `MSB4181` can appear alongsi
 diagnostic. Cancellation does not retract earlier diagnostics.
 For otherwise-successful builds, the final directory scan runs after node and project-cache
 cleanup and logging callbacks, before output caches are serialized; a late violation fails `EndBuild`.
-The host directory captured before logger initialization is restored when the build ends; relative
-API output-cache paths also resolve from that directory. Failures to enable strict
+The host directory captured before logger initialization is restored when the build ends.
+`BuildManager` resolves relative output-cache paths for CLI and API builds before entering the sentinel;
+the CLI resolves its entry-project path before constructing requests inside that scope. Loggers must
+not change the process current directory. Failures to enable strict
 mode, check its state, or restore the directory fail the build; they do not silently disable checks.
 After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
 Locked leftovers are not reused by later builds. Cleanup is best-effort and does not replace

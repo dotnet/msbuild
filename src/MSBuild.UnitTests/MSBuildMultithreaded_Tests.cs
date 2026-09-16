@@ -163,14 +163,6 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
-    public class ChangeCurrentDirectoryOnInitializeLogger : Logger
-    {
-        public override void Initialize(IEventSource eventSource)
-        {
-            Directory.SetCurrentDirectory(Parameters);
-        }
-    }
-
     /// <summary>
     /// Test task that deliberately performs the unresolved-path operations that multi-threaded strict mode
     /// exists to detect.
@@ -602,28 +594,25 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void StrictMode_OutputCachePathIsAnchoredBeforeLoggerInitialization()
+        public void StrictMode_WritesOutputCacheRelativeToLaunchDirectory()
         {
             TransientTestFolder launchDirectory = _env.CreateFolder();
-            TransientTestFolder loggerDirectory = _env.CreateFolder();
             _env.CreateFile(launchDirectory, "main.proj", """
                 <Project>
                     <Target Name="Build" />
                 </Project>
                 """);
             _env.SetCurrentDirectory(launchDirectory.Path);
-            Type loggerType = typeof(ChangeCurrentDirectoryOnInitializeLogger);
 
             string output = RunnerUtilities.ExecMSBuild(
                 BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
-                $"main.proj /m:1 /mt /nr:false /orc:out.cache /logger:{loggerType.FullName},\"{loggerType.Assembly.Location}\";\"{loggerDirectory.Path}\"",
+                "main.proj /m:1 /mt /nr:false /orc:out.cache",
                 out bool success,
                 false,
                 _output);
 
             success.ShouldBeTrue(output);
             File.Exists(Path.Combine(launchDirectory.Path, "out.cache")).ShouldBeTrue(output);
-            File.Exists(Path.Combine(loggerDirectory.Path, "out.cache")).ShouldBeFalse(output);
         }
 
         /// <summary>
