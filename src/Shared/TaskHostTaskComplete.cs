@@ -264,18 +264,12 @@ namespace Microsoft.Build.BackEnd
             TranslateBuildProcessEnvironment(translator);
 #if FEATURE_REPORTFILEACCESSES
             translator.Translate(ref _fileAccessData,
-                static (ITranslator translator, ref FileAccessData data) => TranslateValue(translator, ref data));
+                (ITranslator translator, ref FileAccessData data) => ((ITranslatable)data).Translate(translator));
 #else
             bool hasFileAccessData = false;
             translator.Translate(ref hasFileAccessData);
 #endif
         }
-
-#if FEATURE_REPORTFILEACCESSES
-        private static void TranslateValue<T>(ITranslator translator, ref T value)
-            where T : ITranslatable
-            => value.Translate(translator);
-#endif
 
         private void TranslateBuildProcessEnvironment(ITranslator translator)
         {

@@ -7,9 +7,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
-#if FEATURE_REPORTFILEACCESSES
-using Microsoft.Build.Experimental.FileAccess;
-#endif
 
 namespace Microsoft.Build.CommandLine
 {
@@ -47,6 +44,9 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public TaskExecutionState State { get; set; }
 
+        /// <summary>Whether this task may fail without logging an error.</summary>
+        public bool AllowFailureWithoutError { get; set; }
+
         /// <summary>
         /// Saved current directory when task blocks on a BuildProjectFile callback.
         /// </summary>
@@ -73,24 +73,6 @@ namespace Microsoft.Build.CommandLine
         /// Stored per-task to prevent stale references when nested tasks overwrite the shared field.
         /// </summary>
         public OutOfProcTaskAppDomainWrapper? TaskWrapper { get; set; }
-
-#if FEATURE_REPORTFILEACCESSES
-        /// <summary>
-        /// File accesses reported by this task execution.
-        /// </summary>
-        internal List<FileAccessData> FileAccesses { get; } = [];
-
-        /// <summary>
-        /// Records a file access when reporting was enabled for this task.
-        /// </summary>
-        internal void ReportFileAccess(FileAccessData fileAccessData)
-        {
-            if (Configuration.ReportFileAccesses)
-            {
-                FileAccesses.Add(fileAccessData);
-            }
-        }
-#endif
 
         /// <summary>
         /// Saved _debugCommunications setting for this task.
