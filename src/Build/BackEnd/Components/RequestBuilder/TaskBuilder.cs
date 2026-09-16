@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 #if FEATURE_APARTMENT_STATE
@@ -77,8 +76,6 @@ namespace Microsoft.Build.BackEnd
         private IBuildComponentHost _componentHost;
 
         private TaskResultCacheFileDigestCache _taskResultCacheFileDigestCache;
-
-        private TaskResultCacheStatistics _taskResultCacheStatistics;
 
         /// <summary>
         /// The original target child instance
@@ -228,7 +225,6 @@ namespace Microsoft.Build.BackEnd
                 Assumed.NotNull(_taskExecutionHost, "taskExecutionHost not initialized.");
                 _componentHost = null;
                 _taskResultCacheFileDigestCache = null;
-                _taskResultCacheStatistics = null;
 
                 IDisposable disposable = _taskExecutionHost as IDisposable;
                 disposable?.Dispose();
@@ -829,8 +825,6 @@ namespace Microsoft.Build.BackEnd
                     {
                         _taskResultCacheFileDigestCache ??=
                             (TaskResultCacheFileDigestCache)_componentHost.GetComponent(BuildComponentType.TaskResultCacheFileDigestCache);
-                        _taskResultCacheStatistics ??=
-                            (TaskResultCacheStatistics)_componentHost.GetComponent(BuildComponentType.TaskResultCacheStatistics);
 
                         if (!IsTaskResultCacheInvocationEligible(
                                 taskExecutionHost.TaskLoadedType,
@@ -845,7 +839,6 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            long cacheRequestStartTimestamp = Stopwatch.GetTimestamp();
                             TaskResultCacheOpenResponse cacheOpenResponse =
                                 await TaskResultCacheSession.TryOpenAsync(
                                     taskExecutionHost.TaskInstance,
@@ -857,9 +850,6 @@ namespace Microsoft.Build.BackEnd
                                     _taskResultCacheFileDigestCache,
                                     _cancellationToken);
                             cacheOpenResult = cacheOpenResponse.Result;
-                            _taskResultCacheStatistics.Record(
-                                cacheOpenResult,
-                                Stopwatch.GetTimestamp() - cacheRequestStartTimestamp);
                             cacheSession = cacheOpenResponse.Session;
                             cachedEvents = cacheOpenResponse.Events;
                             cacheReason = cacheOpenResponse.Reason;

@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
-#nullable disable
+#nullable enable
 
 namespace Microsoft.Build.BackEnd.Components.Caching
 {
@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             CancellationToken cancellationToken)
         {
             string normalizedPath = FileUtilities.NormalizePath(path);
-            if (!_digests.TryGetValue(normalizedPath, out DigestEntry entry))
+            if (!_digests.TryGetValue(normalizedPath, out DigestEntry? entry))
             {
                 entry = _digests.GetOrAdd(normalizedPath, static path => new DigestEntry(path));
             }
@@ -62,13 +62,13 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         private sealed class DigestEntry(string path)
         {
             private readonly SemaphoreSlim _gate = new(1, 1);
-            private DigestState _state;
+            private DigestState? _state;
 
             internal async ValueTask<TaskResultCacheFileDigest> GetDigestAsync(
                 CancellationToken cancellationToken)
             {
                 FileFingerprint fingerprint = GetFingerprint(path);
-                DigestState state = Volatile.Read(ref _state);
+                DigestState? state = Volatile.Read(ref _state);
                 if (state is not null && state.Fingerprint.Equals(fingerprint))
                 {
                     return state.Digest;
@@ -117,7 +117,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     FileOptions.Asynchronous | FileOptions.SequentialScan);
                 await stream.CopyToAsync(hashStream, 81920, cancellationToken);
                 hashStream.FlushFinalBlock();
-                return new TaskResultCacheFileDigest(length, hash.Hash);
+                return new TaskResultCacheFileDigest(length, hash.Hash!);
             }
         }
 

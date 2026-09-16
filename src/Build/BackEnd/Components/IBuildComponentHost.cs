@@ -157,11 +157,6 @@ namespace Microsoft.Build.BackEnd
         /// Per-build declared-I/O task input file digests.
         /// </summary>
         TaskResultCacheFileDigestCache,
-
-        /// <summary>
-        /// Per-build declared-I/O task result cache statistics.
-        /// </summary>
-        TaskResultCacheStatistics,
     }
 
     /// <summary>

@@ -17,7 +17,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-#nullable disable
+#nullable enable
 
 namespace Microsoft.Build.BackEnd.Components.Caching
 {
@@ -33,9 +33,9 @@ namespace Microsoft.Build.BackEnd.Components.Caching
     {
         internal TaskResultCacheOpenResponse(
             TaskResultCacheOpenResult result,
-            TaskResultCacheSession session = null,
-            IReadOnlyList<TaskResultCacheEvent> events = null,
-            string reason = null)
+            TaskResultCacheSession? session = null,
+            IReadOnlyList<TaskResultCacheEvent>? events = null,
+            string? reason = null)
         {
             Result = result;
             Session = session;
@@ -45,16 +45,16 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         internal TaskResultCacheOpenResult Result { get; }
 
-        internal TaskResultCacheSession Session { get; }
+        internal TaskResultCacheSession? Session { get; }
 
-        internal IReadOnlyList<TaskResultCacheEvent> Events { get; }
+        internal IReadOnlyList<TaskResultCacheEvent>? Events { get; }
 
-        internal string Reason { get; }
+        internal string? Reason { get; }
     }
 
     internal readonly struct TaskResultCacheStoreResponse
     {
-        internal TaskResultCacheStoreResponse(bool success, string reason = null)
+        internal TaskResultCacheStoreResponse(bool success, string? reason = null)
         {
             Success = success;
             Reason = reason;
@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         internal bool Success { get; }
 
-        internal string Reason { get; }
+        internal string? Reason { get; }
     }
 
     internal sealed class TaskResultCacheSession
@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         internal string Key => _key;
 
-        internal static string ResolveCacheDirectory(string configuredDirectory, string enabled)
+        internal static string? ResolveCacheDirectory(string configuredDirectory, string enabled)
         {
             if (!String.IsNullOrWhiteSpace(configuredDirectory))
             {
@@ -118,7 +118,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             string userCacheDirectory;
             if (NativeMethodsShared.IsUnixLike)
             {
-                string xdgCacheDirectory = Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
+                string? xdgCacheDirectory = Environment.GetEnvironmentVariable("XDG_CACHE_HOME");
                 userCacheDirectory = !String.IsNullOrWhiteSpace(xdgCacheDirectory) &&
                     Path.IsPathRooted(xdgCacheDirectory)
                     ? xdgCacheDirectory
@@ -361,7 +361,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     }
                 }
 
-                var temporaryFiles = new string[outputs.Count];
+                var temporaryFiles = new string?[outputs.Count];
                 try
                 {
                     for (int i = 0; i < outputs.Count; i++)
@@ -372,7 +372,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                             continue;
                         }
 
-                        string outputDirectory = Path.GetDirectoryName(output.Path);
+                        string? outputDirectory = Path.GetDirectoryName(output.Path);
                         if (!String.IsNullOrEmpty(outputDirectory))
                         {
                             Directory.CreateDirectory(outputDirectory);
@@ -402,7 +402,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         }
 
                         File.Delete(output.Path);
-                        File.Move(temporaryFiles[i], output.Path);
+                        File.Move(temporaryFiles[i]!, output.Path);
                         temporaryFiles[i] = null;
                         File.SetLastWriteTimeUtc(output.Path, DateTime.UtcNow);
 #if NET
@@ -418,9 +418,10 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 {
                     for (int i = 0; i < temporaryFiles.Length; i++)
                     {
-                        if (temporaryFiles[i] is not null)
+                        string? temporaryFile = temporaryFiles[i];
+                        if (temporaryFile is not null)
                         {
-                            File.Delete(temporaryFiles[i]);
+                            File.Delete(temporaryFile);
                         }
                     }
                 }
@@ -457,14 +458,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     task,
                     "DeclaredInputs",
                     projectDirectory,
-                    out IReadOnlyList<string> inputPaths,
-                    out string reason) ||
+                    out IReadOnlyList<string>? inputPaths,
+                    out string? reason) ||
                 !TryGetDeclaredPaths(
                     taskType,
                     task,
                     "DeclaredOutputs",
                     projectDirectory,
-                    out IReadOnlyList<string> outputPaths,
+                    out IReadOnlyList<string>? outputPaths,
                     out reason))
             {
                 return new TaskResultCacheKeyResponse(success: false, reason: reason);
@@ -476,7 +477,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 using var hashStream = new CryptoStream(Stream.Null, hash, CryptoStreamMode.Write);
                 using var writer = new BinaryWriter(hashStream, Encoding.UTF8, leaveOpen: true);
 
-                writer.Write(taskType.AssemblyQualifiedName);
+                writer.Write(taskType.AssemblyQualifiedName!);
                 writer.Write(typeof(Microsoft.Build.Execution.BuildManager).Module.ModuleVersionId.ToByteArray());
                 writer.Write(RuntimeInformation.FrameworkDescription);
                 writer.Write(RuntimeInformation.OSArchitecture.ToString());
@@ -537,7 +538,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 hashStream.FlushFinalBlock();
                 return new TaskResultCacheKeyResponse(
                     success: true,
-                    ToHex(hash.Hash),
+                    ToHex(hash.Hash!),
                     outputPaths);
             }
             catch (Exception e) when (IsExpectedCacheException(e) || e is TargetInvocationException)
@@ -556,7 +557,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             BinaryWriter writer,
             ITask task,
             ICollection<string> parameterNames,
-            out string reason)
+            out string? reason)
         {
             reason = null;
             Type taskType = task.GetType();
@@ -577,7 +578,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             for (int i = 0; i < sortedParameterNames.Count; i++)
             {
                 string parameterName = sortedParameterNames[i];
-                if (!propertiesByName.TryGetValue(parameterName, out PropertyInfo property) ||
+                if (!propertiesByName.TryGetValue(parameterName, out PropertyInfo? property) ||
                     property.GetMethod is null)
                 {
                     reason = $"Task parameter \"{parameterName}\" does not have a readable property.";
@@ -585,7 +586,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 }
 
                 writer.Write(parameterName);
-                writer.Write(property.PropertyType.AssemblyQualifiedName);
+                writer.Write(property.PropertyType.AssemblyQualifiedName!);
                 if (!TryWriteValue(writer, property.GetValue(task), out reason))
                 {
                     reason = $"Task parameter \"{parameterName}\" cannot be cached: {reason}";
@@ -598,8 +599,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
         private static bool TryWriteValue(
             BinaryWriter writer,
-            object value,
-            out string reason)
+            object? value,
+            out string? reason)
         {
             reason = null;
             if (value is null)
@@ -661,8 +662,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
                 case IConvertible convertible:
                     writer.Write((byte)8);
-                    writer.Write(value.GetType().AssemblyQualifiedName);
-                    writer.Write(convertible.ToString(CultureInfo.InvariantCulture));
+                    writer.Write(value.GetType().AssemblyQualifiedName!);
+                    writer.Write(convertible.ToString(CultureInfo.InvariantCulture)!);
                     return true;
 
                 default:
@@ -700,12 +701,12 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             ITask task,
             string propertyName,
             string projectDirectory,
-            out IReadOnlyList<string> paths,
-            out string reason)
+            [NotNullWhen(true)] out IReadOnlyList<string>? paths,
+            out string? reason)
         {
             paths = null;
             reason = null;
-            PropertyInfo property = taskType.GetProperty(
+            PropertyInfo? property = taskType.GetProperty(
                 propertyName,
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
             if (property?.GetMethod is null || property.GetValue(task) is not ITaskItem[] items)
@@ -752,7 +753,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 if (output.Present)
                 {
                     writer.Write(output.Length);
-                    writer.Write(output.Hash);
+                    writer.Write(output.Hash!);
                     writer.Write((int)output.Attributes);
                     writer.Write(output.UnixFileMode);
                 }
@@ -819,7 +820,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         hash: null,
                         attributes: 0,
                         unixFileMode: 0);
-                if (present && outputs[i].Hash.Length != 32)
+                if (present && outputs[i].Hash?.Length != 32)
                 {
                     throw new InvalidDataException("The cache manifest contains an invalid output hash.");
                 }
@@ -877,7 +878,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             using var hashStream = new CryptoStream(destination, hash, CryptoStreamMode.Write);
             await source.CopyToAsync(hashStream, 81920, cancellationToken);
             hashStream.FlushFinalBlock();
-            return (hash.Hash, source.Position);
+            return (hash.Hash!, source.Position);
         }
 
         private static FileStream CreateAsyncFileStream(
@@ -895,9 +896,9 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 FileOptions.Asynchronous | FileOptions.SequentialScan);
         }
 
-        private static bool HashesEqual(byte[] left, byte[] right)
+        private static bool HashesEqual(byte[] left, byte[]? right)
         {
-            if (left.Length != right.Length)
+            if (right is null || left.Length != right.Length)
             {
                 return false;
             }
@@ -1133,9 +1134,9 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         {
             internal TaskResultCacheKeyResponse(
                 bool success,
-                string key = null,
-                IReadOnlyList<string> outputPaths = null,
-                string reason = null)
+                string? key = null,
+                IReadOnlyList<string>? outputPaths = null,
+                string? reason = null)
             {
                 Success = success;
                 Key = key;
@@ -1143,21 +1144,23 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 Reason = reason;
             }
 
+            [MemberNotNullWhen(true, nameof(Key))]
+            [MemberNotNullWhen(true, nameof(OutputPaths))]
             internal bool Success { get; }
 
-            internal string Key { get; }
+            internal string? Key { get; }
 
-            internal IReadOnlyList<string> OutputPaths { get; }
+            internal IReadOnlyList<string>? OutputPaths { get; }
 
-            internal string Reason { get; }
+            internal string? Reason { get; }
         }
 
         private readonly struct TaskResultCacheRestoreResponse
         {
             internal TaskResultCacheRestoreResponse(
                 bool success,
-                IReadOnlyList<TaskResultCacheEvent> events = null,
-                string reason = null)
+                IReadOnlyList<TaskResultCacheEvent>? events = null,
+                string? reason = null)
             {
                 Success = success;
                 Events = events;
@@ -1166,9 +1169,9 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
             internal bool Success { get; }
 
-            internal IReadOnlyList<TaskResultCacheEvent> Events { get; }
+            internal IReadOnlyList<TaskResultCacheEvent>? Events { get; }
 
-            internal string Reason { get; }
+            internal string? Reason { get; }
         }
 
         private readonly struct TaskResultCacheManifest
@@ -1192,7 +1195,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 string path,
                 bool present,
                 long length,
-                byte[] hash,
+                byte[]? hash,
                 FileAttributes attributes,
                 int unixFileMode)
             {
@@ -1210,7 +1213,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
             internal long Length { get; }
 
-            internal byte[] Hash { get; }
+            internal byte[]? Hash { get; }
 
             internal FileAttributes Attributes { get; }
 
