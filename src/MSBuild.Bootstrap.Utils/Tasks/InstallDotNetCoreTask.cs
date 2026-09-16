@@ -1,9 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -18,6 +22,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
     public sealed class InstallDotNetCoreTask : ToolTask
     {
         private const string ScriptName = "dotnet-install";
+        private const int MaxScriptDownloadAttempts = 3;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InstallDotNetCoreTask"/> class.
@@ -53,6 +58,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         /// Gets or sets the base URL for downloading the .NET Core installation script. The default value is "https://dot.net/v1/".
         /// </summary>
         public string DotNetInstallBaseUrl { get; set; } = "https://dot.net/v1/";
+
+        internal HttpMessageHandler HttpMessageHandler { get; set; } = null!;
 
         private bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
@@ -96,22 +103,96 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         /// <param name="scriptPath">The path where the script will be saved.</param>
         private async AsyncTasks.Task DownloadScriptAsync(string scriptName, string scriptPath)
         {
-            using (HttpClient client = new HttpClient())
+            string scriptContent = await DownloadScriptContentAsync(scriptName).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(scriptContent))
             {
-                HttpResponseMessage response = await client.GetAsync($"{DotNetInstallBaseUrl}{scriptName}").ConfigureAwait(false);
-                if (response.IsSuccessStatusCode)
+                File.WriteAllText(scriptPath, scriptContent);
+            }
+        }
+
+        private async AsyncTasks.Task<string> DownloadScriptContentAsync(string scriptName)
+        {
+            string scriptUrl = $"{DotNetInstallBaseUrl}{scriptName}";
+
+#pragma warning disable CA2000 // Dispose objects before losing scope because HttpClientHandler is disposed by HttpClient.Dispose()
+            using (HttpClient client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
+#pragma warning restore CA2000
+            {
+                for (int attempt = 1; attempt <= MaxScriptDownloadAttempts; attempt++)
                 {
-                    string scriptContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    if (!string.IsNullOrEmpty(scriptContent))
+                    try
                     {
-                        File.WriteAllText(scriptPath, scriptContent);
+                        using (HttpResponseMessage response = await client.GetAsync(scriptUrl).ConfigureAwait(false))
+                        {
+                            if (response.IsSuccessStatusCode)
+                            {
+                                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            }
+
+                            Log.LogError($"Install-scripts download from {DotNetInstallBaseUrl} error. Status code: {response.StatusCode}.");
+                            return null!;
+                        }
+                    }
+                    catch (Exception e) when (IsScriptDownloadTransportFailure(e))
+                    {
+                        string flattenedMessage = GetInnerExceptionMessageString(e);
+
+                        if (attempt < MaxScriptDownloadAttempts && IsTransientTransportFailure(e))
+                        {
+                            Log.LogMessage(MessageImportance.Low, $"Install-scripts download from {scriptUrl} failed with a transient transport error. Retrying attempt {attempt + 1} of {MaxScriptDownloadAttempts}. {flattenedMessage}");
+                            continue;
+                        }
+
+                        Log.LogError($"Install-scripts download from {scriptUrl} failed after {attempt} {(attempt == 1 ? "attempt" : "attempts")}. {flattenedMessage}");
+                        Log.LogMessage(MessageImportance.Low, e.ToString());
+                        return null!;
                     }
                 }
-                else
+            }
+
+            return null!;
+        }
+
+        private static bool IsScriptDownloadTransportFailure(Exception exception)
+        {
+            return exception is HttpRequestException or IOException or SocketException or AuthenticationException;
+        }
+
+        private static bool IsTransientTransportFailure(Exception exception)
+        {
+            bool isTransient = false;
+
+            for (Exception current = exception; current is not null; current = current.InnerException)
+            {
+                if (current is AuthenticationException)
                 {
-                    Log.LogError($"Install-scripts download from {DotNetInstallBaseUrl} error. Status code: {response.StatusCode}.");
+                    return false;
+                }
+
+                if (current is SocketException socketException)
+                {
+                    isTransient |= socketException.SocketErrorCode is SocketError.ConnectionReset or SocketError.ConnectionAborted or SocketError.NetworkReset or SocketError.TimedOut;
+                }
+                else if (current is IOException)
+                {
+                    isTransient = true;
                 }
             }
+
+            return isTransient;
+        }
+
+        private static string GetInnerExceptionMessageString(Exception exception)
+        {
+            StringBuilder message = new StringBuilder(exception.Message);
+
+            for (Exception current = exception.InnerException; current is not null; current = current.InnerException)
+            {
+                message.Append(' ');
+                message.Append(current.Message);
+            }
+
+            return message.ToString();
         }
 
         /// <summary>
