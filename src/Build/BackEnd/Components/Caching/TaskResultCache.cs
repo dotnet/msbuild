@@ -244,7 +244,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                             outputPath,
                             Present: false,
                             Length: 0,
-                            Hash: null,
                             Attributes: 0,
                             UnixFileMode: 0));
                         continue;
@@ -266,13 +265,11 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     const int unixFileMode = 0;
 #endif
                     string payloadPath = GetPayloadPath(temporaryDirectory, i);
-                    (byte[] hash, long length) =
-                        await CopyAndHashAsync(outputPath, payloadPath, cancellationToken);
+                    File.Copy(outputPath, payloadPath);
                     outputs.Add(new CachedOutput(
                         outputPath,
                         Present: true,
-                        Length: length,
-                        Hash: hash,
+                        Length: new FileInfo(payloadPath).Length,
                         Attributes: attributes,
                         UnixFileMode: unixFileMode));
                 }
@@ -376,12 +373,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         string temporaryFile =
                             output.Path + "." + Guid.NewGuid().ToString("N") + ".msbuild-cache";
                         temporaryFiles[i] = temporaryFile;
-                        (byte[] hash, long length) = await CopyAndHashAsync(
-                            GetPayloadPath(_entryDirectory, i),
-                            temporaryFile,
-                            cancellationToken);
-                        if (length != output.Length ||
-                            !HashesEqual(hash, output.Hash))
+                        File.Copy(GetPayloadPath(_entryDirectory, i), temporaryFile);
+                        if (new FileInfo(temporaryFile).Length != output.Length)
                         {
                             throw new InvalidDataException("A cached output payload is missing or corrupt.");
                         }
@@ -731,7 +724,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 if (output.Present)
                 {
                     writer.Write(output.Length);
-                    writer.Write(output.Hash!);
                     writer.Write((int)output.Attributes);
                     writer.Write(output.UnixFileMode);
                 }
@@ -788,20 +780,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                         path,
                         present,
                         reader.ReadInt64(),
-                        reader.ReadBytes(32),
                         (FileAttributes)reader.ReadInt32(),
                         reader.ReadInt32())
                     : new CachedOutput(
                         path,
                         present,
                         Length: 0,
-                        Hash: null,
                         Attributes: 0,
                         UnixFileMode: 0);
-                if (present && outputs[i].Hash?.Length != 32)
-                {
-                    throw new InvalidDataException("The cache manifest contains an invalid output hash.");
-                }
             }
 
             int eventCount = reader.ReadInt32();
@@ -837,28 +823,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             writer.Write(digest.Hash);
         }
 
-        private static async ValueTask<(byte[] Hash, long Length)> CopyAndHashAsync(
-            string sourcePath,
-            string destinationPath,
-            CancellationToken cancellationToken)
-        {
-            using SHA256 hash = SHA256.Create();
-            using var source = CreateAsyncFileStream(
-                sourcePath,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read);
-            using var destination = CreateAsyncFileStream(
-                destinationPath,
-                FileMode.CreateNew,
-                FileAccess.Write,
-                FileShare.None);
-            using var hashStream = new CryptoStream(destination, hash, CryptoStreamMode.Write);
-            await source.CopyToAsync(hashStream, 81920, cancellationToken);
-            hashStream.FlushFinalBlock();
-            return (hash.Hash!, source.Position);
-        }
-
         private static FileStream CreateAsyncFileStream(
             string path,
             FileMode mode,
@@ -872,22 +836,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 share,
                 bufferSize: 4096,
                 FileOptions.Asynchronous | FileOptions.SequentialScan);
-        }
-
-        private static bool HashesEqual(byte[] left, byte[]? right)
-        {
-            if (right is null || left.Length != right.Length)
-            {
-                return false;
-            }
-
-            int difference = 0;
-            for (int i = 0; i < left.Length; i++)
-            {
-                difference |= left[i] ^ right[i];
-            }
-
-            return difference == 0;
         }
 
         private static string ToHex(byte[] bytes)
@@ -1119,7 +1067,6 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             string Path,
             bool Present,
             long Length,
-            byte[]? Hash,
             FileAttributes Attributes,
             int UnixFileMode
         );
