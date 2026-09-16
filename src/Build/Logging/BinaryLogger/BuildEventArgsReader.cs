@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -223,18 +224,21 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="eventFilter">
         /// An optional filter deciding which events are deserialized and returned. For length-framed
-        /// binlogs rejected events skip their type-specific payload without deserializing it.
+        /// binlogs rejected events skip their type-specific payload without deserializing it, except
+        /// for <see cref="TargetSkippedEventArgs"/>, whose original build context is in that payload.
         /// </param>
         /// <returns>
         /// The next accepted <see cref="BuildEventArgs"/>.
         /// If there are no more records, returns <see langword="null"/>.
         /// </returns>
         /// <exception cref="BinaryLogEventFilterException">The filter callback threw an exception.</exception>
-        public BuildEventArgs? Read(BinaryLogEventFilter? eventFilter)
+        public BuildEventArgs? Read(BinaryLogEventFilter? eventFilter) => Read(eventFilter, CancellationToken.None);
+
+        internal BuildEventArgs? Read(BinaryLogEventFilter? eventFilter, CancellationToken cancellationToken)
         {
             CheckErrorsSubscribed();
             BuildEventArgs? result = null;
-            while (result == null)
+            while (result == null && !cancellationToken.IsCancellationRequested)
             {
                 BinaryLogRecordKind recordKind = PreprocessRecordsTillNextEvent(IsAuxiliaryRecord);
 

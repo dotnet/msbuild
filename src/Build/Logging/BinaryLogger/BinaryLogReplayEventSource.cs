@@ -94,9 +94,10 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <remarks>
         /// For length-framed binlogs, rejected events skip their type-specific payload without being
-        /// deserialized. Auxiliary records are always read so retained events can resolve their string
-        /// and name/value-list references. The filter is responsible for retaining a structurally
-        /// consistent event set. It is only applied when replaying structured events.
+        /// deserialized, except for <see cref="TargetSkippedEventArgs"/>, whose original build context
+        /// is in that payload. Auxiliary records are always read so retained events can resolve their
+        /// string and name/value-list references. The filter is responsible for retaining a
+        /// structurally consistent event set. It is only applied when replaying structured events.
         /// </remarks>
         public BinaryLogEventFilter? EventFilter { get; init; }
 
@@ -287,7 +288,7 @@ namespace Microsoft.Build.Logging
                 reader.SkipUnknownEventParts = skipUnknown;
                 reader.RecoverableReadError += RecoverableReadError;
 
-                while (!cancellationToken.IsCancellationRequested && reader.Read(EventFilter) is { } instance)
+                while (!cancellationToken.IsCancellationRequested && reader.Read(EventFilter, cancellationToken) is { } instance)
                 {
                     Dispatch(instance);
                 }

@@ -1200,6 +1200,34 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void Replay_EventFilter_AppliesAfterDeserializationForLegacyBinlogs()
+        {
+            var metadataSeen = new List<BinaryLogEventMetadata>();
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = metadata =>
+                {
+                    metadataSeen.Add(metadata);
+                    return metadata.BuildEventContext?.ProjectContextId == SelectedProjectContextId;
+                }
+            };
+
+            var replayed = new List<BuildEventArgs>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+
+            using var stream = CreateLegacyEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            replayEventSource.Replay(binaryReader, CancellationToken.None);
+
+            metadataSeen.Select(metadata => metadata.BuildEventContext?.ProjectContextId)
+                .ShouldBe([ExcludedProjectContextId, SelectedProjectContextId]);
+            BuildMessageEventArgs message = replayed.OfType<BuildMessageEventArgs>().ShouldHaveSingleItem();
+            message.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
         public void Replay_EventFilter_ProducesReplayableCompactBinlog()
         {
             var replayEventSource = new BinaryLogReplayEventSource
@@ -1259,6 +1287,31 @@ namespace Microsoft.Build.UnitTests
             CreateExpectedLogFile();
         }
 
+        [Fact]
+        public void Replay_EventFilter_ObservesCancellationBetweenRejectedEvents()
+        {
+            using var cancellationSource = new CancellationTokenSource();
+            int filterCalls = 0;
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = _ =>
+                {
+                    filterCalls++;
+                    cancellationSource.Cancel();
+                    return false;
+                }
+            };
+            replayEventSource.AnyEventRaised += (_, _) => { };
+
+            using var stream = CreateEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            replayEventSource.Replay(binaryReader, cancellationSource.Token);
+
+            filterCalls.ShouldBe(1);
+
+            CreateExpectedLogFile();
+        }
+
         private const int SelectedProjectContextId = 101;
         private const int ExcludedProjectContextId = 202;
 
@@ -1308,6 +1361,46 @@ namespace Microsoft.Build.UnitTests
             stream.WriteByte((byte)BinaryLogRecordKind.EndOfFile);
             stream.Position = 0;
             return stream;
+        }
+
+        private static Stream CreateLegacyEventFilterTestStream()
+        {
+            using var framedStream = new MemoryStream();
+            using (var framedWriter = new BinaryWriter(framedStream, Encoding.UTF8, leaveOpen: true))
+            {
+                var writer = new BuildEventArgsWriter(framedWriter);
+                writer.Write(new BuildMessageEventArgs(null, null, null, MessageImportance.Normal)
+                {
+                    BuildEventContext = new BuildEventContext(1, 1, 1, 1, ExcludedProjectContextId, 11, 111),
+                });
+                writer.Write(new BuildMessageEventArgs(null, null, null, MessageImportance.Normal)
+                {
+                    BuildEventContext = new BuildEventContext(1, 1, 2, 2, SelectedProjectContextId, 22, 222),
+                });
+                framedWriter.Flush();
+            }
+
+            framedStream.Position = 0;
+            var legacyStream = new MemoryStream();
+            using (var framedReader = new BinaryReader(framedStream, Encoding.UTF8, leaveOpen: true))
+            using (var legacyWriter = new BinaryWriter(legacyStream, Encoding.UTF8, leaveOpen: true))
+            {
+                legacyWriter.Write(BinaryLogger.ForwardCompatibilityMinimalVersion - 1);
+
+                while (framedStream.Position < framedStream.Length)
+                {
+                    int recordKind = framedReader.Read7BitEncodedInt();
+                    int recordLength = framedReader.Read7BitEncodedInt();
+                    legacyWriter.Write7BitEncodedInt(recordKind);
+                    legacyWriter.Write(framedReader.ReadBytes(recordLength));
+                }
+
+                legacyWriter.Write7BitEncodedInt((int)BinaryLogRecordKind.EndOfFile);
+                legacyWriter.Flush();
+            }
+
+            legacyStream.Position = 0;
+            return legacyStream;
         }
 
         #endregion

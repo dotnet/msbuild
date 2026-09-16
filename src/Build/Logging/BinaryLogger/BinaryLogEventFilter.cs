@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Runtime.Serialization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -45,7 +46,8 @@ public readonly struct BinaryLogEventMetadata
 /// <returns><see langword="true"/> to keep the event; <see langword="false"/> to skip it.</returns>
 /// <remarks>
 /// Returning <see langword="false"/> skips the event. For length-framed binlogs the type-specific
-/// payload is skipped without being deserialized. Auxiliary string, name/value-list and
+/// payload is skipped without being deserialized, except for <see cref="TargetSkippedEventArgs"/>,
+/// whose original build context is part of that payload. Auxiliary string, name/value-list and
 /// embedded-content records are still read so retained events can be decoded correctly.
 ///
 /// The filter is responsible for retaining a structurally consistent set of events. For example,
@@ -62,6 +64,7 @@ public delegate bool BinaryLogEventFilter(BinaryLogEventMetadata metadata);
 /// log, so filter failures abort the replay instead of being reported as recoverable read errors.
 /// The exception thrown by the filter is available as <see cref="Exception.InnerException"/>.
 /// </remarks>
+[Serializable]
 public sealed class BinaryLogEventFilterException : Exception
 {
     /// <summary>
@@ -70,6 +73,14 @@ public sealed class BinaryLogEventFilterException : Exception
     /// <param name="innerException">The exception thrown by the filter callback.</param>
     public BinaryLogEventFilterException(Exception innerException)
         : base(ResourceUtilities.GetResourceString("Binlog_EventFilterThrew"), innerException)
+    {
+    }
+
+#if NET8_0_OR_GREATER
+    [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
+    private BinaryLogEventFilterException(SerializationInfo info, StreamingContext context)
+        : base(info, context)
     {
     }
 }
