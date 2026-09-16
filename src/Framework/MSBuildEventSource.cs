@@ -17,10 +17,10 @@ namespace Microsoft.Build.Eventing
         public static class Keywords
         {
             /// <summary>
-            /// Keyword applied to all MSBuild events.
+            /// Keyword applied to general MSBuild tracing events.
             /// </summary>
             /// <remarks>
-            /// Literally every event should define this.
+            /// Dedicated opt-in event families may use their own keyword instead.
             /// </remarks>
             public const EventKeywords All = (EventKeywords)0x1;
 
@@ -33,6 +33,11 @@ namespace Microsoft.Build.Eventing
             /// <see href="https://github.com/dotnet/msbuild/pull/5861">text perf log</see>.
             /// </remarks>
             public const EventKeywords PerformanceLog = (EventKeywords)0x2;
+
+            /// <summary>
+            /// Keyword for opt-in project evaluation duration measurements.
+            /// </summary>
+            public const EventKeywords EvaluationMeasurements = (EventKeywords)0x4;
         }
 
         /// <summary>
@@ -829,6 +834,36 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(112, taskName, succeeded);
         }
+        #endregion
+
+        #region Evaluation measurement events
+
+        /// <summary>
+        /// Records one completed project evaluator invocation.
+        /// </summary>
+        /// <param name="durationSeconds">Elapsed wall-clock time in seconds, or NaN if measurement was enabled after evaluation began.</param>
+        /// <param name="stage">The requested evaluation stage: properties, item_definitions, items, using_tasks, or full.</param>
+        /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
+        /// <param name="succeeded">Whether evaluation completed without an error.</param>
+        [Event(113, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
+        public void ProjectEvaluationCompleted(double durationSeconds, string stage, string origin, bool succeeded)
+        {
+            WriteEvent(113, durationSeconds, stage, origin, succeeded);
+        }
+
+        /// <summary>
+        /// Records one completed project evaluation pass.
+        /// </summary>
+        /// <param name="durationSeconds">Elapsed wall-clock time in seconds.</param>
+        /// <param name="stage">The requested evaluation stage: properties, item_definitions, items, using_tasks, or full.</param>
+        /// <param name="pass">The completed pass: initial_properties, properties, item_definitions, items, using_tasks, or targets.</param>
+        /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
+        [Event(114, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
+        public void ProjectEvaluationPassCompleted(double durationSeconds, string stage, string pass, string origin)
+        {
+            WriteEvent(114, durationSeconds, stage, pass, origin);
+        }
+
         #endregion
     }
 }
