@@ -2394,6 +2394,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskHostParameters: taskHostParameters,
                 taskType: _host._UNITTESTONLY_TaskFactoryWrapper.TaskFactoryLoadedType,
                 allowNodeReuse: false,
+                forwardConsoleOutput: false,
                 projectFile: "proj.proj",
 #if FEATURE_APPDOMAIN
                 appDomainSetup: null,
