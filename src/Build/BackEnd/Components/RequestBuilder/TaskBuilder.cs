@@ -815,8 +815,6 @@ namespace Microsoft.Build.BackEnd
                 TaskResultCacheSession cacheSession = null;
                 IReadOnlyList<TaskResultCacheEvent> cachedEvents = null;
                 TaskResultCacheEventCollector eventCollector = null;
-                TaskResultCacheStatisticsRequest cacheStatistics = null;
-                long cacheRequestStartTimestamp = 0;
 
                 if (_taskNode.Outputs.Count == 0 &&
                     taskExecutionHost.TaskInstance is not TaskHostTask &&
@@ -829,18 +827,16 @@ namespace Microsoft.Build.BackEnd
                         project.GetPropertyValue(TaskResultCacheSession.CacheEnabledPropertyName));
                     if (cacheDirectory is not null)
                     {
-                        _taskResultCacheStatistics ??=
-                            (TaskResultCacheStatistics)_componentHost.GetComponent(BuildComponentType.TaskResultCacheStatistics);
                         _taskResultCacheFileDigestCache ??=
                             (TaskResultCacheFileDigestCache)_componentHost.GetComponent(BuildComponentType.TaskResultCacheFileDigestCache);
-                        cacheStatistics = _taskResultCacheStatistics.BeginRequest();
+                        _taskResultCacheStatistics ??=
+                            (TaskResultCacheStatistics)_componentHost.GetComponent(BuildComponentType.TaskResultCacheStatistics);
 
                         if (!IsTaskResultCacheInvocationEligible(
                                 taskExecutionHost.TaskLoadedType,
                                 _taskNode.ParametersForBuild.Keys,
                                 out string cacheReason))
                         {
-                            cacheStatistics?.RecordIneligible();
                             taskLoggingContext.LogComment(
                                 MessageImportance.Low,
                                 "TaskResultCacheFailure",
@@ -849,7 +845,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            cacheRequestStartTimestamp = Stopwatch.GetTimestamp();
+                            long cacheRequestStartTimestamp = Stopwatch.GetTimestamp();
                             TaskResultCacheOpenResponse cacheOpenResponse =
                                 await TaskResultCacheSession.TryOpenAsync(
                                     taskExecutionHost.TaskInstance,
@@ -860,6 +856,9 @@ namespace Microsoft.Build.BackEnd
                                     _taskResultCacheFileDigestCache,
                                     _cancellationToken);
                             cacheOpenResult = cacheOpenResponse.Result;
+                            _taskResultCacheStatistics.Record(
+                                cacheOpenResult,
+                                Stopwatch.GetTimestamp() - cacheRequestStartTimestamp);
                             cacheSession = cacheOpenResponse.Session;
                             cachedEvents = cacheOpenResponse.Events;
                             cacheReason = cacheOpenResponse.Reason;
@@ -867,7 +866,6 @@ namespace Microsoft.Build.BackEnd
                             switch (cacheOpenResult)
                             {
                                 case TaskResultCacheOpenResult.Hit:
-                                    cacheStatistics?.RecordHit();
                                     taskLoggingContext.LogComment(
                                         MessageImportance.Low,
                                         "TaskResultCacheHit",
@@ -876,10 +874,8 @@ namespace Microsoft.Build.BackEnd
                                     break;
 
                                 case TaskResultCacheOpenResult.Miss:
-                                    cacheStatistics?.RecordMiss();
                                     if (!String.IsNullOrEmpty(cacheReason))
                                     {
-                                        cacheStatistics?.RecordError();
                                         taskLoggingContext.LogComment(
                                             MessageImportance.Low,
                                             "TaskResultCacheFailure",
@@ -896,7 +892,6 @@ namespace Microsoft.Build.BackEnd
                                     break;
 
                                 case TaskResultCacheOpenResult.Ineligible:
-                                    cacheStatistics?.RecordIneligible();
                                     taskLoggingContext.LogComment(
                                         MessageImportance.Low,
                                         "TaskResultCacheFailure",
@@ -905,7 +900,6 @@ namespace Microsoft.Build.BackEnd
                                     break;
 
                                 case TaskResultCacheOpenResult.Unavailable:
-                                    cacheStatistics?.RecordError();
                                     taskLoggingContext.LogComment(
                                         MessageImportance.Low,
                                         "TaskResultCacheFailure",
@@ -1181,7 +1175,6 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!eventCollector.IsSupported)
                     {
-                        cacheStatistics?.RecordStoreError();
                         taskLoggingContext.LogComment(
                             MessageImportance.Low,
                             "TaskResultCacheFailure",
@@ -1194,30 +1187,12 @@ namespace Microsoft.Build.BackEnd
                             await cacheSession.TryStoreAsync(eventCollector.Events, _cancellationToken);
                         if (!storeResponse.Success)
                         {
-                            cacheStatistics?.RecordStoreError();
                             taskLoggingContext.LogComment(
                                 MessageImportance.Low,
                                 "TaskResultCacheFailure",
                                 _taskNode.Name,
                                 storeResponse.Reason);
                         }
-                        else
-                        {
-                            cacheStatistics?.RecordStore();
-                        }
-                    }
-                }
-
-                if (cacheRequestStartTimestamp != 0)
-                {
-                    long elapsedStopwatchTicks = Stopwatch.GetTimestamp() - cacheRequestStartTimestamp;
-                    if (cacheOpenResult == TaskResultCacheOpenResult.Hit)
-                    {
-                        cacheStatistics?.RecordHitDuration(elapsedStopwatchTicks);
-                    }
-                    else if (cacheOpenResult == TaskResultCacheOpenResult.Miss)
-                    {
-                        cacheStatistics?.RecordMissDuration(elapsedStopwatchTicks);
                     }
                 }
 

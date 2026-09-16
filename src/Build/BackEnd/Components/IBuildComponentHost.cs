@@ -159,7 +159,7 @@ namespace Microsoft.Build.BackEnd
         TaskResultCacheFileDigestCache,
 
         /// <summary>
-        /// Cumulative declared-I/O task result cache statistics.
+        /// Per-build declared-I/O task result cache statistics.
         /// </summary>
         TaskResultCacheStatistics,
     }

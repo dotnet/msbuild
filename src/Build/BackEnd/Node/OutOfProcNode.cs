@@ -527,6 +527,10 @@ namespace Microsoft.Build.Execution
                 // Shut down logging, which will cause all queued logging messages to be sent.
                 if (_loggingContext != null && _loggingService != null)
                 {
+                    ((TaskResultCacheStatistics)_componentFactories.GetComponent(
+                        BuildComponentType.TaskResultCacheStatistics)).LogAndReset(
+                            _loggingContext.LoggingService,
+                            _loggingContext.BuildEventContext);
                     _loggingContext.LogBuildFinished(true);
                     ((IBuildComponent)_loggingService).ShutdownComponent();
                 }
@@ -544,13 +548,6 @@ namespace Microsoft.Build.Execution
 
                 if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
                 {
-                    TaskResultCacheStatisticsSnapshot cacheStatistics =
-                        TaskResultCacheStatistics.GetAndResetSnapshot();
-                    if (!cacheStatistics.IsEmpty)
-                    {
-                        _nodeEndpoint.SendData(new TaskResultCacheStatisticsPacket(cacheStatistics));
-                    }
-
                     // Notify the BuildManager that we are done.
                     _nodeEndpoint.SendData(new NodeShutdown(_shutdownReason == NodeEngineShutdownReason.Error ? NodeShutdownReason.Error : NodeShutdownReason.Requested, exception));
 
@@ -575,6 +572,7 @@ namespace Microsoft.Build.Execution
         private void CleanupCaches()
         {
             _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheFileDigestCache);
+            _componentFactories.ShutdownComponent(BuildComponentType.TaskResultCacheStatistics);
 
             if (_componentFactories.GetComponent(BuildComponentType.ConfigCache) is IConfigCache configCache)
             {

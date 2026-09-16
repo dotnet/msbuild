@@ -12,7 +12,6 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
-using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
@@ -142,8 +141,6 @@ namespace Microsoft.Build.Server
         /// </summary>
         private readonly bool _shutdownServerAfterBuild;
 
-        private readonly bool _launchServerIfMissing;
-
         /// <summary>
         /// Public constructor with parameters.
         /// </summary>
@@ -191,8 +188,6 @@ namespace Microsoft.Build.Server
             _msbuildLocation = msbuildLocation;
             _multiThreaded = multiThreaded;
             _shutdownServerAfterBuild = shutdownServerAfterBuild;
-            _launchServerIfMissing =
-                !TaskResultCacheStatistics.IsStatisticsCommand(commandLine, out _);
             _serverInstanceId = shutdownServerAfterBuild ? Guid.NewGuid().ToString("N") : null;
 
             // Client <-> Server communication stream
@@ -243,12 +238,6 @@ namespace Microsoft.Build.Server
                 }
                 if (!serverIsAlreadyRunning)
                 {
-                    if (!_launchServerIfMissing)
-                    {
-                        _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
-                        return _exitResult;
-                    }
-
                     CommunicationsUtilities.Trace("Server was not running. Starting server now.");
                     if (!TryLaunchServer())
                     {

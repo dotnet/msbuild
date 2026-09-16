@@ -103,12 +103,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DeclaredIOResultCacheRestoresOutputsAndReplaysWarnings()
         {
-            TaskResultCacheStatistics.Reset();
             using TestEnvironment env = TestEnvironment.Create(_testOutput);
             TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
             string inputPath = Path.Combine(projectFolder.Path, "input.txt");
             string outputPath = Path.Combine(projectFolder.Path, "output.txt");
-            string cachePath = Path.Combine(projectFolder.Path, "cache");
             string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
             File.WriteAllText(inputPath, "first");
             File.WriteAllText(
@@ -142,6 +140,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             firstLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("first!");
             firstLogger.FullLog.ShouldContain("Task result cache miss");
+            firstLogger.FullLog.ShouldContain("Task result cache statistics: hits=0, misses=1");
 
             File.Delete(outputPath);
 
@@ -150,6 +149,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             secondLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("first!");
             secondLogger.FullLog.ShouldContain("Task result cache hit");
+            secondLogger.FullLog.ShouldContain("Task result cache statistics: hits=1, misses=0");
 
             File.WriteAllText(
                 projectPath,
@@ -173,23 +173,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             thirdLogger.WarningCount.ShouldBe(1);
             File.ReadAllText(outputPath).ShouldBe("second?");
             thirdLogger.FullLog.ShouldContain("Task result cache miss");
-
-            TaskResultCacheStatisticsSnapshot statistics =
-                TaskResultCacheStatistics.GetSnapshot();
-            statistics.Requests.ShouldBe(4);
-            statistics.CacheRequests.ShouldBe(4);
-            statistics.Hits.ShouldBe(1);
-            statistics.Misses.ShouldBe(3);
-            statistics.Ineligible.ShouldBe(0);
-            statistics.Errors.ShouldBe(0);
-            statistics.Stores.ShouldBe(3);
-            statistics.StoreErrors.ShouldBe(0);
-            statistics.HitDurationTicks.ShouldBeGreaterThan(0);
-            statistics.MissDurationTicks.ShouldBeGreaterThan(0);
-            statistics.AverageHitTime.ShouldBeGreaterThan(TimeSpan.Zero);
-            statistics.AverageMissTime.ShouldBeGreaterThan(TimeSpan.Zero);
-            statistics.HitRate.ShouldBe(0.25);
-            File.Exists(Path.Combine(cachePath, "statistics.txt")).ShouldBeFalse();
         }
 
         [Theory]
@@ -212,53 +195,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             TaskResultCacheSession.ResolveCacheDirectory("", enabled)
                 .ShouldBe(TaskResultCacheSession.GetDefaultCacheDirectory());
-        }
-
-        [Theory]
-        [InlineData("-taskCacheStats", false)]
-        [InlineData("/TASKCACHESTATS", false)]
-        [InlineData("--resetTaskCacheStats", true)]
-        public void TaskResultCacheStatisticsCommandsAreStandalone(string argument, bool expectedReset)
-        {
-            TaskResultCacheStatistics.IsStatisticsCommand(
-                ["MSBuild.exe", argument],
-                out bool reset).ShouldBeTrue();
-            reset.ShouldBe(expectedReset);
-
-            TaskResultCacheStatistics.IsStatisticsCommand(
-                ["MSBuild.exe", argument, "project.proj"],
-                out _).ShouldBeFalse();
-        }
-
-        [Fact]
-        public void TaskResultCacheStatisticsPacketRoundTrips()
-        {
-            var snapshot = new TaskResultCacheStatisticsSnapshot(
-                requests: 9,
-                hits: 4,
-                misses: 3,
-                ineligible: 2,
-                errors: 1,
-                stores: 3,
-                storeErrors: 1,
-                hitDurationTicks: 40,
-                missDurationTicks: 90);
-            var packet = new TaskResultCacheStatisticsPacket(snapshot);
-
-            packet.Translate(TranslationHelpers.GetWriteTranslator());
-            TaskResultCacheStatisticsPacket roundTripped = (TaskResultCacheStatisticsPacket)
-                TaskResultCacheStatisticsPacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            roundTripped.Type.ShouldBe(NodePacketType.TaskResultCacheStatistics);
-            roundTripped.Snapshot.Requests.ShouldBe(9);
-            roundTripped.Snapshot.Hits.ShouldBe(4);
-            roundTripped.Snapshot.Misses.ShouldBe(3);
-            roundTripped.Snapshot.Ineligible.ShouldBe(2);
-            roundTripped.Snapshot.Errors.ShouldBe(1);
-            roundTripped.Snapshot.Stores.ShouldBe(3);
-            roundTripped.Snapshot.StoreErrors.ShouldBe(1);
-            roundTripped.Snapshot.HitDurationTicks.ShouldBe(40);
-            roundTripped.Snapshot.MissDurationTicks.ShouldBe(90);
         }
 
         [Fact]
@@ -1523,6 +1459,8 @@ namespace ClassLibrary2
 
             private TaskResultCacheFileDigestCache _taskResultCacheFileDigestCache;
 
+            private TaskResultCacheStatistics _taskResultCacheStatistics;
+
             /// <summary>
             /// The request builder
             /// </summary>
@@ -1566,6 +1504,9 @@ namespace ClassLibrary2
 
                 _taskResultCacheFileDigestCache = new TaskResultCacheFileDigestCache();
                 _taskResultCacheFileDigestCache.InitializeComponent(this);
+
+                _taskResultCacheStatistics = new TaskResultCacheStatistics();
+                _taskResultCacheStatistics.InitializeComponent(this);
 
                 _requestBuilder = new RequestBuilder();
                 ((IBuildComponent)_requestBuilder).InitializeComponent(this);
@@ -1634,6 +1575,7 @@ namespace ClassLibrary2
                     BuildComponentType.LoggingService => (IBuildComponent)_loggingService,
                     BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                     BuildComponentType.TaskResultCacheFileDigestCache => _taskResultCacheFileDigestCache,
+                    BuildComponentType.TaskResultCacheStatistics => _taskResultCacheStatistics,
                     BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                     BuildComponentType.TargetBuilder => (IBuildComponent)_targetBuilder,
                     BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,

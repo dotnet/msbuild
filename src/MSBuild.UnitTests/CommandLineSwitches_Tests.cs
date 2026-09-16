@@ -127,21 +127,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("taskcachestats", "TaskCacheStats")]
-        [InlineData("TASKCACHESTATS", "TaskCacheStats")]
-        [InlineData("resettaskcachestats", "ResetTaskCacheStats")]
-        [InlineData("ResetTaskCacheStats", "ResetTaskCacheStats")]
-        public void TaskCacheStatisticsSwitchIdentificationTests(string switchName, string expected)
-        {
-            CommandLineSwitches.IsParameterlessSwitch(
-                switchName,
-                out CommandLineSwitches.ParameterlessSwitch actual,
-                out string duplicateSwitchErrorMessage).ShouldBeTrue();
-            actual.ToString().ShouldBe(expected);
-            duplicateSwitchErrorMessage.ShouldBeNull();
-        }
-
-        [Theory]
         [InlineData("fileLogger")]
         [InlineData("FILELOGGER")]
         [InlineData("FileLogger")]

@@ -50,31 +50,6 @@ namespace Microsoft.Build.CommandLine
                 cancellationToken);
         }
 
-        internal static MSBuildApp.ExitType ExecuteTaskCacheStatisticsCommand(
-            bool reset,
-            CancellationToken cancellationToken)
-        {
-            string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            var client = new MSBuildClient(
-                [
-                    msbuildLocation,
-                    reset ? "-resetTaskCacheStats" : "-taskCacheStats",
-                ],
-                msbuildLocation,
-                multiThreaded: false,
-                shutdownServerAfterBuild: false);
-            MSBuildClientExitResult exitResult = client.Execute(cancellationToken);
-
-            if (exitResult.MSBuildClientExitType == MSBuildClientExitType.Success &&
-                Enum.TryParse(exitResult.MSBuildAppExitTypeString, out MSBuildApp.ExitType exitType))
-            {
-                return exitType;
-            }
-
-            Console.Error.WriteLine(ResourceUtilities.GetResourceString("TaskCacheStatisticsServerUnavailable"));
-            return MSBuildApp.ExitType.MSBuildClientFailure;
-        }
-
         /// <summary>
         /// This is the entry point for the MSBuild client.
         /// </summary>
