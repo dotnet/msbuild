@@ -34,10 +34,7 @@ namespace Microsoft.Build.Logging
         private bool _skipUnknownEvents;
         private bool _skipUnknownEventParts;
 
-        /// <summary>
-        /// Common fields already read by <see cref="Read(BinaryLogEventFilter)"/> in order to evaluate the
-        /// event filter, handed over to the type specific deserialization instead of being read twice.
-        /// </summary>
+        // Reuse the common fields read for filtering during deserialization.
         private BuildEventArgsFields? _prefetchedFields;
 
         /// <summary>
@@ -219,22 +216,12 @@ namespace Microsoft.Build.Logging
         public BuildEventArgs? Read() => Read(eventFilter: null);
 
         /// <summary>
-        /// Reads the next log record from the <see cref="BinaryReader"/>, skipping the records rejected
-        /// by <paramref name="eventFilter"/>.
+        /// Reads the next event accepted by <paramref name="eventFilter"/>.
         /// </summary>
-        /// <param name="eventFilter">
-        /// An optional filter deciding which events are deserialized and returned. For length-framed
-        /// binlogs rejected events skip their type-specific payload without deserializing it, except
-        /// for <see cref="TargetSkippedEventArgs"/>, whose original build context is in that payload.
-        /// </param>
-        /// <returns>
-        /// The next accepted <see cref="BuildEventArgs"/>.
-        /// If there are no more records, returns <see langword="null"/>.
-        /// </returns>
+        /// <param name="eventFilter">The event filter, or <see langword="null"/> to accept all events.</param>
+        /// <returns>The next accepted event, or <see langword="null"/> at end of stream.</returns>
         /// <exception cref="BinaryLogEventFilterException">
-        /// The filter callback threw an exception. The wrapper contains the original exception,
-        /// the metadata passed to the filter, the zero-based record number, and the log's file format version.
-        /// This failure is not reported through <see cref="RecoverableReadError"/>.
+        /// The filter callback threw.
         /// </exception>
         public BuildEventArgs? Read(BinaryLogEventFilter? eventFilter) => Read(eventFilter, CancellationToken.None);
 
@@ -262,9 +249,7 @@ namespace Microsoft.Build.Logging
                 bool filteredOut = false;
                 try
                 {
-                    // Events that cannot be judged from the common fields alone (legacy binlogs that are
-                    // not length-framed, and TargetSkipped whose original context lives in the
-                    // type-specific payload) have to be deserialized before the filter can run.
+                    // Legacy records cannot be skipped; TargetSkipped stores its original context in the payload.
                     BinaryLogEventFilter? filterBeforeDeserialization = null;
                     BinaryLogEventFilter? filterAfterDeserialization = null;
                     if (eventFilter is not null)
@@ -287,8 +272,6 @@ namespace Microsoft.Build.Logging
 
                         if (ApplyEventFilter(filterBeforeDeserialization, metadata))
                         {
-                            // The type specific deserialization starts by reading the very same common
-                            // fields - hand over the ones we've just read instead of rereading them.
                             _prefetchedFields = commonFields;
                         }
                         else
@@ -394,8 +377,7 @@ namespace Microsoft.Build.Logging
             }
             catch (Exception ex)
             {
-                // Wrap so that callers can tell a failing filter callback apart from a problem with
-                // the log being read - the latter can be recoverable, the former never is.
+                // Keep callback failures out of corrupt-record recovery.
                 throw new BinaryLogEventFilterException(metadata, _recordNumber, _fileFormatVersion, ex);
             }
         }
@@ -1582,9 +1564,7 @@ namespace Microsoft.Build.Logging
                 result.Arguments = arguments;
             }
 
-            // Note: for _fileFormatVersion >= 13 the importance is driven by the flags, not by
-            // readImportance - which is what makes prefetching the common fields (see _prefetchedFields)
-            // safe: it is only ever done for length-framed logs, which are always version 18 or higher.
+            // Prefetching uses v18+ flags for importance; readImportance only affects pre-v13 logs.
             if ((_fileFormatVersion < 13 && readImportance) || (_fileFormatVersion >= 13 && (flags & BuildEventArgsFieldFlags.Importance) != 0))
             {
                 result.Importance = (MessageImportance)ReadInt32();

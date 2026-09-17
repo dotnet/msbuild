@@ -1159,7 +1159,6 @@ namespace Microsoft.Build.UnitTests
             using var binaryReader = new BinaryReader(stream);
             replayEventSource.Replay(binaryReader, CancellationToken.None);
 
-            // The rejected record is still offered to the filter, with its common metadata already read.
             metadataSeen.ShouldContain(metadata =>
                 metadata.RecordKind == BinaryLogRecordKind.Warning &&
                 metadata.BuildEventContext != null &&
@@ -1179,8 +1178,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Replay_EventFilter_AppliesToTargetSkippedAfterDeserialization()
         {
-            // TargetSkipped carries the context the filter cares about in its type specific payload,
-            // so it can only be judged once deserialized.
             var replayEventSource = new BinaryLogReplayEventSource
             {
                 EventFilter = metadata =>
@@ -1454,11 +1451,7 @@ namespace Microsoft.Build.UnitTests
         private const int SelectedProjectContextId = 101;
         private const int ExcludedProjectContextId = 202;
 
-        /// <summary>
-        /// Creates an uncompressed, length framed binlog stream holding a build started event, a message and
-        /// a warning in distinct project contexts, a target skipped event referring back to the selected
-        /// context, and a build finished event.
-        /// </summary>
+        // Uncompressed, length-framed events with distinct project and original target contexts.
         private static Stream CreateEventFilterTestStream()
         {
             var selectedContext = new BuildEventContext(1, 1, 1, 1, SelectedProjectContextId, 11, 111);

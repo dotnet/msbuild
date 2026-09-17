@@ -90,19 +90,11 @@ namespace Microsoft.Build.Logging
         public bool AllowForwardCompatibility { private get; init; }
 
         /// <summary>
-        /// Gets or sets a filter deciding which build events are deserialized and dispatched.
+        /// Gets or sets the filter for replayed build events.
         /// </summary>
         /// <remarks>
-        /// For length-framed binlogs, rejected events skip their type-specific payload without being
-        /// deserialized, except for <see cref="TargetSkippedEventArgs"/>, whose original build context
-        /// is in that payload. Auxiliary records are always read so retained events can resolve their
-        /// string and name/value-list references. The filter is responsible for retaining a
-        /// structurally consistent event set. Legacy formats are filtered after deserialization.
-        /// Setting a filter forces structured replay instead of raw record passthrough.
-        /// A <see langword="null"/> filter preserves the existing unfiltered behavior.
-        /// If the callback throws, replay stops with a <see cref="BinaryLogEventFilterException"/>
-        /// containing the original exception and the offending record's information; it is not
-        /// reported through <see cref="RecoverableReadError"/>.
+        /// A <see langword="null"/> filter retains all events. A filter forces structured replay;
+        /// see <see cref="BinaryLogEventFilter"/> for deserialization and event-consistency requirements.
         /// </remarks>
         public BinaryLogEventFilter? EventFilter { get; init; }
 
@@ -115,8 +107,7 @@ namespace Microsoft.Build.Logging
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
         /// <exception cref="BinaryLogEventFilterException">
-        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
-        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// The <see cref="EventFilter"/> callback threw.
         /// </exception>
         public void Replay(string sourceFilePath)
         {
@@ -130,8 +121,7 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
         /// <exception cref="BinaryLogEventFilterException">
-        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
-        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// The <see cref="EventFilter"/> callback threw.
         /// </exception>
         public void Replay(Stream sourceFileStream, CancellationToken cancellationToken)
         {
@@ -231,8 +221,7 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
         /// <exception cref="BinaryLogEventFilterException">
-        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
-        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// The <see cref="EventFilter"/> callback threw.
         /// </exception>
         public void Replay(string sourceFilePath, CancellationToken cancellationToken)
         {
@@ -247,8 +236,7 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
         /// <exception cref="BinaryLogEventFilterException">
-        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
-        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// The <see cref="EventFilter"/> callback threw.
         /// </exception>
         public void Replay(BinaryReader binaryReader, CancellationToken cancellationToken)
             => Replay(binaryReader, false, cancellationToken);
@@ -261,8 +249,7 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
         /// <exception cref="BinaryLogEventFilterException">
-        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
-        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// The <see cref="EventFilter"/> callback threw.
         /// </exception>
         public void Replay(BinaryReader binaryReader, bool closeInput, CancellationToken cancellationToken)
         {
@@ -276,30 +263,15 @@ namespace Microsoft.Build.Logging
         /// <param name="reader">The build events reader - caller is responsible for disposing.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         /// <remarks>
-        /// <para>
-        /// Set <see cref="EventFilter"/> before replay to dispatch only accepted events. A filter
-        /// forces structured reading. In length-framed logs (version 18 or later), rejected events
-        /// skip their type-specific payload without deserialization, except for
-        /// <see cref="TargetSkippedEventArgs"/>, whose original context is in that payload.
-        /// Legacy logs are filtered after deserialization. Auxiliary records are still read.
-        /// </para>
-        /// <para>
-        /// The filter is responsible for retaining a structurally consistent event set, including
-        /// matching start and finish events when required by downstream consumers.
-        /// Cancellation is observed between rejected records as well as accepted records;
-        /// it cannot interrupt a running filter callback.
-        /// </para>
-        /// <para>
-        /// Filter exceptions stop replay, even with <see cref="AllowForwardCompatibility"/>
-        /// enabled, and are not reported through <see cref="RecoverableReadError"/>.
-        /// Inspect <see cref="Exception.InnerException"/> on the resulting
-        /// <see cref="BinaryLogEventFilterException"/> for the original failure and stack trace,
-        /// and its record properties for the event being filtered.
-        /// </para>
+        /// Only events accepted by <see cref="EventFilter"/> are dispatched; see
+        /// <see cref="BinaryLogEventFilter"/> for filtering semantics.
+        /// Cancellation is checked between records, but cannot interrupt a running callback.
+        /// Filter failures abort replay even with <see cref="AllowForwardCompatibility"/> enabled;
+        /// they are not reported through <see cref="RecoverableReadError"/>.
+        /// <see cref="BinaryLogEventFilterException"/> preserves the original failure and record diagnostics.
         /// </remarks>
         /// <exception cref="BinaryLogEventFilterException">
-        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
-        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// The <see cref="EventFilter"/> callback threw.
         /// </exception>
         public void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken)
         {
@@ -310,8 +282,7 @@ namespace Microsoft.Build.Logging
                 : null;
             bool supportsForwardCompatibility = reader.FileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion;
 
-            // Raw record passthrough would bypass the filter altogether, so a set filter forces
-            // structured reading - the records have to be deserialized to be filtered and rewritten.
+            // Raw passthrough bypasses filtering.
             bool structuredReadingOnly = HasStructuredEventsSubscribers || !supportsForwardCompatibility || EventFilter is not null;
 
             // Allow any possible deferred subscriptions to be registered

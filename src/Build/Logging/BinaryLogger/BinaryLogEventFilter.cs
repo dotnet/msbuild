@@ -9,7 +9,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Logging;
 
 /// <summary>
-/// Metadata available before a length-framed binary log event is fully deserialized.
+/// Metadata passed to a binary log event filter.
 /// </summary>
 public readonly struct BinaryLogEventMetadata
 {
@@ -29,12 +29,12 @@ public readonly struct BinaryLogEventMetadata
     public BinaryLogRecordKind RecordKind { get; }
 
     /// <summary>
-    /// Gets the event's build context, or <see langword="null"/> when the event has no context.
+    /// Gets the event's build context, or <see langword="null"/> if absent.
     /// </summary>
     public BuildEventContext? BuildEventContext { get; }
 
     /// <summary>
-    /// Gets the original context carried by a target-skipped event, or <see langword="null"/>.
+    /// Gets the original context of a target-skipped event, or <see langword="null"/>.
     /// </summary>
     public BuildEventContext? OriginalBuildEventContext { get; }
 }
@@ -42,17 +42,12 @@ public readonly struct BinaryLogEventMetadata
 /// <summary>
 /// Decides whether a binary log event should be deserialized and dispatched.
 /// </summary>
-/// <param name="metadata">The metadata of the event about to be read.</param>
+/// <param name="metadata">The event metadata.</param>
 /// <returns><see langword="true"/> to keep the event; <see langword="false"/> to skip it.</returns>
 /// <remarks>
-/// Returning <see langword="false"/> skips the event. For length-framed binlogs the type-specific
-/// payload is skipped without being deserialized, except for <see cref="TargetSkippedEventArgs"/>,
-/// whose original build context is part of that payload. Auxiliary string, name/value-list and
-/// embedded-content records are still read so retained events can be decoded correctly.
-///
-/// The filter is responsible for retaining a structurally consistent set of events. For example,
-/// retaining a finish event while dropping its corresponding start event can produce a log that
-/// downstream consumers cannot interpret correctly.
+/// Rejected payloads are skipped in length-framed logs (v18+). Legacy logs and
+/// <see cref="TargetSkippedEventArgs"/> require deserialization; auxiliary records are always read.
+/// Filters must preserve any event structure required by consumers, including matching start/finish events.
 /// </remarks>
 public delegate bool BinaryLogEventFilter(BinaryLogEventMetadata metadata);
 
@@ -60,17 +55,15 @@ public delegate bool BinaryLogEventFilter(BinaryLogEventMetadata metadata);
 /// Wraps an exception thrown by a <see cref="BinaryLogEventFilter"/> callback.
 /// </summary>
 /// <remarks>
-/// The wrapper distinguishes caller bugs in the filter from errors encountered while reading the
-/// log, so filter failures abort the replay instead of being reported as recoverable read errors.
-/// The exception thrown by the filter is available as <see cref="Exception.InnerException"/>.
-/// Exceptions raised by the reader also identify the record, its build contexts, and the log's
-/// file format version. These details and the original exception are preserved during serialization.
+/// Filter failures abort replay; they are not recoverable read errors.
+/// The original failure is preserved in <see cref="Exception.InnerException"/>.
+/// Serialization preserves the exception and any supplied record diagnostics.
 /// </remarks>
 [Serializable]
 public sealed class BinaryLogEventFilterException : Exception
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="BinaryLogEventFilterException"/> class.
+    /// Creates a filter failure without record diagnostics.
     /// </summary>
     /// <param name="innerException">The exception thrown by the filter callback.</param>
     public BinaryLogEventFilterException(Exception innerException)
@@ -79,12 +72,11 @@ public sealed class BinaryLogEventFilterException : Exception
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="BinaryLogEventFilterException"/> class
-    /// with information about the record being filtered.
+    /// Creates a filter failure with record diagnostics.
     /// </summary>
-    /// <param name="metadata">The metadata passed to the failing filter callback.</param>
+    /// <param name="metadata">The failing callback's event metadata.</param>
     /// <param name="recordNumber">The zero-based record number, including auxiliary records.</param>
-    /// <param name="fileFormatVersion">The file format version of the binary log being read.</param>
+    /// <param name="fileFormatVersion">The source binlog's format version.</param>
     /// <param name="innerException">The exception thrown by the filter callback.</param>
     public BinaryLogEventFilterException(
         BinaryLogEventMetadata metadata,
@@ -107,7 +99,7 @@ public sealed class BinaryLogEventFilterException : Exception
     }
 
     /// <summary>
-    /// Gets the kind of record being filtered, or <see langword="null"/> if no record information was supplied.
+    /// Gets the record kind, or <see langword="null"/> if unavailable.
     /// </summary>
     public BinaryLogRecordKind? RecordKind { get; }
 
@@ -117,20 +109,18 @@ public sealed class BinaryLogEventFilterException : Exception
     public BuildEventContext? BuildEventContext { get; }
 
     /// <summary>
-    /// Gets the original context of a target-skipped event passed to the filter,
-    /// or <see langword="null"/> if unavailable.
+    /// Gets the original target-skipped context, or <see langword="null"/> if unavailable.
     /// </summary>
     public BuildEventContext? OriginalBuildEventContext { get; }
 
     /// <summary>
     /// Gets the zero-based record number, including auxiliary and rejected records,
-    /// or <see langword="null"/> if no record information was supplied.
+    /// or <see langword="null"/> if unavailable.
     /// </summary>
     public long? RecordNumber { get; }
 
     /// <summary>
-    /// Gets the file format version of the binary log being read,
-    /// or <see langword="null"/> if no record information was supplied.
+    /// Gets the source binlog's format version, or <see langword="null"/> if unavailable.
     /// </summary>
     public int? FileFormatVersion { get; }
 
@@ -148,7 +138,7 @@ public sealed class BinaryLogEventFilterException : Exception
     }
 
     /// <summary>
-    /// Serializes the record information together with the base exception and its inner exception.
+    /// Serializes the exception and record diagnostics.
     /// </summary>
     /// <param name="info">The serialization data to populate.</param>
     /// <param name="context">The serialization context.</param>
