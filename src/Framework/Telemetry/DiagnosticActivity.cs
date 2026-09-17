@@ -21,25 +21,25 @@ namespace Microsoft.Build.Framework.Telemetry
             _activity = activity;
         }
 
-        public IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder)
+        public IActivity SetTags(IActivityTelemetryDataHolder? dataHolder)
         {
             Dictionary<string, object>? tags = dataHolder?.GetActivityProperties();
             if (tags != null)
             {
                 foreach (KeyValuePair<string, object> tag in tags)
                 {
-                    SetTag(tag.Key, tag.Value);
+                    _ = SetTag(tag.Key, tag.Value);
                 }
             }
 
             return this;
         }
 
-        public IActivity? SetTag(string key, object? value)
+        public IActivity SetTag(string key, object? value)
         {
             if (value != null)
             {
-                _activity.SetTag($"{TelemetryConstants.PropertyPrefix}{key}", value);
+                _ = _activity.SetTag($"{TelemetryConstants.PropertyPrefix}{key}", value);
             }
 
             return this;

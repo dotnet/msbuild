@@ -14,7 +14,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.Helpers;
 
 using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
@@ -69,7 +68,7 @@ namespace Microsoft.Build.Graph.UnitTests
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
             _logger.FullLog.ShouldContain("MSB4256:");
-            _logger.AllBuildEvents.Count.ShouldBe(6);
+            _logger.AllBuildEvents.Count.ShouldBe(8);
             _logger.ErrorCount.ShouldBe(1);
         }
 
@@ -565,8 +564,8 @@ namespace Microsoft.Build.Graph.UnitTests
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
-            _logger.AllBuildEvents.Count.ShouldBe(6);
-            _logger.Errors.First().Message.ShouldContain("MSB4255:");
+                        _logger.AllBuildEvents.Count.ShouldBe(8);
+                        _logger.Errors.First().Message.ShouldContain("MSB4255:");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist1");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist2");
             _logger.ErrorCount.ShouldBe(1);

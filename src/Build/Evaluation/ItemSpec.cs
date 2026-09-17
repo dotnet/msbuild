@@ -123,9 +123,9 @@ namespace Microsoft.Build.Evaluation
                         ExpanderOptions.ExpandItems,
                         includeNullEntries: false,
                         isTransformExpression: out _,
-                        itemsFromCapture: out var itemsFromCapture);
+                        entries: out var entries);
                     _referencedItems =
-                        itemsFromCapture?.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList() ?? [];
+                        entries?.Select(i => new ReferencedItem(i.Item, new ValueFragment(i.Value, ProjectDirectory))).ToList() ?? [];
 
                     return true;
                 }
@@ -262,25 +262,18 @@ namespace Microsoft.Build.Evaluation
         {
             isItemListExpression = false;
 
-            // Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
-            if (expression.Length == 0)
+            if (Expander<P, I>.TryExpandSingleItemVectorExpression(
+                    expression,
+                    ExpanderOptions.ExpandItems,
+                    elementLocation,
+                    out ExpressionShredder.ItemExpressionCapture itemVector))
             {
-                return null;
+                isItemListExpression = true;
+
+                return new ItemExpressionFragment(itemVector, expression, this, projectDirectory);
             }
 
-            var capture = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
-                expression,
-                ExpanderOptions.ExpandItems,
-                elementLocation);
-
-            if (capture == null)
-            {
-                return null;
-            }
-
-            isItemListExpression = true;
-
-            return new ItemExpressionFragment(capture.Value, expression, this, projectDirectory);
+            return null;
         }
 
         /// <summary>
@@ -395,7 +388,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (var fragment in Fragments)
             {
-                if (fragment is ValueFragment || fragment is GlobFragment)
+                if (fragment is ValueFragment or GlobFragment)
                 {
                     yield return fragment.TextFragment;
                 }
@@ -408,7 +401,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
         }
@@ -582,7 +575,21 @@ namespace Microsoft.Build.Evaluation
                 options == MatchOnMetadataOptions.CaseInsensitive || FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase :
                 StringComparer.Ordinal;
             _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
-            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>)(p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
+            if (options == MatchOnMetadataOptions.PathLike)
+            {
+                // In multithreaded (-mt) mode each project gets its own thread-local working directory while the
+                // process current directory is shared, so relative metadata must be rooted against the former or it
+                // resolves under an unrelated project and comparisons silently stop matching.
+                string baseDirectory = FileUtilities.CurrentThreadWorkingDirectory is { Length: > 0 } threadWorkingDirectory
+                    ? threadWorkingDirectory
+                    : Environment.CurrentDirectory;
+                _normalize = p => FileUtilities.NormalizePathForComparisonNoThrow(p, baseDirectory);
+            }
+            else
+            {
+                _normalize = p => p;
+            }
+
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)

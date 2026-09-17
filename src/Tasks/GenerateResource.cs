@@ -42,6 +42,12 @@ using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using Microsoft.Win32;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Com.Urlmon;
+#endif
 #endif
 
 #nullable disable
@@ -251,7 +257,9 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return (ITaskItem[])_filesWritten.ToArray(typeof(ITaskItem));
+                ITaskItem[] filesWritten = new ITaskItem[_filesWritten.Count];
+                _filesWritten.CopyTo(filesWritten);
+                return filesWritten;
             }
         }
 
@@ -617,7 +625,7 @@ namespace Microsoft.Build.Tasks
         {
             // Throw an internal error, since this method should only ever get called by other aspects of this task, not
             // anything that the user touches.
-            ErrorUtilities.VerifyThrowInternalNull(resGenCommand);
+            Assumed.NotNull(resGenCommand);
 
             // append the /useSourcePath flag if requested.
             if (UseSourcePath)
@@ -808,7 +816,7 @@ namespace Microsoft.Build.Tasks
                                        typeof(ProcessResourceFiles).FullName);
 
                                 Type processType = obj.GetType();
-                                ErrorUtilities.VerifyThrow(processType == typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
+                                Assumed.Equal(processType, typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
 
                                 process = (ProcessResourceFiles)obj;
 
@@ -931,14 +939,26 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
         private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
 
-        private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
         private const uint ZoneInternet = 3;
-        private static IInternetSecurityManager internetSecurityManager = null;
+
+#if FEATURE_WINDOWSINTEROP
+        // CLSID of the InternetSecurityManager coclass exported by urlmon.dll.
+        // Not in the Win32 metadata, so it is hard-coded here.
+        private static readonly Guid CLSID_InternetSecurityManager = new(0x7B8A2D94, 0x0AC9, 0x11D1, 0x89, 0x6C, 0x00, 0xC0, 0x4F, 0xB6, 0xBF, 0xC4);
+
+        // Lazily-activated InternetSecurityManager COM object. Stored agile so the same
+        // pointer can be reused from any thread within the build; one CoCreate per
+        // process is enough. volatile gives the double-checked lock in IsDangerous safe
+        // publication, so a second thread cannot observe the reference before the GIT
+        // cookie set in the AgileComPointer constructor is visible.
+        private static volatile AgileComPointer<IInternetSecurityManager> s_internetSecurityManager;
+        private static readonly object s_internetSecurityManagerLock = new();
+#endif
 #endif
 
         // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
         // so check to see if we should trust them before analyzing them
-        private bool IsDangerous(String filename)
+        private unsafe bool IsDangerous(String filename)
         {
 #if !FEATURE_RESXREADER_LIVEDESERIALIZATION
             return false;
@@ -950,19 +970,40 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // First check the zone, if they are not an untrusted zone, they aren't dangerous
-            if (internetSecurityManager == null)
+#if FEATURE_WINDOWSINTEROP
+            // First check the zone, if they are not an untrusted zone, they aren't dangerous.
+            // CoCreate the InternetSecurityManager once per process and reuse via the GIT;
+            // double-checked lock around lazy init keeps that allocation single-shot.
+            if (s_internetSecurityManager is null)
             {
-                Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
-                internetSecurityManager = (IInternetSecurityManager)Activator.CreateInstance(iismType);
+                lock (s_internetSecurityManagerLock)
+                {
+                    if (s_internetSecurityManager is null)
+                    {
+                        Guid clsid = CLSID_InternetSecurityManager;
+                        Guid iid = IID.Get<IInternetSecurityManager>();
+                        using ComScope<IInternetSecurityManager> scope = new();
+                        PInvoke.CoCreateInstance(&clsid, pUnkOuter: null, CLSCTX.CLSCTX_INPROC_SERVER, &iid, scope).ThrowOnFailure();
+                        s_internetSecurityManager = new AgileComPointer<IInternetSecurityManager>(scope.Pointer, takeOwnership: false);
+                    }
+                }
             }
 
-            int zone;
-            internetSecurityManager.MapUrlToZone(Path.GetFullPath(filename), out zone, 0);
+            uint zone;
+            string fullPath = Path.GetFullPath(filename);
+            using (ComScope<IInternetSecurityManager> mgr = s_internetSecurityManager.GetInterface())
+            {
+                fixed (char* pPath = fullPath)
+                {
+                    mgr.Pointer->MapUrlToZone(new PCWSTR(pPath), &zone, 0).ThrowOnFailure();
+                }
+            }
+
             if (zone < ZoneInternet)
             {
                 return false;
             }
+#endif
 
             // By default all file types that get here are considered dangerous
             bool dangerous = true;
@@ -972,46 +1013,9 @@ namespace Microsoft.Build.Tasks
                 String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // XML files are only dangerous if there are unrecognized objects in them
-                dangerous = false;
-
                 using FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using XmlTextReader reader = new XmlTextReader(stream);
-                reader.DtdProcessing = DtdProcessing.Ignore;
-                reader.XmlResolver = null;
-                try
-                {
-                    while (reader.Read())
-                    {
-                        if (reader.NodeType == XmlNodeType.Element)
-                        {
-                            string s = reader.LocalName;
-
-                            // We only want to parse data nodes,
-                            // the mimetype attribute gives the serializer
-                            // that's requested.
-                            if (reader.LocalName.Equals("data"))
-                            {
-                                if (reader["mimetype"] != null)
-                                {
-                                    dangerous = true;
-                                }
-                            }
-                            else if (reader.LocalName.Equals("metadata"))
-                            {
-                                if (reader["mimetype"] != null)
-                                {
-                                    dangerous = true;
-                                }
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    // If we hit an error while parsing assume there's a dangerous type in this file.
-                    dangerous = true;
-                }
-                stream.Close();
+                using StreamReader streamReader = new StreamReader(stream);
+                dangerous = ResourceFileContentsAreDangerous(streamReader);
             }
 
             return dangerous;
@@ -1049,9 +1053,82 @@ namespace Microsoft.Build.Tasks
 #endif // FEATURE_APPDOMAIN
 
         /// <summary>
-        /// Computes the path to ResGen.exe for use in logging and for passing to the
-        /// nested ResGen task.
+        /// Scans the contents of a <c>.resx</c>/<c>.resw</c> file and determines whether it contains any entry
+        /// that requires the file to be trusted before it is processed by <see cref="GenerateResource"/>.
         /// </summary>
+        /// <remarks>
+        /// This is the content-only portion of the Mark-of-the-Web trust check (see <c>IsDangerous</c>). It is kept
+        /// separate (and free of the zone/COM machinery) so it can be unit-tested on all target frameworks.
+        /// A resource is considered dangerous when a <c>data</c>/<c>metadata</c> element:
+        /// <list type="bullet">
+        /// <item>has a <c>mimetype</c> attribute (an arbitrary object will be deserialized), or</item>
+        /// <item>has a <c>type</c> attribute referencing <c>ResXFileRef</c> (an external linked file will be read), or</item>
+        /// <item>has any other <c>type</c> attribute - only when ChangeWave 18.9 is enabled - because resolving the
+        /// type eventually calls <c>Type.GetType</c>, which can probe for assemblies on disk.</item>
+        /// </list>
+        /// </remarks>
+        internal static bool ResourceFileContentsAreDangerous(TextReader textReader)
+        {
+            // XML files are only dangerous if there are unrecognized objects in them.
+            bool dangerous = false;
+
+            using XmlTextReader reader = new XmlTextReader(textReader);
+            reader.DtdProcessing = DtdProcessing.Ignore;
+            reader.XmlResolver = null;
+            try
+            {
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        string localName = reader.LocalName;
+
+                        // We only want to parse data nodes,
+                        // the mimetype attribute gives the serializer
+                        // that's requested.
+                        if (localName.Equals("data") || localName.Equals("metadata"))
+                        {
+                            if (reader["mimetype"] != null)
+                            {
+                                dangerous = true;
+                            }
+                            else
+                            {
+                                // ResXFileRef can reference external files
+                                string typeAttribute = reader["type"];
+                                if (typeAttribute != null)
+                                {
+                                    if (typeAttribute.IndexOf("ResXFileRef", StringComparison.Ordinal) >= 0)
+                                    {
+                                        dangerous = true;
+                                    }
+                                    else if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9))
+                                    {
+                                        // Require any typed entry on a "Mark of the web" to be unblocked by user
+                                        dangerous = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // The result is already determined; no need to keep parsing the rest of the file.
+                    if (dangerous)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+                // If we hit an error while parsing assume there's a dangerous type in this file.
+                dangerous = true;
+            }
+
+            return dangerous;
+        }
+
+
         /// <returns>True if the path is found (or it doesn't matter because we're executing in memory), false otherwise</returns>
         private bool ComputePathToResGen()
         {
@@ -1145,8 +1222,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputsToProcess">Output files to give to resgen.exe.</param>
         private bool TransformResourceFilesUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count != 0, "There should be resource files to process");
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count == outputsToProcess.Count, "The number of inputs and outputs should be equal");
+            Assumed.True(inputsToProcess.Count != 0, "There should be resource files to process");
+            Assumed.Equal(inputsToProcess.Count, outputsToProcess.Count, "The number of inputs and outputs should be equal");
 
             bool succeeded = true;
 
@@ -1266,7 +1343,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputsToProcess">Output files to give to resgen.exe.</param>
         private bool GenerateStronglyTypedResourceUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count == 1 && outputsToProcess.Count == 1, "For STR, there should only be one input and one output.");
+            Assumed.True(inputsToProcess.Count == 1 && outputsToProcess.Count == 1, "For STR, there should only be one input and one output.");
 
             ResGen resGen = CreateResGenTaskWithDefaultParameters();
 
@@ -2099,7 +2176,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            ErrorUtilities.VerifyThrow(OutputResources != null && OutputResources.Length != 0, "Should be at least one output resource");
+            Assumed.True(OutputResources != null && OutputResources.Length != 0, "Should be at least one output resource");
 
             // We only get here if there was at least one resource generation error.
             ITaskItem[] temp = new ITaskItem[OutputResources.Length - _unsuccessfullyCreatedOutFiles.Count];
@@ -2183,7 +2260,7 @@ namespace Microsoft.Build.Tasks
 
             // This method eats IO Exceptions
             _cache = ResGenDependencies.DeserializeCache(StateFile?.ItemSpec, UseSourcePath, Log);
-            ErrorUtilities.VerifyThrow(_cache != null, "We did not create a cache!");
+            Assumed.NotNull(_cache, "We did not create a cache!");
         }
 
         /// <summary>
@@ -2715,9 +2792,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     currentOutputFile = outFileOrDir;
-                    ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                        "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                        _readers.Count);
+                    Assumed.Equal(_readers.Count, 1, $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                     WriteResources(_readers[0], outFileOrDir);
                 }
 
@@ -2725,9 +2800,7 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                            "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                            _readers.Count);
+                        Assumed.Equal(_readers.Count, 1, $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                         CreateStronglyTypedResources(_readers[0], outFileOrDir, inFile, out currentOutputSourceCodeFile);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -3049,7 +3122,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void AddResourcesUsingMinimalCoreResxParsing(string filename, ReaderInfo reader)
         {
-            using (var xmlReader = new XmlTextReader(filename))
+            using (var xmlReader = new XmlTextReader(filename) { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null })
             {
                 xmlReader.WhitespaceHandling = WhitespaceHandling.None;
                 XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);

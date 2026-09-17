@@ -7,7 +7,6 @@ using System.Reflection;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -71,13 +70,9 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref typeName);
 
             var type = Type.GetType(typeName);
-            ErrorUtilities.VerifyThrow(type != null, "type cannot be null");
-            ErrorUtilities.VerifyThrow(
-                typeof(T).IsAssignableFrom(type),
-                $"{typeName} must be a {typeof(T).FullName}");
-            ErrorUtilities.VerifyThrow(
-                typeof(ITranslatable).IsAssignableFrom(type),
-                $"{typeName} must be a {nameof(ITranslatable)}");
+            Assumed.NotNull(type, "type cannot be null");
+            Assumed.True(typeof(T).IsAssignableFrom(type), $"{typeName} must be a {typeof(T).FullName}");
+            Assumed.True(typeof(ITranslatable).IsAssignableFrom(type), $"{typeName} must be a {nameof(ITranslatable)}");
 
             var parameterlessConstructor = parameterlessConstructorCache.Value.GetOrAdd(
                 type,
@@ -85,9 +80,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     ConstructorInfo constructor = null;
                     constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-                    ErrorUtilities.VerifyThrow(
-                        constructor != null,
-                        "{0} must have a private parameterless constructor", typeName);
+                    Assumed.NotNull(constructor, $"{typeName} must have a private parameterless constructor");
                     return constructor;
                 });
 

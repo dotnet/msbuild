@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -130,6 +130,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// </summary>
         /// <param name="settings">The properties used to build this bootstrapper.</param>
         /// <returns>The results of the bootstrapper generation</returns>
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "Building a bootstrapper transforms its configuration with XslCompiledTransform, which generates IL at runtime; the GenerateBootstrapper task is inherently incompatible with Native AOT.")]
         public BuildResults Build(BuildSettings settings)
         {
             _results = new BuildResults();
@@ -458,7 +460,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 foreach (string packagePath in packagePaths)
                 {
-                    if (folder.Length >= packagePath.Length && folder.Substring(0, packagePath.Length).ToLowerInvariant().CompareTo(packagePath) == 0)
+                    if (folder.Length >= packagePath.Length && folder.StartsWith(packagePath, StringComparison.OrdinalIgnoreCase))
                     {
                         string relPath = folder.Substring(packagePath.Length);
                         if (!folders.Contains(relPath))
@@ -1749,6 +1751,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return null;
         }
 
+        [RequiresDynamicCode("Transforms bootstrapper resource configuration with XslCompiledTransform, which generates IL at runtime and is not supported with Native AOT.")]
         private bool BuildResources(BuildSettings settings, ResourceUpdater resourceUpdater)
         {
             if (_cultures.Count == 0)
@@ -1948,6 +1951,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             node.Attributes.Append(attrib);
         }
 
+        [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3073: ReviewTrustedXsltUse.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3059: UseXmlReaderForXPathDocument.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3052: UseXmlResolver.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
@@ -1956,10 +1960,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             using (var reader = new XmlNodeReader(input))
             {
                 Stream s = GetEmbeddedResourceStream(CONFIG_TRANSFORM);
-                var d = new XPathDocument(s);
+                using var xsltReader = XmlReader.Create(s, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null });
+                var d = new XPathDocument(xsltReader);
                 var xslc = new XslCompiledTransform();
                 // Using the Trusted Xslt is fine as the style sheet comes from our own assembly.
-                xslc.Load(d, XsltSettings.TrustedXslt, new XmlUrlResolver());
+                xslc.Load(d, XsltSettings.TrustedXslt, null);
 
                 var xml = new XPathDocument(reader);
 

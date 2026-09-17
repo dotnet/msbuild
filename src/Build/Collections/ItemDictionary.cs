@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Evaluation;
 #if DEBUG
-using Microsoft.Build.Shared;
 #endif
 
 #nullable disable
@@ -336,7 +335,7 @@ namespace Microsoft.Build.Collections
                 {
 #if DEBUG
                     // Debug only: hot code path
-                    ErrorUtilities.VerifyThrow(String.Equals(itemType, list[i].Key, StringComparison.OrdinalIgnoreCase), "Item type mismatch");
+                    Assumed.Equal(itemType, list[i].Key, StringComparison.OrdinalIgnoreCase, "Item type mismatch");
 #endif
                 }
             }

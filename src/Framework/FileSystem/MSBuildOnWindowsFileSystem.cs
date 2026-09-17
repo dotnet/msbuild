@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -12,14 +12,16 @@ namespace Microsoft.Build.Shared.FileSystem
     /// Implementation of file system operations on windows. Combination of native and managed implementations.
     /// TODO Remove this class and replace with WindowsFileSystem. Test perf to ensure no regressions.
     /// </summary>
-    [SupportedOSPlatform("windows")]
-    internal sealed class MSBuildOnWindowsFileSystem : IFileSystem
+    [SupportedOSPlatform("windows6.1")]
+    internal sealed class MSBuildOnWindowsFileSystem : IFileSystem, IDirectFileSystemEnumeration
     {
         private static readonly MSBuildOnWindowsFileSystem Instance = new MSBuildOnWindowsFileSystem();
 
         public static MSBuildOnWindowsFileSystem Singleton() => Instance;
 
         public MSBuildOnWindowsFileSystem() { }
+
+        public bool SupportsDirectEnumeration => true;
 
         public TextReader ReadFile(string path)
         {

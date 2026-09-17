@@ -186,7 +186,7 @@ namespace Microsoft.Build.Framework
         {
             if (_borrowedBuilder == null)
             {
-                FrameworkErrorUtilities.VerifyThrow(_capacity != -1, "Reusing after dispose");
+                Assumed.NotEqual(_capacity, -1, "Reusing after dispose");
 
                 _borrowedBuilder = ReuseableStringBuilderFactory.Get(_capacity);
                 _borrowedWithCapacity = _borrowedBuilder.Capacity;
@@ -298,7 +298,7 @@ namespace Microsoft.Build.Framework
                 int balance = Interlocked.Decrement(ref s_getVsReleaseBalance);
                 Debug.Assert(balance == 0, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
 #endif
-                FrameworkErrorUtilities.VerifyThrowInternalNull(returning._borrowedBuilder);
+                Assumed.NotNull(returning._borrowedBuilder);
 
                 StringBuilder returningBuilder = returning._borrowedBuilder;
                 int returningLength = returningBuilder.Length;

@@ -17,6 +17,7 @@
     <NoWarn>$(NoWarn);MSB3270;CS0436</NoWarn>
 
     <AppConfig>..\Shared\UnitTests\App.config</AppConfig>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +28,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="FakeItEasy" />
-    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="Verify.XunitV3" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
@@ -36,7 +37,7 @@
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
-    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" Aliases="MSBuildTaskHost" />
+    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full'" Aliases="MSBuildTaskHost" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
@@ -52,8 +53,6 @@
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=$(LatestDotNetCoreForMSBuild)</SetTargetFramework>
     </ProjectReference>
-
-    <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' " />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,25 +63,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\CommunicationUtilities_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
       <Link>XmakeAttributes_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\XmlUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
       <Link>AssemblyNameEx_Tests.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
       <Link>TaskParameter_Tests.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs">
-      <Link>Collections\CopyOnWriteDictionary_Tests.cs</Link>
     </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
@@ -155,4 +146,5 @@
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
+
 </Project>

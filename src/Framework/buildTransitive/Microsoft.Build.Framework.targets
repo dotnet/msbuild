@@ -1,0 +1,32 @@
+<Project>
+
+  <!--
+    MSBuild's trim/AOT feature switches are defined in Microsoft.Build.Framework, but a library's
+    RuntimeHostConfigurationOption items do not flow to a consuming app's publish. This buildTransitive
+    target supplies the same trim-safe defaults to package consumers only when they publish trimmed or
+    Native AOT, preserving normal JIT behavior for untrimmed apps.
+  -->
+
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' or '$(PublishAot)' == 'true'">
+    <MicrosoftBuildEnableCustomPluginProbing Condition="'$(MicrosoftBuildEnableCustomPluginProbing)' == ''">false</MicrosoftBuildEnableCustomPluginProbing>
+    <MicrosoftBuildEnableAllPropertyFunctions Condition="'$(MicrosoftBuildEnableAllPropertyFunctions)' == ''">false</MicrosoftBuildEnableAllPropertyFunctions>
+    <MicrosoftBuildRestrictPropertyFunctionReceivers Condition="'$(MicrosoftBuildRestrictPropertyFunctionReceivers)' == ''">true</MicrosoftBuildRestrictPropertyFunctionReceivers>
+    <MicrosoftBuildEnableSdkResolverDynamicLoading Condition="'$(MicrosoftBuildEnableSdkResolverDynamicLoading)' == ''">false</MicrosoftBuildEnableSdkResolverDynamicLoading>
+    <MicrosoftBuildEnableConfigurationFileToolsets Condition="'$(MicrosoftBuildEnableConfigurationFileToolsets)' == ''">false</MicrosoftBuildEnableConfigurationFileToolsets>
+    <MicrosoftBuildEnableReflectiveTaskExecution Condition="'$(MicrosoftBuildEnableReflectiveTaskExecution)' == ''">false</MicrosoftBuildEnableReflectiveTaskExecution>
+    <MicrosoftBuildEnableReflectiveTaskParameterTypes Condition="'$(MicrosoftBuildEnableReflectiveTaskParameterTypes)' == ''">false</MicrosoftBuildEnableReflectiveTaskParameterTypes>
+    <MicrosoftBuildEnableReflectiveLoggerLoading Condition="'$(MicrosoftBuildEnableReflectiveLoggerLoading)' == ''">false</MicrosoftBuildEnableReflectiveLoggerLoading>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(PublishTrimmed)' == 'true' or '$(PublishAot)' == 'true'">
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableCustomPluginProbing" Value="$(MicrosoftBuildEnableCustomPluginProbing)" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableAllPropertyFunctions" Value="$(MicrosoftBuildEnableAllPropertyFunctions)" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.RestrictPropertyFunctionReceivers" Value="$(MicrosoftBuildRestrictPropertyFunctionReceivers)" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableSdkResolverDynamicLoading" Value="$(MicrosoftBuildEnableSdkResolverDynamicLoading)" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableConfigurationFileToolsets" Value="$(MicrosoftBuildEnableConfigurationFileToolsets)" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveTaskExecution" Value="$(MicrosoftBuildEnableReflectiveTaskExecution)" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveTaskParameterTypes" Value="$(MicrosoftBuildEnableReflectiveTaskParameterTypes)" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveLoggerLoading" Value="$(MicrosoftBuildEnableReflectiveLoggerLoading)" Trim="true" />
+  </ItemGroup>
+
+</Project>

@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
-
-#nullable disable
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -14,31 +13,73 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class TaskParameterTypeVerifier
     {
-        /// <summary>
-        /// Is the parameter type a valid scalar input value
-        /// </summary>
-        internal static bool IsValidScalarInputParameter(Type parameterType) =>
-            parameterType.GetTypeInfo().IsValueType || parameterType == typeof(string) || parameterType == typeof(ITaskItem);
-
-        /// <summary>
-        /// Is the passed in parameterType a valid vector input parameter
-        /// </summary>
-        internal static bool IsValidVectorInputParameter(Type parameterType)
+        internal static bool TryGetSupportedTaskItemValueType(Type parameterType, [NotNullWhen(true)] out Type? valueType)
         {
-            bool result = (parameterType.IsArray && parameterType.GetElementType().GetTypeInfo().IsValueType) ||
-                        parameterType == typeof(string[]) ||
-                        parameterType == typeof(ITaskItem[]);
-            return result;
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(parameterType, out valueType))
+            {
+                return ValueTypeParser.IsSupportedType(valueType);
+            }
+
+            return false;
+        }
+
+        private static bool IsValidValueParameterType(Type parameterType)
+            => parameterType.IsValueType || ValueTypeParser.IsSupportedType(parameterType);
+
+        private static bool IsValidInputElementType(Type parameterType)
+        {
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(parameterType, out Type? valueType))
+            {
+                return ValueTypeParser.IsSupportedType(valueType);
+            }
+
+            if (typeof(ITaskItem).IsAssignableFrom(parameterType))
+            {
+                return parameterType == typeof(ITaskItem);
+            }
+
+            return IsValidValueParameterType(parameterType);
         }
 
         /// <summary>
-        /// Is the passed in value type assignable to an ITask or Itask[] object
+        /// Is the parameter type a valid scalar input value - meaning not an array and a valid input element type
         /// </summary>
-        internal static bool IsAssignableToITask(Type parameterType)
+        internal static bool IsValidScalarInputParameter(Type parameterType) =>
+            !TryGetArrayElement(parameterType, out _) && IsValidInputElementType(parameterType);
+
+        /// <summary>
+        /// Is the passed in parameterType a valid vector input parameter - meaning is an array and the element type is a valid input element type
+        /// </summary>
+        internal static bool IsValidVectorInputParameter(Type parameterType) =>
+            TryGetArrayElement(parameterType, out Type? elementType) && IsValidInputElementType(elementType);
+
+        /// <summary>
+        /// Helper that returns the element type of an array parameter type, or null if the parameter type is not an array - useful to handle nullability flow analysis for array element types in the calling code.
+        /// </summary>
+        private static bool TryGetArrayElement(Type parameterType, [NotNullWhen(true)] out Type? elementType)
         {
-            bool result = typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(parameterType.GetTypeInfo()) ||    /* ITaskItem array or derived type, or */
-                          typeof(ITaskItem).IsAssignableFrom(parameterType);                                    /* ITaskItem or derived type */
-            return result;
+            if (parameterType.IsArray)
+            {
+                elementType = parameterType.GetElementType()!; // GetElementType is non-null because parameterType is an array
+                return true;
+            }
+
+            elementType = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Is the passed in value type assignable to an ITaskItem or ITaskItem[] object
+        /// </summary>
+        internal static bool IsAssignableToITaskItem(Type parameterType)
+        {
+            Type elementType = TryGetArrayElement(parameterType, out Type? arrayElementType) ? arrayElementType : parameterType;
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(elementType, out Type? valueType))
+            {
+                return ValueTypeParser.IsSupportedType(valueType);
+            }
+
+            return typeof(ITaskItem).IsAssignableFrom(elementType);
         }
 
         /// <summary>
@@ -46,11 +87,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static bool IsValueTypeOutputParameter(Type parameterType)
         {
-            bool result = (parameterType.IsArray && parameterType.GetElementType().GetTypeInfo().IsValueType) ||    /* array of value types, or */
-                          parameterType == typeof(string[]) ||                                                      /* string array, or */
-                          parameterType.GetTypeInfo().IsValueType ||                                                /* value type, or */
-                          parameterType == typeof(string);                                                          /* string */
-            return result;
+            Type elementType = TryGetArrayElement(parameterType, out Type? arrayElementType) ? arrayElementType : parameterType;
+            return !typeof(ITaskItem).IsAssignableFrom(elementType)
+                && IsValidValueParameterType(elementType);
         }
 
         /// <summary>
@@ -66,7 +105,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static bool IsValidOutputParameter(Type parameterType)
         {
-            return IsValueTypeOutputParameter(parameterType) || IsAssignableToITask(parameterType);
+            return IsValueTypeOutputParameter(parameterType) || IsAssignableToITaskItem(parameterType);
         }
     }
 }

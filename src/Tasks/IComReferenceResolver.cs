@@ -1,8 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
+#if FEATURE_APPDOMAIN
+
+using TYPELIBATTR = Windows.Win32.System.Com.TLIBATTR;
 
 #nullable disable
 
@@ -44,3 +45,5 @@ namespace Microsoft.Build.Tasks
         bool ResolveComAssemblyReference(string assemblyName, out string assemblyPath);
     }
 }
+
+#endif

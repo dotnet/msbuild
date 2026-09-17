@@ -10,6 +10,11 @@ namespace Microsoft.Build.Framework;
 
 internal static class BinaryWriterExtensions
 {
+#if !NET
+    [ThreadStatic]
+    private static byte[]? s_guidBuffer;
+#endif
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void WriteOptionalString(this BinaryWriter writer, string? value)
     {
@@ -89,15 +94,24 @@ internal static class BinaryWriterExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void WriteGuid(this BinaryWriter writer, Guid value)
     {
-        Guid val = value;
+        const int GuidSize = 16;
+
+#if NET
+        Span<byte> bytes = stackalloc byte[GuidSize];
+        value.TryWriteBytes(bytes);
+#else
+        byte[] bytes = s_guidBuffer ??= new byte[GuidSize];
+
         unsafe
         {
-            byte* ptr = (byte*)&val;
-            for (int i = 0; i < sizeof(Guid); i++, ptr++)
+            fixed (byte* ptr = bytes)
             {
-                writer.Write(*ptr);
+                *(Guid*)ptr = value;
             }
         }
+#endif
+
+        writer.Write(bytes);
     }
 
     public static void WriteExtendedBuildEventData(this BinaryWriter writer, IExtendedBuildEventArgs data)

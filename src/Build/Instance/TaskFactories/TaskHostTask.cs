@@ -5,16 +5,15 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Constants = Microsoft.Build.Framework.Constants;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
@@ -110,6 +109,7 @@ namespace Microsoft.Build.BackEnd
         /// True if currently connected to the task host; false otherwise.
         /// </summary>
         private bool _connectedToTaskHost = false;
+        private NodeProviderOutOfProcBase.NodeContext _taskHostConnection;
 
         /// <summary>
         /// The provider for task host nodes.
@@ -138,13 +138,24 @@ namespace Microsoft.Build.BackEnd
         private bool _taskExecutionSucceeded = false;
 
         /// <summary>
-        /// If true TaskHostFactory expects the TaskHost not will NOT expire after build (until it timeouts or is killed).
-        /// This is relevant for the next cases:
-        /// 1) TaskHostFactory is NOT explicitly requested (we always disable node reuse due to the transient nature of task host factory hosts).
-        /// 2) Runtime="NET" is specified in UsingTask.
-        /// 3) Environment variable MSBUILDFORCEALLTASKSOUTOFPROC is set.
+        /// Whether this task host may be launched with node reuse, so that it does not exit at the
+        /// end of the build. False only when <c>TaskFactory="TaskHostFactory"</c> was explicitly
+        /// requested, where the caller wants a short-lived process that releases its assembly locks.
         /// </summary>
-        private bool _useSidecarTaskHost = false;
+        /// <remarks>
+        /// This says nothing about whether the resulting task host is a sidecar. It is also true for
+        /// a task host of a different runtime or architecture, which is reusable but stays pooled;
+        /// <see cref="NodeProviderOutOfProcTaskHost.DoesConnectionPersistAcrossBuilds"/> makes that
+        /// distinction.
+        /// </remarks>
+        private bool _allowNodeReuse = false;
+
+        /// <summary>
+        /// Whether console output should be forwarded because this task was moved out of process solely for multi-threaded compatibility.
+        /// </summary>
+        private readonly bool _forwardConsoleOutput;
+
+        internal bool ForwardConsoleOutput => _forwardConsoleOutput;
 
         private readonly HostServices _hostServices;
 
@@ -167,7 +178,8 @@ namespace Microsoft.Build.BackEnd
             IBuildComponentHost buildComponentHost,
             TaskHostParameters taskHostParameters,
             LoadedType taskType,
-            bool useSidecarTaskHost,
+            bool allowNodeReuse,
+            bool forwardConsoleOutput,
             string projectFile,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
@@ -176,8 +188,8 @@ namespace Microsoft.Build.BackEnd
             int scheduledNodeId,
             TaskEnvironment taskEnvironment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(taskType);
-            ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);
+            Assumed.NotNull(taskType);
+            Assumed.NotNull(taskEnvironment);
 
             _scheduledNodeId = scheduledNodeId;
 
@@ -191,7 +203,8 @@ namespace Microsoft.Build.BackEnd
             _hostServices = hostServices;
             _projectFile = projectFile;
             _taskHostParameters = taskHostParameters;
-            _useSidecarTaskHost = useSidecarTaskHost;
+            _allowNodeReuse = allowNodeReuse;
+            _forwardConsoleOutput = forwardConsoleOutput;
             _taskEnvironment = taskEnvironment;
 
             _packetFactory = new NodePacketFactory();
@@ -201,7 +214,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
-
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _taskHostLock = new();
@@ -240,11 +253,6 @@ namespace Microsoft.Build.BackEnd
                 _hostObject = value;
             }
         }
-
-        /// <summary>
-        /// Gets information about the assembly from which the task type was loaded.
-        /// </summary>
-        public AssemblyLoadInfo LoadedTaskAssemblyInfo => _taskType.Assembly;
 
         /// <summary>
         /// Sets the requested task parameter to the requested value.
@@ -288,7 +296,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
                     {
-                        _taskHostProvider.SendData(_taskHostNodeKey, new TaskHostTaskCancelled());
+                        _taskHostConnection.SendData(new TaskHostTaskCancelled());
                     }
                 }
 
@@ -301,115 +309,172 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool Execute()
         {
-            _taskLoggingContext.LogComment(
-                MessageImportance.Low,
-                "ExecutingTaskInTaskHost",
-                _taskType.Type.Name,
-                _taskType.Assembly.AssemblyLocation,
-                _taskHostParameters.Runtime,
-                _taskHostParameters.Architecture);
-
-            // set up the node
-            lock (_taskHostLock)
-            {
-                _taskHostProvider = (NodeProviderOutOfProcTaskHost)_buildComponentHost.GetComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
-                ErrorUtilities.VerifyThrowInternalNull(_taskHostProvider, "taskHostProvider");
-            }
-
-            string taskLocation = AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly);
-            if (string.IsNullOrEmpty(taskLocation))
-            {
-                // fall back to the AssemblyLoadInfo location for inline tasks loaded from bytes
-                taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
-            }
-
-            TaskHostConfiguration hostConfiguration =
-                new TaskHostConfiguration(
-                        _buildComponentHost.BuildParameters.NodeId,
-                        _taskEnvironment.ProjectDirectory,
-                        (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
-                        _buildComponentHost.BuildParameters.Culture,
-                        _buildComponentHost.BuildParameters.UICulture,
-                        _hostServices,
-#if FEATURE_APPDOMAIN
-                        _appDomainSetup,
-#endif
-                        BuildEngine.LineNumberOfTaskNode,
-                        BuildEngine.ColumnNumberOfTaskNode,
-                        BuildEngine.ProjectFileOfTaskNode,
-                        BuildEngine.ContinueOnError,
-                        _taskType.Type.FullName,
-                        taskLocation,
-                        _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
-                        _projectFile,
-                        _buildComponentHost.BuildParameters.LogTaskInputs,
-                        _setParameters,
-                        new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
-                        _taskLoggingContext.GetWarningsAsErrors(),
-                        _taskLoggingContext.GetWarningsNotAsErrors(),
-                        _taskLoggingContext.GetWarningsAsMessages());
-
+            MSBuildEventSource.Log.TaskHostDispatchStart(_taskType.Type.FullName);
             try
             {
+                _taskLoggingContext.LogComment(
+                    MessageImportance.Low,
+                    "ExecutingTaskInTaskHost",
+                    _taskType.Type.Name,
+                    _taskType.Assembly.AssemblyLocation,
+                    _taskHostParameters.Runtime,
+                    _taskHostParameters.Architecture);
+
+                // set up the node
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
-                        taskHost: true,
-
-                        // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
-                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost,
-                        taskHostParameters: _taskHostParameters);
-
-                    _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_taskHostNodeKey, this, this, hostConfiguration, _taskHostParameters);
+                    _taskHostProvider = (NodeProviderOutOfProcTaskHost)_buildComponentHost.GetComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+                    Assumed.NotNull(_taskHostProvider);
                 }
 
-                if (_connectedToTaskHost)
+                string taskLocation = _taskType.Type.Assembly.Location;
+                if (string.IsNullOrEmpty(taskLocation))
                 {
-                    try
+                    // fall back to the AssemblyLoadInfo location for inline tasks loaded from bytes
+                    taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
+                }
+
+                TaskHostConfiguration hostConfiguration =
+                    new TaskHostConfiguration(
+                            _buildComponentHost.BuildParameters.NodeId,
+                            _taskEnvironment.ProjectDirectory,
+                            (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
+                            _buildComponentHost.BuildParameters.Culture,
+                            _buildComponentHost.BuildParameters.UICulture,
+                            _hostServices,
+#if FEATURE_APPDOMAIN
+                            _appDomainSetup,
+#endif
+                            BuildEngine.LineNumberOfTaskNode,
+                            BuildEngine.ColumnNumberOfTaskNode,
+                            BuildEngine.ProjectFileOfTaskNode,
+                            BuildEngine.ContinueOnError,
+                            _taskType.Type.FullName,
+                            taskLocation,
+                            _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
+                            _projectFile,
+                            _buildComponentHost.BuildParameters.LogTaskInputs,
+                            _setParameters,
+                            GetGlobalPropertiesForTaskHost(),
+                            _taskLoggingContext.GetWarningsAsErrors(),
+                            _taskLoggingContext.GetWarningsNotAsErrors(),
+                            _taskLoggingContext.GetWarningsAsMessages());
+
+                try
+                {
+                    int hostProcessId;
+                    bool wasNewlyCreated;
+                    bool effectiveNodeReuse;
+
+                    lock (_taskHostLock)
                     {
-                        bool taskFinished = false;
+                        effectiveNodeReuse = _buildComponentHost.BuildParameters.EnableNodeReuse && _allowNodeReuse;
 
-                        while (!taskFinished)
+                        _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
+                            taskHost: true,
+
+                            // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
+                            nodeReuse: effectiveNodeReuse,
+                            taskHostParameters: _taskHostParameters);
+
+                        _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId, _forwardConsoleOutput);
+                        _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
+                            _taskHostNodeKey,
+                            this,
+                            this,
+                            hostConfiguration,
+                            _taskHostParameters,
+                            out hostProcessId,
+                            out wasNewlyCreated,
+                            out _taskHostConnection);
+                    }
+
+                    if (_connectedToTaskHost)
+                    {
+                        _taskLoggingContext.LogComment(
+                            MessageImportance.Low,
+                            "TaskHostDetails",
+                            _taskType.Type.Name,
+                            hostProcessId,
+                            Process.GetCurrentProcess().Id,
+                            wasNewlyCreated,
+                            _allowNodeReuse,
+                            effectiveNodeReuse);
+
+                        try
                         {
-                            _packetReceivedEvent.WaitOne();
+                            bool taskFinished = false;
 
-                            INodePacket packet = null;
-
-                            // Handle the packet that's coming in
-                            while (_receivedPackets.TryDequeue(out packet))
+                            while (!taskFinished)
                             {
-                                if (packet != null)
+                                _packetReceivedEvent.WaitOne();
+
+                                INodePacket packet = null;
+
+                                // Handle the packet that's coming in
+                                while (_receivedPackets.TryDequeue(out packet))
                                 {
-                                    HandlePacket(packet, out taskFinished);
+                                    if (packet != null)
+                                    {
+                                        HandlePacket(packet, out taskFinished);
+                                    }
                                 }
                             }
                         }
-                    }
-                    finally
-                    {
-                        lock (_taskHostLock)
+                        finally
                         {
-                            _taskHostProvider.DisconnectFromHost(_taskHostNodeKey);
-                            _connectedToTaskHost = false;
+                            lock (_taskHostLock)
+                            {
+                                _taskHostProvider.DisconnectFromHost(_taskHostConnection, this);
+                                _connectedToTaskHost = false;
+                                _taskHostConnection = null;
+                            }
                         }
                     }
+                    else
+                    {
+                        LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
+                    }
                 }
-                else
+                catch (BuildAbortedException ex)
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
+                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex);
+                }
+                catch (NodeFailedToLaunchException e)
+                {
+                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
                 }
             }
-            catch (BuildAbortedException ex)
+            finally
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex);
-            }
-            catch (NodeFailedToLaunchException e)
-            {
-                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
+                MSBuildEventSource.Log.TaskHostDispatchStop(_taskType.Type.FullName, _taskExecutionSucceeded);
             }
 
             return _taskExecutionSucceeded;
+        }
+
+        /// <summary>
+        /// Gets the global properties to send to the out-of-proc TaskHost.
+        /// Under ChangeWave 18.6, uses request-level properties from BuildEngine via
+        /// <see cref="IBuildEngine6.GetGlobalProperties"/> because those include per-request
+        /// properties like MSBuildRestoreSessionId that are added by ExecuteRestore() but are
+        /// not present in the build-level BuildParameters.GlobalProperties.
+        /// </summary>
+        private Dictionary<string, string> GetGlobalPropertiesForTaskHost()
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6) && BuildEngine is IBuildEngine6 buildEngine6)
+            {
+                IReadOnlyDictionary<string, string> requestProperties = buildEngine6.GetGlobalProperties();
+                var result = new Dictionary<string, string>(requestProperties.Count);
+                foreach (KeyValuePair<string, string> kvp in requestProperties)
+                {
+                    result[kvp.Key] = kvp.Value;
+                }
+
+                return result;
+            }
+
+            return new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties);
         }
 
         /// <summary>
@@ -511,8 +576,11 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostCoresRequest:
                     HandleCoresRequest(packet as TaskHostCoresRequest);
                     break;
+                case NodePacketType.TaskHostBuildRequest:
+                    HandleBuildRequest(packet as TaskHostBuildRequest);
+                    break;
                 default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                     break;
             }
         }
@@ -536,8 +604,14 @@ namespace Microsoft.Build.BackEnd
             // If it crashed, or if it failed, it didn't succeed.
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
-            // Update the task environment with the environment changes from the task host execution
-            _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            // In the TaskHostTaskComplete packet, EnvironmentMode == Identical means the task did not change the
+            // environment while running in the task host, so it already matches this node's environment and there is
+            // nothing to apply. Any other mode carries the task's post-execution environment, which we must propagate
+            // back here.
+            if (taskHostTaskComplete.EnvironmentMode != InvariantPayloadTransferMode.Identical)
+            {
+                _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            }
 
             // If it crashed during the execution phase, then we can effectively replicate the inproc task execution
             // behaviour by just throwing here and letting the taskbuilder code take care of it the way it would
@@ -571,7 +645,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     exceptionMessageArgs = [_taskType.Type.Name,
-                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                        _taskType.Type.Assembly.Location,
                         string.Empty];
                 }
 
@@ -608,23 +682,57 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleLoggedMessage(LogMessagePacket logMessagePacket)
         {
+            // Before Wave18_12 the switch below enumerated only these five event kinds and had no default case,
+            // so every other kind - extended events, critical messages, telemetry - was dropped without a trace.
+            // Surfacing them can fail a build running /warnAsError, so disabling the wave restores that behavior.
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                && logMessagePacket.EventType is not (LoggingEventType.BuildErrorEvent
+                    or LoggingEventType.BuildWarningEvent
+                    or LoggingEventType.TaskCommandLineEvent
+                    or LoggingEventType.BuildMessageEvent
+                    or LoggingEventType.CustomEvent))
+            {
+                return;
+            }
+
             switch (logMessagePacket.EventType)
             {
                 case LoggingEventType.BuildErrorEvent:
+                case LoggingEventType.ExtendedBuildErrorEvent:
                     this.BuildEngine.LogErrorEvent((BuildErrorEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.BuildWarningEvent:
+                case LoggingEventType.ExtendedBuildWarningEvent:
                     this.BuildEngine.LogWarningEvent((BuildWarningEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.TaskCommandLineEvent:
                 case LoggingEventType.BuildMessageEvent:
+                case LoggingEventType.CriticalBuildMessage:
+                case LoggingEventType.ExtendedBuildMessageEvent:
+                case LoggingEventType.ExtendedCriticalBuildMessageEvent:
                     this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
+                case LoggingEventType.Telemetry:
+                    // A task can only ever produce telemetry through IBuildEngine5.LogTelemetry(name, properties),
+                    // so forwarding those two values reproduces exactly what an in-proc task would have logged.
+                    if (_buildEngine is IBuildEngine5 engine5)
+                    {
+                        TelemetryEventArgs telemetryEvent = (TelemetryEventArgs)logMessagePacket.NodeBuildEvent.Value.Value;
+                        engine5.LogTelemetry(telemetryEvent.EventName, telemetryEvent.Properties);
+                    }
+
+                    break;
                 case LoggingEventType.CustomEvent:
+                case LoggingEventType.ExtendedCustomEvent:
+                default:
                     BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent.Value.Value;
 
                     // "Custom events" in terms of the communications infrastructure can also be, e.g. custom error events,
                     // in which case they need to be dealt with in the same way as their base type of event.
+                    // The same dispatch also covers every event kind without an explicit case above: the task host can
+                    // only ever send what it was handed through LogErrorEvent, LogWarningEvent, LogMessageEvent or
+                    // LogCustomEvent, all of which are strongly typed, so matching on those base types is exhaustive.
+                    // Without this fallback any event type that is not enumerated above is dropped without a trace.
                     if (buildEvent is BuildErrorEventArgs buildErrorEventArgs)
                     {
                         this.BuildEngine.LogErrorEvent(buildErrorEventArgs);
@@ -643,7 +751,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        ErrorUtilities.ThrowInternalError("Unknown event args type.");
+                        InternalError.Throw("Unknown event args type.");
                     }
 
                     break;
@@ -657,7 +765,7 @@ namespace Microsoft.Build.BackEnd
         {
             bool result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
             var response = new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result);
-            _taskHostProvider.SendData(_taskHostNodeKey, response);
+            _taskHostConnection.SendData(response);
         }
 
         /// <summary>
@@ -667,7 +775,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleCoresRequest(TaskHostCoresRequest request)
         {
-            // Default to 1 for RequestCores (not 0) to satisfy the API contract (return ∈ [1, requested]).
+            // Default to 1 for RequestCores (not 0) to satisfy the API contract (return in [1, requested]).
             // For ReleaseCores, 0 is correct as it's just an acknowledgment.
             int grantedCores = request.IsRelease ? 0 : 1;
 
@@ -687,7 +795,66 @@ namespace Microsoft.Build.BackEnd
             }
 
             var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
-            _taskHostProvider.SendData(_taskHostNodeKey, response);
+            _taskHostConnection.SendData(response);
+        }
+
+        /// <summary>
+        /// Handle BuildProjectFile* request from the TaskHost.
+        /// Forwards the call to the in-process IBuildEngine3.BuildProjectFilesInParallel,
+        /// which handles project resolution, scheduler interaction, and target execution.
+        /// </summary>
+        private void HandleBuildRequest(TaskHostBuildRequest request)
+        {
+            TaskHostBuildResponse response = null;
+            try
+            {
+                if (_buildEngine is not IBuildEngine3 engine3)
+                {
+                    InternalError.Throw($"HandleBuildRequest requires IBuildEngine3 but _buildEngine is {_buildEngine?.GetType().Name ?? "null"}");
+                    return; // unreachable, but satisfies flow analysis
+                }
+
+                // Reconstruct IDictionary[] from the serialized Dictionary<string, string>[]
+                System.Collections.IDictionary[] globalProperties = null;
+                if (request.GlobalProperties is not null)
+                {
+                    globalProperties = new System.Collections.IDictionary[request.GlobalProperties.Length];
+                    for (int i = 0; i < request.GlobalProperties.Length; i++)
+                    {
+                        globalProperties[i] = request.GlobalProperties[i];
+                    }
+                }
+
+                // Reconstruct IList<string>[] from List<string>[]
+                IList<string>[] removeGlobalProperties = null;
+                if (request.RemoveGlobalProperties is not null)
+                {
+                    removeGlobalProperties = new IList<string>[request.RemoveGlobalProperties.Length];
+                    for (int i = 0; i < request.RemoveGlobalProperties.Length; i++)
+                    {
+                        removeGlobalProperties[i] = request.RemoveGlobalProperties[i];
+                    }
+                }
+
+                BuildEngineResult result = engine3.BuildProjectFilesInParallel(
+                    request.ProjectFileNames,
+                    request.TargetNames,
+                    globalProperties,
+                    removeGlobalProperties,
+                    request.ToolsVersions,
+                    request.ReturnTargetOutputs);
+
+                response = TaskHostBuildResponse.FromBuildEngineResult(request.RequestId, result);
+            }
+            finally
+            {
+                // Always send a response to prevent the OOP task from hanging.
+                // On success, sends the real result; on exception, sends failure.
+                // Exceptions propagate to TaskBuilder which handles them identically
+                // to the in-proc TaskHost path (CircularDependencyException, etc.).
+                response ??= new TaskHostBuildResponse(request.RequestId, false, null);
+                _taskHostConnection.SendData(response);
+            }
         }
 
         /// <summary>
@@ -696,14 +863,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, Exception e)
         {
-            string taskHostLocation;
+            string taskHostLocation = null;
 
             if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
             {
                 (_, string msbuildPath) = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters);
-                taskHostLocation = msbuildPath != null
-                    ? Path.Combine(msbuildPath, Constants.MSBuildExecutableName)
-                    : null;
+                if (msbuildPath != null)
+                {
+                    (taskHostLocation, _) = NodeProviderOutOfProcTaskHost.ResolveNetTaskHostLaunchPath(msbuildPath);
+                }
             }
             else
             {

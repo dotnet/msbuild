@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Logging
     /// text logs that erase a lot of useful information.
     /// </summary>
     /// <remarks>The logger is public so that it can be instantiated from MSBuild.exe via command-line switch.</remarks>
-    public sealed class BinaryLogger : ILogger
+    public sealed class BinaryLogger : ILogger, IFileOutputLogger
     {
         // version 2:
         //   - new BuildEventContext.EvaluationId
@@ -109,6 +109,10 @@ namespace Microsoft.Build.Logging
         //    - new record kind: BuildCanceledEventArgs
         // version 25:
         //    - add extra information to PropertyInitialValueSetEventArgs and PropertyReassignmentEventArgs and change message formatting logic.
+        // version 26:
+        //    - new record kind: LoggersRegisteredEventArgs (reports registered loggers and their output file paths)
+        // version 27:
+        //    - new record kind: MSBuildServerLifecycleEventArgs (reports how a build related to the MSBuild Server node)
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.
@@ -119,7 +123,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 25;
+        internal const int FileFormatVersion = 27;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
@@ -274,7 +278,7 @@ namespace Microsoft.Build.Logging
 
             parameter = parameter.Trim('"');
 
-            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool isWildcard = parameter.Contains("{}");
             bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
 
             filePath = parameter;
@@ -296,6 +300,12 @@ namespace Microsoft.Build.Logging
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
         internal string FilePath { get; private set; }
+
+        /// <inheritdoc/>
+        IReadOnlyList<string> IFileOutputLogger.OutputFilePaths
+            => AdditionalFilePaths is null || AdditionalFilePaths.Count == 0
+                ? [FilePath]
+                : [FilePath, .. AdditionalFilePaths];
 
         /// <summary>
         /// Gets or sets additional output file paths. When set, the binlog will be copied to all these paths
@@ -501,6 +511,14 @@ namespace Microsoft.Build.Logging
                     projectImportsCollector.AddFile(filePath);
                 }
                 EditorConfigParser.ClearEditorConfigFilePaths();
+
+                // Write the Directory.Parse.config file paths to the log
+                foreach (var filePath in Evaluation.ParserIgnoreConfiguration.BinlogEmbedPaths)
+                {
+                    projectImportsCollector.AddFile(filePath);
+                }
+                Evaluation.ParserIgnoreConfiguration.ClearBinlogEmbedPaths();
+
                 projectImportsCollector.Close();
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
@@ -769,7 +787,7 @@ namespace Microsoft.Build.Logging
 
             parameter = parameter.Trim('"');
 
-            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool isWildcard = parameter.Contains("{}");
             bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
             filePath = parameter;
 

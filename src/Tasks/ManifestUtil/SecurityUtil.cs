@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Utilities;
@@ -11,9 +11,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Deployment.Internal.CodeSigning;
 using System.Diagnostics;
-#if !RUNTIME_TYPE_NETCORE
 using System.Diagnostics.CodeAnalysis;
-#endif
 using System.Globalization;
 using System.IO;
 #if !RUNTIME_TYPE_NETCORE
@@ -31,6 +29,11 @@ using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
+#if RUNTIME_TYPE_NETCORE && FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.LibraryLoader;
+#endif
 
 #nullable disable
 
@@ -42,6 +45,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public static class SecurityUtilities
     {
+        private const string SignFileRequiresUnreferencedCodeMessage = "Signing a ClickOnce manifest reads and writes it with XmlSerializer and resolves SignedXml algorithms by name; members may be trimmed.";
+        private const string SignFileRequiresDynamicCodeMessage = "Signing a ClickOnce manifest uses XmlSerializer, XslCompiledTransform, and SignedXml, all of which require runtime code generation not supported with Native AOT.";
+
 #if RUNTIME_TYPE_NETCORE
         // Partial trust and permission sets are not supported by .NET Core.
 #else
@@ -52,6 +58,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
         private const string ToolName = "signtool.exe";
 #if !RUNTIME_TYPE_NETCORE
+        private static XmlDocument LoadXmlDocument(string path)
+        {
+            var doc = new XmlDocument { XmlResolver = null };
+
+            using (var sr = new StringReader(path))
+            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
+            {
+                doc.Load(reader);
+            }
+
+            return doc;
+        }
+
         private const int Fx2MajorVersion = 2;
         private const int Fx3MajorVersion = 3;
         private static readonly Version s_dotNet40Version = new Version("4.0");
@@ -262,9 +281,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (!string.IsNullOrEmpty(resultInString))
             {
-                var doc = new XmlDocument();
-                // CA3057: DoNotUseLoadXml. Suppressed since the xml being loaded is a string representation of the PermissionSet.
-                doc.LoadXml(resultInString);
+                XmlDocument doc = LoadXmlDocument(resultInString);
 
                 return doc.DocumentElement;
             }
@@ -288,18 +305,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlDocument CreateXmlDocV2(string targetZone)
         {
-            var doc = new XmlDocument();
-
             switch (targetZone)
             {
                 case LocalIntranet:
-                    // CA3057: DoNotUseLoadXml.  Suppressed since is LocalIntranetPermissionSetXml a constant string.
-                    doc.LoadXml(LocalIntranetPermissionSetXml);
-                    return doc;
+                    return LoadXmlDocument(LocalIntranetPermissionSetXml);
                 case Internet:
-                    // CA3057: DoNotUseLoadXml.  Suppressed since is InternetPermissionSetXml a constant string.
-                    doc.LoadXml(InternetPermissionSetXml);
-                    return doc;
+                    return LoadXmlDocument(InternetPermissionSetXml);
                 default:
                     throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
             }
@@ -308,18 +319,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlDocument CreateXmlDocV3(string targetZone)
         {
-            var doc = new XmlDocument();
-
             switch (targetZone)
             {
                 case LocalIntranet:
-                    // CA3057: DoNotUseLoadXml.  Suppressed since is LocalIntranetPermissionSetXml a constant string.
-                    doc.LoadXml(LocalIntranetPermissionSetWithWPFXml);
-                    return doc;
+                    return LoadXmlDocument(LocalIntranetPermissionSetWithWPFXml);
                 case Internet:
-                    // CA3057: DoNotUseLoadXml.  Suppressed since is InternetPermissionSetXml a constant string.
-                    doc.LoadXml(InternetPermissionSetWithWPFXml);
-                    return doc;
+                    return LoadXmlDocument(InternetPermissionSetWithWPFXml);
                 default:
                     throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
             }
@@ -395,21 +400,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string[] PermissionSetToIdentityList(PermissionSet permissionSet)
         {
             string psXml = permissionSet?.ToString() ?? "<PermissionSet/>";
-            var psDocument = new XmlDocument();
-            // CA3057: DoNotUseLoadXml.  Suppressed since 'psXml' is a trusted or a constant string.
-            psDocument.LoadXml(psXml);
+            var psDocument = LoadXmlDocument(psXml);
             return XmlToIdentityList(psDocument.DocumentElement);
         }
 
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         internal static XmlDocument PermissionSetToXml(PermissionSet ps)
         {
-            XmlDocument inputDocument = new XmlDocument();
             string xml = ps?.ToString() ?? "<PermissionSet/>";
 
-            // CA3057: DoNotUseLoadXml.  Suppressed since 'xml' is a trusted or a constant string.
-            inputDocument.LoadXml(xml);
-            var outputDocument = new XmlDocument();
+            XmlDocument inputDocument = LoadXmlDocument(xml);
+            var outputDocument = new XmlDocument { XmlResolver = null };
             XmlElement psElement = XmlUtil.CloneElementToDocument(inputDocument.DocumentElement, outputDocument, XmlNamespaces.asmv2);
             outputDocument.AppendChild(psElement);
             return outputDocument;
@@ -500,6 +501,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path)
         {
             SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion: null, targetFrameworkIdentifier: null);
@@ -513,6 +516,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -530,6 +535,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -549,6 +556,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
         /// <param name="disallowMansignTimestampFallback">Disallow fallback to legacy timestamping when RFC3161 timestamping fails during manifest signing</param>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -608,6 +617,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <remarks>This function is only for signing a manifest, not a PE file.</remarks>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
             using X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
@@ -633,6 +644,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <remarks>This function can only sign a PE file if the X509Certificate2 parameter represents a certificate in the
         /// current user's personal certificate store.</remarks>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
             // setup resources
@@ -641,6 +654,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         private static void SignFileInternal(X509Certificate2 cert,
                                             Uri timestampUrl,
                                             string path,
@@ -679,7 +694,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             else
             {
 #if RUNTIME_TYPE_NETCORE
-                IntPtr hModule = IntPtr.Zero;
+#if FEATURE_WINDOWSINTEROP
+                HMODULE hModule = default;
+#endif
 
                 using (RSA rsa = cert.GetRSAPrivateKey())
 #else
@@ -715,19 +732,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                             signer = new CmiManifestSigner2(rsa, cert, useSha256);
                         }
 
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE && FEATURE_WINDOWSINTEROP
                         // Manifest signing uses .NET FX APIs, implemented in clr.dll.
                         // Load the library explicitly.
+                        if (NativeMethodsShared.IsWindows)
+                        {
+                            string clrDllDir = Path.Combine(
+                                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                                    "Microsoft.NET",
+                                    Environment.Is64BitProcess ? "Framework64" : "Framework",
+                                    "v4.0.30319");
 
-                        string clrDllDir = Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                                "Microsoft.NET",
-                                Environment.Is64BitProcess ? "Framework64" : "Framework",
-                                "v4.0.30319");
-
-                        NativeMethods.SetDllDirectoryW(clrDllDir);
-                        hModule = NativeMethods.LoadLibraryExW(Path.Combine(clrDllDir, "clr.dll"), IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
-                        // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
+                            PInvoke.SetDllDirectory(clrDllDir);
+                            hModule = PInvoke.LoadLibraryEx(Path.Combine(clrDllDir, "clr.dll"), LOAD_LIBRARY_FLAGS.LOAD_LIBRARY_AS_DATAFILE);
+                            // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
+                        }
 #endif
                         if (timestampUrl == null)
                         {
@@ -749,15 +768,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                         throw new ApplicationException(ex.Message, ex);
                     }
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE && FEATURE_WINDOWSINTEROP
                     finally
                     {
-                        if (hModule != IntPtr.Zero)
+                        if (NativeMethodsShared.IsWindows)
                         {
-                            NativeMethods.FreeLibrary(hModule);
-                        }
+                            if (!hModule.IsNull)
+                            {
+                                PInvoke.FreeLibrary(hModule);
+                            }
 
-                        NativeMethods.SetDllDirectoryW(null);
+                            PInvoke.SetDllDirectory((string)null);
+                        }
                     }
 #endif
                 }

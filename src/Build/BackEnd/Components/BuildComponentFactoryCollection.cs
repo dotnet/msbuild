@@ -8,7 +8,6 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.FileAccesses;
 #endif
-using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 
 #nullable disable
@@ -82,7 +81,7 @@ namespace Microsoft.Build.BackEnd
             _componentEntriesByType[BuildComponentType.RequestBuilder] = new BuildComponentEntry(BuildComponentType.RequestBuilder, RequestBuilder.CreateComponent, CreationPattern.CreateAlways);
             // Following two conditionally registers real or no-op implementation based on BuildParameters
             _componentEntriesByType[BuildComponentType.BuildCheckManagerProvider] = new BuildComponentEntry(BuildComponentType.BuildCheckManagerProvider, BuildCheckManagerProvider.CreateComponent, CreationPattern.Singleton);
-            _componentEntriesByType[BuildComponentType.TelemetryForwarder] = new BuildComponentEntry(BuildComponentType.TelemetryForwarder, TelemetryForwarderProvider.CreateComponent, CreationPattern.Singleton);
+            _componentEntriesByType[BuildComponentType.TelemetryCollector] = new BuildComponentEntry(BuildComponentType.TelemetryCollector, TelemetryCollectorProvider.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.TargetBuilder] = new BuildComponentEntry(BuildComponentType.TargetBuilder, TargetBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.TaskBuilder] = new BuildComponentEntry(BuildComponentType.TaskBuilder, TaskBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.RegisteredTaskObjectCache] = new BuildComponentEntry(BuildComponentType.RegisteredTaskObjectCache, RegisteredTaskObjectCache.CreateComponent, CreationPattern.Singleton);
@@ -136,7 +135,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="instance">The instance to be registered.</param>
         public void ReplaceFactory(BuildComponentType componentType, IBuildComponent instance)
         {
-            ErrorUtilities.VerifyThrow(_componentEntriesByType[componentType].Pattern == CreationPattern.Singleton, "Previously existing factory for type {0} was not a singleton factory.", componentType);
+            Assumed.Equal(_componentEntriesByType[componentType].Pattern, CreationPattern.Singleton, $"Previously existing factory for type {componentType} was not a singleton factory.");
             _componentEntriesByType[componentType] = new BuildComponentEntry(componentType, instance);
         }
 
@@ -158,10 +157,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The component</returns>
         public IBuildComponent GetComponent(BuildComponentType type)
         {
-            if (!_componentEntriesByType.TryGetValue(type, out BuildComponentEntry componentEntry))
-            {
-                ErrorUtilities.ThrowInternalError("No factory registered for component type {0}", type);
-            }
+            Assumed.True(_componentEntriesByType.TryGetValue(type, out BuildComponentEntry componentEntry), $"No factory registered for component type {type}");
 
             return componentEntry.GetInstance(_host);
         }
@@ -242,7 +238,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public void ShutdownSingletonInstance()
             {
-                ErrorUtilities.VerifyThrow(Pattern == CreationPattern.Singleton, "Cannot shutdown non-singleton.");
+                Assumed.Equal(Pattern, CreationPattern.Singleton, "Cannot shutdown non-singleton.");
                 if (_singleton != null)
                 {
                     _singleton.ShutdownComponent();

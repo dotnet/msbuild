@@ -1769,7 +1769,7 @@ true, true, true)]
 
                 if (initialProjectFromMemory && reloadProjectFromMemory)
                 {
-                    Assert.Equal(NativeMethodsShared.GetCurrentDirectory(), rootElement.DirectoryPath);
+                    Assert.Equal(Environment.CurrentDirectory, rootElement.DirectoryPath);
                 }
                 else
                 {

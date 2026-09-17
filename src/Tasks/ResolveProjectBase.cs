@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_projectReferences, nameof(ProjectReferences));
+                ArgumentNullException.ThrowIfNull(_projectReferences, nameof(ProjectReferences));
                 return _projectReferences;
             }
             set => _projectReferences = value;

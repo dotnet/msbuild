@@ -13,6 +13,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
+    [MSBuildMultiThreadableTask]
     public class AssignProjectConfiguration : ResolveProjectBase
     {
         #region Properties

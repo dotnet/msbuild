@@ -3,6 +3,7 @@
 
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
@@ -92,7 +93,7 @@ namespace Microsoft.Build.Globbing
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stringToMatch);
+            ArgumentNullException.ThrowIfNull(stringToMatch);
 
             if (!IsLegal)
             {
@@ -116,7 +117,7 @@ namespace Microsoft.Build.Globbing
         /// <returns></returns>
         public MatchInfoResult MatchInfo(string stringToMatch)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stringToMatch);
+            ArgumentNullException.ThrowIfNull(stringToMatch);
 
             if (FileUtilities.PathIsInvalid(stringToMatch) || !IsLegal)
             {
@@ -169,8 +170,8 @@ namespace Microsoft.Build.Globbing
         /// <returns></returns>
         public static MSBuildGlob Parse(string globRoot, string fileSpec)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(globRoot);
-            ErrorUtilities.VerifyThrowArgumentNull(fileSpec);
+            ArgumentNullException.ThrowIfNull(globRoot);
+            ArgumentNullException.ThrowIfNull(fileSpec);
             ErrorUtilities.VerifyThrowArgumentInvalidPath(globRoot, nameof(globRoot));
 
             if (string.IsNullOrEmpty(globRoot))
@@ -200,15 +201,24 @@ namespace Microsoft.Build.Globbing
                 if (isLegalFileSpec)
                 {
                     string matchFileExpression = FileMatcher.RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
+                    bool useInvariantCulture = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                        && !Traits.Instance.UseLegacyCultureSensitiveFileGlobs;
+                    string regexCacheKey = useInvariantCulture
+                        ? $"i;{matchFileExpression}"
+                        : $"c:{CultureInfo.CurrentCulture.Name};{matchFileExpression}";
 
                     lock (s_regexCache)
                     {
-                        s_regexCache.TryGetValue(matchFileExpression, out regex);
+                        s_regexCache.TryGetValue(regexCacheKey, out regex);
                     }
 
                     if (regex == null)
                     {
                         RegexOptions regexOptions = FileMatcher.DefaultRegexOptions;
+                        if (useInvariantCulture)
+                        {
+                            regexOptions |= RegexOptions.CultureInvariant;
+                        }
                         // compile the regex since it's expected to be used multiple times
                         // For the kind of regexes used here, compilation on .NET Framework tends to be expensive and not worth the small
                         // run-time boost so it's enabled only on .NET Core.
@@ -218,9 +228,9 @@ namespace Microsoft.Build.Globbing
                         Regex newRegex = new Regex(matchFileExpression, regexOptions);
                         lock (s_regexCache)
                         {
-                            if (!s_regexCache.TryGetValue(matchFileExpression, out regex))
+                            if (!s_regexCache.TryGetValue(regexCacheKey, out regex))
                             {
-                                s_regexCache[matchFileExpression] = newRegex;
+                                s_regexCache[regexCacheKey] = newRegex;
                             }
                         }
                         regex ??= newRegex;

@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.Versioning;
-using Microsoft.Build.Shared;
 using Microsoft.Win32;
 
 namespace Microsoft.Build.Utilities
@@ -19,9 +18,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public AssemblyFoldersExInfo(RegistryHive hive, RegistryView view, string registryKey, string directoryPath, Version targetFrameworkVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(registryKey);
-            ErrorUtilities.VerifyThrowArgumentNull(directoryPath);
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion);
+            ArgumentNullException.ThrowIfNull(registryKey);
+            ArgumentNullException.ThrowIfNull(directoryPath);
+            ArgumentNullException.ThrowIfNull(targetFrameworkVersion);
 
             Hive = hive;
             View = view;

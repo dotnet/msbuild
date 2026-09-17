@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -17,7 +17,6 @@ using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.CommandLine.UnitTests;
 
-[UsesVerify]
 [UseInvariantCulture]
 public class NodeStatus_Transition_Tests
 {
@@ -100,6 +99,30 @@ public class NodeStatus_Transition_Tests
         await VerifyReplay(rendered);
     }
 
+    [Fact]
+    public void ProjectOnlyNodesAreFullyRedrawn()
+    {
+        TerminalNodeStatus shortNode = new(new string('a', 5), null, null, string.Empty, new MockStopwatch());
+        TerminalNodesFrame previousFrame = new([shortNode], width: 10, height: 5);
+        previousFrame.RenderNodeStatus(0);
+
+        string rendered = new TerminalNodesFrame([shortNode], width: 10, height: 5).Render(previousFrame);
+
+        rendered.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
+
+        TerminalNodeStatus longNode = new(new string('a', 20), null, null, string.Empty, new MockStopwatch());
+        rendered = new TerminalNodesFrame([longNode], width: 10, height: 5).Render(previousFrame);
+
+        rendered.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+
+        previousFrame = new([longNode], width: 10, height: 5);
+        previousFrame.RenderNodeStatus(0);
+
+        rendered = new TerminalNodesFrame([shortNode], width: 10, height: 5).Render(previousFrame);
+
+        rendered.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+    }
+
     /// <summary>
     /// Chains and renders node status updates and outputs replay able string of all the transitions.
     /// </summary>
@@ -135,7 +158,7 @@ public class NodeStatus_Transition_Tests
                 throw;
             }
 
-            if (!ex.Message.StartsWith("Directory:"))
+            if (!ex.Message.StartsWith("Directory:", StringComparison.Ordinal))
             {
                 throw;
             }
@@ -170,7 +193,7 @@ public class NodeStatus_Transition_Tests
 
         void Extract(string line, string prefix, ref string? output)
         {
-            if (line.StartsWith($"{prefix}: "))
+            if (line.StartsWith($"{prefix}: ", StringComparison.Ordinal))
             {
                 output = line.Substring(prefix.Length + 2);
             }

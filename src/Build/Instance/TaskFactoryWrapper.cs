@@ -91,8 +91,8 @@ namespace Microsoft.Build.Execution
             TaskHostParameters factoryIdentityParameters,
             TaskRegistry.RegisteredTaskRecord.Stats? statistics = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskFactory);
-            ErrorUtilities.VerifyThrowArgumentLength(taskName);
+            ArgumentNullException.ThrowIfNull(taskFactory);
+            ArgumentException.ThrowIfNullOrEmpty(taskName);
             _taskFactory = taskFactory;
             _taskName = taskName;
             TaskFactoryLoadedType = taskFactoryLoadInfo;
@@ -201,8 +201,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void SetPropertyValue(ITask task, TaskPropertyInfo property, object value)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task);
-            ErrorUtilities.VerifyThrowArgumentNull(property);
+            ArgumentNullException.ThrowIfNull(task);
+            ArgumentNullException.ThrowIfNull(property);
 
             IGeneratedTask? generatedTask = task as IGeneratedTask;
             if (generatedTask != null)
@@ -221,27 +221,17 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal object? GetPropertyValue(ITask task, TaskPropertyInfo property)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task);
-            ErrorUtilities.VerifyThrowArgumentNull(property);
+            ArgumentNullException.ThrowIfNull(task);
+            ArgumentNullException.ThrowIfNull(property);
 
-            IGeneratedTask? generatedTask = task as IGeneratedTask;
-            if (generatedTask != null)
+            if (task is IGeneratedTask generatedTask)
             {
-                return generatedTask.GetPropertyValue(property);
+                return (object?)generatedTask.GetPropertyValue(property);
             }
-            else
-            {
-                ReflectableTaskPropertyInfo? propertyInfo = property as ReflectableTaskPropertyInfo;
-                if (propertyInfo != null)
-                {
-                    return propertyInfo.Reflection?.GetValue(task, null);
-                }
-                else
-                {
-                    ErrorUtilities.ThrowInternalError("Task does not implement IGeneratedTask and we don't have {0} either.", typeof(ReflectableTaskPropertyInfo).Name);
-                    throw new InternalErrorException(); // unreachable
-                }
-            }
+
+            return property is ReflectableTaskPropertyInfo propertyInfo
+                ? propertyInfo.Reflection?.GetValue(task, null)
+                : InternalError.Throw<object?>($"Task does not implement IGeneratedTask and we don't have {typeof(ReflectableTaskPropertyInfo)} either.");
         }
 
         /// <summary>

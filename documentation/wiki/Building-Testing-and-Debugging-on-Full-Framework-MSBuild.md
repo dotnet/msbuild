@@ -4,9 +4,11 @@ These instructions refer to working with the `main` branch.
 
 ## Required Software
 
-**Latest Microsoft Visual Studio 2022**: You can download the Visual Studio Community edition from [visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/).
+**Latest Microsoft Visual Studio 2026**: You can download the Visual Studio Community edition from [visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/). Select the components specified in [`.vsconfig`](../../.vsconfig).
 
-All command lines should be executed from a Visual Studio developer command prompt.
+**.NET Framework 3.5** must also be installed on the Windows machine for the full build to succeed. `MSBuildTaskHost.exe` still targets .NET Framework 3.5; a newer .NET SDK or .NET Framework 4.x does not replace it.
+
+All command lines should be executed from a `Developer Command Prompt for VS 2026`.
 
 ## Getting the code
 
@@ -29,13 +31,13 @@ Some tests are creating symlinks to test associated functionality - in order for
 * Enable [Development Mode](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) on your machine.
 * Or run those tests elevated
 
-To mimic our CI job use `eng\CIBuild.cmd`. Be aware that this command may delete your local NuGet cache.
+To mimic our CI job run `build.cmd -pack -sign -publish -ci`.
 
 The CI does two builds. In the second build, it uses the binaries from the first build to build the repository again.
 
 ### Unit testing inside virtualized environment 
 
-In case you develop on Windows OS, but need to run/debug tests on other platforms - unit tests can be run and debugged on a local virtualized environment supported by [Visual Studio Remote Testing](https://learn.microsoft.com/en-us/visualstudio/test/remote-testing?view=vs-2022).
+In case you develop on Windows OS, but need to run/debug tests on other platforms - unit tests can be run and debugged on a local virtualized environment supported by [Visual Studio Remote Testing](https://learn.microsoft.com/en-us/visualstudio/test/remote-testing).
 Initial configurations have been added for `WSL` and net 7.0 linux docker via [`testenvironments.json`](../../testenvironments.json).
 Upon opening the Tests Explorer the advanced environments are available in the GUI: 
 
@@ -69,13 +71,13 @@ Now, just point `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe`
 
 ### Patching Visual Studio with repository binaries
 
-Sometimes it's useful to patch your copy of Visual Studio in order to test or debug your local MSBuild changes from Visual Studio. You can use the [Deploy-MSBuild script](../Deploy-MSBuild.md) for copying your locally built MSBuild binaries over the MSBuild binaries shipping with Visual Studio. Example usage:
-```
+Sometimes it's useful to patch your copy of Visual Studio in order to test or debug your local MSBuild changes from Visual Studio. You can use the [Deploy-MSBuild script](../Deploy-MSBuild.md) for copying your locally built MSBuild binaries over the MSBuild binaries shipping with Visual Studio. Example usage from an administrator Developer PowerShell for VS 2026 (adjust the destination for your edition and installation path):
+```powershell
 # bootstrap build
 .\build.cmd
 
 # copy the bootstrap build output over the MSBuild binaries in Visual Studio
-.\scripts\Deploy-MSBuild.ps1 -destination "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin"
+.\scripts\Deploy-MSBuild.ps1 -destination "C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin"
 ```
 
 ### Debugging MSBuild

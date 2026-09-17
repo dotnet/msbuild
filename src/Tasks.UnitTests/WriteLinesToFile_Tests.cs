@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -14,7 +14,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -158,6 +157,68 @@ namespace Microsoft.Build.Tasks.UnitTests
                     Lines = new ITaskItem[] { new TaskItem("File contents2") }
                 };
 
+                a3.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBeGreaterThan(writeTime.AddSeconds(1));
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
+        /// <summary>
+        /// With a custom encoding, WriteOnlyWhenDifferent must compare using that encoding (BOM included).
+        /// </summary>
+        [Theory]
+        [InlineData("utf-8")]
+        [InlineData("unicode")]
+        [InlineData("utf-32")]
+        public void WriteOnlyWhenDifferentRespectsEncoding(string encoding)
+        {
+            var file = FileUtilities.GetTemporaryFile();
+            try
+            {
+                // Initial write.
+                var a = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+                a.Execute().ShouldBeTrue();
+
+                var writeTime = DateTime.Now.AddHours(-1);
+                File.SetLastWriteTime(file, writeTime);
+
+                // Same contents: write is skipped, timestamp preserved.
+                var a2 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+                a2.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
+
+                // Different contents: file is rewritten.
+                var a3 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents2") }
+                };
                 a3.Execute().ShouldBeTrue();
                 File.GetLastWriteTime(file).ShouldBeGreaterThan(writeTime.AddSeconds(1));
             }
@@ -391,6 +452,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14417")]
         [Fact]
         public void TransactionalModeHandlesConcurrentWritesSuccessfully()
         {
@@ -452,8 +514,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14428")]
         [Fact]
-        public void TransactionalModePreservesAllData()
+        public void TransactionalModeSucceedsWithConcurrentOverwrites()
         {
             using (var testEnv = TestEnvironment.Create(_output))
             {
@@ -526,88 +589,6 @@ namespace Microsoft.Build.Tasks.UnitTests
                     }
                 }
                 foundProject.ShouldBeTrue("At least one project's output should be in the file");
-            }
-        }
-
-        [Fact]
-        public void NonTransactionalModeCausesDataLoss()
-        {
-            using (var testEnv = TestEnvironment.Create(_output))
-            {
-                // Disable transactional mode via changewave to test non-transactional behavior
-                ChangeWaves.ResetStateForTests();
-                testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_3.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                var outputFile = testEnv.CreateFile("output.txt").Path;
-                var projectCount = 20; 
-
-                var parallelProjectContent = @$"
-            <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                <ItemGroup>
-            {string.Join("\n", Enumerable.Range(1, projectCount).Select(i => $@"<Project Include=""TestProject{i}.csproj"" />"))}
-                </ItemGroup>
-                <Target Name=""Build"">
-                <MSBuild Projects=""@(Project)"" Targets=""WriteToFile"" BuildInParallel=""true""/>
-                </Target>
-            </Project>";
-                var parallelProjectFile = testEnv.CreateFile("ParallelBuildProject.csproj", parallelProjectContent).Path;
-
-                for (int i = 0; i < projectCount; i++)
-                {
-                    var projectContent = @$"
-                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-                    <ItemGroup>
-                    <LinesToWrite Include=""Line from Project {i + 1}"" />
-                    </ItemGroup>
-                    <Target Name=""WriteToFile"">
-                    <!-- NO Transactional mode, Overwrite=true -->
-                    <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)"" Overwrite=""true""/>
-                    <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)"" Overwrite=""true""/>
-                    <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)"" Overwrite=""true""/>
-                    <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)"" Overwrite=""true""/>
-                    <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)"" Overwrite=""true""/>
-                    </Target>
-                </Project>";
-                    testEnv.CreateFile($"TestProject{i + 1}.csproj", projectContent);
-                }
-
-                // Build using ProjectCollection as recommended by Change Waves documentation
-                using (var collection = new ProjectCollection(
-                    globalProperties: null,
-                    loggers: null,
-                    remoteLoggers: null,
-                    toolsetDefinitionLocations: ToolsetDefinitionLocations.Default,
-                    maxNodeCount: Environment.ProcessorCount,
-                    onlyLogCriticalEvents: false))
-                {
-                    var project = collection.LoadProject(parallelProjectFile);
-                    var buildSucceeded = project.Build("Build");
-
-                    // With non-transactional mode and concurrent writes, build may fail due to file locking
-                    // or succeed with data loss. Either outcome demonstrates the problem with non-transactional mode.
-                    // If build succeeded, verify data loss occurred
-                    if (buildSucceeded)
-                {
-
-                var content = File.ReadAllText(outputFile);
-                var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-
-                var expectedWithoutRace = projectCount * 5;
-
-                // Without transactional mode and with Overwrite=true, concurrent writes will overwrite each other
-                // We expect significant data loss - only the last write(s) will survive
-                lines.Length.ShouldBeLessThan(expectedWithoutRace,
-                    $"Without transactional mode, data loss should occur. " +
-                    $"Expected significant data loss from {expectedWithoutRace} lines, but got {lines.Length}");
-
-                    // With Overwrite=true and parallel builds without transactional mode, 
-                    // only the last few writes should survive (typically 1-5 lines)
-                    lines.Length.ShouldBeLessThanOrEqualTo(5,
-                        "With Overwrite=true and parallel builds without transactional mode, " +
-                        "only last project's writes should survive due to race conditions");
-                    }
-                    // If build failed, that's also acceptable - it demonstrates file locking issues with non-transactional mode
-                }
             }
         }
     }

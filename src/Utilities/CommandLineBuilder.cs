@@ -247,7 +247,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="unquotedTextToAppend"></param>
         protected void AppendQuotedTextToBuffer(StringBuilder buffer, string unquotedTextToAppend)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buffer);
+            ArgumentNullException.ThrowIfNull(buffer);
 
             if (unquotedTextToAppend != null)
             {
@@ -404,7 +404,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">The delimiter between file names</param>
         public void AppendFileNamesIfNotNull(string[] fileNames, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
+            ArgumentNullException.ThrowIfNull(delimiter);
 
             if (fileNames?.Length > 0)
             {
@@ -439,7 +439,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between items in the command line</param>
         public void AppendFileNamesIfNotNull(ITaskItem[] fileItems, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
+            ArgumentNullException.ThrowIfNull(delimiter);
 
             if (fileItems?.Length > 0)
             {
@@ -483,7 +483,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="switchName">The switch to append to the command line, may not be null</param>
         public void AppendSwitch(string switchName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ArgumentNullException.ThrowIfNull(switchName);
 
             AppendSpaceIfNotEmpty();
             AppendTextUnquoted(switchName);
@@ -500,7 +500,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, quoted if necessary. If null, this method has no effect.</param>
         public void AppendSwitchIfNotNull(string switchName, string parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ArgumentNullException.ThrowIfNull(switchName);
 
             if (parameter != null)
             {
@@ -549,7 +549,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, quoted if necessary. If null, this method has no effect.</param>
         public void AppendSwitchIfNotNull(string switchName, ITaskItem parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ArgumentNullException.ThrowIfNull(switchName);
 
             if (parameter != null)
             {
@@ -570,8 +570,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchIfNotNull(string switchName, string[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
+            ArgumentNullException.ThrowIfNull(switchName);
+            ArgumentNullException.ThrowIfNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -602,8 +602,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchIfNotNull(string switchName, ITaskItem[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
+            ArgumentNullException.ThrowIfNull(switchName);
+            ArgumentNullException.ThrowIfNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -640,7 +640,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, not quoted. If null, this method has no effect.</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, string parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ArgumentNullException.ThrowIfNull(switchName);
 
             if (parameter != null)
             {
@@ -661,7 +661,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, not quoted. If null, this method has no effect.</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, ITaskItem parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ArgumentNullException.ThrowIfNull(switchName);
 
             if (parameter != null)
             {
@@ -681,8 +681,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, string[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
+            ArgumentNullException.ThrowIfNull(switchName);
+            ArgumentNullException.ThrowIfNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -712,8 +712,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, ITaskItem[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName);
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
+            ArgumentNullException.ThrowIfNull(switchName);
+            ArgumentNullException.ThrowIfNull(delimiter);
 
             if (parameters?.Length > 0)
             {

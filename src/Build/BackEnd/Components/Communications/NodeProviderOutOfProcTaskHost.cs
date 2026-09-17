@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -20,11 +20,33 @@ using Constants = Microsoft.Build.Framework.Constants;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// Represents a unique key for identifying task host nodes.
+    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
+    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// </summary>
+    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
+    /// <param name="NodeId">
+    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
+    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
+    /// its own task host, so the node ID is used to distinguish them.
+    /// </param>
+    /// <param name="ForwardConsoleOutput">
+    /// Whether the task host forwards console output. Hosts with different forwarding behavior must not share a connection.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId, bool ForwardConsoleOutput = false);
+
+    /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
     /// </summary>
     internal class NodeProviderOutOfProcTaskHost : NodeProviderOutOfProcBase, INodeProvider, INodePacketFactory, INodePacketHandler
     {
+        /// <summary>
+        /// The provider used by a worker node, whose lifetime is the process rather than the build.
+        /// </summary>
+        private static NodeProviderOutOfProcTaskHost s_processWideInstance;
+        private readonly bool _processWide;
+
         /// <summary>
         /// Store the path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it.
         /// </summary>
@@ -93,20 +115,26 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<int, TaskHostNodeKey> _nodeIdToNodeKey;
 
         /// <summary>
-        /// A mapping of all of the INodePacketFactories wrapped by this provider.
-        /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
-        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
-        /// can simultaneously create their own taskhosts.
+        /// Per-node handler stacks for routing packets from OOP TaskHost processes.
+        /// Keyed by communication node ID (one per OOP process). Each node can have
+        /// multiple OOP processes for different architectures (x86, x64, ARM64).
+        /// The stack supports nested BuildProjectFile callbacks: when Task A calls
+        /// BuildProjectFile and blocks, Task B is dispatched to the same process --
+        /// handler B is pushed on top. Packets always route to Peek() (the active task).
+        /// When Task B finishes, handler B is popped and Task A's handler is restored.
         /// </summary>
-        private ConcurrentDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
+        private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
 
         /// <summary>
-        /// A mapping of all of the INodePacketHandlers wrapped by this provider.
-        /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
-        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
-        /// can simultaneously create their own taskhosts.
+        /// Communication node IDs explicitly enabled for console forwarding.
         /// </summary>
-        private ConcurrentDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
+        private HashSet<int> _consoleForwardingNodeIds;
+
+        private readonly LockType _consoleForwardingLock = new();
+
+        private bool _consoleOutputForwarded;
+
+        private bool _isShutDown;
 
         /// <summary>
         /// Keeps track of the set of node IDs for which we have not yet received shutdown notification.
@@ -127,8 +155,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor.
         /// </summary>
-        private NodeProviderOutOfProcTaskHost()
+        private NodeProviderOutOfProcTaskHost(bool processWide = false)
         {
+            _processWide = processWide;
         }
 
         #region INodeProvider Members
@@ -154,6 +183,17 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal bool ConsoleOutputForwarded
+        {
+            get
+            {
+                lock (_consoleForwardingLock)
+                {
+                    return _consoleOutputForwarded;
+                }
+            }
+        }
+
         /// <summary>
         /// Returns the name of the CLR2 Task Host executable
         /// </summary>
@@ -161,17 +201,14 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                if (s_msbuildTaskHostName == null)
+                string name = s_msbuildTaskHostName;
+                if (name is null)
                 {
-                    s_msbuildTaskHostName = Environment.GetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME");
-
-                    if (s_msbuildTaskHostName == null)
-                    {
-                        s_msbuildTaskHostName = "MSBuildTaskHost.exe";
-                    }
+                    name = Environment.GetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME") ?? "MSBuildTaskHost.exe";
+                    s_msbuildTaskHostName = name;
                 }
 
-                return s_msbuildTaskHostName;
+                return name;
             }
         }
 
@@ -185,25 +222,74 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Sends data to the specified node.
-        /// Note: For task hosts, use the overload that takes TaskHostNodeKey instead.
+        /// Task hosts send through the connection returned by AcquireAndSetUpHost.
         /// </summary>
         /// <param name="nodeId">The node to which data shall be sent.</param>
         /// <param name="packet">The packet to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            throw new NotImplementedException("For task hosts, use the overload that takes TaskHostNodeKey.");
+            throw new NotImplementedException("Task hosts send through their acquired connection.");
         }
 
         /// <summary>
-        /// Sends data to the specified task host node.
+        /// Whether a task host launched with these options is owned by this process, staying
+        /// connected to it between builds instead of disconnecting into the pool of task hosts any
+        /// process may claim.
         /// </summary>
-        /// <param name="nodeKey">The task host node key identifying the target node.</param>
-        /// <param name="packet">The packet to send.</param>
-        internal void SendData(TaskHostNodeKey nodeKey, INodePacket packet)
-        {
-            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), "Invalid host context specified: {0}.", nodeKey);
+        /// <remarks>
+        /// Explicit <c>TaskFactory="TaskHostFactory"</c> requests disable node reuse before this
+        /// check. Among reusable task hosts, only sidecars stay connected. Hosts needed for a
+        /// different runtime or architecture remain pooled so other processes can use them.
+        ///
+        /// Behind <see cref="ChangeWaves.Wave18_12"/>: opting out pools every reusable task host.
+        /// Both endpoints must support cleanup acknowledgments. A legacy reuse flag alone does
+        /// not establish ownership.
+        /// </remarks>
+        protected override bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion)
+            => SupportsSidecarLifetime(handshakeOptions, negotiatedVersion)
+                && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
 
-            SendData(context, packet);
+        private static bool SupportsSidecarLifetime(HandshakeOptions handshakeOptions, byte negotiatedVersion)
+            => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                && negotiatedVersion >= NodePacketTypeExtensions.TaskHostOwnershipMinVersion
+                && !ExistsOnlyForCompatibility(handshakeOptions);
+
+        /// <summary>
+        /// Whether a task host with these options exists only because this process cannot run the
+        /// task itself, rather than to keep a task out of this process.
+        /// </summary>
+        internal static bool ExistsOnlyForCompatibility(HandshakeOptions handshakeOptions)
+        {
+            // A different runtime. CLR2 always is. .NET only when this process is not itself .NET.
+            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.CLR2))
+            {
+                return true;
+            }
+
+            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NET))
+            {
+#if NETFRAMEWORK
+                return true;
+#else
+                // Same runtime as this process. A .NET task host runs whatever architecture the SDK
+                // shipped and suppresses its architecture bits for that reason, so they carry no
+                // information here and there is nothing further to compare.
+                return false;
+#endif
+            }
+
+            // A different architecture. The handshake encodes only x64 and arm64, so no bit means
+            // x86 -- which differs from this process unless this process is itself x86.
+            bool wantsX64 = Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.X64);
+            bool wantsArm64 = Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.Arm64);
+
+            string requestedArchitecture = wantsX64
+                ? XMakeAttributes.MSBuildArchitectureValues.x64
+                : wantsArm64
+                    ? XMakeAttributes.MSBuildArchitectureValues.arm64
+                    : XMakeAttributes.MSBuildArchitectureValues.x86;
+
+            return !string.Equals(requestedArchitecture, XMakeAttributes.GetCurrentMSBuildArchitecture(), StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -212,12 +298,66 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            // Send the build completion message to the nodes, causing them to shutdown or reset.
+            if (_nodeContexts is null)
+            {
+                return;
+            }
+
             List<NodeContext> contextsToShutDown = [.. _nodeContexts.Values];
 
-            ShutdownConnectedNodes(contextsToShutDown, enableReuse);
+            // Processes that could not be connected to are skipped for the rest of a build; clear
+            // that for the next one, or a pooled task host this process failed to claim once is
+            // never retried and a new one is started instead. The worker node provider is shared
+            // across every build the process serves, so this would otherwise accumulate.
+            ClearProcessesToIgnore();
 
-            _noNodesActiveEvent.WaitOne();
+            bool waitForCleanup = false;
+
+            // Retire terminal sidecars before sending shutdown, so a new build cannot acquire them.
+            lock (_activeNodes)
+            {
+                foreach (NodeContext context in contextsToShutDown)
+                {
+                    if (!_nodeIdToNodeKey.TryGetValue(context.NodeId, out TaskHostNodeKey nodeKey))
+                    {
+                        continue;
+                    }
+
+                    if (!enableReuse && SupportsSidecarLifetime(nodeKey.HandshakeOptions, context.NegotiatedPacketVersion))
+                    {
+                        RetireNode(context.NodeId);
+                    }
+                    else
+                    {
+                        _activeNodes.Add(context.NodeId);
+                        waitForCleanup = true;
+                    }
+                }
+
+                if (_activeNodes.Count == 0)
+                {
+                    _noNodesActiveEvent.Set();
+                }
+                else
+                {
+                    _noNodesActiveEvent.Reset();
+                }
+            }
+
+            foreach (NodeContext context in contextsToShutDown)
+            {
+                NodeBuildCompleteAction action = !enableReuse
+                    ? NodeBuildCompleteAction.Shutdown
+                    : context.ConnectionPersistsAcrossBuilds
+                        ? NodeBuildCompleteAction.ReuseWithConnection
+                        : NodeBuildCompleteAction.Legacy;
+                context.SendData(new NodeBuildComplete(enableReuse, action));
+            }
+
+            if (waitForCleanup)
+            {
+                _noNodesActiveEvent.WaitOne();
+            }
         }
 
         /// <summary>
@@ -225,11 +365,34 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
+            // Sidecars stay connected between builds, so they are reachable here and wouldn't be found
+            // by the scan below, which looks for nodes this process is not connected to.
+            ShutdownConnectedNodes(enableReuse: false);
+
             ShutdownAllNodes(ComponentHost.BuildParameters.EnableNodeReuse, NodeContextTerminated);
         }
         #endregion
 
         #region IBuildComponent Members
+
+        /// <summary>
+        /// The connections this provider owns, or <see langword="null"/> before initialization.
+        /// FOR UNIT TESTING ONLY: a worker node process must keep the same set across every build it
+        /// serves, or task hosts that are still connected are lost.
+        /// </summary>
+        internal ConcurrentDictionary<TaskHostNodeKey, NodeContext> ConnectedNodes => _nodeContexts;
+
+        /// <summary>
+        /// The host of the build currently being served. FOR UNIT TESTING ONLY.
+        /// </summary>
+        internal IBuildComponentHost CurrentComponentHost => ComponentHost;
+
+        /// <summary>
+        /// Whether a node launched with these options keeps its connection between builds.
+        /// FOR UNIT TESTING ONLY.
+        /// </summary>
+        internal bool ConnectionPersists(HandshakeOptions handshakeOptions, byte negotiatedVersion = NodePacketTypeExtensions.PacketVersion)
+            => DoesConnectionPersistAcrossBuilds(handshakeOptions, negotiatedVersion);
 
         /// <summary>
         /// Initializes the component.
@@ -238,12 +401,27 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             ComponentHost = host;
+
+            // This provider outlives the component collection that resolved it. A worker node
+            // process serves many builds and constructs a fresh OutOfProcNode for each one (see
+            // MSBuildApp.StartLocalNode), while the task hosts it launched stay connected to this
+            // process across those builds. Re-initializing here would strand those connections:
+            // unreachable from this process because nothing references them, and unclaimable by any
+            // other because a task host pipe accepts only one connection at a time. So once the
+            // node state exists, only refresh the host.
+            if (_nodeContexts is not null)
+            {
+                return;
+            }
+
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
-            _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
-            _nodeIdToPacketHandler = new ConcurrentDictionary<int, INodePacketHandler>();
+            _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
+            _consoleForwardingNodeIds = [];
+            _consoleOutputForwarded = false;
             _activeNodes = [];
             _nextNodeId = 0;
+            _isShutDown = false;
 
             _noNodesActiveEvent = new ManualResetEvent(true);
             _localPacketFactory = new NodePacketFactory();
@@ -251,6 +429,15 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ConsoleWrite, ConsoleWritePacket.FactoryForDeserialization, this);
+
+            // Register callback request packet types so we can deserialize them when
+            // they arrive from TaskHost processes. These are forwarded to the current
+            // TaskHostTask handler via the handler stack.
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
         }
 
         /// <summary>
@@ -258,6 +445,28 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
+            lock (_consoleForwardingLock)
+            {
+                _isShutDown = !_processWide;
+                _consoleForwardingNodeIds.Clear();
+            }
+
+            if (!_processWide)
+            {
+                ShutdownConnectedNodes(enableReuse: false);
+            }
+        }
+
+        /// <summary>
+        /// Prevents packets from task hosts belonging to the completed build from reaching a later build's console.
+        /// </summary>
+        internal void ClearPerBuildState()
+        {
+            lock (_consoleForwardingLock)
+            {
+                _consoleForwardingNodeIds.Clear();
+                _consoleOutputForwarded = false;
+            }
         }
 
         #endregion
@@ -286,20 +495,17 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Takes a serializer, deserializes the packet and routes it to the appropriate handler.
+        /// Always uses the local packet factory for deserialization, which routes through
+        /// our PacketReceived method (using the handler stack).
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
-            {
-                nodePacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
-            }
-            else
-            {
-                _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
-            }
+            // Always route through our local factory which handles deserialization
+            // and routes to our PacketReceived, which uses the handler stack.
+            _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
         /// <summary>
@@ -313,20 +519,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Routes the specified packet
+        /// Routes the specified packet through our PacketReceived method (handler stack).
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
-            {
-                nodePacketFactory.RoutePacket(nodeId, packet);
-            }
-            else
-            {
-                _localPacketFactory.RoutePacket(nodeId, packet);
-            }
+            _localPacketFactory.RoutePacket(nodeId, packet);
         }
 
         #endregion
@@ -341,28 +540,90 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            if (_nodeIdToPacketHandler.TryGetValue(node, out INodePacketHandler packetHandler))
+            if (packet is NodeBuildComplete buildComplete)
             {
-                packetHandler.PacketReceived(node, packet);
-            }
-            else
-            {
-                ErrorUtilities.VerifyThrow(packet.Type == NodePacketType.NodeShutdown, "We should only ever handle packets of type NodeShutdown -- everything else should only come in when there's an active task");
-
-                // May also be removed by unnatural termination, so don't assume it's there
+                Assumed.True(buildComplete.PrepareForReuse);
+                Assumed.Equal(buildComplete.Action, NodeBuildCompleteAction.ReuseWithConnection);
                 lock (_activeNodes)
                 {
-                    if (_activeNodes.Contains(node))
-                    {
-                        _activeNodes.Remove(node);
-                    }
-
+                    _activeNodes.Remove(node);
                     if (_activeNodes.Count == 0)
                     {
                         _noNodesActiveEvent.Set();
                     }
                 }
+                return;
             }
+
+            if (packet.Type == NodePacketType.NodeShutdown)
+            {
+                INodePacketHandler[] handlers = [];
+                lock (_activeNodes)
+                {
+                    // Prevent a late acquisition from attaching after the terminal notification.
+                    if (_nodeIdToNodeKey.TryRemove(node, out TaskHostNodeKey nodeKey))
+                    {
+                        _nodeContexts.TryRemove(nodeKey, out _);
+                    }
+
+                    if (_nodeIdToPacketHandlerStack.TryRemove(node, out Stack<INodePacketHandler> shutdownHandlers))
+                    {
+                        lock (shutdownHandlers)
+                        {
+                            handlers = shutdownHandlers.ToArray();
+                            shutdownHandlers.Clear();
+                        }
+                    }
+                }
+
+                // Nested and blocked tasks all need the failure, not just the top of the stack.
+                foreach (INodePacketHandler handler in handlers)
+                {
+                    handler.PacketReceived(node, packet);
+                }
+                return;
+            }
+
+            if (packet is ConsoleWritePacket consoleWrite)
+            {
+                lock (_consoleForwardingLock)
+                {
+                    if (!_isShutDown && _consoleForwardingNodeIds.Contains(node))
+                    {
+                        switch (consoleWrite.OutputType)
+                        {
+                            case ConsoleOutput.Standard:
+                                Console.Out.Write(consoleWrite.Text);
+                                break;
+                            case ConsoleOutput.Error:
+                                Console.Error.Write(consoleWrite.Text);
+                                break;
+                            default:
+                                InternalError.Throw($"Unexpected console output type {consoleWrite.OutputType}");
+                                break;
+                        }
+
+                        _consoleOutputForwarded |= !string.IsNullOrEmpty(consoleWrite.Text);
+                    }
+                }
+
+                return;
+            }
+
+            if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack))
+            {
+                lock (handlerStack)
+                {
+                    if (handlerStack.Count > 0)
+                    {
+                        INodePacketHandler packetHandler = handlerStack.Peek();
+                        packetHandler.PacketReceived(node, packet);
+                        return;
+                    }
+                }
+            }
+
+            Assumed.Unreachable($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
         }
 
         #endregion
@@ -372,13 +633,33 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, "Factory cannot create components of type {0}", componentType);
+            Assumed.Equal(componentType, BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProcTaskHost();
         }
 
         /// <summary>
+        /// Factory for the provider shared by every build a worker node process serves.
+        /// </summary>
+        /// <remarks>
+        /// A task host launched with node reuse stays connected to the process that launched it, so
+        /// its connection is a process-lifetime resource. A worker node builds a fresh component
+        /// collection per build, so resolving a new provider each time would forget task hosts that
+        /// are still running and still connected: this process could no longer reach them, and no
+        /// other process could claim them either, because a task host pipe accepts only one
+        /// connection at a time. That strands one task host per worker per build and loses reuse
+        /// entirely, so the object owning those connections is scoped to the process.
+        /// </remarks>
+        internal static IBuildComponent CreateProcessWideComponent(BuildComponentType componentType)
+        {
+            Assumed.Equal(componentType, BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
+            return s_processWideInstance ??= new NodeProviderOutOfProcTaskHost(processWide: true);
+        }
+
+        /// <summary>
         /// Clears out our cached values for the various task host names and paths.
-        /// FOR UNIT TESTING ONLY
+        /// FOR UNIT TESTING ONLY. Must not be called concurrently with methods that
+        /// read or populate these statics (e.g. GetMSBuildExecutablePathForNonNETRuntimes),
+        /// otherwise cleared fields may be partially reinstated by an in-flight caller.
         /// </summary>
         internal static void ClearCachedTaskHostPaths()
         {
@@ -399,25 +680,26 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
             {
                 return TaskHostNameForClr2TaskHost;
             }
 
-            if (string.IsNullOrEmpty(s_msbuildName))
+            string name = s_msbuildName;
+            if (string.IsNullOrEmpty(name))
             {
-                s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-                if (!string.IsNullOrEmpty(s_msbuildName))
+                name = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
+                if (string.IsNullOrEmpty(name))
                 {
-                    return s_msbuildName;
+                    // Default based on whether it's .NET or Framework
+                    name = Constants.MSBuildExecutableName;
                 }
 
-                // Default based on whether it's .NET or Framework
-                s_msbuildName = Constants.MSBuildExecutableName;
+                s_msbuildName = name;
             }
 
-            return s_msbuildName;
+            return name;
         }
 
         /// <summary>
@@ -430,12 +712,33 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         internal static string GetMSBuildExecutablePathForNonNETRuntimes(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
             var toolName = GetTaskHostNameFromHostContext(hostContext);
-            s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
-            s_baseTaskHostPathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
+
+            // Snapshot to locals so concurrent callers never read a null static
+            // that another thread hasn't written yet. Redundant computation is
+            // harmless — BuildEnvironmentHelper properties are deterministic.
+            string basePath = s_baseTaskHostPath;
+            if (basePath is null)
+            {
+                basePath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+                s_baseTaskHostPath = basePath;
+            }
+
+            string basePath64 = s_baseTaskHostPath64;
+            if (basePath64 is null)
+            {
+                basePath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
+                s_baseTaskHostPath64 = basePath64;
+            }
+
+            string basePathArm64 = s_baseTaskHostPathArm64;
+            if (basePathArm64 is null)
+            {
+                basePathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
+                s_baseTaskHostPathArm64 = basePathArm64;
+            }
 
             bool isX64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64);
             bool isArm64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
@@ -443,27 +746,24 @@ namespace Microsoft.Build.BackEnd
 
             if (isCLR2)
             {
-                if (isArm64)
-                {
-                    ErrorUtilities.ThrowInternalError("ARM64 CLR2 task hosts are not supported.");
-                }
+                Assumed.False(isArm64, "ARM64 CLR2 task hosts are not supported.");
 
                 return isX64
-                    ? Path.Combine(GetOrInitializeX64Clr2Path(toolName), toolName)
-                    : Path.Combine(GetOrInitializeX32Clr2Path(toolName), toolName);
+                    ? Path.Combine(GetOrInitializeX64Clr2Path(toolName, basePath64), toolName)
+                    : Path.Combine(GetOrInitializeX32Clr2Path(toolName, basePath), toolName);
             }
 
             if (isX64)
             {
-                return Path.Combine(s_pathToX64Clr4 ??= s_baseTaskHostPath64, toolName);
+                return Path.Combine(s_pathToX64Clr4 ??= basePath64, toolName);
             }
 
             if (isArm64)
             {
-                return Path.Combine(s_pathToArm64Clr4 ??= s_baseTaskHostPathArm64, toolName);
+                return Path.Combine(s_pathToArm64Clr4 ??= basePathArm64, toolName);
             }
 
-            return Path.Combine(s_pathToX32Clr4 ??= s_baseTaskHostPath, toolName);
+            return Path.Combine(s_pathToX32Clr4 ??= basePath, toolName);
         }
 
         /// <summary>
@@ -476,7 +776,7 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         internal static (string RuntimeHostPath, string MSBuildPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
             return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters));
         }
@@ -503,12 +803,12 @@ namespace Microsoft.Build.BackEnd
 
                 if (string.IsNullOrEmpty(path))
                 {
-                    ErrorUtilities.ThrowInternalError(ResourceUtilities.GetResourceString("SDKPathResolution_Failed"));
+                    InternalError.Throw(ResourceUtilities.GetResourceString("SDKPathResolution_Failed"));
                 }
 
                 if (!FileSystems.Default.DirectoryExists(path))
                 {
-                    ErrorUtilities.ThrowInternalError(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SDKPathCheck_Failed", path));
+                    InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SDKPathCheck_Failed", path));
                 }
 
                 var sdkVersion = ExtractSdkVersionFromPath(path);
@@ -559,18 +859,14 @@ namespace Microsoft.Build.BackEnd
                 : null;
         }
 
-        private static string GetOrInitializeX64Clr2Path(string toolName)
+        private static string GetOrInitializeX64Clr2Path(string toolName, string basePath64)
         {
-            s_pathToX64Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION64", s_baseTaskHostPath64, toolName);
-
-            return s_pathToX64Clr2;
+            return s_pathToX64Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION64", basePath64, toolName);
         }
 
-        private static string GetOrInitializeX32Clr2Path(string toolName)
+        private static string GetOrInitializeX32Clr2Path(string toolName, string basePath)
         {
-            s_pathToX32Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION", s_baseTaskHostPath, toolName);
-
-            return s_pathToX32Clr2;
+            return s_pathToX32Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION", basePath, toolName);
         }
 
         private static string GetPathFromEnvironmentOrDefault(string environmentVariable, string defaultPath, string toolName)
@@ -597,11 +893,19 @@ namespace Microsoft.Build.BackEnd
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            in TaskHostParameters taskHostParameters)
+            in TaskHostParameters taskHostParameters,
+            out int hostProcessId,
+            out bool wasNewlyCreated,
+            out NodeContext connection)
         {
+            hostProcessId = -1;
+            wasNewlyCreated = false;
+            connection = null;
+
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(nodeKey))
             {
+                wasNewlyCreated = true;
                 nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
             }
             else
@@ -612,12 +916,42 @@ namespace Microsoft.Build.BackEnd
 
             if (nodeCreationSucceeded)
             {
-                NodeContext context = _nodeContexts[nodeKey];
-                // Map the transport ID directly to the handlers for O(1) packet routing
-                _nodeIdToPacketFactory[context.NodeId] = factory;
-                _nodeIdToPacketHandler[context.NodeId] = handler;
+                if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
+                {
+                    return false;
+                }
+
+                // A sidecar retained from an earlier build is idle, so re-activate it: shutdown
+                // waits only for nodes marked active, and would otherwise not wait for this one.
+                if (!TryAttachTaskHandler(context, handler))
+                {
+                    return false;
+                }
+
+                try
+                {
+                    hostProcessId = context.Process?.Id ?? -1;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
+                    hostProcessId = -1;
+                }
 
                 // Configure the node.
+                connection = context;
+                lock (_consoleForwardingLock)
+                {
+                    if (!_isShutDown &&
+                        nodeKey.ForwardConsoleOutput &&
+                        nodeKey.NodeId == NodeManager.FirstMultiThreadedNodeId &&
+                        context.NegotiatedPacketVersion >= NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion &&
+                        _consoleForwardingNodeIds.Add(context.NodeId))
+                    {
+                        context.SendData(new TaskHostConsoleConfiguration());
+                    }
+                }
+
                 context.SendData(configuration);
                 return true;
             }
@@ -628,23 +962,28 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Expected to be called when TaskHostTask is done with host of the given context.
         /// </summary>
-        internal void DisconnectFromHost(TaskHostNodeKey nodeKey)
+        internal void DisconnectFromHost(NodeContext context, INodePacketHandler handler)
         {
-            // The node context might already have been removed by NodeContextTerminated if the task host
-            // process terminated before we got here. This is a valid race condition - just return early.
-            // Note: NodeContextTerminated does NOT remove handlers, so they'll be orphaned in this case,
-            // but that's acceptable since the task host is dead and the handlers will be cleaned up
-            // when the provider is shut down.
-            if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
+            lock (_activeNodes)
             {
-                CommunicationsUtilities.Trace("DisconnectFromHost: Node context already removed for key: {0}", nodeKey);
-                return;
+                int nodeId = context.NodeId;
+
+                if (_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlerStack))
+                {
+                    lock (handlerStack)
+                    {
+                        if (handlerStack.Count > 0 && ReferenceEquals(handlerStack.Peek(), handler))
+                        {
+                            handlerStack.Pop();
+                        }
+
+                        if (handlerStack.Count == 0)
+                        {
+                            _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
+                        }
+                    }
+                }
             }
-
-            bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(context.NodeId, out _);
-            bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(context.NodeId, out _);
-
-            ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
         }
 
         /// <summary>
@@ -652,8 +991,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, in TaskHostParameters taskHostParameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory);
-            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
+            ArgumentNullException.ThrowIfNull(factory);
+            Assumed.False(_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 
@@ -670,7 +1009,7 @@ namespace Microsoft.Build.BackEnd
                 return default;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext, nodeLaunchData.MSBuildLocation);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, spawning executable from {nodeLaunchData.MSBuildLocation}.");
 
             IList<NodeContext> nodeContexts = GetNodes(
                 nodeLaunchData,
@@ -730,8 +1069,8 @@ namespace Microsoft.Build.BackEnd
             HandshakeOptions hostContext,
             bool nodeReuseEnabled)
         {
-            string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
             string commandLineArgs = BuildCommandLineArgs(nodeReuseEnabled);
+            (string launchPath, bool useAppHost) = ResolveNetTaskHostLaunchPath(msbuildAssemblyPath);
 
             // The child task host (NodeEndpointOutOfProcTaskHost) computes its handshake
             // toolsDirectory from BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot,
@@ -743,7 +1082,7 @@ namespace Microsoft.Build.BackEnd
             //
             // On .NET Core, parent and child are always from the same SDK directory. Passing
             // msbuildAssemblyPath from $(NetCoreSdkRoot) can cause a handshake mismatch on
-            // macOS where /tmp → /private/tmp symlink means the property value differs from
+            // macOS where /tmp -> /private/tmp symlink means the property value differs from
             // AppContext.BaseDirectory. By omitting toolsDirectory, both sides default to
             // BuildEnvironmentHelper which resolves symlinks consistently.
 #if RUNTIME_TYPE_NETCORE
@@ -752,16 +1091,16 @@ namespace Microsoft.Build.BackEnd
             Handshake handshake = new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath);
 #endif
 
-            if (FileSystems.Default.FileExists(appHostPath))
+            if (useAppHost)
             {
-                CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {launchPath}.");
 
-                IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
+                var dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
 
                 return dotnetOverrides == null
                     ? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet"))
                     : new NodeLaunchData(
-                        appHostPath,
+                        launchPath,
                         commandLineArgs,
                         handshake,
                         dotnetOverrides);
@@ -776,12 +1115,27 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, resolvedDotnetHostPath);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found, falling back to dotnet.exe ({resolvedDotnetHostPath}) hosting {launchPath}.");
 
             return new NodeLaunchData(
                 resolvedDotnetHostPath,
-                $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
+                $"\"{launchPath}\" {commandLineArgs}",
                 handshake);
+        }
+
+        /// <summary>
+        /// Resolves the .NET task host launch target for an SDK directory: the MSBuild app host
+        /// (<c>MSBuild[.exe]</c>) when present, otherwise <c>MSBuild.dll</c> (which is launched via
+        /// <c>dotnet[.exe]</c>). Single source of truth for the apphost-vs-fallback decision,
+        /// shared by the launch path and any caller that needs to describe the launch target
+        /// (e.g. error messages).
+        /// </summary>
+        internal static (string LaunchPath, bool UseAppHost) ResolveNetTaskHostLaunchPath(string msbuildAssemblyPath)
+        {
+            string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
+            return FileSystems.Default.FileExists(appHostPath)
+                ? (appHostPath, true)
+                : (Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), false);
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
@@ -789,15 +1143,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method called when a context created.
         /// </summary>
-        private void NodeContextCreated(NodeContext context, TaskHostNodeKey nodeKey)
+        internal void NodeContextCreated(NodeContext context, TaskHostNodeKey nodeKey)
         {
-            _nodeContexts[nodeKey] = context;
-            _nodeIdToNodeKey[context.NodeId] = nodeKey;
-
             lock (_activeNodes)
             {
-                _activeNodes.Add(context.NodeId);
-                _noNodesActiveEvent.Reset();
+                _nodeContexts[nodeKey] = context;
+                _nodeIdToNodeKey[context.NodeId] = nodeKey;
+                TryActivateNode(context);
             }
 
             // Start the asynchronous read.
@@ -805,19 +1157,76 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Method called when a context terminates (called from CreateNode callbacks or ShutdownAllNodes).
+        /// Marks a node as participating in the current build, so that shutdown waits for it.
         /// </summary>
-        private void NodeContextTerminated(int nodeId)
+        /// <returns>
+        /// <see langword="false"/> if the node is no longer tracked, meaning its process went away
+        /// between being looked up and being used, in which case the caller must not use it.
+        /// </returns>
+        private bool TryActivateNode(NodeContext context)
         {
-            // Remove from nodeKey-based lookup if we have it
-            if (_nodeIdToNodeKey.TryRemove(nodeId, out TaskHostNodeKey nodeKey))
-            {
-                _nodeContexts.TryRemove(nodeKey, out _);
-            }
-
-            // May also be removed by unnatural termination, so don't assume it's there
             lock (_activeNodes)
             {
+                if (!_nodeIdToNodeKey.ContainsKey(context.NodeId))
+                {
+                    return false;
+                }
+
+                if (_activeNodes.Add(context.NodeId))
+                {
+                    _noNodesActiveEvent.Reset();
+                }
+
+                return true;
+            }
+        }
+
+        internal bool TryAttachTaskHandler(NodeContext context, INodePacketHandler handler)
+        {
+            lock (_activeNodes)
+            {
+                if (!TryActivateNode(context))
+                {
+                    return false;
+                }
+
+                Stack<INodePacketHandler> handlers = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
+                lock (handlers)
+                {
+                    handlers.Push(handler);
+                }
+                return true;
+            }
+        }
+
+        internal int TaskHandlerRegistrationCount => _nodeIdToPacketHandlerStack.Count;
+
+        /// <summary>
+        /// Method called when a context terminates (called from CreateNode callbacks or ShutdownAllNodes).
+        /// </summary>
+        internal void NodeContextTerminated(int nodeId)
+        {
+            lock (_consoleForwardingLock)
+            {
+                _consoleForwardingNodeIds.Remove(nodeId);
+            }
+
+            lock (_activeNodes)
+            {
+                RetireNode(nodeId);
+                _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
+            }
+        }
+
+        // Stop acquisition and shutdown waits, but keep handlers until the connection notifies them.
+        private void RetireNode(int nodeId)
+        {
+            lock (_activeNodes)
+            {
+                if (_nodeIdToNodeKey.TryRemove(nodeId, out TaskHostNodeKey nodeKey))
+                {
+                    _nodeContexts.TryRemove(nodeKey, out _);
+                }
                 _activeNodes.Remove(nodeId);
 
                 if (_activeNodes.Count == 0)

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -7,10 +7,14 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if FEATURE_WINDOWSINTEROP
+using Microsoft.Build.Tasks.Fusion;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+#endif
 
 #nullable disable
 
@@ -56,8 +60,8 @@ namespace Microsoft.Build.Tasks
         private static string GetLocationImpl(AssemblyNameExtension assemblyName, string targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
-            ErrorUtilities.VerifyThrow(assemblyName.FullName != null, "Got a null assembly name fullname.");
+            ArgumentNullException.ThrowIfNull(assemblyName);
+            Assumed.NotNull(assemblyName.FullName, "Got a null assembly name fullname.");
 
             string strongName = assemblyName.FullName;
 
@@ -117,7 +121,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static SortedDictionary<Version, SortedDictionary<AssemblyNameExtension, string>> GenerateListOfAssembliesByRuntime(string strongName, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetedRuntime);
+            ArgumentNullException.ThrowIfNull(targetedRuntime);
 
             IEnumerable<AssemblyNameExtension> gacEnum = getGacEnumerator(strongName);
 
@@ -175,41 +179,47 @@ namespace Microsoft.Build.Tasks
         /// Given a fusion name get the path to the assembly on disk.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Microsoft.Build.Tasks.IAssemblyCache.QueryAssemblyInfo(System.UInt32,System.String,Microsoft.Build.Tasks.ASSEMBLY_INFO@)", Justification = "We use the out parameters to determine if we got a good assembly back or not")]
-        internal static string RetrievePathFromFusionName(string strongName)
+#if FEATURE_WINDOWSINTEROP
+        internal static unsafe string RetrievePathFromFusionName(string strongName)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(strongName);
+            ArgumentNullException.ThrowIfNull(strongName);
 
-            string value;
+            // net472-only = inherently Windows. Manual struct-based COM (see Fusion folder).
+            using ComScope<IAssemblyCache> assemblyCache = new(null);
+            HRESULT hr = Fusion.NativeMethods.CreateAssemblyCache(assemblyCache, 0);
+            Assumed.Equal(hr, HRESULT.S_OK, $"CreateAssemblyCache failed, hr {hr}");
 
-            if (NativeMethodsShared.IsWindows)
+            ASSEMBLY_INFO assemblyInfo = default;
+            assemblyInfo.cbAssemblyInfo = (uint)sizeof(ASSEMBLY_INFO);
+
+            fixed (char* pStrongName = strongName)
             {
-                uint hr = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);
-
-                ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
-
-                var assemblyInfo = new ASSEMBLY_INFO { cbAssemblyInfo = (uint)Marshal.SizeOf<ASSEMBLY_INFO>() };
-
-                assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
+                assemblyCache.Pointer->QueryAssemblyInfo(0, pStrongName, &assemblyInfo);
 
                 if (assemblyInfo.cbAssemblyInfo == 0)
                 {
                     return null;
                 }
 
-                assemblyInfo.pszCurrentAssemblyPathBuf = new string(new char[assemblyInfo.cchBuf]);
+                char[] pathBuffer = new char[assemblyInfo.cchBuf];
+                fixed (char* pPathBuffer = pathBuffer)
+                {
+                    assemblyInfo.pszCurrentAssemblyPathBuf = pPathBuffer;
+                    assemblyCache.Pointer->QueryAssemblyInfo(0, pStrongName, &assemblyInfo);
 
-                assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
+                    // cchBuf includes the null terminator; trim it.
+                    int length = (int)assemblyInfo.cchBuf;
+                    if (length > 0 && pathBuffer[length - 1] == '\0')
+                    {
+                        length--;
+                    }
 
-                value = assemblyInfo.pszCurrentAssemblyPathBuf;
+                    return new string(pathBuffer, 0, length);
+                }
             }
-            else
-            {
-                value = NativeMethods.AssemblyCacheEnum.AssemblyPathFromStrongName(strongName);
-            }
-
-            return value;
         }
+#endif
 
         /// <summary>
         /// If we know we have a full fusion name we can skip enumerating the gac and just query for the path. This will
@@ -280,7 +290,12 @@ namespace Microsoft.Build.Tasks
             bool specificVersion)
         {
             ConcurrentDictionary<AssemblyNameExtension, string> fusionNameToResolvedPath = null;
+            // The GAC is a process-wide / machine-wide resource, so the MSBUILDDISABLEGACRARCACHE
+            // opt-out is read from the process environment rather than the per-task TaskEnvironment.
+            // Per-task overrides of MSBUILD* environment variables are not supported.
+#pragma warning disable MSBuildTask0002
             bool useGacRarCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEGACRARCACHE") == null;
+#pragma warning restore MSBuildTask0002
             if (buildEngine != null && useGacRarCache)
             {
                 string key = $"44d78b60-3bbe-48fe-9493-04119ebf515f|{targetProcessorArchitecture}|{targetedRuntimeVersion}|{fullFusionName}|{specificVersion}";
@@ -379,16 +394,24 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Return the root path of the GAC.
         /// </summary>
+#if FEATURE_WINDOWSINTEROP
         internal static string GetGacPath()
         {
-            int gacPathLength = 0;
+            uint gacPathLength = 0;
             unsafe
             {
-                NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, null, ref gacPathLength);
-                char* gacPath = stackalloc char[gacPathLength];
-                NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, gacPath, ref gacPathLength);
-                return new string(gacPath, 0, gacPathLength - 1);
+                Fusion.NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, null, &gacPathLength);
+                char* gacPath = stackalloc char[(int)gacPathLength];
+                Fusion.NativeMethods.GetCachePath(AssemblyCacheFlags.GAC, gacPath, &gacPathLength);
+                return new string(gacPath, 0, (int)gacPathLength - 1);
             }
         }
+#else
+        internal static string RetrievePathFromFusionName(string strongName)
+            => throw new PlatformNotSupportedException();
+
+        internal static string GetGacPath()
+            => throw new PlatformNotSupportedException();
+#endif
     }
 }

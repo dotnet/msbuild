@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks
     public sealed class VerifyFileHash : TaskExtension, ICancelableTask, IMultiThreadableTask
     {
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// The file path.

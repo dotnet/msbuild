@@ -1,0 +1,15 @@
+<Project>
+  <!-- ExampleTaskPath is passed as a global property from the parent -->
+  <UsingTask
+      TaskName="Microsoft.Build.UnitTests.BackEnd.BuildProjectFileAndReportPidTask"
+      AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
+      Runtime="NET"/>
+
+  <Target Name="ReportPid">
+    <Microsoft.Build.UnitTests.BackEnd.BuildProjectFileAndReportPidTask>
+      <Output PropertyName="ChildPid" TaskParameter="ProcessId" />
+    </Microsoft.Build.UnitTests.BackEnd.BuildProjectFileAndReportPidTask>
+    <Message Text="CHILD_TASKHOST_PID=$(ChildPid)" Importance="high" />
+  </Target>
+</Project>

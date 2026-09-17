@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_paths, nameof(Paths));
+                ArgumentNullException.ThrowIfNull(_paths, nameof(Paths));
                 return _paths;
             }
 

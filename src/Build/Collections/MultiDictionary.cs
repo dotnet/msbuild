@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -117,7 +116,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Add(K key, V value)
         {
-            ErrorUtilities.VerifyThrow(value != null, "Null value not allowed");
+            Assumed.NotNull(value, "Null value not allowed");
 
             if (!_backing.TryGetValue(key, out SmallList<V> entry))
             {
@@ -137,7 +136,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(K key, V value)
         {
-            ErrorUtilities.VerifyThrow(value != null, "Null value not allowed");
+            Assumed.NotNull(value, "Null value not allowed");
 
             if (!_backing.TryGetValue(key, out SmallList<V> entry))
             {

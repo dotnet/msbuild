@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -171,17 +171,17 @@ namespace Microsoft.Build.Construction
         internal ProjectRootElement(XmlReader xmlReader, ProjectRootElementCacheBase projectRootElementCache, bool isExplicitlyLoaded,
             bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlReader);
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
+            ArgumentNullException.ThrowIfNull(xmlReader);
+            ArgumentNullException.ThrowIfNull(projectRootElementCache);
 
             IsExplicitlyLoaded = isExplicitlyLoaded;
             ProjectRootElementCache = projectRootElementCache;
-            _directory = NativeMethodsShared.GetCurrentDirectory();
+            _directory = Environment.CurrentDirectory;
             IncrementVersion();
 
             XmlDocumentWithLocation document = LoadDocument(xmlReader, preserveFormatting);
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.ParserIgnoreConfiguration);
         }
 
         private readonly bool _isEphemeral = false;
@@ -198,10 +198,10 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
+            ArgumentNullException.ThrowIfNull(projectRootElementCache);
 
             ProjectRootElementCache = projectRootElementCache;
-            _directory = NativeMethodsShared.GetCurrentDirectory();
+            _directory = Environment.CurrentDirectory;
             IncrementVersion();
 
             var document = new XmlDocumentWithLocation();
@@ -217,7 +217,7 @@ namespace Microsoft.Build.Construction
                 document.Load(xr);
             }
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -230,9 +230,9 @@ namespace Microsoft.Build.Construction
                 ProjectRootElementCacheBase projectRootElementCache,
                 bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path);
+            ArgumentException.ThrowIfNullOrEmpty(path);
             ErrorUtilities.VerifyThrowInternalRooted(path);
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
+            ArgumentNullException.ThrowIfNull(projectRootElementCache);
             ProjectRootElementCache = projectRootElementCache;
 
             IncrementVersion();
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Construction
 
             XmlDocumentWithLocation document = LoadDocument(path, preserveFormatting, projectRootElementCache.LoadProjectsReadOnly);
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -254,14 +254,14 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(document);
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
+            ArgumentNullException.ThrowIfNull(document);
+            ArgumentNullException.ThrowIfNull(projectRootElementCache);
 
             ProjectRootElementCache = projectRootElementCache;
-            _directory = NativeMethodsShared.GetCurrentDirectory();
+            _directory = Environment.CurrentDirectory;
             IncrementVersion();
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -273,7 +273,9 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document)
         {
-            ProjectParser.Parse(document, this);
+            // This constructor is only used by ThrowIfDocumentHasParsingErrors to check whether a document
+            // parses; it deliberately has no cache, so there is no configuration to apply.
+            ProjectParser.Parse(document, this, ProjectRootElementCache?.ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -415,7 +417,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value);
+                ArgumentException.ThrowIfNullOrEmpty(value);
                 if (Link != null)
                 {
                     RootLink.FullPath = value;
@@ -644,13 +646,7 @@ namespace Microsoft.Build.Construction
         /// This does not allow conditions, so it should not be called.
         /// </summary>
         public override ElementLocation ConditionLocation
-        {
-            get
-            {
-                ErrorUtilities.ThrowInternalError("Should not evaluate this");
-                return null;
-            }
-        }
+            => InternalError.Throw<ElementLocation>("Should not evaluate this");
 
         /// <summary>
         /// Location of the originating file itself, not any specific content within it.
@@ -737,7 +733,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectRootElement CreateEphemeral(ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
+            ArgumentNullException.ThrowIfNull(projectRootElementCache);
 
             return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions, isEphemeral: true);
         }
@@ -774,7 +770,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(ProjectCollection projectCollection, NewProjectFileOptions projectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             return Create(projectCollection.ProjectRootElementCache, projectFileOptions);
         }
@@ -812,8 +808,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(string path, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path);
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentException.ThrowIfNullOrEmpty(path);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             var projectRootElement = new ProjectRootElement(
                 projectCollection.ProjectRootElementCache,
@@ -850,7 +846,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(XmlReader xmlReader, ProjectCollection projectCollection, bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             return new ProjectRootElement(xmlReader, projectCollection.ProjectRootElementCache, true /*Explicitly loaded*/,
                 preserveFormatting);
@@ -883,8 +879,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path);
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentException.ThrowIfNullOrEmpty(path);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             path = FileUtilities.NormalizePath(path);
 
@@ -903,7 +899,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path);
+            ArgumentException.ThrowIfNullOrEmpty(path);
 
             return TryOpen(path, ProjectCollection.GlobalProjectCollection);
         }
@@ -940,8 +936,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path);
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentException.ThrowIfNullOrEmpty(path);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             path = FileUtilities.NormalizePath(path);
 
@@ -957,7 +953,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportElement AddImport(string project)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(project);
+            ArgumentException.ThrowIfNullOrEmpty(project);
 
             ProjectImportGroupElement importGroupToAddTo =
                 ImportGroupsReversed.FirstOrDefault(importGroup => importGroup.Condition.Length <= 0);
@@ -1014,8 +1010,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public ProjectItemElement AddItem(string itemType, string include, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType);
-            ErrorUtilities.VerifyThrowArgumentLength(include);
+            ArgumentException.ThrowIfNullOrEmpty(itemType);
+            ArgumentException.ThrowIfNullOrEmpty(include);
 
             ProjectItemGroupElement itemGroupToAddTo = null;
 
@@ -1091,7 +1087,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemDefinitionElement AddItemDefinition(string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType);
+            ArgumentException.ThrowIfNullOrEmpty(itemType);
 
             ProjectItemDefinitionGroupElement itemDefinitionGroupToAddTo = null;
 
@@ -1727,7 +1723,7 @@ namespace Microsoft.Build.Construction
 
             RemoveAllChildren();
 
-            ProjectParser.Parse(newDocument, this);
+            ProjectParser.Parse(newDocument, this, ProjectRootElementCache.ParserIgnoreConfiguration);
 
             MarkDirty("Project reloaded", null);
         }
@@ -1782,7 +1778,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ProjectRootElement Open(XmlDocumentWithLocation document)
         {
-            ErrorUtilities.VerifyThrow(document.FullPath == null, "Only virtual documents supported");
+            Assumed.Null(document.FullPath, "Only virtual documents supported");
 
             return new ProjectRootElement(document, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
         }
@@ -1821,7 +1817,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal XmlElementWithLocation CreateElement(string name, ElementLocation location = null)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
             return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace, location);
         }
 
@@ -1882,8 +1878,8 @@ namespace Microsoft.Build.Construction
         /// <param name="project">The dirtied project.</param>
         internal void MarkProjectDirty(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project);
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            ArgumentNullException.ThrowIfNull(project);
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             // Only bubble this event up if the cache knows about this PRE, which is equivalent to
             // whether this PRE has a path.
@@ -2168,7 +2164,7 @@ namespace Microsoft.Build.Construction
         {
             if (HasUnsavedChanges && throwIfUnsavedChanges)
             {
-                ErrorUtilities.ThrowInvalidOperation("NoReloadOnUnsavedChanges", null);
+                ErrorUtilities.ThrowInvalidOperation("NoReloadOnUnsavedChanges");
             }
         }
     }

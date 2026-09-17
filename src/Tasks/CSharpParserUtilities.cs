@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks
                             result.IsInsideConditionalBlock = true;
                         }
                     }
-                    else if (t.InnerText == "class")
+                    else if (t.InnerText == "class" || t.InnerText == "record")
                     {
                         state.ResolvingClass = true;
                         if (state.InsideConditionalDirective)

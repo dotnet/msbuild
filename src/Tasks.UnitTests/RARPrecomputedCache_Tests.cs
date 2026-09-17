@@ -87,7 +87,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // Write precomputed cache
                 rarWriterTask.WriteStateFile();
 
-                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference();
+                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference()
+                {
+                };
                 rarReaderTask.StateFile = standardCache.Path;
                 rarReaderTask.AssemblyInformationCachePaths = new ITaskItem[]
                 {
@@ -131,7 +133,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.Delete(precomputedCache.Path);
                 rarWriterTask.WriteStateFile();
 
-                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference();
+                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference()
+                {
+                };
                 rarReaderTask.StateFile = precomputedCache.Path.Substring(0, precomputedCache.Path.Length - 6); // Not a real path; should not be used.
                 rarReaderTask.AssemblyInformationCachePaths = new ITaskItem[]
                 {

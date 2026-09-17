@@ -9,7 +9,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -80,7 +79,7 @@ namespace Microsoft.Build.BackEnd
             Lookup lookup,
             int bucketSequenceNumber)
         {
-            ErrorUtilities.VerifyThrow(lookup != null, "Need lookup.");
+            Assumed.NotNull(lookup, "Need lookup.");
 
             // Create our own lookup just for this bucket
             _lookup = lookup.Clone();

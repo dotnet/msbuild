@@ -1275,7 +1275,7 @@ namespace Microsoft.Build.UnitTests
                 Environment.NewLine,
                 actualContent.Split(MSBuildConstants.CrLf)
                              .Select(line => line.Trim())
-                             .Where(line => line.Length > 0 && !line.StartsWith(commentStart)));
+                             .Where(line => line.Length > 0 && !line.StartsWith(commentStart, StringComparison.Ordinal)));
 
             expectedContent.ShouldBe(normalizedActualContent);
         }
@@ -1312,7 +1312,7 @@ namespace Microsoft.Build.UnitTests
                 // Helper function to extract the WriteCodeFragment comment from generated code
                 static string ExtractMSBuildComment(string content) =>
                     content.Split(MSBuildConstants.CrLf)
-                           .FirstOrDefault(line => line.Trim().StartsWith("//") && line.Contains("MSBuild"));
+                           .FirstOrDefault(line => line.Trim().StartsWith("//", StringComparison.Ordinal) && line.Contains("MSBuild"));
                 
                 string comment = ExtractMSBuildComment(content);
                 

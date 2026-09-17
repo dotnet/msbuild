@@ -250,9 +250,7 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return globalProperties ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                    ? ImmutableDictionary<string, string>.Empty
-                    : null);
+                return globalProperties ?? ImmutableDictionary<string, string>.Empty;
             }
 
             internal set
@@ -301,9 +299,7 @@ namespace Microsoft.Build.Framework
                 // up the live list of properties from the loaded project, which is stored in the configuration as well.
                 // By doing this, we no longer need to transmit properties using this message because they've already
                 // been transmitted as part of the BuildRequestConfiguration.
-                return properties ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                    ? (DictionaryEntry[])[]
-                    : null);
+                return properties ?? (DictionaryEntry[])[];
             }
         }
 
@@ -327,9 +323,7 @@ namespace Microsoft.Build.Framework
                 // case, this access is to the live list.  For the central logger in the multi-proc case, the main node
                 // has likely not loaded this project, and therefore the live items would not be available to them, which is
                 // the same as the current functionality.
-                return items ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                    ? (DictionaryEntry[])[]
-                    : null);
+                return items ?? (DictionaryEntry[])[];
             }
         }
 

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -50,8 +50,17 @@ namespace Microsoft.Build.Graph
         private readonly ProjectInterpretation _projectInterpretation;
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
+        private readonly ProjectGraphMode _graphMode;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
         private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
+
+        /// <summary>
+        /// Tracks which projects are referencing each project. Used to provide better error messages
+        /// when a referenced project fails to load.
+        /// Key: The project being referenced
+        /// Value: Set of projects that reference it
+        /// </summary>
+        private readonly ConcurrentDictionary<ConfigurationMetadata, ConcurrentBag<string>> _projectReferrers = new();
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -59,6 +68,7 @@ namespace Microsoft.Build.Graph
             ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory,
             ProjectInterpretation projectInterpretation,
             int degreeOfParallelism,
+            ProjectGraphMode mode,
             CancellationToken cancellationToken)
         {
             var (actualEntryPoints, solutionDependencies) = ExpandSolutionIfPresent(entryPoints.ToImmutableArray());
@@ -77,6 +87,7 @@ namespace Microsoft.Build.Graph
             _projectCollection = projectCollection;
             _projectInstanceFactory = projectInstanceFactory;
             _projectInterpretation = projectInterpretation;
+            _graphMode = mode;
         }
 
         public void BuildGraph()
@@ -220,12 +231,12 @@ namespace Microsoft.Build.Graph
             {
                 var referencingProjectPath = solutionDependency.Key;
 
-                ErrorUtilities.VerifyThrow(projectsByPath.TryGetValue(referencingProjectPath, out var referencingNodes), "nodes should include solution projects");
+                Assumed.True(projectsByPath.TryGetValue(referencingProjectPath, out var referencingNodes), "nodes should include solution projects");
 
                 var referencedNodes = solutionDependency.Value.SelectMany(
                     referencedProjectPath =>
                     {
-                        ErrorUtilities.VerifyThrow(projectsByPath.TryGetValue(referencedProjectPath, out List<ProjectGraphNode> projectToReturn), "nodes should include solution projects");
+                        Assumed.True(projectsByPath.TryGetValue(referencedProjectPath, out List<ProjectGraphNode> projectToReturn), "nodes should include solution projects");
                         return projectToReturn;
                     }).ToArray();
 
@@ -452,9 +463,7 @@ namespace Microsoft.Build.Graph
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(
-                        state == NodeVisitationState.Processed,
-                        "entrypoints should get processed after a call to detect cycles");
+                    Assumed.Equal(state, NodeVisitationState.Processed, "entrypoints should get processed after a call to detect cycles");
                 }
             }
 
@@ -528,10 +537,44 @@ namespace Microsoft.Build.Graph
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
 
-            var projectInstance = _projectInstanceFactory(
-                configurationMetadata.ProjectFullPath,
-                globalProperties,
-                _projectCollection);
+            ProjectInstance projectInstance;
+            try
+            {
+                projectInstance = _projectInstanceFactory(
+                    configurationMetadata.ProjectFullPath,
+                    globalProperties,
+                    _projectCollection);
+            }
+            catch (InvalidProjectFileException ex) when (_projectReferrers.TryGetValue(configurationMetadata, out var referrers) && !referrers.IsEmpty)
+            {
+                // Enrich the exception with information about which project(s) referenced this project
+                string referrerList = string.Join(", ", referrers.Distinct().OrderBy(r => r));
+
+                string enrichedMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "ProjectGraphProjectFileCannotBeLoadedWithReferrers",
+                    configurationMetadata.ProjectFullPath,
+                    referrerList);
+
+                // Append the specific reason from the inner exception (e.g. "Could not find file '...'")
+                // without doing any locale-specific string manipulation on the outer exception's message.
+                string innerDetail = ex.InnerException?.Message;
+                if (!string.IsNullOrEmpty(innerDetail))
+                {
+                    enrichedMessage = $"{enrichedMessage} {innerDetail}";
+                }
+
+                throw new InvalidProjectFileException(
+                    ex.ProjectFile ?? configurationMetadata.ProjectFullPath,
+                    ex.LineNumber,
+                    ex.ColumnNumber,
+                    ex.EndLineNumber,
+                    ex.EndColumnNumber,
+                    enrichedMessage,
+                    ex.ErrorSubcategory,
+                    ex.ErrorCode,
+                    ex.HelpKeyword,
+                    ex.InnerException);
+            }
 
             if (projectInstance == null)
             {
@@ -575,7 +618,7 @@ namespace Microsoft.Build.Graph
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching, _graphMode))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {
@@ -584,6 +627,10 @@ namespace Microsoft.Build.Graph
                         referenceInfo.ReferenceConfiguration.ProjectFullPath,
                         referenceInfo.ReferenceConfiguration.ProjectFullPath));
                 }
+
+                // Track that this project is referencing the target project
+                _projectReferrers.GetOrAdd(referenceInfo.ReferenceConfiguration, _ => new ConcurrentBag<string>())
+                    .Add(parsedProject.ProjectInstance.FullPath);
 
                 SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
 
@@ -654,7 +701,7 @@ namespace Microsoft.Build.Graph
             {
                 get
                 {
-                    ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
+                    Assumed.True(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
                     return referenceItem;
                 }
             }
@@ -699,7 +746,7 @@ namespace Microsoft.Build.Graph
 
             public void RemoveEdge((ProjectGraphNode node, ProjectGraphNode reference) key)
             {
-                ErrorUtilities.VerifyThrow(ReferenceItems.TryRemove(key, out _), "All requested keys should exist");
+                Assumed.True(ReferenceItems.TryRemove(key, out _), "All requested keys should exist");
             }
 
             internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);

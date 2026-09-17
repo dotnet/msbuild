@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using Shouldly;
 using Xunit;
@@ -38,6 +39,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
             var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.X64, 1);
+
+            key1.ShouldNotBe(key2);
+            (key1 != key2).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void TaskHostNodeKey_Equality_DifferentConsoleForwarding_AreNotEqual()
+        {
+            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, ForwardConsoleOutput: false);
+            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, ForwardConsoleOutput: true);
 
             key1.ShouldNotBe(key2);
             (key1 != key2).ShouldBeTrue();

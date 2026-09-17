@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
@@ -16,7 +20,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Base class for all manifest generation tasks.
     /// </summary>
-    public abstract class GenerateManifestBase : Task
+    public abstract class GenerateManifestBase : Task, IMultiThreadableTask
     {
         private enum AssemblyType
         {
@@ -80,6 +84,9 @@ namespace Microsoft.Build.Tasks
         }
 
         public string TargetFrameworkMoniker { get; set; }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         protected internal AssemblyReference AddAssemblyNameFromItem(ITaskItem item, AssemblyReferenceType referenceType)
         {
@@ -270,6 +277,8 @@ namespace Microsoft.Build.Tasks
             return new AssemblyIdentity(name, version, publicKeyToken, culture, _processorArchitecture);
         }
 
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2026:RequiresUnreferencedCode",
+            Justification = "ClickOnce manifest generation reads and writes manifests with XmlSerializer; this task is inherently incompatible with trimming.")]
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -277,6 +286,14 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateManifestBase));
                 return false;
             }
+
+#if NET
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                Log.LogErrorWithCodeFromResources("GenerateManifest.General", "Dynamic code generation is not supported in this runtime environment.");
+                return false;
+            }
+#endif
 
             bool success = true;
 
@@ -303,6 +320,8 @@ namespace Microsoft.Build.Tasks
             return success;
         }
 
+        [RequiresUnreferencedCode("Builds and writes a ClickOnce manifest with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Builds and writes a ClickOnce manifest with XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private bool BuildManifest()
         {
             if (!OnManifestLoaded(_manifest))
@@ -420,6 +439,8 @@ namespace Microsoft.Build.Tasks
             return GetDefaultFileName();
         }
 
+        [RequiresUnreferencedCode("Reads the input ClickOnce manifest, which deserializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Reads the input ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private bool InitializeManifest(Type manifestType)
         {
             _startTime = Environment.TickCount;
@@ -452,7 +473,8 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    _manifest = ManifestReader.ReadManifest(manifestType.Name, InputManifest.ItemSpec, true);
+                    AbsolutePath inputManifestPath = TaskEnvironment.GetAbsolutePath(InputManifest.ItemSpec);
+                    _manifest = ManifestReader.ReadManifest(manifestType.Name, inputManifestPath, true);
                 }
                 catch (Exception ex)
                 {
@@ -511,7 +533,7 @@ namespace Microsoft.Build.Tasks
         {
             int t1 = Environment.TickCount;
 
-            string[] searchPaths = { Directory.GetCurrentDirectory() };
+            string[] searchPaths = { TaskEnvironment.ProjectDirectory };
             _manifest.ResolveFiles(searchPaths);
             _manifest.UpdateFileInfo(TargetFrameworkVersion);
             if (_manifest.OutputMessages.ErrorCount > 0)
@@ -600,6 +622,8 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
+        [RequiresUnreferencedCode("Writes the output ClickOnce manifest, which serializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Writes the output ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private bool WriteManifest()
         {
             if (OutputManifest == null)
@@ -613,13 +637,14 @@ namespace Microsoft.Build.Tasks
             }
 
             int t1 = Environment.TickCount;
+            AbsolutePath outputManifestPath = TaskEnvironment.GetAbsolutePath(OutputManifest.ItemSpec);
             try
             {
-                ManifestWriter.WriteManifest(_manifest, OutputManifest.ItemSpec, TargetFrameworkVersion);
+                ManifestWriter.WriteManifest(_manifest, outputManifestPath, TargetFrameworkVersion);
             }
             catch (Exception ex)
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(OutputManifest.ItemSpec);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(outputManifestPath);
                 Log.LogErrorWithCodeFromResources("GenerateManifest.WriteOutputManifestFailed", OutputManifest.ItemSpec, ex.Message, lockedFileMessage);
 
                 return false;

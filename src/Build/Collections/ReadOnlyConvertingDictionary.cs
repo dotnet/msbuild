@@ -34,8 +34,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal ReadOnlyConvertingDictionary(IDictionary<K, V> backing, Func<V, N> converter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(backing);
-            ErrorUtilities.VerifyThrowArgumentNull(converter);
+            ArgumentNullException.ThrowIfNull(backing);
+            ArgumentNullException.ThrowIfNull(converter);
 
             _backing = backing;
             _converter = converter;
@@ -52,15 +52,7 @@ namespace Microsoft.Build.Collections
         /// Returns the collection of values in the dictionary.
         /// </summary>
         public ICollection<N> Values
-        {
-            get
-            {
-                ErrorUtilities.ThrowInternalError("Values is not supported on ReadOnlyConvertingDictionary.");
-
-                // Show the compiler that this always throws:
-                throw new NotImplementedException();
-            }
-        }
+            => InternalError.Throw<ICollection<N>>("Values is not supported on ReadOnlyConvertingDictionary.");
 
         /// <summary>
         /// Returns the number of items in the collection.
@@ -155,7 +147,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void CopyTo(KeyValuePair<K, N>[] array, int arrayIndex)
         {
-            ErrorUtilities.VerifyThrow(array.Length - arrayIndex >= _backing.Count, "Specified array size insufficient to hold the contents of the collection.");
+            Assumed.GreaterThanOrEqual(array.Length - arrayIndex, _backing.Count, "Specified array size insufficient to hold the contents of the collection.");
 
             foreach (KeyValuePair<K, V> pair in _backing)
             {

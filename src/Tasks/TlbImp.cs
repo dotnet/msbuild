@@ -3,6 +3,8 @@
 
 using System;
 
+using Microsoft.Build.Framework;
+
 #nullable disable
 
 namespace Microsoft.Build.Tasks
@@ -40,6 +42,7 @@ namespace Microsoft.Build.Tasks
         /// Defines the "TlbImp" MSBuild task, which enables using TlbImp.exe
         /// to generate assemblies from type libraries.
         /// </summary>
+        [MSBuildMultiThreadableTask]
         internal class TlbImp : AxTlbBaseTask
         {
             #region Properties

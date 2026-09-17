@@ -1,22 +1,23 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.InteropServices.ComTypes;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Ole;
+using Windows.Win32.System.Variant;
 using COMException = System.Runtime.InteropServices.COMException;
 using Marshal = System.Runtime.InteropServices.Marshal;
-using VarEnum = System.Runtime.InteropServices.VarEnum;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
-    // Abstract the method for releasing COM objects for unit testing.
-    // Our mocks are not actually COM objects and they would blow up if passed to the real Marshal.ReleaseComObject.
-    internal delegate int MarshalReleaseComObject(object o);
-
     /// <summary>
     /// COM type library dependency walker class
     /// </summary>
@@ -24,16 +25,16 @@ namespace Microsoft.Build.Tasks
     {
         // Dependencies of all analyzed typelibs. Can be cleared to allow for analyzing typelibs one by one while
         // still skipping already seen types
-        private readonly HashSet<TYPELIBATTR> _dependencies;
+        private readonly HashSet<TLIBATTR> _dependencies;
 
         // History of already seen types.
         private readonly HashSet<AnalyzedTypesInfoKey> _analyzedTypes;
 
-        private sealed class TYPELIBATTRComparer : IEqualityComparer<TYPELIBATTR>
+        private sealed class TLIBATTRComparer : IEqualityComparer<TLIBATTR>
         {
-            public static readonly IEqualityComparer<TYPELIBATTR> Instance = new TYPELIBATTRComparer();
+            public static readonly IEqualityComparer<TLIBATTR> Instance = new TLIBATTRComparer();
 
-            public bool Equals(TYPELIBATTR a, TYPELIBATTR b)
+            public bool Equals(TLIBATTR a, TLIBATTR b)
             {
                 return a.guid == b.guid &&
                        a.lcid == b.lcid &&
@@ -43,9 +44,9 @@ namespace Microsoft.Build.Tasks
                        a.wMinorVerNum == b.wMinorVerNum;
             }
 
-            public int GetHashCode(TYPELIBATTR x)
+            public int GetHashCode(TLIBATTR x)
             {
-                return unchecked(x.guid.GetHashCode() + x.lcid + (int)x.syskind + (int)x.wLibFlags + (x.wMajorVerNum << 16) + x.wMinorVerNum);
+                return unchecked(x.guid.GetHashCode() + (int)x.lcid + (int)x.syskind + (int)x.wLibFlags + (x.wMajorVerNum << 16) + x.wMinorVerNum);
             }
         }
 
@@ -93,8 +94,6 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private readonly MarshalReleaseComObject _marshalReleaseComObject;
-
         /// <summary>
         /// List of exceptions thrown by the components during scanning
         /// </summary>
@@ -103,41 +102,28 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Internal constructor
         /// </summary>
-        internal ComDependencyWalker(MarshalReleaseComObject marshalReleaseComObject)
+        internal ComDependencyWalker()
         {
-            _dependencies = new HashSet<TYPELIBATTR>(TYPELIBATTRComparer.Instance);
+            _dependencies = new HashSet<TLIBATTR>(TLIBATTRComparer.Instance);
             _analyzedTypes = new HashSet<AnalyzedTypesInfoKey>(AnalyzedTypesInfoKeyComparer.Instance);
             EncounteredProblems = new List<Exception>();
-
-            _marshalReleaseComObject = marshalReleaseComObject;
         }
 
         /// <summary>
         /// The main entry point to the dependency walker
         /// </summary>
         /// <param name="typeLibrary">type library to be analyzed</param>
-        internal void AnalyzeTypeLibrary(ITypeLib typeLibrary)
+        internal unsafe void AnalyzeTypeLibrary(ITypeLib* typeLibrary)
         {
             try
             {
-                int typeInfoCount = typeLibrary.GetTypeInfoCount();
+                uint typeInfoCount = typeLibrary->GetTypeInfoCount();
 
-                for (int i = 0; i < typeInfoCount; i++)
+                for (uint i = 0; i < typeInfoCount; i++)
                 {
-                    ITypeInfo typeInfo = null;
-
-                    try
-                    {
-                        typeLibrary.GetTypeInfo(i, out typeInfo);
-                        AnalyzeTypeInfo(typeInfo);
-                    }
-                    finally
-                    {
-                        if (typeInfo != null)
-                        {
-                            _marshalReleaseComObject(typeInfo);
-                        }
-                    }
+                    using ComScope<ITypeInfo> typeInfo = new(null);
+                    typeLibrary->GetTypeInfo(i, typeInfo).ThrowOnFailure();
+                    AnalyzeTypeInfo(typeInfo.Pointer);
                 }
             }
             // This is the only catch block in this class, meaning that once a type library throws it's game over for it.
@@ -155,89 +141,97 @@ namespace Microsoft.Build.Tasks
         /// Analyze the given type looking for dependencies on other type libraries
         /// </summary>
         /// <param name="typeInfo"></param>
-        private void AnalyzeTypeInfo(ITypeInfo typeInfo)
+        private unsafe void AnalyzeTypeInfo(ITypeInfo* typeInfo)
         {
-            ITypeLib containingTypeLib = null;
+            using ComScope<ITypeLib> containingTypeLib = new(null);
+            uint indexInContainingTypeLib;
+            typeInfo->GetContainingTypeLib(containingTypeLib, &indexInContainingTypeLib).ThrowOnFailure();
 
-            try
+            ComReference.GetTypeLibAttrForTypeLib(containingTypeLib.Pointer, out TLIBATTR containingTypeLibAttributes);
+
+            // Have we analyzed this type info already? If so skip it.
+            var typeInfoId = new AnalyzedTypesInfoKey(
+                containingTypeLibAttributes.guid, (short)containingTypeLibAttributes.wMajorVerNum,
+                (short)containingTypeLibAttributes.wMinorVerNum, (int)containingTypeLibAttributes.lcid, (int)indexInContainingTypeLib);
+
+            // Get enough information about the type to figure out if we want to register it as a dependency
+            ComReference.GetTypeAttrForTypeInfo(typeInfo, out TYPEATTR typeAttributes);
+
+            // Is it one of the types we don't care about?
+            if (!CanSkipType(typeInfo, containingTypeLib.Pointer, typeAttributes, containingTypeLibAttributes))
             {
-                typeInfo.GetContainingTypeLib(out containingTypeLib, out int indexInContainingTypeLib);
+                _dependencies.Add(containingTypeLibAttributes);
 
-                ComReference.GetTypeLibAttrForTypeLib(ref containingTypeLib, out TYPELIBATTR containingTypeLibAttributes);
-
-                // Have we analyzed this type info already? If so skip it.
-                var typeInfoId = new AnalyzedTypesInfoKey(
-                    containingTypeLibAttributes.guid, containingTypeLibAttributes.wMajorVerNum,
-                    containingTypeLibAttributes.wMinorVerNum, containingTypeLibAttributes.lcid, indexInContainingTypeLib);
-
-                // Get enough information about the type to figure out if we want to register it as a dependency
-
-                ComReference.GetTypeAttrForTypeInfo(typeInfo, out TYPEATTR typeAttributes);
-
-                // Is it one of the types we don't care about?
-                if (!CanSkipType(typeInfo, containingTypeLib, typeAttributes, containingTypeLibAttributes))
+                if (_analyzedTypes.Add(typeInfoId))
                 {
-                    _dependencies.Add(containingTypeLibAttributes);
-
-                    if (_analyzedTypes.Add(typeInfoId))
-                    {
-                        // We haven't already analyzed this type, so rescan
-                        ScanImplementedTypes(typeInfo, typeAttributes);
-                        ScanDefinedVariables(typeInfo, typeAttributes);
-                        ScanDefinedFunctions(typeInfo, typeAttributes);
-                    }
-                }
-                // Make sure if we encounter this type again, we won't rescan it, since we already know we can skip it
-                else
-                {
-                    _analyzedTypes.Add(typeInfoId);
+                    // We haven't already analyzed this type, so rescan
+                    ScanImplementedTypes(typeInfo, typeAttributes);
+                    ScanDefinedVariables(typeInfo, typeAttributes);
+                    ScanDefinedFunctions(typeInfo, typeAttributes);
                 }
             }
-            finally
+            // Make sure if we encounter this type again, we won't rescan it, since we already know we can skip it
+            else
             {
-                if (containingTypeLib != null)
-                {
-                    _marshalReleaseComObject(containingTypeLib);
-                }
+                _analyzedTypes.Add(typeInfoId);
             }
         }
 
         /// <summary>
         /// Returns true if we don't need to analyze this particular type.
         /// </summary>
-        private static bool CanSkipType(ITypeInfo typeInfo, ITypeLib typeLib, TYPEATTR typeAttributes, TYPELIBATTR typeLibAttributes)
+        private static unsafe bool CanSkipType(ITypeInfo* typeInfo, ITypeLib* typeLib, TYPEATTR typeAttributes, TLIBATTR typeLibAttributes)
         {
-            // Well known OLE type?
-            if ((typeAttributes.guid == NativeMethods.IID_IUnknown) ||
-                (typeAttributes.guid == NativeMethods.IID_IDispatch) ||
-                (typeAttributes.guid == NativeMethods.IID_IDispatchEx) ||
-                (typeAttributes.guid == NativeMethods.IID_IEnumVariant) ||
-                (typeAttributes.guid == NativeMethods.IID_ITypeInfo))
+            // Well known OLE type? Compare against the IIDs CsWin32 emits on each generated interface struct.
+            if ((typeAttributes.guid == IUnknown.IID_Guid) ||
+                (typeAttributes.guid == IDispatch.IID_Guid) ||
+                (typeAttributes.guid == IDispatchEx.IID_Guid) ||
+                (typeAttributes.guid == IEnumVARIANT.IID_Guid) ||
+                (typeAttributes.guid == ITypeInfo.IID_Guid))
             {
                 return true;
             }
 
             // Is this the Guid type? If so we should be using the corresponding .NET type.
-            if (typeLibAttributes.guid == NativeMethods.IID_StdOle)
+            if (typeLibAttributes.guid == NativeMethods.LIBID_StdOle)
             {
-                typeInfo.GetDocumentation(-1, out string typeName, out _, out _, out _);
+                // All out-params must be supplied: the runtime-callable-wrapper marshaller writes every
+                // [out] BSTR even though only the name is needed here.
+                using BSTR typeName = default;
+                using BSTR docString = default;
+                using BSTR helpFile = default;
+                uint helpContext;
+                typeInfo->GetDocumentation(-1, &typeName, &docString, &helpContext, &helpFile).ThrowOnFailure();
 
-                if (string.CompareOrdinal(typeName, "GUID") == 0)
+                if (string.CompareOrdinal(typeName.ToString(), "GUID") == 0)
                 {
                     return true;
                 }
             }
 
             // Skip types exported from .NET assemblies
-            if (typeLib is ITypeLib2 typeLib2)
+            using ComScope<ITypeLib2> typeLib2 = new(null);
+            Guid typeLib2Iid = ITypeLib2.IID_Guid;
+            if (typeLib->QueryInterface(&typeLib2Iid, typeLib2).Succeeded)
             {
-                typeLib2.GetCustData(ref NativeMethods.GUID_ExportedFromComPlus, out object exportedFromComPlusObj);
-
-                string exportedFromComPlus = exportedFromComPlusObj as string;
-
-                if (!string.IsNullOrEmpty(exportedFromComPlus))
+                Guid exportedFromComPlusGuid = NativeMethods.GUID_ExportedFromComPlus;
+                VARIANT custData = default;
+                if (typeLib2.Pointer->GetCustData(&exportedFromComPlusGuid, &custData).Succeeded)
                 {
-                    return true;
+                    object exportedFromComPlusObj;
+                    try
+                    {
+                        exportedFromComPlusObj = Marshal.GetObjectForNativeVariant((IntPtr)(&custData));
+                    }
+                    finally
+                    {
+                        PInvoke.VariantClear(&custData);
+                    }
+
+                    if (exportedFromComPlusObj is string exportedFromComPlus && !string.IsNullOrEmpty(exportedFromComPlus))
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -247,49 +241,39 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// For a given type, analyze recursively all the types implemented by it.
         /// </summary>
-        private void ScanImplementedTypes(ITypeInfo typeInfo, TYPEATTR typeAttributes)
+        private unsafe void ScanImplementedTypes(ITypeInfo* typeInfo, TYPEATTR typeAttributes)
         {
             for (int implTypeIndex = 0; implTypeIndex < typeAttributes.cImplTypes; implTypeIndex++)
             {
-                IFixedTypeInfo implementedType = null;
+                uint hRef;
+                typeInfo->GetRefTypeOfImplType((uint)implTypeIndex, &hRef).ThrowOnFailure();
 
-                try
-                {
-                    var fixedTypeInfo = (IFixedTypeInfo)typeInfo;
-                    fixedTypeInfo.GetRefTypeOfImplType(implTypeIndex, out IntPtr hRef);
-                    fixedTypeInfo.GetRefTypeInfo(hRef, out implementedType);
+                using ComScope<ITypeInfo> implementedType = new(null);
+                typeInfo->GetRefTypeInfo(hRef, implementedType).ThrowOnFailure();
 
-                    AnalyzeTypeInfo((ITypeInfo)implementedType);
-                }
-                finally
-                {
-                    if (implementedType != null)
-                    {
-                        _marshalReleaseComObject(implementedType);
-                    }
-                }
+                AnalyzeTypeInfo(implementedType.Pointer);
             }
         }
 
         /// <summary>
         /// For a given type, analyze all the variables defined by it
         /// </summary>
-        private void ScanDefinedVariables(ITypeInfo typeInfo, TYPEATTR typeAttributes)
+        private unsafe void ScanDefinedVariables(ITypeInfo* typeInfo, TYPEATTR typeAttributes)
         {
             for (int definedVarIndex = 0; definedVarIndex < typeAttributes.cVars; definedVarIndex++)
             {
-                IntPtr varDescHandleToRelease = IntPtr.Zero;
+                VARDESC* varDesc = null;
 
                 try
                 {
-                    ComReference.GetVarDescForVarIndex(typeInfo, definedVarIndex, out VARDESC varDesc, out varDescHandleToRelease);
-                    AnalyzeElement(typeInfo, varDesc.elemdescVar);
+                    ComReference.GetVarDescForVarIndex(typeInfo, definedVarIndex, out varDesc);
+                    AnalyzeElement(typeInfo, varDesc->elemdescVar);
                 }
                 finally
                 {
-                    if (varDescHandleToRelease != IntPtr.Zero)
+                    if (varDesc != null)
                     {
-                        typeInfo.ReleaseVarDesc(varDescHandleToRelease);
+                        typeInfo->ReleaseVarDesc(varDesc);
                     }
                 }
             }
@@ -298,37 +282,30 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// For a given type, analyze all the functions implemented by it. That means all the argument and return types.
         /// </summary>
-        private void ScanDefinedFunctions(ITypeInfo typeInfo, TYPEATTR typeAttributes)
+        private unsafe void ScanDefinedFunctions(ITypeInfo* typeInfo, TYPEATTR typeAttributes)
         {
             for (int definedFuncIndex = 0; definedFuncIndex < typeAttributes.cFuncs; definedFuncIndex++)
             {
-                IntPtr funcDescHandleToRelease = IntPtr.Zero;
+                FUNCDESC* funcDesc = null;
 
                 try
                 {
-                    ComReference.GetFuncDescForDescIndex(typeInfo, definedFuncIndex, out FUNCDESC funcDesc, out funcDescHandleToRelease);
-
-                    int offset = 0;
+                    ComReference.GetFuncDescForDescIndex(typeInfo, definedFuncIndex, out funcDesc);
 
                     // Analyze the argument types
-                    for (int paramIndex = 0; paramIndex < funcDesc.cParams; paramIndex++)
+                    for (int paramIndex = 0; paramIndex < funcDesc->cParams; paramIndex++)
                     {
-                        var elemDesc = (ELEMDESC)Marshal.PtrToStructure(
-                            new IntPtr(funcDesc.lprgelemdescParam.ToInt64() + offset), typeof(ELEMDESC));
-
-                        AnalyzeElement(typeInfo, elemDesc);
-
-                        offset += Marshal.SizeOf<ELEMDESC>();
+                        AnalyzeElement(typeInfo, funcDesc->lprgelemdescParam[paramIndex]);
                     }
 
                     // Analyze the return value type
-                    AnalyzeElement(typeInfo, funcDesc.elemdescFunc);
+                    AnalyzeElement(typeInfo, funcDesc->elemdescFunc);
                 }
                 finally
                 {
-                    if (funcDescHandleToRelease != IntPtr.Zero)
+                    if (funcDesc != null)
                     {
-                        typeInfo.ReleaseFuncDesc(funcDescHandleToRelease);
+                        typeInfo->ReleaseFuncDesc(funcDesc);
                     }
                 }
             }
@@ -337,37 +314,25 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Analyze the given element (i.e. composite type of an argument) recursively
         /// </summary>
-        private void AnalyzeElement(ITypeInfo typeInfo, ELEMDESC elementDesc)
+        private unsafe void AnalyzeElement(ITypeInfo* typeInfo, ELEMDESC elementDesc)
         {
             TYPEDESC typeDesc = elementDesc.tdesc;
 
             // If the current type is a pointer or an array, determine the child type and analyze that.
-            while (((VarEnum)typeDesc.vt == VarEnum.VT_PTR) || ((VarEnum)typeDesc.vt == VarEnum.VT_SAFEARRAY))
+            while ((typeDesc.vt == VARENUM.VT_PTR) || (typeDesc.vt == VARENUM.VT_SAFEARRAY))
             {
-                var childTypeDesc = (TYPEDESC)Marshal.PtrToStructure(typeDesc.lpValue, typeof(TYPEDESC));
-                typeDesc = childTypeDesc;
+                typeDesc = *typeDesc.Anonymous.lptdesc;
             }
 
             // We're only interested in user defined types for recursive analysis
-            if ((VarEnum)typeDesc.vt == VarEnum.VT_USERDEFINED)
+            if (typeDesc.vt == VARENUM.VT_USERDEFINED)
             {
-                IntPtr hrefType = typeDesc.lpValue;
-                IFixedTypeInfo childTypeInfo = null;
+                uint hrefType = typeDesc.Anonymous.hreftype;
 
-                try
-                {
-                    IFixedTypeInfo fixedTypeInfo = (IFixedTypeInfo)typeInfo;
-                    fixedTypeInfo.GetRefTypeInfo(hrefType, out childTypeInfo);
+                using ComScope<ITypeInfo> childTypeInfo = new(null);
+                typeInfo->GetRefTypeInfo(hrefType, childTypeInfo).ThrowOnFailure();
 
-                    AnalyzeTypeInfo((ITypeInfo)childTypeInfo);
-                }
-                finally
-                {
-                    if (childTypeInfo != null)
-                    {
-                        _marshalReleaseComObject(childTypeInfo);
-                    }
-                }
+                AnalyzeTypeInfo(childTypeInfo.Pointer);
             }
         }
 
@@ -375,9 +340,9 @@ namespace Microsoft.Build.Tasks
         /// Get all the dependencies of the processed libraries
         /// </summary>
         /// <returns></returns>
-        internal TYPELIBATTR[] GetDependencies()
+        internal TLIBATTR[] GetDependencies()
         {
-            var returnArray = new TYPELIBATTR[_dependencies.Count];
+            var returnArray = new TLIBATTR[_dependencies.Count];
             _dependencies.CopyTo(returnArray);
             return returnArray;
         }
@@ -417,3 +382,5 @@ namespace Microsoft.Build.Tasks
         }
     }
 }
+
+#endif

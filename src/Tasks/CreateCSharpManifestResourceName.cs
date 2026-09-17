@@ -16,6 +16,7 @@ namespace Microsoft.Build.Tasks
     /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class CreateCSharpManifestResourceName : CreateManifestResourceName
     {
         protected override string SourceFileExtension => ".cs";
@@ -117,8 +118,8 @@ namespace Microsoft.Build.Tasks
             else
             {
                 info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, treatAsCultureNeutral);
+
                 // If the item has a culture override, respect that.
-                // We need to recheck here due to changewave in condition above - after Wave17_14 removal, this should be unconditional.
                 if (!string.IsNullOrEmpty(culture))
                 {
                     info.culture = culture;

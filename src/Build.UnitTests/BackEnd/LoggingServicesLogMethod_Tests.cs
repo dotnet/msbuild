@@ -14,6 +14,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Logging;
 using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -1046,6 +1047,52 @@ namespace Microsoft.Build.UnitTests.Logging
             buildEvent = new BuildFinishedEventArgs(string.Empty, null /* no help keyword */, true, service.ProcessedBuildEvent.Timestamp);
             Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
+        [Fact]
+        public void LogBuildStartedLogsLoggerNames()
+        {
+            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+            ConsoleLogger consoleLogger = new ConsoleLogger();
+            service.RegisterLogger(consoleLogger);
+
+            service.LogBuildStarted();
+            var enabledLogsEvent = service.AllProcessedBuildEvents
+                .OfType<BuildMessageEventArgs>()
+                .FirstOrDefault(e => e.Message?.Contains("ConsoleLogger") == true);
+            enabledLogsEvent.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void LogFilePathsPresentInFileLog()
+        {
+            using var env = TestEnvironment.Create();
+            var logFilePath = env.ExpectFile(".log").Path;
+
+            var fileLogger = new FileLogger { Parameters = "logfile=" + logFilePath };
+            var mockLogger = new MockLogger();
+
+            using (var collection = new ProjectCollection())
+            {
+                var project = ObjectModelHelpers.CreateInMemoryProject(collection, @"
+            <Project>
+              <Target Name=""Build"" />
+            </Project>");
+                project.Build(new ILogger[] { fileLogger, mockLogger }).ShouldBeTrue();
+            }
+
+            // Check that MockLogger captured a LoggersRegisteredEventArgs containing the file logger path
+            var registeredEvent = mockLogger.AllBuildEvents
+                .OfType<LoggersRegisteredEventArgs>()
+                .FirstOrDefault(e => e.Loggers.Any(l => l.LoggerName == nameof(FileLogger)));
+            registeredEvent.ShouldNotBeNull();
+            var fileLoggerDesc = registeredEvent.Loggers.First(l => l.LoggerName == nameof(FileLogger));
+            var expectedPath = Path.GetFullPath(logFilePath);
+            fileLoggerDesc.OutputFilePaths.ShouldContain(expectedPath);
+            fileLoggerDesc.Parameters.ShouldBe(fileLogger.Parameters);
+
+            // Check the file log itself contains the exact path
+            var fileLogContents = File.ReadAllText(logFilePath);
+            fileLogContents.ShouldContain(expectedPath);
+        }
 
         [Fact]
         public void LogBuildCanceled()
@@ -1795,6 +1842,11 @@ namespace Microsoft.Build.UnitTests.Logging
             /// to verify that a buildEvent was sent to ProcessLoggingEvent.
             /// </summary>
             private BuildEventArgs _processedBuildEvent;
+
+            /// <summary>
+            /// All events processed by ProcessLoggingEvent.
+            /// </summary>
+            internal List<BuildEventArgs> AllProcessedBuildEvents { get; } = new();
             #endregion
             #region Constructor
             /// <summary>
@@ -1857,6 +1909,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 if (buildEvent is BuildEventArgs buildEventArgs)
                 {
                     _processedBuildEvent = buildEventArgs;
+                    AllProcessedBuildEvents.Add(buildEventArgs);
                 }
                 else if (buildEvent is KeyValuePair<int, BuildEventArgs> kvp)
                 {

@@ -216,32 +216,31 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                    ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
-                    使用可能なパラメーター。
-                       default -- ターミナル 
- の既定の動作を指定します
-                       ロガー。次のいずれかの値が必要です:
-                          - `on`、`true` は TerminalLogger を強制的に使用します
-                           無効である場合も同様です。
-                          - `off`、`false` は TerminalLogger を使用しないように強制します
-                           有効である場合も同様です。
-                          - `auto` は、次の場合にターミナルで TerminalLogger を有効にします
-                           サポートされており、セッションがリダイレクトされていない場合です
-                           stdout/stderr
-                       verbosity-- 下記の verbosity 設定をオーバーライドします
-                       logger
-                       showCommandLine -- TaskCommandLineEvent メッセージを表示します
+                     ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
+                     使用可能なパラメーター。
+                        default -- ターミナル ロガーの既定の動作を
+                        ロガー。次のいずれかの値が必要です:
+                           - `on`、`true` は TerminalLogger を強制的に使用します
+                            無効である場合も同様です。
+                           - `off`、`false` は TerminalLogger を使用しないように強制します
+                            有効である場合も同様です。
+                           - `auto` は、次の場合にターミナルで TerminalLogger を有効にします
+                            サポートされており、セッションがリダイレクトされていない場合です
+                            stdout/stderr
+                        verbosity-- 下記の verbosity 設定をオーバーライドします
+                        logger
+                        showCommandLine -- TaskCommandLineEvent メッセージを表示します
 
-                     例: 
-                       -tlp:default=auto;verbosity=diag;shownCommandLine
-   </target>
+                      例:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -254,14 +253,14 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="translated">  -multithreaded[:true|false]
                      MSBuild で試験的なマルチスレッド モードを有効にします。
-                     つまり、MSBuild は複数のプロセスではなく、
-                     複数のスレッドを使用してプロジェクトを
-                     並列にビルドします。
+                     これは、MSBuild でプロジェクトのビルドを
+                     並列実行する際に、複数のプロセスではなく
+                     複数のスレッドが使われることを意味します。
                      このオプションはサポートされていません。
                      使用されるスレッドの最大数は、
-                     -maxCpuCount スイッチによって決まります。
+                     -maxCpuCount スイッチで指定します。
                      マルチスレッド モードが有効で、
                      MSBUILDFORCEALLTASKSOUTOFPROC=1 の場合、
                      maxCpuCount は 256 を超えることはできません。
@@ -312,6 +311,16 @@
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1072: マルチスレッド モードの値が無効です。{0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -379,6 +388,71 @@
         <source>not set</source>
         <target state="translated">未設定</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerConnectFailed">
+        <source>could not connect to the server within the timeout window; the server may have failed to start</source>
+        <target state="translated">タイムアウト時間内にサーバーに接続できませんでした。サーバーの起動に失敗した可能性があります</target>
+        <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerCrashedOnLaunch">
+        <source>the server process exited with code {0} immediately after launch</source>
+        <target state="translated">起動直後にサーバー プロセスがコード {0} で終了しました</target>
+        <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerLaunchError">
+        <source>the server process could not be launched</source>
+        <target state="translated">サーバー プロセスを起動できませんでした</target>
+        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeReused">
+        <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
+        <target state="translated">実行中の MSBuild Server ノードをこのビルドに再利用しています (プロセス ID {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawned">
+        <source>MSBuild Server node started for this build (process ID {0}).</source>
+        <target state="translated">このビルドの MSBuild Server ノードが開始されました (プロセス ID {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawnedShortLived">
+        <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
+        <target state="translated">MSBuild Server ノードがこのビルド専用で開始されました。後でシャットダウンされます (プロセス ID {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNotUsedForBuild">
+        <source>MSBuild Server was requested but not used for this build: {0}.</source>
+        <target state="translated">MSBuild Server が要求されましたが、このビルドには使用されませんでした: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonBusy">
+        <source>the server was busy with another build</source>
+        <target state="translated">サーバーは別のビルドで使用中でした</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
+        <source>this invocation is not compatible with MSBuild Server</source>
+        <target state="translated">この呼び出しは MSBuild Server と互換性がありません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
+        <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
+        <target state="translated">ノードの再利用が無効になっています (-nodeReuse:false または MSBUILDDISABLENODEREUSE=1)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
+        <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
+        <target state="translated">MSBUILDENSURESTDOUTFORTASKPROCESSES エスケープ ハッチが有効になっています</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerStateUnknown">
+        <source>the current server state could not be determined</source>
+        <target state="translated">現在のサーバーの状態を判断できませんでした</target>
+        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerUnavailable">
+        <source>MSBuild server unavailable: {0}. Falling back to an in-process build.</source>
+        <target state="translated">MSBuild サーバーを使用できません: {0}。インプロセス ビルドにフォールバックしています。</target>
+        <note>LOCALIZATION: {0} is a sub-message describing why the MSBuild server could not be used. It is one of MSBuildServerCrashedOnLaunch / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed. The outer template supplies the trailing period after {0}; sub-messages must NOT end with a period or other sentence-final punctuation.</note>
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
@@ -1719,6 +1793,22 @@
       where the switches are coming from.
     </note>
       </trans-unit>
+      <trans-unit id="PickedUpSwitchesFromResponseFile">
+        <source>Some command line switches were read from this response file:</source>
+        <target state="translated">次の応答ファイルからいくつかのコマンド ライン スイッチが読み取られました:</target>
+        <note>
+      UE: This message appears before a command-line parsing error when switches were read from a response file: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file path is printed on a separate line after this message.
+    </note>
+      </trans-unit>
+      <trans-unit id="PickedUpSwitchesFromResponseFiles">
+        <source>Some command line switches were read from these response files:</source>
+        <target state="translated">次の応答ファイルからいくつかのコマンド ライン スイッチが読み取られました:</target>
+        <note>
+      UE: This message appears before a command-line parsing error when switches were read from response files: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file paths are printed on separate lines after this message.
+    </note>
+      </trans-unit>
       <trans-unit id="Process">
         <source>Process = "{0}"</source>
         <target state="translated">プロセス = "{0}"</target>
@@ -2279,6 +2369,36 @@
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
         <target state="translated">MSBUILD : error MSB4192: プロジェクト ファイル "{0}" は ".vcproj" または ".dsp" ファイル形式であり、MSBuild では直接ビルドできません。Visual Studio IDE でファイルを開くか、変換ツールを実行して、プロジェクトを変換してください。または、".vcproj" の場合は、MSBuild を使用して、このプロジェクトを含むソリューション ファイルを代わりにビルドできます。</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: MSBuild タスク ホストは、IBuildEngine コールバックを実行するタスクの実行をサポートしていません。これらの操作を実行する場合は、タスクをコア MSBuild プロセスで実行してください。UsingTask の属性として設定されている "Runtime" または "Architecture" の値、あるいはタスク呼び出しの属性として設定されている "MSBuildRuntime" または "MSBuildArchitecture" の値が MSBuild の現在のランタイムまたはアーキテクチャと一致しない場合、タスクは自動的にタスク ホストで実行されます。</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: ログ ファイルの読み取り中に例外が発生しました: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">親ノードから受け取った環境をタスク ホストに適用する前に、次の変更を行っています:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  '{0}' を親環境の値 '{2}' ではなく '{1}' に設定しています。</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">スキーマの検証</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
       </trans-unit>
     </body>
   </file>

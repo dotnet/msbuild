@@ -9,12 +9,12 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
@@ -64,6 +64,31 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public void PropertiesUsageCheck_RulesAreIndependentlyConfigurable()
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: false,
+            out TransientTestFile projectFile,
+            out TransientTestFile editorconfigFile,
+            "PropsCheckTest.csproj");
+
+        // Turning BC0201 off must not turn BC0202 off - they are separately configurable rules
+        //  that happen to be implemented by a single check.
+        File.WriteAllText(
+            editorconfigFile.Path,
+            File.ReadAllText(editorconfigFile.Path)
+                .Replace("build_check.BC0201.Severity=warning", "build_check.BC0201.Severity=none"));
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        output.ShouldNotContain("BC0201");
+        output.ShouldMatch(@"BC0202: .* Property: 'MyPropT2'");
     }
 
     [Theory]
@@ -161,7 +186,7 @@ public class EndToEndTests : IDisposable
         const string templateToReplace = "###EmbeddedResourceToAdd";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
 
-        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        FileUtilities.CopyDirectory(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
         ReplaceStringInFile(Path.Combine(workFolder.Path, referencedProjectName, $"{referencedProjectName}.csproj"),
             templateToReplace, resourceXmlToAdd);
         File.Copy(
@@ -194,21 +219,6 @@ public class EndToEndTests : IDisposable
             string text = File.ReadAllText(filePath);
             text = text.Replace(original, replacement);
             File.WriteAllText(filePath, text);
-        }
-    }
-
-    private static void CopyFilesRecursively(string sourcePath, string targetPath)
-    {
-        // First Create all directories
-        foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-        {
-            Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-        }
-
-        // Then copy all the files & Replaces any files with the same name
-        foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
-        {
-            File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
         }
     }
 
@@ -271,7 +281,7 @@ public class EndToEndTests : IDisposable
         const string entryProjectName = "EntryProject";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
 
-        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        FileUtilities.CopyDirectory(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
@@ -383,7 +393,7 @@ public class EndToEndTests : IDisposable
         const string templateToReplace = "###TFM";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
 
-        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        FileUtilities.CopyDirectory(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
         ReplaceStringInFile(Path.Combine(workFolder.Path, $"{projectName}.csproj"),
             templateToReplace, tfmString);
 
@@ -953,6 +963,7 @@ public class EndToEndTests : IDisposable
     }
 
 #if NET
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14392")]
     [Fact]
     public void TestBuildCheckTemplate()
     {
@@ -986,7 +997,12 @@ public class EndToEndTests : IDisposable
         var nugetTemplatePath = Path.Combine(checkCandidatePath, "nugetTemplate.config");
 
         var doc = new XmlDocument();
-        doc.LoadXml(File.ReadAllText(nugetTemplatePath));
+        using (StringReader sreader = new StringReader(File.ReadAllText(nugetTemplatePath)))
+        using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+        {
+            doc.Load(reader);
+        }
+
         if (doc.DocumentElement != null)
         {
             XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");

@@ -18,14 +18,15 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates a bootstrapper for ClickOnce deployment projects.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     [SupportedOSPlatform("windows")]
-    public sealed class GenerateLauncher : TaskExtension
+    public sealed class GenerateLauncher : TaskExtension, IMultiThreadableTask
     {
         private const string LAUNCHER_EXE = "Launcher.exe";
         private const string ENGINE_PATH = "Engine"; // relative to ClickOnce bootstrapper path
 
         #region Properties
-
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
         public ITaskItem EntryPoint { get; set; }
 
         public string LauncherPath { get; set; }
@@ -40,6 +41,8 @@ namespace Microsoft.Build.Tasks
         public ITaskItem OutputEntryPoint { get; set; }
         #endregion
 
+        // MSBuildTask0005 (transitive unsafe API) warnings are currently emitted here due to
+        // an analyzer limitation around data-flow reachability. See https://github.com/dotnet/msbuild/issues/13867.
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -51,20 +54,22 @@ namespace Microsoft.Build.Tasks
             if (LauncherPath == null)
             {
                 // Launcher lives next to ClickOnce bootstrapper.
-                // GetDefaultPath obtains the root ClickOnce boostrapper path.
+                // Use the TaskEnvironment overload of GetDefaultPath so the fallback is the
+                // project directory rather than the process-wide current directory.
                 LauncherPath = Path.Combine(
-                    Microsoft.Build.Tasks.Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion),
+                    Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion, TaskEnvironment),
                     ENGINE_PATH,
                     LAUNCHER_EXE);
             }
-
             if (EntryPoint == null)
             {
                 Log.LogErrorWithCodeFromResources("GenerateLauncher.InvalidInput");
                 return false;
             }
 
-            var launcherBuilder = new LauncherBuilder(LauncherPath);
+            AbsolutePath outputPath = string.IsNullOrEmpty(OutputPath) ? default : TaskEnvironment.GetAbsolutePath(OutputPath);
+
+            var launcherBuilder = new LauncherBuilder(LauncherPath, TaskEnvironment);
             string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
 
             // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
@@ -77,7 +82,7 @@ namespace Microsoft.Build.Tasks
                 entryPointFileName = AssemblyName;
             }
 
-            BuildResults results = launcherBuilder.Build(entryPointFileName, OutputPath);
+            BuildResults results = launcherBuilder.Build(entryPointFileName, outputPath);
 
             BuildMessage[] messages = results.Messages;
             if (messages != null)
@@ -98,8 +103,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-
-            OutputEntryPoint = new TaskItem(Path.Combine(Path.GetDirectoryName(EntryPoint.ItemSpec), results.KeyFile));
+            string outputEntryPoint = Path.Combine(Path.GetDirectoryName(EntryPoint.ItemSpec), results.KeyFile);
+            OutputEntryPoint = new TaskItem(outputEntryPoint);
             OutputEntryPoint.SetMetadata(ItemMetadataNames.targetPath, results.KeyFile);
 
             return !Log.HasLoggedErrors;

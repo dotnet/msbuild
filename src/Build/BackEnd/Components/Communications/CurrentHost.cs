@@ -25,14 +25,15 @@ internal static class CurrentHost
     public static string? GetCurrentHost()
     {
 #if RUNTIME_TYPE_NETCORE
-        if (s_currentHost == null)
+        string? host = s_currentHost;
+        if (host is null)
         {
             string dotnetExe = Path.Combine(
                 FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
                 Constants.DotnetProcessName);
             if (FileSystems.Default.FileExists(dotnetExe))
             {
-                s_currentHost = dotnetExe;
+                host = dotnetExe;
             }
             else
             {
@@ -40,7 +41,7 @@ internal static class CurrentHost
                     && Path.GetFileName(processPath) == Constants.DotnetProcessName)
                 {
                     // If the current process is already running in a general-purpose host, use its path.
-                    s_currentHost = processPath;
+                    host = processPath;
                 }
                 else
                 {
@@ -50,19 +51,16 @@ internal static class CurrentHost
                     dotnetExe = Path.Combine(
                         FileUtilities.GetFolderAbove(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), 4),
                         Constants.DotnetProcessName);
-                    if (FileSystems.Default.FileExists(dotnetExe))
-                    {
-                        s_currentHost = dotnetExe;
-                    }
-                    else
-                    {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                    }
+                    host = FileSystems.Default.FileExists(dotnetExe)
+                        ? dotnetExe
+                        : Assumed.Unreachable<string>();
                 }
             }
+
+            s_currentHost = host;
         }
 
-        return s_currentHost;
+        return host;
 #else
         return null;
 #endif

@@ -12,7 +12,6 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 #nullable disable

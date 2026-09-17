@@ -185,7 +185,8 @@ namespace Microsoft.Build.Shared
         internal const string ProjectCachePlugin = nameof(ProjectCachePlugin);
 
         /// <summary>
-        /// Embed specified files in the binary log
+        /// Embed specified files in the binary log. Item specs should be absolute paths; relative
+        /// paths are resolved against the directory of the project that declares the item.
         /// </summary>
         internal const string EmbedInBinlog = nameof(EmbedInBinlog);
     }

@@ -23,7 +23,6 @@ namespace Company.CheckTemplate
             // configurationContext to be used only if check needs external configuration data.
         }
 
-
         public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
         {
             registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);

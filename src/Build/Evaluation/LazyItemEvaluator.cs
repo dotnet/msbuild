@@ -521,7 +521,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
+                Assumed.Unreachable();
             }
 
             _itemLists.TryGetValue(itemElement.ItemType, out LazyItemList previousItemList);
@@ -666,21 +666,13 @@ namespace Microsoft.Build.Evaluation
 
         private void AddItemReferences(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation)
         {
-            if (expression.Length == 0)
+            if (Expander<P, I>.TryExpandSingleItemVectorExpression(
+                    expression,
+                    ExpanderOptions.ExpandItems,
+                    elementLocation,
+                    out ExpressionShredder.ItemExpressionCapture itemVector))
             {
-                return;
-            }
-            else
-            {
-                ExpressionShredder.ItemExpressionCapture? match = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
-                    expression, ExpanderOptions.ExpandItems, elementLocation);
-
-                if (match == null)
-                {
-                    return;
-                }
-
-                AddReferencedItemLists(operationBuilder, match.Value);
+                AddReferencedItemLists(operationBuilder, itemVector);
             }
         }
 

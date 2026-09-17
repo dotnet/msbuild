@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -17,7 +16,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="project">The changed project.</param>
         internal ProjectChangedEventArgs(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project);
+            ArgumentNullException.ThrowIfNull(project);
 
             Project = project;
         }

@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable
@@ -29,8 +29,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetBuiltReason">Reason the target is being built</param>
         internal TargetSpecification(string targetName, ElementLocation referenceLocation, TargetBuiltReason targetBuiltReason = TargetBuiltReason.None)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetName);
-            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation);
+            ArgumentException.ThrowIfNullOrEmpty(targetName);
+            ArgumentNullException.ThrowIfNull(referenceLocation);
 
             this._targetName = targetName;
             this._referenceLocation = referenceLocation;

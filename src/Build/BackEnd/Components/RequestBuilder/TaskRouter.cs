@@ -1,21 +1,26 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// Determines where a task should be executed in multi-threaded mode.
-    /// In multi-threaded execution mode, tasks implementing IMultiThreadableTask or marked with
-    /// MSBuildMultiThreadableTaskAttribute run in-process within thread nodes, while legacy tasks
-    /// are routed to sidecar TaskHost processes for isolation.
+    /// In multi-threaded execution mode, tasks marked with MSBuildMultiThreadableTaskAttribute run
+    /// in-process within thread nodes, while all other tasks are routed to sidecar TaskHost processes
+    /// for isolation.
     /// </summary>
     /// <remarks>
     /// This class should only be used when in multi-threaded mode. Traditional multi-proc builds
     /// have different semantics and should not use this routing logic.
+    /// <para>
+    /// The attribute is the only routing signal. <see cref="Microsoft.Build.Framework.IMultiThreadableTask"/> is
+    /// deliberately not consulted here: <c>Microsoft.Build.Utilities.ToolTask</c> implements it, so honoring it
+    /// would silently opt in every ToolTask-derived task in the ecosystem. The interface instead controls
+    /// TaskEnvironment injection, which TaskExecutionHost handles separately.
+    /// </para>
     /// </remarks>
     internal static class TaskRouter
     {
@@ -48,7 +53,7 @@ namespace Microsoft.Build.BackEnd
     /// </remarks>
     public static bool NeedsTaskHostInMultiThreadedMode(Type taskType)
     {
-        ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
+        ArgumentNullException.ThrowIfNull(taskType);
 
         // Tasks without the thread-safety attribute need isolation in a TaskHost sidecar
         return !HasMultiThreadableTaskAttribute(taskType);

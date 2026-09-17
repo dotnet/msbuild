@@ -178,9 +178,14 @@ namespace Microsoft.Build.Tasks.UnitTests
             return process.StandardOutput.ReadToEnd().Trim() != "0";
         }
 
-        [ConditionalFact(nameof(NotRunningAsRoot))] // root can write to read-only files
+        [Fact]
         public void LogsErrorIfReadOnlyFileCannotBeOverwitten()
         {
+            if (!NotRunningAsRoot())
+            {
+                Assert.Skip("root can write to read-only files");
+            }
+
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
                 TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);

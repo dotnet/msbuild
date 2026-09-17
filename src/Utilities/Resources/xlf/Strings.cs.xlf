@@ -72,6 +72,11 @@
         <target state="translated">Úlohu nelze přeskočit, protože není aktuální.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEOFTimeout">
+        <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
+        <target state="translated">Hodnota EOF kanálu nebyla přijata během {0} sekund. Proces vnoučete může stále držet kanál otevřený. Výstup, který se už doručil, se zaprotokoloval.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: Příkaz {0} byl ukončen s kódem {1}.</target>
@@ -296,6 +301,21 @@
         <source>Build succeeded.</source>
         <target state="translated">Vytváření sestavení bylo úspěšně dokončeno.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="KillingProcess">
+        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
+        <target state="translated">MSB5002: Spustitelný soubor úlohy {0} se ukončuje, protože nebyl dokončen ve stanoveném limitu {1} milisekund.</target>
+        <note>{StrBegin="MSB5002: "}</note>
+      </trans-unit>
+      <trans-unit id="KillingProcessByCancellation">
+        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
+        <target state="translated">MSB5021: Spustitelný soubor úlohy {0} a její podřízené procesy se ukončují, protože sestavení bylo zrušeno.</target>
+        <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+      <trans-unit id="FailedDeletingTempFile">
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
+        <target state="translated">MSB5018: Nepodařilo se odstranit dočasný soubor {0}. {1} {2}</target>
+        <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
     </body>
   </file>

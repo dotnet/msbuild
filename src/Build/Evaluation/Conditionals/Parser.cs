@@ -99,8 +99,7 @@ namespace Microsoft.Build.Evaluation
         {
             // We currently have no support (and no scenarios) for disallowing property references
             // in Conditions.
-            ErrorUtilities.VerifyThrow(0 != (optionSettings & ParserOptions.AllowProperties),
-                "Properties should always be allowed.");
+            Assumed.True((optionSettings & ParserOptions.AllowProperties) != 0, "Properties should always be allowed.");
 
             _options = optionSettings;
             _elementLocation = elementLocation;

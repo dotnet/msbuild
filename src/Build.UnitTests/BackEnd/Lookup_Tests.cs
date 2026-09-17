@@ -8,6 +8,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -1281,6 +1282,302 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Now the lookup and original group are updated
             Assert.Equal("v4", lookup.GetProperty("p1").EvaluatedValue);
             Assert.Equal("v4", group["p1"].EvaluatedValue);
+        }
+
+        /// <summary>
+        /// Regression coverage for the perf fix in <see cref="Lookup.GetItems"/> when many
+        /// items are removed across batches: the result must still contain exactly the items
+        /// that were not removed, regardless of whether the implementation uses the
+        /// linear-scan fast path or the HashSet path.
+        /// </summary>
+        [Fact]
+        public void GetItemsAfterManyBatchedRemoves_ReturnsCorrectItems()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+            const int baseCount = 200;
+            const int batchCount = 50; // 50 batches × 4 = 200 removes total → exercises HashSet path
+            const int batchSize = 4;
+
+            var allItems = new List<ProjectItemInstance>(baseCount);
+            for (int i = 0; i < baseCount; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath);
+                table1.Add(item);
+                allItems.Add(item);
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            lookup.EnterScope("x");
+
+            var removedSet = new HashSet<ProjectItemInstance>();
+            for (int b = 0; b < batchCount; b++)
+            {
+                var batch = new List<ProjectItemInstance>(batchSize);
+                for (int k = 0; k < batchSize; k++)
+                {
+                    int idx = b * batchSize + k;
+                    batch.Add(allItems[idx]);
+                    removedSet.Add(allItems[idx]);
+                }
+                lookup.RemoveItems(itemType, batch);
+            }
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            remaining.Count.ShouldBe(baseCount - (batchCount * batchSize));
+            foreach (ProjectItemInstance item in remaining)
+            {
+                removedSet.ShouldNotContain(item);
+            }
+            // And no expected-remaining item is missing
+            for (int i = batchCount * batchSize; i < baseCount; i++)
+            {
+                remaining.ShouldContain(allItems[i]);
+            }
+        }
+
+        /// <summary>
+        /// Effective output is independent of how many phantom (no-op) removes are mixed
+        /// with the real ones. Whether the implementation uses a small or large remove set
+        /// internally must not change which items survive.
+        /// </summary>
+        [Fact]
+        public void GetItems_PhantomRemovesDoNotChangeResult()
+        {
+            const int baseCount = 50;
+            const int realRemoveCount = 5;
+            const string itemType = "i";
+
+            // Build items once and share between both runs so the resulting collections
+            // contain the same ProjectItemInstance references, allowing reference-equal
+            // set comparison.
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            var allItems = new List<ProjectItemInstance>(baseCount);
+            for (int i = 0; i < baseCount; i++)
+            {
+                allItems.Add(new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath));
+            }
+
+            // Phantom (no-op) remove references padding the second run.
+            var phantoms = new List<ProjectItemInstance>();
+            for (int i = 0; i < 20; i++)
+            {
+                phantoms.Add(new ProjectItemInstance(project, itemType, $"phantom_{i}", project.FullPath));
+            }
+
+            ICollection<ProjectItemInstance> noPhantoms = RunWith(allItems, [], realRemoveCount, itemType);
+            ICollection<ProjectItemInstance> withPhantoms = RunWith(allItems, phantoms, realRemoveCount, itemType);
+
+            noPhantoms.Count.ShouldBe(baseCount - realRemoveCount);
+            withPhantoms.Count.ShouldBe(baseCount - realRemoveCount);
+            // Reference-equal set comparison: both runs must return the exact same items.
+            new HashSet<ProjectItemInstance>(withPhantoms).SetEquals(noPhantoms).ShouldBeTrue();
+
+            static ICollection<ProjectItemInstance> RunWith(
+                List<ProjectItemInstance> allItems,
+                List<ProjectItemInstance> phantomRemoves,
+                int realRemoveCount,
+                string itemType)
+            {
+                var table = new ItemDictionary<ProjectItemInstance>();
+                foreach (var item in allItems)
+                {
+                    table.Add(item);
+                }
+
+                Lookup lookup = LookupHelpers.CreateLookup(table);
+                lookup.EnterScope("x");
+
+                var toRemove = new List<ProjectItemInstance>(realRemoveCount + phantomRemoves.Count);
+                for (int i = 0; i < realRemoveCount; i++)
+                {
+                    toRemove.Add(allItems[i]);
+                }
+                toRemove.AddRange(phantomRemoves);
+
+                lookup.RemoveItems(itemType, toRemove);
+                return lookup.GetItems(itemType);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that GetItems uses reference equality (matching pre-#12320 behavior).
+        /// Two different <see cref="ProjectItemInstance"/> instances with identical
+        /// EvaluatedInclude must be treated as distinct: removing one must not remove the other.
+        /// </summary>
+        [Fact]
+        public void GetItems_RemoveUsesReferenceEquality_NotValueEquality()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+            const string sharedSpec = "duplicate.cpp";
+
+            // Many items so the HashSet path is exercised
+            var allItems = new List<ProjectItemInstance>();
+            for (int i = 0; i < 30; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, sharedSpec, project.FullPath);
+                table1.Add(item);
+                allItems.Add(item);
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            lookup.EnterScope("x");
+
+            // Remove only the first 10 references, even though all share the same EvaluatedInclude
+            var toRemove = allItems.Take(10).ToList();
+            lookup.RemoveItems(itemType, toRemove);
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            // Exactly the 20 untouched references should remain
+            remaining.Count.ShouldBe(20);
+            for (int i = 0; i < 10; i++)
+            {
+                remaining.ShouldNotContain(allItems[i]);
+            }
+            for (int i = 10; i < 30; i++)
+            {
+                remaining.ShouldContain(allItems[i]);
+            }
+        }
+
+        /// <summary>
+        /// Merged-subscope variant of <see cref="GetItemsAfterManyBatchedRemoves_ReturnsCorrectItems"/>:
+        /// each batch lives in a child scope that is then merged into the outer scope, mirroring
+        /// how batched intrinsic-task removes accumulate. Exercises the HashSet path with
+        /// removes coming from multiple scope levels (multiple lists in <c>allRemoves</c>).
+        /// </summary>
+        [Fact]
+        public void GetItemsAfterMergedSubScopeRemoves_ReturnsCorrectItems()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+            const int baseCount = 100;
+            const int batchCount = 20;
+            const int batchSize = 3;
+
+            var allItems = new List<ProjectItemInstance>(baseCount);
+            for (int i = 0; i < baseCount; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath);
+                table1.Add(item);
+                allItems.Add(item);
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            Lookup.Scope outer = lookup.EnterScope("outer");
+
+            for (int b = 0; b < batchCount; b++)
+            {
+                Lookup.Scope inner = lookup.EnterScope("batch");
+
+                var batch = new List<ProjectItemInstance>(batchSize);
+                for (int k = 0; k < batchSize; k++)
+                {
+                    batch.Add(allItems[b * batchSize + k]);
+                }
+                lookup.RemoveItems(itemType, batch);
+                inner.LeaveScope();
+            }
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            remaining.Count.ShouldBe(baseCount - (batchCount * batchSize));
+            for (int i = 0; i < batchCount * batchSize; i++)
+            {
+                remaining.ShouldNotContain(allItems[i]);
+            }
+            for (int i = batchCount * batchSize; i < baseCount; i++)
+            {
+                remaining.ShouldContain(allItems[i]);
+            }
+
+            outer.LeaveScope();
+        }
+
+        /// <summary>
+        /// Removes that don't match anything in the base group must be no-ops: the original
+        /// items must all survive. Exercises the HashSet path with totalRemoves above the
+        /// threshold while none of the removes correspond to existing items.
+        /// </summary>
+        [Fact]
+        public void GetItems_RemovesNotInGroup_AreNoOps()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+
+            var originalItems = new List<ProjectItemInstance>();
+            for (int i = 0; i < 30; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"original_{i}", project.FullPath);
+                table1.Add(item);
+                originalItems.Add(item);
+            }
+
+            // Build 20 distinct ProjectItemInstance references that were never added to table1.
+            var phantomRemoves = new List<ProjectItemInstance>();
+            for (int i = 0; i < 20; i++)
+            {
+                phantomRemoves.Add(new ProjectItemInstance(project, itemType, $"phantom_{i}", project.FullPath));
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            lookup.EnterScope("x");
+            lookup.RemoveItems(itemType, phantomRemoves);
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            remaining.Count.ShouldBe(30);
+            foreach (var original in originalItems)
+            {
+                remaining.ShouldContain(original);
+            }
+        }
+
+        /// <summary>
+        /// The HashSet path filters both <c>groupFound</c> AND <c>allAdds</c>. This test
+        /// covers the adds branch: add many new items, then remove a subset (above threshold)
+        /// and verify exactly the unremoved adds survive in the GetItems result.
+        /// </summary>
+        [Fact]
+        public void GetItems_RemoveSubsetOfAdds_ReturnsRemainingAdds()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            // Empty base table: groupFound will be empty, so the HashSet path applies only to adds.
+            Lookup lookup = LookupHelpers.CreateLookup(new ItemDictionary<ProjectItemInstance>());
+            const string itemType = "i";
+
+            lookup.EnterScope("x");
+
+            var addedItems = new List<ProjectItemInstance>();
+            for (int i = 0; i < 20; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"add_{i}", project.FullPath);
+                addedItems.Add(item);
+                lookup.AddNewItem(item);
+            }
+
+            // Remove 15 of the adds → totalRemoves > 8 → HashSet path exercised on the adds branch.
+            var toRemove = addedItems.Take(15).ToList();
+            lookup.RemoveItems(itemType, toRemove);
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            remaining.Count.ShouldBe(5);
+            for (int i = 0; i < 15; i++)
+            {
+                remaining.ShouldNotContain(addedItems[i]);
+            }
+            for (int i = 15; i < 20; i++)
+            {
+                remaining.ShouldContain(addedItems[i]);
+            }
         }
     }
 

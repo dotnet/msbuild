@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -28,7 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Associate a (nodeID and project_context_id) to a target framework.
         /// </summary>
         internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
-
+        private readonly List<RegisteredLoggerInfo> _registeredLoggers = new();
         #region Constructors
         /// <summary>
         /// Default constructor.
@@ -204,6 +204,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the data structures created when the logger was created
+            _registeredLoggers.Clear();
             propertyOutputMap = new Dictionary<(int, int), string>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
@@ -320,6 +321,23 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
                 resetColor();
+            }
+
+            // Show paths to the files created by enabled loggers.
+            if (ShowSummary == true
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
+                && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
+            {
+                WriteNewLine();
+
+                foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
+                {
+                    string displayPaths = string.Join(
+                        CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
+                        logger.OutputFilePaths);
+
+                    WriteLinePretty(string.Format(CultureInfo.CurrentCulture, Microsoft.Build.Framework.Resources.SR.LogFileOutputPath, logger.LoggerName, displayPaths));
+                }
             }
 
             // Show build time if verbosity is normal, detailed or diagnostic or the user specified to
@@ -511,8 +529,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void ProjectStartedHandler(object sender, ProjectStartedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
-            ErrorUtilities.VerifyThrowArgumentNull(e.ParentProjectBuildEventContext, "ParentProjectBuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.ParentProjectBuildEventContext, "ParentProjectBuildEventContext");
 
             // Add the project to the BuildManager so we can use the start information later in the build process
             _buildEventManager.AddProjectStartedEvent(e, _showTimeStamp || IsVerbosityAtLeast(LoggerVerbosity.Detailed));
@@ -651,11 +669,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void ProjectFinishedHandler(object sender, ProjectFinishedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
 
             // Get the project started event so we can use its information to properly display a project finished event
             ProjectStartedEventMinimumFields startedEvent = _buildEventManager.GetProjectStartedEvent(e.BuildEventContext);
-            ErrorUtilities.VerifyThrow(startedEvent != null, "Project finished event for {0} received without matching start event", e.ProjectFile);
+            Assumed.NotNull(startedEvent, $"Project finished event for {e.ProjectFile} received without matching start event");
 
             if (this.showPerfSummary)
             {
@@ -842,7 +860,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void TargetStartedHandler(object sender, TargetStartedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
 
             // Add the target started information to the buildEventManager so its information can be used
             // later in the build
@@ -863,7 +881,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void TargetFinishedHandler(object sender, TargetFinishedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
 
             if (this.showPerfSummary)
             {
@@ -880,7 +898,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Get the target started event so we can determine whether or not to show the targetFinishedEvent
                 // as we only want to show target finished events if a target started event has been shown
                 TargetStartedEventMinimumFields startedEvent = _buildEventManager.GetTargetStartedEvent(e.BuildEventContext);
-                ErrorUtilities.VerifyThrow(startedEvent != null, "Started event should not be null in the finished event handler");
+                Assumed.NotNull(startedEvent, "Started event should not be null in the finished event handler");
                 if (startedEvent.ShowTargetFinishedEvent)
                 {
                     if (showTargetOutputs)
@@ -935,7 +953,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void TaskStartedHandler(object sender, TaskStartedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
 
             // if verbosity is detailed or diagnostic
 
@@ -976,7 +994,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void TaskFinishedHandler(object sender, TaskFinishedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
             if (this.showPerfSummary)
             {
                 // Stop the task performance counter which was started in the task started event
@@ -1026,7 +1044,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void ErrorHandler(object sender, BuildErrorEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
             // Keep track of the number of error events raised
             errorCount++;
 
@@ -1072,7 +1090,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void WarningHandler(object sender, BuildWarningEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
             // Keep track of the number of warning events raised during the build
             warningCount++;
 
@@ -1124,13 +1142,12 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
-
             if (e.BuildEventContext == null && e is AssemblyLoadBuildEventArgs)
             {
                 return;
             }
 
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
             bool print = false;
             bool lightenText = false;
 
@@ -1212,6 +1229,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     var evaluationKey = GetEvaluationKey(e.BuildEventContext);
                     propertyOutputMap[evaluationKey] = value;
                 }
+            }
+            else if (e is LoggersRegisteredEventArgs loggerEvent)
+            {
+                _registeredLoggers.AddRange(loggerEvent.Loggers);
             }
             else if (e is BuildCanceledEventArgs buildCanceled)
             {
@@ -1429,7 +1450,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 setColor(ConsoleColor.Cyan);
 
                 ProjectStartedEventMinimumFields startedEvent = _buildEventManager.GetProjectStartedEvent(e);
-                ErrorUtilities.VerifyThrow(startedEvent != null, "Project Started should not be null in deferred target started");
+                Assumed.NotNull(startedEvent, "Project Started should not be null in deferred target started");
                 string currentProjectFile = startedEvent.ProjectFile ?? string.Empty;
 
                 string targetName;
@@ -1560,7 +1581,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return;
             }
 
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ArgumentNullException.ThrowIfNull(e.BuildEventContext, "BuildEventContext");
             if (IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
                 // ignore custom events with null messages -- some other
@@ -1724,7 +1745,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     entryPoint.AddEventFinished(null, buildEventContext, eventTimeStamp);
                 }
 
-                ErrorUtilities.VerifyThrow(_startedEvent != null, "Cannot have finished counter without started counter. ");
+                Assumed.NotNull(_startedEvent, "Cannot have finished counter without started counter. ");
 
                 if (_startedEvent.TryGetValue(buildEventContext, out object time))
                 {

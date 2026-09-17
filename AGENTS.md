@@ -15,14 +15,14 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 
 ### Technology Stack
 - .NET 10.0 and .NET Framework 4.7.2
-- C# 13 features (especially collection expressions)
+- C# 14 features (especially collection expressions)
 - xUnit with Shouldly for testing
 - Multi-platform support (Windows, Linux, macOS)
 
 ## General
 
 * Performance is the top priority - minimize allocations, avoid LINQ in hot paths, use efficient algorithms.
-* Always use the latest C# features, currently C# 13, especially collection expressions (`[]` over `new Type[]`).
+* Always use the latest C# features, currently C# 14, especially collection expressions (`[]` over `new Type[]`).
 * Match the style of surrounding code when making edits, but modernize aggressively for substantial changes.
 
 ## Code Review Instructions
@@ -105,6 +105,8 @@ ImmutableDictionary<string, int> lookup = ...;
 
 ## Building
 
+Most development can use `dotnet build`. For the most complete possible build, use `MSBuild.exe` from Visual Studio 2026. See the [Windows build prerequisites](README.md#building-msbuild-with-visual-studio-2026-on-windows).
+
 NEVER pipe MSBuild output to a file. If you want a list of errors, add `-flp:"v=q;LogFile=ErrorsAndWarnings.log"` to the arguments.
 
 When considering a subset of build errors, always look at the BEGINNING of the set, not the end.
@@ -151,7 +153,7 @@ dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 ```
 
-You can run a single unit test with `--filter {methodname}`, for example `dotnet test src/Framework.UnitTests/ --filter ExerciseBuildEventContext`.
+You can run a single unit test with `-- --filter-method "*{methodname}*"`, for example `dotnet test src/Framework.UnitTests/ -- --filter-method "*ExerciseBuildEventContext*"`.
 
 ### Test Verification
 

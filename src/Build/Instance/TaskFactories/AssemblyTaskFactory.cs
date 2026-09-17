@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 #endif
 
@@ -38,7 +40,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The type loader to load types which derrive from ITask or ITask2
         /// </summary>
-        private readonly TypeLoader _typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
+        private readonly TypeLoader _typeLoader = TypeLoader.Create<ITask>();
 
         /// <summary>
         /// Name of the task wrapped by the task factory
@@ -54,7 +56,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A cache of tasks and the AppDomains they are loaded in.
         /// </summary>
-        private Dictionary<ITask, AppDomain> _tasksAndAppDomains = new Dictionary<ITask, AppDomain>();
+        private readonly ConcurrentDictionary<ITask, AppDomain> _tasksAndAppDomains = new ConcurrentDictionary<ITask, AppDomain>();
 #endif
 
         /// <summary>
@@ -62,11 +64,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters _factoryIdentityParameters;
 
-        /// <summary>
-        /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
-        /// TaskLoader will be able to call back with errors.
-        /// </summary>
-        private TaskLoggingContext _taskLoggingContext;
+        private bool _taskHostExplicitlyRequested;
+
 
         #endregion
 
@@ -93,6 +92,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the type of task this factory creates.
         /// </summary>
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type TaskType
         {
             get { return _loadedType.Type; }
@@ -113,11 +113,9 @@ namespace Microsoft.Build.BackEnd
         /// The taskFactoryLoggingHost will log messages in the context of the target where the task is first used.
         /// </para>
         /// </remarks>
+        [RequiresUnreferencedCode("Loads the task type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
-        {
-            ErrorUtilities.ThrowInternalError("Use internal call to properly initialize the assembly task factory");
-            return false;
-        }
+            => InternalError.Throw<bool>("Use internal call to properly initialize the assembly task factory");
 
         /// <summary>
         /// Initializes this factory for instantiating tasks with a particular inline task block and a set of UsingTask parameters.
@@ -138,11 +136,9 @@ namespace Microsoft.Build.BackEnd
         /// The taskFactoryLoggingHost will log messages in the context of the target where the task is first used.
         /// </para>
         /// </remarks>
+        [RequiresUnreferencedCode("Loads the task type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         public bool Initialize(string taskName, IDictionary<string, string> factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
-        {
-            ErrorUtilities.ThrowInternalError("Use internal call to properly initialize the assembly task factory");
-            return false;
-        }
+            => InternalError.Throw<bool>("Use internal call to properly initialize the assembly task factory");
 
         /// <summary>
         /// Get a list of parameters for the task.
@@ -162,11 +158,9 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// The generated task, or <c>null</c> if the task failed to be created.
         /// </returns>
+        [RequiresUnreferencedCode("Loads the task type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
-        {
-            ErrorUtilities.ThrowInternalError("Use internal call to properly create a task instance from the assembly task factory");
-            return null;
-        }
+            => InternalError.Throw<ITask>("Use internal call to properly create a task instance from the assembly task factory");
 
         /// <summary>
         /// Create an instance of the task to be used.
@@ -185,11 +179,9 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// The generated task, or <c>null</c> if the task failed to be created.
         /// </returns>
+        [RequiresUnreferencedCode("Loads the task type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost, IDictionary<string, string> taskIdentityParameters)
-        {
-            ErrorUtilities.ThrowInternalError("Use internal call to properly create a task instance from the assembly task factory");
-            return null;
-        }
+            => InternalError.Throw<ITask>("Use internal call to properly create a task instance from the assembly task factory");
 
         /// <summary>
         /// Cleans up any context or state that may have been built up for a given task.
@@ -202,12 +194,10 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task);
+            ArgumentNullException.ThrowIfNull(task);
 #if FEATURE_APPDOMAIN
-            AppDomain appDomain;
-            if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
+            if (_tasksAndAppDomains.TryRemove(task, out AppDomain appDomain))
             {
-                _tasksAndAppDomains.Remove(task);
 
                 if (appDomain != null)
                 {
@@ -245,6 +235,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize the factory from the task registry.
         /// </summary>
+        [RequiresUnreferencedCode("Loads the task type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         internal LoadedType InitializeFactory(
             AssemblyLoadInfo loadInfo,
             string taskName,
@@ -256,8 +247,9 @@ namespace Microsoft.Build.BackEnd
             ElementLocation elementLocation,
             string taskProjectFile)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
+            ArgumentNullException.ThrowIfNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
+            _taskHostExplicitlyRequested = taskHostExplicitlyRequested;
 
             bool taskHostParamsMatchCurrentProc = true;
             if (!taskFactoryIdentityParameters.IsEmpty)
@@ -268,7 +260,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName);
+                ArgumentException.ThrowIfNullOrEmpty(taskName);
                 _taskName = taskName;
 
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
@@ -330,7 +322,7 @@ namespace Microsoft.Build.BackEnd
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
 
             TaskHostParameters mergedParameters = TaskHostParameters.Empty;
-            _taskLoggingContext = taskLoggingContext;
+            bool useTaskHostForMultiThreadedCompatibility = false;
 
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
             // the task factory parameters if we have any to calculate; otherwise even if we
@@ -352,24 +344,25 @@ namespace Microsoft.Build.BackEnd
                 if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
                 {
                     useTaskFactory = true;
+                    useTaskHostForMultiThreadedCompatibility =
+                        !_taskHostExplicitlyRequested;
                 }
             }
 
-            _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
+            taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
 
             if (useTaskFactory)
             {
-                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
+                Assumed.NotNull(buildComponentHost);
 
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
                 mergedParameters = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
-                // Sidecar here means that the task host is launched with /nodeReuse:true and doesn't terminate
-                // after the task execution. This improves performance for tasks that run multiple times in a build.
-                // If the task host factory is explicitly requested, do not act as a sidecar task host.
-                // This is important as customers use task host factories for short lived tasks to release
-                // potential locks.
-                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
+                // Launching with /nodeReuse:true keeps the task host alive after the task finishes,
+                // which improves performance for tasks that run multiple times in a build. An
+                // explicitly requested task host factory is deliberately excluded: customers use it
+                // for short lived tasks precisely so the process exits and releases its locks.
+                bool allowNodeReuse = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
@@ -377,7 +370,8 @@ namespace Microsoft.Build.BackEnd
                     buildComponentHost,
                     mergedParameters,
                     _loadedType,
-                    useSidecarTaskHost: useSidecarTaskHost,
+                    allowNodeReuse: allowNodeReuse,
+                    forwardConsoleOutput: useTaskHostForMultiThreadedCompatibility,
                     projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
@@ -400,7 +394,9 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.File,
                     taskLocation.Line,
                     taskLocation.Column,
-                    new TaskLoader.LogError(ErrorLoggingDelegate),
+                    new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
+                        taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
+                    taskEnvironment,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
@@ -423,7 +419,7 @@ namespace Microsoft.Build.BackEnd
                 if (taskInstance != null)
                 {
                     bool isMicrosoftOwned = IsMicrosoftAuthoredTask();
-                    _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
+                    taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
                 }
 
                 return taskInstance;
@@ -458,6 +454,7 @@ namespace Microsoft.Build.BackEnd
         /// Is the given task name able to to be created by the task factory. In the case of an assembly task factory
         /// this question is answered by checking the assembly wrapped by the task factory to see if it exists.
         /// </summary>
+        [RequiresUnreferencedCode("Loads the task type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         internal bool TaskNameCreatableByFactory(string taskName, in TaskHostParameters taskIdentityParameters, string taskProjectFile, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
         {
             if (!TaskIdentityParametersMatchFactory(_factoryIdentityParameters, taskIdentityParameters))
@@ -467,7 +464,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName, "TaskName");
+                ArgumentException.ThrowIfNullOrEmpty(taskName, "TaskName");
                 // Parameters match, so now we check to see if the task exists.
                 return _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly) != null;
             }
@@ -510,7 +507,7 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
-#endregion
+        #endregion
 
         #region Private members
 
@@ -596,7 +593,7 @@ namespace Microsoft.Build.BackEnd
             if (taskIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(factoryIdentityParameters.Runtime);
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture);
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture, normalizedRuntime);
 
                 return normalizedRuntime == factoryIdentityParameters.Runtime && normalizedArch == factoryIdentityParameters.Architecture
                     ? factoryIdentityParameters
@@ -606,7 +603,7 @@ namespace Microsoft.Build.BackEnd
             if (factoryIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(taskIdentityParameters.Runtime);
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture);
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture, normalizedRuntime);
 
                 return normalizedRuntime == taskIdentityParameters.Runtime && normalizedArch == taskIdentityParameters.Architecture
                     ? taskIdentityParameters
@@ -615,14 +612,12 @@ namespace Microsoft.Build.BackEnd
 
             if (!XMakeAttributes.TryMergeRuntimeValues(taskIdentityParameters.Runtime, factoryIdentityParameters.Runtime, out var mergedRuntime))
             {
-                ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable? " +
-                    $"TaskIdentity Runtime: {taskIdentityParameters.Runtime}, FactoryIdentity Runtime: {factoryIdentityParameters.Runtime}.");
+                InternalError.Throw($"How did we get two runtime values that were unmergeable? TaskIdentity Runtime: {taskIdentityParameters.Runtime}, FactoryIdentity Runtime: {factoryIdentityParameters.Runtime}.");
             }
 
             if (!XMakeAttributes.TryMergeArchitectureValues(taskIdentityParameters.Architecture, factoryIdentityParameters.Architecture, out var mergedArchitecture))
             {
-                ErrorUtilities.ThrowInternalError("How did we get two architecture values that were unmergeable? " +
-                    $"TaskIdentity Architecture: {taskIdentityParameters.Architecture}, FactoryIdentity Architecture: {factoryIdentityParameters.Architecture}.");
+                InternalError.Throw($"How did we get two architecture values that were unmergeable? TaskIdentity Architecture: {taskIdentityParameters.Architecture}, FactoryIdentity Architecture: {factoryIdentityParameters.Architecture}.");
             }
 
             return new TaskHostParameters(
@@ -748,14 +743,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Log errors from TaskLoader.
-        /// </summary>
-        private void ErrorLoggingDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
-        {
-            _taskLoggingContext.LogError(new BuildEventFileInfo(taskLocation, taskLine, taskColumn), message, messageArgs);
-        }
-
-        /// <summary>
         /// Initializes this factory for instantiating tasks with a particular inline task block and a set of UsingTask parameters.
         /// </summary>
         /// <param name="taskName">Name of the task.</param>
@@ -774,11 +761,9 @@ namespace Microsoft.Build.BackEnd
         /// The taskFactoryLoggingHost will log messages in the context of the target where the task is first used.
         /// </para>
         /// </remarks>
+        [RequiresUnreferencedCode("Loads the task type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         public bool Initialize(string taskName, TaskHostParameters factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
-        {
-            ErrorUtilities.ThrowInternalError("Use internal call to properly initialize the assembly task factory");
-            return false;
-        }
+            => InternalError.Throw<bool>("Use internal call to properly initialize the assembly task factory");
 
         /// <summary>
         /// Create an instance of the task to be used.
@@ -797,11 +782,9 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// The generated task, or <c>null</c> if the task failed to be created.
         /// </returns>
+        [RequiresUnreferencedCode("Loads the task type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost, TaskHostParameters taskIdentityParameters)
-        {
-            ErrorUtilities.ThrowInternalError("Use internal call to properly create a task instance from the assembly task factory");
-            return null;
-        }
+            => InternalError.Throw<ITask>("Use internal call to properly create a task instance from the assembly task factory");
 
         #endregion
     }

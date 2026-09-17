@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -959,7 +960,7 @@ namespace Microsoft.Build.UnitTests.Definition
             // Cause an exception if the path is invalid
             Path.GetFileName(path);
 
-            string pathWithoutTrailingSlash = path.EndsWith(Path.DirectorySeparatorChar.ToString())
+            string pathWithoutTrailingSlash = path.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
                                                   ? path.Substring(0, path.Length - 1)
                                                   : path;
             // NOTE: the Replace calls below are a very minimal attempt to convert a basic, cmd.exe-style wildcard
@@ -982,7 +983,12 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             string xmlContents = _defaultTasksFileMap[path];
             XmlDocumentWithLocation xmlDocument = new XmlDocumentWithLocation();
-            xmlDocument.LoadXml(xmlContents);
+            using (StringReader sreader = new StringReader(xmlContents))
+            using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            {
+                xmlDocument.Load(reader);
+            }
+
             return xmlDocument;
         }
 

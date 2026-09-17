@@ -240,7 +240,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -253,7 +253,7 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="translated">  -multithreaded[:true|false]
                      在 MSBuild 中启用实验性多线程模式。
                      这意味着 MSBuild 将使用多个线程
                      并行构建项目，
@@ -263,7 +263,6 @@
                      由 -maxCpuCount 开关决定。
                      如果开启多线程模式
                      且 MSBUILDFORCEALLTASKSOUTOFPROC=1
-，
                      maxCpuCount 不能大于 256。
                      (缩写: -mt)
     </target>
@@ -312,6 +311,16 @@
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1072: 多线程模式值无效。{0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -379,6 +388,71 @@
         <source>not set</source>
         <target state="translated">未设置</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerConnectFailed">
+        <source>could not connect to the server within the timeout window; the server may have failed to start</source>
+        <target state="translated">在超时时间内无法连接到服务器；服务器可能启动失败</target>
+        <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerCrashedOnLaunch">
+        <source>the server process exited with code {0} immediately after launch</source>
+        <target state="translated">服务器进程启动后立即退出，显示代码: {0}</target>
+        <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerLaunchError">
+        <source>the server process could not be launched</source>
+        <target state="translated">无法启动服务器进程</target>
+        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeReused">
+        <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
+        <target state="translated">为此生成重用了正在运行的 MSBuild Server 节点(进程 ID {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawned">
+        <source>MSBuild Server node started for this build (process ID {0}).</source>
+        <target state="translated">为此生成启动了 MSBuild Server 节点(进程 ID {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawnedShortLived">
+        <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
+        <target state="translated">仅为此生成启动了 MSBuild Server 节点；它将在之后关闭(进程 ID {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNotUsedForBuild">
+        <source>MSBuild Server was requested but not used for this build: {0}.</source>
+        <target state="translated">已请求 MSBuild Server，但未用于此生成: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonBusy">
+        <source>the server was busy with another build</source>
+        <target state="translated">服务器正在处理另一个生成</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
+        <source>this invocation is not compatible with MSBuild Server</source>
+        <target state="translated">此调用与 MSBuild Server 不兼容</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
+        <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
+        <target state="translated">已禁用节点重用(-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
+        <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
+        <target state="translated">已启用 MSBUILDENSURESTDOUTFORTASKPROCESSES 安全门</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerStateUnknown">
+        <source>the current server state could not be determined</source>
+        <target state="translated">无法确定当前服务器状态</target>
+        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerUnavailable">
+        <source>MSBuild server unavailable: {0}. Falling back to an in-process build.</source>
+        <target state="translated">MSBuild 服务器不可用: {0}。回退到进程内生成。</target>
+        <note>LOCALIZATION: {0} is a sub-message describing why the MSBuild server could not be used. It is one of MSBuildServerCrashedOnLaunch / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed. The outer template supplies the trailing period after {0}; sub-messages must NOT end with a period or other sentence-final punctuation.</note>
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
@@ -1719,6 +1793,22 @@
       where the switches are coming from.
     </note>
       </trans-unit>
+      <trans-unit id="PickedUpSwitchesFromResponseFile">
+        <source>Some command line switches were read from this response file:</source>
+        <target state="translated">从此响应文件中读取了一些命令行开关:</target>
+        <note>
+      UE: This message appears before a command-line parsing error when switches were read from a response file: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file path is printed on a separate line after this message.
+    </note>
+      </trans-unit>
+      <trans-unit id="PickedUpSwitchesFromResponseFiles">
+        <source>Some command line switches were read from these response files:</source>
+        <target state="translated">从以下响应文件中读取了一些命令行开关:</target>
+        <note>
+      UE: This message appears before a command-line parsing error when switches were read from response files: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file paths are printed on separate lines after this message.
+    </note>
+      </trans-unit>
       <trans-unit id="Process">
         <source>Process = "{0}"</source>
         <target state="translated">进程 = "{0}"</target>
@@ -2102,20 +2192,18 @@
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      将所有生成事件序列化为压缩的二进制文件。
                      默认情况下，该文件位于当前目录中，名为
-                     "msbuild.binlog"。二进制日志是生成过程的详细描述
-，
+                     "msbuild.binlog"。二进制日志是生成过程的详细描述，
                      稍后可用于重新构造
                      文本日志并供其他分析工具使用。二进制日志
                      大小通常为最详细的文本诊断级别日志的 1/10 至 1/20，
                      但它包含更多信息。
                      (缩写: -bl)
 
-                     可选的 LogFile 指定保存二进制日志
-                     的路径。要为每个生成产生不同的日志文件
-，
+                     可选的 LogFile 指定保存二进制日志的
+                     路径。要为每个生成产生不同的日志文件，
                      可以将令牌 "{}" 添加到
-                     路径中，例如: LogFile=output-{}-log.binlog。日志路径中的每个
-                     "{}" 都使用时间戳、正在运行的进程 ID 和
+                     路径中，例如: LogFile=output-{}-log.binlog。日志路径中的
+                     每个 "{}" 都使用时间戳、正在运行的进程 ID 和
                      随机字符串戳
                      替换为唯一字符串。
 
@@ -2129,8 +2217,7 @@
                       ProjectImports=Embed    - 将项目导入嵌入到
                                                 日志文件中。
                       ProjectImports=ZipFile - 将项目文件保存到
-                                                output.projectimports.zip
-，
+                                                output.projectimports.zip，
                                                 其中输出的名称与
                                                 二进制日志文件名相同。
 
@@ -2282,6 +2369,36 @@
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
         <target state="translated">MSBUILD : error MSB4192: 项目文件“{0}”为“.vcproj”或“.dsp”文件格式，而 MSBuild 无法直接生成这些文件格式。请通过在 Visual Studio IDE 中打开该项目或运行转换工具来转换该项目；对于“.vcproj”格式，还可以使用 MSBuild 来生成包含该项目的解决方案文件。</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: MSBuild 任务宿主不支持运行执行 IBuildEngine 回调的任务。如果需要执行这些操作，请改为在核心 MSBuild 进程中运行您的任务。如果 UsingTask 已用“Runtime”或“Architecture”值特性化，或者任务调用已用“MSBuildRuntime”或“MSBuildArchitecture”值(与 MSBuild 的当前运行时或体系结构不匹配)特性化，则将自动在任务宿主中执行任务。</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: 读取日志文件时出现异常: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">先对从父节点收到的环境进行以下修改，然后再将其应用于任务宿主:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  将“{0}”设置为“{1}”，而不是父环境的值“{2}”。</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">架构验证</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
       </trans-unit>
     </body>
   </file>

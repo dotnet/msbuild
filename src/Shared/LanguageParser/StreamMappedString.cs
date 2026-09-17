@@ -192,7 +192,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     break;
                 }
 
-                ErrorUtilities.VerifyThrow(originalPageNumber != _currentPageNumber, "Expected a new page.");
+                Assumed.NotEqual(originalPageNumber, _currentPageNumber, "Expected a new page.");
             }
 
             // Is it the current page?
@@ -287,7 +287,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <param name="c"></param>
         private void AppendCharacterToStream(char c)
         {
-            ErrorUtilities.VerifyThrow(_charactersRead != _pageSize, "Attempt to append to non-last page.");
+            Assumed.NotEqual(_charactersRead, _pageSize, "Attempt to append to non-last page.");
 
             _currentPage[_charactersRead] = c;
             ++_charactersRead;
@@ -302,7 +302,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             char c;
             if (_charactersRead == 0)
             {
-                ErrorUtilities.VerifyThrow(_priorPage != null, "There is no last character in the stream.");
+                Assumed.NotNull(_priorPage, "There is no last character in the stream.");
                 c = _priorPage[_pageSize - 1];
             }
             else
@@ -386,7 +386,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 int charactersOnPage = GetCharactersOnPage(startPosition + i);
 
                 charactersExtracted = Math.Min(length - i, charactersOnPage - relativeStartPosition);
-                ErrorUtilities.VerifyThrow(charactersExtracted > 0, "Expected non-zero extraction count.");
+                Assumed.Positive(charactersExtracted, "Expected non-zero extraction count.");
 
                 result.Append(page, relativeStartPosition, charactersExtracted);
             }
@@ -401,7 +401,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         private int GetCharactersOnPage(int offset)
         {
             int page = PageFromAbsoluteOffset(offset);
-            ErrorUtilities.VerifyThrow(page >= _currentPageNumber - 1 && page <= _currentPageNumber, "Could not get character count for this page.");
+            Assumed.InRange(page, _currentPageNumber - 1, _currentPageNumber, "Could not get character count for this page.");
 
             if (page == _currentPageNumber)
             {

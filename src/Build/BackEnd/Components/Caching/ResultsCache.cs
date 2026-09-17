@@ -5,9 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -68,7 +67,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_resultsByConfiguration.TryGetValue(result.ConfigurationId, out BuildResult buildResult))
                 {
-                    if (Object.ReferenceEquals(buildResult, result))
+                    if (ReferenceEquals(buildResult, result))
                     {
                         // Merging results would be meaningless as we would be merging the object with itself.
                         return;
@@ -81,10 +80,7 @@ namespace Microsoft.Build.BackEnd
                     // Note that we are not making a copy here.  This is by-design.  The TargetBuilder uses this behavior
                     // to ensure that re-entering a project will be able to see all previously built targets and avoid
                     // building them again.
-                    if (!_resultsByConfiguration.TryAdd(result.ConfigurationId, result))
-                    {
-                        ErrorUtilities.ThrowInternalError("Failed to add result for configuration {0}", result.ConfigurationId);
-                    }
+                    Assumed.True(_resultsByConfiguration.TryAdd(result.ConfigurationId, result), $"Failed to add result for configuration {result.ConfigurationId}");
                 }
             }
         }
@@ -112,7 +108,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The build results for the specified request.</returns>
         public BuildResult GetResultForRequest(BuildRequest request)
         {
-            ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
+            Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
 
             lock (_resultsByConfiguration)
             {
@@ -120,7 +116,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     foreach (string target in request.Targets)
                     {
-                        ErrorUtilities.VerifyThrow(result.HasResultsForTarget(target), "No results in cache for target " + target);
+                        Assumed.True(result.HasResultsForTarget(target), "No results in cache for target " + target);
                     }
 
                     return result;
@@ -162,20 +158,41 @@ namespace Microsoft.Build.BackEnd
         /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method
         /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
+        /// <param name="allowedTopLevelTargets">When non-null, the request is only considered satisfiable if all of its explicitly
+        /// requested targets (or the configuration's default targets when no targets are specified) are contained in this set.
+        /// Used to enforce isolation constraints deterministically for cross-project references in isolated builds.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
+        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets)
         {
-            ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
+            Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
+
+            // In isolated builds a cross-project reference may only be satisfied from the cache for targets that were
+            // explicitly requested for the referenced configuration (i.e. declared via ProjectReferenceTargets and built
+            // by the static graph). A target that merely has a cached result because it ran as a dependency of another
+            // target must not satisfy the reference, otherwise the build result would depend on node scheduling (whether
+            // the dependency happened to run on the same node). Treat such requests as a cache miss so the isolation
+            // constraint check runs and deterministically reports the incomplete graph.
+            if (allowedTopLevelTargets != null)
+            {
+                List<string> targetsToCheck = request.Targets.Count > 0 ? request.Targets : configDefaultTargets;
+                if (targetsToCheck != null)
+                {
+                    foreach (string target in targetsToCheck)
+                    {
+                        if (!ContainsIgnoreCase(allowedTopLevelTargets, target))
+                        {
+                            return response;
+                        }
+                    }
+                }
+            }
 
             lock (_resultsByConfiguration)
             {
                 if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
                 {
-                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                        ? AreBuildResultFlagsCompatible(request, allResults) : true;
-
-                    if (buildDataFlagsSatisfied)
+                    if (AreBuildResultFlagsCompatible(request, allResults))
                     {
                         // Check for targets explicitly specified.
                         bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss);
@@ -281,7 +298,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
         }
 
         /// <summary>
@@ -299,8 +316,24 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ResultsCache, "Cannot create components of type {0}", componentType);
+            Assumed.Equal(componentType, BuildComponentType.ResultsCache, $"Cannot create components of type {componentType}");
             return new ResultsCache();
+        }
+
+        /// <summary>
+        /// Determines whether the given collection contains the specified target name, ignoring case.
+        /// </summary>
+        private static bool ContainsIgnoreCase(IReadOnlyCollection<string> targets, string target)
+        {
+            foreach (string candidate in targets)
+            {
+                if (MSBuildNameIgnoreCaseComparer.Default.Equals(candidate, target))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

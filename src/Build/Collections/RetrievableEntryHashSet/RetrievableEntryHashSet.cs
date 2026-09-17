@@ -118,10 +118,7 @@ namespace Microsoft.Build.Collections
 
         public RetrievableEntryHashSet(IEqualityComparer<string> comparer)
         {
-            if (comparer == null)
-            {
-                ErrorUtilities.ThrowInternalError("use explicit comparer");
-            }
+            Assumed.NotNull(comparer, "use explicit comparer");
 
             _comparer = comparer;
             _constrainedComparer = comparer as IConstrainedEqualityComparer<string>;

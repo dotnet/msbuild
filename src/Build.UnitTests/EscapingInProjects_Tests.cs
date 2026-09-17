@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-#if FEATURE_COMPILE_IN_TESTS
 using System.Reflection;
-#endif
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -22,7 +20,6 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 #if FEATURE_COMPILE_IN_TESTS
 using Microsoft.Build.Shared;
 #endif
@@ -123,7 +120,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
 
-#if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
         /// Make sure I can define a property with escaped characters and pass it into
         /// an ITaskItem[] task parameter.
@@ -135,7 +131,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
-                    <UsingTask TaskName=`Microsoft.Build.UnitTests.EscapingInProjects_Tests.MyTestTask` AssemblyFile=`{new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath}` />
+                    <UsingTask TaskName=`Microsoft.Build.UnitTests.EscapingInProjects_Tests.MyTestTask` AssemblyFile=`{Assembly.GetExecutingAssembly().Location}` />
 
                     <PropertyGroup>
                         <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
@@ -176,12 +172,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 </Project>
 
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath),
+                ", Assembly.GetExecutingAssembly().Location),
                 logger: new MockLogger(_output));
 
             logger.AssertLogContains("Received TaskItemParam: 123 abc ; def ; ghi 789");
         }
-#endif
 
         /// <summary>
         /// If I try to add a new item to a project, and my new item's Include has an unescaped semicolon
@@ -828,7 +823,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         </None>
                     </ItemGroup>
                 </Project>";
-            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
             Project project = new Project(reader);
             ProjectItem item = project.GetItems("None").Single();
 
@@ -874,7 +869,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
-            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
@@ -906,7 +901,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
-            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 

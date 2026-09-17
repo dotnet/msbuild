@@ -20,7 +20,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -83,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public TaskRegistry_Tests(ITestOutputHelper output)
         {
-            _testTaskLocation = typeof(TaskRegistry_Tests).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
+            _testTaskLocation = typeof(TaskRegistry_Tests).Assembly.ManifestModule.FullyQualifiedName;
 
             _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             _targetLoggingContext = new TargetLoggingContext(_loggingService, _loggerContext);
@@ -1128,7 +1127,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
-            ProjectUsingTaskElement element = project.AddUsingTask("Task1", AssemblyUtilities.GetAssemblyLocation(typeof(TaskRegistry_Tests.NullTaskTypeTaskFactory).GetTypeInfo().Assembly), null);
+            ProjectUsingTaskElement element = project.AddUsingTask("Task1", typeof(TaskRegistry_Tests.NullTaskTypeTaskFactory).Assembly.Location, null);
 
             element.TaskFactory = typeof(NullTaskTypeTaskFactory).FullName;
             elementList.Add(element);
@@ -1352,11 +1351,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // Note output is false so these are only input parameters
                 string output = bool.FalseString;
                 string required = bool.TrueString;
-#if FEATURE_ASSEMBLY_LOCATION
                 string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
-#else
-                string type = type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
-#endif
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
@@ -1407,11 +1402,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             type = typeof(ITaskItem).FullName;
             VerifyTypeParameter(output, required, type);
 
-#if FEATURE_ASSEMBLY_LOCATION
             type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
-#else
-            type = typeof(DerivedFromITaskItem).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
-#endif
             VerifyTypeParameter(output, required, type);
 
             type = typeof(ITaskItem[]).FullName;
@@ -1426,11 +1417,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             type = typeof(DateTime[]).FullName;
             VerifyTypeParameter(output, required, type);
 
-#if FEATURE_ASSEMBLY_LOCATION
             type = typeof(DerivedFromITaskItem[]).FullName + "," + typeof(DerivedFromITaskItem).Assembly.FullName;
-#else
-            type = typeof(DerivedFromITaskItem[]).FullName + "," + typeof(DerivedFromITaskItem).GetTypeInfo().Assembly.FullName;
-#endif
             VerifyTypeParameter(output, required, type);
         }
 
@@ -1597,11 +1584,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(
                 parameterInfo.PropertyType,
                 Type.GetType(
-#if FEATURE_ASSEMBLY_LOCATION
                     expandedType + "," + typeof(ITaskItem).Assembly.FullName,
-#else
-                    expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName,
-#endif
                     false /* don't throw on error */,
                     true /* case-insensitive */));
         }
@@ -1981,11 +1964,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             if (paramType == null)
             {
                 paramType = Type.GetType(
-#if FEATURE_ASSEMBLY_LOCATION
                     type + "," + typeof(ITaskItem).Assembly.FullName,
-#else
-                    type + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName,
-#endif
                     false /* don't throw on error */,
                     true /* case-insensitive */);
             }

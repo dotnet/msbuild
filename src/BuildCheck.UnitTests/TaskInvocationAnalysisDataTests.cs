@@ -13,7 +13,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.BuildCheckManagerProvider;
 
 namespace Microsoft.Build.BuildCheck.UnitTests
@@ -120,6 +119,26 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             data.Parameters.Count.ShouldBe(1);
             data.Parameters["Text"].IsOutput.ShouldBe(false);
             data.Parameters["Text"].Value.ShouldBe("Hello");
+        }
+
+        [Theory]
+        [InlineData("Text")]
+        [InlineData("text")]
+        [InlineData("TEXT")]
+        [InlineData("tExT")]
+        public void ReportsTaskParametersKeyedCaseInsensitively(string parameterName)
+        {
+            BuildProject("<Message Text='Hello'/>");
+
+            s_testCheck!.CheckData.Count.ShouldBe(1);
+            var data = s_testCheck.CheckData[0];
+
+            // Parameter names are MSBuild names, so a check must be able to look them up without
+            // knowing the casing the task author declared the property with.
+            data.Parameters.ContainsKey(parameterName).ShouldBeTrue();
+            data.Parameters.TryGetValue(parameterName, out var parameter).ShouldBeTrue();
+            parameter.ShouldNotBeNull().Value.ShouldBe("Hello");
+            data.Parameters[parameterName].Value.ShouldBe("Hello");
         }
 
         [Theory]

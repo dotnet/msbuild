@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>A TaskEnvironment suitable for use in tests.</returns>
         public static TaskEnvironment CreateForTest()
         {
-            return new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+            return TaskEnvironment.Fallback;
         }
     }
 }

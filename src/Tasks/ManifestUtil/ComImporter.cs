@@ -1,14 +1,18 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Runtime.Versioning;
+#if FEATURE_WINDOWSINTEROP
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Resources;
-using System.Runtime.InteropServices;
-using ComTypes = System.Runtime.InteropServices.ComTypes;
-using System.Runtime.Versioning;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Ole;
+#endif
 
 #nullable disable
 
@@ -17,6 +21,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [SupportedOSPlatform("windows")]
     internal class ComImporter
     {
+#if FEATURE_WINDOWSINTEROP
         private readonly OutputMessageCollection _outputMessages;
         private readonly string _outputDisplayName;
         private readonly ResourceManager _resources = new ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", System.Reflection.Assembly.GetExecutingAssembly());
@@ -37,112 +42,99 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             "Version",
             "VersionIndependentProgID",
         };
+#endif
 
-        public ComImporter(string path, OutputMessageCollection outputMessages, string outputDisplayName)
+        public unsafe ComImporter(string path, OutputMessageCollection outputMessages, string outputDisplayName)
         {
+#if FEATURE_WINDOWSINTEROP
             _outputMessages = outputMessages;
             _outputDisplayName = outputDisplayName;
 
-            if (NativeMethods.SfcIsFileProtected(IntPtr.Zero, path) != 0)
+            // ComImporter relies on Windows-only type-library COM APIs. This guard short-circuits non-Windows
+            // runs and raises the platform-compatibility analyzer floor to windows6.1 for the CsWin32 calls
+            // below. The sole caller, FileReference.ImportComComponent, is [SupportedOSPlatform("windows")].
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return;
+            }
+
+            if (PInvoke.SfcIsFileProtected(default, path))
             {
                 outputMessages.AddWarningMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.ProtectedFile"));
             }
 
-            object obj = null;
-            try { NativeMethods.LoadTypeLibEx(path, NativeMethods.RegKind.RegKind_None, out obj); }
-            catch (COMException) { }
-
-#pragma warning disable 618
-            ComTypes.ITypeLib tlib = (ComTypes.ITypeLib)obj;
-            if (tlib != null)
-            {
-                IntPtr typeLibAttrPtr = IntPtr.Zero;
-                try
-                {
-                    tlib.GetLibAttr(out typeLibAttrPtr);
-                    var typeLibAttr = (ComTypes.TYPELIBATTR)Marshal.PtrToStructure(typeLibAttrPtr, typeof(ComTypes.TYPELIBATTR));
-                    Guid tlbid = typeLibAttr.guid;
-
-                    tlib.GetDocumentation(-1, out _, out string docString, out _, out string helpFile);
-                    string helpdir = Util.FilterNonprintableChars(helpFile); // Path.GetDirectoryName(helpFile);
-
-                    TypeLib = new TypeLib(tlbid, new Version(typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum), helpdir, typeLibAttr.lcid, Convert.ToInt32(typeLibAttr.wLibFlags, CultureInfo.InvariantCulture));
-
-                    var comClassList = new List<ComClass>();
-                    int count = tlib.GetTypeInfoCount();
-                    for (int i = 0; i < count; ++i)
-                    {
-                        tlib.GetTypeInfoType(i, out ComTypes.TYPEKIND tkind);
-                        if (tkind == ComTypes.TYPEKIND.TKIND_COCLASS)
-                        {
-                            IntPtr tinfoAttrPtr = IntPtr.Zero;
-                            tlib.GetTypeInfo(i, out ComTypes.ITypeInfo tinfo);
-                            try
-                            {
-                                tinfo.GetTypeAttr(out tinfoAttrPtr);
-                                ComTypes.TYPEATTR tinfoAttr = (ComTypes.TYPEATTR)Marshal.PtrToStructure(tinfoAttrPtr, typeof(ComTypes.TYPEATTR));
-                                Guid clsid = tinfoAttr.guid;
-
-                                tlib.GetDocumentation(i, out _, out docString, out _, out helpFile);
-                                string description = Util.FilterNonprintableChars(docString);
-
-                                ClassInfo info = GetRegisteredClassInfo(clsid);
-                                if (info == null)
-                                {
-                                    continue;
-                                }
-                                comClassList.Add(new ComClass(tlbid, clsid, info.Progid, info.ThreadingModel, description));
-                            }
-                            finally
-                            {
-                                try
-                                {
-                                    if (tinfoAttrPtr != IntPtr.Zero)
-                                    {
-                                        tinfo.ReleaseTypeAttr(tinfoAttrPtr);
-                                    }
-                                    Marshal.ReleaseComObject(tinfo);
-                                    tinfo = null;
-                                }
-                                // Ignore COM exceptions when releasing type attributes.
-                                catch (COMException) {}
-                            }
-                        }
-                    }
-                    if (comClassList.Count > 0)
-                    {
-                        ComClasses = comClassList.ToArray();
-                        Success = true;
-                    }
-                    else
-                    {
-                        outputMessages.AddErrorMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.NoRegisteredClasses"));
-                        Success = false;
-                    }
-                }
-                finally
-                {
-                    try
-                    {
-                        if (typeLibAttrPtr != IntPtr.Zero) 
-                        {
-                            tlib.ReleaseTLibAttr(typeLibAttrPtr);
-                        }
-                        Marshal.ReleaseComObject(tlib);
-                        tlib = null;
-                    }
-                    // Ignore COM exceptions when releasing type attributes.
-                    catch (COMException) {}
-                }
-            }
-            else
+            using ComScope<ITypeLib> typeLib = new(null);
+            if (PInvoke.LoadTypeLibEx(path, REGKIND.REGKIND_NONE, typeLib).Failed)
             {
                 outputMessages.AddErrorMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.TypeLibraryLoadFailure"));
                 Success = false;
+                return;
             }
-#pragma warning restore 618
+
+            TLIBATTR* pLibAttr;
+            typeLib.Pointer->GetLibAttr(&pLibAttr).ThrowOnFailure();
+            Guid tlbid = pLibAttr->guid;
+            try
+            {
+                // Only the help file is needed; GetDocumentation accepts null for any out-param the caller doesn't use.
+                using BSTR helpFile = default;
+                typeLib.Pointer->GetDocumentation(-1, null, null, null, &helpFile).ThrowOnFailure();
+                TypeLib = new TypeLib(
+                    tlbid,
+                    new Version(pLibAttr->wMajorVerNum, pLibAttr->wMinorVerNum),
+                    Util.FilterNonprintableChars(helpFile.ToString()),
+                    (int)pLibAttr->lcid,
+                    (int)pLibAttr->wLibFlags);
+            }
+            finally
+            {
+                typeLib.Pointer->ReleaseTLibAttr(pLibAttr);
+            }
+
+            var comClassList = new List<ComClass>();
+            uint count = typeLib.Pointer->GetTypeInfoCount();
+            for (uint i = 0; i < count; ++i)
+            {
+                TYPEKIND tkind;
+                typeLib.Pointer->GetTypeInfoType(i, &tkind).ThrowOnFailure();
+                if (tkind != TYPEKIND.TKIND_COCLASS)
+                {
+                    continue;
+                }
+
+                using ComScope<ITypeInfo> typeInfo = new(null);
+                typeLib.Pointer->GetTypeInfo(i, typeInfo).ThrowOnFailure();
+
+                TYPEATTR* pTypeAttr;
+                typeInfo.Pointer->GetTypeAttr(&pTypeAttr).ThrowOnFailure();
+                Guid clsid = pTypeAttr->guid;
+                typeInfo.Pointer->ReleaseTypeAttr(pTypeAttr);
+
+                ClassInfo info = GetRegisteredClassInfo(clsid);
+                if (info == null)
+                {
+                    continue;
+                }
+
+                // Only the doc string is needed; GetDocumentation accepts null for any out-param the caller doesn't use.
+                using BSTR docString = default;
+                typeLib.Pointer->GetDocumentation((int)i, null, &docString, null, null).ThrowOnFailure();
+                comClassList.Add(new ComClass(tlbid, clsid, info.Progid, info.ThreadingModel, Util.FilterNonprintableChars(docString.ToString())));
+            }
+
+            if (comClassList.Count == 0)
+            {
+                outputMessages.AddErrorMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.NoRegisteredClasses"));
+                Success = false;
+                return;
+            }
+
+            ComClasses = comClassList.ToArray();
+            Success = true;
+#endif
         }
 
+#if FEATURE_WINDOWSINTEROP
         private void CheckForUnknownSubKeys(RegistryKey key)
         {
             CheckForUnknownSubKeys(key, []);
@@ -285,12 +277,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             info = new ClassInfo(progid, threadingModel);
             return succeeded;
         }
+#endif
 
         public bool Success { get; } = true;
 
         public ComClass[] ComClasses { get; }
         public TypeLib TypeLib { get; }
 
+#if FEATURE_WINDOWSINTEROP
         private class ClassInfo
         {
             internal readonly string Progid;
@@ -301,5 +295,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 ThreadingModel = threadingModel;
             }
         }
+#endif
     }
 }

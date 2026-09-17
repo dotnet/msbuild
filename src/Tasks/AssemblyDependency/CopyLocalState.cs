@@ -1,9 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-
-
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -86,32 +83,23 @@ namespace Microsoft.Build.Tasks
         /// Returns the true or false from a CopyLocalState.
         /// </summary>
         internal static bool IsCopyLocal(CopyLocalState state)
-        {
-            switch (state)
+            => state switch
             {
-                case CopyLocalState.YesBecauseOfHeuristic:
-                case CopyLocalState.YesBecauseReferenceItemHadMetadata:
-                    return true;
-                case CopyLocalState.NoBecauseConflictVictim:
-                case CopyLocalState.NoBecauseUnresolved:
-                case CopyLocalState.NoBecauseFrameworkFile:
-                case CopyLocalState.NoBecausePrerequisite:
-                case CopyLocalState.NoBecauseReferenceItemHadMetadata:
-                case CopyLocalState.NoBecauseReferenceResolvedFromGAC:
-                case CopyLocalState.NoBecauseReferenceFoundInGAC:
-                case CopyLocalState.NoBecauseEmbedded:
-                case CopyLocalState.NoBecauseParentReferencesFoundInGAC:
-                case CopyLocalState.NoBecauseBadImage:
-                    return false;
-                default:
-                    throw new InternalErrorException("Unexpected CopyLocal flag.");
-                    // Used to be:
-                    //
-                    //   ErrorUtilities.VerifyThrow(false, "Unexpected CopyLocal flag.");
-                    //
-                    // but this popped up constantly when debugging because its call
-                    // directly by a property accessor in Reference.
-            }
-        }
+                CopyLocalState.YesBecauseOfHeuristic or
+                CopyLocalState.YesBecauseReferenceItemHadMetadata => true,
+
+                CopyLocalState.NoBecauseConflictVictim or
+                CopyLocalState.NoBecauseUnresolved or
+                CopyLocalState.NoBecauseFrameworkFile or
+                CopyLocalState.NoBecausePrerequisite or
+                CopyLocalState.NoBecauseReferenceItemHadMetadata or
+                CopyLocalState.NoBecauseReferenceResolvedFromGAC or
+                CopyLocalState.NoBecauseReferenceFoundInGAC or
+                CopyLocalState.NoBecauseEmbedded or
+                CopyLocalState.NoBecauseParentReferencesFoundInGAC or
+                CopyLocalState.NoBecauseBadImage => false,
+
+                _ => Assumed.Unreachable<bool>("Unexpected CopyLocal flag."),
+            };
     }
 }

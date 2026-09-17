@@ -62,6 +62,16 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? ServerFallbackReason { get; set; }
 
         /// <summary>
+        /// Why MSBuild server was engaged for this invocation. One of:
+        ///   "EnvVar"      — MSBUILDUSESERVER=1 was set (explicit opt-in)
+        ///   "ImpliedByMt" — this is a multithreaded (-mt) build and MSBUILDUSESERVER was unset
+        ///   null          — server was not engaged
+        /// Lets dashboards measure adoption of the implicit -mt-implies-server path separately
+        /// from the explicit env-var path.
+        /// </summary>
+        public string? ServerEnableReason { get; set; }
+
+        /// <summary>
         /// Version of MSBuild.
         /// </summary>
         public Version? BuildEngineVersion { get; set; }
@@ -125,9 +135,20 @@ namespace Microsoft.Build.Framework.Telemetry
         public bool? MultiThreadedModeEnabled { get; set; }
 
         /// <summary>
+        /// True if non-empty stdout or stderr was forwarded from an eligible task host during this build.
+        /// </summary>
+        public bool? TaskHostConsoleOutputForwarded { get; set; }
+
+        /// <summary>
         /// True if Smart Application Control was enabled.
         /// </summary>
         public bool? SACEnabled { get; set; }
+
+        /// <summary>
+        /// Time in milliseconds spent waiting for a deferred coordinator node grant.
+        /// Null if no wait occurred (immediate grant or coordinator not used).
+        /// </summary>
+        public double? CoordinatorWaitDurationMs { get; set; }
 
         /// <summary>
         /// State of MSBuild server process before this build.
@@ -174,7 +195,9 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildEngineVersion);
             AddIfNotNull(BuildCheckEnabled);
             AddIfNotNull(MultiThreadedModeEnabled);
+            AddIfNotNull(TaskHostConsoleOutputForwarded);
             AddIfNotNull(SACEnabled);
+            AddIfNotNull(CoordinatorWaitDurationMs);
             AddIfNotNull(IsStandaloneExecution);
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts);
@@ -200,12 +223,15 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(InitialMSBuildServerState);
             AddIfNotNull(ProjectPath != null ? Path.GetFileName(ProjectPath) : null, nameof(ProjectPath));
             AddIfNotNull(ServerFallbackReason);
+            AddIfNotNull(ServerEnableReason);
             AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
             AddIfNotNull(BuildEngineVersion?.ToString(), nameof(BuildEngineVersion));
             AddIfNotNull(BuildSuccess?.ToString(), nameof(BuildSuccess));
             AddIfNotNull(BuildCheckEnabled?.ToString(), nameof(BuildCheckEnabled));
             AddIfNotNull(MultiThreadedModeEnabled?.ToString(), nameof(MultiThreadedModeEnabled));
+            AddIfNotNull(TaskHostConsoleOutputForwarded?.ToString(), nameof(TaskHostConsoleOutputForwarded));
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
+            AddIfNotNull(CoordinatorWaitDurationMs?.ToString(CultureInfo.InvariantCulture), nameof(CoordinatorWaitDurationMs));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts?.ToString(), nameof(ErrorCounts));

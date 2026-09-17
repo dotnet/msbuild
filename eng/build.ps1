@@ -1,205 +1,239 @@
-#
-# Copyright (c) .NET Foundation and contributors. All rights reserved.
-# Licensed under the MIT license. See LICENSE file in the project root for full license information.
-#
-
+# Only parameters that this script has to see itself are declared here; everything else flows through
+# $properties untouched and is forwarded verbatim, so Arcade parameters keep working without being
+# mirrored. Two of them are declared purely to stop PowerShell from claiming the argument first:
+# without '-verbosity', '-v minimal' binds to the common '-Verbose' switch and 'minimal' arrives as a
+# bare property, and without '-build', Arcade's '-b' prefix-matches '-binaryLog' and silently turns a
+# build request into a binary log request.
+# Keep this list to [string] and [switch] parameters. A [bool] parameter (Arcade has several, such as
+# -nodeReuse and -msbuildMultiThreaded) would need special handling, because it forwards as 'True'
+# or 'False', which re-parses as a string rather than as a boolean; leaving those undeclared lets
+# Arcade bind them from $properties directly, as '-nodeReuse 0' or '-nodeReuse $false'.
 [CmdletBinding(PositionalBinding=$false)]
 Param(
-  [string][Alias('c')]$configuration = "Debug",
-  [string] $projects,
-  [string][Alias('v')]$verbosity = "minimal",
-  [string] $msbuildEngine = $null,
-  [bool] $warnAsError = $true,
-  [bool] $nodeReuse = $true,
-  [switch][Alias('r')]$restore,
-  [switch] $deployDeps,
-  [switch][Alias('b')]$build,
-  [switch] $rebuild,
-  [switch] $deploy,
-  [switch] $test,
-  [switch] $integrationTest,
-  [switch] $performanceTest,
-  [switch] $sign,
-  [switch] $pack,
-  [switch] $publish,
-  [switch][Alias('bl')]$binaryLog,
+  [string][Alias('c')] $configuration = "Debug",
+  [string][Alias('v')] $verbosity,
+  [string] $msbuildEngine,
+  [switch][Alias('b')] $build,
+  [switch][Alias('t')] $test,
   [switch] $ci,
-  [switch] $prepareMachine,
-  [switch] $help,
-
-  # official build settings
-  [string]$officialBuildId = "",
-  [string]$officialSkipApplyOptimizationData = "",
-
+  [switch][Alias('bl')] $binaryLog,
+  [string][Alias('bln')] $binaryLogName,
+  [switch][Alias('nobl')] $excludeCIBinarylog,
+  [switch] $stage2,
+  [string[]] $stage2Argument = @(),
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
-function Print-Usage() {
-  Write-Host "Common settings:"
-  Write-Host "  -configuration <value>  Build configuration: 'Debug' or 'Release' (short: -c)"
-  Write-Host "  -verbosity <value>      Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
-  Write-Host "  -binaryLog              Output binary log (short: -bl)"
-  Write-Host ""
+$pwshPath = (Get-Process -Id $PID).Path
+$buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 
-  Write-Host "Actions:"
-  Write-Host "  -restore                Restore dependencies (short: -r)"
-  Write-Host "  -build                  Build solution (short: -b)"
-  Write-Host "  -rebuild                Rebuild solution"
-  Write-Host "  -deploy                 Deploy built VSIXes"
-  Write-Host "  -deployDeps             Deploy dependencies (e.g. VSIXes for integration tests)"
-  Write-Host "  -test                   Run all unit tests in the solution"
-  Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
-  Write-Host "  -help                   Print help and exit"
-  Write-Host "  -integrationTest        Run all integration tests in the solution"
-  Write-Host "  -performanceTest        Run all performance tests in the solution"
-  Write-Host "  -sign                   Sign build outputs"
-  Write-Host "  -publish                Publish artifacts (e.g. symbols)"
-  Write-Host ""
+# The build script path is single-quoted for the `pwsh -Command` re-parse below, so any single quote
+# in the repo path has to be doubled to stay inside the quoted string.
+$quotedBuildScript = "'" + ($buildScript -replace "'", "''") + "'"
 
-  Write-Host "Advanced settings:"
-  Write-Host "  -projects <value>       Semi-colon delimited list of sln/proj's to build. Globbing is supported (*.sln)"
-  Write-Host "  -ci                     Set when running on CI server"
-  Write-Host "  -prepareMachine         Prepare machine for CI run"
-  Write-Host "  -msbuildEngine <value>  Msbuild engine to use to run build ('dotnet', 'vs', or unspecified)."
-  Write-Host ""
-
-  Write-Host "Official build settings:"
-  Write-Host "  -officialBuildId                            An official build id, e.g. 20190102.3"
-  Write-Host "  -officialSkipApplyOptimizationData <bool>   Pass 'true' to not apply optimization data"
-  Write-Host ""
-  Write-Host "Command line arguments not listed above are passed thru to msbuild."
-  Write-Host "The above arguments can be shortened as much as to be unambiguous (e.g. -co for configuration, -t for test, etc.)."
+# The stage builds run out-of-proc so that stage 2 doesn't inherit stage 1's state variables, but
+# they are invoked through `pwsh -Command` rather than `pwsh -File`. `-File` passes every argument
+# as a literal string, which typed parameters such as `[bool] $nodeReuse` and `[bool] $msbuildMultiThreaded`
+# can't bind to. `-Command` re-parses the arguments as PowerShell, so `-mt 1` arrives as an integer.
+# Quote anything that isn't a simple token so it survives that re-parse intact
+# (e.g. '-warnnotaserror NU1901;NU1902;NU1903', where ';' would otherwise separate statements).
+function Get-QuotedArguments([string[]] $arguments) {
+  $quoted = $arguments | ForEach-Object {
+    if ($_ -match '^[\w\-/\\.:=+]+$') { $_ } else { "'" + ($_ -replace "'", "''") + "'" }
+  }
+  $quoted -join ' '
 }
 
-function Process-Arguments() {
-  function OfficialBuildOnly([string]$argName) {
-    if ((Get-Variable $argName -Scope Script).Value) {
-      if (!$officialBuildId) {
-        Write-Host "$argName can only be specified for official builds"
-        exit 1
+function Get-BuildCommand([string[]] $arguments) {
+  # Default to a failure exit code so that an error which prevents the script from running at all
+  # (e.g. a parameter binding failure) isn't reported as success by the trailing `exit`.
+  "`$global:LASTEXITCODE = 1`n& $quotedBuildScript $(Get-QuotedArguments $arguments)`nexit `$LASTEXITCODE"
+}
+
+# The command as it's displayed to the user: just the invocation, without the exit code plumbing
+# that Get-BuildCommand wraps around it.
+function Get-BuildCommandForDisplay([string[]] $arguments) {
+  "& $quotedBuildScript $(Get-QuotedArguments $arguments)"
+}
+
+# Forward every explicitly supplied parameter to the Arcade build. Apart from -configuration, which is
+# always passed on because this script uses it for its own paths, only bound parameters are forwarded,
+# so parameters the caller didn't pass keep their Arcade defaults instead of being pinned to this
+# script's. Parameters listed here are handled by this script and must not be forwarded verbatim.
+$locallyHandledParameters = @('configuration', 'test', 'stage2', 'stage2Argument', 'binaryLogName', 'properties')
+
+function Get-ForwardedArguments($boundParameters) {
+  $forwarded = @()
+  foreach ($parameter in $boundParameters.GetEnumerator()) {
+    if (($locallyHandledParameters -contains $parameter.Key) -or
+        ([System.Management.Automation.PSCmdlet]::CommonParameters -contains $parameter.Key) -or
+        ([System.Management.Automation.PSCmdlet]::OptionalCommonParameters -contains $parameter.Key)) {
+      continue
+    }
+
+    $value = $parameter.Value
+    if ($value -is [switch]) {
+      # Every Arcade switch defaults to off, so an explicit '-switch:$false' needs nothing forwarded.
+      if ($value.IsPresent) {
+        $forwarded += "-$($parameter.Key)"
       }
-    } else {
-      if ($officialBuildId) {
-        Write-Host "$argName must be specified in official builds"
-        exit 1
-      }
+    }
+    else {
+      $forwarded += "-$($parameter.Key)"
+      $forwarded += [string] $value
     }
   }
 
-  if ($help -or (($properties -ne $null) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
-    Print-Usage
-    exit 0
-  }
+  $forwarded
+}
 
-  OfficialBuildOnly "officialSkipApplyOptimizationData"
+# Arguments common to the stage1 and stage2 builds, including any caller-supplied $properties.
+# The binary log name is deliberately not part of this set: each stage gets its own name below.
+$commonBuildArgs = @('-configuration', $configuration) + (Get-ForwardedArguments $PSBoundParameters)
 
-  if ($officialBuildId) {
-    $script:applyOptimizationData = ![System.Boolean]::Parse($officialSkipApplyOptimizationData)
+# Guarded because $properties is $null rather than an empty array when no extra arguments were passed,
+# which would otherwise append an empty argument to the build command.
+if ($properties) {
+  $commonBuildArgs += $properties
+}
+
+# Supplying stage2Arguments implies a multi-stage build
+if ($stage2Argument.Count -gt 0) {
+  $stage2 = $true
+}
+
+$buildArgs = $commonBuildArgs
+
+if ($binaryLogName) {
+  $buildArgs += '-binaryLogName'
+  $buildArgs += $binaryLogName
+}
+
+# If the caller requested a multi-stage build, add the -prepareMachine switch to the stage 1 build so that it kills any lingering processes from stage 1 before stage 2 starts.
+# Also disable the pipeline set result masking for stage 1 so that a stage 1 failure surfaces its real exit code to this wrapper (stage 2 is the terminal build that reports the pipeline result).
+if ($stage2) {
+  $buildArgs += '-prepareMachine'
+  $buildArgs += '-disablePipelineSetResult'
+}
+
+if ($test -and -not $stage2) {
+  $buildArgs += '-test'
+}
+
+# Log the stage 1 build command so that it's clear which arguments flow to it.
+$stage1Command = Get-BuildCommand $buildArgs
+Write-Host "Stage 1 build: $(Get-BuildCommandForDisplay $buildArgs)"
+
+& $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -Command $stage1Command
+
+if (-not $stage2) {
+  exit $LASTEXITCODE
+}
+
+### END of stage1 build ###
+
+if ($LASTEXITCODE -ne 0) {
+  throw "Stage 1 build failed with exit code $LASTEXITCODE"
+}
+
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
+$ArtifactsDir = Join-Path $RepoRoot 'artifacts'
+$Stage1Dir = Join-Path $RepoRoot 'stage1'
+$Stage1BinDir = Join-Path $Stage1Dir 'bin'
+$PerfLogDir = Join-Path $ArtifactsDir "log\$configuration\PerformanceLogs"
+$BootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
+
+# Clean a previous stage1 artifacts folder and move the stage 1 outputs aside so stage 2 gets a clean $ArtifactsDir to build into.
+Remove-Item -Force -Recurse $Stage1Dir -ErrorAction SilentlyContinue
+Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
+
+# The move above relocated the stage 1 log directory (including its binlog) out of the published
+# $ArtifactsDir\log location. Copy the whole log folder back so CI publishes the stage 1 logs alongside
+# the stage 2 ones. This runs before the stage 2 build, so it won't clobber any stage 2 output. The
+# stage 1 binlog keeps its default Build.binlog name, distinct from the stage 2 Build.stage2.binlog.
+# Best-effort: never fail the build if the stage 1 log folder isn't there (e.g. when no logs were produced).
+$stage1LogDir = Join-Path $Stage1Dir 'log'
+if (Test-Path $stage1LogDir) {
+  New-Item -ItemType Directory -Force -Path $ArtifactsDir | Out-Null
+  Copy-Item -Path $stage1LogDir -Destination $ArtifactsDir -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# Mirror of tools.ps1 GetDefaultMSBuildEngine: presence of tools.vs => 'vs', else tools.dotnet => 'dotnet'.
+$GlobalJson = Get-Content -Raw -Path (Join-Path $RepoRoot 'global.json') | ConvertFrom-Json
+if (-not $msbuildEngine) {
+  if (Get-Member -InputObject $GlobalJson.tools -Name 'vs') {
+    $msbuildEngine = 'vs'
+  } elseif (Get-Member -InputObject $GlobalJson.tools -Name 'dotnet') {
+    $msbuildEngine = 'dotnet'
   } else {
-    $script:applyOptimizationData = $false
-  }
-
-  if ($ci) {
-    $script:binaryLog = $true
-    $script:nodeReuse = $false
+    Write-Host 'error: -msbuildEngine must be specified, or global.json must specify tools.dotnet or tools.vs.'
+    exit 1
   }
 }
 
-function Build-Repo() {
-  $bl = if ($binaryLog) { "/bl:" + (Join-Path $LogDir "Build.binlog") } else { "" }
-  $toolsetBuildProj = InitializeToolset
-
-  if ($projects) {
-    # Re-assign properties to a new variable because PowerShell doesn't let us append properties directly for unclear reasons.
-    # Explicitly set the type as string[] because otherwise PowerShell would make this char[] if $properties is empty.
-    [string[]] $msbuildArgs = $properties
-    $msbuildArgs += "/p:Projects=$projects"
-    $properties = $msbuildArgs
-  }
-
-  # Do not set this property to true explicitly, since that would override values set in projects.
-  $suppressPartialNgenOptimization = if (!$applyOptimizationData) { "/p:EnableNgenOptimization=false" } else { "" }
-
-  MSBuild $toolsetBuildProj `
-    $bl `
-    /p:Configuration=$configuration `
-    /p:RepoRoot=$RepoRoot `
-    /p:Restore=$restore `
-    /p:DeployDeps=$deployDeps `
-    /p:Build=$build `
-    /p:Rebuild=$rebuild `
-    /p:Deploy=$deploy `
-    /p:Test=$test `
-    /p:Pack=$pack `
-    /p:IntegrationTest=$integrationTest `
-    /p:PerformanceTest=$performanceTest `
-    /p:Sign=$sign `
-    /p:Publish=$publish `
-    /p:ContinuousIntegrationBuild=$ci `
-    /p:OfficialBuildId=$officialBuildId `
-    $suppressPartialNgenOptimization `
-    @properties
+if ($msbuildEngine -eq 'vs')
+{
+  $buildToolPath = Join-Path $BootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
+  $buildToolCommand = "";
+}
+else
+{
+  $buildToolPath = "$BootstrapRoot\core\dotnet.exe"
+  $buildToolCommand = "msbuild"
+  $env:DOTNET_ROOT="$BootstrapRoot\core"
 }
 
-# Set VSO variables used by MicroBuildBuildVSBootstrapper pipeline task
-function Set-OptProfVariables() {
-  $insertionDir = Join-Path $VSSetupDir "Insertion"
-  $manifestList = [string]::Join(',', (Get-ChildItem "$insertionDir\*.vsman"))
-  Write-Host "##vso[task.setvariable variable=VisualStudio.SetupManifestList;]$manifestList"
-}
+# Communicate the bootstrapped build tool to the (out-of-proc) stage 2 build.ps1 via environment
+# variables so it does not require dot-sourcing tools.ps1 here. tools.ps1's InitializeBuildTool
+# honors _BuildToolPath / _BuildToolCommand and only consumes Path and Command.
+$env:_BuildToolPath    = $buildToolPath
+$env:_BuildToolCommand = $buildToolCommand
 
-function Check-EditedFiles() {
-  # Log VSTS errors for changed lines
-  git --no-pager diff HEAD --unified=0 --no-color --exit-code -- src/ | ForEach-Object { "##vso[task.logissue type=error] $_" }
-  if ($LASTEXITCODE -ne 0) {
-    throw "##vso[task.logissue type=error] After building, there are changed files.  Please build locally and include these changes in your pull request."
-  }
-}
+# Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
+$env:MSBUILDDONOTLAUNCHDEBUGGER="true"
 
-function Check-RequiredVersionBumps() {
-  # Log VSTS errors for missing required version bumps
-  $targetBranch = $env:SYSTEM_PULLREQUEST_TARGETBRANCH
-  if ($targetBranch) {
-    # Some PRs specify the bare target branch (most commonly "main"), some prefix it with "refs/heads/".
-    # The following statement normalizes both to a revision spec that git understands.
-    $targetBranch = "refs/remotes/origin/" + ($targetBranch -replace "^refs/heads/", "")
-    $versionLineChanged = $false
-    git --no-pager diff --unified --no-color --exit-code -w $targetBranch HEAD src\Framework\EngineServices.cs `
-      | Select-String -Pattern "int Version =" | ForEach-Object -process { $versionLineChanged = $true }
-    if (($LASTEXITCODE -ne 0) -and (-not $versionLineChanged)) {
-      throw "##vso[task.logissue type=error] Detected changes in Framework\EngineServices.cs without a version bump.  " +
-            "If you are making API changes, please bump the version.  " +
-            "If the changes in the file are cosmetic, please change an inline comment on the `"int Version =`" line in EngineServices.cs to silence the error."
-    }
+# Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
+$env:DOTNET_PERFLOG_DIR=$PerfLogDir
+
+# Point child processes (stage 2 build.ps1, tests, and the MSBuild grandchildren they spawn, notably
+# net472 x86 testhosts invoking .NET Core MSBuild → /mt → sidecar TaskHost) at the freshly-built
+# bootstrap .NET host, so task hosts launch with the bits under test. This matches DOTNET_ROOT (set
+# above for the core engine) and the bootstrap's own expectation that tests invoke the bootstrap dotnet
+# (see eng/BootStrapMsBuild.targets).
+$env:DOTNET_HOST_PATH = Join-Path $BootstrapRoot 'core\dotnet.exe'
+$env:DOTNET_INSTALL_DIR = Join-Path $BootstrapRoot 'core'
+
+# $stage2Argument are appended to the stage 2 build only.
+# Use this for switches like /mt that should not be passed to the stage1 build
+# until a stable version of MT is available in the images.
+$stage2Args = $stage2Argument
+
+$stage2BuildArgs = $commonBuildArgs
+
+# Give the stage 2 binary log a distinct name so it doesn't collide with the stage 1 binlog
+# (both otherwise default to Build.binlog) when CI publishes them to the same artifacts location.
+# Only do this when a binary log will actually be produced, so we don't force one to be created:
+# Arcade emits a binlog for CI builds (-ci) or when -binaryLog is passed explicitly, unless it's
+# suppressed with -excludeCIBinarylog.
+if (($ci -or $binaryLog) -and -not $excludeCIBinarylog) {
+  $stage2BuildArgs += '-binaryLogName'
+  $stage2BuildArgs += if ($binaryLogName) {
+    "$([System.IO.Path]::GetFileNameWithoutExtension($binaryLogName)).stage2$([System.IO.Path]::GetExtension($binaryLogName))"
+  } else {
+    'Build.stage2.binlog'
   }
 }
 
-try {
-  Process-Arguments
-
-  # Import Arcade functions
-  . (Join-Path $PSScriptRoot "common\tools.ps1")
-  . (Join-Path $PSScriptRoot "configure-toolset.ps1")
-
-  $VSSetupDir = Join-Path $ArtifactsDir "VSSetup\$configuration"
-
-  if ($ci -and $build) {
-    Check-RequiredVersionBumps
-  }
-
-  Build-Repo
-
-  if ($ci -and $build) {
-    Set-OptProfVariables
-
-    Check-EditedFiles
-  }
-}
-catch {
-  Write-Host $_
-  Write-Host $_.Exception
-  Write-Host $_.ScriptStackTrace
-  ExitWithExitCode 1
+# Only run tests in stage2 when supplying the '-test' switch in a multi-stage build.
+if ($test) {
+  $stage2BuildArgs += '-test'
 }
 
-ExitWithExitCode 0
+$stage2BuildArgs += $stage2Args
+
+$stage2Command = Get-BuildCommand $stage2BuildArgs
+Write-Host "Stage 2 build: $(Get-BuildCommandForDisplay $stage2BuildArgs)"
+# Needs to run out-of-proc to not inherit the stage 1 build's state variables.
+& $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -Command $stage2Command
+
+exit $LASTEXITCODE

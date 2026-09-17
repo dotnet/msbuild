@@ -14,6 +14,12 @@
                       Private="false"
                       ReferenceOutputAssembly="false"
                       OutputItemType="FrameworkResolvedProjectReferencePath" />
+
+    <Arm64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuild.Coordinator\MSBuild.Coordinator.csproj"
+                         SetPlatform="Platform=arm64"
+                         SetTargetFramework="TargetFramework=$(FullFrameworkTFM)"
+                         OutputItemType="MSBuildCoordinatorArm64ResolvedProjectReferencePath" />
+
   </ItemGroup>
 
   <Target Name="SetBinPathsArm64" DependsOnTargets="ResolveProjectReferences">
@@ -29,6 +35,7 @@
     <PropertyGroup>
       <FrameworkBinPath>@(FrameworkResolvedProjectReferencePath->'%(RootDir)%(Directory)')</FrameworkBinPath>
       <Arm64BinPath>@(MSBuildArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</Arm64BinPath>
+      <CoordinatorArm64BinPath>@(MSBuildCoordinatorArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</CoordinatorArm64BinPath>
     </PropertyGroup>
   </Target>
 

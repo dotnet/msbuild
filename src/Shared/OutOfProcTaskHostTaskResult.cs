@@ -62,21 +62,21 @@ namespace Microsoft.Build.Shared
                 result == TaskCompleteType.CrashedDuringExecution ||
                 result == TaskCompleteType.CrashedAfterExecution)
             {
-                ErrorUtilities.VerifyThrowInternalNull(taskException);
+                Assumed.NotNull(taskException);
             }
 
             if (exceptionMessage != null)
             {
-                ErrorUtilities.VerifyThrow(
-                        result == TaskCompleteType.CrashedDuringInitialization ||
-                        result == TaskCompleteType.CrashedDuringExecution ||
-                        result == TaskCompleteType.CrashedAfterExecution,
-                        "If we have an exception message, the result type should be 'crashed' of some variety.");
+                Assumed.True(
+                    result is TaskCompleteType.CrashedDuringInitialization or
+                              TaskCompleteType.CrashedDuringExecution or
+                              TaskCompleteType.CrashedAfterExecution,
+                    "If we have an exception message, the result type should be 'crashed' of some variety.");
             }
 
             if (exceptionMessageArgs?.Length > 0)
             {
-                ErrorUtilities.VerifyThrow(exceptionMessage != null, "If we have message args, we need a message.");
+                Assumed.NotNull(exceptionMessage, "If we have message args, we need a message.");
             }
 
             Result = result;

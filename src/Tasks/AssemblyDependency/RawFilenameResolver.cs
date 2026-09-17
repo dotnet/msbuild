@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -18,8 +19,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public RawFilenameResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
+        public RawFilenameResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, TaskEnvironment taskEnvironment)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false, taskEnvironment)
         {
         }
 
@@ -41,13 +42,20 @@ namespace Microsoft.Build.Tasks
             foundPath = null;
             userRequestedSpecificFile = false;
 
-            if (rawFileNameCandidate != null)
+            if (rawFileNameCandidate is not null)
             {
-                // {RawFileName} was passed in.
-                if (isImmutableFrameworkReference || fileExists(rawFileNameCandidate))
+                // For empty input, keep the empty string as-is to preserve the pre-MT diagnostic:
+                // fileExists("") returns false and the entry is added to assembliesConsideredAndRejected.
+                // For non-empty input, absolutize via TaskEnvironment so resolution targets the project
+                // directory rather than the process CWD (which is no longer per-project under MT).
+                string fullRawFileName = rawFileNameCandidate.Length == 0
+                    ? rawFileNameCandidate
+                    : taskEnvironment.GetAbsolutePath(rawFileNameCandidate).Value;
+
+                if (isImmutableFrameworkReference || fileExists(fullRawFileName))
                 {
                     userRequestedSpecificFile = true;
-                    foundPath = rawFileNameCandidate;
+                    foundPath = fullRawFileName;
                     return true;
                 }
 
@@ -55,7 +63,7 @@ namespace Microsoft.Build.Tasks
                 {
                     var considered = new ResolutionSearchLocation
                     {
-                        FileNameAttempted = rawFileNameCandidate,
+                        FileNameAttempted = fullRawFileName,
                         SearchPath = searchPathElement,
                         Reason = NoMatchReason.NotAFileNameOnDisk
                     };

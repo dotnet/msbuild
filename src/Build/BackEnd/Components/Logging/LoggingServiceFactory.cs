@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -46,7 +45,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns>An instance of a LoggingService as a IBuildComponent</returns>
         public IBuildComponent CreateInstance(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.LoggingService, "Cannot create components of type {0}", type);
+            Assumed.Equal(type, BuildComponentType.LoggingService, $"Cannot create components of type {type}");
             IBuildComponent loggingService = (IBuildComponent)LoggingService.CreateLoggingService(_logMode, _nodeId);
             return loggingService;
         }

@@ -1015,7 +1015,7 @@ public class CrashTelemetry_Tests
         public override string? StackTrace => _stack;
     }
 
-    private sealed class ExceptionWithBuildEventArgs : Exception
+    private sealed class ExceptionWithBuildEventArgs : Exception, IBuildEventArgsTelemetryProvider
     {
         public ExceptionWithBuildEventArgs(string message, BuildEventArgs buildEventArgs) : base(message)
         {
@@ -1023,5 +1023,9 @@ public class CrashTelemetry_Tests
         }
 
         public BuildEventArgs BuildEventArgs { get; }
+
+        // Mirrors InternalLoggerException: surface the event type name through the telemetry
+        // contract so CrashTelemetry can read it without reflection.
+        string? IBuildEventArgsTelemetryProvider.BuildEventArgsTypeName => BuildEventArgs?.GetType().Name;
     }
 }

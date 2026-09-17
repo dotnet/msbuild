@@ -10,6 +10,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -341,6 +342,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(result["omega"].ResultCode, deserializedResult["omega"].ResultCode);
             Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception, out diffReason), diffReason);
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
+        }
+
+        [Fact]
+        public void TestTranslationPreservesEvaluationId()
+        {
+            BuildRequest request = new(1, 1, 2, ["Build"], null, new BuildEventContext(1, 1, 2, 3, 4, 5), null);
+            BuildResult result = new(request, new BuildAbortedException())
+            {
+                EvaluationId = 42,
+            };
+
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = BuildResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            BuildResult deserializedResult = (packet as BuildResult)!;
+
+            deserializedResult.EvaluationId.ShouldBe(42);
         }
 
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)

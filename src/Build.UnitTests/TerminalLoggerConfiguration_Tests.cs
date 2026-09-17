@@ -8,7 +8,6 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests;
 
@@ -28,11 +27,13 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
     {
         _env = TestEnvironment.Create(output);
 
+        string sleepCommand = Helpers.GetSleepCommand(TimeSpan.FromSeconds(1));
         TransientTestFolder logFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile projectFile = _env.CreateFile(logFolder, "myProj.proj", $"""
             <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Hello">
                 <Target Name="Hello">
                   <Message Text="Hello, world!" />
+                  <Exec Command="{sleepCommand}" Condition="'$(WaitForTerminalLoggerRefresh)' == 'true'" />
                 </Target>
             </Project>
             """);
@@ -225,10 +226,11 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         _ = _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", msbuildinprocnodeState);
 
         string output = RunnerUtilities.ExecMSBuild(
-            $"{_cmd} -tl:true",
+            $"{_cmd} -tl:true -p:WaitForTerminalLoggerRefresh=true",
             out bool success);
 
         success.ShouldBeTrue();
+        output.ShouldContain("loggingConfiguration:TerminalLogger=True");
         ShouldBeTerminalLog(output);
         output.ShouldContain("Build succeeded.");
     }

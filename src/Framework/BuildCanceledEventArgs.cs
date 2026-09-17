@@ -46,7 +46,7 @@ namespace Microsoft.Build.Framework
         {
             if (string.IsNullOrWhiteSpace(message))
             {
-                throw new InternalErrorException("Message cannot be null or consist only white-space characters.");
+                InternalError.Throw("Message cannot be null or consist only white-space characters.");
             }
         }
     }

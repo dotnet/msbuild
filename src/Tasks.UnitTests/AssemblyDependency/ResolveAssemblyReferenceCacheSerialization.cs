@@ -192,5 +192,97 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // The new cache was not written to disk at all because none of the entries were actually used.
             sysState2.ShouldBeNull();
         }
+
+        /// <summary>
+        /// SystemState.DeserializePrecomputedCaches absolutizes the state file path via TaskEnvironment
+        /// (relative to the project directory), not via the process current working directory.
+        /// A relative state file path that exists in CWD but not in the project directory should
+        /// fail to deserialize.
+        /// </summary>
+        [Fact]
+        public void DeserializePrecomputedCaches_AbsolutizesStateFilePathViaTaskEnvironment()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // cacheDir holds the real cache file (and becomes CWD); projectDir is empty.
+            string cacheDir = env.CreateFolder().Path;
+            string projectDir = env.CreateFolder().Path;
+            string cacheFileName = "rar.cache";
+            string cacheFullPath = Path.Combine(cacheDir, cacheFileName);
+
+            WriteCacheFileWithSingleEntry(cacheFullPath, "TestAssembly.dll");
+
+            env.SetCurrentDirectory(cacheDir);
+
+            ITaskItem[] stateFiles = [new TaskItem(cacheFileName)];
+            TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir);
+
+            SystemState result = SystemState.DeserializePrecomputedCaches(
+                stateFiles,
+                null,
+                _ => true,
+                taskEnvironment);
+
+            // The relative path is resolved via TaskEnvironment to projectDir/rar.cache, which doesn't
+            // exist. If the implementation incorrectly used CWD, it would have found the cache and
+            // populated entries.
+            result.ShouldNotBeNull();
+            result.instanceLocalFileStateCache.ShouldBeEmpty();
+        }
+
+        /// <summary>
+        /// With Wave18_8 disabled, SystemState.DeserializePrecomputedCaches uses the raw
+        /// stateFile.ToString() path which means a relative state file path is opened relative
+        /// to the process current working directory — NOT relative to TaskEnvironment.ProjectDirectory.
+        /// </summary>
+        [Fact]
+        public void DeserializePrecomputedCaches_Wave18_8_Disabled_UsesRawPathRelativeToCwd()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            try
+            {
+                // cacheDir holds the real cache file (and becomes CWD); projectDir is empty.
+                string cacheDir = env.CreateFolder().Path;
+                string projectDir = env.CreateFolder().Path;
+                string cacheFileName = "rar.cache";
+                string cacheFullPath = Path.Combine(cacheDir, cacheFileName);
+
+                WriteCacheFileWithSingleEntry(cacheFullPath, "TestAssembly.dll");
+
+                env.SetCurrentDirectory(cacheDir);
+
+                ITaskItem[] stateFiles = [new TaskItem(cacheFileName)];
+                TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir);
+
+                SystemState result = SystemState.DeserializePrecomputedCaches(
+                    stateFiles,
+                    null,
+                    _ => true,
+                    taskEnvironment);
+
+                // Under wave-off, the bare relative path is resolved via CWD (= cacheDir),
+                // where the cache exists, so deserialization succeeded and the entry was processed.
+                result.ShouldNotBeNull();
+                result.instanceLocalFileStateCache.ShouldNotBeEmpty();
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        /// <summary>
+        /// Writes a serialized SystemState cache with a single entry to <paramref name="cacheFullPath"/>.
+        /// </summary>
+        private static void WriteCacheFileWithSingleEntry(string cacheFullPath, string relativeKey)
+        {
+            SystemState sysState = new();
+            sysState.instanceLocalOutgoingFileStateCache[relativeKey] = new SystemState.FileState(DateTime.UtcNow);
+            sysState.SerializeCache(cacheFullPath, log: null);
+        }
     }
 }

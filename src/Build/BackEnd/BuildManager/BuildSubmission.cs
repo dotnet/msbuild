@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -35,7 +36,7 @@ namespace Microsoft.Build.Execution
         protected internal BuildSubmissionBase(BuildManager buildManager, int submissionId, TRequestData requestData)
             : base(buildManager, submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestData);
+            ArgumentNullException.ThrowIfNull(requestData);
             BuildRequestData = requestData;
         }
 
@@ -59,8 +60,10 @@ namespace Microsoft.Build.Execution
         /// Starts the request and blocks until results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         public abstract TResultData Execute();
 
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         private protected void ExecuteAsync(
             BuildSubmissionCompleteCallbackInternal<TRequestData, TResultData>? callback,
             object? context,
@@ -77,7 +80,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CompleteResults(TResultData result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(result);
+            ArgumentNullException.ThrowIfNull(result);
             CheckResultValidForCompletion(result);
 
             BuildResult ??= result;
@@ -165,6 +168,7 @@ namespace Microsoft.Build.Execution
         /// Starts the request asynchronously and immediately returns control to the caller.
         /// </summary>
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         public void ExecuteAsync(BuildSubmissionCompleteCallback? callback, object? context)
         {
             void Clb(BuildSubmissionBase<BuildRequestData, BuildResult> submission)
@@ -179,6 +183,7 @@ namespace Microsoft.Build.Execution
         /// Starts the request and blocks until results are available.
         /// </summary>
         /// <exception cref="System.InvalidOperationException">The request has already been started or is already complete.</exception>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         public override BuildResult Execute()
         {
             LegacyThreadingData legacyThreadingData = ((IBuildComponentHost)BuildManager).LegacyThreadingData;
@@ -196,8 +201,7 @@ namespace Microsoft.Build.Execution
 
             legacyThreadingData.UnregisterSubmissionForLegacyThread(SubmissionId);
 
-            ErrorUtilities.VerifyThrow(BuildResult != null,
-                "BuildResult is not populated after Execute is done.");
+            Assumed.NotNull(BuildResult, "BuildResult is not populated after Execute is done.");
 
             return BuildResult!;
         }
@@ -214,8 +218,7 @@ namespace Microsoft.Build.Execution
 
         protected internal override BuildResult CreateFailedResult(Exception exception)
         {
-            ErrorUtilities.VerifyThrow(BuildRequest != null,
-                "BuildRequest is not populated while reporting failed result.");
+            Assumed.NotNull(BuildRequest, "BuildRequest is not populated while reporting failed result.");
             return new(BuildRequest!, exception);
         }
 
@@ -227,8 +230,7 @@ namespace Microsoft.Build.Execution
             // this one.)
             if (result.ConfigurationId != BuildRequest?.ConfigurationId)
             {
-                ErrorUtilities.ThrowInternalError("BuildResult configuration ({0}) doesn't match BuildRequest configuration ({1})",
-                    result.ConfigurationId, BuildRequest?.ConfigurationId);
+                InternalError.Throw($"BuildResult configuration ({result.ConfigurationId}) doesn't match BuildRequest configuration ({BuildRequest?.ConfigurationId})");
             }
         }
 

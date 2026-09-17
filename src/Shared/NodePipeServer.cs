@@ -101,7 +101,7 @@ namespace Microsoft.Build.Internal
                     bool connected = false;
                     try
                     {
-                        CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
+                        CommunicationsUtilities.Trace($"Waiting for connection {waitTimeRemaining} ms...");
                         await _pipeServer.WaitForConnectionAsync(cts.Token).ConfigureAwait(false);
                         connected = true;
                     }
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Internal
                         //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
                         // 2. The host is too old sending us bits we automatically reject in the handshake
                         // 3. We expected to read the EndOfHandshake signal, but we received something else
-                        CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
+                        CommunicationsUtilities.Trace($"Client connection failed but we will wait for another connection. Exception: {e.Message}");
                         gotValidConnection = false;
                     }
                     catch (InvalidOperationException)
@@ -150,7 +150,7 @@ namespace Microsoft.Build.Internal
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
+                    CommunicationsUtilities.Trace($"Client connection failed.  Exiting comm thread. {e}");
                     if (_pipeServer.IsConnected)
                     {
                         _pipeServer.Disconnect();
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Internal
                 {
                     if (handshakePart.Value != component.Value)
                     {
-                        CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, component.Value);
+                        CommunicationsUtilities.Trace($"Handshake failed. Received {handshakePart} from host not {component.Value}. Probably the host is a different MSBuild build.");
                         _pipeServer.WriteIntForHandshake(index + 1);
                         return false;
                     }
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Internal
 
             if (clientIdentity == null || !string.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
             {
-                CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
+                CommunicationsUtilities.Trace($"Handshake failed. Host user is {(clientIdentity == null ? "<unknown>" : clientIdentity.Name)} but we were created by {currentIdentity.Name}.");
                 return false;
             }
 

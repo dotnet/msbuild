@@ -13,7 +13,7 @@ public static class DummyMappedDriveUtils
     {
         const string drivePlaceholder = "%DRIVE%";
         // if this seems to be rooted path - replace with the dummy mount
-        if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
+        if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder, StringComparison.Ordinal))
         {
             path = driveLetter + path.Substring(drivePlaceholder.Length);
         }

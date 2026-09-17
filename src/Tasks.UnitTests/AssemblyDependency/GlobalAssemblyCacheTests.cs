@@ -10,7 +10,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
-using Xunit.Abstractions;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable

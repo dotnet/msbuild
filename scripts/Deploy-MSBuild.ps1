@@ -76,7 +76,7 @@ else {
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
 } else {
-    $targetFramework = "net10.0"
+    $targetFramework = "net11.0"
 }
 
 # If bootstrap directory is not defined in parameters, use the default location
@@ -138,7 +138,6 @@ if ($runtime -eq "Desktop") {
         FileToCopy "$bootstrapBinDirectory\System.Text.Json.dll"
         FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Dataflow.dll"
         FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Extensions.dll"
-        FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"
     )
 } else {
     $runtimeSpecificFiles = @(

@@ -49,6 +49,7 @@ When `_BuildNonexistentProjectsByDefault` is set to `true`:
 1. **MSBuild tasks** that don't explicitly specify `SkipNonexistentProjects` will default to `SkipNonexistentProjects="Build"` instead of `SkipNonexistentProjects="False"`
 2. **In-memory projects** with a valid `FullPath` can be built even when no physical file exists on disk
 3. **Existing explicit settings** are preserved - if `SkipNonexistentProjects` is explicitly set on the MSBuild task, that takes precedence
+4. **`ProjectReference` items** are treated as existent by the `_SplitProjectReferencesByFileExistence` target, bypassing the `Exists()` file-system check. This allows virtual project references between in-memory projects.
 
 ### Implementation Details
 
@@ -56,6 +57,10 @@ The property is checked in two MSBuild task implementations:
 
 1. **`src/Tasks/MSBuild.cs`** - The standard MSBuild task implementation
 2. **`src/Build/BackEnd/Components/RequestBuilder/IntrinsicTasks/MSBuild.cs`** - The backend intrinsic task implementation
+
+And in the common targets:
+
+3. **`src/Tasks/Microsoft.Common.CurrentVersion.targets`** - The `_SplitProjectReferencesByFileExistence` target, which classifies `ProjectReference` items as existent or non-existent
 
 The logic follows this precedence order:
 
@@ -79,6 +84,35 @@ bool result = project.Build();
 ### SDK Integration
 
 The .NET SDK will use this property to enable building file-based applications without workarounds when calling MSBuild tasks that reference the current project.
+
+### Virtual ProjectReference
+
+When file-based applications need to reference other files (e.g., via `#:ref file.cs`), the SDK creates multiple in-memory projects with `ProjectReference` items between them. With `_BuildNonexistentProjectsByDefault=true`, these virtual references are resolved from the `ProjectRootElementCache` without requiring files on disk. Both the main project and its references can be virtual:
+
+```csharp
+var collection = new ProjectCollection(
+    globalProperties: new Dictionary<string, string>
+    {
+        { "_BuildNonexistentProjectsByDefault", "true" },
+    },
+    loggers: null,
+    ToolsetDefinitionLocations.Default);
+
+// Create referenced project in memory.
+var referencedRoot = ProjectRootElement.Create(XmlReader.Create(new StringReader(referencedXml)), collection);
+referencedRoot.FullPath = Path.Join(projectDir, "referenced.csproj");
+
+// Create main project with a ProjectReference to the referenced project.
+var mainRoot = ProjectRootElement.Create(XmlReader.Create(new StringReader(mainXml)), collection);
+mainRoot.FullPath = Path.Join(projectDir, "main.csproj");
+
+// Both projects are in the same ProjectRootElementCache.
+// The build engine resolves "referenced.csproj" from the cache, not from disk.
+```
+
+## Limitations
+
+Virtual projects only work with in-process builds (single node). Out-of-proc build nodes have their own `ProjectRootElementCache` and cannot see virtual projects from the caller's collection. This applies to all scenarios: self-referencing MSBuild tasks, virtual `ProjectReference` items, and any other target that loads a virtual project by path.
 
 ## Breaking Changes
 

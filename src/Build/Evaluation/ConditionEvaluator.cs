@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -225,9 +224,9 @@ namespace Microsoft.Build.Evaluation
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowArgumentNull(condition);
-            ErrorUtilities.VerifyThrowArgumentNull(expander);
-            ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory);
+            ArgumentNullException.ThrowIfNull(condition);
+            ArgumentNullException.ThrowIfNull(expander);
+            ArgumentException.ThrowIfNullOrEmpty(evaluationDirectory);
 
             // An empty condition is equivalent to a "true" condition.
             if (condition.Length == 0)
@@ -236,7 +235,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // If the condition wasn't empty, there must be a location for it
-            ErrorUtilities.VerifyThrowArgumentNull(elementLocation);
+            ArgumentNullException.ThrowIfNull(elementLocation);
 
             // Get the expression tree cache for the current parsing options.
             var cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.GetOrAdd(
@@ -434,10 +433,10 @@ namespace Microsoft.Build.Evaluation
                 IFileSystem fileSystem,
                 ProjectRootElementCacheBase? projectRootElementCache = null)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(condition);
-                ErrorUtilities.VerifyThrowArgumentNull(expander);
-                ErrorUtilities.VerifyThrowArgumentNull(evaluationDirectory);
-                ErrorUtilities.VerifyThrowArgumentNull(elementLocation);
+                ArgumentNullException.ThrowIfNull(condition);
+                ArgumentNullException.ThrowIfNull(expander);
+                ArgumentNullException.ThrowIfNull(evaluationDirectory);
+                ArgumentNullException.ThrowIfNull(elementLocation);
 
                 Condition = condition;
                 _expander = expander;

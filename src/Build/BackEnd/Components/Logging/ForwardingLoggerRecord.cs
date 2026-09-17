@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
@@ -19,7 +19,7 @@ namespace Microsoft.Build.Logging
         public ForwardingLoggerRecord(ILogger centralLogger, LoggerDescription forwardingLoggerDescription)
         {
             // The logging service allows a null central logger, so we don't check for it here.
-            ErrorUtilities.VerifyThrowArgumentNull(forwardingLoggerDescription);
+            ArgumentNullException.ThrowIfNull(forwardingLoggerDescription);
 
             this.CentralLogger = centralLogger;
             this.ForwardingLoggerDescription = forwardingLoggerDescription;

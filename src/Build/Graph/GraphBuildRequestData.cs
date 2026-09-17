@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -8,7 +9,6 @@ using Microsoft.Build.Execution;
 #if NETFRAMEWORK
 using Microsoft.Build.Experimental.BuildCheck;
 #endif
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
 {
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Graph
         public GraphBuildRequestData(ProjectGraph projectGraph, ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(targetsToBuild, hostServices, flags)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectGraph);
+            ArgumentNullException.ThrowIfNull(projectGraph);
 
             ProjectGraph = projectGraph;
         }
@@ -150,7 +150,7 @@ namespace Microsoft.Build.Graph
         public GraphBuildRequestData(IEnumerable<ProjectGraphEntryPoint> projectGraphEntryPoints, ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(targetsToBuild, hostServices, flags)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectGraphEntryPoints);
+            ArgumentNullException.ThrowIfNull(projectGraphEntryPoints);
 
             ProjectGraphEntryPoints = projectGraphEntryPoints;
         }
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Graph
         public GraphBuildRequestData(IEnumerable<ProjectGraphEntryPoint> projectGraphEntryPoints, ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, GraphBuildOptions graphBuildOptions)
             : this(targetsToBuild, hostServices, flags, graphBuildOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectGraphEntryPoints);
+            ArgumentNullException.ThrowIfNull(projectGraphEntryPoints);
 
             ProjectGraphEntryPoints = projectGraphEntryPoints.ToList();
         }

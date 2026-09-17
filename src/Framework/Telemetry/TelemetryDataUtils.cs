@@ -86,7 +86,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Converts tasks details to a list of custom objects for telemetry.
         /// </summary>
-        private static List<TaskDetailInfo> GetTasksDetails(
+        internal static List<TaskDetailInfo> GetTasksDetails(
             Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksDetails)
         {
             var result = new List<TaskDetailInfo>();

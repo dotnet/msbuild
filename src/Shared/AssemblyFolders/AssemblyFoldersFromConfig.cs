@@ -28,8 +28,8 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <param name="targetArchitecture">The <see cref="ProcessorArchitecture"/> to target.</param>
         internal AssemblyFoldersFromConfig(string configFile, string targetRuntimeVersion, ProcessorArchitecture targetArchitecture)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(configFile);
-            ErrorUtilities.VerifyThrowArgumentNull(targetRuntimeVersion);
+            ArgumentNullException.ThrowIfNull(configFile);
+            ArgumentNullException.ThrowIfNull(targetRuntimeVersion);
 
             var collection = AssemblyFolderCollection.Load(configFile);
             var assemblyTargets = GatherVersionStrings(targetRuntimeVersion, collection);

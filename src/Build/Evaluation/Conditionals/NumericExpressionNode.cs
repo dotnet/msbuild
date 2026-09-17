@@ -17,7 +17,7 @@ namespace Microsoft.Build.Evaluation
 
         internal NumericExpressionNode(string value)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(value), "NumericExpressionNode cannot have empty value");
+            Assumed.NotNullOrEmpty(value, "NumericExpressionNode cannot have empty value");
             _value = value;
         }
 

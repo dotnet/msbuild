@@ -7,7 +7,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -45,7 +44,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var projectFile = env.CreateFile(env.CreateFolder(), "test.csproj", projectContent).Path;
                 Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectFile, touchProject: false);
 
-                string expectedBuildMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(expectedResourceName, formatArgs);
+                string expectedBuildMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(expectedResourceName, formatArgs ?? []);
                 MockLogger logger = new MockLogger(_testOutput);
 
                 project.Build(logger);

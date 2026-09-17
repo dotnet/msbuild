@@ -7,6 +7,9 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+#if NETFRAMEWORK
+using Windows.Win32.System.SystemInformation;
+#endif
 
 namespace Microsoft.Build.Framework.Telemetry;
 
@@ -425,19 +428,20 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
             InnerExceptionMessage = TruncateMessage(inner.Message);
         }
 
-        // Extract BuildEventArgs type from InternalLoggerException without taking
-        // a direct dependency on Microsoft.Build.dll. The property is public.
-        try
+        // InternalLoggerException (in Microsoft.Build) carries the type name of the BuildEventArgs
+        // it was delivering. It implements IBuildEventArgsTelemetryProvider so we can read it without
+        // a hard dependency on Microsoft.Build.dll and without reflection - a plain type check is
+        // trimming- and Native AOT-safe.
+        if (exception is IBuildEventArgsTelemetryProvider buildEventArgsProvider)
         {
-            var buildEventArgsProp = exception.GetType().GetProperty("BuildEventArgs");
-            if (buildEventArgsProp?.GetValue(exception) is object eventArgs)
+            try
             {
-                LoggerEventType = eventArgs.GetType().Name;
+                LoggerEventType = buildEventArgsProvider.BuildEventArgsTypeName;
             }
-        }
-        catch
-        {
-            // Best effort: reflection failures must not cause a secondary failure.
+            catch
+            {
+                // Best effort: a provider must never cause a secondary failure while collecting crash telemetry.
+            }
         }
     }
 
@@ -460,10 +464,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         try
         {
 #if NETFRAMEWORK
-            NativeMethods.MemoryStatus? memoryStatus = NativeMethods.GetMemoryStatus();
-            if (memoryStatus != null)
+            if (NativeMethods.TryGetMemoryStatus(out MEMORYSTATUSEX memoryStatus))
             {
-                MemoryLoadPercent = (int)memoryStatus.MemoryLoad;
+                MemoryLoadPercent = (int)memoryStatus.dwMemoryLoad;
             }
 #else
             // On .NET Core, GC.GetGCMemoryInfo() provides the total available memory

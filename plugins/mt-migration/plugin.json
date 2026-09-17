@@ -1,0 +1,9 @@
+{
+  "name": "mt-migration",
+  "version": "0.1.0",
+  "description": "MSBuild multithreaded task migration toolkit: the migration playbook + an MT-specific code reviewer that traces call chains end-to-end. Portable across repos that consume Microsoft.Build.Framework's TaskEnvironment/IMultiThreadableTask API (e.g., dotnet/msbuild, dotnet/sdk, and any task assembly migrating to the MT model).",
+  "skills": ["./skills/"],
+  "agents": [
+    "./agents/mt-migration-reviewer.agent.md"
+  ]
+}

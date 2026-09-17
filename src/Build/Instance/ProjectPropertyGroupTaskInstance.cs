@@ -6,7 +6,6 @@ using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -50,9 +49,9 @@ namespace Microsoft.Build.Execution
             ElementLocation conditionLocation,
             List<ProjectPropertyGroupTaskPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(condition);
-            ErrorUtilities.VerifyThrowInternalNull(location);
-            ErrorUtilities.VerifyThrowInternalNull(properties);
+            Assumed.NotNull(condition);
+            Assumed.NotNull(location);
+            Assumed.NotNull(properties);
 
             _condition = condition;
             _location = location;

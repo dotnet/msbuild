@@ -56,15 +56,7 @@ namespace Microsoft.Build.Tasks
                 string processorSpecificToolDirectory;
                 try
                 {
-                    processorSpecificToolDirectory = currentArchitecture switch
-                    {
-                        // There may not be an arm directory so we will fall back to the x86 tool location
-                        // but if there is then we should try and use it.
-                        ProcessorArchitecture.ARM => Path.Combine(sdkToolsPath, "arm"),
-                        ProcessorArchitecture.AMD64 => Path.Combine(sdkToolsPath, "x64"),
-                        ProcessorArchitecture.IA64 => Path.Combine(sdkToolsPath, "ia64"),
-                        _ => sdkToolsPath,
-                    };
+                    processorSpecificToolDirectory = GetProcessorSpecificToolDirectory(currentArchitecture, sdkToolsPath);
                     pathToTool = Path.Combine(processorSpecificToolDirectory, toolName);
 
                     if (!fileExists(pathToTool))
@@ -123,6 +115,19 @@ namespace Microsoft.Build.Tasks
             }
 
             return pathToTool;
+        }
+
+        internal static string GetProcessorSpecificToolDirectory(string currentArchitecture, string sdkToolsPath)
+        {
+            return currentArchitecture switch
+            {
+                // There may not be an arm directory so we will fall back to the x86 tool location
+                // but if there is then we should try and use it.
+                ProcessorArchitecture.ARM => Path.Combine(sdkToolsPath, "arm"),
+                ProcessorArchitecture.AMD64 => Path.Combine(sdkToolsPath, "x64"),
+                ProcessorArchitecture.IA64 => Path.Combine(sdkToolsPath, "ia64"),
+                _ => sdkToolsPath,
+            };
         }
 
         /// <summary>

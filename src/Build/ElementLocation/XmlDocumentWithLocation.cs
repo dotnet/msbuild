@@ -64,6 +64,7 @@ namespace Microsoft.Build.Construction
         internal XmlDocumentWithLocation()
             : base(s_nameTable)
         {
+            XmlResolver = null;
         }
 
         /// <summary>
@@ -73,6 +74,7 @@ namespace Microsoft.Build.Construction
             : this()
         {
             _loadAsReadOnly = loadAsReadOnly;
+            XmlResolver = null;
         }
 
         /// <summary>
@@ -356,7 +358,7 @@ namespace Microsoft.Build.Construction
                     if (Path.GetFileName(fullPath).StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
                     {
                         // Load read-only if they're in program files or windows directories
-                        ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
+                        Assumed.True(Path.IsPathRooted(fullPath), "should be full path");
                         string directory = Path.GetDirectoryName(fullPath);
 
                         string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);

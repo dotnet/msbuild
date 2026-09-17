@@ -94,12 +94,9 @@ namespace Microsoft.Build.Shared.Debugging
         {
             Exception ex = (Exception)e.ExceptionObject;
             DumpExceptionToFile(ex);
-#if !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
             RecordCrashTelemetryForUnhandledException(ex);
-#endif
         }
 
-#if !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
         /// <summary>
         /// Records and immediately flushes crash telemetry for an unhandled exception.
         /// Best effort - must never throw, as the process is already crashing.
@@ -113,7 +110,6 @@ namespace Microsoft.Build.Shared.Debugging
                 isUnhandled: true,
                 isCritical: ExceptionHandling.IsCriticalException(ex));
         }
-#endif
 
         /// <summary>
         /// Dump the exception information to a file

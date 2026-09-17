@@ -12,13 +12,13 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
-using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
 using static VerifyXunit.Verifier;
 
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
         public bool HaveLoggedBuildFinishedEvent { get; set; }
 
         void IBuildEventSink.Consume(BuildEventArgs buildEvent, int sinkId) => (this as IBuildEventSink).Consume(buildEvent);
-        
+
         void IBuildEventSink.Consume(BuildEventArgs buildEvent)
         {
             // map the incoming build event to the appropriate event handler
@@ -132,10 +132,43 @@ namespace Microsoft.Build.UnitTests
         public void InvokeCustomEventRaised(CustomBuildEventArgs args) => CustomEventRaised?.Invoke(_eventSender, args);
     }
 
-    [UsesVerify]
     [UseInvariantCulture]
     public class TerminalLogger_Tests
     {
+        private sealed class ResizableTerminal(TextWriter output, int width, int height) : ITerminal
+        {
+            private readonly Terminal _terminal = new(output);
+
+            public int Width { get; set; } = width;
+
+            public int Height { get; set; } = height;
+
+            /// <summary>
+            /// Number of times the logger asked for the terminal dimensions.
+            /// </summary>
+            public int SizeQueryCount { get; private set; }
+
+            public (int Width, int Height) GetSize()
+            {
+                SizeQueryCount++;
+                return (Width, Height);
+            }
+
+            public bool SupportsProgressReporting => false;
+
+            public void BeginUpdate() => _terminal.BeginUpdate();
+            public void EndUpdate() => _terminal.EndUpdate();
+            public void Write(string text) => _terminal.Write(text);
+            public void Write(ReadOnlySpan<char> text) => _terminal.Write(text);
+            public void WriteLine(string text) => _terminal.WriteLine(text);
+            public void WriteLineFitToWidth(ReadOnlySpan<char> text) => _terminal.WriteLineFitToWidth(text);
+            public void WriteColor(TerminalColor color, string text) => _terminal.WriteColor(color, text);
+            public void WriteColorLine(TerminalColor color, string text) => _terminal.WriteColorLine(color, text);
+            public void Dispose()
+            {
+            }
+        }
+
         private const int _nodeCount = 8;
 
         private const string _immediateMessageString =
@@ -169,7 +202,7 @@ namespace Microsoft.Build.UnitTests
         {
             _outputHelper = outputHelper;
             _mockTerminal = new Terminal(_outputWriter);
-            
+
             _terminallogger = new TerminalLogger(_mockTerminal);
             _terminallogger.Initialize(_centralNodeEventSource, _nodeCount);
             _terminallogger._createStopwatch = () => new MockStopwatch();
@@ -237,6 +270,39 @@ namespace Microsoft.Build.UnitTests
             logger.Verbosity.ShouldBe(expectedVerbosity);
         }
 
+        /// <summary>
+        /// Regression test for dotnet/msbuild#13940. Under MSBuild Server, TerminalLogger
+        /// auto-detection runs in the server node, whose own stdout is redirected. The node receives
+        /// the client's real console capabilities and exposes them via
+        /// <c>NativeMethods.ConsoleConfigurationOverride</c>. When the client transmitted a
+        /// screen-capable console, '-tl:auto' must auto-select <see cref="TerminalLogger"/> (the bug
+        /// was that it fell back to the console logger); when the client transmitted a redirected
+        /// console, it must fall back to <see cref="ConsoleLogger"/>. This exercises the real
+        /// <c>QueryIsScreenAndTryEnableAnsiColorCodes</c> path and needs no real terminal.
+        /// </summary>
+        [Theory]
+        [InlineData(true, true, typeof(TerminalLogger))]
+        [InlineData(false, false, typeof(ConsoleLogger))]
+        [InlineData(true, false, typeof(ConsoleLogger))]
+        [InlineData(false, true, typeof(ConsoleLogger))]
+        public void CreateTerminalOrConsoleLogger_AutoHonorsServerTransmittedConsoleConfiguration(bool acceptAnsi, bool outputIsScreen, Type expectedType)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_outputHelper);
+            env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", "");
+
+            try
+            {
+                Microsoft.Build.Framework.NativeMethods.ConsoleConfigurationOverride = (acceptAnsi, outputIsScreen);
+
+                ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(["-tl:auto"]);
+
+                logger.ShouldBeOfType(expectedType);
+            }
+            finally
+            {
+                Microsoft.Build.Framework.NativeMethods.ConsoleConfigurationOverride = null;
+            }
+        }
 
         #region Helper methods to create BuildEventArgs with BuildEventContext
 
@@ -537,6 +603,92 @@ namespace Microsoft.Build.UnitTests
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Theory]
+        [InlineData(false, LoggerVerbosity.Normal, MessageImportance.Low)]
+        [InlineData(true, LoggerVerbosity.Normal, MessageImportance.Low)]
+        [InlineData(true, LoggerVerbosity.Quiet, MessageImportance.High)]
+        public void MessageRaised_DoesNotFormatFilteredMessages(bool useRemoteNode, LoggerVerbosity verbosity, MessageImportance importance)
+        {
+            _remoteTerminalLogger.Verbosity = verbosity;
+            var message = new BuildMessageEventArgs("Message {0}", null, null, importance, DateTime.UtcNow, "argument")
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+
+            MockBuildEventSink eventSource = useRemoteNode ? _remoteNodeEventSource : _centralNodeEventSource;
+            eventSource.InvokeMessageRaised(message);
+
+            message.RawArguments.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void TerminalLogger_DoesNotMutateRenderedEvents()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Diagnostic;
+            object[] messageArguments = ["argument"];
+            object[] warningArguments = ["argument"];
+            object[] errorArguments = ["argument"];
+            var message = new BuildMessageEventArgs("Message {0}", null, null, MessageImportance.High, DateTime.UtcNow, messageArguments)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+            var warning = new BuildWarningEventArgs("", "TESTWARNING", "", 0, 0, 0, 0, "Warning {0}", "keyword", "sender", DateTime.UtcNow, warningArguments)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+            var error = new BuildErrorEventArgs("", "TESTERROR", "", 0, 0, 0, 0, "Error {0}", "keyword", "sender", DateTime.UtcNow, errorArguments)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(message);
+                _centralNodeEventSource.InvokeWarningRaised(warning);
+                _centralNodeEventSource.InvokeErrorRaised(error);
+
+                message.RawArguments.ShouldBeSameAs(messageArguments);
+                warning.RawArguments.ShouldBeSameAs(warningArguments);
+                error.RawArguments.ShouldBeSameAs(errorArguments);
+            });
+
+            string output = _outputWriter.ToString();
+            output.ShouldContain("Message argument");
+            output.ShouldContain("Warning argument");
+            output.ShouldContain("Error argument");
+        }
+
+        [Theory]
+        [InlineData("TLTESTPASSED", LoggerVerbosity.Normal)]
+        [InlineData("TLTESTSKIPPED", LoggerVerbosity.Normal)]
+        [InlineData("TLTESTFINISH", LoggerVerbosity.Normal)]
+        [InlineData("TLTESTOUTPUT", LoggerVerbosity.Quiet)]
+        [InlineData("TLTESTOUTPUT", LoggerVerbosity.Normal)]
+        public void MessageRaised_DoesNotMutateStructuredTestMessages(string extendedType, LoggerVerbosity verbosity)
+        {
+            _terminallogger.Verbosity = verbosity;
+            object[] arguments = ["argument"];
+            var message = new ExtendedBuildMessageEventArgs(extendedType, "Message {0}", null, null, MessageImportance.High, DateTime.UtcNow, arguments)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+                ExtendedMetadata = new Dictionary<string, string?>
+                {
+                    ["displayName"] = "testName",
+                    ["localizedResult"] = "result",
+                    ["total"] = "1",
+                    ["passed"] = "1",
+                    ["skipped"] = "0",
+                    ["failed"] = "0",
+                },
+            };
+
+            InvokeLoggerCallbacksForTestProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(message);
+                message.RawArguments.ShouldBeSameAs(arguments);
+            });
         }
 
         [Fact]
@@ -864,6 +1016,103 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void RefreshUsesOneSnapshotOnlyWhileNodesAreActive()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 120, height: 40);
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                terminalLogger.Refresh();
+
+                terminal.SizeQueryCount.ShouldBe(0);
+                output.ToString().ShouldBeEmpty();
+
+                StartActiveProject(eventSource, _projectFile);
+                terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+
+                terminalLogger.Refresh();
+
+                terminal.SizeQueryCount.ShouldBe(2);
+                output.ToString().ShouldNotBeEmpty();
+                output.ToString().ShouldNotContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+
+                BuildEventContext secondProjectContext = MakeBuildEventContext(evalId: 2, projectContextId: 2, nodeId: 2);
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile2, buildEventContext: secondProjectContext));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile2, buildEventContext: secondProjectContext));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile2, "Build", secondProjectContext));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile2, "Task", secondProjectContext));
+                terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+                int queriesBeforeProjectFinished = terminal.SizeQueryCount;
+                eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded: true));
+
+                (terminal.SizeQueryCount - queriesBeforeProjectFinished).ShouldBe(1);
+                string projectFinishedOutput = output.ToString();
+                projectFinishedOutput.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                string liveNodes = projectFinishedOutput.Substring(projectFinishedOutput.LastIndexOf(AnsiCodes.HideCursor, StringComparison.Ordinal));
+                liveNodes.ShouldContain("project2");
+                liveNodes.Split([AnsiCodes.SetCursorHorizontal(120)], StringSplitOptions.None).Length.ShouldBe(2);
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Theory]
+        [InlineData(120, 40, 40, 40, 4)]
+        [InlineData(120, 40, 119, 40, 3)]
+        [InlineData(80, 40, 40, 40, 3)]
+        [InlineData(140, 40, 130, 40, 2)]
+        [InlineData(120, 40, 120, 20, 2)]
+        public void RefreshRedrawsImmediatelyAfterTerminalResize(
+            int initialWidth,
+            int initialHeight,
+            int resizedWidth,
+            int resizedHeight,
+            int expectedCursorMove)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: initialWidth, height: initialHeight);
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                StartActiveProject(eventSource, _projectFile);
+                terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+
+                terminal.Width = resizedWidth;
+                terminal.Height = resizedHeight;
+                terminalLogger.Refresh();
+
+                string resizedOutput = output.ToString();
+                resizedOutput.ShouldStartWith($"{AnsiCodes.CSI}{expectedCursorMove}{AnsiCodes.MoveUpToLineStart}");
+                resizedOutput.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                resizedOutput.ShouldContain("project");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        private void StartActiveProject(MockBuildEventSink eventSource, string projectFile)
+        {
+            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(projectFile));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(projectFile));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(projectFile, "Build"));
+            eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(projectFile, "Task"));
+        }
 
         [Fact]
         public async Task DisplayNodesOverwritesWithNewTargetFramework()
@@ -916,11 +1165,11 @@ namespace Microsoft.Build.UnitTests
                 string logFileWithoutTL = env.ExpectFile(".binlog").Path;
 
                 // Execute MSBuild with binary, file and terminal loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success, outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Execute MSBuild with binary and file loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success, outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Read the binary log and replay into mockLogger
@@ -1018,6 +1267,7 @@ namespace Microsoft.Build.UnitTests
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14394")]
         [Fact]
         public void ReplayBinaryLogWithFewerNodesThanOriginalBuild()
         {
@@ -1029,7 +1279,7 @@ namespace Microsoft.Build.UnitTests
             {
                 // Create multiple projects that will build in parallel
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
-                
+
                 // Create three simple projects
                 TransientTestFile project1 = env.CreateFile(logFolder, "project1.proj", @"
 <Project>
@@ -1037,21 +1287,21 @@ namespace Microsoft.Build.UnitTests
         <Message Text='Building project1' Importance='High' />
     </Target>
 </Project>");
-                
+
                 TransientTestFile project2 = env.CreateFile(logFolder, "project2.proj", @"
 <Project>
     <Target Name='Build'>
         <Message Text='Building project2' Importance='High' />
     </Target>
 </Project>");
-                
+
                 TransientTestFile project3 = env.CreateFile(logFolder, "project3.proj", @"
 <Project>
     <Target Name='Build'>
         <Message Text='Building project3' Importance='High' />
     </Target>
 </Project>");
-                
+
                 // Create a solution file that builds all projects in parallel
                 string solutionContents = $@"
 <Project>
@@ -1135,6 +1385,31 @@ namespace Microsoft.Build.UnitTests
             _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
+        }
+
+        [Fact]
+        public void MetaprojProjectStartedDoesNotCrash()
+        {
+#if DEBUG
+            // Metaproj files (generated for solution multi-targeting builds) are never evaluated,
+            // so they have no matching ProjectEvaluationFinished event. TerminalLogger should
+            // handle ProjectStarted for metaproj files without hitting the Debug.Assert that
+            // checks for prior evaluation info. In Release mode this test is a no-op because
+            // Debug.Assert is compiled out.
+            string metaprojFile = NativeMethods.IsUnixLike ? "/src/solution.sln.metaproj" : @"C:\src\solution.sln.metaproj";
+
+            BuildEventContext buildContext = MakeBuildEventContext(evalId: -1, projectContextId: 10);
+
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+
+            Should.NotThrow(() =>
+            {
+                _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(metaprojFile, "Build", buildEventContext: buildContext));
+                _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(metaprojFile, true, buildEventContext: buildContext));
+            });
+
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
+#endif
         }
     }
 }

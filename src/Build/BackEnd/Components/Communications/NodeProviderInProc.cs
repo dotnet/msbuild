@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 #if FEATURE_THREAD_CULTURE
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
@@ -155,11 +154,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The data to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet);
+            ArgumentNullException.ThrowIfNull(packet);
 
             bool nodeExists = _nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext);
 
-            ErrorUtilities.VerifyThrow(nodeExists, $"InProc node {nodeId} does not exist.");
+            Assumed.True(nodeExists, $"InProc node {nodeId} does not exist.");
 
             nodeContext._inProcNodeEndpoint.SendData(packet);
         }
@@ -264,38 +263,25 @@ namespace Microsoft.Build.BackEnd
         /// Registers a packet handler.  Not used in the in-proc node.
         /// </summary>
         public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
-        {
-            // Not used
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Unregisters a packet handler.  Not used in the in-proc node.
         /// </summary>
         public void UnregisterPacketHandler(NodePacketType packetType)
-        {
-            // Not used
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Deserializes and routes a packet.  Not used in the in-proc node.
         /// </summary>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
-        {
-            // Not used
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Deserializes and routes a packet.  Not used in the in-proc node.
         /// </summary>
         public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
-        {
-            // Not used
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-            return null;
-        }
+            => Assumed.Unreachable<INodePacket>();
 
         /// <summary>
         /// Routes a packet.
@@ -348,7 +334,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.InProcNodeProvider, "Cannot create component of type {0}", type);
+            Assumed.Equal(type, BuildComponentType.InProcNodeProvider, $"Cannot create component of type {type}");
             return new NodeProviderInProc();
         }
 
@@ -359,7 +345,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool InstantiateNode(int nodeId, INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeId), $"In Proc node {nodeId} already instantiated.");
+            Assumed.False(_nodeContexts.ContainsKey(nodeId), $"In Proc node {nodeId} already instantiated.");
 
             NodeEndpointInProc.EndpointPair endpoints = NodeEndpointInProc.CreateInProcEndpoints(NodeEndpointInProc.EndpointMode.Synchronous, _componentHost, nodeId);
 
@@ -394,7 +380,7 @@ namespace Microsoft.Build.BackEnd
 
             int connectionTimeout = CommunicationsUtilities.NodeConnectionTimeout;
             bool connected = nodeContext._endpointConnectedEvent.WaitOne(connectionTimeout);
-            ErrorUtilities.VerifyThrow(connected, "In-proc node failed to start up within {0}ms", connectionTimeout);
+            Assumed.True(connected, $"In-proc node failed to start up within {connectionTimeout}ms");
             return true;
         }
 
@@ -431,7 +417,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // We don't verify this outside of the 'if' because we don't care about the link going down, which will occur
                     // after we have cleared the inProcNodeEndpoint due to shutting down the node.
-                    ErrorUtilities.VerifyThrow(foundEndpoint, "Received link status event for a node other than our peer.");
+                    Assumed.True(foundEndpoint, "Received link status event for a node other than our peer.");
                 }
             }
         }
@@ -451,7 +437,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case NodeEngineShutdownReason.ConnectionFailed:
-                    ErrorUtilities.ThrowInternalError("Unexpected shutdown code {0} received.", reason);
+                    InternalError.Throw($"Unexpected shutdown code {reason} received.");
                     break;
             }
         }

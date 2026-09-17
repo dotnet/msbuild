@@ -43,8 +43,8 @@ namespace Microsoft.Build.Evaluation
         /// <param name="settingValue">Property tracking setting value</param>
         public PropertyTrackingEvaluatorDataWrapper(IEvaluatorData<P, I, M, D> dataToWrap, EvaluationLoggingContext evaluationLoggingContext, int settingValue)
         {
-            ErrorUtilities.VerifyThrowInternalNull(dataToWrap);
-            ErrorUtilities.VerifyThrowInternalNull(evaluationLoggingContext);
+            Assumed.NotNull(dataToWrap);
+            Assumed.NotNull(evaluationLoggingContext);
 
             _wrapped = dataToWrap;
             _evaluationLoggingContext = evaluationLoggingContext;
@@ -437,7 +437,7 @@ namespace Microsoft.Build.Evaluation
         // Either we want to specifically track property reassignments
         // or we do not want to track nothing - in which case the prop reassignment is enabled by default.
         internal static bool IsPropertyReassignmentEnabled(PropertyTrackingSetting currentTrackingSetting) => IsPropertyTrackingEnabled(currentTrackingSetting, PropertyTrackingSetting.PropertyReassignment)
-                || (currentTrackingSetting == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10));
+                || currentTrackingSetting == PropertyTrackingSetting.None;
 
         /// <summary>
         /// Logs property assignment information during execution, providing detailed tracking of property value changes.

@@ -142,7 +142,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void InsertAfterChild(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child);
+            ArgumentNullException.ThrowIfNull(child);
             if (Link != null)
             {
                 ContainerLink.InsertAfterChild(child, reference);
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Construction
 
             if (child.NextSibling != null)
             {
-                ErrorUtilities.VerifyThrow(child.NextSibling.PreviousSibling == reference, "Invalid structure");
+                Assumed.Equal(child.NextSibling.PreviousSibling, reference, "Invalid structure");
                 child.NextSibling.PreviousSibling = child;
             }
 
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void InsertBeforeChild(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child);
+            ArgumentNullException.ThrowIfNull(child);
 
             if (Link != null)
             {
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Construction
 
             if (child.PreviousSibling != null)
             {
-                ErrorUtilities.VerifyThrow(child.PreviousSibling.NextSibling == reference, "Invalid structure");
+                Assumed.Equal(child.PreviousSibling.NextSibling, reference, "Invalid structure");
                 child.PreviousSibling.NextSibling = child;
             }
 
@@ -253,7 +253,7 @@ namespace Microsoft.Build.Construction
             }
             else
             {
-                ErrorUtilities.VerifyThrow(FirstChild != null, "Invalid structure");
+                Assumed.NotNull(FirstChild, "Invalid structure");
                 InsertAfterChild(child, LastChild);
             }
         }
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Construction
             }
             else
             {
-                ErrorUtilities.VerifyThrow(LastChild != null, "Invalid structure");
+                Assumed.NotNull(LastChild, "Invalid structure");
                 InsertBeforeChild(child, FirstChild);
             }
         }
@@ -292,7 +292,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void RemoveChild(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child);
+            ArgumentNullException.ThrowIfNull(child);
 
             ErrorUtilities.VerifyThrowArgument(child.Parent == this, "OM_NodeNotAlreadyParentedByThis");
 
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void DeepCopyFrom(ProjectElementContainer element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element);
+            ArgumentNullException.ThrowIfNull(element);
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)
@@ -386,9 +386,9 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal void AppendParentedChildNoChecks(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(child.Parent == this, "Expected parent already set");
-            ErrorUtilities.VerifyThrow(child.PreviousSibling == null && child.NextSibling == null, "Invalid structure");
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Equal(child.Parent, this, "Expected parent already set");
+            Assumed.True(child.PreviousSibling == null && child.NextSibling == null, "Invalid structure");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (LastChild == null)
             {
@@ -438,7 +438,7 @@ namespace Microsoft.Build.Construction
 
         private void SetElementAsAttributeValue(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             // Assumes that child.ExpressedAsAttribute is true
             Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Construction
         /// <param name="oldName">The old name for the child element</param>
         internal void UpdateElementName(ProjectElement child, string oldName)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -471,7 +471,7 @@ namespace Microsoft.Build.Construction
         /// <param name="child">A child element which might be represented as an attribute</param>
         internal void UpdateElementValue(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -491,7 +491,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -606,7 +606,7 @@ namespace Microsoft.Build.Construction
 
         internal void RemoveFromXml(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -648,7 +648,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal void AddInitialChild(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(FirstChild == null && LastChild == null, "Expecting no children");
+            Assumed.True(FirstChild == null && LastChild == null, "Expecting no children");
 
             if (Link != null)
             {
@@ -689,8 +689,8 @@ namespace Microsoft.Build.Construction
             // In RemoveChild() we do not update the victim's NextSibling (or PreviousSibling) to null, to allow RemoveChild to be
             // called within an enumeration. So we can't expect these to be null if the child was previously removed. However, we
             // can expect that what they point to no longer point back to it. They've been reconnected.
-            ErrorUtilities.VerifyThrow(child.NextSibling == null || child.NextSibling.PreviousSibling != this, "Invalid structure");
-            ErrorUtilities.VerifyThrow(child.PreviousSibling == null || child.PreviousSibling.NextSibling != this, "Invalid structure");
+            Assumed.True(child.NextSibling == null || child.NextSibling.PreviousSibling != this, "Invalid structure");
+            Assumed.True(child.PreviousSibling == null || child.PreviousSibling.NextSibling != this, "Invalid structure");
             VerifyThrowInvalidOperationNotSelfAncestor(child);
         }
 
@@ -844,7 +844,7 @@ namespace Microsoft.Build.Construction
 
             public void CopyTo(T[] array, int arrayIndex)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(array);
+                ArgumentNullException.ThrowIfNull(array);
 
                 if (_realizedElements != null)
                 {
@@ -875,7 +875,7 @@ namespace Microsoft.Build.Construction
 
             void ICollection.CopyTo(Array array, int index)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(array);
+                ArgumentNullException.ThrowIfNull(array);
 
                 int i = index;
                 foreach (T entry in this)

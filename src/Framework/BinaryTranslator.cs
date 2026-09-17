@@ -100,13 +100,7 @@ namespace Microsoft.Build.BackEnd
             /// Gets the writer, if any.
             /// </summary>
             public BinaryWriter Writer
-            {
-                get
-                {
-                    EscapeHatches.ThrowInternalError("Cannot get writer from reader.");
-                    return null;
-                }
-            }
+                => InternalError.Throw<BinaryWriter>("Cannot get writer from reader.");
 
             /// <summary>
             /// Returns the current serialization mode.
@@ -943,13 +937,7 @@ namespace Microsoft.Build.BackEnd
             /// Gets the reader, if any.
             /// </summary>
             public BinaryReader Reader
-            {
-                get
-                {
-                    EscapeHatches.ThrowInternalError("Cannot get reader from writer.");
-                    return null;
-                }
-            }
+                => InternalError.Throw<BinaryReader>("Cannot get reader from writer.");
 
             /// <summary>
             /// Gets the writer, if any.
