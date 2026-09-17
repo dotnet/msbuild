@@ -134,8 +134,10 @@ public class TaskEnvironment
 { 
     public AbsolutePath ProjectDirectory { get; internal set; }
 
-    // This function resolves paths relative to ProjectDirectory.
+    // These functions resolve relative paths against ProjectDirectory.
     public AbsolutePath GetAbsolutePath(string path);
+
+    // This function uses task-local environment variables in multithreaded mode.
     public AbsolutePath GetTempPath();
     
     public string? GetEnvironmentVariable(string name);

@@ -80,10 +80,13 @@ namespace Microsoft.Build.Framework
         public AbsolutePath GetAbsolutePath(string path) => _driver.GetAbsolutePath(path);
 
         /// <summary>
-        /// Gets the path of the temporary folder for this task environment, resolving environment
-        /// variables from this instance rather than from the process environment.
+        /// Gets the temporary folder path for this task environment.
         /// </summary>
-        /// <remarks>This method does not verify that the path exists or that it is accessible.</remarks>
+        /// <remarks>
+        /// In multithreaded mode, this method resolves environment variables from the task-local environment.
+        /// The fallback environment uses the process environment.
+        /// This method does not verify that the path exists or that it is accessible.
+        /// </remarks>
         /// <returns>The absolute temporary folder path, ending with a directory separator.</returns>
         public AbsolutePath GetTempPath() => _driver.GetTempPath();
 

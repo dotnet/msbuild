@@ -426,7 +426,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [WindowsOnlyFact]
-        public void TaskEnvironment_GetTempPath_OnWindows_ForSystemProcessUsesSystemTemp()
+        public void TaskEnvironment_GetTempPath_OnWindows_WithGetTempPath2UsesSystemTemp()
         {
             string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
             string systemTempDirectory = Path.Combine(GetResolvedTempPath(), "system-temp");
@@ -437,12 +437,12 @@ namespace Microsoft.Build.UnitTests
             };
             using var driver = new MultiThreadedTaskEnvironmentDriver(projectDirectory, environmentVariables);
 
-            driver.GetTempPath(isSystemProcess: true).Value.ShouldBe(
+            driver.GetTempPath(useSystemTemp: true).Value.ShouldBe(
                 systemTempDirectory + Path.DirectorySeparatorChar);
         }
 
         [WindowsOnlyFact]
-        public void TaskEnvironment_GetTempPath_OnWindows_ForSystemProcessUsesDefaultSystemTemp()
+        public void TaskEnvironment_GetTempPath_OnWindows_WithGetTempPath2UsesDefaultSystemTemp()
         {
             string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
             var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -452,8 +452,24 @@ namespace Microsoft.Build.UnitTests
             using var driver = new MultiThreadedTaskEnvironmentDriver(projectDirectory, environmentVariables);
 
             string windowsDirectory = Path.GetDirectoryName(Environment.SystemDirectory)!;
-            driver.GetTempPath(isSystemProcess: true).Value.ShouldBe(
+            driver.GetTempPath(useSystemTemp: true).Value.ShouldBe(
                 Path.Combine(windowsDirectory, "SystemTemp") + Path.DirectorySeparatorChar);
+        }
+
+        [WindowsOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnWindows_WithoutGetTempPath2IgnoresSystemTemp()
+        {
+            string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            string tempDirectory = Path.Combine(GetResolvedTempPath(), "tmp");
+            var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["TMP"] = tempDirectory,
+                ["SystemTemp"] = Path.Combine(GetResolvedTempPath(), "system-temp"),
+            };
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDirectory, environmentVariables);
+
+            driver.GetTempPath(useSystemTemp: false).Value.ShouldBe(
+                tempDirectory + Path.DirectorySeparatorChar);
         }
 
         [WindowsOnlyFact]
@@ -521,6 +537,22 @@ namespace Microsoft.Build.UnitTests
         {
             string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
             const string tempDirectory = "/tmp/task\\temp";
+            var environmentVariables = new Dictionary<string, string>
+            {
+                ["TMPDIR"] = tempDirectory,
+            };
+
+            TaskEnvironment taskEnvironment =
+                TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory, environmentVariables);
+
+            AssertTempPathAndDispose(taskEnvironment, tempDirectory + Path.DirectorySeparatorChar);
+        }
+
+        [UnixOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnUnix_PreservesRelativeSegmentsInTmpDir()
+        {
+            string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            const string tempDirectory = "/tmp/link/../task-temp";
             var environmentVariables = new Dictionary<string, string>
             {
                 ["TMPDIR"] = tempDirectory,

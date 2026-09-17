@@ -14,6 +14,10 @@ using System.IO;
 using System.Security.Principal;
 #endif
 using Microsoft.Build.Internal;
+#if FEATURE_WINDOWSINTEROP && NET
+using Windows.Win32;
+using Windows.Win32.Foundation;
+#endif
 
 namespace Microsoft.Build.Framework
 {
@@ -27,6 +31,8 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     internal sealed class MultiThreadedTaskEnvironmentDriver : ITaskEnvironmentDriver
     {
+        private static readonly bool s_getTempPath2Available = IsGetTempPath2Available();
+
         private readonly Dictionary<string, string> _environmentVariables;
         private AbsolutePath _currentDirectory;
 
@@ -83,21 +89,23 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public AbsolutePath GetTempPath()
         {
-            return GetTempPath(IsSystemProcess());
+            return GetTempPath(s_getTempPath2Available && IsSystemProcess());
         }
 
-        internal AbsolutePath GetTempPath(bool isSystemProcess)
+        internal AbsolutePath GetTempPath(bool useSystemTemp)
         {
+            // Match Path.GetTempPath while reading task-local environment variables.
+            // Unix source: https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/System.Private.CoreLib/src/System/IO/Path.Unix.cs
             if (!NativeMethods.IsWindows)
             {
                 string? tempDirectory = GetEnvironmentVariable("TMPDIR");
-                AbsolutePath absoluteTempDirectory = GetAbsolutePath(
-                    string.IsNullOrEmpty(tempDirectory) ? "/tmp" : tempDirectory!);
                 return FileUtilities.EnsureTrailingSlashWithoutNormalization(
-                    absoluteTempDirectory.GetCanonicalForm());
+                    GetAbsolutePath(string.IsNullOrEmpty(tempDirectory) ? "/tmp" : tempDirectory!));
             }
 
-            if (isSystemProcess)
+            // .NET uses GetTempPath2W when that export exists. It changes the result only for SYSTEM processes.
+            // Windows source: https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/System.Private.CoreLib/src/System/IO/Path.Windows.cs
+            if (useSystemTemp)
             {
                 string systemTempDirectory = GetEnvironmentVariable("SystemTemp") ?? string.Empty;
                 if (string.IsNullOrEmpty(systemTempDirectory))
@@ -136,6 +144,25 @@ namespace Microsoft.Build.Framework
         private static string GetWindowsDirectory()
         {
             return Path.GetDirectoryName(Environment.SystemDirectory)!;
+        }
+
+        private static unsafe bool IsGetTempPath2Available()
+        {
+#if FEATURE_WINDOWSINTEROP && NET
+            if (!OperatingSystem.IsWindowsVersionAtLeast(5, 1, 2600))
+            {
+                return false;
+            }
+
+            const string Kernel32 = "kernel32.dll";
+            fixed (char* moduleName = Kernel32)
+            {
+                HMODULE kernel32 = PInvoke.GetModuleHandle(moduleName);
+                return !kernel32.IsNull && !PInvoke.GetProcAddress(kernel32, "GetTempPath2W").IsNull;
+            }
+#else
+            return false;
+#endif
         }
 
         private static bool IsSystemProcess()
