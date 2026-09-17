@@ -129,6 +129,7 @@ dotnet build .\MyProject.csproj -m -mt -nr:false -bl:migration-strict.binlog "-w
 ```
 
 Ensure [change wave 18.12](../../wiki/ChangeWaves.md#1812) is enabled so the default strict checks are active.
+`MSB4287` is a warning by default; the command promotes it to an error for migration sign-off.
 Do not suppress `MSB4286` or `MSB4287` through `-nowarn` or `MSBuildWarningsAsMessages`.
 Clean the relevant outputs or invoke the required targets so the migrated task actually
 runs. In the binlog, confirm that the expected task assembly was used and the task ran

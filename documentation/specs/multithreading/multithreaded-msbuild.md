@@ -271,7 +271,9 @@ finish, before its result is reported, and once more at build completion. Cancel
 | Diagnostic | Check boundary | Meaning |
 |---|---|---|
 | `MSB4286` | Task completion | The process current directory changed. MSBuild resets it to the sentinel. |
-| `MSB4287` | Project or build completion | Files or directories remain in the sentinel. MSBuild attempts to remove them. |
+| `MSB4287` | Project or build completion | Warning: files or directories remain in the sentinel. MSBuild attempts to remove them. |
+| `MSB4288` | Verification | Error: the sentinel was removed during the build. |
+| `MSB4289` | Build initialization | Error: another strict build is already active in this process. |
 
 The `Microsoft-Build` EventSource emits paired `StrictModeDirectoryScanStart` and
 `StrictModeDirectoryScanStop` events around scans, including lock wait and filesystem work.
@@ -281,13 +283,14 @@ Their build ID and project-file payloads identify the caller; build-end scans ha
 `"-warnAsError:MSB4286"` to prevent `ContinueOnError` from turning it into a passing warning.
 Do not also suppress that code through `-nowarn` or `MSBuildWarningsAsMessages`;
 normal warning-to-message suppression takes precedence over warning-to-error promotion.
-`MSB4287` is a project/build error, not a failure of the task that happened to write the file.
-The writing task and its target can finish successfully, and that task's `ContinueOnError`
-does not downgrade the later error. Project results, including cached failures, reflect the violation.
+`MSB4287` is a project/build warning, not a failure of the task that happened to write the file.
+It follows normal warning suppression and promotion; use `"-warnAsError:MSB4287"` to fail a migration gate.
+The writing task's `ContinueOnError` does not control the later warning.
 Existing task diagnostics keep their normal timing: `MSB4181` can appear alongside a strict
 diagnostic. Cancellation does not retract earlier diagnostics.
 For otherwise-successful builds, the final directory scan runs after node and project-cache
-cleanup and logging callbacks, before output caches are serialized; a late violation fails `EndBuild`.
+cleanup and logging callbacks, before output caches are serialized. A normal or suppressed warning
+allows cache serialization; a late warning promoted to an error fails `EndBuild` and prevents serialization.
 The host directory captured before logger initialization is restored when the build ends.
 `BuildManager` resolves relative output-cache paths for CLI and API builds before entering the sentinel;
 the CLI resolves its entry-project path before constructing requests inside that scope. Loggers must
@@ -297,8 +300,7 @@ After successful restoration, MSBuild attempts to remove the scope's own tempora
 Locked leftovers are not reused by later builds. Cleanup is best-effort and does not replace
 the reported build result.
 The cleanup path is derived from the scope's unique temporary root, never from mutable process CWD.
-Late teardown of overlapping non-strict builds does not restore an expired sentinel or displace an
-active strict scope.
+When wave 18.12 is disabled, nodes retain their pre-strict-mode CWD restoration behavior.
 
 Each independently observed CWD change is reported, even if an earlier task changed to the
 same directory. An undeletable sentinel entry is reported once while it remains present;
@@ -312,9 +314,12 @@ can still leave the build green. CWD changes undone within a task can escape det
 Files created and removed before the next project/build scan also escape detection, and a later
 task can consume a stray file before that scan removes it. This delayed observation avoids
 serialized directory enumeration after every task.
+Directory scans serialize enumeration and cleanup, and finish enumerating before removing entries.
+The normal per-task CWD read is lock-free; only a detected change takes the scope lock for repair.
 Concurrent projects, tasks, loggers and host code share the process; the task or project observing
-a violation is not necessarily its originator. Use a dedicated process; concurrent API builds
-in that process are not isolated from this mode.
+a violation is not necessarily its originator. This observation-based attribution is an accepted
+limitation. Use a dedicated process: overlapping independent API builds in that process, including
+non-MT builds, are unsupported while strict mode is active.
 
 Unannotated tasks retain their TaskHost working directory, but can still receive an incorrect
 absolute path from project or engine code. When constructing a nested task, pass the parent's

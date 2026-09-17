@@ -275,8 +275,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private MultiThreadedStrictModeScope? _multiThreadedStrictModeScope;
 
-        private MultiThreadedStrictModeScope.CurrentDirectorySnapshot? _savedCurrentDirectory;
-
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
 #if DEBUG
@@ -626,14 +624,9 @@ namespace Microsoft.Build.Execution
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
                 bool strictMode = _buildParameters.MultiThreaded
                     && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12);
-                var buildEntryDirectory = strictMode || (_buildParameters.MultiThreaded && _buildParameters.SaveOperatingEnvironment)
+                var buildEntryDirectory = strictMode
                     ? MultiThreadedStrictModeScope.CaptureCurrentDirectory()
                     : default;
-
-                // A strict scope owns its own restoration; rejected scope entry must not restore another build's CWD.
-                _savedCurrentDirectory = _buildParameters.MultiThreaded && !strictMode && _buildParameters.SaveOperatingEnvironment
-                    ? buildEntryDirectory
-                    : null;
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
@@ -656,7 +649,7 @@ namespace Microsoft.Build.Execution
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
                 {
                     _buildParameters.OutputResultsCacheFile = strictMode
-                        ? FileUtilities.NormalizePath(buildEntryDirectory.Directory, "msbuild-cache")
+                        ? FileUtilities.NormalizePath(buildEntryDirectory.RestoreTarget, "msbuild-cache")
                         : FileUtilities.NormalizePath("msbuild-cache");
                 }
 
@@ -781,7 +774,7 @@ namespace Microsoft.Build.Execution
                         // EndBuild serializes output caches before restoring CWD. Resolve their paths now.
                         if (_buildParameters.UsesOutputCache())
                         {
-                            _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(buildEntryDirectory.Directory, _buildParameters.OutputResultsCacheFile);
+                            _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(buildEntryDirectory.RestoreTarget, _buildParameters.OutputResultsCacheFile);
                         }
 
                         _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter(_buildParameters.BuildId, buildEntryDirectory);
@@ -789,7 +782,7 @@ namespace Microsoft.Build.Execution
                             BuildEventContext.Invalid,
                             MessageImportance.Low,
                             "MultiThreadedStrictModeEnabled",
-                            Directory.GetCurrentDirectory());
+                            _multiThreadedStrictModeScope.SentinelDirectory);
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -1161,7 +1154,6 @@ namespace Microsoft.Build.Execution
             }
 
             var exceptionsThrownInEndBuild = false;
-            bool nodesStopped = false;
 
             try
             {
@@ -1192,8 +1184,6 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                nodesStopped = true;
-
                 // Wait for all of the actions in the work queue to drain.
                 // _workQueue.Completion.Wait() could throw here if there was an unhandled exception in the work queue,
                 // but the top level exception handler there should catch everything and have forwarded it to the
@@ -1212,14 +1202,38 @@ namespace Microsoft.Build.Execution
                     // after callbacks finish and before persisting caches; canceled/failed builds already failed.
                     projectCacheDispose.Wait();
                     WaitForAllLoggingServiceEventsToBeProcessed();
+                    string? entries;
                     try
                     {
-                        _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation);
+                        entries = _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation);
                     }
                     catch (InvalidProjectFileException e)
                     {
                         ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(BuildEventContext.Invalid, e);
                         throw;
+                    }
+
+                    if (entries is not null)
+                    {
+                        ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+                        string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                            out string? warningCode, out string? helpKeyword,
+                            "MultiThreadedStrictModeUnresolvedPathWrite", entries, _multiThreadedStrictModeScope.SentinelDirectory);
+                        Assumed.NotNull(warningCode, "The strict-mode warning must have a diagnostic code.");
+                        loggingService.LogWarningFromText(
+                            BuildEventContext.Invalid, null, warningCode, helpKeyword, BuildEventFileInfo.Empty, message);
+                        WaitForAllLoggingServiceEventsToBeProcessed();
+
+                        if (loggingService.ShouldTreatWarningAsError(BuildEventContext.Invalid, warningCode))
+                        {
+                            // Submissions have already completed. An already-logged exception also fails Build() and
+                            // CLI callers that captured their result before EndBuild, without duplicating the diagnostic.
+                            throw new InvalidProjectFileException(
+                                string.Empty, 0, 0, 0, 0, message, null, warningCode, helpKeyword)
+                            {
+                                HasBeenLogged = true,
+                            };
+                        }
                     }
                 }
 
@@ -1284,10 +1298,6 @@ namespace Microsoft.Build.Execution
                     {
                         _multiThreadedStrictModeScope.Exit();
                     }
-                    else if (nodesStopped && _savedCurrentDirectory is not null)
-                    {
-                        _savedCurrentDirectory.Value.Restore();
-                    }
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
@@ -1301,7 +1311,6 @@ namespace Microsoft.Build.Execution
                 finally
                 {
                     _multiThreadedStrictModeScope = null;
-                    _savedCurrentDirectory = null;
                 }
 
                 try

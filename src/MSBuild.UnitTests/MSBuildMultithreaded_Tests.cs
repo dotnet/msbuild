@@ -544,7 +544,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             string output = RunStrictModeProbe("WriteRelativeFile", $"/m /nodereuse:false {mtArgument}", out bool success);
 
-            success.ShouldBeFalse(output);
+            success.ShouldBeTrue(output);
             output.ShouldContain("MSB4287");
             output.ShouldContain("strict-mode-probe.txt");
         }
@@ -616,10 +616,10 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// Sentinel contents are checked at project completion, outside the writing task's error policy.
+        /// Sentinel contents are reported at project completion, outside the writing task's error policy.
         /// </summary>
         [Fact]
-        public void StrictMode_ProjectCompletionErrorIsNotDowngradedByContinueOnError()
+        public void StrictMode_ProjectCompletionWarningIsIndependentOfContinueOnError()
         {
             TransientTestFile binlog = _env.CreateFile(".binlog");
             string output = RunStrictModeProbe(
@@ -628,10 +628,36 @@ namespace Microsoft.Build.Engine.UnitTests
                 out bool success,
                 continueOnError: true);
 
-            success.ShouldBeFalse(output);
+            success.ShouldBeTrue(output);
             MockLogger logger = ReadBinlog(binlog.Path);
             logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
-            AssertProjectCompletionError(logger);
+            AssertProjectCompletionWarning(logger);
+        }
+
+        [Theory]
+        [InlineData("", true, 1, 0)]
+        [InlineData("/warnAsError:MSB4287", false, 0, 1)]
+        [InlineData("/warnAsError", false, 0, 1)]
+        [InlineData("/warnAsError /warnNotAsError:MSB4287", true, 1, 0)]
+        [InlineData("/warnAsError /nowarn:MSB4287", true, 0, 0)]
+        [InlineData("/p:MSBuildWarningsAsErrors=MSB4287", false, 0, 1)]
+        [InlineData("/p:MSBuildWarningsAsMessages=MSB4287", true, 0, 0)]
+        public void StrictMode_RelativeWriteHonorsWarningControls(string warningArguments, bool succeeds, int warnings, int errors)
+        {
+            TransientTestFile binlog = _env.CreateFile(".binlog");
+            string output = RunStrictModeProbe(
+                "WriteRelativeFile",
+                $"/m:1 /mt /nr:false /bl:\"{binlog.Path}\" {warningArguments}",
+                out bool success);
+
+            success.ShouldBe(succeeds, output);
+            MockLogger logger = ReadBinlog(binlog.Path);
+            logger.Warnings.Count.ShouldBe(warnings);
+            logger.Errors.Count.ShouldBe(errors);
+            logger.Warnings.ShouldAllBe(warning => warning.Code == "MSB4287");
+            logger.Errors.ShouldAllBe(error => error.Code == "MSB4287");
+            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBe(succeeds);
         }
 
         /// <summary>
@@ -684,7 +710,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 $"\"{project.Path}\" /m:1 /mt /nr:false /bl:\"{binlog.Path}\"",
                 out bool success, false, _output);
 
-            success.ShouldBeFalse(output);
+            success.ShouldBeTrue(output);
             output.ShouldContain("STRICT-MODE-PROBE-CONTENTS=probe");
             output.ShouldContain("STRICT-MODE-FOLLOWING-TASK");
             MockLogger logger = ReadBinlog(binlog.Path);
@@ -693,7 +719,7 @@ namespace Microsoft.Build.Engine.UnitTests
             logger.TaskFinishedEvents.ShouldAllBe(task => task.Succeeded);
             logger.TargetFinishedEvents.Select(target => target.TargetName).ShouldBe(["Write", "Observe"]);
             logger.TargetFinishedEvents.ShouldAllBe(target => target.Succeeded);
-            AssertProjectCompletionError(logger);
+            AssertProjectCompletionWarning(logger);
         }
 
         /// <summary>
@@ -807,6 +833,7 @@ namespace Microsoft.Build.Engine.UnitTests
             string output = RunStrictModeProbe("DeleteSentinel", "/m /mt /nr:false", out bool success, continueOnError: continueOnError);
 
             success.ShouldBeFalse(output);
+            output.ShouldContain("MSB4288");
             output.ShouldContain("MT-sentinel-CWD");
         }
 
@@ -815,7 +842,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             string output = RunStrictModeProbe("WriteManyFiles", "/m /mt /nr:false", out bool success);
 
-            success.ShouldBeFalse(output);
+            success.ShouldBeTrue(output);
             output.ShouldContain("MSB4287");
             for (int i = 0; i < 30; i++)
             {
@@ -842,30 +869,30 @@ namespace Microsoft.Build.Engine.UnitTests
             return logger;
         }
 
-        private static void AssertProjectCompletionError(MockLogger logger)
+        private static void AssertProjectCompletionWarning(MockLogger logger)
         {
-            BuildErrorEventArgs error = logger.Errors.ShouldHaveSingleItem();
-            error.Code.ShouldBe("MSB4287");
-            string message = error.Message.ShouldNotBeNull();
+            BuildWarningEventArgs warning = logger.Warnings.ShouldHaveSingleItem();
+            warning.Code.ShouldBe("MSB4287");
+            string message = warning.Message.ShouldNotBeNull();
             message.ShouldContain("strict-mode-probe.txt");
             message.ShouldContain("MT-sentinel-CWD");
             message.ShouldNotContain(nameof(StrictModeProbeTask));
-            BuildEventContext errorContext = error.BuildEventContext.ShouldNotBeNull();
-            errorContext.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
-            errorContext.TargetId.ShouldBe(BuildEventContext.InvalidTargetId);
-            logger.Warnings.ShouldBeEmpty();
+            BuildEventContext warningContext = warning.BuildEventContext.ShouldNotBeNull();
+            warningContext.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
+            warningContext.TargetId.ShouldBe(BuildEventContext.InvalidTargetId);
+            logger.Errors.ShouldBeEmpty();
 
             ProjectFinishedEventArgs projectFinished = logger.ProjectFinishedEvents.ShouldHaveSingleItem();
-            projectFinished.Succeeded.ShouldBeFalse();
+            projectFinished.Succeeded.ShouldBeTrue();
             BuildEventContext projectContext = projectFinished.BuildEventContext.ShouldNotBeNull();
-            errorContext.ProjectContextId.ShouldBe(projectContext.ProjectContextId);
-            errorContext.NodeId.ShouldBe(projectContext.NodeId);
+            warningContext.ProjectContextId.ShouldBe(projectContext.ProjectContextId);
+            warningContext.NodeId.ShouldBe(projectContext.NodeId);
             BuildFinishedEventArgs buildFinished = logger.BuildFinishedEvents.ShouldHaveSingleItem();
-            buildFinished.Succeeded.ShouldBeFalse();
+            buildFinished.Succeeded.ShouldBeTrue();
 
-            int errorIndex = logger.AllBuildEvents.IndexOf(error);
-            errorIndex.ShouldBeGreaterThan(logger.AllBuildEvents.IndexOf(logger.TargetFinishedEvents.Last()));
-            errorIndex.ShouldBeLessThan(logger.AllBuildEvents.IndexOf(projectFinished));
+            int warningIndex = logger.AllBuildEvents.IndexOf(warning);
+            warningIndex.ShouldBeGreaterThan(logger.AllBuildEvents.IndexOf(logger.TargetFinishedEvents.Last()));
+            warningIndex.ShouldBeLessThan(logger.AllBuildEvents.IndexOf(projectFinished));
             logger.AllBuildEvents.IndexOf(projectFinished).ShouldBeLessThan(logger.AllBuildEvents.IndexOf(buildFinished));
         }
 

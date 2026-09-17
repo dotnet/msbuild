@@ -1358,7 +1358,8 @@
     <comment>{0} is the full path of the sentinel directory.</comment>
   </data>
   <data name="MultiThreadedStrictModeAlreadyActive" xml:space="preserve">
-    <value>Another strict build is already active in this process. Finish it before starting a new strict build.</value>
+    <value>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</value>
+    <comment>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</comment>
   </data>
   <data name="MultiThreadedStrictModeCurrentDirectoryChanged" xml:space="preserve">
     <value>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</value>
@@ -1367,6 +1368,10 @@
   <data name="MultiThreadedStrictModeUnresolvedPathWrite" xml:space="preserve">
     <value>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</value>
     <comment>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeSentinelMissing" xml:space="preserve">
+    <value>MSB4288: The multi-threaded strict-mode sentinel directory "{0}" was removed during the build. Do not remove this engine-owned directory. To temporarily disable strict checks, set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process.</value>
+    <comment>{StrBegin="MSB4288: "}{0} is the sentinel directory. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</comment>
   </data>
   <data name="CouldNotLoadSdkResolver" xml:space="preserve">
     <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>

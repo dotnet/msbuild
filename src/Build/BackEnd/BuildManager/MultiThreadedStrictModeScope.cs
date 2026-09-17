@@ -22,7 +22,7 @@ internal sealed class MultiThreadedStrictModeScope
     internal const string SentinelDirectoryName = "MT-sentinel-CWD";
 
     // Serializes scope installation, restoration and directory repair. Never log under this lock.
-    private static readonly LockType s_stateLock = NativeMethodsShared.CurrentDirectoryLock;
+    private static readonly LockType s_stateLock = new();
     private static MultiThreadedStrictModeScope? s_activeScope;
 
     private readonly object _reportedEntriesLock = new();
@@ -54,9 +54,10 @@ internal sealed class MultiThreadedStrictModeScope
 
     internal static MultiThreadedStrictModeScope Enter(int buildId) => Enter(buildId, CaptureCurrentDirectory());
 
-    internal static MultiThreadedStrictModeScope Enter(int buildId, CurrentDirectorySnapshot directoryToRestore)
-        => Enter(buildId, directoryToRestore, Directory.SetCurrentDirectory);
+    internal static MultiThreadedStrictModeScope Enter(int buildId, CurrentDirectorySnapshot snapshot)
+        => Enter(buildId, snapshot, Directory.SetCurrentDirectory);
 
+    // The test callback runs under the CWD lock and must not wait for engine work.
     internal static MultiThreadedStrictModeScope Enter(
         int buildId,
         CurrentDirectorySnapshot snapshot,
@@ -64,11 +65,15 @@ internal sealed class MultiThreadedStrictModeScope
     {
         lock (s_stateLock)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(s_activeScope is null, "MultiThreadedStrictModeAlreadyActive");
+            if (s_activeScope is not null)
+            {
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("MultiThreadedStrictModeAlreadyActive"));
+            }
 
-            string directoryToRestore = snapshot.Directory;
+            string directoryToRestore = snapshot.RestoreTarget;
             string temporaryDirectory = FileUtilities.GetTemporaryDirectory(createDirectory: false);
             string sentinelDirectory = Path.Combine(temporaryDirectory, SentinelDirectoryName);
+            bool entered = false;
             try
             {
                 Directory.CreateDirectory(sentinelDirectory);
@@ -85,6 +90,7 @@ internal sealed class MultiThreadedStrictModeScope
                 MultiThreadedStrictModeScope scope = new(buildId, sentinelDirectory, directoryToRestore, temporaryDirectory);
                 setCurrentDirectory(sentinelDirectory);
                 Volatile.Write(ref s_activeScope, scope);
+                entered = true;
                 return scope;
             }
             catch (Exception entryFailure) when (!ExceptionHandling.IsCriticalException(entryFailure))
@@ -98,52 +104,50 @@ internal sealed class MultiThreadedStrictModeScope
                     throw new AggregateException(entryFailure, restorationFailure);
                 }
 
-                FileUtilities.TryDeleteFileOrDirectory(temporaryDirectory);
                 throw;
+            }
+            finally
+            {
+                if (!entered)
+                {
+                    FileUtilities.TryDeleteFileOrDirectory(temporaryDirectory);
+                }
             }
         }
     }
 
     internal readonly struct CurrentDirectorySnapshot(string directory, MultiThreadedStrictModeScope? owner)
     {
-        internal string Directory =>
+        internal string RestoreTarget =>
             owner is not null && FileUtilities.PathComparer.Equals(directory, owner.SentinelDirectory)
                 ? owner._directoryToRestore
                 : directory;
-
-        internal void Restore()
-        {
-            lock (s_stateLock)
-            {
-                // A saved sentinel expires with its owner; an unowned snapshot must not displace a new owner.
-                if (ReferenceEquals(owner, s_activeScope))
-                {
-                    NativeMethodsShared.SetCurrentDirectory(owner?.SentinelDirectory ?? directory);
-                }
-            }
-        }
     }
 
     internal void Exit()
     {
-        lock (s_stateLock)
+        // When both locks are needed, take the scan lock before the CWD lock.
+        lock (_reportedEntriesLock)
         {
-            if (!ReferenceEquals(s_activeScope, this))
+            lock (s_stateLock)
             {
-                return;
+                if (!ReferenceEquals(s_activeScope, this))
+                {
+                    return;
+                }
+
+                try
+                {
+                    Directory.SetCurrentDirectory(_directoryToRestore);
+                }
+                finally
+                {
+                    Volatile.Write(ref s_activeScope, null);
+                }
             }
 
-            try
-            {
-                Directory.SetCurrentDirectory(_directoryToRestore);
-            }
-            finally
-            {
-                Volatile.Write(ref s_activeScope, null);
-            }
+            FileUtilities.TryDeleteFileOrDirectory(_temporaryDirectory);
         }
-
-        FileUtilities.TryDeleteFileOrDirectory(_temporaryDirectory);
     }
 
     internal bool VerifyAndReportCurrentDirectory(
@@ -152,7 +156,18 @@ internal sealed class MultiThreadedStrictModeScope
         ElementLocation taskLocation,
         bool convertErrorsToWarnings)
     {
-        string? unexpectedDirectory = DetectCurrentDirectoryViolation();
+        string? unexpectedDirectory;
+        try
+        {
+            unexpectedDirectory = DetectCurrentDirectoryViolation();
+        }
+        catch (DirectoryNotFoundException)
+        {
+            ProjectErrorUtilities.ThrowInvalidProject(taskLocation,
+                "MultiThreadedStrictModeSentinelMissing", SentinelDirectory);
+            throw;
+        }
+
         if (unexpectedDirectory is null)
         {
             return false;
@@ -197,7 +212,7 @@ internal sealed class MultiThreadedStrictModeScope
         return unexpectedDirectory;
     }
 
-    internal void VerifyUnresolvedPathWrites(ElementLocation location)
+    internal string? VerifyUnresolvedPathWrites(ElementLocation location)
     {
         bool trace = MSBuildEventSource.Log.IsEnabled();
         if (trace)
@@ -205,10 +220,15 @@ internal sealed class MultiThreadedStrictModeScope
             MSBuildEventSource.Log.StrictModeDirectoryScanStart(BuildId, location.File);
         }
 
-        string? entries;
         try
         {
-            entries = DetectUnresolvedPathWrites();
+            return DetectUnresolvedPathWrites();
+        }
+        catch (DirectoryNotFoundException)
+        {
+            ProjectErrorUtilities.ThrowInvalidProject(location,
+                "MultiThreadedStrictModeSentinelMissing", SentinelDirectory);
+            throw;
         }
         finally
         {
@@ -217,23 +237,27 @@ internal sealed class MultiThreadedStrictModeScope
                 MSBuildEventSource.Log.StrictModeDirectoryScanStop(BuildId, location.File);
             }
         }
-
-        if (entries is not null)
-        {
-            ProjectErrorUtilities.ThrowInvalidProject(location,
-                "MultiThreadedStrictModeUnresolvedPathWrite", entries, SentinelDirectory);
-        }
     }
 
     internal string? DetectUnresolvedPathWrites()
     {
+        if (!ReferenceEquals(ActiveScope, this))
+        {
+            return null;
+        }
+
         lock (_reportedEntriesLock)
         {
-            // Only failed deletions remain remembered between checks.
+            if (!ReferenceEquals(ActiveScope, this))
+            {
+                return null;
+            }
+
+            // Finish enumeration before deleting entries from the directory.
+            string[] snapshot = Directory.GetFileSystemEntries(SentinelDirectory);
             HashSet<string>? noLongerPresent = _reportedEntries.Count == 0 ? null : new(_reportedEntries, FileUtilities.PathComparer);
             List<string>? entries = null;
-            // Timestamps cannot safely replace enumeration: multiple writes can share the same timestamp.
-            foreach (string entry in Directory.EnumerateFileSystemEntries(SentinelDirectory))
+            foreach (string entry in snapshot)
             {
                 string name = Path.GetFileName(entry);
                 noLongerPresent?.Remove(name);
@@ -242,7 +266,7 @@ internal sealed class MultiThreadedStrictModeScope
                     (entries ??= []).Add(name);
                 }
 
-                // Remove stray outputs at project/build boundaries and retry locked leftovers without duplicate diagnostics.
+                // Retry locked leftovers without duplicate diagnostics.
                 if (FileUtilities.TryDeleteFileOrDirectory(entry))
                 {
                     _reportedEntries.Remove(name);

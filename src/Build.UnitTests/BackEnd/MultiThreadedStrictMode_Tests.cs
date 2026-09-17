@@ -14,6 +14,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Logging;
 using Shouldly;
 using Xunit;
@@ -131,80 +132,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void StartupLoggerCannotChangeStrictRestorationOrCacheBase(bool saveEnvironment)
-        {
-            _env.SetCurrentDirectory(_env.CreateFolder().Path);
-            string originalDirectory = Directory.GetCurrentDirectory();
-            string loggerDirectory = _env.CreateFolder().Path;
-            var project = _env.CreateFile("startup-cwd.proj", """<Project><Target Name="Build" /></Project>""");
-            using BuildManager manager = new();
-            BuildParameters parameters = new()
-            {
-                MultiThreaded = true,
-                SaveOperatingEnvironment = saveEnvironment,
-                OutputResultsCacheFile = "startup.cache",
-                ShutdownInProcNodeOnBuildFinish = true,
-                EnableNodeReuse = false,
-                Loggers = [new MockLogger(_output), new InitializationCallbackLogger(() => Directory.SetCurrentDirectory(loggerDirectory))],
-            };
-
-            manager.Build(parameters, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
-                .ShouldHaveSucceeded();
-
-            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
-            File.Exists(Path.Combine(originalDirectory, "startup.cache")).ShouldBeTrue();
-            File.Exists(Path.Combine(loggerDirectory, "startup.cache")).ShouldBeFalse();
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        [InlineData(2)]
-        public void OverlappingBuildsPreserveTheCurrentScopeInEveryTeardownOrder(int strictIndex)
-        {
-            string originalDirectory = Directory.GetCurrentDirectory();
-            int[][] endOrders = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]];
-            foreach (int[] endOrder in endOrders)
-            {
-                using BuildManager first = new();
-                using BuildManager second = new();
-                using BuildManager third = new();
-                BuildManager[] managers = [first, second, third];
-                HashSet<int> active = [];
-                try
-                {
-                    for (int i = 0; i < managers.Length; i++)
-                    {
-                        managers[i].BeginBuild(new BuildParameters
-                        {
-                            MultiThreaded = i == strictIndex,
-                            SaveOperatingEnvironment = true,
-                            Loggers = [new MockLogger(_output)],
-                        });
-                        active.Add(i);
-                    }
-
-                    string sentinel = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull().SentinelDirectory;
-                    foreach (int index in endOrder)
-                    {
-                        active.Remove(index);
-                        managers[index].EndBuild();
-                        Directory.GetCurrentDirectory().ShouldBe(active.Contains(strictIndex) ? sentinel : originalDirectory);
-                    }
-                }
-                finally
-                {
-                    foreach (int index in active)
-                    {
-                        managers[index].EndBuild();
-                    }
-                }
-            }
-        }
-
         [Fact]
         public void NonMtIsolationPreservesHostRelativeDeclarations()
         {
@@ -290,51 +217,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
 
-        [Fact]
-        public void NonMtTaskChecksDoNotUseAnotherBuildsScope()
-        {
-            var project = _env.CreateFile("foreign-scope.proj", $"""
-                <Project>
-                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
-                  <Target Name="Build">
-                    <StrictLifetimeTask Violation="Write">
-                      <Output TaskParameter="Value" PropertyName="Value" />
-                    </StrictLifetimeTask>
-                  </Target>
-                </Project>
-                """);
-            string originalDirectory = Directory.GetCurrentDirectory();
-            using BuildManager owner = new();
-            owner.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
-            try
-            {
-                var scope = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull();
-                MockLogger logger = new(_output);
-                using BuildManager other = new();
-                BuildParameters parameters = new()
-                {
-                    MultiThreaded = false,
-                    SaveOperatingEnvironment = false,
-                    ShutdownInProcNodeOnBuildFinish = true,
-                    EnableNodeReuse = false,
-                    Loggers = [logger],
-                };
-
-                other.Build(parameters, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
-
-                logger.AssertNoErrors();
-                logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
-                MultiThreadedStrictModeScope.ActiveScope.ShouldBeSameAs(scope);
-                scope.DetectUnresolvedPathWrites().ShouldBe("late-output.txt");
-            }
-            finally
-            {
-                owner.EndBuild();
-            }
-
-            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
-        }
-
         /// <summary>
         /// The scope owns process-wide state, so entering must move the process and exiting must put it back.
         /// </summary>
@@ -383,11 +265,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using var lifetime = new ScopeLifetime(scope);
 
             scope.SentinelDirectory.ShouldBe(installedDirectory);
-            var otherSnapshot = MultiThreadedStrictModeScope.CaptureCurrentDirectory();
             scope.DetectCurrentDirectoryViolation().ShouldBe(changedDirectory);
             scope.DetectUnresolvedPathWrites().ShouldBeNull();
             File.ReadAllText(protectedFile.Path).ShouldBe("must not be deleted");
-            otherSnapshot.Restore();
             Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
         }
 
@@ -411,6 +291,69 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
         }
 
+        [Fact]
+        public void FailedEntryCleansItsRootEvenWhenRestorationFails()
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var directory = _env.CreateFolder();
+            _env.SetCurrentDirectory(directory.Path);
+            var snapshot = MultiThreadedStrictModeScope.CaptureCurrentDirectory();
+            Directory.SetCurrentDirectory(originalDirectory);
+            Directory.Delete(directory.Path);
+            string? temporaryDirectory = null;
+            IOException entryFailure = new("injected CWD switch failure");
+
+            var exception = Should.Throw<AggregateException>(() => MultiThreadedStrictModeScope.Enter(0, snapshot, path =>
+            {
+                temporaryDirectory = Path.GetDirectoryName(path);
+                throw entryFailure;
+            }));
+
+            exception.InnerExceptions.Count.ShouldBe(2);
+            exception.InnerExceptions[0].ShouldBeSameAs(entryFailure);
+            exception.InnerExceptions[1].ShouldBeOfType<DirectoryNotFoundException>();
+            temporaryDirectory.ShouldNotBeNull();
+            Directory.Exists(temporaryDirectory).ShouldBeFalse();
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
+        }
+
+        [Fact]
+        public void InactiveScopeDoesNotInspectAnEndedSentinel()
+        {
+            var first = MultiThreadedStrictModeScope.Enter(0);
+            using var firstLifetime = new ScopeLifetime(first);
+            first.Exit();
+            first.DetectUnresolvedPathWrites().ShouldBeNull();
+
+            var second = MultiThreadedStrictModeScope.Enter(1);
+            using var secondLifetime = new ScopeLifetime(second);
+            File.WriteAllText("second.txt", "content");
+
+            first.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation);
+
+            File.Exists(Path.Combine(second.SentinelDirectory, "second.txt")).ShouldBeTrue();
+            second.DetectUnresolvedPathWrites().ShouldBe("second.txt");
+        }
+
+        [Fact]
+        public void UnchangedCurrentDirectoryCheckDoesNotAcquireStateLock()
+        {
+            var scope = MultiThreadedStrictModeScope.Enter(0);
+            using var lifetime = new ScopeLifetime(scope);
+            System.Threading.Tasks.Task<string?> check;
+            bool completed;
+            LockType stateLock = typeof(MultiThreadedStrictModeScope)
+                .GetField("s_stateLock", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null).ShouldBeOfType<LockType>();
+            lock (stateLock)
+            {
+                check = System.Threading.Tasks.Task.Run(scope.DetectCurrentDirectoryViolation);
+                completed = check.Wait(TimeSpan.FromSeconds(10));
+            }
+
+            check.GetAwaiter().GetResult().ShouldBeNull();
+            completed.ShouldBeTrue();
+        }
+
         [Theory]
         [InlineData("Empty")]
         [InlineData("Write")]
@@ -431,14 +374,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             using EventSourceTestHelper listener = new();
-            Exception? exception = Record.Exception(() => scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation));
+            string? entries = null;
+            Exception? exception = Record.Exception(() => entries = scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation));
             if (state == "Write")
             {
-                exception.ShouldBeOfType<InvalidProjectFileException>().ErrorCode.ShouldBe("MSB4287");
+                exception.ShouldBeNull();
+                entries.ShouldBe("scan-event.txt");
             }
             else if (state == "Missing")
             {
-                exception.ShouldBeOfType<DirectoryNotFoundException>();
+                var missing = exception.ShouldBeOfType<InvalidProjectFileException>();
+                missing.ErrorCode.ShouldBe("MSB4288");
+                missing.Message.ShouldContain(scope.SentinelDirectory);
             }
             else
             {
@@ -474,7 +421,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                Should.Throw<InvalidOperationException>(() => MultiThreadedStrictModeScope.Enter(1));
+                var exception = Should.Throw<InvalidOperationException>(() => MultiThreadedStrictModeScope.Enter(1));
+                exception.Message.ShouldContain("MSB4289");
+                exception.Message.ShouldContain("MSBUILDDISABLEFEATURESFROMVERSION=18.12");
                 MultiThreadedStrictModeScope.ActiveScope.ShouldBe(scope);
             }
             finally
@@ -488,7 +437,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// A write through an unresolved relative path lands in the sentinel directory, and must be reported
-        /// exactly once so that later tasks are not failed for a file that was already reported.
+        /// exactly once so that subsequent project checks do not repeat the diagnostic.
         /// </summary>
         [Fact]
         public void UnresolvedPathWriteIsDetectedOnceAndRemoved()
@@ -576,19 +525,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.Exists(Name).ShouldBeFalse();
         }
 
-        [Fact]
-        public void UnresolvedPathWritesAreReportedAndRemovedInOneCheck()
+        [Theory]
+        [InlineData(25, 0)]
+        [InlineData(40, 40)]
+        [InlineData(512, 64)]
+        public void UnresolvedPathWritesAreReportedAndRemovedInOneCheck(int files, int directories)
         {
-            const int StrayCount = 25;
             using TestEnvironment env = TestEnvironment.Create(_output);
             MultiThreadedStrictModeScope scope = MultiThreadedStrictModeScope.Enter(0);
             using var lifetime = new ScopeLifetime(scope);
-            string[] expected = new string[StrayCount];
+            string[] expected = new string[files + directories];
 
-            for (int i = 0; i < StrayCount; i++)
+            for (int i = 0; i < files; i++)
             {
                 expected[i] = $"stray{i:D2}.txt";
                 File.WriteAllText(expected[i], "probe");
+            }
+
+            for (int i = 0; i < directories; i++)
+            {
+                string directory = expected[files + i] = $"directory{i:D2}";
+                Directory.CreateDirectory(directory);
+                File.WriteAllText(Path.Combine(directory, "nested.txt"), "probe");
             }
 
             string? reported = scope.DetectUnresolvedPathWrites();
@@ -681,6 +639,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [Theory]
         [InlineData("ErrorAndStop")]
+        [InlineData("ErrorAndContinue")]
         [InlineData("WarnAndContinue")]
         public void VerificationFailureDoesNotLogSuccessfulTaskCompletion(string continueOnError)
         {
@@ -704,23 +663,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Directory.SetCurrentDirectory(originalDirectory);
                 Directory.Delete(sentinel);
             }));
-            MockLogger logger = new(_output) { AllowTaskCrashes = true };
-            BuildResult? result = null;
-            Exception? exception = Record.Exception(() => result = BuildStrictProject(project.Path, logger, hostServices: hostServices));
+            MockLogger logger = new(_output);
+            using EventSourceTestHelper listener = new();
 
-            if (exception is null)
-            {
-                result.ShouldNotBeNull().ShouldHaveFailed();
-            }
-            else
-            {
-                exception.ShouldBeOfType<DirectoryNotFoundException>();
-            }
+            BuildStrictProject(project.Path, logger, hostServices: hostServices).ShouldHaveFailed();
 
+            logger.Errors.ShouldContain(e => e.Code == "MSB4288"
+                && e.BuildEventContext!.TaskId != BuildEventContext.InvalidTaskId);
+            logger.Errors.ShouldAllBe(e => e.Code == "MSB4288");
+            logger.AssertNoWarnings();
             logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
             logger.AssertLogDoesntContain("UNEXPECTED-CONTINUATION");
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+
+            var projectEvents = listener.GetEvents().FindAll(e => e.EventName is
+                nameof(MSBuildEventSource.BuildProjectStart) or nameof(MSBuildEventSource.BuildProjectStop));
+            projectEvents.Count.ShouldBe(2);
+            projectEvents[0].EventName.ShouldBe(nameof(MSBuildEventSource.BuildProjectStart));
+            projectEvents[1].EventName.ShouldBe(nameof(MSBuildEventSource.BuildProjectStop));
         }
 
         /// <summary>
@@ -760,7 +721,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(false, false)]
         [InlineData(true, true)]
         [InlineData(true, false)]
-        public void MtBuildRestoresHostDirectory(bool strict, bool saveEnvironment)
+        public void MtBuildPreservesStrictAndLegacyRestoration(bool strict, bool saveEnvironment)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             SetStrictMode(env, enabled: strict);
@@ -823,6 +784,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             manager.Build(parameters, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
             Directory.GetCurrentDirectory().ShouldBe(saveEnvironment ? originalDirectory : changedDirectory);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void NonStrictEmptyBuildDoesNotRestoreProcessDirectory(bool saveEnvironment)
+        {
+            SetStrictMode(_env, enabled: false);
+            _env.SetCurrentDirectory(_env.CreateFolder().Path);
+            string changedDirectory = _env.CreateFolder().Path;
+            using BuildManager manager = new();
+            manager.BeginBuild(new BuildParameters
+            {
+                MultiThreaded = true,
+                SaveOperatingEnvironment = saveEnvironment,
+                Loggers = [new MockLogger(_output)],
+            });
+            try
+            {
+                Directory.SetCurrentDirectory(changedDirectory);
+                changedDirectory = Directory.GetCurrentDirectory();
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            Directory.GetCurrentDirectory().ShouldBe(changedDirectory);
         }
 
         [WindowsOnlyFact]
@@ -892,9 +881,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData("Write", "ErrorAndStop", false)]
-        [InlineData("Write", "ErrorAndContinue", false)]
-        [InlineData("Write", "WarnAndContinue", false)]
+        [InlineData("Write", "ErrorAndStop", true)]
+        [InlineData("Write", "ErrorAndContinue", true)]
+        [InlineData("Write", "WarnAndContinue", true)]
         [InlineData("ChangeDirectory", "ErrorAndStop", false)]
         [InlineData("ChangeDirectory", "ErrorAndContinue", false)]
         [InlineData("ChangeDirectory", "WarnAndContinue", true)]
@@ -953,12 +942,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 """);
             MockLogger logger = new(_output);
 
-            BuildStrictProject(project.Path, logger).ShouldHaveFailed();
+            BuildStrictProject(project.Path, logger).ShouldHaveSucceeded();
 
             logger.AssertLogContains("BEFORE_PROJECT_END:True:true", "MSB4287");
             logger.TaskFinishedEvents.ShouldAllBe(e => e.Succeeded);
-            logger.ProjectFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
-            logger.Errors.ShouldHaveSingleItem().BuildEventContext!.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
+            logger.ProjectFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            logger.Warnings.ShouldHaveSingleItem().BuildEventContext!.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
+            logger.AssertNoErrors();
         }
 
         [Fact]
@@ -1005,7 +995,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
 
                 submission.WaitHandle.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue();
-                submission.BuildResult!.ShouldHaveFailed();
+                submission.BuildResult!.ShouldHaveSucceeded();
             }
             finally
             {
@@ -1013,7 +1003,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
-            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+            logger.Warnings.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+            logger.AssertNoErrors();
         }
 
         [Fact]
@@ -1041,8 +1032,54 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.TaskFinishedEvents.ShouldAllBe(e => e.Succeeded);
         }
 
+        [Theory]
+        [InlineData("Default", "", false, false)]
+        [InlineData("PromoteCode", "", true, false)]
+        [InlineData("PromoteAll", "", true, false)]
+        [InlineData("Suppress", "", false, true)]
+        [InlineData("SuppressPromoted", "", false, true)]
+        [InlineData("ExcludeFromAll", "", false, false)]
+        [InlineData("ExcludeSpecific", "", true, false)]
+        [InlineData("PromoteOther", "", false, false)]
+        [InlineData("Default", "<MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>", true, false)]
+        [InlineData("Default", "<MSBuildWarningsAsErrors>MSB4287</MSBuildWarningsAsErrors>", true, false)]
+        [InlineData("Default", "<MSBuildWarningsAsMessages>MSB4287</MSBuildWarningsAsMessages>", false, true)]
+        [InlineData("PromoteCode", "<MSBuildWarningsAsMessages>MSB4287</MSBuildWarningsAsMessages>", false, true)]
+        [InlineData("Suppress", "<MSBuildWarningsAsErrors>MSB4287</MSBuildWarningsAsErrors>", false, true)]
+        [InlineData("PromoteAll", "<MSBuildWarningsNotAsErrors>MSB4287</MSBuildWarningsNotAsErrors>", false, false)]
+        [InlineData("ExcludeFromAll", "<MSBuildWarningsAsErrors>MSB4287</MSBuildWarningsAsErrors>", true, false)]
+        public void ProjectWriteUsesNormalWarningPolicy(string policy, string projectPolicy, bool promoted, bool suppressed)
+        {
+            var project = _env.CreateFile("warning-policy.proj", $"""
+                <Project>
+                  <PropertyGroup>{projectPolicy}</PropertyGroup>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask Violation="Write">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                  </Target>
+                </Project>
+                """);
+            MockLogger logger = new(_output);
+            BuildParameters parameters = CreateStrictWarningParameters(logger, policy);
+            using BuildManager manager = new();
+
+            BuildResult result = manager.Build(parameters,
+                new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null));
+
+            result.OverallResult.ShouldBe(promoted ? BuildResultCode.Failure : BuildResultCode.Success);
+            result.Exception.ShouldBeNull();
+            BuildEventArgs diagnostic = AssertUnresolvedPathDiagnostic(logger, promoted, suppressed);
+            diagnostic.BuildEventContext!.ProjectContextId.ShouldBe(
+                logger.ProjectStartedEvents.ShouldHaveSingleItem().BuildEventContext!.ProjectContextId);
+            diagnostic.BuildEventContext.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
+            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBe(!promoted);
+        }
+
         [Fact]
-        public void ProjectWriteFailureIsRetainedInCachedResults()
+        public void ProjectWriteWarningDoesNotFailCachedResults()
         {
             var project = _env.CreateFile("cached-write.proj", $"""
                 <Project>
@@ -1055,10 +1092,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 """);
             MockLogger logger = new(_output);
+            string outputCache = Path.Combine(_env.CreateFolder().Path, "results.cache");
             using BuildManager manager = new();
             manager.BeginBuild(new BuildParameters
             {
                 MultiThreaded = true,
+                OutputResultsCacheFile = outputCache,
                 ShutdownInProcNodeOnBuildFinish = true,
                 EnableNodeReuse = false,
                 Loggers = [logger],
@@ -1069,8 +1108,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 for (int i = 0; i < 2; i++)
                 {
                     BuildResult result = manager.BuildRequest(request);
-                    result.ShouldHaveFailed();
-                    result.Exception.ShouldBeOfType<InvalidProjectFileException>().ErrorCode.ShouldBe("MSB4287");
+                    result.ShouldHaveSucceeded();
+                    result.Exception.ShouldBeNull();
                 }
             }
             finally
@@ -1079,57 +1118,228 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
-            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+            logger.Warnings.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+            logger.AssertNoErrors();
+            File.Exists(outputCache).ShouldBeTrue();
+
+            MockLogger cachedLogger = new(_output);
+            using BuildManager cacheReader = new();
+            cacheReader.Build(new BuildParameters
+            {
+                MultiThreaded = true,
+                InputResultsCacheFiles = [outputCache],
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                Loggers = [cachedLogger],
+            }, new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null)).ShouldHaveSucceeded();
+            cachedLogger.TaskFinishedEvents.ShouldBeEmpty();
+            cachedLogger.AssertNoErrors();
+            cachedLogger.AssertNoWarnings();
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void FinalBuildSweepReportsLateWritesBeforeSerializingCaches(bool writeFromProjectFinished)
+        [InlineData("PromoteCode", "")]
+        [InlineData("PromoteAll", "")]
+        [InlineData("Default", "<MSBuildWarningsAsErrors>MSB4287</MSBuildWarningsAsErrors>")]
+        [InlineData("Default", "<MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>")]
+        public void ProjectWritePromotionUsesStandardCachedWarningSemantics(string policy, string projectPolicy)
         {
-            string originalDirectory = Directory.GetCurrentDirectory();
-            var project = _env.CreateFile("late-write.proj", """<Project><Target Name="Build" /></Project>""");
-            string outputCache = Path.Combine(_env.CreateFolder().Path, "results.cache");
-            string? sentinel = null;
+            var project = _env.CreateFile("cached-promoted-write.proj", $"""
+                <Project>
+                  <PropertyGroup>{projectPolicy}</PropertyGroup>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <StrictLifetimeTask Violation="Write">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                  </Target>
+                </Project>
+                """);
             MockLogger logger = new(_output);
             using BuildManager manager = new();
-            manager.BeginBuild(new BuildParameters
+            manager.BeginBuild(CreateStrictWarningParameters(logger, policy));
+            try
             {
-                MultiThreaded = true,
-                OutputResultsCacheFile = outputCache,
-                ShutdownInProcNodeOnBuildFinish = true,
-                EnableNodeReuse = false,
-                Loggers =
-                [
-                    logger,
-                    new InitializationCallbackLogger(() => { }, source =>
-                    {
-                        if (writeFromProjectFinished)
-                        {
-                            source.ProjectFinished += (_, _) => File.WriteAllText(Path.Combine(sentinel!, "late.txt"), "late output");
-                        }
-                    }),
-                ],
-            });
-            sentinel = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull().SentinelDirectory;
-            manager.BuildRequest(new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
-                .ShouldHaveSucceeded();
-            if (!writeFromProjectFinished)
+                BuildRequestData request = new(project.Path, new Dictionary<string, string?>(), null, ["Build"], null);
+                for (int i = 0; i < 2; i++)
+                {
+                    BuildResult result = manager.BuildRequest(request);
+                    result.OverallResult.ShouldBe(i == 0 ? BuildResultCode.Failure : BuildResultCode.Success);
+                    result.Exception.ShouldBeNull();
+                }
+            }
+            finally
             {
-                File.WriteAllText(Path.Combine(sentinel, "late.txt"), "late output");
+                manager.EndBuild();
             }
 
-            Should.Throw<InvalidProjectFileException>(() => manager.EndBuild()).ErrorCode.ShouldBe("MSB4287");
-
-            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            AssertUnresolvedPathDiagnostic(logger, promoted: true, suppressed: false);
             logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
-            File.Exists(outputCache).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void ProjectWriteWarningDoesNotAdoptAnotherPromotedWarning()
+        {
+            var project = _env.CreateFile("unrelated-promoted-warning.proj", $"""
+                <Project>
+                  <UsingTask TaskName="StrictLifetimeTask" AssemblyFile="{typeof(StrictLifetimeTask).Assembly.Location}" />
+                  <Target Name="Build">
+                    <Warning Code="OTHER0001" Text="Unrelated warning" />
+                    <StrictLifetimeTask Violation="Write">
+                      <Output TaskParameter="Value" PropertyName="Value" />
+                    </StrictLifetimeTask>
+                  </Target>
+                </Project>
+                """);
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+
+            BuildResult result = manager.Build(CreateStrictWarningParameters(logger, "PromoteOther"),
+                new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null));
+
+            result.ShouldHaveFailed();
+            result.Exception.ShouldBeNull();
+            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("OTHER0001");
+            logger.Warnings.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+        }
+
+        [Theory]
+        [InlineData("Default", false, false)]
+        [InlineData("PromoteCode", true, false)]
+        [InlineData("PromoteAll", true, false)]
+        [InlineData("Suppress", false, true)]
+        [InlineData("SuppressPromoted", false, true)]
+        [InlineData("ExcludeFromAll", false, false)]
+        [InlineData("ExcludeSpecific", true, false)]
+        [InlineData("PromoteOther", false, false)]
+        public void FinalBuildSweepUsesGlobalWarningPolicyBeforeSerializingCaches(string policy, bool promoted, bool suppressed)
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var project = _env.CreateFile("late-write.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <MSBuildWarningsAsErrors>MSB4287</MSBuildWarningsAsErrors>
+                    <MSBuildWarningsAsMessages>MSB4287</MSBuildWarningsAsMessages>
+                    <MSBuildWarningsNotAsErrors>MSB4287</MSBuildWarningsNotAsErrors>
+                  </PropertyGroup>
+                  <Target Name="Build" />
+                </Project>
+                """);
+            string outputCache = Path.Combine(_env.CreateFolder().Path, "results.cache");
+            MockLogger logger = new(_output);
+            using BuildManager manager = new();
+            BuildParameters parameters = CreateStrictWarningParameters(logger, policy);
+            parameters.OutputResultsCacheFile = outputCache;
+            manager.BeginBuild(parameters);
+            string sentinel = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull().SentinelDirectory;
+            manager.BuildRequest(new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
+                .ShouldHaveSucceeded();
+            File.WriteAllText(Path.Combine(sentinel, "late.txt"), "late output");
+
+            Exception? exception = Record.Exception(manager.EndBuild);
+            if (promoted)
+            {
+                var failure = exception.ShouldBeOfType<InvalidProjectFileException>();
+                failure.ErrorCode.ShouldBe("MSB4287");
+                failure.HasBeenLogged.ShouldBeTrue();
+                failure.ProjectFile.ShouldBeEmpty();
+            }
+            else
+            {
+                exception.ShouldBeNull();
+            }
+
+            BuildEventArgs diagnostic = AssertUnresolvedPathDiagnostic(logger, promoted, suppressed);
+            diagnostic.BuildEventContext.ShouldBe(BuildEventContext.Invalid);
+            string? file = diagnostic switch
+            {
+                BuildWarningEventArgs warning => warning.File,
+                BuildErrorEventArgs error => error.File,
+                BuildMessageEventArgs message => message.File,
+                _ => throw new InvalidOperationException(),
+            };
+            file.ShouldBeEmpty();
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBe(!promoted);
+            File.Exists(outputCache).ShouldBe(!promoted);
             Directory.Exists(sentinel).ShouldBeFalse();
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
 
             manager.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
             manager.EndBuild();
+        }
+
+        [Theory]
+        [InlineData("Default", false, false)]
+        [InlineData("PromoteCode", true, false)]
+        [InlineData("SuppressPromoted", false, true)]
+        public void FinalBuildSweepDoesNotReturnSuccessForPromotedWarning(string policy, bool promoted, bool suppressed)
+        {
+            var project = _env.CreateFile("late-build-result.proj", """<Project><Target Name="Build" /></Project>""");
+            string outputCache = Path.Combine(_env.CreateFolder().Path, "results.cache");
+            MockLogger logger = new(_output);
+            BuildParameters parameters = CreateStrictWarningParameters(logger, policy);
+            parameters.OutputResultsCacheFile = outputCache;
+            parameters.Loggers =
+            [
+                logger,
+                new InitializationCallbackLogger(() => { }, source =>
+                    source.ProjectFinished += (_, _) => File.WriteAllText(
+                        Path.Combine(MultiThreadedStrictModeScope.ActiveScope!.SentinelDirectory, "late.txt"), "late output")),
+            ];
+            using BuildManager manager = new();
+            BuildResult? result = null;
+
+            Exception? exception = Record.Exception(() => result = manager.Build(parameters,
+                new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null)));
+
+            if (promoted)
+            {
+                var failure = exception.ShouldBeOfType<InvalidProjectFileException>();
+                failure.ErrorCode.ShouldBe("MSB4287");
+                failure.HasBeenLogged.ShouldBeTrue();
+                result.ShouldBeNull();
+            }
+            else
+            {
+                exception.ShouldBeNull();
+                result.ShouldNotBeNull().ShouldHaveSucceeded();
+            }
+
+            AssertUnresolvedPathDiagnostic(logger, promoted, suppressed).BuildEventContext.ShouldBe(BuildEventContext.Invalid);
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBe(!promoted);
+            File.Exists(outputCache).ShouldBe(!promoted);
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
+        }
+
+        [Fact]
+        public void FinalBuildSweepDoesNotAttributeEarlierErrorsToItsWarning()
+        {
+            var project = _env.CreateFile("earlier-error.proj", """<Project><Target Name="Build" /></Project>""");
+            string outputCache = Path.Combine(_env.CreateFolder().Path, "results.cache");
+            MockLogger logger = new(_output);
+            BuildParameters parameters = CreateStrictWarningParameters(logger, "PromoteOther");
+            parameters.OutputResultsCacheFile = outputCache;
+            using BuildManager manager = new();
+            manager.BeginBuild(parameters);
+            try
+            {
+                manager.BuildRequest(new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
+                    .ShouldHaveSucceeded();
+                ((IBuildComponentHost)manager).LoggingService.LogWarningFromText(
+                    BuildEventContext.Invalid, null, "OTHER0001", null, BuildEventFileInfo.Empty, "Unrelated warning");
+                File.WriteAllText(Path.Combine(MultiThreadedStrictModeScope.ActiveScope!.SentinelDirectory, "late.txt"), "late output");
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("OTHER0001");
+            logger.Warnings.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
+            File.Exists(outputCache).ShouldBeTrue();
         }
 
         [Theory]
@@ -1152,11 +1362,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 """);
             MockLogger logger = new(_output);
-            BuildStrictProject(project.Path, logger).ShouldHaveFailed();
-            string strictDiagnostic = violation == "Write" ? "MSB4287" : "MSB4286";
-            logger.Errors.Count.ShouldBe(returnFalse ? 2 : 1);
-            logger.Errors[0].Code.ShouldBe(returnFalse ? "MSB4181" : strictDiagnostic);
-            logger.Errors[logger.Errors.Count - 1].Code.ShouldBe(strictDiagnostic);
+            BuildResult result = BuildStrictProject(project.Path, logger);
+            result.OverallResult.ShouldBe(violation == "Write" && !returnFalse ? BuildResultCode.Success : BuildResultCode.Failure);
+            if (violation == "Write")
+            {
+                logger.Warnings.ShouldHaveSingleItem().Code.ShouldBe("MSB4287");
+                logger.Errors.Count.ShouldBe(returnFalse ? 1 : 0);
+            }
+            else
+            {
+                logger.AssertNoWarnings();
+                logger.Errors.Count.ShouldBe(returnFalse ? 2 : 1);
+                logger.Errors[logger.Errors.Count - 1].Code.ShouldBe("MSB4286");
+            }
+
+            if (returnFalse)
+            {
+                logger.Errors[0].Code.ShouldBe("MSB4181");
+            }
             logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictLifetimeTask))!.Succeeded
                 .ShouldBe(violation == "Write" && !returnFalse);
         }
@@ -1182,7 +1405,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new OutputCallbackHost(() => observedApartment = Thread.CurrentThread.GetApartmentState()));
             MockLogger logger = new(_output);
 
-            BuildStrictProject(project.Path, logger, hostServices: hostServices).ShouldHaveFailed();
+            BuildStrictProject(project.Path, logger, hostServices: hostServices).ShouldHaveSucceeded();
 
             observedApartment.ShouldBe(ApartmentState.STA);
             logger.AssertLogContains("STA_RESULT:true:value", "MSB4287");
@@ -1215,9 +1438,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData("Write", "ErrorAndStop", false)]
-        [InlineData("Write", "ErrorAndContinue", false)]
-        [InlineData("Write", "WarnAndContinue", false)]
+        [InlineData("Write", "ErrorAndStop", true)]
+        [InlineData("Write", "ErrorAndContinue", true)]
+        [InlineData("Write", "WarnAndContinue", true)]
         [InlineData("ChangeDirectory", "ErrorAndStop", false)]
         [InlineData("ChangeDirectory", "ErrorAndContinue", false)]
         [InlineData("ChangeDirectory", "WarnAndContinue", true)]
@@ -1620,6 +1843,77 @@ namespace Microsoft.Build.UnitTests.BackEnd
             environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
                 enabled ? null : ChangeWaves.Wave18_12.ToString());
             ChangeWaves.ResetStateForTests();
+        }
+
+        private static BuildParameters CreateStrictWarningParameters(MockLogger logger, string policy)
+        {
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                ShutdownInProcNodeOnBuildFinish = true,
+                EnableNodeReuse = false,
+                UseSynchronousLogging = false,
+                Loggers = [logger],
+            };
+
+            switch (policy)
+            {
+                case "Default":
+                    break;
+                case "PromoteCode":
+                    parameters.WarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    break;
+                case "PromoteAll":
+                    parameters.WarningsAsErrors = new HashSet<string>();
+                    break;
+                case "Suppress":
+                    parameters.WarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    break;
+                case "SuppressPromoted":
+                    parameters.WarningsAsErrors = new HashSet<string>();
+                    parameters.WarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    break;
+                case "ExcludeFromAll":
+                    parameters.WarningsAsErrors = new HashSet<string>();
+                    parameters.WarningsNotAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    break;
+                case "ExcludeSpecific":
+                    parameters.WarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    parameters.WarningsNotAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    break;
+                case "PromoteOther":
+                    parameters.WarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "OTHER0001" };
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(policy));
+            }
+
+            return parameters;
+        }
+
+        private static BuildEventArgs AssertUnresolvedPathDiagnostic(MockLogger logger, bool promoted, bool suppressed)
+        {
+            logger.Errors.Count.ShouldBe(promoted ? 1 : 0);
+            logger.Warnings.Count.ShouldBe(!promoted && !suppressed ? 1 : 0);
+            List<BuildMessageEventArgs> messages = logger.BuildMessageEvents.FindAll(e => e.Code == "MSB4287");
+            messages.Count.ShouldBe(suppressed ? 1 : 0);
+            if (promoted)
+            {
+                BuildErrorEventArgs error = logger.Errors.ShouldHaveSingleItem();
+                error.Code.ShouldBe("MSB4287");
+                return error;
+            }
+
+            if (suppressed)
+            {
+                BuildMessageEventArgs message = messages.ShouldHaveSingleItem();
+                message.Importance.ShouldBe(MessageImportance.Low);
+                return message;
+            }
+
+            BuildWarningEventArgs warning = logger.Warnings.ShouldHaveSingleItem();
+            warning.Code.ShouldBe("MSB4287");
+            return warning;
         }
 
         private static BuildResult BuildStrictProject(

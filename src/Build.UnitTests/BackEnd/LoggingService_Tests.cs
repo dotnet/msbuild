@@ -1042,6 +1042,8 @@ namespace Microsoft.Build.UnitTests.Logging
 
             buildEvent.BuildEventContext = projectStarted;
 
+            bool shouldTreatWarningAsError = buildEvent is BuildWarningEventArgs warning
+                && loggingService.ShouldTreatWarningAsError(projectStarted, warning.Code);
             loggingService.LogBuildEvent(buildEvent);
 
             loggingService.LogProjectFinished(projectStarted, "projectFile", true);
@@ -1053,6 +1055,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             ((IBuildComponent)loggingService).ShutdownComponent();
 
+            logger.Errors.Count.ShouldBe(shouldTreatWarningAsError ? 1 : 0);
             return logger;
         }
 
