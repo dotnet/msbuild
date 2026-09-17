@@ -2,13 +2,13 @@
 
 ## Visual Studio
 
-[Deploy-MSBuild](https://github.com/dotnet/msbuild/blob/deploy-msbuild/scripts/Deploy-MSBuild.ps1) is a way to conveniently take private bits and install them into Visual Studio (VS) for testing. To use it:
+[Deploy-MSBuild](../scripts/Deploy-MSBuild.ps1) is a way to conveniently take private bits and install them into Visual Studio (VS) for testing. To use it:
 
-- If you haven't already, clone [MSBuild](https://github.com/dotnet/msbuild) and make the changes you want.
+- If you haven't already, follow the [Windows setup instructions](../README.md#building-msbuild-with-visual-studio-2026-on-windows), clone [MSBuild](https://github.com/dotnet/msbuild), and make the changes you want.
 - Build MSBuild with the changes you want using `build.cmd`.
 - In an administrator powershell window, navigate to the msbuild folder.
 - Run `scripts\Deploy-MSBuild.ps1 -destination {destination} -configuration {configuration}`.
-  - Specify the Bin folder of MSBuild in your VS install as the destination. This is somewhere like `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin"`.
+  - Specify the Bin folder of MSBuild in your VS install as the destination. For Visual Studio 2026 Community, the default is `"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin"`. Adjust this for your edition and installation path.
   - Make sure the `{configuration}` you pass to the deploy script matches the one you gave to `build.cmd` (this is `Debug` by default).
 
 The Deploy-MSBuild script creates backups of the relevant MSBuild binaries, then copies the new binaries in their place.

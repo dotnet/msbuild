@@ -30,7 +30,7 @@ variables:
   # without the manual OptProf bootstrap rerun. Refresh this each release in the main-bump PR
   # (documentation/release-checklist.md, Phase 3) via scripts/Get-LatestOptProfDrop.ps1.
   - name: OptProfBaselineDrop
-    value: 'OptimizationData/DotNet-msbuild-Trusted/main/20260724.1/14773990/1'
+    value: 'OptimizationData/DotNet-msbuild-Trusted/main/20260812.2/14983723/1'
   - name: requireDefaultChannels
     value: false
   - name: SourceBranch

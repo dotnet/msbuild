@@ -15,6 +15,7 @@ Categories of threading issues with .NET API usage in thread-safe tasks to be aw
 1. **Process Culture Modification and Usage**, which can affect data formatting.
 1. **Assembly Loading**
 1. **Static Fields**
+1. **Registered Task Objects**
 
 ### Best Practices
 
@@ -24,10 +25,13 @@ Instead of the problematic APIs listed below, thread-safe tasks should:
 1. **Always use absolute paths** when still using some standard .NET file system APIs.
 1. **Explicitly configure external processes** using `TaskEnvironment`.
 1. **Never modify process culture**: Avoid modifying culture defaults.
+1. **Review registered task objects for safe concurrent access.**
 
 ## Detailed API Reference
 
 The following tables list specific .NET APIs and their threading safety classification:
+
+`REVIEW` means the use needs a closer look; it does not mean the use is unsafe.
 
 ### System.IO.Path Class
 
@@ -119,6 +123,16 @@ The following tables list specific .NET APIs and their threading safety classifi
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
 | Static fields | WARNING | Shared across threads, can cause race conditions | Avoid |
+
+### Microsoft.Build.Framework.IBuildEngine4 registered task objects
+
+| API | Level | Short Reason | Recommendation |
+|-----|-------|--------------|-------|
+| `RegisterTaskObject` | REVIEW | Equal-key registrations do not replace the retained object | Check registration races and cleanup of unretained objects |
+| `GetRegisteredTaskObject` | REVIEW | The object can be used by concurrent tasks | Check that concurrent access is safe |
+| `UnregisterTaskObject` | REVIEW | Other tasks can be using the object | Check that removal is coordinated |
+
+These APIs are not inherently unsafe. They require review because sharing changes in multithreaded mode. Tasks in different processes do not share the cache.
 
 ### Assembly Loading (System.Reflection.Assembly class, System.Activator class)
 Tasks that load assemblies dynamically in the task host may cause version conflicts. Version conflicts in task assemblies will cause build failures (previously these might have been sporadic). Both dynamically loaded dependencies and static dependencies can cause issues.

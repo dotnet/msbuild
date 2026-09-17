@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../Strings.resx">
     <body>
@@ -731,7 +731,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">Project の作成時に、部分評価 ("{0}" 評価ステージ) はサポートされていません。部分評価を実行するには ProjectInstance を使用するか、Project を作成するには Full 評価ステージを使用してください。</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -3326,7 +3326,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">カスタム イベントの種類 '{0}' は、すべてのカスタム イベントの種類が非推奨になったため、サポートされていません。代わりに Extended*EventArgs を使用してください。詳細情報: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">すべてのカスタム イベントの種類が非推奨になったため、カスタム イベントの種類 '{0}' はサポートされていません。代わりに Extended*EventArgs を使用してください。詳細情報: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProjectFile">

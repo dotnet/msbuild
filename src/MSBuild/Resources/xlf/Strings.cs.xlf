@@ -48,8 +48,7 @@
     </source>
         <target state="translated">  -question
                      (experimentální) Dotaz, jestli je dochází k práci na sestavení.
-                     MSBuild zobrazí chybu při zjištění cíle nebo úkolu
-,
+                     MSBuild zobrazí chybu při zjištění cíle nebo úkolu,
                      který může být přírůstkový (obsahuje vstupy a výstupy),
                      ale není aktuální.
                      (Krátký tvar: -q)
@@ -254,7 +253,7 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded
+        <target state="translated">  -multithreaded[:true|false]
                      Povolí experimentální vícevláknový režim v nástroji MSBuild.
                      To znamená, že nástroj MSBuild bude používat více vláken
                      k paralelnímu sestavování projektů
@@ -317,7 +316,7 @@
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
         <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1072: Hodnota režimu s více vlákny není platná. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -392,62 +391,62 @@
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
-        <target state="needs-review-translation">v časovém limitu se nepovedlo připojit k serveru; server se možná nepodařilo spustit</target>
+        <target state="translated">v časovém limitu se nepovedlo připojit k serveru; server se možná nepodařilo spustit</target>
         <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerCrashedOnLaunch">
         <source>the server process exited with code {0} immediately after launch</source>
-        <target state="needs-review-translation">Proces serveru byl ukončen s kódem {0} ihned po spuštění</target>
+        <target state="translated">Proces serveru byl ukončen s kódem {0} ihned po spuštění</target>
         <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
-        <target state="needs-review-translation">proces serveru se nepovedlo spustit</target>
+        <target state="translated">proces serveru se nepovedlo spustit</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">Pro toto sestavení se znovu používá spuštěný uzel serveru MSBuild (ID procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">Uzel serveru MSBuild byl spuštěn pro toto sestavení (ID procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">Uzel serveru MSBuild byl spuštěn jen pro toto sestavení. Po jeho dokončení se vypne (ID procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">Server MSBuild byl vyžádán, ale pro toto sestavení se nepoužil: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">server byl zaneprázdněný jiným sestavením</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">toto vyvolání není kompatibilní se serverem MSBuild</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">opakované použití uzlu je zakázané (-nodeReuse:false nebo MSBUILDDISABLENODEREUSE=1)</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">je povolený nouzový přepínač MSBUILDENSURESTDOUTFORTASKPROCESSES</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
-        <target state="needs-review-translation">aktuální stav serveru nelze určit</target>
+        <target state="translated">aktuální stav serveru nelze určit</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerUnavailable">
@@ -580,19 +579,16 @@
         <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Nepravda]
                      Způsobí, že MSBuild sestaví každý projekt v izolaci.
 
-Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
-                     tvar „Zpráva“), jsou serializovány pouze výsledky z cílů nejvyšší úrovně
-                     pokud je dodán přepínač -outputResultsCache
-.
-                     Tímto se zmírní pravděpodobnost
+                     Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
+                     tvar Zpráva), pouze výsledky z cílů nejvyšší úrovně
+                     jsou serializovány, pokud je přepínač -outputResultsCache
+                     zadán. Tímto se zmírní pravděpodobnost
                      cíle porušujícího izolaci v projektu závislosti pomocí
-                     nesprávného stavu kvůli své závislosti na cíli uloženém v mezipaměti
-,
+                     nesprávného stavu kvůli své závislosti na cíli uloženém v mezipaměti,
                      jehož vedlejší účinky by se nezohlednily.
                      (Například definice vlastnosti.)
 
-                    Toto je přísnější režim MSBuildu, protože vyžaduje
-,
+                     Toto je přísnější režim MSBuildu, protože vyžaduje,
                      aby byl graf projektu staticky zjistitelný v
                      období vyhodnocování, ale může zlepšit plánování a snížit
                      režie paměti při sestavování velké sady projektů.
@@ -715,8 +711,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
     </source>
         <target state="translated">  -warnNotAsError[:code[;code2]]
                      Seznam kódů upozornění, které se nemají považovat za chyby.
-                     K oddělení
- více kódů upozornění použijte středník 
+                     K oddělení více kódů upozornění použijte středník 
                      nebo čárku. Nemá žádný vliv, pokud přepínač -warnaserror
                      není nastavený.
 

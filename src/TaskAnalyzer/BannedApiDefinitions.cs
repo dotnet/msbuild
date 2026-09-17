@@ -13,10 +13,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     {
         internal enum ApiCategory
         {
-            /// <summary>MSBuildTask0001: Critical errors - no safe alternative.</summary>
+            /// <summary>MSBuildTask0001: Never-safe APIs - no safe alternative.</summary>
             CriticalError,
             /// <summary>MSBuildTask0002: Requires TaskEnvironment replacement.</summary>
             TaskEnvironment,
+            /// <summary>MSBuildTask0003: File APIs require absolute paths.</summary>
+            FilePathRequiresAbsolute,
             /// <summary>MSBuildTask0004: Potential issue - review required.</summary>
             PotentialIssue,
         }
@@ -43,7 +45,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             return ImmutableArray.Create(
                 // ══════════════════════════════════════════════════════════════
-                // MSBuildTask0001: Critical errors - no safe alternative
+                // MSBuildTask0001: Never-safe APIs - no safe alternative
                 // Console.* is handled at the TYPE level in the analyzer.
                 // ══════════════════════════════════════════════════════════════
 
@@ -121,9 +123,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new BannedApi("M:System.IO.Path.GetTempPath",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetTempPath() instead"),
 
-                // Path.GetTempFileName - depends on environment variables
+                // Other temp helpers - depend on environment variables
                 new BannedApi("M:System.IO.Path.GetTempFileName",
-                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; use TaskEnvironment.GetEnvironmentVariable(\"TMP\") instead"),
+                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
+                new BannedApi("M:System.IO.Directory.CreateTempSubdirectory(System.String)",
+                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
+                new BannedApi("M:System.CodeDom.Compiler.TempFileCollection.#ctor",
+                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; pass an explicit task-resolved temporary directory or suppress with a justification"),
 
                 // Process.Start - use TaskEnvironment.GetProcessStartInfo
                 new BannedApi("M:System.Diagnostics.Process.Start(System.String)",
