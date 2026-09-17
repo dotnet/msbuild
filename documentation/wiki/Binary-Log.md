@@ -153,6 +153,71 @@ logReader.Replay(path_to_binlog_file);
 
 ```
 
+### Filtering events during replay
+
+Set `BinaryLogReplayEventSource.EventFilter` when constructing the replay source to select
+which events reach subscribers. The callback receives `BinaryLogEventMetadata`, containing
+the record kind, its `BuildEventContext` (if present), and the original build context for a
+`TargetSkipped` event. Return `true` to retain an event or `false` to skip it. A `null` filter
+leaves replay unchanged. All `Replay` overloads apply the filter.
+
+```csharp
+var logReader = new BinaryLogReplayEventSource
+{
+    EventFilter = metadata =>
+        metadata.RecordKind is BinaryLogRecordKind.Error or BinaryLogRecordKind.Warning
+};
+
+logReader.AnyEventRaised += (_, e) => Console.WriteLine(e.Message);
+logReader.Replay(path_to_binlog_file);
+```
+
+This example selects diagnostics for display, not for creating a complete build log.
+When writing a filtered binlog or passing events to a consumer that relies on build
+structure, retain a consistent set of events (for example, matching start/finish events
+and any required parent project or target events).
+
+A filter forces structured reading instead of raw record passthrough. With length-framed
+logs (format version 18 or later), rejected events skip their type-specific payload
+without deserialization. `TargetSkipped` is an exception: its original build context
+requires deserializing the payload first. Older formats also filter after deserialization.
+Auxiliary records, including strings, name/value lists, and embedded content, are still
+read so retained events can be decoded correctly. Cancellation is checked between rejected
+records too, but cannot interrupt a callback already running.
+
+If a filter throws, replay stops with `BinaryLogEventFilterException`. This is a callback
+failure, not a recoverable log-format error: `AllowForwardCompatibility` does not suppress
+it and `RecoverableReadError` is not raised for it. The exception provides:
+
+| Property | Diagnostic information |
+| --- | --- |
+| `InnerException` | The original exception, including its type, message, stack trace, and any nested exceptions. |
+| `RecordKind` | The kind of event passed to the failing callback. |
+| `BuildEventContext` | The event's build context, or `null` if absent. |
+| `OriginalBuildEventContext` | The original context of a `TargetSkipped` event, or `null` if absent. |
+| `RecordNumber` | The zero-based record number in the reader, including auxiliary and rejected records; not a byte offset or count of dispatched events. |
+| `FileFormatVersion` | The format version of the source binary log. |
+
+The localized exception message includes the record kind, number, format version, and
+available contexts. The properties remain available across .NET Framework exception
+serialization. When manually constructing the exception with only an inner exception,
+the record properties are `null` because no record information was supplied.
+
+```csharp
+try
+{
+    logReader.Replay(path_to_binlog_file);
+}
+catch (BinaryLogEventFilterException ex)
+{
+    Console.Error.WriteLine(ex); // Includes record information and the original exception.
+    throw;
+}
+```
+
+Low-level readers can use `BuildEventArgsReader.Read(eventFilter)` directly; it returns
+the next accepted event and reports filter failures with the same exception information.
+
 ### Handling the recoverable reading errors
 
 In compatibility mode (default for `BinaryLogReplayEventSource`. Only supported for binlogs of version 18 and higher) reader is capable of skipping unknown event types and unknown parts of known events (`BuildEventArgsReader` can configure the behavior via 2 separate properties - `SkipUnknownEvents` and `SkipUnknownEventParts`).

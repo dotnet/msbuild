@@ -231,7 +231,11 @@ namespace Microsoft.Build.Logging
         /// The next accepted <see cref="BuildEventArgs"/>.
         /// If there are no more records, returns <see langword="null"/>.
         /// </returns>
-        /// <exception cref="BinaryLogEventFilterException">The filter callback threw an exception.</exception>
+        /// <exception cref="BinaryLogEventFilterException">
+        /// The filter callback threw an exception. The wrapper contains the original exception,
+        /// the metadata passed to the filter, the zero-based record number, and the log's file format version.
+        /// This failure is not reported through <see cref="RecoverableReadError"/>.
+        /// </exception>
         public BuildEventArgs? Read(BinaryLogEventFilter? eventFilter) => Read(eventFilter, CancellationToken.None);
 
         internal BuildEventArgs? Read(BinaryLogEventFilter? eventFilter, CancellationToken cancellationToken)
@@ -382,7 +386,7 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private static bool ApplyEventFilter(BinaryLogEventFilter eventFilter, BinaryLogEventMetadata metadata)
+        private bool ApplyEventFilter(BinaryLogEventFilter eventFilter, BinaryLogEventMetadata metadata)
         {
             try
             {
@@ -392,7 +396,7 @@ namespace Microsoft.Build.Logging
             {
                 // Wrap so that callers can tell a failing filter callback apart from a problem with
                 // the log being read - the latter can be recoverable, the former never is.
-                throw new BinaryLogEventFilterException(ex);
+                throw new BinaryLogEventFilterException(metadata, _recordNumber, _fileFormatVersion, ex);
             }
         }
 

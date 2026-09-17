@@ -63,6 +63,8 @@ public delegate bool BinaryLogEventFilter(BinaryLogEventMetadata metadata);
 /// The wrapper distinguishes caller bugs in the filter from errors encountered while reading the
 /// log, so filter failures abort the replay instead of being reported as recoverable read errors.
 /// The exception thrown by the filter is available as <see cref="Exception.InnerException"/>.
+/// Exceptions raised by the reader also identify the record, its build contexts, and the log's
+/// file format version. These details and the original exception are preserved during serialization.
 /// </remarks>
 [Serializable]
 public sealed class BinaryLogEventFilterException : Exception
@@ -76,11 +78,93 @@ public sealed class BinaryLogEventFilterException : Exception
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BinaryLogEventFilterException"/> class
+    /// with information about the record being filtered.
+    /// </summary>
+    /// <param name="metadata">The metadata passed to the failing filter callback.</param>
+    /// <param name="recordNumber">The zero-based record number, including auxiliary records.</param>
+    /// <param name="fileFormatVersion">The file format version of the binary log being read.</param>
+    /// <param name="innerException">The exception thrown by the filter callback.</param>
+    public BinaryLogEventFilterException(
+        BinaryLogEventMetadata metadata,
+        long recordNumber,
+        int fileFormatVersion,
+        Exception innerException)
+        : base(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+            "Binlog_EventFilterThrewWithContext",
+            recordNumber,
+            metadata.RecordKind,
+            fileFormatVersion,
+            metadata.BuildEventContext,
+            metadata.OriginalBuildEventContext), innerException)
+    {
+        RecordKind = metadata.RecordKind;
+        BuildEventContext = metadata.BuildEventContext;
+        OriginalBuildEventContext = metadata.OriginalBuildEventContext;
+        RecordNumber = recordNumber;
+        FileFormatVersion = fileFormatVersion;
+    }
+
+    /// <summary>
+    /// Gets the kind of record being filtered, or <see langword="null"/> if no record information was supplied.
+    /// </summary>
+    public BinaryLogRecordKind? RecordKind { get; }
+
+    /// <summary>
+    /// Gets the build context passed to the filter, or <see langword="null"/> if unavailable.
+    /// </summary>
+    public BuildEventContext? BuildEventContext { get; }
+
+    /// <summary>
+    /// Gets the original context of a target-skipped event passed to the filter,
+    /// or <see langword="null"/> if unavailable.
+    /// </summary>
+    public BuildEventContext? OriginalBuildEventContext { get; }
+
+    /// <summary>
+    /// Gets the zero-based record number, including auxiliary and rejected records,
+    /// or <see langword="null"/> if no record information was supplied.
+    /// </summary>
+    public long? RecordNumber { get; }
+
+    /// <summary>
+    /// Gets the file format version of the binary log being read,
+    /// or <see langword="null"/> if no record information was supplied.
+    /// </summary>
+    public int? FileFormatVersion { get; }
+
 #if NET8_0_OR_GREATER
     [Obsolete(DiagnosticId = "SYSLIB0051")]
 #endif
     private BinaryLogEventFilterException(SerializationInfo info, StreamingContext context)
         : base(info, context)
     {
+        RecordKind = (BinaryLogRecordKind?)info.GetValue(nameof(RecordKind), typeof(BinaryLogRecordKind?));
+        BuildEventContext = (BuildEventContext?)info.GetValue(nameof(BuildEventContext), typeof(BuildEventContext));
+        OriginalBuildEventContext = (BuildEventContext?)info.GetValue(nameof(OriginalBuildEventContext), typeof(BuildEventContext));
+        RecordNumber = (long?)info.GetValue(nameof(RecordNumber), typeof(long?));
+        FileFormatVersion = (int?)info.GetValue(nameof(FileFormatVersion), typeof(int?));
+    }
+
+    /// <summary>
+    /// Serializes the record information together with the base exception and its inner exception.
+    /// </summary>
+    /// <param name="info">The serialization data to populate.</param>
+    /// <param name="context">The serialization context.</param>
+#if FEATURE_SECURITY_PERMISSIONS
+    [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter = true)]
+#endif
+#if NET8_0_OR_GREATER
+    [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
+    public override void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        base.GetObjectData(info, context);
+        info.AddValue(nameof(RecordKind), RecordKind, typeof(BinaryLogRecordKind?));
+        info.AddValue(nameof(BuildEventContext), BuildEventContext, typeof(BuildEventContext));
+        info.AddValue(nameof(OriginalBuildEventContext), OriginalBuildEventContext, typeof(BuildEventContext));
+        info.AddValue(nameof(RecordNumber), RecordNumber, typeof(long?));
+        info.AddValue(nameof(FileFormatVersion), FileFormatVersion, typeof(int?));
     }
 }

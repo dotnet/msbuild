@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+#if NETFRAMEWORK
+using System.Runtime.Serialization.Formatters.Binary;
+#endif
 using System.Text;
 using System.Threading;
 using FakeItEasy;
@@ -1267,25 +1270,161 @@ namespace Microsoft.Build.UnitTests
             replayed.ShouldNotContain(e => e is BuildWarningEventArgs);
         }
 
-        [Fact]
-        public void Replay_EventFilter_WrapsExceptionsThrownByTheFilter()
+        [Theory]
+        [InlineData(BinaryLogRecordKind.BuildStarted)]
+        [InlineData(BinaryLogRecordKind.Message)]
+        [InlineData(BinaryLogRecordKind.TargetSkipped)]
+        public void Replay_EventFilter_WrapsExceptionsThrownByTheFilter(BinaryLogRecordKind recordKind)
         {
-            var expected = new InvalidOperationException("filter failed");
+            var expected = new InvalidDataException("filter failed", new InvalidOperationException("root cause"));
+            BinaryLogEventMetadata failedMetadata = default;
             var replayEventSource = new BinaryLogReplayEventSource
             {
-                EventFilter = _ => throw expected
+                AllowForwardCompatibility = true,
+                EventFilter = metadata =>
+                {
+                    if (metadata.RecordKind != recordKind)
+                    {
+                        return false;
+                    }
+
+                    failedMetadata = metadata;
+                    throw expected;
+                }
             };
-            replayEventSource.AnyEventRaised += (_, _) => { };
+            int dispatchedEvents = 0;
+            int recoverableErrors = 0;
+            replayEventSource.AnyEventRaised += (_, _) => dispatchedEvents++;
+            replayEventSource.RecoverableReadError += _ => recoverableErrors++;
 
             using var stream = CreateEventFilterTestStream();
+            int fileFormatVersion = BinaryLogger.FileFormatVersion + 1;
+            using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                writer.Write(fileFormatVersion);
+            }
+
+            stream.Position = 0;
             using var binaryReader = new BinaryReader(stream);
 
+            // Count serialized records independently, including auxiliary records not offered to the filter.
+            binaryReader.ReadInt32();
+            binaryReader.ReadInt32();
+            long recordNumber = 0;
+            while ((BinaryLogRecordKind)binaryReader.Read7BitEncodedInt() != recordKind)
+            {
+                int length = binaryReader.Read7BitEncodedInt();
+                binaryReader.ReadBytes(length).Length.ShouldBe(length);
+                recordNumber++;
+            }
+
+            stream.Position = 0;
             BinaryLogEventFilterException exception = Should.Throw<BinaryLogEventFilterException>(
                 () => replayEventSource.Replay(binaryReader, CancellationToken.None));
+
             exception.InnerException.ShouldBeSameAs(expected);
+            exception.RecordKind.ShouldBe(recordKind);
+            exception.BuildEventContext.ShouldBeSameAs(failedMetadata.BuildEventContext);
+            exception.OriginalBuildEventContext.ShouldBeSameAs(failedMetadata.OriginalBuildEventContext);
+            exception.RecordNumber.ShouldBe(recordNumber);
+            exception.FileFormatVersion.ShouldBe(fileFormatVersion);
+            exception.Message.ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                "Binlog_EventFilterThrewWithContext", recordNumber, recordKind, fileFormatVersion,
+                failedMetadata.BuildEventContext, failedMetadata.OriginalBuildEventContext));
+            exception.ToString().ShouldContain(expected.ToString());
+            expected.StackTrace.ShouldNotBeNullOrEmpty();
+            recoverableErrors.ShouldBe(0);
+            dispatchedEvents.ShouldBe(0);
 
             CreateExpectedLogFile();
         }
+
+        [Fact]
+        public void Replay_EventFilter_LegacyFailureIncludesRecordInformation()
+        {
+            var expected = new FormatException("legacy filter failed");
+            BinaryLogEventMetadata failedMetadata = default;
+            using var stream = CreateLegacyEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(binaryReader, closeInput: false);
+
+            BinaryLogEventFilterException exception = Should.Throw<BinaryLogEventFilterException>(
+                () => reader.Read(metadata =>
+                {
+                    if (metadata.BuildEventContext?.ProjectContextId != SelectedProjectContextId)
+                    {
+                        return false;
+                    }
+
+                    failedMetadata = metadata;
+                    throw expected;
+                }));
+
+            exception.InnerException.ShouldBeSameAs(expected);
+            exception.RecordKind.ShouldBe(BinaryLogRecordKind.Message);
+            exception.BuildEventContext.ShouldBeSameAs(failedMetadata.BuildEventContext);
+            exception.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+            exception.OriginalBuildEventContext.ShouldBeNull();
+            exception.RecordNumber.ShouldBe(1);
+            exception.FileFormatVersion.ShouldBe(BinaryLogger.ForwardCompatibilityMinimalVersion - 1);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void Replay_EventFilter_ExceptionWithoutRecordInformation()
+        {
+            var expected = new InvalidOperationException("filter failed");
+            var exception = new BinaryLogEventFilterException(expected);
+
+            exception.InnerException.ShouldBeSameAs(expected);
+            exception.Message.ShouldBe(ResourceUtilities.GetResourceString("Binlog_EventFilterThrew"));
+            exception.RecordKind.ShouldBeNull();
+            exception.BuildEventContext.ShouldBeNull();
+            exception.OriginalBuildEventContext.ShouldBeNull();
+            exception.RecordNumber.ShouldBeNull();
+            exception.FileFormatVersion.ShouldBeNull();
+
+            CreateExpectedLogFile();
+        }
+
+#if NETFRAMEWORK
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Replay_EventFilter_ExceptionSerializationPreservesDiagnosticInformation(bool includeRecordInformation)
+        {
+            var innerException = Should.Throw<InvalidOperationException>(
+                () => throw new InvalidOperationException("filter failed", new FormatException("root cause")));
+            var metadata = new BinaryLogEventMetadata(
+                BinaryLogRecordKind.TargetSkipped,
+                new BuildEventContext(1, 2, 3, 4, 5, 6, 7),
+                new BuildEventContext(8, 9, 10, 11, 12, 13, 14));
+            var exception = includeRecordInformation
+                ? new BinaryLogEventFilterException(metadata, (long)int.MaxValue + 1, 17, innerException)
+                : new BinaryLogEventFilterException(innerException);
+
+            using var stream = new MemoryStream();
+            var formatter = new BinaryFormatter();
+            formatter.Serialize(stream, exception);
+            stream.Position = 0;
+            var roundTripped = (BinaryLogEventFilterException)formatter.Deserialize(stream);
+
+            roundTripped.Message.ShouldBe(exception.Message);
+            roundTripped.RecordKind.ShouldBe(exception.RecordKind);
+            (roundTripped.BuildEventContext?.ToString()).ShouldBe(exception.BuildEventContext?.ToString());
+            (roundTripped.OriginalBuildEventContext?.ToString()).ShouldBe(exception.OriginalBuildEventContext?.ToString());
+            roundTripped.RecordNumber.ShouldBe(exception.RecordNumber);
+            roundTripped.FileFormatVersion.ShouldBe(exception.FileFormatVersion);
+            roundTripped.InnerException.ShouldBeOfType<InvalidOperationException>();
+            roundTripped.InnerException.Message.ShouldBe(innerException.Message);
+            roundTripped.InnerException.StackTrace.ShouldBe(innerException.StackTrace);
+            roundTripped.InnerException.InnerException.ShouldBeOfType<FormatException>();
+            roundTripped.InnerException.InnerException.Message.ShouldBe("root cause");
+
+            CreateExpectedLogFile();
+        }
+#endif
 
         [Fact]
         public void Replay_EventFilter_ObservesCancellationBetweenRejectedEvents()

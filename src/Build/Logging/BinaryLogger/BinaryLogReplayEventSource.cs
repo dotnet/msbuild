@@ -97,7 +97,12 @@ namespace Microsoft.Build.Logging
         /// deserialized, except for <see cref="TargetSkippedEventArgs"/>, whose original build context
         /// is in that payload. Auxiliary records are always read so retained events can resolve their
         /// string and name/value-list references. The filter is responsible for retaining a
-        /// structurally consistent event set. It is only applied when replaying structured events.
+        /// structurally consistent event set. Legacy formats are filtered after deserialization.
+        /// Setting a filter forces structured replay instead of raw record passthrough.
+        /// A <see langword="null"/> filter preserves the existing unfiltered behavior.
+        /// If the callback throws, replay stops with a <see cref="BinaryLogEventFilterException"/>
+        /// containing the original exception and the offending record's information; it is not
+        /// reported through <see cref="RecoverableReadError"/>.
         /// </remarks>
         public BinaryLogEventFilter? EventFilter { get; init; }
 
@@ -108,6 +113,11 @@ namespace Microsoft.Build.Logging
         /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
         /// </summary>
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
+        /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
+        /// <exception cref="BinaryLogEventFilterException">
+        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
+        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// </exception>
         public void Replay(string sourceFilePath)
         {
             Replay(sourceFilePath, CancellationToken.None);
@@ -117,7 +127,12 @@ namespace Microsoft.Build.Logging
         /// Read the provided binary log file opened as a stream and raise corresponding events for each BuildEventArgs
         /// </summary>
         /// <param name="sourceFileStream">Stream over the binlog content.</param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
+        /// <exception cref="BinaryLogEventFilterException">
+        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
+        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// </exception>
         public void Replay(Stream sourceFileStream, CancellationToken cancellationToken)
         {
             using var binaryReader = OpenReader(sourceFileStream);
@@ -214,6 +229,11 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
+        /// <exception cref="BinaryLogEventFilterException">
+        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
+        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// </exception>
         public void Replay(string sourceFilePath, CancellationToken cancellationToken)
         {
             using var eventsReader = OpenBuildEventsReader(OpenReader(sourceFilePath), true, AllowForwardCompatibility);
@@ -225,6 +245,11 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="binaryReader">The binary log content binary reader - caller is responsible for disposing.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
+        /// <exception cref="BinaryLogEventFilterException">
+        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
+        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// </exception>
         public void Replay(BinaryReader binaryReader, CancellationToken cancellationToken)
             => Replay(binaryReader, false, cancellationToken);
 
@@ -234,6 +259,11 @@ namespace Microsoft.Build.Logging
         /// <param name="binaryReader">The binary log content binary reader - caller is responsible for disposing, unless <paramref name="closeInput"/> is set to true.</param>
         /// <param name="closeInput">Indicates whether the passed BinaryReader should be closed on disposing.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        /// <inheritdoc cref="Replay(BuildEventArgsReader, CancellationToken)" path="/remarks"/>
+        /// <exception cref="BinaryLogEventFilterException">
+        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
+        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// </exception>
         public void Replay(BinaryReader binaryReader, bool closeInput, CancellationToken cancellationToken)
         {
             using var reader = OpenBuildEventsReader(binaryReader, closeInput, AllowForwardCompatibility);
@@ -245,6 +275,32 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="reader">The build events reader - caller is responsible for disposing.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        /// <remarks>
+        /// <para>
+        /// Set <see cref="EventFilter"/> before replay to dispatch only accepted events. A filter
+        /// forces structured reading. In length-framed logs (version 18 or later), rejected events
+        /// skip their type-specific payload without deserialization, except for
+        /// <see cref="TargetSkippedEventArgs"/>, whose original context is in that payload.
+        /// Legacy logs are filtered after deserialization. Auxiliary records are still read.
+        /// </para>
+        /// <para>
+        /// The filter is responsible for retaining a structurally consistent event set, including
+        /// matching start and finish events when required by downstream consumers.
+        /// Cancellation is observed between rejected records as well as accepted records;
+        /// it cannot interrupt a running filter callback.
+        /// </para>
+        /// <para>
+        /// Filter exceptions stop replay, even with <see cref="AllowForwardCompatibility"/>
+        /// enabled, and are not reported through <see cref="RecoverableReadError"/>.
+        /// Inspect <see cref="Exception.InnerException"/> on the resulting
+        /// <see cref="BinaryLogEventFilterException"/> for the original failure and stack trace,
+        /// and its record properties for the event being filtered.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="BinaryLogEventFilterException">
+        /// The <see cref="EventFilter"/> callback threw. The exception contains the original
+        /// exception and the offending record's kind, contexts, number, and file format version.
+        /// </exception>
         public void Replay(BuildEventArgsReader reader, CancellationToken cancellationToken)
         {
             _fileFormatVersion = reader.FileFormatVersion;
