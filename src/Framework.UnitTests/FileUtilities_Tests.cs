@@ -512,14 +512,14 @@ public class FileUtilities_Tests
         FileUtilities.PathIsInvalid(@"c:\foo\|||").ShouldBeTrue();
     }
 
-    [WindowsOnlyFact]
+    [Fact]
     public void PathIsInvalid_DoesNotRejectLongPaths()
     {
         string longSegment = new string('a', 300);
         FileUtilities.PathIsInvalid($@"c:\{longSegment}\file.txt").ShouldBeFalse();
     }
 
-    [WindowsOnlyFact]
+    [Fact]
     public void PathIsInvalid_DoesNotRejectLeadingOrTrailingWhitespace()
     {
         FileUtilities.PathIsInvalid("  c:\\temp\\file.txt  ").ShouldBeFalse();
@@ -527,9 +527,13 @@ public class FileUtilities_Tests
 
 #if NETFRAMEWORK
     [WindowsOnlyFact]
-    public void NormalizePath_RootedPathOnNetFramework_MatchesMicrosoftIoGetFullPath()
+    public void NormalizePath_OnNetFramework_UsesMicrosoftIoGetFullPath()
     {
-        string path = @"c:\temp\subdir\..\..\windows";
+        // System.IO.Path.GetFullPath on .NET Framework rejects a ':' outside the volume separator
+        // position (e.g. alternate data streams), while Microsoft.IO.Path.GetFullPath accepts it.
+        // Using such a path ensures the test fails if NormalizePath falls back to System.IO.Path.
+        string path = @"c:\temp\subdir\..\file.txt:stream";
+        Should.Throw<NotSupportedException>(() => System.IO.Path.GetFullPath(path));
         FileUtilities.NormalizePath(path).ShouldBe(Microsoft.IO.Path.GetFullPath(path));
     }
 #endif
