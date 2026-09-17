@@ -272,8 +272,9 @@ finish, before its result is reported, and once more at build completion. Cancel
 |---|---|---|
 | `MSB4286` | Task completion | The process current directory changed. MSBuild resets it to the sentinel. |
 | `MSB4287` | Project or build completion | Warning: files or directories remain in the sentinel. MSBuild attempts to remove them. |
-| `MSB4288` | Verification | Error: the sentinel was removed during the build. |
+| `MSB4288` | Verification | Warning: MSBuild recovered an unavailable sentinel/CWD and restored the process current directory. |
 | `MSB4289` | Build initialization | Error: another strict build is already active in this process. |
+| `MSB4290` | Recovery | Error: MSBuild could not recreate or re-enter the sentinel. |
 
 The `Microsoft-Build` EventSource emits paired `StrictModeDirectoryScanStart` and
 `StrictModeDirectoryScanStop` events around scans, including lock wait and filesystem work.
@@ -286,6 +287,9 @@ normal warning-to-message suppression takes precedence over warning-to-error pro
 `MSB4287` is a project/build warning, not a failure of the task that happened to write the file.
 It follows normal warning suppression and promotion; use `"-warnAsError:MSB4287"` to fail a migration gate.
 The writing task's `ContinueOnError` does not control the later warning.
+If the sentinel disappears, MSBuild recreates it and re-enters it before reporting `MSB4288`.
+This warning follows normal suppression and promotion. Recovery restores future checking, not files
+or effects already lost; failure to recreate or re-enter the sentinel remains an error (`MSB4290`).
 Existing task diagnostics keep their normal timing: `MSB4181` can appear alongside a strict
 diagnostic. Cancellation does not retract earlier diagnostics.
 For otherwise-successful builds, the final directory scan runs after node and project-cache
@@ -294,8 +298,8 @@ allows cache serialization; a late warning promoted to an error fails `EndBuild`
 The host directory captured before logger initialization is restored when the build ends.
 `BuildManager` resolves relative output-cache paths for CLI and API builds before entering the sentinel;
 the CLI resolves its entry-project path before constructing requests inside that scope. Loggers must
-not change the process current directory. Failures to enable strict
-mode, check its state, or restore the directory fail the build; they do not silently disable checks.
+not change the process current directory. Failures to enable strict mode, recover its directory,
+or restore the host directory fail the build; they do not silently disable checks.
 After successful restoration, MSBuild attempts to remove the scope's own temporary directory.
 Locked leftovers are not reused by later builds. Cleanup is best-effort and does not replace
 the reported build result.

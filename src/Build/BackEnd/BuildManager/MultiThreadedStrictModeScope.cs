@@ -161,11 +161,15 @@ internal sealed class MultiThreadedStrictModeScope
         {
             unexpectedDirectory = DetectCurrentDirectoryViolation();
         }
-        catch (DirectoryNotFoundException)
+        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
         {
-            ProjectErrorUtilities.ThrowInvalidProject(taskLocation,
-                "MultiThreadedStrictModeSentinelMissing", SentinelDirectory);
-            throw;
+            if (RecoverSentinelDirectory(taskLocation, e))
+            {
+                taskLoggingContext.LogWarning(null, new BuildEventFileInfo(taskLocation),
+                    "MultiThreadedStrictModeSentinelMissing", SentinelDirectory);
+            }
+
+            return false;
         }
 
         if (unexpectedDirectory is null)
@@ -212,8 +216,9 @@ internal sealed class MultiThreadedStrictModeScope
         return unexpectedDirectory;
     }
 
-    internal string? VerifyUnresolvedPathWrites(ElementLocation location)
+    internal string? VerifyUnresolvedPathWrites(ElementLocation location, out bool recovered)
     {
+        recovered = false;
         bool trace = MSBuildEventSource.Log.IsEnabled();
         if (trace)
         {
@@ -224,17 +229,70 @@ internal sealed class MultiThreadedStrictModeScope
         {
             return DetectUnresolvedPathWrites();
         }
-        catch (DirectoryNotFoundException)
+        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
         {
-            ProjectErrorUtilities.ThrowInvalidProject(location,
-                "MultiThreadedStrictModeSentinelMissing", SentinelDirectory);
-            throw;
+            recovered = RecoverSentinelDirectory(location, e);
+            return null;
         }
         finally
         {
             if (trace)
             {
                 MSBuildEventSource.Log.StrictModeDirectoryScanStop(BuildId, location.File);
+            }
+        }
+    }
+
+    private bool RecoverSentinelDirectory(ElementLocation location, Exception failure)
+    {
+        lock (_reportedEntriesLock)
+        {
+            lock (s_stateLock)
+            {
+                if (!ReferenceEquals(s_activeScope, this))
+                {
+                    return false;
+                }
+
+                try
+                {
+                    bool sentinelExists = Directory.Exists(SentinelDirectory);
+                    if (failure is not (DirectoryNotFoundException or FileNotFoundException) && sentinelExists)
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(location,
+                            "MultiThreadedStrictModeSentinelRecoveryFailed", SentinelDirectory, failure.Message);
+                    }
+
+                    string? currentDirectory = null;
+                    if (sentinelExists)
+                    {
+                        try
+                        {
+                            currentDirectory = Directory.GetCurrentDirectory();
+                        }
+                        catch (Exception e) when (e is DirectoryNotFoundException or FileNotFoundException)
+                        {
+                            // A removed Unix CWD can remain unlinked even after the path is recreated.
+                        }
+                    }
+
+                    // Another observer may have completed recovery while this one waited.
+                    if (sentinelExists && FileUtilities.PathComparer.Equals(currentDirectory, SentinelDirectory))
+                    {
+                        return false;
+                    }
+
+                    Directory.CreateDirectory(SentinelDirectory);
+                    Directory.SetCurrentDirectory(SentinelDirectory);
+                    _reportedEntries.Clear();
+                    return true;
+                }
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(location,
+                        "MultiThreadedStrictModeSentinelRecoveryFailed", SentinelDirectory, e.Message);
+                    throw;
+                }
             }
         }
     }

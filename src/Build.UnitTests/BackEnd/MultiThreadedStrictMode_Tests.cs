@@ -329,8 +329,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using var secondLifetime = new ScopeLifetime(second);
             File.WriteAllText("second.txt", "content");
 
-            first.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation);
+            first.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out bool recovered);
 
+            recovered.ShouldBeFalse();
             File.Exists(Path.Combine(second.SentinelDirectory, "second.txt")).ShouldBeTrue();
             second.DetectUnresolvedPathWrites().ShouldBe("second.txt");
         }
@@ -358,6 +359,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData("Empty")]
         [InlineData("Write")]
         [InlineData("Missing")]
+        [InlineData("Blocked")]
         public void DirectoryScansEmitPairedPerformanceEvents(string state)
         {
             string originalDirectory = Directory.GetCurrentDirectory();
@@ -367,15 +369,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 File.WriteAllText("scan-event.txt", "content");
             }
-            else if (state == "Missing")
+            else if (state is "Missing" or "Blocked")
             {
                 Directory.SetCurrentDirectory(originalDirectory);
                 Directory.Delete(scope.SentinelDirectory);
+                if (state == "Blocked")
+                {
+                    File.WriteAllText(scope.SentinelDirectory, "occupied");
+                }
             }
 
             using EventSourceTestHelper listener = new();
             string? entries = null;
-            Exception? exception = Record.Exception(() => entries = scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation));
+            bool recovered = false;
+            Exception? exception = Record.Exception(() => entries = scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out recovered));
             if (state == "Write")
             {
                 exception.ShouldBeNull();
@@ -383,9 +390,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             else if (state == "Missing")
             {
-                var missing = exception.ShouldBeOfType<InvalidProjectFileException>();
-                missing.ErrorCode.ShouldBe("MSB4288");
-                missing.Message.ShouldContain(scope.SentinelDirectory);
+                exception.ShouldBeNull();
+                recovered.ShouldBeTrue();
+                Directory.Exists(scope.SentinelDirectory).ShouldBeTrue();
+                Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
+            }
+            else if (state == "Blocked")
+            {
+                exception.ShouldBeOfType<InvalidProjectFileException>().ErrorCode.ShouldBe("MSB4290");
+                recovered.ShouldBeFalse();
             }
             else
             {
@@ -406,6 +419,69 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 payload[0].ShouldBe(42);
                 payload[1].ShouldBe(string.Empty);
             }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MissingSentinelRecoveryRestoresFutureChecks(bool removeRoot)
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var scope = MultiThreadedStrictModeScope.Enter(42);
+            using var lifetime = new ScopeLifetime(scope);
+            Directory.SetCurrentDirectory(originalDirectory);
+            Directory.Delete(scope.SentinelDirectory);
+            if (removeRoot)
+            {
+                Directory.Delete(Path.GetDirectoryName(scope.SentinelDirectory)!);
+            }
+
+            scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out bool recovered).ShouldBeNull();
+
+            recovered.ShouldBeTrue();
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeSameAs(scope);
+            Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
+            File.WriteAllText("after-recovery.txt", "content");
+            scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out recovered).ShouldBe("after-recovery.txt");
+            recovered.ShouldBeFalse();
+        }
+
+        [UnixOnlyFact]
+        public void RecoveryReentersAnUnlinkedCurrentDirectory()
+        {
+            var scope = MultiThreadedStrictModeScope.Enter(42);
+            using var lifetime = new ScopeLifetime(scope);
+            Directory.Delete(scope.SentinelDirectory);
+
+            scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out bool recovered).ShouldBeNull();
+
+            recovered.ShouldBeTrue();
+            Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
+            File.WriteAllText("after-recovery.txt", "content");
+            scope.DetectUnresolvedPathWrites().ShouldBe("after-recovery.txt");
+        }
+
+        [Fact]
+        public void ConcurrentScansRecoverTheMissingSentinelOnce()
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var scope = MultiThreadedStrictModeScope.Enter(42);
+            using var lifetime = new ScopeLifetime(scope);
+            Directory.SetCurrentDirectory(originalDirectory);
+            Directory.Delete(scope.SentinelDirectory);
+            int recoveries = 0;
+
+            System.Threading.Tasks.Parallel.For(0, 16, _ =>
+            {
+                scope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out bool recovered).ShouldBeNull();
+                if (recovered)
+                {
+                    Interlocked.Increment(ref recoveries);
+                }
+            });
+
+            recoveries.ShouldBe(1);
+            Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
         }
 
         /// <summary>
@@ -638,10 +714,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData("ErrorAndStop")]
-        [InlineData("ErrorAndContinue")]
-        [InlineData("WarnAndContinue")]
-        public void VerificationFailureDoesNotLogSuccessfulTaskCompletion(string continueOnError)
+        [InlineData("ErrorAndStop", false)]
+        [InlineData("ErrorAndContinue", false)]
+        [InlineData("WarnAndContinue", false)]
+        [InlineData("ErrorAndStop", true)]
+        [InlineData("ErrorAndContinue", true)]
+        [InlineData("WarnAndContinue", true)]
+        public void MissingSentinelRecoversUnlessItsPathIsBlocked(string continueOnError, bool blockRecovery)
         {
             _env.SetCurrentDirectory(_env.CreateFolder().Path);
             string originalDirectory = Directory.GetCurrentDirectory();
@@ -652,7 +731,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <StrictLifetimeTask ContinueOnError="{continueOnError}">
                       <Output TaskParameter="Value" PropertyName="Value" />
                     </StrictLifetimeTask>
-                    <Message Text="UNEXPECTED-CONTINUATION" Importance="high" />
+                    <Message Text="AFTER-RECOVERY:$(MSBuildLastTaskResult)" Importance="high" />
                   </Target>
                 </Project>
                 """);
@@ -662,18 +741,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string sentinel = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(originalDirectory);
                 Directory.Delete(sentinel);
+                if (blockRecovery)
+                {
+                    File.WriteAllText(sentinel, "occupied");
+                }
             }));
             MockLogger logger = new(_output);
             using EventSourceTestHelper listener = new();
 
-            BuildStrictProject(project.Path, logger, hostServices: hostServices).ShouldHaveFailed();
-
-            logger.Errors.ShouldContain(e => e.Code == "MSB4288"
-                && e.BuildEventContext!.TaskId != BuildEventContext.InvalidTaskId);
-            logger.Errors.ShouldAllBe(e => e.Code == "MSB4288");
-            logger.AssertNoWarnings();
-            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
-            logger.AssertLogDoesntContain("UNEXPECTED-CONTINUATION");
+            BuildResult result = BuildStrictProject(project.Path, logger, hostServices: hostServices);
+            result.OverallResult.ShouldBe(blockRecovery ? BuildResultCode.Failure : BuildResultCode.Success);
+            if (blockRecovery)
+            {
+                logger.Errors.ShouldContain(e => e.Code == "MSB4290"
+                    && e.BuildEventContext!.TaskId != BuildEventContext.InvalidTaskId);
+                logger.Errors.ShouldAllBe(e => e.Code == "MSB4290");
+                logger.AssertNoWarnings();
+                logger.AssertLogDoesntContain("AFTER-RECOVERY");
+            }
+            else
+            {
+                logger.AssertNoErrors();
+                logger.Warnings.ShouldHaveSingleItem().Code.ShouldBe("MSB4288");
+                logger.AssertLogContains("AFTER-RECOVERY:true");
+            }
+            logger.TaskFinishedEvents.Find(e => e.TaskName == nameof(StrictLifetimeTask))!.Succeeded.ShouldBe(!blockRecovery);
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
             Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
 
@@ -1070,7 +1162,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             result.OverallResult.ShouldBe(promoted ? BuildResultCode.Failure : BuildResultCode.Success);
             result.Exception.ShouldBeNull();
-            BuildEventArgs diagnostic = AssertUnresolvedPathDiagnostic(logger, promoted, suppressed);
+            BuildEventArgs diagnostic = AssertStrictDiagnostic(logger, promoted, suppressed);
             diagnostic.BuildEventContext!.ProjectContextId.ShouldBe(
                 logger.ProjectStartedEvents.ShouldHaveSingleItem().BuildEventContext!.ProjectContextId);
             diagnostic.BuildEventContext.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
@@ -1174,7 +1266,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
-            AssertUnresolvedPathDiagnostic(logger, promoted: true, suppressed: false);
+            AssertStrictDiagnostic(logger, promoted: true, suppressed: false);
             logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
         }
 
@@ -1205,23 +1297,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData("Default", false, false)]
-        [InlineData("PromoteCode", true, false)]
-        [InlineData("PromoteAll", true, false)]
-        [InlineData("Suppress", false, true)]
-        [InlineData("SuppressPromoted", false, true)]
-        [InlineData("ExcludeFromAll", false, false)]
-        [InlineData("ExcludeSpecific", true, false)]
-        [InlineData("PromoteOther", false, false)]
-        public void FinalBuildSweepUsesGlobalWarningPolicyBeforeSerializingCaches(string policy, bool promoted, bool suppressed)
+        [InlineData("Default", false, false, false)]
+        [InlineData("PromoteCode", true, false, false)]
+        [InlineData("PromoteAll", true, false, false)]
+        [InlineData("Suppress", false, true, false)]
+        [InlineData("SuppressPromoted", false, true, false)]
+        [InlineData("ExcludeFromAll", false, false, false)]
+        [InlineData("ExcludeSpecific", true, false, false)]
+        [InlineData("PromoteOther", false, false, false)]
+        [InlineData("Default", false, false, true)]
+        [InlineData("PromoteCode", true, false, true)]
+        [InlineData("PromoteAll", true, false, true)]
+        [InlineData("Suppress", false, true, true)]
+        [InlineData("SuppressPromoted", false, true, true)]
+        [InlineData("ExcludeFromAll", false, false, true)]
+        [InlineData("ExcludeSpecific", true, false, true)]
+        [InlineData("PromoteOther", false, false, true)]
+        public void FinalBuildSweepUsesGlobalWarningPolicyBeforeSerializingCaches(string policy, bool promoted, bool suppressed, bool missingSentinel)
         {
             string originalDirectory = Directory.GetCurrentDirectory();
-            var project = _env.CreateFile("late-write.proj", """
+            string code = missingSentinel ? "MSB4288" : "MSB4287";
+            var project = _env.CreateFile("late-write.proj", $"""
                 <Project>
                   <PropertyGroup>
-                    <MSBuildWarningsAsErrors>MSB4287</MSBuildWarningsAsErrors>
-                    <MSBuildWarningsAsMessages>MSB4287</MSBuildWarningsAsMessages>
-                    <MSBuildWarningsNotAsErrors>MSB4287</MSBuildWarningsNotAsErrors>
+                    <MSBuildWarningsAsErrors>{code}</MSBuildWarningsAsErrors>
+                    <MSBuildWarningsAsMessages>{code}</MSBuildWarningsAsMessages>
+                    <MSBuildWarningsNotAsErrors>{code}</MSBuildWarningsNotAsErrors>
                   </PropertyGroup>
                   <Target Name="Build" />
                 </Project>
@@ -1229,19 +1330,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string outputCache = Path.Combine(_env.CreateFolder().Path, "results.cache");
             MockLogger logger = new(_output);
             using BuildManager manager = new();
-            BuildParameters parameters = CreateStrictWarningParameters(logger, policy);
+            BuildParameters parameters = CreateStrictWarningParameters(logger, policy, code);
             parameters.OutputResultsCacheFile = outputCache;
             manager.BeginBuild(parameters);
             string sentinel = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull().SentinelDirectory;
             manager.BuildRequest(new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
                 .ShouldHaveSucceeded();
-            File.WriteAllText(Path.Combine(sentinel, "late.txt"), "late output");
+            if (missingSentinel)
+            {
+                Directory.SetCurrentDirectory(originalDirectory);
+                Directory.Delete(sentinel);
+            }
+            else
+            {
+                File.WriteAllText(Path.Combine(sentinel, "late.txt"), "late output");
+            }
 
             Exception? exception = Record.Exception(manager.EndBuild);
             if (promoted)
             {
                 var failure = exception.ShouldBeOfType<InvalidProjectFileException>();
-                failure.ErrorCode.ShouldBe("MSB4287");
+                failure.ErrorCode.ShouldBe(code);
                 failure.HasBeenLogged.ShouldBeTrue();
                 failure.ProjectFile.ShouldBeEmpty();
             }
@@ -1250,7 +1359,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 exception.ShouldBeNull();
             }
 
-            BuildEventArgs diagnostic = AssertUnresolvedPathDiagnostic(logger, promoted, suppressed);
+            BuildEventArgs diagnostic = AssertStrictDiagnostic(logger, promoted, suppressed, code);
             diagnostic.BuildEventContext.ShouldBe(BuildEventContext.Invalid);
             string? file = diagnostic switch
             {
@@ -1268,6 +1377,88 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             manager.BeginBuild(new BuildParameters { MultiThreaded = true, Loggers = [new MockLogger(_output)] });
             manager.EndBuild();
+        }
+
+        [Theory]
+        [InlineData("Default", false, false)]
+        [InlineData("PromoteCode", true, false)]
+        [InlineData("SuppressPromoted", false, true)]
+        public void ProjectScanRecoversMissingSentinel(string policy, bool promoted, bool suppressed)
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var project = _env.CreateFile("project-recovery.proj", """
+                <Project><Target Name="Build"><Message Text="built" /></Target></Project>
+                """);
+            using ManualResetEventSlim taskFinished = new();
+            MockLogger logger = new(_output);
+            BuildParameters parameters = CreateStrictWarningParameters(logger, policy, "MSB4288");
+            parameters.Loggers =
+            [
+                logger,
+                new InitializationCallbackLogger(() => { }, source => source.TaskFinished += (_, _) => taskFinished.Set()),
+            ];
+            using BuildManager manager = new();
+            manager.BeginBuild(parameters);
+            try
+            {
+                var scope = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull();
+                object scanLock = typeof(MultiThreadedStrictModeScope)
+                    .GetField("_reportedEntriesLock", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(scope)!;
+                BuildSubmission submission = manager.PendBuildRequest(
+                    new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null));
+                lock (scanLock)
+                {
+                    submission.ExecuteAsync(null, null);
+                    taskFinished.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                    Directory.SetCurrentDirectory(originalDirectory);
+                    Directory.Delete(scope.SentinelDirectory);
+                }
+
+                submission.WaitHandle.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                submission.BuildResult!.OverallResult.ShouldBe(promoted ? BuildResultCode.Failure : BuildResultCode.Success);
+                Directory.GetCurrentDirectory().ShouldBe(scope.SentinelDirectory);
+            }
+            finally
+            {
+                manager.EndBuild();
+            }
+
+            BuildEventArgs diagnostic = AssertStrictDiagnostic(logger, promoted, suppressed, "MSB4288");
+            BuildEventContext context = diagnostic.BuildEventContext.ShouldNotBeNull();
+            context.TaskId.ShouldBe(BuildEventContext.InvalidTaskId);
+            context.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
+            logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBe(!promoted);
+        }
+
+        [Fact]
+        public void FinalRecoveryFailureCannotBeSuppressed()
+        {
+            string originalDirectory = Directory.GetCurrentDirectory();
+            var project = _env.CreateFile("failed-recovery.proj", """<Project><Target Name="Build" /></Project>""");
+            string outputCache = Path.Combine(_env.CreateFolder().Path, "results.cache");
+            MockLogger logger = new(_output);
+            BuildParameters parameters = CreateStrictWarningParameters(logger, "Default");
+            parameters.OutputResultsCacheFile = outputCache;
+            parameters.WarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4288", "MSB4290" };
+            using BuildManager manager = new();
+            manager.BeginBuild(parameters);
+            string sentinel = MultiThreadedStrictModeScope.ActiveScope.ShouldNotBeNull().SentinelDirectory;
+            manager.BuildRequest(new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
+                .ShouldHaveSucceeded();
+            Directory.SetCurrentDirectory(originalDirectory);
+            Directory.Delete(sentinel);
+            File.WriteAllText(sentinel, "occupied");
+
+            var failure = Should.Throw<InvalidProjectFileException>(manager.EndBuild);
+
+            failure.ErrorCode.ShouldBe("MSB4290");
+            logger.Errors.ShouldHaveSingleItem().Code.ShouldBe("MSB4290");
+            logger.AssertNoWarnings();
+            logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
+            File.Exists(outputCache).ShouldBeFalse();
+            Directory.GetCurrentDirectory().ShouldBe(originalDirectory);
+            MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
         }
 
         [Theory]
@@ -1307,7 +1498,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 result.ShouldNotBeNull().ShouldHaveSucceeded();
             }
 
-            AssertUnresolvedPathDiagnostic(logger, promoted, suppressed).BuildEventContext.ShouldBe(BuildEventContext.Invalid);
+            AssertStrictDiagnostic(logger, promoted, suppressed).BuildEventContext.ShouldBe(BuildEventContext.Invalid);
             logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBe(!promoted);
             File.Exists(outputCache).ShouldBe(!promoted);
             MultiThreadedStrictModeScope.ActiveScope.ShouldBeNull();
@@ -1845,7 +2036,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ChangeWaves.ResetStateForTests();
         }
 
-        private static BuildParameters CreateStrictWarningParameters(MockLogger logger, string policy)
+        private static BuildParameters CreateStrictWarningParameters(MockLogger logger, string policy, string code = "MSB4287")
         {
             BuildParameters parameters = new()
             {
@@ -1861,25 +2052,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 case "Default":
                     break;
                 case "PromoteCode":
-                    parameters.WarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    parameters.WarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { code };
                     break;
                 case "PromoteAll":
                     parameters.WarningsAsErrors = new HashSet<string>();
                     break;
                 case "Suppress":
-                    parameters.WarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    parameters.WarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { code };
                     break;
                 case "SuppressPromoted":
                     parameters.WarningsAsErrors = new HashSet<string>();
-                    parameters.WarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    parameters.WarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { code };
                     break;
                 case "ExcludeFromAll":
                     parameters.WarningsAsErrors = new HashSet<string>();
-                    parameters.WarningsNotAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    parameters.WarningsNotAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { code };
                     break;
                 case "ExcludeSpecific":
-                    parameters.WarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
-                    parameters.WarningsNotAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4287" };
+                    parameters.WarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { code };
+                    parameters.WarningsNotAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { code };
                     break;
                 case "PromoteOther":
                     parameters.WarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "OTHER0001" };
@@ -1891,16 +2082,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return parameters;
         }
 
-        private static BuildEventArgs AssertUnresolvedPathDiagnostic(MockLogger logger, bool promoted, bool suppressed)
+        private static BuildEventArgs AssertStrictDiagnostic(MockLogger logger, bool promoted, bool suppressed, string code = "MSB4287")
         {
             logger.Errors.Count.ShouldBe(promoted ? 1 : 0);
             logger.Warnings.Count.ShouldBe(!promoted && !suppressed ? 1 : 0);
-            List<BuildMessageEventArgs> messages = logger.BuildMessageEvents.FindAll(e => e.Code == "MSB4287");
+            List<BuildMessageEventArgs> messages = logger.BuildMessageEvents.FindAll(e => e.Code == code);
             messages.Count.ShouldBe(suppressed ? 1 : 0);
             if (promoted)
             {
                 BuildErrorEventArgs error = logger.Errors.ShouldHaveSingleItem();
-                error.Code.ShouldBe("MSB4287");
+                error.Code.ShouldBe(code);
                 return error;
             }
 
@@ -1912,7 +2103,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             BuildWarningEventArgs warning = logger.Warnings.ShouldHaveSingleItem();
-            warning.Code.ShouldBe("MSB4287");
+            warning.Code.ShouldBe(code);
             return warning;
         }
 

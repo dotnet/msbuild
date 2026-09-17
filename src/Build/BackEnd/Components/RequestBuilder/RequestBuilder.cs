@@ -1263,8 +1263,13 @@ namespace Microsoft.Build.BackEnd
                     && scope.BuildId == _componentHost.BuildParameters.BuildId)
                 {
                     ElementLocation location = _requestEntry.RequestConfiguration.Project.ProjectFileLocation;
-                    string entries = scope.VerifyUnresolvedPathWrites(location);
-                    if (entries is not null)
+                    string entries = scope.VerifyUnresolvedPathWrites(location, out bool recovered);
+                    if (recovered)
+                    {
+                        _projectLoggingContext.LogWarning(null, new BuildEventFileInfo(location),
+                            "MultiThreadedStrictModeSentinelMissing", scope.SentinelDirectory);
+                    }
+                    else if (entries is not null)
                     {
                         _projectLoggingContext.LogWarning(null, new BuildEventFileInfo(location),
                             "MultiThreadedStrictModeUnresolvedPathWrite", entries, scope.SentinelDirectory);

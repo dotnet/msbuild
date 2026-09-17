@@ -1370,8 +1370,12 @@
     <comment>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
   </data>
   <data name="MultiThreadedStrictModeSentinelMissing" xml:space="preserve">
-    <value>MSB4288: The multi-threaded strict-mode sentinel directory "{0}" was removed during the build. Do not remove this engine-owned directory. To temporarily disable strict checks, set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process.</value>
-    <comment>{StrBegin="MSB4288: "}{0} is the sentinel directory. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</comment>
+    <value>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</value>
+    <comment>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeSentinelRecoveryFailed" xml:space="preserve">
+    <value>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</value>
+    <comment>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</comment>
   </data>
   <data name="CouldNotLoadSdkResolver" xml:space="preserve">
     <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>

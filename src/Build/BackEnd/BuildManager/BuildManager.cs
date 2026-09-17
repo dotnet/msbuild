@@ -1203,9 +1203,10 @@ namespace Microsoft.Build.Execution
                     projectCacheDispose.Wait();
                     WaitForAllLoggingServiceEventsToBeProcessed();
                     string? entries;
+                    bool recovered;
                     try
                     {
-                        entries = _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation);
+                        entries = _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out recovered);
                     }
                     catch (InvalidProjectFileException e)
                     {
@@ -1213,12 +1214,18 @@ namespace Microsoft.Build.Execution
                         throw;
                     }
 
-                    if (entries is not null)
+                    if (recovered || entries is not null)
                     {
                         ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
-                        string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                            out string? warningCode, out string? helpKeyword,
-                            "MultiThreadedStrictModeUnresolvedPathWrite", entries, _multiThreadedStrictModeScope.SentinelDirectory);
+                        string? warningCode;
+                        string? helpKeyword;
+                        string message = recovered
+                            ? ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                                out warningCode, out helpKeyword,
+                                "MultiThreadedStrictModeSentinelMissing", _multiThreadedStrictModeScope.SentinelDirectory)
+                            : ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                                out warningCode, out helpKeyword,
+                                "MultiThreadedStrictModeUnresolvedPathWrite", entries, _multiThreadedStrictModeScope.SentinelDirectory);
                         Assumed.NotNull(warningCode, "The strict-mode warning must have a diagnostic code.");
                         loggingService.LogWarningFromText(
                             BuildEventContext.Invalid, null, warningCode, helpKeyword, BuildEventFileInfo.Empty, message);

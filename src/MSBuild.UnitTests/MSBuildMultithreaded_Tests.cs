@@ -200,6 +200,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     break;
 
                 case "DeleteSentinel":
+                case "BlockSentinelRecovery":
                     string sentinel = Directory.GetCurrentDirectory();
                     if (Path.GetFileName(sentinel) != "MT-sentinel-CWD")
                     {
@@ -207,6 +208,10 @@ namespace Microsoft.Build.Engine.UnitTests
                     }
                     Directory.SetCurrentDirectory(Path.GetDirectoryName(sentinel)!);
                     Directory.Delete(sentinel);
+                    if (Behavior == "BlockSentinelRecovery")
+                    {
+                        File.WriteAllText(sentinel, "occupied");
+                    }
                     break;
 
                 case "WriteManyFiles":
@@ -643,10 +648,24 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData("/p:MSBuildWarningsAsErrors=MSB4287", false, 0, 1)]
         [InlineData("/p:MSBuildWarningsAsMessages=MSB4287", true, 0, 0)]
         public void StrictMode_RelativeWriteHonorsWarningControls(string warningArguments, bool succeeds, int warnings, int errors)
+            => AssertStrictWarningPolicy("WriteRelativeFile", "MSB4287", warningArguments, succeeds, warnings, errors);
+
+        [Theory]
+        [InlineData("", true, 1, 0)]
+        [InlineData("/warnAsError:MSB4288", false, 0, 1)]
+        [InlineData("/warnAsError", false, 0, 1)]
+        [InlineData("/warnAsError /warnNotAsError:MSB4288", true, 1, 0)]
+        [InlineData("/warnAsError /nowarn:MSB4288", true, 0, 0)]
+        [InlineData("/p:MSBuildWarningsAsErrors=MSB4288", false, 0, 1)]
+        [InlineData("/p:MSBuildWarningsAsMessages=MSB4288", true, 0, 0)]
+        public void StrictMode_SentinelRecoveryHonorsWarningControls(string warningArguments, bool succeeds, int warnings, int errors)
+            => AssertStrictWarningPolicy("DeleteSentinel", "MSB4288", warningArguments, succeeds, warnings, errors);
+
+        private void AssertStrictWarningPolicy(string behavior, string code, string warningArguments, bool succeeds, int warnings, int errors)
         {
             TransientTestFile binlog = _env.CreateFile(".binlog");
             string output = RunStrictModeProbe(
-                "WriteRelativeFile",
+                behavior,
                 $"/m:1 /mt /nr:false /bl:\"{binlog.Path}\" {warningArguments}",
                 out bool success);
 
@@ -654,8 +673,8 @@ namespace Microsoft.Build.Engine.UnitTests
             MockLogger logger = ReadBinlog(binlog.Path);
             logger.Warnings.Count.ShouldBe(warnings);
             logger.Errors.Count.ShouldBe(errors);
-            logger.Warnings.ShouldAllBe(warning => warning.Code == "MSB4287");
-            logger.Errors.ShouldAllBe(error => error.Code == "MSB4287");
+            logger.Warnings.ShouldAllBe(warning => warning.Code == code);
+            logger.Errors.ShouldAllBe(error => error.Code == code);
             logger.TaskFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBeTrue();
             logger.BuildFinishedEvents.ShouldHaveSingleItem().Succeeded.ShouldBe(succeeds);
         }
@@ -828,13 +847,31 @@ namespace Microsoft.Build.Engine.UnitTests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void StrictMode_DeletedSentinelCannotBeDowngradedToSuccess(bool continueOnError)
+        public void StrictMode_DeletedSentinelIsRecovered(bool continueOnError)
         {
             string output = RunStrictModeProbe("DeleteSentinel", "/m /mt /nr:false", out bool success, continueOnError: continueOnError);
 
-            success.ShouldBeFalse(output);
+            success.ShouldBeTrue(output);
             output.ShouldContain("MSB4288");
             output.ShouldContain("MT-sentinel-CWD");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void StrictMode_RecoveryFailureCannotBeSuppressed(bool continueOnError)
+        {
+            TransientTestFile binlog = _env.CreateFile(".binlog");
+            string output = RunStrictModeProbe(
+                "BlockSentinelRecovery", $"/m /mt /nr:false /nowarn:MSB4288,MSB4290 /bl:\"{binlog.Path}\"",
+                out bool success, continueOnError: continueOnError);
+
+            success.ShouldBeFalse(output);
+            output.ShouldContain("MSB4290");
+            MockLogger logger = ReadBinlog(binlog.Path);
+            logger.Errors.ShouldNotBeEmpty();
+            logger.Errors.ShouldAllBe(error => error.Code == "MSB4290");
+            logger.Warnings.ShouldBeEmpty();
         }
 
         [Fact]
