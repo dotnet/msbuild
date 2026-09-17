@@ -110,6 +110,34 @@ namespace Microsoft.Build.UnitTests
             engine.Log.ShouldNotContain("Retrying attempt");
         }
 
+        [Fact]
+        public async Task DownloadScriptAsyncDoesNotRetryHttpStatusFailure()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+            string scriptPath = Path.Combine(folder.Path, "dotnet-install.ps1");
+            int requestCount = 0;
+
+            MockEngine engine = new MockEngine(_output);
+            using MockHttpMessageHandler handler = new MockHttpMessageHandler((message, token) =>
+            {
+                requestCount++;
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    RequestMessage = message
+                };
+            });
+            InstallDotNetCoreTask task = CreateTask(engine, handler);
+
+            await DownloadScriptAsync(task, scriptPath);
+
+            requestCount.ShouldBe(1);
+            File.Exists(scriptPath).ShouldBeFalse(scriptPath);
+            engine.Errors.ShouldBe(1, engine.Log);
+            engine.Log.ShouldContain("Status code: InternalServerError.");
+            engine.Log.ShouldNotContain("Retrying attempt");
+        }
+
         private static InstallDotNetCoreTask CreateTask(MockEngine engine, HttpMessageHandler httpMessageHandler)
         {
             InstallDotNetCoreTask task = new InstallDotNetCoreTask

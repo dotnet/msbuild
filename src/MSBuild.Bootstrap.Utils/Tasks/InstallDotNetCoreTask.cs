@@ -118,35 +118,45 @@ namespace MSBuild.Bootstrap.Utils.Tasks
             using (HttpClient client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
 #pragma warning restore CA2000
             {
-                for (int attempt = 1; attempt <= MaxScriptDownloadAttempts; attempt++)
+                using (HttpResponseMessage response = await GetScriptDownloadResponseAsync(client, scriptUrl).ConfigureAwait(false))
                 {
-                    try
+                    if (response == null)
                     {
-                        using (HttpResponseMessage response = await client.GetAsync(scriptUrl).ConfigureAwait(false))
-                        {
-                            if (response.IsSuccessStatusCode)
-                            {
-                                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            }
-
-                            Log.LogError($"Install-scripts download from {DotNetInstallBaseUrl} error. Status code: {response.StatusCode}.");
-                            return null!;
-                        }
-                    }
-                    catch (Exception e) when (IsScriptDownloadTransportFailure(e))
-                    {
-                        string flattenedMessage = GetInnerExceptionMessageString(e);
-
-                        if (attempt < MaxScriptDownloadAttempts && IsTransientTransportFailure(e))
-                        {
-                            Log.LogMessage(MessageImportance.Low, $"Install-scripts download from {scriptUrl} failed with a transient transport error. Retrying attempt {attempt + 1} of {MaxScriptDownloadAttempts}. {flattenedMessage}");
-                            continue;
-                        }
-
-                        Log.LogError($"Install-scripts download from {scriptUrl} failed after {attempt} {(attempt == 1 ? "attempt" : "attempts")}. {flattenedMessage}");
-                        Log.LogMessage(MessageImportance.Low, e.ToString());
                         return null!;
                     }
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+
+                    Log.LogError($"Install-scripts download from {DotNetInstallBaseUrl} error. Status code: {response.StatusCode}.");
+                    return null!;
+                }
+            }
+        }
+
+        private async AsyncTasks.Task<HttpResponseMessage> GetScriptDownloadResponseAsync(HttpClient client, string scriptUrl)
+        {
+            for (int attempt = 1; attempt <= MaxScriptDownloadAttempts; attempt++)
+            {
+                try
+                {
+                    return await client.GetAsync(scriptUrl).ConfigureAwait(false);
+                }
+                catch (Exception e) when (IsScriptDownloadTransportFailure(e))
+                {
+                    string flattenedMessage = GetInnerExceptionMessageString(e);
+
+                    if (attempt < MaxScriptDownloadAttempts && IsTransientTransportFailure(e))
+                    {
+                        Log.LogMessage(MessageImportance.Low, $"Install-scripts download from {scriptUrl} failed with a transient transport error. Retrying attempt {attempt + 1} of {MaxScriptDownloadAttempts}. {flattenedMessage}");
+                        continue;
+                    }
+
+                    Log.LogError($"Install-scripts download from {scriptUrl} failed after {attempt} {(attempt == 1 ? "attempt" : "attempts")}. {flattenedMessage}");
+                    Log.LogMessage(MessageImportance.Low, e.ToString());
+                    return null!;
                 }
             }
 
