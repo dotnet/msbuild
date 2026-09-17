@@ -957,6 +957,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void DeferredMessagesAreClearedWhenBeginBuildThrows()
+        {
+            const string deferredMessage = "Message from a failed BeginBuild";
+
+            _buildManager.BeginBuild(_parameters);
+            Should.Throw<InvalidOperationException>(() => _buildManager.BeginBuild(
+                _parameters,
+                [new BuildManager.DeferredBuildMessage(deferredMessage, MessageImportance.High)]));
+            _buildManager.EndBuild();
+
+            BuildResult result = _buildManager.Build(
+                _parameters,
+                GetBuildRequestData("<Project><Target Name='test' /></Project>"));
+
+            result.ShouldHaveSucceeded();
+            _logger.AssertLogDoesntContain(deferredMessage);
+        }
+
+        [Fact]
         public void DeferredMessageShouldBeLogged()
         {
             string contents = CleanupFileContents(@"

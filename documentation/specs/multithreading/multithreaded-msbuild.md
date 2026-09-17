@@ -2,6 +2,12 @@
 
 This is a description of changes that will enable MSBuild to run multiple projects concurrently within the same process, rather than spawning separate processes for each node. This will allow better resource utilization and potentially faster builds, as fewer processes will need to be created, reducing .NET runtime overhead and inter-process communication--but it's nontrivial to implement without breaking existing builds, which we must not do.
 
+## Known incompatibilities
+
+### File-access reporting
+
+Because `/reportfileaccesses` requires detoured out-of-proc worker processes and attributes accesses to the single project executing on each node, it cannot be combined with multithreaded mode.
+
 ## Current state
 
 Currently, MSBuild supports parallel builds (a critical feature for a build system) by spawning worker processes. This made adoption easier because it didn't impose any requirements on tasks: they continue to own the whole process while they are executing, just like they did when the build was single-threaded and running one task at a time. But it's a pretty strange design decision in the modern age, where we assume things are multithreaded and async.
@@ -138,7 +144,7 @@ The scheduler is already capable of juggling multiple projects, and there's alre
 
 The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, CLI or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode creating all the thread nodes in the entry process for simplicity--in final production these will be in an [MSBuild Server process](#msbuild-server-integration).
 
-In the current implementation, enabling multithreaded mode implies that all worker nodes are in-proc. Out-of-proc worker-node topologies for multithreaded execution remain future work. Because `/reportfileaccesses` requires detoured out-of-proc worker processes and attributes accesses to the single project executing on each node, it cannot be combined with multithreaded mode.
+In the current implementation, enabling multithreaded mode implies that all worker nodes are in-proc. Out-of-proc worker-node topologies for multithreaded execution remain future work.
 
 ```mermaid
 sequenceDiagram

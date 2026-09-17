@@ -509,8 +509,14 @@ namespace Microsoft.Build.Execution
 
             // deferredBuildMessages cannot be an optional parameter on a single BeginBuild method because it would break binary compatibility.
             _deferredBuildMessages = deferredBuildMessages;
-            BeginBuild(parameters);
-            _deferredBuildMessages = null;
+            try
+            {
+                BeginBuild(parameters);
+            }
+            finally
+            {
+                _deferredBuildMessages = null;
+            }
         }
 
         private void UpdatePriority(Process p, ProcessPriorityClass priority)
