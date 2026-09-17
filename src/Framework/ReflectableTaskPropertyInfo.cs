@@ -46,6 +46,7 @@ namespace Microsoft.Build.Execution
             {
                 IsTypeUnresolved = reflectableProperty.IsTypeUnresolved;
                 ParameterTypeForExpansion = reflectableProperty.ParameterTypeForExpansion;
+                DeclaredTypeName = reflectableProperty.DeclaredTypeName;
             }
         }
 
@@ -87,15 +88,31 @@ namespace Microsoft.Build.Execution
             IsValueTypeOutputParameter |= IsPathType(parameterTypeForExpansion);
             ParameterTypeForExpansion = parameterTypeForExpansion;
             IsTypeUnresolved = isTypeUnresolved;
+            if (isTypeUnresolved)
+            {
+                try
+                {
+                    DeclaredTypeName = propertyType.FullName;
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                }
+            }
         }
 
         internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, Type parameterTypeForExpansion)
+            : this(propertyInfo, output, required, parameterTypeForExpansion, declaredTypeName: null)
+        {
+        }
+
+        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, Type parameterTypeForExpansion, string declaredTypeName)
             : base(propertyInfo.Name, parameterTypeForExpansion ?? typeof(object), output, required)
         {
             _propertyInfo = propertyInfo;
             IsTypeUnresolved = true;
             IsValueTypeOutputParameter |= IsPathType(parameterTypeForExpansion);
             ParameterTypeForExpansion = parameterTypeForExpansion;
+            DeclaredTypeName = declaredTypeName;
         }
 
         private static bool IsPathType(Type type)
@@ -108,6 +125,8 @@ namespace Microsoft.Build.Execution
         internal bool IsTypeUnresolved { get; }
 
         internal Type ParameterTypeForExpansion { get; }
+
+        internal string DeclaredTypeName { get; }
 
         /// <summary>
         /// Gets or sets the reflection-produced PropertyInfo.

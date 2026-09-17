@@ -300,7 +300,7 @@ namespace Microsoft.Build.Shared
             return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
         }
 
-        private static Type ReadParameterTypeForExpansion(PropertyInfo propertyInfo)
+        private static (Type TypeForExpansion, string DeclaredTypeName) ReadParameterTypeInfo(PropertyInfo propertyInfo)
         {
             try
             {
@@ -317,79 +317,119 @@ namespace Microsoft.Build.Shared
                 PropertyDefinition property = metadataReader.GetPropertyDefinition(
                     (PropertyDefinitionHandle)MetadataTokens.EntityHandle(propertyInfo.MetadataToken));
                 BlobReader signature = metadataReader.GetBlobReader(property.Signature);
-                return ReadParameterTypeForExpansion(ref signature, metadataReader);
+                return ReadParameterTypeInfo(ref signature, metadataReader);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                return null;
+                return default;
             }
         }
 
-        internal static Type ReadParameterTypeForExpansion(ref BlobReader signature, MetadataReader metadataReader)
+        internal static Type ReadParameterTypeForExpansion(ref BlobReader signature, MetadataReader metadataReader) =>
+            ReadParameterTypeInfo(ref signature, metadataReader).TypeForExpansion;
+
+        private static (Type TypeForExpansion, string DeclaredTypeName) ReadParameterTypeInfo(
+            ref BlobReader signature,
+            MetadataReader metadataReader)
         {
             SignatureHeader header = signature.ReadSignatureHeader();
             if (header.Kind != SignatureKind.Property || header.IsGeneric || signature.ReadCompressedInteger() != 0)
             {
-                return null;
+                return default;
             }
 
-            Type parameterType = ReadParameterTypeForExpansion(ref signature, metadataReader, depth: 0);
-            return signature.RemainingBytes == 0 ? parameterType : null;
+            (Type TypeForExpansion, string DeclaredTypeName) parameterType =
+                ReadParameterTypeInfo(ref signature, metadataReader, depth: 0);
+            return signature.RemainingBytes == 0 ? parameterType : default;
         }
 
-        private static Type ReadParameterTypeForExpansion(ref BlobReader signature, MetadataReader metadataReader, int depth)
+        private static (Type TypeForExpansion, string DeclaredTypeName) ReadParameterTypeInfo(
+            ref BlobReader signature,
+            MetadataReader metadataReader,
+            int depth)
         {
             if (depth >= 16)
             {
-                return null;
+                return default;
             }
 
             int typeCode = signature.ReadCompressedInteger();
             if (typeCode == (int)SignatureTypeCode.SZArray)
             {
-                Type elementType = ReadParameterTypeForExpansion(ref signature, metadataReader, depth + 1);
-                return elementType?.IsArray == false ? LoadedType.GetArrayExpansionType(elementType) : null;
+                (Type TypeForExpansion, string DeclaredTypeName) elementType =
+                    ReadParameterTypeInfo(ref signature, metadataReader, depth + 1);
+                return (
+                    elementType.TypeForExpansion?.IsArray == false
+                        ? LoadedType.GetArrayExpansionType(elementType.TypeForExpansion)
+                        : null,
+                    elementType.DeclaredTypeName is null ? null : $"{elementType.DeclaredTypeName}[]");
             }
 
             if (typeCode is >= (int)SignatureTypeCode.Boolean and <= (int)SignatureTypeCode.String)
             {
-                return typeof(string);
+                return (typeof(string), $"System.{(SignatureTypeCode)typeCode}");
             }
 
             if (metadataReader is null
                 || typeCode is not ((int)SignatureTypeKind.Class) and not ((int)SignatureTypeKind.ValueType))
             {
-                return null;
+                return default;
             }
 
             EntityHandle handle = signature.ReadTypeHandle();
-            string fullName;
-            if (handle.Kind == HandleKind.TypeDefinition)
+            if (handle.Kind is not HandleKind.TypeDefinition and not HandleKind.TypeReference)
             {
-                TypeDefinition type = metadataReader.GetTypeDefinition((TypeDefinitionHandle)handle);
-                fullName = GetFullName(type.Namespace, type.Name);
-            }
-            else if (handle.Kind == HandleKind.TypeReference)
-            {
-                TypeReference type = metadataReader.GetTypeReference((TypeReferenceHandle)handle);
-                fullName = GetFullName(type.Namespace, type.Name);
-            }
-            else
-            {
-                return null;
+                return default;
             }
 
-            return fullName switch
+            string fullName = GetFullName(handle, depth: 0);
+            return (fullName switch
             {
                 string name when name == typeof(AbsolutePath).FullName => typeof(AbsolutePath),
                 string name when name == typeof(FileInfo).FullName => typeof(FileInfo),
                 string name when name == typeof(DirectoryInfo).FullName => typeof(DirectoryInfo),
                 _ when typeCode == (int)SignatureTypeKind.ValueType => typeof(string),
                 _ => null,
-            };
+            }, fullName);
 
-            string GetFullName(StringHandle namespaceHandle, StringHandle nameHandle) =>
-                $"{metadataReader.GetString(namespaceHandle)}.{metadataReader.GetString(nameHandle)}";
+            string GetFullName(EntityHandle typeHandle, int depth)
+            {
+                if (depth >= 16)
+                {
+                    return null;
+                }
+
+                StringHandle namespaceHandle;
+                StringHandle nameHandle;
+                EntityHandle declaringType = default;
+                if (typeHandle.Kind == HandleKind.TypeDefinition)
+                {
+                    TypeDefinition type = metadataReader.GetTypeDefinition((TypeDefinitionHandle)typeHandle);
+                    namespaceHandle = type.Namespace;
+                    nameHandle = type.Name;
+                    declaringType = type.GetDeclaringType();
+                }
+                else
+                {
+                    TypeReference type = metadataReader.GetTypeReference((TypeReferenceHandle)typeHandle);
+                    namespaceHandle = type.Namespace;
+                    nameHandle = type.Name;
+                    if (type.ResolutionScope.Kind == HandleKind.TypeReference)
+                    {
+                        declaringType = (TypeReferenceHandle)type.ResolutionScope;
+                    }
+                }
+
+                string name = metadataReader.GetString(nameHandle);
+                if (!declaringType.IsNil)
+                {
+                    string declaringTypeName = GetFullName(declaringType, depth + 1);
+                    return declaringTypeName is null ? null : $"{declaringTypeName}+{name}";
+                }
+
+                string @namespace = metadataReader.GetString(namespaceHandle);
+                return @namespace.Length == 0 ? name : $"{@namespace}.{name}";
+            }
         }
 
         /// <summary>
@@ -655,7 +695,7 @@ namespace Microsoft.Build.Shared
                 });
 
                 return type != null
-                    ? new LoadedType(
+                    ? LoadedType.CreateWithParameterTypeInfoResolver(
                         type,
                         _assemblyLoadInfo,
                         _loadedAssembly ?? type.Assembly,
@@ -663,7 +703,7 @@ namespace Microsoft.Build.Shared
                         runtime: null,
                         architecture: null,
                         loadedViaMetadataLoadContext: false,
-                        parameterTypeForExpansionResolver: ReadParameterTypeForExpansion)
+                        parameterTypeInfoResolver: ReadParameterTypeInfo)
                     : null;
             }
 
@@ -723,7 +763,7 @@ namespace Microsoft.Build.Shared
                     {
                         MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
                         var taskItemType = context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
-                        LoadedType loadedType = new(
+                        LoadedType loadedType = LoadedType.CreateWithParameterTypeInfoResolver(
                             foundType,
                             _assemblyLoadInfo,
                             loadedAssembly,
@@ -731,7 +771,7 @@ namespace Microsoft.Build.Shared
                             _runtime,
                             _architecture,
                             loadedViaMetadataLoadContext: true,
-                            parameterTypeForExpansionResolver: ReadParameterTypeForExpansion);
+                            parameterTypeInfoResolver: ReadParameterTypeInfo);
 
                         MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
                         return loadedType;

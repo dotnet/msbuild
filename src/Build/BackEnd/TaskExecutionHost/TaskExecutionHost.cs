@@ -1608,7 +1608,7 @@ namespace Microsoft.Build.BackEnd
 
         private static string GetTaskParameterTypeName(TaskPropertyInfo parameter) =>
             parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true } reflectableParameter
-                ? reflectableParameter.ParameterTypeForExpansion?.FullName ?? "<unresolved>"
+                ? reflectableParameter.DeclaredTypeName ?? "<unresolved>"
                 : parameter.PropertyType.FullName;
 
         /// <summary>

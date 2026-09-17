@@ -48,9 +48,29 @@ namespace Microsoft.Build.Shared
                 runtime,
                 architecture,
                 loadedViaMetadataLoadContext,
-                parameterTypeForExpansionResolver: null)
+                parameterTypeForExpansionResolver: (Func<PropertyInfo, Type?>?)null)
         {
         }
+
+        internal static LoadedType CreateWithParameterTypeInfoResolver(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+            Type type,
+            AssemblyLoadInfo assemblyLoadInfo,
+            Assembly loadedAssembly,
+            Type iTaskItemType,
+            string? runtime,
+            string? architecture,
+            bool loadedViaMetadataLoadContext,
+            Func<PropertyInfo, (Type? TypeForExpansion, string? DeclaredTypeName)>? parameterTypeInfoResolver) =>
+            new(
+                type,
+                assemblyLoadInfo,
+                loadedAssembly,
+                iTaskItemType,
+                runtime,
+                architecture,
+                loadedViaMetadataLoadContext,
+                parameterTypeInfoResolver);
 
         internal LoadedType(
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
@@ -62,6 +82,30 @@ namespace Microsoft.Build.Shared
             string? architecture,
             bool loadedViaMetadataLoadContext,
             Func<PropertyInfo, Type?>? parameterTypeForExpansionResolver)
+            : this(
+                type,
+                assemblyLoadInfo,
+                loadedAssembly,
+                iTaskItemType,
+                runtime,
+                architecture,
+                loadedViaMetadataLoadContext,
+                parameterTypeInfoResolver: parameterTypeForExpansionResolver is null
+                    ? null
+                    : property => (parameterTypeForExpansionResolver(property), null))
+        {
+        }
+
+        private LoadedType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+            Type type,
+            AssemblyLoadInfo assemblyLoadInfo,
+            Assembly loadedAssembly,
+            Type iTaskItemType,
+            string? runtime,
+            string? architecture,
+            bool loadedViaMetadataLoadContext,
+            Func<PropertyInfo, (Type? TypeForExpansion, string? DeclaredTypeName)>? parameterTypeInfoResolver)
         {
             Assumed.NotNull(type, "We must have the type.");
             Assumed.NotNull(assemblyLoadInfo, "We must have the assembly the type was loaded from.");
@@ -165,11 +209,14 @@ namespace Microsoft.Build.Shared
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
+                    (Type? TypeForExpansion, string? DeclaredTypeName) parameterTypeInfo =
+                        parameterTypeInfoResolver?.Invoke(props[i]) ?? default;
                     Properties[i] = new ReflectableTaskPropertyInfo(
                         props[i],
                         outputAttribute,
                         requiredAttribute,
-                        parameterTypeForExpansionResolver?.Invoke(props[i]));
+                        parameterTypeInfo.TypeForExpansion,
+                        parameterTypeInfo.DeclaredTypeName);
                     continue;
                 }
 
