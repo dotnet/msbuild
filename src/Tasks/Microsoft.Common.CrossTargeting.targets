@@ -121,7 +121,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      @(InnerOutput) - The combined output items of the inner targets across
                       all target frameworks..
   ============================================================
-  -->
+  -->    
   <Target Name="DispatchToInnerBuilds"
           DependsOnTargets="_ComputeTargetFrameworkItems"
           Returns="@(InnerOutput)">
@@ -129,11 +129,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MSBuild Projects="@(_InnerBuildProjects)"
              Condition="'@(_InnerBuildProjects)' != '' "
              Targets="$(InnerTargets)"
-             BuildInParallel="$(BuildInParallel)">
+             BuildInParallel="$(BuildInParallel)"
+             ContinueOnError="$(DispatchToInnerBuildsContinueOnError)">
       <Output ItemName="InnerOutput" TaskParameter="TargetOutputs" />
     </MSBuild>
   </Target>
 
+  <PropertyGroup>
+    <DispatchToInnerBuildsContinueOnError Condition="'$(DispatchToInnerBuildsContinueOnError)' == ''">false</DispatchToInnerBuildsContinueOnError>
+  </PropertyGroup>
+    
   <!--
   ============================================================
                                        Build
