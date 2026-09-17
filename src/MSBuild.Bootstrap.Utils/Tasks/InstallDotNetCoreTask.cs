@@ -155,31 +155,29 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
         private static bool IsScriptDownloadTransportFailure(Exception exception)
         {
-            return exception is HttpRequestException or IOException or SocketException or AuthenticationException;
+            return exception is HttpRequestException or IOException or SocketException;
         }
 
         private static bool IsTransientTransportFailure(Exception exception)
         {
-            bool isTransient = false;
-
-            for (Exception current = exception; current is not null; current = current.InnerException)
+            if (exception is HttpRequestException httpRequestException)
             {
-                if (current is AuthenticationException)
+                return httpRequestException.InnerException switch
                 {
-                    return false;
-                }
-
-                if (current is SocketException socketException)
-                {
-                    isTransient |= socketException.SocketErrorCode is SocketError.ConnectionReset or SocketError.ConnectionAborted or SocketError.NetworkReset or SocketError.TimedOut;
-                }
-                else if (current is IOException)
-                {
-                    isTransient = true;
-                }
+                    AuthenticationException => false,
+                    IOException => true,
+                    SocketException socketException => IsTransientSocketException(socketException),
+                    _ => false
+                };
             }
 
-            return isTransient;
+            return exception is IOException ||
+                (exception is SocketException directSocketException && IsTransientSocketException(directSocketException));
+        }
+
+        private static bool IsTransientSocketException(SocketException socketException)
+        {
+            return socketException.SocketErrorCode is SocketError.ConnectionReset or SocketError.ConnectionAborted or SocketError.NetworkReset or SocketError.TimedOut;
         }
 
         private static string GetInnerExceptionMessageString(Exception exception)
