@@ -1400,7 +1400,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Empty(t.ResolvedFiles);
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch", @"C:\Regress714052\X86\A.dll", "X86", "AMD64");
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch", @"C:\Regress714052\X86\A.dll", "X86", "AMD64");
             mockEngine.AssertLogContains(message);
         }
 
@@ -8557,7 +8557,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(rar).ShouldBeTrue();
 
-            mockEngine.AssertLogContains(rar.Log.FormatResourceString("ResolveAssemblyReference.SearchPathAddedByParentAssembly",
+            mockEngine.AssertLogContains(rar.Log.FormatResourceString("AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly",
                 @"C:\DirectoryTest",
                 @"C:\DirectoryTest\A.dll"));
         }

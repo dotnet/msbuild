@@ -83,6 +83,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildCanceledEventArgs buildCanceled = new("message", DateTime.UtcNow);
             WorkerNodeTelemetryEventArgs workerNodeTelemetry = new();
             LoggersRegisteredEventArgs loggersRegistered = new(new List<RegisteredLoggerInfo> { new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }) });
+            AssemblyResolutionSearchTraceEventArgs assemblyResolutionSearch = CreateAssemblyResolutionSearch();
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -121,6 +122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(buildCanceled, LoggingEventType.BuildCanceledEvent);
             VerifyLoggingPacket(workerNodeTelemetry, LoggingEventType.WorkerNodeTelemetryEvent);
             VerifyLoggingPacket(loggersRegistered, LoggingEventType.LoggersRegisteredEvent);
+            VerifyLoggingPacket(assemblyResolutionSearch, LoggingEventType.AssemblyResolutionSearchTraceEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -338,6 +340,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             verbosity: LoggerVerbosity.Diagnostic,
                             parameters: "LogFile=a.log;LogFile=b.log"),
                     }),
+                    CreateAssemblyResolutionSearch(),
                 };
                 foreach (BuildEventArgs arg in testArgs)
                 {
@@ -366,6 +369,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             }
         }
+
+        private static AssemblyResolutionSearchTraceEventArgs CreateAssemblyResolutionSearch()
+            => new(
+                "Requested, Version=1.0.0.0",
+                "MSIL",
+                [
+                    new AssemblyResolutionSearchAttempt(
+                        "first.dll",
+                        "search-path",
+                        "parent.dll",
+                        "Candidate, Version=2.0.0.0",
+                        AssemblyResolutionSearchResult.FusionNamesDidNotMatch,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: true),
+                    new AssemblyResolutionSearchAttempt(
+                        "second.dll",
+                        "search-path",
+                        "parent.dll",
+                        assemblyName: null,
+                        AssemblyResolutionSearchResult.TargetHadNoFusionName,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: true),
+                ],
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
 
         /// <summary>
         /// Verify the LoggingMessagePacket is properly created from a build event.

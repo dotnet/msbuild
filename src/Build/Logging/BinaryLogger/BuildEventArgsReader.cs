@@ -332,6 +332,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
                 BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
                 BinaryLogRecordKind.MSBuildServerLifecycle => ReadMSBuildServerLifecycleEventArgs(),
+                BinaryLogRecordKind.AssemblyResolutionSearchTrace => ReadAssemblyResolutionSearchTraceEventArgs(),
                 _ => null
             };
 
@@ -519,6 +520,42 @@ namespace Microsoft.Build.Logging
             string text = ReadString();
             object storedString = stringStorage.Add(text);
             stringRecords.Add(storedString);
+        }
+
+        private BuildEventArgs ReadAssemblyResolutionSearchTraceEventArgs()
+        {
+            BuildEventArgsFields fields = ReadBuildEventArgsFields(readImportance: true);
+            string requestedAssemblyName = ReadOptionalString() ?? string.Empty;
+            string? targetProcessorArchitecture = ReadOptionalString();
+
+            int count = ReadInt32();
+            var attempts = new AssemblyResolutionSearchAttempt[count];
+            AssemblyResolutionSearchAttempt? previous = null;
+            for (int i = 0; i < count; i++)
+            {
+                var unchangedContext = (AssemblyResolutionSearchAttemptContext)_binaryReader.ReadByte();
+                var attempt = new AssemblyResolutionSearchAttempt(
+                    ReadOptionalString(),
+                    (unchangedContext & AssemblyResolutionSearchAttemptContext.SearchPathUnchanged) != 0 ? previous?.SearchPath : ReadOptionalString(),
+                    (unchangedContext & AssemblyResolutionSearchAttemptContext.ParentAssemblyUnchanged) != 0 ? previous?.ParentAssembly : ReadOptionalString(),
+                    ReadOptionalString(),
+                    (AssemblyResolutionSearchResult)ReadInt32(),
+                    ReadOptionalString(),
+                    (unchangedContext & AssemblyResolutionSearchAttemptContext.AssemblyFoldersExUnchanged) != 0 ? previous?.IsAssemblyFoldersExSearch ?? false : ReadBoolean());
+                attempts[i] = attempt;
+                previous = attempt;
+            }
+
+            var e = new AssemblyResolutionSearchTraceEventArgs(
+                requestedAssemblyName,
+                targetProcessorArchitecture,
+                attempts,
+                fields.SenderName ?? string.Empty,
+                fields.Importance,
+                fields.Timestamp);
+            SetCommonFields(e, fields);
+            e.ProjectFile = fields.ProjectFile;
+            return e;
         }
 
         private BuildEventArgs ReadProjectImportedEventArgs()
