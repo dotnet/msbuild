@@ -75,8 +75,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             projectPath,
             File.ReadAllText(projectPath).Replace(
                 "Marker=\"!\"",
-                "Marker=\"?\"",
-                StringComparison.Ordinal));
+                "Marker=\"?\""));
         File.Delete(outputPath);
 
         MockLogger parameterChangeLogger = BuildCacheProject(projectPath);
@@ -407,8 +406,46 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         File.ReadAllText(outputPath).ShouldBe("input");
     }
 
+    [Fact]
+    public void DeclaredPathGetterFailureRunsTask()
+    {
+        using TestEnvironment env = TestEnvironment.Create(testOutput);
+        TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+        string inputPath = Path.Combine(projectFolder.Path, "input.txt");
+        string outputPath = Path.Combine(projectFolder.Path, "output.txt");
+        string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+        File.WriteAllText(inputPath, "input");
+        File.WriteAllText(
+            projectPath,
+            $"""
+            <Project>
+              <PropertyGroup>
+                <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+              </PropertyGroup>
+              <UsingTask
+                  TaskName="{typeof(TaskResultCacheTestTask).FullName}"
+                  AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
+              <Target Name="Build">
+                <TaskResultCacheTestTask
+                    Input="input.txt"
+                    OutputFile="output.txt"
+                    ThrowOnDeclaredInputsRead="true"
+                    DeclaredInputs="input.txt"
+                    DeclaredOutputs="output.txt" />
+              </Target>
+            </Project>
+            """);
+
+        MockLogger logger = BuildCacheProject(projectPath);
+
+        logger.AssertNoErrors();
+        logger.FullLog.ShouldContain("declared-input-getter-failure");
+        logger.FullLog.ShouldNotContain("Task result cache miss");
+        File.ReadAllText(outputPath).ShouldBe("input");
+    }
+
 #if NET
-    [UnixOnlyFact]
+    [LinuxOnlyFact]
     [UnsupportedOSPlatform("windows")]
     public void CorruptEntryDeletionDoesNotBlockReplacementPublication()
     {
@@ -551,6 +588,8 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
 [MSBuildDeclaredIORequiresUnset(nameof(UncacheableMode))]
 public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
 {
+    private ITaskItem[] _declaredInputs = [];
+
     public ITaskItem Input { get; set; } = null!;
 
     public ITaskItem OutputFile { get; set; } = null!;
@@ -563,7 +602,15 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
 
     public bool UncacheableMode { get; set; }
 
-    public ITaskItem[] DeclaredInputs { get; set; } = [];
+    public bool ThrowOnDeclaredInputsRead { get; set; }
+
+    public ITaskItem[] DeclaredInputs
+    {
+        get => ThrowOnDeclaredInputsRead
+            ? throw new InvalidOperationException("declared-input-getter-failure")
+            : _declaredInputs;
+        set => _declaredInputs = value;
+    }
 
     public ITaskItem[] DeclaredOutputs { get; set; } = [];
 

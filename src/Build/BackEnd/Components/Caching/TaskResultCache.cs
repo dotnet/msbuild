@@ -432,35 +432,37 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             TaskResultCacheFileDigestCache fileDigestCache,
             CancellationToken cancellationToken)
         {
-            Type taskType = task.GetType();
-            string taskAssemblyPath = taskType.Assembly.Location;
-            if (String.IsNullOrEmpty(taskAssemblyPath) || !File.Exists(taskAssemblyPath))
-            {
-                return new TaskResultCacheKeyResponse(
-                    Success: false,
-                    Reason: "The task assembly does not have a readable file location.");
-            }
-
-            if (!TryGetDeclaredPaths(
-                    taskType,
-                    task,
-                    "DeclaredInputs",
-                    projectDirectory,
-                    out IReadOnlyList<string>? inputPaths,
-                    out string? reason) ||
-                !TryGetDeclaredPaths(
-                    taskType,
-                    task,
-                    "DeclaredOutputs",
-                    projectDirectory,
-                    out IReadOnlyList<string>? outputPaths,
-                    out reason))
-            {
-                return new TaskResultCacheKeyResponse(Success: false, Reason: reason);
-            }
-
             try
             {
+                Type taskType = task.GetType();
+                string taskAssemblyPath = taskType.Assembly.Location;
+                if (String.IsNullOrEmpty(taskAssemblyPath) || !File.Exists(taskAssemblyPath))
+                {
+                    return new TaskResultCacheKeyResponse(
+                        Success: false,
+                        Reason: "The task assembly does not have a readable file location.");
+                }
+
+                if (!TryGetDeclaredPaths(
+                        taskType,
+                        task,
+                        "DeclaredInputs",
+                        projectDirectory,
+                        out IReadOnlyList<string>? inputPaths,
+                        out string? reason) ||
+                    !TryGetDeclaredPaths(
+                        taskType,
+                        task,
+                        "DeclaredOutputs",
+                        projectDirectory,
+                        out IReadOnlyList<string>? outputPaths,
+                        out reason))
+                {
+                    return new TaskResultCacheKeyResponse(
+                        Success: false,
+                        Reason: reason);
+                }
+
                 using SHA256 hash = SHA256.Create();
                 using var hashStream = new CryptoStream(Stream.Null, hash, CryptoStreamMode.Write);
                 using ITranslator translator = BinaryTranslator.GetWriteTranslator(hashStream);
