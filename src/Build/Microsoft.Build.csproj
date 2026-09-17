@@ -114,6 +114,7 @@
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
+    <Compile Include="..\Shared\TaskHostTaskPacket.cs" />
     <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesRequest.cs" />
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />

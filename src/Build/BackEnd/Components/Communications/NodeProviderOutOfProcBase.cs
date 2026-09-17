@@ -1651,7 +1651,7 @@ namespace Microsoft.Build.BackEnd
                     _readTranslator.NegotiatedPacketVersion = _negotiatedPacketVersion;
                     _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, _readTranslator);
                 }
-                catch (IOException e)
+                catch (Exception e) when (e is IOException or InvalidDataException)
                 {
                     CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in ReadAndRoutePacket: {e}");
                     _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));

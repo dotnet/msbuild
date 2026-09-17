@@ -157,10 +157,8 @@ internal enum NodePacketType : byte
 
     /// <summary>
     /// Informs the parent node that the task host has finished executing a
-    /// particular task.  Does not need to contain identifying information
-    /// about the task, because the task host will only ever be connected to
-    /// one parent node at a a time, and will only ever be executing one task
-    /// for that node at any one time.
+    /// particular task. Protocols supporting overlapping TaskHost invocations
+    /// enclose this payload in <see cref="TaskHostTaskPacket"/> to identify its owner.
     ///
     /// Contents:
     /// Task result (success / failure)
@@ -266,7 +264,10 @@ internal enum NodePacketType : byte
     /// </summary>
     TaskHostConsoleConfiguration = 0x26,
 
-    // 0x27 reserved for future TaskHost callback packet types
+    /// <summary>
+    /// A task invocation identity and its log, callback request, or completion payload.
+    /// </summary>
+    TaskHostTaskPacket = 0x27,
 
     #endregion
 

@@ -104,6 +104,7 @@ namespace Microsoft.Build.BackEnd
         /// The ID of the node on which this task is scheduled to run.
         /// </summary>
         private readonly int _scheduledNodeId;
+        private long _taskInvocationId;
 
         /// <summary>
         /// True if currently connected to the task host; false otherwise.
@@ -387,6 +388,7 @@ namespace Microsoft.Build.BackEnd
                             out hostProcessId,
                             out wasNewlyCreated,
                             out _taskHostConnection);
+                        _taskInvocationId = hostConfiguration.TaskInvocationId;
                     }
 
                     if (_connectedToTaskHost)
@@ -425,7 +427,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             lock (_taskHostLock)
                             {
-                                _taskHostProvider.DisconnectFromHost(_taskHostConnection, this);
+                                _taskHostProvider.DisconnectFromHost(_taskHostConnection, this, _taskInvocationId);
                                 _connectedToTaskHost = false;
                                 _taskHostConnection = null;
                             }
