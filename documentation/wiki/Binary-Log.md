@@ -161,7 +161,35 @@ the record kind, its `BuildEventContext` (if present), and the original build co
 `TargetSkipped` event. Return `true` to retain an event or `false` to skip it. A `null` filter
 leaves replay unchanged. All `Replay` overloads apply the filter.
 
+#### Run a filtered replay from a console application
+
+Filtering is a .NET API, not an MSBuild command-line switch. The following example
+prints only errors and warnings from an existing binlog without rebuilding the
+original project or changing the input file.
+
+Use a .NET SDK supported by the `Microsoft.Build` package version you are referencing.
+Create a console application and add the package, replacing `VERSION_WITH_EVENT_FILTER`
+with a version containing this API. Older packages without `EventFilter` cannot compile
+this example. To try an unreleased build of this change, configure a local NuGet source
+containing the packages built from this branch.
+
+```powershell
+dotnet new console --name FilterBinlog --no-restore
+dotnet add .\FilterBinlog\FilterBinlog.csproj package Microsoft.Build --version "VERSION_WITH_EVENT_FILTER" --no-restore
+```
+
+Replace `FilterBinlog\Program.cs` with:
+
 ```csharp
+using System;
+using Microsoft.Build.Logging;
+
+if (args.Length != 1)
+{
+    Console.Error.WriteLine("Usage: FilterBinlog <path-to-binlog>");
+    return 1;
+}
+
 var logReader = new BinaryLogReplayEventSource
 {
     EventFilter = metadata =>
@@ -169,13 +197,28 @@ var logReader = new BinaryLogReplayEventSource
 };
 
 logReader.AnyEventRaised += (_, e) => Console.WriteLine(e.Message);
-logReader.Replay(path_to_binlog_file);
+logReader.Replay(args[0]);
+return 0;
 ```
+
+Build the sample, then invoke it with the path to your binlog:
+
+```powershell
+dotnet build .\FilterBinlog\FilterBinlog.csproj -bl:{{}}
+dotnet run --project .\FilterBinlog\FilterBinlog.csproj --no-build -- "C:\logs\build.binlog"
+```
+
+The `--` separates the application's argument from `dotnet run` options. Replay runs
+synchronously and prints each retained event's message. If the log contains no errors
+or warnings, the application prints nothing and exits successfully. To select different
+events, change the `EventFilter` predicate; event subscribers receive only accepted events.
 
 This example selects diagnostics for display, not for creating a complete build log.
 When writing a filtered binlog or passing events to a consumer that relies on build
 structure, retain a consistent set of events (for example, matching start/finish events
 and any required parent project or target events).
+
+#### Filtering behavior and failures
 
 A filter forces structured reading instead of raw record passthrough. With length-framed
 logs (format version 18 or later), rejected events skip their type-specific payload
@@ -203,10 +246,13 @@ available contexts. The properties remain available across .NET Framework except
 serialization. When manually constructing the exception with only an inner exception,
 the record properties are `null` because no record information was supplied.
 
+To log a callback failure explicitly, replace the `logReader.Replay(args[0])` call in
+the console application above with:
+
 ```csharp
 try
 {
-    logReader.Replay(path_to_binlog_file);
+    logReader.Replay(args[0]);
 }
 catch (BinaryLogEventFilterException ex)
 {
