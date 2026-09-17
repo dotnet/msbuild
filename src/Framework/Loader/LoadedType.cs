@@ -5,11 +5,6 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
-#if !NETSTANDARD2_0
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
-using System.Reflection.PortableExecutable;
-#endif
 #if NET
 using System.Runtime.CompilerServices;
 #endif
@@ -45,6 +40,28 @@ namespace Microsoft.Build.Shared
             string? runtime = null,
             string? architecture = null,
             bool loadedViaMetadataLoadContext = false)
+            : this(
+                type,
+                assemblyLoadInfo,
+                loadedAssembly,
+                iTaskItemType,
+                runtime,
+                architecture,
+                loadedViaMetadataLoadContext,
+                parameterTypeForExpansionResolver: null)
+        {
+        }
+
+        internal LoadedType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+            Type type,
+            AssemblyLoadInfo assemblyLoadInfo,
+            Assembly loadedAssembly,
+            Type iTaskItemType,
+            string? runtime,
+            string? architecture,
+            bool loadedViaMetadataLoadContext,
+            Func<PropertyInfo, Type?>? parameterTypeForExpansionResolver)
         {
             Assumed.NotNull(type, "We must have the type.");
             Assumed.NotNull(assemblyLoadInfo, "We must have the assembly the type was loaded from.");
@@ -152,7 +169,7 @@ namespace Microsoft.Build.Shared
                         props[i],
                         outputAttribute,
                         requiredAttribute,
-                        ReadParameterTypeForExpansion(props[i]));
+                        parameterTypeForExpansionResolver?.Invoke(props[i]));
                     continue;
                 }
 
@@ -209,110 +226,12 @@ namespace Microsoft.Build.Shared
             return propertyType.IsArray ? GetArrayExpansionType(expansionType) : expansionType;
         }
 
-        private static Type? GetArrayExpansionType(Type? elementType) =>
+        internal static Type? GetArrayExpansionType(Type? elementType) =>
             elementType == typeof(string) ? typeof(string[]) :
             elementType == typeof(AbsolutePath) ? typeof(AbsolutePath[]) :
             elementType == typeof(FileInfo) ? typeof(FileInfo[]) :
             elementType == typeof(DirectoryInfo) ? typeof(DirectoryInfo[]) :
             null;
-
-        private static Type? ReadParameterTypeForExpansion(PropertyInfo propertyInfo)
-        {
-#if NETSTANDARD2_0
-            return null;
-#else
-            try
-            {
-#if NET
-                string assemblyPath = RuntimeFeature.IsDynamicCodeSupported
-                    ? propertyInfo.DeclaringType?.Assembly.Location ?? string.Empty
-                    : string.Empty;
-#else
-                string assemblyPath = propertyInfo.DeclaringType?.Assembly.Location ?? string.Empty;
-#endif
-                using FileStream stream = File.OpenRead(assemblyPath);
-                using var peReader = new PEReader(stream);
-                MetadataReader metadataReader = peReader.GetMetadataReader();
-                PropertyDefinition property = metadataReader.GetPropertyDefinition(
-                    (PropertyDefinitionHandle)MetadataTokens.EntityHandle(propertyInfo.MetadataToken));
-                BlobReader signature = metadataReader.GetBlobReader(property.Signature);
-                return ReadParameterTypeForExpansion(ref signature, metadataReader);
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                return null;
-            }
-#endif
-        }
-
-#if !NETSTANDARD2_0
-        internal static Type? ReadParameterTypeForExpansion(ref BlobReader signature, MetadataReader? metadataReader)
-        {
-            SignatureHeader header = signature.ReadSignatureHeader();
-            if (header.Kind != SignatureKind.Property || header.IsGeneric || signature.ReadCompressedInteger() != 0)
-            {
-                return null;
-            }
-
-            Type? parameterType = ReadParameterTypeForExpansion(ref signature, metadataReader, depth: 0);
-            return signature.RemainingBytes == 0 ? parameterType : null;
-        }
-
-        private static Type? ReadParameterTypeForExpansion(ref BlobReader signature, MetadataReader? metadataReader, int depth)
-        {
-            if (depth >= 16)
-            {
-                return null;
-            }
-
-            int typeCode = signature.ReadCompressedInteger();
-            if (typeCode == (int)SignatureTypeCode.SZArray)
-            {
-                Type? elementType = ReadParameterTypeForExpansion(ref signature, metadataReader, depth + 1);
-                return elementType?.IsArray == false ? GetArrayExpansionType(elementType) : null;
-            }
-
-            if (typeCode is >= (int)SignatureTypeCode.Boolean and <= (int)SignatureTypeCode.String)
-            {
-                return typeof(string);
-            }
-
-            if (metadataReader is null
-                || typeCode is not ((int)SignatureTypeKind.Class) and not ((int)SignatureTypeKind.ValueType))
-            {
-                return null;
-            }
-
-            EntityHandle handle = signature.ReadTypeHandle();
-            string? fullName;
-            if (handle.Kind == HandleKind.TypeDefinition)
-            {
-                TypeDefinition type = metadataReader.GetTypeDefinition((TypeDefinitionHandle)handle);
-                fullName = GetFullName(type.Namespace, type.Name);
-            }
-            else if (handle.Kind == HandleKind.TypeReference)
-            {
-                TypeReference type = metadataReader.GetTypeReference((TypeReferenceHandle)handle);
-                fullName = GetFullName(type.Namespace, type.Name);
-            }
-            else
-            {
-                return null;
-            }
-
-            return fullName switch
-            {
-                string name when name == typeof(AbsolutePath).FullName => typeof(AbsolutePath),
-                string name when name == typeof(FileInfo).FullName => typeof(FileInfo),
-                string name when name == typeof(DirectoryInfo).FullName => typeof(DirectoryInfo),
-                _ when typeCode == (int)SignatureTypeKind.ValueType => typeof(string),
-                _ => null,
-            };
-
-            string GetFullName(StringHandle namespaceHandle, StringHandle nameHandle) =>
-                $"{metadataReader.GetString(namespaceHandle)}.{metadataReader.GetString(nameHandle)}";
-        }
-#endif
 
         #endregion
 

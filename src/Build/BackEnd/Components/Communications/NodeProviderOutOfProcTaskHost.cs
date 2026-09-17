@@ -790,13 +790,21 @@ namespace Microsoft.Build.BackEnd
             return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters));
         }
 
+        /// <summary>
+        /// Determines whether the selected .NET task host supports deferred parameter conversion.
+        /// </summary>
+        /// <returns>True when conversion is supported; false when the host lacks it or its capability cannot be determined.</returns>
         internal static bool SupportsTaskParameterConversion(in TaskHostParameters taskHostParameters)
         {
             if (taskHostParameters.MSBuildAssemblyPath is null)
             {
+                // No alternate MSBuild was selected. The default host comes from the current
+                // tools directory and is assumed to support conversion.
                 return true;
             }
 
+            // An explicitly selected SDK may predate parameter conversion.
+            // Inspect its metadata for the conversion method without loading the assembly.
             try
             {
                 string assemblyPath = Path.GetFullPath(

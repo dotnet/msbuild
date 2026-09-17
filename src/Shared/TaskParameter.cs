@@ -196,6 +196,11 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// Creates a task output parameter using its declared type to preserve task-item
+        /// classification when the value is <see langword="null"/>.
+        /// This lets the receiving process recognize task-item outputs even when it cannot resolve the declared type.
+        /// </summary>
         internal static TaskParameter CreateForTaskOutput(object wrappedParameter, Type declaredType)
         {
             Type elementType = declaredType.IsArray ? declaredType.GetElementType() : declaredType;

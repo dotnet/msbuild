@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 #if NET
 using System.Runtime.Loader;
 #endif
@@ -59,6 +60,22 @@ namespace Microsoft.Build.UnitTests
         public void Regress_Mutation_ParameterOrderDoesntMatter()
         {
             Assert.True(TypeLoader.IsPartialTypeNameMatch("Csc", "Microsoft.Build.Tasks.Csc"));
+        }
+
+        [Theory]
+        [InlineData(new byte[]
+        {
+            0x28, 0x00, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d,
+            0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x08,
+        })]
+        [InlineData(new byte[] { 0x28, 0xdf, 0xff, 0xff, 0xff, 0x08 })]
+        public unsafe void PropertySignatureClassifierIsBounded(byte[] signature)
+        {
+            fixed (byte* bytes = signature)
+            {
+                BlobReader reader = new(bytes, signature.Length);
+                TypeLoader.ReadParameterTypeForExpansion(ref reader, metadataReader: null).ShouldBeNull();
+            }
         }
 
 

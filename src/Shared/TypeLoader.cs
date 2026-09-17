@@ -9,6 +9,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
+using System.Reflection.PortableExecutable;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.Eventing;
@@ -294,6 +300,98 @@ namespace Microsoft.Build.Shared
             return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
         }
 
+        private static Type ReadParameterTypeForExpansion(PropertyInfo propertyInfo)
+        {
+            try
+            {
+#if NET
+                string assemblyPath = RuntimeFeature.IsDynamicCodeSupported
+                    ? propertyInfo.DeclaringType?.Assembly.Location ?? string.Empty
+                    : string.Empty;
+#else
+                string assemblyPath = propertyInfo.DeclaringType?.Assembly.Location ?? string.Empty;
+#endif
+                using FileStream stream = File.OpenRead(assemblyPath);
+                using var peReader = new PEReader(stream);
+                MetadataReader metadataReader = peReader.GetMetadataReader();
+                PropertyDefinition property = metadataReader.GetPropertyDefinition(
+                    (PropertyDefinitionHandle)MetadataTokens.EntityHandle(propertyInfo.MetadataToken));
+                BlobReader signature = metadataReader.GetBlobReader(property.Signature);
+                return ReadParameterTypeForExpansion(ref signature, metadataReader);
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                return null;
+            }
+        }
+
+        internal static Type ReadParameterTypeForExpansion(ref BlobReader signature, MetadataReader metadataReader)
+        {
+            SignatureHeader header = signature.ReadSignatureHeader();
+            if (header.Kind != SignatureKind.Property || header.IsGeneric || signature.ReadCompressedInteger() != 0)
+            {
+                return null;
+            }
+
+            Type parameterType = ReadParameterTypeForExpansion(ref signature, metadataReader, depth: 0);
+            return signature.RemainingBytes == 0 ? parameterType : null;
+        }
+
+        private static Type ReadParameterTypeForExpansion(ref BlobReader signature, MetadataReader metadataReader, int depth)
+        {
+            if (depth >= 16)
+            {
+                return null;
+            }
+
+            int typeCode = signature.ReadCompressedInteger();
+            if (typeCode == (int)SignatureTypeCode.SZArray)
+            {
+                Type elementType = ReadParameterTypeForExpansion(ref signature, metadataReader, depth + 1);
+                return elementType?.IsArray == false ? LoadedType.GetArrayExpansionType(elementType) : null;
+            }
+
+            if (typeCode is >= (int)SignatureTypeCode.Boolean and <= (int)SignatureTypeCode.String)
+            {
+                return typeof(string);
+            }
+
+            if (metadataReader is null
+                || typeCode is not ((int)SignatureTypeKind.Class) and not ((int)SignatureTypeKind.ValueType))
+            {
+                return null;
+            }
+
+            EntityHandle handle = signature.ReadTypeHandle();
+            string fullName;
+            if (handle.Kind == HandleKind.TypeDefinition)
+            {
+                TypeDefinition type = metadataReader.GetTypeDefinition((TypeDefinitionHandle)handle);
+                fullName = GetFullName(type.Namespace, type.Name);
+            }
+            else if (handle.Kind == HandleKind.TypeReference)
+            {
+                TypeReference type = metadataReader.GetTypeReference((TypeReferenceHandle)handle);
+                fullName = GetFullName(type.Namespace, type.Name);
+            }
+            else
+            {
+                return null;
+            }
+
+            return fullName switch
+            {
+                string name when name == typeof(AbsolutePath).FullName => typeof(AbsolutePath),
+                string name when name == typeof(FileInfo).FullName => typeof(FileInfo),
+                string name when name == typeof(DirectoryInfo).FullName => typeof(DirectoryInfo),
+                _ when typeCode == (int)SignatureTypeKind.ValueType => typeof(string),
+                _ => null,
+            };
+
+            string GetFullName(StringHandle namespaceHandle, StringHandle nameHandle) =>
+                $"{metadataReader.GetString(namespaceHandle)}.{metadataReader.GetString(nameHandle)}";
+        }
+
         /// <summary>
         /// Adds assembly paths to a dictionary, keyed by file name.
         /// Later arrays in the parameter list take priority over earlier ones,
@@ -557,7 +655,15 @@ namespace Microsoft.Build.Shared
                 });
 
                 return type != null
-                    ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false)
+                    ? new LoadedType(
+                        type,
+                        _assemblyLoadInfo,
+                        _loadedAssembly ?? type.Assembly,
+                        typeof(ITaskItem),
+                        runtime: null,
+                        architecture: null,
+                        loadedViaMetadataLoadContext: false,
+                        parameterTypeForExpansionResolver: ReadParameterTypeForExpansion)
                     : null;
             }
 
@@ -617,7 +723,15 @@ namespace Microsoft.Build.Shared
                     {
                         MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
                         var taskItemType = context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
-                        LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, _runtime, _architecture, loadedViaMetadataLoadContext: true);
+                        LoadedType loadedType = new(
+                            foundType,
+                            _assemblyLoadInfo,
+                            loadedAssembly,
+                            taskItemType,
+                            _runtime,
+                            _architecture,
+                            loadedViaMetadataLoadContext: true,
+                            parameterTypeForExpansionResolver: ReadParameterTypeForExpansion);
 
                         MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
                         return loadedType;
