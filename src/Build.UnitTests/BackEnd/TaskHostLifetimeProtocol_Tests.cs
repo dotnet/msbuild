@@ -59,6 +59,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     [InlineData(5, false)]
     [InlineData(6, true)]
     [InlineData(7, true)]
+    [InlineData(8, true)]
     public void Clr4CompletionUsesVersionedLifetimeActions(byte version, bool extended)
     {
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(
@@ -85,6 +86,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     [Theory]
     [InlineData(6, false)]
     [InlineData(7, true)]
+    [InlineData(8, true)]
     public void Clr4ConsoleConfigurationCarriesItsNegotiatedVersion(byte version, bool extended)
     {
         NodePacketTypeExtensions.TryCreateExtendedHeaderType(

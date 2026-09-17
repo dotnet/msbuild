@@ -204,7 +204,7 @@ stateDiagram-v2
 1. **Idle**: `WaitAny()` blocks on the four wait handles. No task thread exists. `_currentConfiguration` is null.
 2. **TaskHostConfiguration arrives**: `HandleTaskHostConfiguration()` stores the config and spawns a task runner thread (stored in `TaskExecutionContext.ExecutingThread`) to call `RunTask()`. The main thread immediately returns to `WaitAny()`.
 3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, and collects output parameters. After task cleanup, it enqueues the result with the originating invocation identity and signals `_taskCompleteEvent`.
-4. **CompleteTask()**: The main thread wakes on index 2 and drains `_taskCompletePackets` to the owning worker node. Keeping a queue preserves distinct completions even when event signals coalesce. Version-8 results are enclosed with their invocation identity; legacy results keep their existing format. When no tasks remain active or blocked, it clears `_currentConfiguration`.
+4. **CompleteTask()**: The main thread wakes on index 2 and drains `_taskCompletePackets` to the owning worker node. Keeping a queue preserves distinct completions even when event signals coalesce. It flushes the process-scoped console writers before each completion, including results enqueued during the drain. Version-8 results are enclosed with their invocation identity; legacy results keep their existing format. When no tasks remain active or blocked, it clears `_currentConfiguration`.
 5. **Back to step 1**: The main thread loops back to `WaitAny()`, ready for another `TaskHostConfiguration` or a `NodeBuildComplete`.
 
 ### State Between Tasks

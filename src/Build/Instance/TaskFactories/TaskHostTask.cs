@@ -632,7 +632,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Preserve the original callback exception (notably CircularDependencyException),
                     // but do not lose a second failure reported by the remote task.
-                    _taskLoggingContext.LogFatalTaskError(taskHostTaskComplete.TaskException, new BuildEventFileInfo(_taskLocation), _taskType.Type.Name);
+                    LogSecondaryTaskFailure(taskHostTaskComplete.TaskException);
                     return;
                 }
 
@@ -901,8 +901,26 @@ namespace Microsoft.Build.BackEnd
         }
 
         private static bool CanDeferCallbackException(Exception exception)
+        {
             // Logger failures abort the whole build immediately, including when raised inside a callback.
-            => exception is not LoggerException and not InternalLoggerException && !ExceptionHandling.IsCriticalException(exception);
+            if (exception is LoggerException or InternalLoggerException || ExceptionHandling.IsCriticalException(exception))
+            {
+                return false;
+            }
+
+            if (exception is AggregateException aggregateException)
+            {
+                foreach (Exception innerException in aggregateException.InnerExceptions)
+                {
+                    if (!CanDeferCallbackException(innerException))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
 
         private void CaptureCallbackException(Exception exception)
         {
@@ -910,6 +928,20 @@ namespace Microsoft.Build.BackEnd
             if (_callbackException is null)
             {
                 _callbackException = ExceptionDispatchInfo.Capture(exception);
+            }
+            else
+            {
+                LogSecondaryTaskFailure(exception);
+            }
+        }
+
+        private void LogSecondaryTaskFailure(Exception exception)
+        {
+            // ContinueOnError is true for both continuing modes; only WarnAndContinue converts errors.
+            if (_buildEngine is TaskHost { ConvertErrorsToWarnings: true })
+            {
+                _taskLoggingContext.LogTaskWarningFromException(exception, new BuildEventFileInfo(_taskLocation), _taskType.Type.Name);
+                _taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
             }
             else
             {

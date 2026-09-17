@@ -105,6 +105,7 @@ public sealed class TaskHostTaskPacket_Tests
     }
 
     [Theory]
+    [InlineData(0, 0)]
     [InlineData(6, 0)]
     [InlineData(7, 0)]
     [InlineData(8, 1234)]

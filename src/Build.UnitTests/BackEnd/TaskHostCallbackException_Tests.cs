@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,12 +12,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
 
@@ -174,21 +177,12 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
     }
 
     [Theory]
-    [InlineData("build", false)]
-    [InlineData("multiple-nodes", false)]
-    [InlineData("request-cores", false)]
-    [InlineData("release-cores", false)]
-    [InlineData("build", true)]
-    [InlineData("multiple-nodes", true)]
-    [InlineData("request-cores", true)]
-    [InlineData("release-cores", true)]
-    public async Task BuildWideCallbackExceptionIsNotDeferred(string callback, bool loggerFailure)
+    [MemberData(nameof(BuildWideFailures))]
+    public async Task BuildWideCallbackExceptionIsNotDeferred(string callback, string failureKind)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         using var harness = new PacketPumpHarness(_output);
-        Exception originalException = loggerFailure
-            ? new LoggerException("Synthetic logger failure")
-            : new OutOfMemoryException("Synthetic critical callback failure");
+        Exception originalException = CreateBuildWideFailure(failureKind);
         var engine = new ThrowingBuildEngine(originalException, _output, callback);
         TaskHostTask task = harness.CreateTask(engine, TaskEnvironmentHelper.CreateForTest());
         Task<Exception?> execution = Task.Run(() => Record.Exception(() => { task.Execute(); }));
@@ -201,6 +195,7 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
             (await Within(Task.WhenAny(execution, engine.TrailingMessageReceived.Task)))
                 .ShouldBeSameAs(execution, "Build-wide failures must propagate immediately, not wait for a remote task.");
             (await execution).ShouldBeSameAs(originalException);
+            originalException.StackTrace.ShouldNotBeNull().ShouldContain(nameof(ThrowingBuildEngine));
             harness.Provider.TaskHandlerRegistrationCount.ShouldBe(0);
         }
         finally
@@ -209,6 +204,156 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
             await Within(execution);
         }
     }
+
+    public static IEnumerable<object[]> BuildWideFailures()
+    {
+        string[] callbacks = ["build", "multiple-nodes", "request-cores", "release-cores"];
+        string[] failures = ["critical", "logger", "internal-logger", "aggregate-critical", "nested-critical",
+            "aggregate-logger", "nested-logger", "aggregate-internal-logger", "nested-internal-logger"];
+        foreach (string callback in callbacks)
+        {
+            foreach (string failure in failures)
+            {
+                yield return [callback, failure];
+            }
+        }
+    }
+
+    private static Exception CreateBuildWideFailure(string failureKind)
+    {
+        Exception leaf = failureKind.EndsWith("internal-logger", StringComparison.Ordinal)
+            ? new InternalLoggerException("Internal logger failure", new InvalidOperationException("logger cause"),
+                null, "MSB4017", "MSBuild.FatalErrorWhileLogging", false)
+            : failureKind.EndsWith("logger", StringComparison.Ordinal)
+                ? new LoggerException("Logger failure")
+                : new OutOfMemoryException("Synthetic critical failure");
+        if (failureKind.StartsWith("nested-", StringComparison.Ordinal))
+        {
+            return new AggregateException(new InvalidOperationException("nonfatal sibling"),
+                new AggregateException(new ArgumentException("nonfatal nested sibling"), leaf));
+        }
+        return failureKind.StartsWith("aggregate-", StringComparison.Ordinal) ? new AggregateException(leaf) : leaf;
+    }
+
+    [Theory]
+    [InlineData(true, "callback", "default")]
+    [InlineData(false, "callback", "default")]
+    [InlineData(true, "remote", "default")]
+    [InlineData(false, "remote", "default")]
+    [InlineData(true, "logger", "default")]
+    [InlineData(false, "logger", "default")]
+    [InlineData(true, "callback", "warn-as-error")]
+    [InlineData(true, "remote", "warn-as-error")]
+    [InlineData(true, "callback", "code-exempt")]
+    [InlineData(true, "remote", "code-exempt")]
+    [InlineData(true, "callback", "as-message")]
+    [InlineData(true, "remote", "as-message")]
+    public async Task SecondaryCallbackFailureRespectsActualTaskHostPolicy(bool warnAndContinue, string secondFailure, string warningPolicy)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        using var harness = new PacketPumpHarness(_output);
+        var first = new InvalidOperationException("First task-local callback failure");
+        Exception second = secondFailure == "logger"
+            ? CreateBuildWideFailure("nested-logger")
+            : new ArgumentException("Second task-local failure");
+        var callback = new FailingTargetCallback(first, secondFailure == "remote" ? null : second);
+        RecordingTaskHost engine = harness.CreatePolicyHost(callback, warnAndContinue, warningPolicy);
+        // Both modes advertise ContinueOnError=true; only the actual host policy distinguishes them.
+        engine.ContinueOnError.ShouldBeTrue();
+        TaskEnvironment environment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(env.CreateFolder().Path, new Dictionary<string, string>());
+        TaskHostTask task = harness.CreateTask(engine, environment);
+        Task<Exception?> execution = Task.Run(() => Record.Exception(() => { task.Execute(); }));
+        try
+        {
+            long id = (await Within(harness.Pipe.Configuration.Task)).TaskInvocationId;
+            harness.Provider.TryAttachTaskHandler(harness.Context, harness.Peer, PeerInvocationId).ShouldBeTrue();
+            harness.Provider.PacketReceived(1, new TaskHostTaskPacket(id, LegacyRequest(17)));
+            (await Within(harness.Pipe.ResponseFor(17))).ShouldBeOfType<TaskHostBuildResponse>().Success.ShouldBeFalse();
+            Exception firstObserved = engine.CallbackFailures.ShouldHaveSingleItem();
+            firstObserved.ShouldBeOfType<AggregateException>().InnerExceptions.ShouldHaveSingleItem().ShouldBeSameAs(first);
+            execution.IsCompleted.ShouldBeFalse();
+
+            harness.Provider.PacketReceived(1, new TaskHostTaskPacket(id, LegacyRequest(18)));
+            if (secondFailure == "logger")
+            {
+                // No completion is sent: even after a deferred local failure, this must abort immediately.
+                task.PacketReceived(1, Message(TrailingMessage));
+                (await Within(Task.WhenAny(execution, engine.TrailingMessageReceived.Task))).ShouldBeSameAs(execution);
+                Exception fatal = (await execution).ShouldNotBeNull();
+                engine.CallbackFailures.Count.ShouldBe(2);
+                fatal.ShouldBeSameAs(engine.CallbackFailures[1]);
+                fatal.ShouldBeOfType<AggregateException>().InnerExceptions.ShouldHaveSingleItem().ShouldBeSameAs(second);
+                fatal.StackTrace.ShouldNotBeNull().ShouldContain(nameof(TaskHost.BuildProjectFilesInParallel));
+            }
+            else
+            {
+                (await Within(Task.WhenAny(harness.Pipe.ResponseFor(18), execution))).ShouldBeSameAs(harness.Pipe.ResponseFor(18));
+                var response = (await harness.Pipe.ResponseFor(18)).ShouldBeOfType<TaskHostBuildResponse>();
+                response.RequestId.ShouldBe(18);
+                response.Success.ShouldBe(secondFailure == "remote");
+                harness.Provider.PacketReceived(1, new TaskHostTaskPacket(id, Message(TrailingMessage)));
+                (await Within(Task.WhenAny(engine.TrailingMessageReceived.Task, execution))).ShouldBeSameAs(engine.TrailingMessageReceived.Task);
+                execution.IsCompleted.ShouldBeFalse();
+                harness.Provider.PacketReceived(1, new TaskHostTaskPacket(PeerInvocationId, Message("peer remains attached")));
+
+                var result = secondFailure == "remote"
+                    ? new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, second)
+                    : new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
+                harness.Provider.PacketReceived(1, new TaskHostTaskPacket(id, new TaskHostTaskComplete(result,
+#if FEATURE_REPORTFILEACCESSES
+                    null,
+#endif
+                    new Dictionary<string, string> { [EnvironmentVariable] = "applied" })));
+                Exception observed = (await Within(execution)).ShouldNotBeNull();
+                observed.ShouldBeSameAs(firstObserved);
+                observed.StackTrace.ShouldNotBeNull().ShouldContain(nameof(TaskHost.BuildProjectFilesInParallel));
+                environment.GetEnvironmentVariable(EnvironmentVariable).ShouldBe("applied");
+
+                if (warningPolicy == "as-message")
+                {
+                    harness.Logger.Errors.ShouldBeEmpty();
+                    harness.Logger.Warnings.ShouldBeEmpty();
+                    BuildMessageEventArgs message = harness.Logger.BuildMessageEvents.FindAll(e => e.Code == "MSB4018").ShouldHaveSingleItem();
+                    message.Importance.ShouldBe(MessageImportance.Low);
+                    message.Message.ShouldNotBeNull().ShouldContain(second.ToString());
+                    message.BuildEventContext.ShouldBeSameAs(harness.TaskContext);
+                }
+                else if (warnAndContinue && warningPolicy != "warn-as-error")
+                {
+                    harness.Logger.Errors.ShouldBeEmpty();
+                    BuildWarningEventArgs warning = harness.Logger.Warnings.ShouldHaveSingleItem();
+                    warning.Code.ShouldBe("MSB4018");
+                    warning.Message.ShouldNotBeNull().ShouldContain(second.ToString());
+                    warning.BuildEventContext.ShouldBeSameAs(harness.TaskContext);
+                }
+                else
+                {
+                    harness.Logger.Warnings.ShouldBeEmpty();
+                    BuildErrorEventArgs error = harness.Logger.Errors.ShouldHaveSingleItem();
+                    error.Code.ShouldBe("MSB4018");
+                    error.Message.ShouldNotBeNull().ShouldContain(second.ToString());
+                    error.BuildEventContext.ShouldBeSameAs(harness.TaskContext);
+                }
+            }
+            if (secondFailure == "logger")
+            {
+                harness.Logger.Errors.ShouldBeEmpty();
+                harness.Logger.Warnings.ShouldBeEmpty();
+            }
+            harness.Provider.PacketReceived(1, new TaskHostTaskPacket(PeerInvocationId, Message("peer after failure")));
+            harness.Peer.Packets.ShouldAllBe(packet => packet.Type == NodePacketType.LogMessage);
+            harness.Provider.TaskHandlerRegistrationCount.ShouldBe(1);
+        }
+        finally
+        {
+            harness.Provider.PacketReceived(1, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+            await Within(execution);
+            environment.Dispose();
+        }
+    }
+
+    private static TaskHostBuildRequest LegacyRequest(int id)
+        => new([null!], ["Build"], [null], null, [null!], true) { RequestId = id };
 
     private static ITaskHostCallbackPacket CreateRequest(string callback)
     {
@@ -240,6 +385,7 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
     {
         private readonly Process _process = Process.GetCurrentProcess();
         private readonly ManualResetEventSlim _terminated = new();
+        private BuildEventContext? _policyProjectContext;
         public ReplyStream Pipe { get; } = new();
         public RecordingHandler Peer { get; } = new();
         public MockLogger Logger { get; }
@@ -248,6 +394,7 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
         public BuildParameters BuildParameters { get; } = new() { EnableNodeReuse = false };
         public LegacyThreadingData LegacyThreadingData { get; } = new();
         public ILoggingService LoggingService { get; }
+        public BuildEventContext TaskContext { get; private set; } = BuildEventContext.Invalid;
         public string Name => nameof(PacketPumpHarness);
 
         public PacketPumpHarness(ITestOutputHelper output)
@@ -268,7 +415,7 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
         public TaskHostTask CreateTask(IBuildEngine engine, TaskEnvironment environment)
             => new(
                 ElementLocation.Create("callback.proj", 1, 1),
-                new TaskLoggingContext(LoggingService, BuildEventContext.Invalid),
+                new TaskLoggingContext(LoggingService, TaskContext),
                 this, TaskHostParameters.Empty,
                 new LoadedType(typeof(TestTask), AssemblyLoadInfo.Create(typeof(TestTask).Assembly.FullName, null),
                     typeof(TestTask).Assembly, typeof(ITaskItem)),
@@ -277,6 +424,44 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
                 null,
 #endif
                 null, 1, environment) { BuildEngine = engine };
+
+        public RecordingTaskHost CreatePolicyHost(ITargetBuilderCallback callback, bool warnAndContinue, string warningPolicy)
+        {
+            var request = new BuildRequest(1, 1, 1, [], null, BuildEventContext.Invalid, null);
+            var configuration = new BuildRequestConfiguration(1,
+                new BuildRequestData("callback.proj", new Dictionary<string, string?>(), "Current", ["Build"], null), "Current")
+            {
+                Project = new ProjectInstance(ProjectRootElement.Create())
+            };
+            var loggingHost = new MockHost(BuildParameters) { LoggingService = LoggingService };
+            loggingHost.GetComponent<ConfigCache>(BuildComponentType.ConfigCache).AddConfiguration(configuration);
+            LoggingService.InitializeComponent(loggingHost);
+            _policyProjectContext = LoggingService.LogProjectStarted(
+                new BuildEventContext(1, -1, BuildEventContext.InvalidProjectContextId, -1),
+                1, 1, BuildEventContext.Invalid, "callback.proj", "Build", [], []);
+            TaskContext = new BuildEventContext(_policyProjectContext.SubmissionId, _policyProjectContext.NodeId,
+                _policyProjectContext.ProjectInstanceId, _policyProjectContext.ProjectContextId, targetId: 2, taskId: 3);
+            if (warningPolicy != "default")
+            {
+                LoggingService.AddWarningsAsErrors(_policyProjectContext, new HashSet<string>());
+                if (warningPolicy == "code-exempt")
+                {
+                    LoggingService.AddWarningsNotAsErrors(_policyProjectContext, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4018" });
+                }
+                else if (warningPolicy == "as-message")
+                {
+                    LoggingService.AddWarningsAsMessages(_policyProjectContext, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "MSB4018" });
+                }
+            }
+
+            var entry = new BuildRequestEntry(request, configuration, TaskEnvironmentHelper.CreateForTest());
+            return new RecordingTaskHost(this, entry, ElementLocation.Create("callback.proj", 1, 1), callback)
+            {
+                LoggingContext = new TaskLoggingContext(LoggingService, TaskContext),
+                ContinueOnError = true,
+                ConvertErrorsToWarnings = warnAndContinue,
+            };
+        }
 
         public IBuildComponent GetComponent(BuildComponentType type)
             => type == BuildComponentType.OutOfProcTaskHostNodeProvider ? Provider : throw new NotSupportedException(type.ToString());
@@ -289,6 +474,10 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
             Pipe.CompleteRead();
             _terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
             Context.WaitForSendCompletion(10_000).ShouldBeTrue();
+            if (_policyProjectContext is not null)
+            {
+                LoggingService.LogProjectFinished(_policyProjectContext, "callback.proj", false);
+            }
             LoggingService.ShutdownComponent();
             Pipe.Dispose();
             _terminated.Dispose();
@@ -302,7 +491,12 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
         private readonly MemoryStream _written = new();
         private long _consumed;
         public TaskCompletionSource<TaskHostConfiguration> Configuration { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-        public TaskCompletionSource<ITaskHostCallbackPacket> Response { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<ITaskHostCallbackPacket>> _responses = new();
+        public TaskCompletionSource<ITaskHostCallbackPacket> Response => ResponseSource(17);
+        public Task<ITaskHostCallbackPacket> ResponseFor(int id) => ResponseSource(id).Task;
+        private TaskCompletionSource<ITaskHostCallbackPacket> ResponseSource(int id)
+            => _responses.GetOrAdd(id, _ => new(TaskCreationOptions.RunContinuationsAsynchronously));
+        private void RecordResponse(ITaskHostCallbackPacket response) => ResponseSource(response.RequestId).TrySetResult(response);
 
         public void CompleteRead() => _read.TrySetResult(0);
         public override void Write(byte[] buffer, int offset, int count)
@@ -330,13 +524,13 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
                         Configuration.TrySetResult((TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(translator));
                         break;
                     case NodePacketType.TaskHostBuildResponse:
-                        Response.TrySetResult((TaskHostBuildResponse)TaskHostBuildResponse.FactoryForDeserialization(translator));
+                        RecordResponse((TaskHostBuildResponse)TaskHostBuildResponse.FactoryForDeserialization(translator));
                         break;
                     case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
-                        Response.TrySetResult((TaskHostIsRunningMultipleNodesResponse)TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization(translator));
+                        RecordResponse((TaskHostIsRunningMultipleNodesResponse)TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization(translator));
                         break;
                     case NodePacketType.TaskHostCoresResponse:
-                        Response.TrySetResult((TaskHostCoresResponse)TaskHostCoresResponse.FactoryForDeserialization(translator));
+                        RecordResponse((TaskHostCoresResponse)TaskHostCoresResponse.FactoryForDeserialization(translator));
                         break;
                 }
 
@@ -362,6 +556,57 @@ public sealed class TaskHostCallbackException_Tests(ITestOutputHelper output)
             }
             base.Dispose(disposing);
         }
+    }
+
+    private sealed class RecordingTaskHost(IBuildComponentHost host, BuildRequestEntry entry, ElementLocation location, ITargetBuilderCallback callback)
+        : TaskHost(host, entry, location, callback), IBuildEngine3
+    {
+        public List<Exception> CallbackFailures { get; } = [];
+        public TaskCompletionSource<bool> TrailingMessageReceived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        BuildEngineResult IBuildEngine3.BuildProjectFilesInParallel(string[] projects, string[] targets,
+            IDictionary[] properties, IList<string>[] removedProperties, string[] toolsVersions, bool returnOutputs)
+        {
+            try
+            {
+                return base.BuildProjectFilesInParallel(projects, targets, properties, removedProperties, toolsVersions, returnOutputs);
+            }
+            catch (Exception ex)
+            {
+                CallbackFailures.Add(ex);
+                throw;
+            }
+        }
+
+        void IBuildEngine.LogMessageEvent(BuildMessageEventArgs e)
+        {
+            base.LogMessageEvent(e);
+            if (e.Message == TrailingMessage)
+            {
+                TrailingMessageReceived.TrySetResult(true);
+            }
+        }
+    }
+
+    private sealed class FailingTargetCallback(params Exception?[] failures) : ITargetBuilderCallback
+    {
+        private int _next;
+        public Task<ITargetResult[]> LegacyCallTarget(string[] targets, bool continueOnError, ElementLocation location)
+        {
+            Exception? failure = failures[_next++];
+            return failure is not null
+                ? Task.FromException<ITargetResult[]>(failure)
+                : Task.FromResult<ITargetResult[]>([new TargetResult([], BuildResultUtilities.GetSuccessResult())]);
+        }
+        public Task<BuildResult[]> BuildProjects(string[] files, PropertyDictionary<ProjectPropertyInstance>[] properties,
+            string[] versions, string[] targets, bool wait, bool skipNonexistentTargets) => throw new NotSupportedException();
+        public Task BlockOnTargetInProgress(int id, string target, BuildResult result) => throw new NotSupportedException();
+        public void Yield() => throw new NotSupportedException();
+        public void Reacquire() => throw new NotSupportedException();
+        public void EnterMSBuildCallbackState() => throw new NotSupportedException();
+        public void ExitMSBuildCallbackState() => throw new NotSupportedException();
+        public int RequestCores(object monitor, int cores, bool wait) => throw new NotSupportedException();
+        public void ReleaseCores(int cores) => throw new NotSupportedException();
     }
 
     private sealed class RecordingHandler : INodePacketHandler

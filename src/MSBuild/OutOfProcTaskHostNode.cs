@@ -1303,10 +1303,10 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-                _consoleOutWriter?.Flush();
-                _consoleErrorWriter?.Flush();
                 while (_taskCompletePackets.TryDequeue(out INodePacket packet))
                 {
+                    _consoleOutWriter?.Flush();
+                    _consoleErrorWriter?.Flush();
                     _nodeEndpoint.SendData(packet);
                 }
             }
