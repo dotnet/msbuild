@@ -163,6 +163,11 @@ disconnect removes the exact handler even when it is not at the top. Invocation
 registrations are removed on completion or connection termination. Unknown
 invocation IDs are invalid wire data and use the existing connection-failure path.
 
+Task-local exceptions raised while servicing callbacks do not end the remote
+invocation. The parent sends a failure or conservative reply, retains ownership
+until completion or terminal notification, and then rethrows the original
+exception. Critical exceptions and logger failures retain immediate-abort behavior.
+
 Attachment and terminal notification are synchronized. A terminal failure notifies every attached task and removes its registrations. Each task sends replies and cancellation through its acquired connection, not a reusable lookup key, so a late reply cannot reach a replacement TaskHost.
 
 **Compatibility boundary:** invocation routing requires version-8 task
