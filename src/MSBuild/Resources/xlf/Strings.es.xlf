@@ -38,6 +38,11 @@
         <target state="translated">Rutas de registro binarias duplicadas especificadas y omitidas: {0}</target>
         <note>{0} is the list of duplicate paths that were filtered out</note>
       </trans-unit>
+      <trans-unit id="DuplicateReplayFilter">
+        <source>MSBUILD : error MSB1075: Specify -replayFilter only once, including response files.</source>
+        <target state="new">MSBUILD : error MSB1075: Specify -replayFilter only once, including response files.</target>
+        <note>{StrBegin="MSBUILD : error MSB1075: "}Do not localize -replayFilter.</note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -304,6 +309,42 @@ Esta marca es experimental y puede que no funcione según lo previsto.
     LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
   </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_53_ReplayFilterSwitch">
+        <source>  -replayFilter:Exclude=&lt;kind&gt;[,&lt;kind&gt;...]
+                     Replay a .binlog into one new -binaryLogger output,
+                     excluding the named event kinds from all replay loggers.
+                     Names are case-insensitive. Specify this switch once.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Existing destinations and newer-format inputs are rejected.
+                     Custom/file/terminal loggers, -check, build-only switches
+                     and ProjectImports=ZipFile are not supported.
+                     Embedded imports are not filtered. This is not redaction.
+
+                     Example:
+                     in.binlog -bl:out.binlog -replayFilter:Exclude=Message
+    </source>
+        <target state="new">  -replayFilter:Exclude=&lt;kind&gt;[,&lt;kind&gt;...]
+                     Replay a .binlog into one new -binaryLogger output,
+                     excluding the named event kinds from all replay loggers.
+                     Names are case-insensitive. Specify this switch once.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Existing destinations and newer-format inputs are rejected.
+                     Custom/file/terminal loggers, -check, build-only switches
+                     and ProjectImports=ZipFile are not supported.
+                     Embedded imports are not filtered. This is not redaction.
+
+                     Example:
+                     in.binlog -bl:out.binlog -replayFilter:Exclude=Message
+    </target>
+        <note>
+      LOCALIZATION: Switches, event kind names, ProjectImports=ZipFile, and Exclude= should not be localized.
+      LOCALIZATION: Keep help lines within 80 characters.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: El valor de prioridad baja no es válido. {0}.</target>
@@ -333,6 +374,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       This error is shown when a user specifies a value for the nologo parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="InvalidReplayFilter">
+        <source>MSBUILD : error MSB1076: Invalid replay filter. Use Exclude= followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed.</source>
+        <target state="new">MSBUILD : error MSB1076: Invalid replay filter. Use Exclude= followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed.</target>
+        <note>{StrBegin="MSBUILD : error MSB1076: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
@@ -1705,6 +1751,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="MissingReplayFilter">
+        <source>MSBUILD : error MSB1074: Specify -replayFilter:Exclude=&lt;kind&gt;[,&lt;kind&gt;...].</source>
+        <target state="new">MSBUILD : error MSB1074: Specify -replayFilter:Exclude=&lt;kind&gt;[,&lt;kind&gt;...].</target>
+        <note>{StrBegin="MSBUILD : error MSB1074: "}Do not localize -replayFilter:Exclude=.</note>
+      </trans-unit>
       <trans-unit id="MissingResponseFileError">
         <source>MSBUILD : error MSB1012: Specify a response file.</source>
         <target state="translated">MSBUILD : error MSB1012: Especifique un archivo de respuesta.</target>
@@ -1853,6 +1904,51 @@ Esta marca es experimental y puede que no funcione según lo previsto.
     reference here, we disallow the same response file from being included twice. This error message would be followed by the
     exact @ switch that resulted in the duplicate response file.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterCanceled">
+        <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
+        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterEvaluationPair">
+        <source>MSBUILD : error MSB1083: Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="new">MSBUILD : error MSB1083: Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</target>
+        <note>{StrBegin="MSBUILD : error MSB1083: "}Do not localize the event kind names.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterFailed">
+        <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
+        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterInputRequired">
+        <source>MSBUILD : error MSB1078: -replayFilter requires a .binlog input, not a project or solution.</source>
+        <target state="new">MSBUILD : error MSB1078: -replayFilter requires a .binlog input, not a project or solution.</target>
+        <note>{StrBegin="MSBUILD : error MSB1078: "}Do not localize -replayFilter or .binlog.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterInvalidOutput">
+        <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
+        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterOutputExists">
+        <source>MSBUILD : error MSB1080: The filtered binary log destination already exists. Choose a new output path.</source>
+        <target state="new">MSBUILD : error MSB1080: The filtered binary log destination already exists. Choose a new output path.</target>
+        <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterOutputRequired">
+        <source>MSBUILD : error MSB1079: -replayFilter requires exactly one -binaryLogger output.</source>
+        <target state="new">MSBUILD : error MSB1079: -replayFilter requires exactly one -binaryLogger output.</target>
+        <note>{StrBegin="MSBUILD : error MSB1079: "}Do not localize -replayFilter or -binaryLogger.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterUnsupportedSwitch">
+        <source>MSBUILD : error MSB1077: This switch is not supported with -replayFilter.</source>
+        <target state="new">MSBUILD : error MSB1077: This switch is not supported with -replayFilter.</target>
+        <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize -replayFilter.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterZipNotSupported">
+        <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
+        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
         <source>MSBUILD : error MSB1022: Response file does not exist.</source>

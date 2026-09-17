@@ -343,6 +343,25 @@ namespace Microsoft.Build.Logging
         /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
         /// </summary>
         public void Initialize(IEventSource eventSource)
+            => InitializeCore(eventSource, outputStream: null);
+
+        /// <summary>
+        /// Initializes the logger to write to the supplied stream instead of the configured log file.
+        /// </summary>
+        /// <param name="eventSource">The source of build events.</param>
+        /// <param name="outputStream">A writable stream, closed by <see cref="Shutdown"/>.</param>
+        /// <remarks>
+        /// The configured file path still identifies the log in metadata and controls import archive paths.
+        /// The caller must dispose the stream if initialization fails.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="outputStream"/> is null.</exception>
+        public void Initialize(IEventSource eventSource, Stream outputStream)
+        {
+            ArgumentNullException.ThrowIfNull(outputStream);
+            InitializeCore(eventSource, outputStream);
+        }
+
+        private void InitializeCore(IEventSource eventSource, Stream outputStream)
         {
             _initialTargetOutputLogging = Traits.Instance.EnableTargetOutputLogging;
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
@@ -377,7 +396,7 @@ namespace Microsoft.Build.Logging
                     Directory.CreateDirectory(logDirectory);
                 }
 
-                stream = new FileStream(FilePath, FileMode.Create);
+                stream = outputStream ?? new FileStream(FilePath, FileMode.Create);
 
                 if (CollectProjectImports != ProjectImportsCollectionMode.None && replayEventSource == null)
                 {

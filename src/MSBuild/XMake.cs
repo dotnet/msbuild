@@ -455,6 +455,7 @@ namespace Microsoft.Build.CommandLine
                 bool serverIncompatibleSwitch =
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
+                    commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReplayFilter) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
                     FileUtilities.IsBinaryLogFilename(projectFile);
 
@@ -942,6 +943,7 @@ namespace Microsoft.Build.CommandLine
                 string[] getTargetResult = [];
                 string getResultOutputFile = string.Empty;
                 BuildResult result = null;
+                FilteredBinlogReplay filteredReplay = null;
 #if FEATURE_REPORTFILEACCESSES
                 bool reportFileAccesses = false;
 #endif
@@ -1007,6 +1009,7 @@ namespace Microsoft.Build.CommandLine
                                             ref getItem,
                                             ref getTargetResult,
                                             ref getResultOutputFile,
+                                            ref filteredReplay,
                                             recursing: false,
                                             string.Join(" ", commandLine),
                                             switchesAlreadyGathered);
@@ -1041,7 +1044,18 @@ namespace Microsoft.Build.CommandLine
 
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
                     // as if a build is happening
-                    if (FileUtilities.IsBinaryLogFilename(projectFile))
+                    if (filteredReplay is not null)
+                    {
+                        ILogger[] replayLoggers = distributedLoggerRecords
+                            .Select(record => record.CentralLogger)
+                            .Where(logger => logger is not null)
+                            .Concat(loggers)
+                            .ToArray();
+                        exitType = filteredReplay.Replay(replayLoggers, cpuCount, s_buildCancellationSource.Token)
+                            ? ExitType.Success
+                            : ExitType.BuildError;
+                    }
+                    else if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
                         ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount, isBuildCheckEnabled);
                     }
@@ -1181,7 +1195,7 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(timerOutputFilename))
+                    if (filteredReplay is null && !string.IsNullOrEmpty(timerOutputFilename))
                     {
                         AppendOutputFile(timerOutputFilename, (long)elapsedTime.TotalMilliseconds);
                     }
@@ -2459,6 +2473,7 @@ namespace Microsoft.Build.CommandLine
             ref string[] getItem,
             ref string[] getTargetResult,
             ref string getResultOutputFile,
+            ref FilteredBinlogReplay filteredReplay,
             bool recursing,
             string commandLine,
             bool switchesAlreadyGathered = false)
@@ -2535,7 +2550,8 @@ namespace Microsoft.Build.CommandLine
             {
                 ShowHelpMessage();
             }
-            else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
+            else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode)
+                && !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReplayFilter))
             {
                 s_isNodeMode = true;
 
@@ -2618,6 +2634,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref getItem,
                                                            ref getTargetResult,
                                                            ref getResultOutputFile,
+                                                           ref filteredReplay,
                                                            recursing: true,
                                                            commandLine);
                     }
@@ -2627,6 +2644,18 @@ namespace Microsoft.Build.CommandLine
                             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
                             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
                             Directory.GetFiles));
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReplayFilter))
+                    {
+                        filteredReplay = FilteredBinlogReplay.Create(projectFile, commandLineSwitches);
+                        string terminalLoggerArgument = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.TerminalLogger].LastOrDefault();
+                        CommandLineSwitchException.VerifyThrow(
+                            !string.Equals(terminalLoggerArgument, "true", StringComparison.OrdinalIgnoreCase)
+                                && !string.Equals(terminalLoggerArgument, "on", StringComparison.OrdinalIgnoreCase),
+                            "ReplayFilterUnsupportedSwitch",
+                            "-terminalLogger");
+                        useTerminalLogger = false;
+                    }
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
@@ -3860,7 +3889,10 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Add any loggers which have been specified on the command line
-            distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
+            // Filtered replay ignores dotnet's injected build logger, validated during preflight.
+            distributedLoggerRecords = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReplayFilter)
+                ? []
+                : ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
             // Otherwise choose default console logger: None, TerminalLogger, or the older ConsoleLogger
             if (useSimpleErrorLogger)
