@@ -13,23 +13,19 @@ As a result all shared code _must_ have **internal** access only. There should b
 ___
 
 ## **Resources**
-Shared code needs access to assembly resources e.g. for loading error messages for exceptions. Each assembly that shares code, _must_ define a class called `AssemblyResources` in the shared namespace, with an `internal static readonly` member of type `ResourceManager` called `resources`. Each sharing assembly is required to do this because only it knows what the manifest resource name (a.k.a. logical name) of its resources is. Shared code can then statically reference the assembly’s resources. If the `AssemblyResources` class is not defined, it is a compile-time error.
+Shared code needs access to assembly resources e.g. for loading error messages for exceptions. Each assembly that shares code, _must_ define a class called `AssemblyResources` in the shared namespace, exposing an `internal static` `ResourceManager` property called `PrimaryResources`. Each sharing assembly is required to do this because only it knows what the manifest resource name (a.k.a. logical name) of its resources is. Shared code can then statically reference the assembly’s resources. If the `AssemblyResources` class is not defined, it is a compile-time error.
 
 The `AssemblyResources` class at a minimum must look like this:
 
 ```cs
 using System.Resources;
-using System.Reflection;
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.Shared;
+
+internal static class AssemblyResources
 {
-    internal static class AssemblyResources
-    {
-        internal static readonly ResourceManager resources =
-            new ResourceManager(
-                "<manifest resource name>",
-                Assembly.GetExecutingAssembly());
-    }
+    internal static ResourceManager PrimaryResources { get; } =
+        new ResourceManager("<manifest resource name>", typeof(AssemblyResources).Assembly);
 }
 ```
 
@@ -39,45 +35,35 @@ ___
 ## **Shared Resources**
 Shared code sometimes needs to define its own resources. If this were not allowed, then each sharing assembly would have to redefine the same set of resources on behalf of the shared code. As with code, maintaining multiple copies of the same resources is not desirable.
 
-Shared resources must be placed in the file `Strings.shared.resx` in the shared code directory. All resource names must be prefixed with “`Shared.`” to distinguish the shared resources from an assembly’s primary resources. Each sharing assembly must add an `internal static readonly` member of type `ResourceManager`, called `sharedResources`, to the `AssemblyResources` class. This is necessary because only the sharing assembly can assign the correct manifest resource name to the shared resources. Shared code can then statically reference the shared resources. The absence of either the `AssemblyResources` class, or the `sharedResources` member is a compile-time error.
+Shared resources live in `Microsoft.Build.Framework`'s `SR.resx` (`src/Framework/Resources/SR.resx`). Because every assembly that shares code already references `Microsoft.Build.Framework`, they can all consume these resources through Framework's generated `SR.ResourceManager`. Each sharing assembly exposes them via an `internal static` `ResourceManager` property called `SharedResources` on its `AssemblyResources` class. Shared resource names do **not** use any special prefix — they are ordinary names in Framework's `SR.resx`.
 
-For assemblies that share resources, the `AssemblyResources` class at a minimum must look like this:
+For assemblies that share resources, the `AssemblyResources` class looks like this:
 
 ```cs
 using System.Resources;
-using System.Reflection;
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.Shared;
+
+internal static class AssemblyResources
 {
-    internal static class AssemblyResources
-    {
-        internal static readonly ResourceManager resources =
-            new ResourceManager(
-                "<manifest resource name>",
-                Assembly.GetExecutingAssembly());
+    internal static ResourceManager PrimaryResources { get; } =
+        new ResourceManager("<manifest resource name>", typeof(AssemblyResources).Assembly);
 
-        internal static readonly ResourceManager sharedResources =
-            new ResourceManager(
-                "<manifest resource name of shared resources>",
-                Assembly.GetExecutingAssembly());
-    }
+    internal static ResourceManager SharedResources => Framework.Resources.SR.ResourceManager;
 }
 ```
 
-To simplify the retrieval of resources, the `AssemblyResources` class can optionally define a method called `GetString()` that searches both the assembly’s primary resources as well as its shared resources for a given string. For example:
+To simplify the retrieval of resources, the `AssemblyResources` class defines a `GetString()` method that searches the assembly’s primary resources first, then falls back to its shared resources:
 
 ```cs
-internal static string GetString(string name)
+internal static string GetString(string name, CultureInfo? culture = null)
 {
-    string resource = resources.GetString(name, CultureInfo.CurrentUICulture);
+    culture ??= CultureInfo.CurrentUICulture;
+    string? resource = PrimaryResources.GetString(name, culture) ??
+                       SharedResources.GetString(name, culture);
 
-    if (resource == null)
-    {
-        resource = sharedResources.GetString(name, CultureInfo.CurrentUICulture);
-    }
+    Assumed.NotNull(resource, $"Missing resource '{name}'");
 
     return resource;
 }
 ```
-
-NOTE: if the above method is added to the `AssemblyResources` class, it is advisable to make both `resources` and `sharedResources` private (instead of `internal`) to unify access to assembly resources.

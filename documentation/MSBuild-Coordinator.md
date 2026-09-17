@@ -22,7 +22,8 @@ The coordinator solves this by:
 1. **Enforcing a global node budget** (defaults to processor count)
 2. **Implementing fair-share allocation** to distribute available nodes fairly
 3. **Monitoring build health** via periodic heartbeats
-4. **Auto-shutting down** after a timeout period
+4. **Allowing nested build processes to share root grants** without consuming additional global budget
+5. **Auto-shutting down** after a timeout period
 
 *Note*: The current default budget is intentionally conservative for V1. As we gather real-world usage data, we should experiment with alternative defaults (including moderate oversubscription above 1x processor count) and tune this value for better throughput without destabilizing interactive machine workloads.
 
@@ -79,7 +80,8 @@ The coordinator solves this by:
 **Coordinator Server** ([src/MSBuild.Coordinator/](../src/MSBuild.Coordinator/))
 - `CoordinatorServer.cs` - Main coordinator server that listens for client connections via named pipe
 - `NodeBudgetManager.cs` - Implements node allocation and fair-share logic
-- `ClientConnection.cs` - Manages individual client connections
+- `CoordinatorServer.Connection.cs` - Handles initial server-side handshake and request negotiation
+- `CoordinatorServer.ConnectedClient.cs` - Manages accepted client connections
 - `BuildGrant.cs` - Represents a node allocation to a build
 - `Program.cs` - Server launcher and singleton instance management
 
@@ -89,7 +91,7 @@ The coordinator solves this by:
 
 **Protocol** ([src/Framework/Coordinator/](../src/Framework/Coordinator/))
 - Handshake messages: `ClientHandshakeMessage`, `ServerHandshakeMessage`
-- Client messages: `RequestNodesMessage`, `HeartbeatMessage`, `ReleaseNodesMessage`
+- Client messages: `RequestNodesMessage`, `JoinGrantMessage`, `HeartbeatMessage`, `ReleaseNodesMessage`
 - Server messages: `NodeGrantMessage`, `WaitMessage`, `ErrorMessage`
 - `Capabilities.cs` - Capability constants for feature negotiation
 - `CoordinatorSettings.cs` - Configuration management
@@ -120,15 +122,16 @@ This design avoids the "version bump" problem where a single version number forc
 
 ### Message Types
 
-After the handshake, the coordinator uses a binary protocol with six message types:
+After the handshake, the coordinator uses a binary protocol with these message types:
 
 **Client → Server:**
 - `RequestNodesMessage` - Requests a node grant (contains requested node count)
+- `JoinGrantMessage` - Requests to join an existing root grant (requires `nested-grants` capability)
 - `HeartbeatMessage` - Periodic keep-alive message (default: every 5 seconds)
 - `ReleaseNodesMessage` - Sent when build completes, releases allocated nodes
 
 **Server → Client:**
-- `NodeGrantMessage` - Grants nodes to a build
+- `NodeGrantMessage` - Grants nodes to a build and optionally includes a root grant token (when both sides support `nested-grants`)
 - `WaitMessage` - Indicates build is queued, no nodes immediately available
 - `ErrorMessage` - Indicates an error condition
 
@@ -152,7 +155,41 @@ Build Queued:
   Build ← WaitMessage
   Build → Heartbeat (every 5s while waiting)
   Eventually: Build ← NodeGrantMessage(N) [N is fair-share computed from available nodes and contenders, capped by requested nodes (N <= 4 here)]
+
+Nested Build:
+  Root Build → ClientHandshakeMessage(..., capabilities: nested-grants)
+  Root Build ← ServerHandshakeMessage(..., capabilities: nested-grants)
+  Root Build → RequestNodesMessage(4)
+  Root Build ← NodeGrantMessage(grantId, 4)
+  Nested Build inherits grantId from the root build process environment
+  Nested Build → ClientHandshakeMessage(..., capabilities: nested-grants)
+  Nested Build ← ServerHandshakeMessage(..., capabilities: nested-grants)
+  Nested Build → JoinGrantMessage(grantId, 4)
+  Nested Build ← NodeGrantMessage(grantId, 4)
 ```
+
+---
+
+## Nested Grants
+
+Some build operations launch child MSBuild processes while the parent build still owns its coordinator grant. A common example is NuGet static-graph restore, which can invoke a nested process that uses the MSBuild APIs as part of an already-running coordinated build.
+
+Without nested grants, the child process could request a new root grant while the parent is still holding the full budget. If no budget is available, the child waits for resources that the parent cannot release until the child completes, causing a deadlock.
+
+Nested grants avoid this by treating child processes as participants in the parent grant:
+
+1. The root build receives a grant token in `NodeGrantMessage`.
+2. `BuildManager` records that token in the build process environment as `MSBUILDCOORDINATORGRANTID`, so task-launched child processes inherit it.
+3. A child process that sees the token and a server that supports `nested-grants` sends `JoinGrantMessage`.
+4. The coordinator validates that the root grant is still active.
+5. If valid, the child receives a grant capped by the root grant's node count without consuming additional global budget.
+6. Releasing a nested grant does not release global budget or invalidate the root grant token.
+
+Nested grants do not implement a scheduler within the root grant. Each nested process is capped by the root grant's node count, but the coordinator does not track combined concurrency across the root process and all nested participants. The root build is expected to coordinate its own nested work so it does not oversubscribe the resources it was granted.
+
+Nested grant validation happens when the nested process joins the root grant. If the root grant is released later, the coordinator rejects new joins for that grant ID, but it does not revoke nested grants that were already issued. Those nested builds continue until they release or disconnect.
+
+Nested grants are capability-gated. Older peers that do not advertise `nested-grants` continue to exchange `NodeGrantMessage` using the legacy int-only wire shape (`GrantId` is `Guid.Empty` and never sent on the wire), and clients only send `JoinGrantMessage` when the server advertises the capability.
 
 ---
 
@@ -219,17 +256,18 @@ This ensures:
 4. Receives either `NodeGrantMessage` (nodes granted) or `WaitMessage` (queued)
    - *Note*: If `WaitMessage` is received, `CoordinatorClient` starts sending periodic heartbeats while waiting for the deferred `NodeGrantMessage`, so the coordinator doesn't consider it stale during the queue wait.
 5. Updates build's maximum node count based on grant
+6. If the grant includes a grant ID, records it in the build process environment so nested child processes can join the root grant
 
 > *V1 Behavior*: The number of nodes granted to a build is fixed at initialization and does not change during the build's lifetime. The grant persists as long as the build is running (indicated by heartbeats) and is released only when the build completes.
 
 **During build execution:**
 
-6. BuildManager spawns build nodes up to the maximum node count, which may have been limited by the number of nodes granted by the coordinator
-7. `CoordinatorClient` continues sending periodic heartbeats to indicate the build is still active
+7. BuildManager spawns build nodes up to the maximum node count, which may have been limited by the number of nodes granted by the coordinator
+8. `CoordinatorClient` continues sending periodic heartbeats to indicate the build is still active
 
 **On build completion:**
 
-8. Sends `ReleaseNodesMessage` to free nodes for other waiting builds
+9. Sends `ReleaseNodesMessage` to free nodes for other waiting builds
 
 **Key Principle:** The coordinator is entirely optional. If it's unavailable or disabled, the build uses its requested node count without coordination.
 
@@ -251,6 +289,7 @@ This ensures:
 | `MSBUILDCOORDINATORNODEBUDGET` | Processor count | Override total node budget |
 | `MSBUILDCOORDINATORHEARTBEAT` | 5000 | Override heartbeat interval (ms) |
 | `MSBUILDCOORDINATORSHUTDOWNTIMEOUT` | 60000 | Override shutdown timeout (ms) |
+| `MSBUILDCOORDINATORGRANTID` | (empty) | Internal token used by child processes to join an active root grant |
 
 *Note*: `MSBUILDCOORDINATORNODEBUDGET` is the primary knob for throughput experiments, including testing moderate oversubscription factors above 1x processor count.
 

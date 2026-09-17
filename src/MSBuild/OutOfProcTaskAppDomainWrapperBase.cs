@@ -12,6 +12,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -122,7 +123,7 @@ namespace Microsoft.Build.CommandLine
             LoadedType taskType = null;
             try
             {
-                TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
+                TypeLoader typeLoader = TypeLoader.Create<ITask>();
                 taskType = typeLoader.Load(
                     taskName,
                     AssemblyLoadInfo.Create(null, taskLocation),
@@ -139,6 +140,18 @@ namespace Microsoft.Build.CommandLine
                 return new OutOfProcTaskHostTaskResult(
                                 TaskCompleteType.CrashedDuringInitialization,
                                 exceptionToReturn,
+                                "TaskInstantiationFailureError",
+                                [taskName, taskLocation, String.Empty]);
+            }
+
+            // TypeLoader.Load returns null (rather than throwing) when the requested type cannot be
+            // found in the assembly. Guard against that here so we surface an actionable diagnostic
+            // instead of crashing later with an opaque NullReferenceException.
+            if (taskType == null)
+            {
+                return new OutOfProcTaskHostTaskResult(
+                                TaskCompleteType.CrashedDuringInitialization,
+                                new TypeLoadException(),
                                 "TaskInstantiationFailureError",
                                 [taskName, taskLocation, String.Empty]);
             }
@@ -325,6 +338,10 @@ namespace Microsoft.Build.CommandLine
                     taskLine,
                     taskColumn,
                     new TaskLoader.LogError(LogErrorDelegate),
+                    // The out-of-proc task host runs tasks in multi-process mode, where each process provides
+                    // its own isolated environment. Supply the fallback environment so a task that only declares
+                    // a TaskEnvironment constructor can still be instantiated here.
+                    TaskEnvironment.Fallback,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     // custom app domain assembly loading won't be available for task host
@@ -439,19 +456,17 @@ namespace Microsoft.Build.CommandLine
         /// Logs errors from TaskLoader
         /// </summary>
         private void LogErrorDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
-        {
-            buildEngine.LogErrorEvent(new BuildErrorEventArgs(
-                null,
-                null,
-                taskLocation,
-                taskLine,
-                taskColumn,
-                0,
-                0,
-                ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
-                null,
-                taskName));
-        }
+            => buildEngine.LogErrorEvent(new BuildErrorEventArgs(
+                subcategory: null,
+                code: null,
+                file: taskLocation,
+                lineNumber: taskLine,
+                columnNumber: taskColumn,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message: MessageFormatter.Format(AssemblyResources.GetString(message), messageArgs),
+                helpKeyword: null,
+                senderName: taskName));
 
         /// <summary>
         /// Filters null elements from a string[] task output.

@@ -94,20 +94,7 @@ environment: copilot-pat-pool
 engine:
   id: copilot
   env:
-     COPILOT_GITHUB_TOKEN: |
-      ${{ case(
-        needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_PAT_0,
-        needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_PAT_1,
-        needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_PAT_2,
-        needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_PAT_3,
-        needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_PAT_4,
-        needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_PAT_5,
-        needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_PAT_6,
-        needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_PAT_7,
-        needs.pat_pool.outputs.pat_number == '8', secrets.COPILOT_PAT_8,
-        needs.pat_pool.outputs.pat_number == '9', secrets.COPILOT_PAT_9,
-        'NO COPILOT PAT AVAILABLE')
-      }}
+     COPILOT_GITHUB_TOKEN: "${{ case( needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_PAT_0, needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_PAT_1, needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_PAT_2, needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_PAT_3, needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_PAT_4, needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_PAT_5, needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_PAT_6, needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_PAT_7, needs.pat_pool.outputs.pat_number == '8', secrets.COPILOT_PAT_8, needs.pat_pool.outputs.pat_number == '9', secrets.COPILOT_PAT_9, 'NO COPILOT PAT AVAILABLE') }}"
 ---
 
 # Flaky Test Auto-Fixer (scheduled daily)
@@ -177,8 +164,14 @@ repo-wide text search, then locate the class/method within it.
 Run the detector against the quarantine pipeline, synchronously, via the `bash` tool:
 
 ```bash
-pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 150 -MaxArtifactDownloads 400 -IncludePassed -IncludeErrorDetails -JsonOut quarantine-health.json
+pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 500 -MaxArtifactDownloads 1200 -IncludePassed -IncludeErrorDetails -JsonOut quarantine-health.json
 ```
+
+`-MaxBuilds` and `-MaxArtifactDownloads` are **caps**, not targets: a higher value never forces extra
+work, it only stops the scan being marked truncated (`scanComplete: false`). Definition 344 produces
+~335 completed builds in a 21-day window (mostly PR-validation builds, which are a legitimate data
+source here), carrying several hundred test-log artifacts, so both caps are set comfortably above
+that real volume so a full, unbiased scan can complete. Raise them further if def-344 volume grows.
 
 The scan downloads and parses many artifacts and can take **several minutes**. It writes the JSON to
 stdout and to `-JsonOut` **only on completion** — there is no partial file mid-run. Do **not**

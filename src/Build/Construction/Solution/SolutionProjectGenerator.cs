@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 #endif
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -206,6 +207,7 @@ namespace Microsoft.Build.Construction
         /// <param name="sdkResolverService">An <see cref="ISdkResolverService"/> to use.</param>
         /// <param name="submissionId">The current build submission ID.</param>
         /// <returns>An array of ProjectInstances.  The first instance is the traversal project, the remaining are the metaprojects for each project referenced in the solution.</returns>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         internal static ProjectInstance[] Generate(
             SolutionFile solution,
             IDictionary<string, string> globalProperties,
@@ -736,6 +738,7 @@ namespace Microsoft.Build.Construction
         /// project to be generated is the private variable "msbuildProject" and the SolutionFile containing information
         /// about the solution is the private variable "solutionFile"
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         private ProjectInstance[] Generate()
         {
             // The Version is not available in the new parser.
@@ -763,6 +766,7 @@ namespace Microsoft.Build.Construction
         /// Given a parsed solution, generate a top level traversal project and the metaprojects representing the dependencies for each real project
         /// referenced in the solution.
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         private ProjectInstance[] CreateSolutionProject(string wrapperProjectToolsVersion, bool explicitToolsVersionSpecified)
         {
             AddFakeReleaseSolutionConfigurationIfNecessary();
@@ -899,6 +903,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Creates the traversal project instance.  This has all of the properties against which we can perform evaluations for the remainder of the process.
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         private ProjectInstance CreateTraversalInstance(string wrapperProjectToolsVersion, bool explicitToolsVersionSpecified, List<ProjectInSolution> projectsInOrder)
         {
             // Create the traversal project's root element.  We will later instantiate this, and use it for evaluation of conditions on
@@ -2188,6 +2193,7 @@ namespace Microsoft.Build.Construction
         /// Loads each MSBuild project in this solution and looks for its project-to-project references so that
         /// we know what build order we should use when building the solution.
         /// </summary>
+        [RequiresUnreferencedCode("Constructs and evaluates projects, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         private void ScanProjectDependencies(string childProjectToolsVersion, string fullSolutionConfigurationName)
         {
             // Don't bother with all this if the solution configuration doesn't even exist.

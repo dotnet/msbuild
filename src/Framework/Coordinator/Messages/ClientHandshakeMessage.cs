@@ -14,8 +14,6 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record ClientHandshakeMessage : ClientMessage
 {
-    public override ClientMessageType MessageType => ClientMessageType.Handshake;
-
     /// <summary>
     ///  Gets a unique identifier for this connection, used to distinguish clients
     ///  even if OS process IDs are recycled.
@@ -33,6 +31,7 @@ internal sealed record ClientHandshakeMessage : ClientMessage
     public ImmutableArray<string> Capabilities { get; }
 
     public ClientHandshakeMessage(Guid connectionId, int processId, ImmutableArray<string> capabilities)
+        : base(ClientMessageType.Handshake)
     {
         ConnectionId = connectionId;
         ProcessId = processId;
@@ -51,7 +50,7 @@ internal sealed record ClientHandshakeMessage : ClientMessage
         }
     }
 
-    public static ClientHandshakeMessage ReadPayload(BinaryReader reader)
+    internal static ClientHandshakeMessage ReadPayload(BinaryReader reader)
     {
         Guid connectionId = reader.ReadGuid();
         int processId = reader.ReadInt32();

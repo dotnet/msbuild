@@ -115,26 +115,41 @@ namespace Microsoft.Build.Evaluation
 
             if ((locations & ToolsetDefinitionLocations.ConfigurationFile) == ToolsetDefinitionLocations.ConfigurationFile)
             {
-                if (configurationReader == null)
+                // The configuration-file reader is gated by the EnableConfigurationFileToolsets feature switch so
+                // the trimmer can fold this check to its substituted constant. When the switch is disabled (the
+                // trimmer substitutes false) the reader subtree - and with it the System.Configuration.ConfigurationManager
+                // dependency - is dead-stripped from a trimmed/AOT application, leaving only the observable throw below.
+                if (Framework.FeatureSwitches.EnableConfigurationFileToolsets)
                 {
-                    configurationReader = new ToolsetConfigurationReader(environmentProperties, globalProperties);
+                    if (configurationReader == null)
+                    {
+                        configurationReader = new ToolsetConfigurationReader(environmentProperties, globalProperties);
+                    }
+
+                    ReadConfigToolset();
+
+                    // This is isolated into its own function in order to isolate loading of
+                    // System.Configuration.ConfigurationManager.dll to codepaths that really
+                    // need it as a way of mitigating the need to update references to that
+                    // assembly in API consumers.
+                    //
+                    // https://github.com/microsoft/MSBuildLocator/issues/159
+                    [MethodImplAttribute(MethodImplOptions.NoInlining)]
+                    void ReadConfigToolset()
+                    {
+                        // Accumulation of properties is okay in the config file because it's deterministically ordered
+                        defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
+                                        initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
+                                        out defaultOverrideToolsVersionFromConfiguration);
+                    }
                 }
-
-                ReadConfigToolset();
-
-                // This is isolated into its own function in order to isolate loading of
-                // System.Configuration.ConfigurationManager.dll to codepaths that really
-                // need it as a way of mitigating the need to update references to that
-                // assembly in API consumers.
-                //
-                // https://github.com/microsoft/MSBuildLocator/issues/159
-                [MethodImplAttribute(MethodImplOptions.NoInlining)]
-                void ReadConfigToolset()
+                else
                 {
-                    // Accumulation of properties is okay in the config file because it's deterministically ordered
-                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
-                                    initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
-                                    out defaultOverrideToolsVersionFromConfiguration);
+                    // The caller explicitly requested configuration-file toolsets, but the feature was compiled out
+                    // of this trimmed/Native AOT host. Fail observably rather than silently returning no toolsets.
+                    // The configuration file is not a default toolset location on .NET, so hosts that do not opt in
+                    // to ToolsetDefinitionLocations.ConfigurationFile never reach this path.
+                    ErrorUtilities.ThrowArgument("OM_ConfigurationFileToolsetsNotSupported");
                 }
             }
 

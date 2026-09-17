@@ -100,6 +100,11 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
+            if (ReferenceEquals(newEnvironment, _environmentVariables))
+            {
+                return;
+            }
+
             // Simply replace the entire environment dictionary
             _environmentVariables.Clear();
             foreach (KeyValuePair<string, string> entry in newEnvironment)

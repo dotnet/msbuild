@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!Enum.TryParse(Importance, ignoreCase: true, out messageImportance))
                 {
-                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", Importance);
+                    Log.LogErrorWithCodeFromResources("Message_InvalidImportance", Importance);
                     return false;
                 }
             }

@@ -69,6 +69,12 @@ namespace Microsoft.Build.BackEnd
         private readonly ConcurrentDictionary<string, byte /*void*/> _processesToIgnore = new();
 
         /// <summary>
+        /// Stops skipping the processes this provider failed to connect to, so the next build
+        /// retries them instead of starting new nodes.
+        /// </summary>
+        private protected void ClearProcessesToIgnore() => _processesToIgnore.Clear();
+
+        /// <summary>
         /// Delegate used to tell the node provider that a context has been created.
         /// </summary>
         /// <param name="context">The created node context.</param>
@@ -265,18 +271,27 @@ namespace Microsoft.Build.BackEnd
             string expectedProcessName = null;
             ConcurrentQueue<Process> possibleRunningNodes = null;
 
-            // Try to connect to idle nodes if node reuse is enabled.
+            // Try to connect to idle nodes if node reuse is enabled. Scanning the machine for candidates is
+            // best effort: if it fails we simply have nothing to reuse and fall back to launching new nodes.
             if (nodeReuseRequested)
             {
-                IList<Process> possibleRunningNodesList;
-                MSBuildEventSource.Log.NodeReuseScanStart();
-                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
-                MSBuildEventSource.Log.NodeReuseScanStop(possibleRunningNodesList.Count);
-                possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
-
-                if (possibleRunningNodesList.Count > 0)
+                try
                 {
-                    CommunicationsUtilities.Trace($"Attempting to connect to {possibleRunningNodesList.Count} existing processes '{expectedProcessName}'...");
+                    IList<Process> possibleRunningNodesList;
+                    MSBuildEventSource.Log.NodeReuseScanStart();
+                    (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
+                    MSBuildEventSource.Log.NodeReuseScanStop(possibleRunningNodesList.Count);
+                    possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
+
+                    if (possibleRunningNodesList.Count > 0)
+                    {
+                        CommunicationsUtilities.Trace($"Attempting to connect to {possibleRunningNodesList.Count} existing processes '{expectedProcessName}'...");
+                    }
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    CommunicationsUtilities.Trace($"Failed to scan for reusable nodes, will launch new nodes instead: {ex}");
+                    possibleRunningNodes = null;
                 }
             }
 
@@ -319,38 +334,64 @@ namespace Microsoft.Build.BackEnd
             {
                 while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
                 {
-                    CommunicationsUtilities.Trace($"Trying to connect to existing process {nodeToReuse.ProcessName} with id {nodeToReuse.Id} to establish node {nodeId}...");
-                    if (nodeToReuse.Id == currentProcessId)
+                    // Cached up front so that the failure path never has to touch the foreign process again:
+                    // reading Process.Id can itself throw once that process is gone.
+                    int nodeToReuseId = -1;
+                    Stream nodeStream;
+                    HandshakeResult result;
+
+                    // Only inspecting and connecting to the candidate is guarded here. A candidate belongs to
+                    // another build and may exit, be killed, hit its idle timeout, or refuse a handshake at any
+                    // moment, so probing it is inherently racy. Skip such a candidate and keep looking rather than
+                    // failing the build; the remaining candidates stay usable and StartNewNode is still available
+                    // as the fallback. Everything after a successful connect is deliberately left unguarded: once
+                    // CreateNodeContext has registered the node, treating a failure as "candidate unusable" would
+                    // launch a replacement node for the same node id on top of the already registered context.
+                    try
                     {
+                        nodeToReuseId = nodeToReuse.Id;
+
+                        // Use the name we searched for rather than nodeToReuse.ProcessName: the candidate list is a
+                        // snapshot, and Process.ProcessName throws InvalidOperationException once the process exits.
+                        CommunicationsUtilities.Trace($"Trying to connect to existing process {expectedProcessName} with id {nodeToReuseId} to establish node {nodeId}...");
+                        if (nodeToReuseId == currentProcessId)
+                        {
+                            continue;
+                        }
+
+                        // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
+                        string nodeLookupKey = GetProcessesToIgnoreKey(nodeLaunchData.Handshake, nodeToReuseId);
+                        if (_processesToIgnore.ContainsKey(nodeLookupKey))
+                        {
+                            continue;
+                        }
+
+                        // We don't need to check this again
+                        _processesToIgnore.TryAdd(nodeLookupKey, default);
+
+                        // Attempt to connect to each process in turn.
+                        MSBuildEventSource.Log.NodePipeConnectStart(nodeId, nodeToReuseId);
+                        nodeStream = TryConnectToProcess(nodeToReuseId, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out result);
+                        MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuseId, succeeded: nodeStream != null);
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        CommunicationsUtilities.Trace($"Failed to probe existing process with id {nodeToReuseId} while establishing node {nodeId}, skipping it: {ex}");
                         continue;
                     }
 
-                    // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
-                    string nodeLookupKey = GetProcessesToIgnoreKey(nodeLaunchData.Handshake, nodeToReuse.Id);
-                    if (_processesToIgnore.ContainsKey(nodeLookupKey))
-                    {
-                        continue;
-                    }
-
-                    // We don't need to check this again
-                    _processesToIgnore.TryAdd(nodeLookupKey, default);
-
-                    // Attempt to connect to each process in turn.
-                    MSBuildEventSource.Log.NodePipeConnectStart(nodeId, nodeToReuse.Id);
-                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out HandshakeResult result);
-                    MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuse.Id, succeeded: nodeStream != null);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
-                        CommunicationsUtilities.Trace($"Successfully connected to existing node {nodeId} which is PID {nodeToReuse.Id}");
-                        string msg = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeReused", nodeId, nodeToReuse.Id);
+                        CommunicationsUtilities.Trace($"Successfully connected to existing node {nodeId} which is PID {nodeToReuseId}");
+                        string msg = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeReused", nodeId, nodeToReuseId);
                         _componentHost.LoggingService.LogBuildEvent(new BuildMessageEventArgs(msg, null, null, MessageImportance.Low)
                         {
                             BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
                         });
 
                         CreateNodeContext(nodeId, nodeToReuse, nodeStream, result.NegotiatedPacketVersion);
-                        MSBuildEventSource.Log.NodeConnectStop(nodeId, nodeToReuse.Id, isReused: true);
+                        MSBuildEventSource.Log.NodeConnectStop(nodeId, nodeToReuseId, isReused: true);
                         return true;
                     }
                 }
@@ -440,11 +481,22 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, nodeLaunchData.Handshake.HandshakeOptions);
+                HandshakeOptions handshakeOptions = nodeLaunchData.Handshake.HandshakeOptions;
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions, negotiatedVersion));
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
         }
+
+        /// <summary>
+        /// Whether a node launched with these handshake options stays connected to this process after
+        /// one of its builds completes, so that this process can use it again for the next one. Such
+        /// a node resets in place rather than disconnecting, and more packets follow on its
+        /// connection afterwards.
+        /// False by default: a node disconnects at the end of a build and, if reusable, waits on its
+        /// pipe for some other process to claim it.
+        /// </summary>
+        protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion) => false;
 
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
@@ -862,7 +914,7 @@ namespace Microsoft.Build.BackEnd
         /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
         /// <remarks>
-        /// Reused by MSBuild server client <see cref="Experimental.MSBuildClient"/>.
+        /// Reused by MSBuild server client <see cref="Microsoft.Build.Server.MSBuildClient"/>.
         /// </remarks>
         internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {
@@ -926,6 +978,13 @@ namespace Microsoft.Build.BackEnd
 
             // The pipe(s) used to communicate with the node.
             private readonly Stream _pipeStream;
+
+#if !FEATURE_APM
+            /// <summary>
+            /// Stream used for async packet reads.
+            /// </summary>
+            private readonly Stream _readStream;
+#endif
 
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
@@ -995,6 +1054,8 @@ namespace Microsoft.Build.BackEnd
             /// Used to signal the consuming thread that a packet has been enqueued;
             /// </summary>
             private readonly AutoResetEvent _packetEnqueued;
+            private bool _sendCompleted;
+            private int _closed;
 
             /// <summary>
             /// Used to signal that the exit packet has been sent and we no longer need to wait for the queue to drain.
@@ -1010,6 +1071,25 @@ namespace Microsoft.Build.BackEnd
             /// The minimum packet version supported by both the host and the node.
             /// </summary>
             private readonly byte _negotiatedPacketVersion;
+
+            /// <summary>
+            /// A snapshot of the build process environment most recently sent in full to this task-host connection.
+            /// Used to avoid re-transmitting the (invariant) environment in every <see cref="TaskHostConfiguration"/>:
+            /// when an outgoing configuration's environment matches this baseline it is sent as
+            /// <see cref="InvariantPayloadTransferMode.Identical"/> instead.
+            /// </summary>
+            private Dictionary<string, string> _forwardEnvironmentBaseline;
+
+            /// <summary>
+            /// A snapshot of the global properties most recently sent in full to this task-host connection.
+            /// Used to avoid re-transmitting the (largely invariant) global properties in every
+            /// <see cref="TaskHostConfiguration"/>: when an outgoing configuration's global properties match this
+            /// baseline they are sent as <see cref="InvariantPayloadTransferMode.Identical"/> instead. Held as a defensive
+            /// copy for robustness and for consistency with <see cref="_forwardEnvironmentBaseline"/>; unlike the
+            /// environment, the configuration's global-properties dictionary is freshly allocated per configuration
+            /// today, so it is not actually aliased to a mutated-in-place source.
+            /// </summary>
+            private Dictionary<string, string> _forwardGlobalParametersBaseline;
 
 
 #if FEATURE_APM
@@ -1027,11 +1107,18 @@ namespace Microsoft.Build.BackEnd
                 INodePacketFactory factory,
                 NodeContextTerminateDelegate terminateDelegate,
                 byte negotiatedVersion,
-                HandshakeOptions handshakeOptions = HandshakeOptions.None)
+                HandshakeOptions handshakeOptions = HandshakeOptions.None,
+                bool connectionPersistsAcrossBuilds = false)
             {
                 _nodeId = nodeId;
+                _connectionPersistsAcrossBuilds = connectionPersistsAcrossBuilds;
                 _process = process;
                 _pipeStream = nodePipe;
+#if !FEATURE_APM
+                _readStream = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                    ? new BufferedReadStream(nodePipe, 64 * 1024)
+                    : nodePipe;
+#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _readBufferMemoryStream = new MemoryStream();
@@ -1065,6 +1152,23 @@ namespace Microsoft.Build.BackEnd
             public int NodeId => _nodeId;
 
             /// <summary>
+            /// Whether this node stays connected after a build completes, so that its owner can use
+            /// it again for the next one, instead of disconnecting into the pool of nodes that any
+            /// process may claim.
+            /// </summary>
+            private readonly bool _connectionPersistsAcrossBuilds;
+
+            /// <summary>
+            /// Whether this node stays connected after a build completes. Its owner uses this to
+            /// tell the nodes that will disconnect from the ones it must retire itself.
+            /// </summary>
+            public bool ConnectionPersistsAcrossBuilds => _connectionPersistsAcrossBuilds;
+
+            internal byte NegotiatedPacketVersion => _negotiatedPacketVersion;
+
+            internal bool WaitForSendCompletion(int millisecondsTimeout) => _drainPacketQueueThread.Join(millisecondsTimeout);
+
+            /// <summary>
             /// Starts a new asynchronous read operation for this node.
             /// </summary>
             public void BeginAsyncPacketRead()
@@ -1086,7 +1190,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await _pipeStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
+                        int bytesRead = await _readStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -1111,7 +1215,7 @@ namespace Microsoft.Build.BackEnd
                         int totalBytesRead = 0;
                         while (totalBytesRead < packetLength)
                         {
-                            int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            int bytesRead = await _readStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
                             if (bytesRead == 0)
                             {
                                 break;
@@ -1158,12 +1262,67 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packet">The packet to send.</param>
             public void SendData(INodePacket packet)
             {
-                if (IsExitPacket(packet))
+                lock (_packetWriteQueue)
                 {
-                    _exitPacketState = ExitPacketState.ExitPacketQueued;
+                    if (_sendCompleted)
+                    {
+                        CommunicationsUtilities.Trace(_nodeId, $"Ignoring {packet.Type} after the node send queue closed.");
+                        return;
+                    }
+
+                    if (IsExitPacket(packet))
+                    {
+                        _exitPacketState = ExitPacketState.ExitPacketQueued;
+                    }
+                    _packetWriteQueue.Enqueue(packet);
+                    _packetEnqueued.Set();
                 }
-                _packetWriteQueue.Enqueue(packet);
-                _packetEnqueued.Set();
+            }
+
+            /// <summary>
+            /// Marks an outgoing config <see cref="InvariantPayloadTransferMode.Identical"/> when its
+            /// environment matches the connection baseline (leaving the dictionary off the wire); otherwise sends
+            /// it in full and updates the baseline. Only <see cref="DrainPacketQueue"/> calls this, in wire order,
+            /// and the child applies the same updates in the same order, so the baselines never drift and no
+            /// locking is needed.
+            /// </summary>
+            private void MarkEnvironmentTransferMode(TaskHostConfiguration configuration)
+            {
+                Dictionary<string, string> environment = configuration.BuildProcessEnvironment;
+
+                if (_forwardEnvironmentBaseline != null && CommunicationsUtilities.AreDictionariesEquivalent(environment, _forwardEnvironmentBaseline))
+                {
+                    configuration.EnvironmentMode = InvariantPayloadTransferMode.Identical;
+                }
+                else
+                {
+                    configuration.EnvironmentMode = InvariantPayloadTransferMode.Full;
+                    _forwardEnvironmentBaseline = new Dictionary<string, string>(environment, CommunicationsUtilities.EnvironmentVariableComparer);
+                }
+            }
+
+            /// <summary>
+            /// Marks an outgoing config <see cref="InvariantPayloadTransferMode.Identical"/> when its global properties
+            /// match the connection baseline (leaving the dictionary off the wire); otherwise sends them in full and
+            /// snapshots them as the new baseline. As in <see cref="MarkEnvironmentTransferMode"/>, only
+            /// <see cref="DrainPacketQueue"/> calls this in wire order, so the baselines never drift and no locking
+            /// is needed.
+            /// </summary>
+            private void MarkGlobalParametersTransferMode(TaskHostConfiguration configuration)
+            {
+                Dictionary<string, string> globalParameters = configuration.GlobalProperties;
+
+                if (_forwardGlobalParametersBaseline != null && CommunicationsUtilities.AreDictionariesEquivalent(globalParameters, _forwardGlobalParametersBaseline))
+                {
+                    configuration.GlobalParametersMode = InvariantPayloadTransferMode.Identical;
+                }
+                else
+                {
+                    configuration.GlobalParametersMode = InvariantPayloadTransferMode.Full;
+                    _forwardGlobalParametersBaseline = globalParameters == null
+                        ? null
+                        : new Dictionary<string, string>(globalParameters, StringComparer.OrdinalIgnoreCase);
+                }
             }
 
             /// <summary>
@@ -1173,6 +1332,27 @@ namespace Microsoft.Build.BackEnd
             /// a burst of SendData comes in, with 10-20 packets scheduled.</remarks>
             private void DrainPacketQueue(object state)
             {
+                try
+                {
+                    DrainPacketQueueCore(state);
+                }
+                finally
+                {
+                    lock (_packetWriteQueue)
+                    {
+                        _sendCompleted = true;
+                        _packetEnqueued.Dispose();
+                        while (_packetWriteQueue.TryDequeue(out _))
+                        {
+                        }
+                    }
+
+                    _writeBufferMemoryStream.Dispose();
+                }
+            }
+
+            private void DrainPacketQueueCore(object state)
+            {
                 NodeContext context = (NodeContext)state;
                 MemoryStream writeStream = context._writeBufferMemoryStream;
                 Stream serverToClientStream = context._pipeStream;
@@ -1180,6 +1360,11 @@ namespace Microsoft.Build.BackEnd
                 while (true)
                 {
                     context._packetEnqueued.WaitOne();
+                    if (Volatile.Read(ref _closed) != 0)
+                    {
+                        return;
+                    }
+
                     while (context._packetWriteQueue.TryDequeue(out INodePacket packet))
                     {
                         // clear the buffer but keep the underlying capacity to avoid reallocations
@@ -1192,7 +1377,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Write packet type with extended header.
                             // On the receiving side we will check if the extended header is present before making an attempt to read the packet version.
-                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType);
+                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType, _negotiatedPacketVersion);
                             writeStream.WriteByte(rawPacketType);
 
                             // Pad for the packet length
@@ -1209,6 +1394,15 @@ namespace Microsoft.Build.BackEnd
                                 // CLR4 task hosts: set version to 0 to enable version-dependent fields.
                                 // CLR2 task hosts: leave as null (default) to skip version-dependent fields.
                                 writeTranslator.NegotiatedPacketVersion = 0;
+                            }
+
+                            // When the negotiated wire format supports it, send the (invariant) build process
+                            // environment and global properties only when they changed; otherwise mark them
+                            // as unchanged on the wire.
+                            if (packet is TaskHostConfiguration taskHostConfiguration && writeTranslator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
+                            {
+                                context.MarkEnvironmentTransferMode(taskHostConfiguration);
+                                context.MarkGlobalParametersTransferMode(taskHostConfiguration);
                             }
 
                             packet.Translate(writeTranslator);
@@ -1244,7 +1438,11 @@ namespace Microsoft.Build.BackEnd
                         // disposed); otherwise the thread loops back to WaitOne() and blocks forever, leaking the
                         // thread and the NodeContext it captures. In a long-lived host like Visual Studio these
                         // leaked threads accumulate across builds.
-                        if (packet is NodeBuildComplete)
+                        //
+                        // A node that stays connected is the exception: its owner sends it more packets after this
+                        // one, so the drain thread has to keep running.
+                        if (packet is NodeBuildComplete buildComplete &&
+                            !(_connectionPersistsAcrossBuilds && buildComplete.PrepareForReuse))
                         {
                             if (IsExitPacket(packet))
                             {
@@ -1285,6 +1483,20 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private void Close()
             {
+                if (Interlocked.Exchange(ref _closed, 1) != 0)
+                {
+                    return;
+                }
+
+                lock (_packetWriteQueue)
+                {
+                    if (!_sendCompleted)
+                    {
+                        _sendCompleted = true;
+                        _packetEnqueued.Set();
+                    }
+                }
+
                 _pipeStream.Dispose();
                 _terminateDelegate(_nodeId);
             }
@@ -1435,6 +1647,8 @@ namespace Microsoft.Build.BackEnd
                 try
                 {
                     _readBufferMemoryStream.Position = 0;
+
+                    _readTranslator.NegotiatedPacketVersion = _negotiatedPacketVersion;
                     _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, _readTranslator);
                 }
                 catch (IOException e)

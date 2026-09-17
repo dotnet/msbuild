@@ -25,7 +25,7 @@ internal sealed record class CoordinatorSettings()
     public const int DefaultShutdownTimeoutMs = 60_000;
     public const int MaxHeartbeatIntervalMs = 300_000;
 
-    private static string DefaultPipeName => $"{PipeNameBase}-{Environment.UserName}";
+    private static string DefaultPipeName => $"{PipeNameBase}-{EnvironmentUtilities.CurrentUserName}";
 
     private int? _heartbeatIntervalMs;
     private int? _missedHeartbeatsThreshold;

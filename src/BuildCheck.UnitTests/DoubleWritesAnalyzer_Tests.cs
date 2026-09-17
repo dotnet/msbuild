@@ -54,9 +54,32 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         }
 
         [Theory]
+        [InlineData("Copy")]
+        [InlineData("copy")]
+        [InlineData("COPY")]
+        public void TestCopyTask_TaskNameCasingIsIgnored(string taskName)
+        {
+            _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData(taskName, new Dictionary<string, TaskInvocationCheckData.TaskParameter>
+                {
+                    { "SourceFiles", new TaskInvocationCheckData.TaskParameter("source1", IsOutput: false) },
+                    { "DestinationFolder", new TaskInvocationCheckData.TaskParameter("outdir", IsOutput: false) },
+                }));
+            _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData(taskName, new Dictionary<string, TaskInvocationCheckData.TaskParameter>
+                {
+                    { "SourceFiles", new TaskInvocationCheckData.TaskParameter("source1", IsOutput: false) },
+                    { "DestinationFiles", new TaskInvocationCheckData.TaskParameter(Path.Combine("outdir", "source1"), IsOutput: false) },
+                }));
+
+            _registrationContext.Results.Count.ShouldBe(1);
+            _registrationContext.Results[0].CheckRule.Id.ShouldBe("BC0102");
+        }
+
+        [Theory]
         [InlineData("Csc")]
         [InlineData("Vbc")]
         [InlineData("Fsc")]
+        [InlineData("csc")]
+        [InlineData("VBC")]
         public void TestCompilerTask(string taskName)
         {
             for (int i = 0; i < 2; i++)

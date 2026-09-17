@@ -331,6 +331,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
                 BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
                 BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
+                BinaryLogRecordKind.MSBuildServerLifecycle => ReadMSBuildServerLifecycleEventArgs(),
                 _ => null
             };
 
@@ -1249,6 +1250,33 @@ namespace Microsoft.Build.Logging
                 assemblyPath,
                 mvid,
                 appDomainName);
+            SetCommonFields(e, fields);
+            e.ProjectFile = fields.ProjectFile;
+
+            return e;
+        }
+
+        private MSBuildServerLifecycleEventArgs ReadMSBuildServerLifecycleEventArgs()
+        {
+            // Field order/count MUST stay in sync with BuildEventArgsWriter.Write(MSBuildServerLifecycleEventArgs)
+            // and with MSBuildServerLifecycleEventArgs.CreateFromStream (the node-packet path). ReadInt32() is a
+            // 7-bit-encoded int, paired with the writer's Write(int).
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+
+            MSBuildServerLifecycleKind kind = (MSBuildServerLifecycleKind)ReadInt32();
+            int processId = ReadInt32();
+            string? reason = ReadDeduplicatedString();
+            string? reasonCode = ReadDeduplicatedString();
+            bool shortLived = ReadBoolean();
+
+            var e = new MSBuildServerLifecycleEventArgs(
+                kind,
+                processId,
+                reason,
+                reasonCode,
+                fields.Message,
+                fields.Importance,
+                shortLived);
             SetCommonFields(e, fields);
             e.ProjectFile = fields.ProjectFile;
 

@@ -157,6 +157,7 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14418")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]

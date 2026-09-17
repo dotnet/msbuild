@@ -13,14 +13,13 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record ServerHandshakeMessage : ServerMessage
 {
-    public override ServerMessageType MessageType => ServerMessageType.HandshakeResponse;
-
     /// <summary>
     ///  Gets the capabilities advertised by the server.
     /// </summary>
     public ImmutableArray<string> Capabilities { get; }
 
     public ServerHandshakeMessage(ImmutableArray<string> capabilities)
+        : base(ServerMessageType.HandshakeResponse)
     {
         Capabilities = capabilities.IsDefault ? [] : capabilities;
     }

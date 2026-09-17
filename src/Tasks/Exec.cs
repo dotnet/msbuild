@@ -396,9 +396,7 @@ namespace Microsoft.Build.Tasks
 
             if (ConsoleToMSBuild)
             {
-                string trimmedTextLine = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) ?
-                    singleLine.TrimEnd() :
-                    singleLine.Trim();
+                string trimmedTextLine = singleLine.TrimEnd();
 
                 if (trimmedTextLine.Length > 0)
                 {
@@ -605,11 +603,6 @@ namespace Microsoft.Build.Tasks
             {
                 commandLine.AppendSwitch("-c");
                 commandLine.AppendTextUnquoted(" \"");
-                bool setLocale = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
-                if (setLocale)
-                {
-                    commandLine.AppendTextUnquoted("export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; ");
-                }
                 commandLine.AppendTextUnquoted(". ");
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
                 commandLine.AppendTextUnquoted("\"");

@@ -88,6 +88,54 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldNotContain("Process path: " + Path.Combine(env.GetEnvironmentVariable("DOTNET_ROOT") ?? "", "dotnet.exe"));
         }
 
+        /// <summary>
+        /// Regression test for the inbox TarDirectory/Untar registrations in Microsoft.Common.tasks.
+        ///
+        /// Those tasks depend on System.Formats.Tar, so they only exist in the .NETCoreApp tasks assembly. On
+        /// .NET Framework MSBuild they are therefore registered against the SDK's .NETCoreApp tasks assembly via
+        /// AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" and dispatched into the .NET TaskHost
+        /// with Runtime="NET".
+        ///
+        /// UsingTask registration is lazy -- TaskRegistry only stores the AssemblyLoadInfo and never validates it --
+        /// so a malformed row (for example a file path placed in AssemblyName, which requires an assembly identity)
+        /// stays invisible until the task is actually instantiated. Nothing else in the repo instantiates these
+        /// tasks through their inbox registration, so this test is what closes that gap: it builds a project that
+        /// simply calls the tasks, with the SDK resolver pointed at the freshly built bootstrap SDK layout so
+        /// $(NetCoreSdkRoot) resolves to the tasks assembly produced by this build.
+        /// </summary>
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_InboxTarTasks_ResolveFromSdkAndRoundTrip()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Point the .NET SDK resolver at the freshly built bootstrap SDK layout so that $(NetCoreSdkRoot)
+            // (defined as $(MSBuildThisFileDirectory) in Microsoft.NETCoreSdk.BundledVersions.props) resolves to
+            // the tasks assembly built by this repo rather than to an ambient, previously shipped SDK.
+            string coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "InboxTarTasks", "InboxTarTasks.csproj");
+            string workDir = env.CreateFolder().Path;
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{testProjectPath}\" -t:TarRoundTrip -restore -v:n -p:WorkDir=\"{workDir}\" -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
+                out bool success,
+                outputHelper: _output,
+                timeoutMilliseconds: 120_000);
+
+            success.ShouldBeTrue(customMessage: output);
+
+            // A registration that cannot be resolved surfaces as MSB4062 (task could not be loaded from the assembly).
+            output.ShouldNotContain("MSB4062", customMessage: output);
+
+            // The tasks must have come from the SDK layout under test, proving the $(NetCoreSdkRoot) row was used.
+            output.ShouldContain(Path.Combine(coreDirectory, "sdk", RunnerUtilities.BootstrapSdkVersion), customMessage: output);
+
+            // Both tasks actually ran and produced a correct archive round trip.
+            output.ShouldContain("TAR_ROUND_TRIP_OK", customMessage: output);
+            File.Exists(Path.Combine(workDir, "extracted", "hello.txt")).ShouldBeTrue();
+        }
+
         [WindowsFullFrameworkOnlyFact] // Verifies that when using the app host, DOTNET_ROOT is properly set for child processes to find the runtime.
         public void NetTaskHostTest_AppHostSetsDotnetRoot()
         {
@@ -353,6 +401,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// This test recreates the scenario by symlinking the bootstrap SDK directory and
         /// running MSBuild through the symlink.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14393")]
         [UnixOnlyFact]
         public void NetTaskHost_SymlinkedSdkPath_ShouldNotCauseMSB4216()
         {
@@ -382,16 +431,20 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
+                // Launching the bootstrap apphost directly bypasses ExecBootstrapedMSBuild, so seed the environment
+                // from the shared helper to pick up the bootstrap DOTNET_ROOT/HOST_PATH/INSTALL_DIR pinning (and the
+                // central SDK-path clearing done in MSBuildTestPipelineStartup). This test additionally points the
+                // child's dotnet host at the *real* (non-symlinked) SDK path to exercise the symlink handshake.
+                Dictionary<string, string> symlinkEnvironment = RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables();
+                symlinkEnvironment[Constants.DotnetHostPathEnvVarName] = Path.Combine(realSdkPath, "dotnet");
+
                 string testTaskOutput = RunnerUtilities.RunProcessAndGetOutput(
                     apphostPath,
                     $"\"{testProjectPath}\" -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
                     out bool successTestTask,
                     shellExecute: false,
                     outputHelper: _output,
-                    environmentVariables: new Dictionary<string, string>
-                    {
-                        [Constants.DotnetHostPathEnvVarName] = Path.Combine(realSdkPath, "dotnet"),
-                    });
+                    environmentVariables: symlinkEnvironment);
 
                 _output.WriteLine(testTaskOutput);
 

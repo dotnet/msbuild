@@ -96,6 +96,16 @@ internal static partial class EnvironmentUtilities
         }
     }
 
+    /// <summary>
+    ///  Gets the name of the user the current process is running as, for scoping machine-wide
+    ///  resource names to a single user. Empty when the name is unavailable.
+    /// </summary>
+    /// <remarks>
+    ///  Cached because <see cref="Environment.UserName"/> queries the OS and allocates on every call
+    ///  (~75us on Windows, versus a few nanoseconds here). A race just recomputes an equal string.
+    /// </remarks>
+    public static string CurrentUserName => field ??= Environment.UserName;
+
     public static bool IsWellKnownEnvironmentDerivedProperty(string propertyName)
         => propertyName.StartsWith("MSBUILD", StringComparison.OrdinalIgnoreCase) ||
            propertyName.StartsWith("COMPLUS_", StringComparison.OrdinalIgnoreCase) ||

@@ -10,11 +10,10 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record RequestNodesMessage : ClientMessage
 {
-    public override ClientMessageType MessageType => ClientMessageType.RequestNodes;
-
     public int RequestedNodes { get; }
 
     public RequestNodesMessage(int requestedNodes)
+        : base(ClientMessageType.RequestNodes)
     {
         RequestedNodes = requestedNodes;
     }
@@ -25,5 +24,9 @@ internal sealed record RequestNodesMessage : ClientMessage
     }
 
     internal static RequestNodesMessage ReadPayload(BinaryReader reader)
-        => new(requestedNodes: reader.ReadInt32());
+    {
+        int requestedNodes = reader.ReadInt32();
+
+        return new(requestedNodes: requestedNodes);
+    }
 }

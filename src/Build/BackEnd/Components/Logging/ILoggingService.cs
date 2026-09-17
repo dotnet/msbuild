@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -328,6 +329,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="centralLogger">Central logger which is to receive the events created by the forwarding logger</param>
         /// <param name="forwardingLogger">A description of the forwarding logger</param>
         /// <returns value="bool">True if the central and forwarding loggers were registered. False if the central logger or the forwarding logger were already registered</returns>
+        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         bool RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger);
 
         /// <summary>
@@ -352,6 +354,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The id of the node the logging services is on</param>
         /// <exception cref="ArgumentNullException">When forwardingLoggerSink is null</exception>
         /// <exception cref="ArgumentNullException">When loggerDescriptions is null</exception>
+        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         void InitializeNodeLoggers(ICollection<LoggerDescription> loggerDescriptions, IBuildEventSink forwardingLoggerSink, int nodeId);
 
         #endregion

@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -149,6 +150,19 @@ namespace Microsoft.Build.Execution
 
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+
+            // This process serves many builds and constructs a fresh OutOfProcNode for each one, but
+            // the task hosts it launches with node reuse stay connected to the process across those
+            // builds. Their connections are process-lifetime resources, so scope the provider that
+            // owns them to the process: a later build then reuses the task hosts this one started,
+            // instead of stranding them alive, unreachable and unclaimable.
+            //
+            // Behind the same wave as the connections themselves: when they do not persist, the
+            // provider has nothing to carry across builds and the original per-build one is used.
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
+            {
+                _componentFactories.ReplaceFactory(BuildComponentType.OutOfProcTaskHostNodeProvider, NodeProviderOutOfProcTaskHost.CreateProcessWideComponent);
+            }
             SerializationContractInitializer.Initialize();
             _packetFactory = new NodePacketFactory();
 
@@ -627,6 +641,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Dispatches the packet to the correct handler.
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "The build-request arms now reach task execution through the EnableReflectiveTaskExecution leaf gate, which fails observably under trimming. The remaining RequiresUnreferencedCode reached here is HandleNodeConfiguration, which initializes node forwarding loggers by reflection - a separate subsystem this task-execution gate does not cover. This message-pump switch cannot carry RequiresUnreferencedCode.")]
         private void HandlePacket(INodePacket packet)
         {
             // Console.WriteLine("Handling packet {0} at {1}", packet.Type, DateTime.Now);
@@ -706,10 +722,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Handles the NodeConfiguration packet.
         /// </summary>
+        [RequiresUnreferencedCode("Initializes node loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         private void HandleNodeConfiguration(NodeConfiguration configuration)
         {
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
+
+            s_projectRootElementCacheBase.SetParserIgnoreConfiguration(configuration.BuildParameters.ParserIgnoreConfiguration);
 
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 

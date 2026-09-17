@@ -240,9 +240,25 @@ namespace Microsoft.Build.Collections
         {
             using (_lock.EnterDisposableReadLock())
             {
-                foreach (T item in _properties.Values)
+                // PERF: Prefer the struct enumerator from the concrete hash set to avoid the allocation
+                // caused by boxing when iterating _properties.Values through the ICollection<T> interface.
+                // This fast path is the common case and hot (e.g. per-item metadata enumeration during
+                // ProjectInstance creation): all metadata and normally-constructed property dictionaries
+                // are backed by RetrievableValuedEntryHashSet<T>. The else branch only covers the rare
+                // linked/immutable-project converter types that also implement IRetrievableValuedEntryHashSet<T>.
+                if (_properties is RetrievableValuedEntryHashSet<T> hashSet)
                 {
-                    yield return item;
+                    foreach (T item in hashSet)
+                    {
+                        yield return item;
+                    }
+                }
+                else
+                {
+                    foreach (T item in _properties.Values)
+                    {
+                        yield return item;
+                    }
                 }
             }
         }
@@ -250,16 +266,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Get an enumerator over entries.
         /// </summary>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            using (_lock.EnterDisposableReadLock())
-            {
-                foreach (T item in _properties.Values)
-                {
-                    yield return item;
-                }
-            }
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         #region IEquatable<PropertyDictionary<T>> Members
 

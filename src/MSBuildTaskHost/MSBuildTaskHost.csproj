@@ -1,9 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
-       a .props file that prevents building the project from doing much of anything. -->
-  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
-
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -32,6 +28,10 @@
 
     <!-- Work around arcade generating invalid string resource code on .NET 3.5 -->
     <DefineConstants>$(DefineConstants);NET20</DefineConstants>
+
+    <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
+         a .props file that prevents building the project from doing much of anything. -->
+    <ExcludeFromBuild Condition="'$(MSBuildRuntimeType)' != 'Full'">true</ExcludeFromBuild>
   </PropertyGroup>
 
   <ItemGroup>

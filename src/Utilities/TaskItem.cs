@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
@@ -166,6 +167,59 @@ namespace Microsoft.Build.Utilities
 
         #endregion
 
+        #region Task parameter type registration
+
+        /// <summary>
+        /// Registers a value type so it can be used as a task parameter type (the <c>ParameterType</c> of a
+        /// <c>&lt;UsingTask&gt;</c> <c>&lt;ParameterGroup&gt;</c> parameter) in a trimmed or Native AOT host,
+        /// where resolving the type from its declared name by reflection is unavailable.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The value type to register. Enums and user-defined structs are permitted. The type and its array
+        /// form (<c>T[]</c>) both become resolvable, and the type is rooted so a trimmer preserves it.
+        /// </typeparam>
+        /// <remarks>
+        /// <para>
+        /// The MSBuild intrinsic value types (<see cref="bool"/>, <see cref="int"/>, <see cref="System.DateTime"/>,
+        /// and so on), <see cref="string"/>, and the MSBuild <see cref="ITaskItem"/> types are already
+        /// registered; call this only for an additional value type a host uses as a task parameter type.
+        /// </para>
+        /// <para>
+        /// Intended to be called once per type during host initialization, before the first project is
+        /// evaluated. This method is thread-safe and idempotent.
+        /// </para>
+        /// </remarks>
+        public static void RegisterTaskParameterValueType<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>()
+            where T : struct
+            => TaskParameterTypeRegistry.RegisterValueType<T>();
+
+        /// <summary>
+        /// Registers an <see cref="ITaskItem"/> type so it can be used as a task parameter type (the
+        /// <c>ParameterType</c> of a <c>&lt;UsingTask&gt;</c> <c>&lt;ParameterGroup&gt;</c> parameter) in a
+        /// trimmed or Native AOT host, where resolving the type from its declared name by reflection is
+        /// unavailable.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The <see cref="ITaskItem"/> type to register. The type and its array form (<c>T[]</c>) both become
+        /// resolvable. Item-typed parameters are validated by assignability, not member-reflected, so the
+        /// type reference alone is preserved (no member rooting is required).
+        /// </typeparam>
+        /// <remarks>
+        /// <para>
+        /// The MSBuild <see cref="ITaskItem"/> types are already registered; call this only for an additional
+        /// item type a host uses as a task parameter type.
+        /// </para>
+        /// <para>
+        /// Intended to be called once per type during host initialization, before the first project is
+        /// evaluated. This method is thread-safe and idempotent.
+        /// </para>
+        /// </remarks>
+        public static void RegisterTaskParameterItemType<T>()
+            where T : ITaskItem
+            => TaskParameterTypeRegistry.RegisterTaskItemType<T>();
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -275,7 +329,7 @@ namespace Microsoft.Build.Utilities
         {
             ArgumentNullException.ThrowIfNull(metadataName);
             ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(metadataName),
-                "Shared.CannotChangeItemSpecModifiers", metadataName);
+                "CannotChangeItemSpecModifiers", metadataName);
 
             _metadata = _metadata?.Remove(metadataName);
         }
@@ -311,7 +365,7 @@ namespace Microsoft.Build.Utilities
             // Non-derivable metadata can only be set at construction time.
             // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
             ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName),
-                "Shared.CannotChangeItemSpecModifiers", metadataName);
+                "CannotChangeItemSpecModifiers", metadataName);
 
             _metadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
 

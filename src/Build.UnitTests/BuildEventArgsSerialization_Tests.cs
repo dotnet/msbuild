@@ -4,12 +4,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -18,6 +22,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
+using EngineTaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using UtilitiesTaskItem = Microsoft.Build.Utilities.TaskItem;
 
 #nullable disable
 
@@ -539,6 +545,115 @@ namespace Microsoft.Build.UnitTests
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
+        /// <summary>
+        /// The MSBuild Server lifecycle events are logged as a dedicated <see cref="MSBuildServerLifecycleEventArgs"/>
+        /// recorded under its own <see cref="BinaryLogRecordKind.MSBuildServerLifecycle"/>. This keeps the data in a
+        /// specific, versionable event type (not an ad-hoc message); binary-log readers that predate the record kind
+        /// skip it via the forward-compatible, length-prefixed record framing.
+        /// </summary>
+        [Fact]
+        public void RoundtripMSBuildServerLifecycleEventArgs()
+        {
+            var args = new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Spawned,
+                processId: 4321,
+                reason: null,
+                reasonCode: null,
+                "MSBuild Server node started for this build only; it will shut down afterward (process ID 4321).",
+                MessageImportance.Low,
+                shortLived: true)
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+            };
+
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            // The event serializes under its OWN dedicated record kind (not Message), so readers that predate it
+            // skip the unknown record via the forward-compatible length-prefixed framing rather than mis-reading it.
+            memoryStream.Position = 0;
+            using (var rawReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var eventsReader = new BuildEventArgsReader(rawReader, BinaryLogger.FileFormatVersion))
+            {
+                BinaryLogRecordKind eventRecordKind;
+                do
+                {
+                    eventRecordKind = eventsReader.ReadRaw().RecordKind;
+                }
+                while (eventRecordKind is BinaryLogRecordKind.String
+                    or BinaryLogRecordKind.NameValueList
+                    or BinaryLogRecordKind.ProjectImportArchive);
+
+                eventRecordKind.ShouldBe(BinaryLogRecordKind.MSBuildServerLifecycle);
+            }
+
+            // A current reader reconstructs the strongly-typed event with all of its structured fields.
+            memoryStream.Position = 0;
+            using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion))
+            {
+                var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
+                deserialized.Kind.ShouldBe(MSBuildServerLifecycleKind.Spawned);
+                deserialized.ShortLived.ShouldBeTrue();
+                deserialized.ProcessId.ShouldBe(4321);
+                deserialized.Reason.ShouldBeNull();
+                deserialized.ReasonCode.ShouldBeNull();
+                deserialized.Message.ShouldBe("MSBuild Server node started for this build only; it will shut down afterward (process ID 4321).");
+            }
+        }
+
+        /// <summary>
+        /// Companion to <see cref="RoundtripMSBuildServerLifecycleEventArgs"/> covering the <c>NotUsed</c> kind
+        /// with a non-null <see cref="MSBuildServerLifecycleEventArgs.Reason"/> /
+        /// <see cref="MSBuildServerLifecycleEventArgs.ReasonCode"/> (the deduplicated-string branch the Spawned
+        /// case leaves null) and the <c>Reused</c> kind (a non-zero enum value). Verifies every structured field
+        /// round-trips through the binary-log writer/reader.
+        /// </summary>
+        [Fact]
+        public void RoundtripMSBuildServerLifecycleEventArgs_NotUsedAndReused()
+        {
+            RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.NotUsed,
+                processId: 0,
+                reason: "node reuse is disabled",
+                reasonCode: "node-reuse-disabled",
+                "MSBuild Server was requested but not used for this build: node reuse is disabled.",
+                MessageImportance.Low));
+
+            RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Reused,
+                processId: 9876,
+                reason: null,
+                reasonCode: null,
+                "Reusing the running MSBuild Server node for this build (process ID 9876).",
+                MessageImportance.Low));
+
+            static void RoundtripAndAssert(MSBuildServerLifecycleEventArgs args)
+            {
+                args.BuildEventContext = BuildEventContext.Invalid;
+
+                var memoryStream = new MemoryStream();
+                using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(binaryWriter).Write(args);
+                }
+
+                memoryStream.Position = 0;
+                using var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+                using var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+                var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
+                deserialized.Kind.ShouldBe(args.Kind);
+                deserialized.ProcessId.ShouldBe(args.ProcessId);
+                deserialized.Reason.ShouldBe(args.Reason);
+                deserialized.ReasonCode.ShouldBe(args.ReasonCode);
+                deserialized.ShortLived.ShouldBe(args.ShortLived);
+                deserialized.Message.ShouldBe(args.Message);
+            }
+        }
+
         [Fact]
         public void RoundtripAssemblyLoadBuild()
         {
@@ -767,6 +882,318 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void AbsolutePathTaskParameterTextUsesOriginalValue()
+        {
+            var basePath = new AbsolutePath(Path.GetFullPath("."));
+            var path = new AbsolutePath("input.txt", basePath);
+
+            ItemGroupLoggingHelper.GetStringFromParameterValue(path).ShouldBe("input.txt");
+        }
+
+        [Fact]
+        public void TaskParameterEventForwardingPreservesAbsolutePathOriginalValue()
+        {
+            TaskParameterEventArgs args = CreateAbsolutePathTaskParameterEventArgs();
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                args.WriteToStream(binaryWriter);
+            }
+
+            memoryStream.Position = 0;
+#pragma warning disable SYSLIB0050 // Required to exercise the legacy event forwarding deserializer.
+            var forwardedArgs = (TaskParameterEventArgs)FormatterServices.GetUninitializedObject(typeof(TaskParameterEventArgs));
+#pragma warning restore SYSLIB0050
+            using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                forwardedArgs.CreateFromStream(binaryReader, version: 0);
+            }
+
+            forwardedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)forwardedArgs.Items[0]).ItemSpec.ShouldBe("input.txt");
+        }
+
+        [Fact]
+        public void BinaryLogSerializationPreservesAbsolutePathOriginalValue()
+        {
+            TaskParameterEventArgs args = CreateAbsolutePathTaskParameterEventArgs();
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            memoryStream.Position = 0;
+            using var reader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+
+            replayedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)replayedArgs.Items[0]).ItemSpec.ShouldBe("input.txt");
+            replayedArgs.Message.ShouldContain("input.txt");
+            replayedArgs.Message.ShouldNotContain(Path.GetFullPath("input.txt"));
+        }
+
+        [Fact]
+        public void BinaryLogSerializationWritesEmptyItemSpecForDefaultAbsolutePath()
+        {
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskInput,
+                "File",
+                propertyName: null,
+                "File",
+                new object[] { default(AbsolutePath) },
+                logItemMetadata: false,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            memoryStream.Position = 0;
+            using var reader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+
+            replayedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)replayedArgs.Items[0]).ItemSpec.ShouldBe(string.Empty);
+        }
+
+        private static TaskParameterEventArgs CreateAbsolutePathTaskParameterEventArgs()
+        {
+            var basePath = new AbsolutePath(Path.GetFullPath("."));
+            return new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskInput,
+                "File",
+                propertyName: null,
+                "File",
+                new object[] { new AbsolutePath("input.txt", basePath) },
+                logItemMetadata: false,
+                DateTime.MinValue);
+        }
+
+        [Fact]
+        public void TaskParameterSerializationReusesSharedBackingMetadata()
+        {
+            ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata
+                .Add("Metadata", "value%253b");
+            var first = new UtilitiesTaskItem("ItemSpec1");
+            var second = new UtilitiesTaskItem("ItemSpec2");
+            ((IMetadataContainer)first).ImportMetadata(metadata);
+            ((IMetadataContainer)second).ImportMetadata(metadata);
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(1);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterSerializationCachesEmptyMetadataAndFallsBackForTaskItemData()
+        {
+            var first = new UtilitiesTaskItem("ItemSpec1");
+            var second = new UtilitiesTaskItem("ItemSpec2");
+            var taskItemData = new TaskItemData(
+                "ItemSpec3",
+                new Dictionary<string, string>
+                {
+                    ["Metadata"] = "value%253b",
+                });
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second, taskItemData },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(0);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterSerializationReusesItemDefinitionMetadata()
+        {
+            var project = new Project();
+            var definition = new ProjectItemDefinition(project, "MyItem");
+            definition.SetMetadataValue("Metadata", "value%253b");
+            var itemDefinitions = new List<ProjectItemDefinitionInstance>
+            {
+                new ProjectItemDefinitionInstance(definition),
+            };
+            var first = new EngineTaskItem(
+                "ItemSpec1",
+                "ItemSpec1",
+                directMetadata: null,
+                itemDefinitions,
+                projectDirectory: null,
+                immutable: false,
+                definingFileEscaped: "project.proj");
+            var second = new EngineTaskItem(
+                "ItemSpec2",
+                "ItemSpec2",
+                directMetadata: null,
+                itemDefinitions,
+                projectDirectory: null,
+                immutable: false,
+                definingFileEscaped: "project.proj");
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(1);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterBackingMetadataFastPathPreservesSerializedBytes()
+        {
+            ImmutableDictionary<string, string> backingMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                .Add("Metadata", "value%253b");
+            var optimizedFirst = new UtilitiesTaskItem("ItemSpec1");
+            var optimizedSecond = new UtilitiesTaskItem("ItemSpec2");
+            ((IMetadataContainer)optimizedFirst).ImportMetadata(backingMetadata);
+            ((IMetadataContainer)optimizedSecond).ImportMetadata(backingMetadata);
+
+            byte[] optimizedBytes = SerializeTaskParameter([optimizedFirst, optimizedSecond]);
+            byte[] fallbackBytes = SerializeTaskParameter(
+                [
+                    new FallbackTaskItem("ItemSpec1", "Metadata", "value%3b"),
+                    new FallbackTaskItem("ItemSpec2", "Metadata", "value%3b"),
+                ]);
+
+            optimizedBytes.ShouldBe(fallbackBytes);
+
+            static byte[] SerializeTaskParameter(ITaskItem[] items)
+            {
+                var args = new TaskParameterEventArgs(
+                    TaskParameterMessageKind.TaskOutput,
+                    "ParameterName",
+                    "PropertyName",
+                    "ItemName",
+                    items,
+                    logItemMetadata: true,
+                    DateTime.MinValue);
+                var stream = new MemoryStream();
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(writer).Write(args);
+                }
+                return stream.ToArray();
+            }
+        }
+
+        [Fact]
+        public void TaskParameterTaskItemDataDirectPathPreservesSerializedBytes()
+        {
+            var metadata = new Dictionary<string, string>
+            {
+                ["First"] = "value",
+                ["Second"] = string.Empty,
+                ["Escaped"] = "value%3b",
+            };
+            var differentMetadata = new Dictionary<string, string>(metadata)
+            {
+                ["First"] = "different",
+            };
+            byte[] directBytes = SerializeTaskParameter(
+                [
+                    new TaskItemData("ItemSpec1", new Dictionary<string, string>(metadata)),
+                    new TaskItemData("ItemSpec2", new Dictionary<string, string>(metadata)),
+                    new TaskItemData("ItemSpec3", differentMetadata),
+                    new TaskItemData("ItemSpec4", metadata: null),
+                ]);
+            byte[] fallbackBytes = SerializeTaskParameter(
+                [
+                    new FallbackTaskItem("ItemSpec1", new Dictionary<string, string>(metadata)),
+                    new FallbackTaskItem("ItemSpec2", new Dictionary<string, string>(metadata)),
+                    new FallbackTaskItem("ItemSpec3", new Dictionary<string, string>(differentMetadata)),
+                    new FallbackTaskItem("ItemSpec4", new Dictionary<string, string>()),
+                ]);
+
+            directBytes.ShouldBe(fallbackBytes);
+
+            using var stream = new MemoryStream(directBytes);
+            using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+            replayedArgs.Items.Count.ShouldBe(4);
+            ((ITaskItem)replayedArgs.Items[0]).GetMetadata("First").ShouldBe("value");
+            ((ITaskItem)replayedArgs.Items[1]).GetMetadata("First").ShouldBe("value");
+            ((ITaskItem)replayedArgs.Items[2]).GetMetadata("First").ShouldBe("different");
+            ((ITaskItem)replayedArgs.Items[0]).GetMetadata("Escaped").ShouldBe("value%3b");
+            ((ITaskItem)replayedArgs.Items[1]).GetMetadata("Second").ShouldBe(string.Empty);
+            ((ITaskItem)replayedArgs.Items[2]).GetMetadata("Escaped").ShouldBe("value%3b");
+            ((ITaskItem)replayedArgs.Items[3]).MetadataCount.ShouldBe(0);
+            stream.Position.ShouldBe(stream.Length);
+
+            static byte[] SerializeTaskParameter(ITaskItem[] items)
+            {
+                var args = new TaskParameterEventArgs(
+                    TaskParameterMessageKind.TaskOutput,
+                    "ParameterName",
+                    "PropertyName",
+                    "ItemName",
+                    items,
+                    logItemMetadata: true,
+                    DateTime.MinValue);
+                var stream = new MemoryStream();
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(writer).Write(args);
+                }
+
+                return stream.ToArray();
+            }
+        }
+
+        [Fact]
         public void RoundtripProjectEvaluationStartedEventArgs()
         {
             var projectFile = @"C:\foo\bar.proj";
@@ -855,6 +1282,52 @@ namespace Microsoft.Build.UnitTests
 
             /// <inheritdoc />
             public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata() => _metadata;
+        }
+
+        private sealed class FallbackTaskItem : ITaskItem
+        {
+            private readonly Dictionary<string, string> _metadata;
+
+            internal FallbackTaskItem(string itemSpec, string metadataName, string metadataValue)
+            {
+                ItemSpec = itemSpec;
+                _metadata = new Dictionary<string, string>
+                {
+                    [metadataName] = metadataValue,
+                };
+            }
+
+            internal FallbackTaskItem(string itemSpec, Dictionary<string, string> metadata)
+            {
+                ItemSpec = itemSpec;
+                _metadata = metadata;
+            }
+
+            public string ItemSpec { get; set; }
+
+            public ICollection MetadataNames => _metadata.Keys;
+
+            public int MetadataCount => _metadata.Count;
+
+            public string GetMetadata(string metadataName)
+                => _metadata.TryGetValue(metadataName, out string value) ? value : string.Empty;
+
+            public void SetMetadata(string metadataName, string metadataValue)
+                => _metadata[metadataName] = metadataValue;
+
+            public void RemoveMetadata(string metadataName)
+                => _metadata.Remove(metadataName);
+
+            public void CopyMetadataTo(ITaskItem destinationItem)
+            {
+                foreach (KeyValuePair<string, string> metadata in _metadata)
+                {
+                    destinationItem.SetMetadata(metadata.Key, metadata.Value);
+                }
+            }
+
+            public IDictionary CloneCustomMetadata()
+                => new Dictionary<string, string>(_metadata);
         }
 
         [Fact]

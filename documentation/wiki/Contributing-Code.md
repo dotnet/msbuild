@@ -17,7 +17,7 @@ You will have to sign a Contributor License Agreement (CLA) before we can accept
 ### Developer Workflow
 
 1. Work item is assigned to a developer during the triage process
-2. Both Microsoft and external contributors are expected to do their work in a local fork and submit code for consideration via a pull request.
+2. Both Microsoft and external contributors submit code for consideration via a pull request.
 3. When the pull request process deems the change ready it will be merged directly into the tree. 
 
 ### Creating New Issues

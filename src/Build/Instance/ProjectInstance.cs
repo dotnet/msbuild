@@ -195,6 +195,13 @@ namespace Microsoft.Build.Execution
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
         /// <summary>
+        /// How far evaluation proceeded when this instance was produced. Defaults to
+        /// <see cref="ProjectEvaluationStage.Full"/>. A partial value means later-pass state
+        /// (items, targets, and so on) was not produced and accessing it will throw.
+        /// </summary>
+        private ProjectEvaluationStage _evaluationStage = ProjectEvaluationStage.Full;
+
+        /// <summary>
         /// The property and item filter used when creating this instance, or null if this is not a filtered copy
         /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
         /// </summary>
@@ -297,9 +304,11 @@ namespace Microsoft.Build.Execution
         /// <param name="evaluationContext">The context to use for evaluation.</param>
         /// <param name="directoryCacheFactory">The directory cache factory to use for file I/O.</param>
         /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
+        /// <param name="evaluationStage">The stage after which to stop evaluation.</param>
         /// <returns>A new project instance</returns>
         private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
-            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
+            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             ArgumentException.ThrowIfNullOrEmpty(projectFile);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -317,7 +326,7 @@ namespace Microsoft.Build.Execution
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext,
-                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory);
+                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory, evaluationStage: evaluationStage);
         }
 
         /// <summary>
@@ -539,9 +548,11 @@ namespace Microsoft.Build.Execution
         /// <param name="evaluationContext">The context to use for evaluation.</param>
         /// <param name="directoryCacheFactory">The directory cache factory to use for file I/O.</param>
         /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
+        /// <param name="evaluationStage">The stage after which to stop evaluation.</param>
         /// <returns>A new project instance</returns>
         private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
-            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
+            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
@@ -551,7 +562,7 @@ namespace Microsoft.Build.Execution
             };
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, buildParameters, projectCollection.LoggingService, buildEventContext,
-                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory);
+                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory, evaluationStage: evaluationStage);
         }
 
         /// <summary>
@@ -926,7 +937,8 @@ namespace Microsoft.Build.Execution
                 options.LoadSettings,
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
-                options.Interactive);
+                options.Interactive,
+                options.EvaluationStage);
         }
 
         /// <summary>
@@ -945,7 +957,8 @@ namespace Microsoft.Build.Execution
                 options.LoadSettings,
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
-                options.Interactive);
+                options.Interactive,
+                options.EvaluationStage);
         }
 
         /// <summary>
@@ -1174,6 +1187,7 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             get
             {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(Items));
                 return (_items == null) ?
                     (ICollection<ProjectItemInstance>)ReadOnlyEmptyCollection<ProjectItemInstance>.Instance :
                     new ReadOnlyCollection<ProjectItemInstance>(_items);
@@ -1214,6 +1228,30 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// How far evaluation proceeded when this instance was produced.
+        /// When this is not <see cref="ProjectEvaluationStage.Full"/>, the instance is the result of a
+        /// partial evaluation and members exposing state from later passes (for example items or targets)
+        /// throw <see cref="InvalidOperationException"/>.
+        /// </summary>
+        public ProjectEvaluationStage EvaluationStage
+        {
+            get { return _evaluationStage; }
+        }
+
+        /// <summary>
+        /// Throws <see cref="InvalidOperationException"/> if this instance was produced by a partial
+        /// evaluation that stopped before <paramref name="requiredStage"/>, meaning the requested
+        /// member's state was never computed.
+        /// </summary>
+        private void VerifyThrowEvaluationStageReached(ProjectEvaluationStage requiredStage, string memberName)
+        {
+            if (_evaluationStage < requiredStage)
+            {
+                ErrorUtilities.ThrowInvalidOperation("OM_PartialEvaluationMemberUnavailable", memberName, _evaluationStage, requiredStage);
+            }
+        }
+
+        /// <summary>
         /// The project's root directory, for evaluation of relative paths and
         /// setting the current directory during build.
         /// Is never null: projects not loaded from disk use the current directory from
@@ -1242,9 +1280,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public IDictionary<string, ProjectItemDefinitionInstance> ItemDefinitions
         {
-            [DebuggerStepThrough]
             get
-            { return _itemDefinitions; }
+            {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.ItemDefinitions, nameof(ItemDefinitions));
+                return _itemDefinitions;
+            }
         }
 
         /// <summary>
@@ -1268,8 +1308,16 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> DefaultTargets
         {
-            get { return _defaultTargets; }
-            private set { _defaultTargets = value; }
+            get
+            {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Full, nameof(DefaultTargets));
+                return _defaultTargets;
+            }
+
+            private set
+            {
+                _defaultTargets = value;
+            }
         }
 
         /// <summary>
@@ -1292,7 +1340,10 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return _targets; }
+            {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Full, nameof(Targets));
+                return _targets;
+            }
         }
 
         /// <summary>
@@ -2079,6 +2130,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public ICollection<ProjectItemInstance> GetItems(string itemType)
         {
+            VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(GetItems));
+
             // GetItems already returns a readonly collection
             return ((IItemProvider<ProjectItemInstance>)this).GetItems(itemType);
         }
@@ -2179,6 +2232,7 @@ namespace Microsoft.Build.Execution
         /// Returns true on success, false on failure.
         /// Only valid if mutable.
         /// </summary>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build()
         {
             return Build(null);
@@ -2194,6 +2248,7 @@ namespace Microsoft.Build.Execution
         /// If any of the loggers supplied are already attached to the logging service we
         /// were passed, throws InvalidOperationException.
         /// </remarks>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(IEnumerable<ILogger> loggers)
         {
             return Build((string[])null, loggers, null);
@@ -2209,6 +2264,7 @@ namespace Microsoft.Build.Execution
         /// If any of the loggers supplied are already attached to the logging service we
         /// were passed, throws InvalidOperationException.
         /// </remarks>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             return Build((string[])null, loggers, remoteLoggers);
@@ -2225,6 +2281,7 @@ namespace Microsoft.Build.Execution
         /// If any of the loggers supplied are already attached to the logging service we
         /// were passed, throws InvalidOperationException.
         /// </remarks>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string target, IEnumerable<ILogger> loggers)
         {
             return Build(target, loggers, null);
@@ -2242,6 +2299,7 @@ namespace Microsoft.Build.Execution
         /// If any of the loggers supplied are already attached to the logging service we
         /// were passed, throws InvalidOperationException.
         /// </remarks>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string target, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             string[] targets = (target == null) ? [] : [target];
@@ -2260,6 +2318,7 @@ namespace Microsoft.Build.Execution
         /// If any of the loggers supplied are already attached to the logging service we
         /// were passed, throws InvalidOperationException.
         /// </remarks>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string[] targets, IEnumerable<ILogger> loggers)
         {
             return Build(targets, loggers, null);
@@ -2277,6 +2336,7 @@ namespace Microsoft.Build.Execution
         /// If any of the loggers supplied are already attached to the logging service we
         /// were passed, throws InvalidOperationException.
         /// </remarks>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             IDictionary<string, TargetResult> targetOutputs;
@@ -2295,6 +2355,7 @@ namespace Microsoft.Build.Execution
         /// If any of the loggers supplied are already attached to the logging service we
         /// were passed, throws InvalidOperationException.
         /// </remarks>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, out IDictionary<string, TargetResult> targetOutputs)
         {
             return Build(targets, loggers, null, null, out targetOutputs);
@@ -2312,6 +2373,7 @@ namespace Microsoft.Build.Execution
         /// If any of the loggers supplied are already attached to the logging service we
         /// were passed, throws InvalidOperationException.
         /// </remarks>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, out IDictionary<string, TargetResult> targetOutputs)
         {
             return Build(targets, loggers, remoteLoggers, null, out targetOutputs);
@@ -2620,6 +2682,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a set of project instances which represent the project dependency graph for a solution build.
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates a solution's projects, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         internal static ProjectInstance[] LoadSolutionForBuild(
             string projectFile,
             PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances,
@@ -2684,6 +2747,7 @@ namespace Microsoft.Build.Execution
             return projectInstances;
         }
 
+        [RequiresUnreferencedCode("Evaluates a solution's projects, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         private static ProjectInstance[] CalculateToolsVersionAndGenerateSolutionWrapper(
             string projectFile,
             BuildParameters buildParameters,
@@ -2778,6 +2842,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Builds a list of targets with the specified loggers.
         /// </summary>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         internal bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ILoggingService loggingService, int maxNodeCount, out IDictionary<string, TargetResult> targetOutputs)
         {
             VerifyThrowNotImmutable();
@@ -2833,6 +2898,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Builds a list of targets with the specified loggers.
         /// </summary>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         internal bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ILoggingService loggingService, out IDictionary<string, TargetResult> targetOutputs)
         {
             return Build(targets, loggers, remoteLoggers, loggingService, 1, out targetOutputs);
@@ -2975,6 +3041,7 @@ namespace Microsoft.Build.Execution
         /// <param name="sdkResolverService"></param>
         /// <param name="submissionId"></param>
         /// <returns>The ProjectRootElement for the root traversal and each of the metaprojects.</returns>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         private static ProjectInstance[] GenerateSolutionWrapper(
 
                 string projectFile,
@@ -3028,6 +3095,7 @@ namespace Microsoft.Build.Execution
         /// <param name="submissionId"></param>
         /// <returns>An appropriate ProjectRootElement</returns>
         [MethodImpl(MethodImplOptions.NoInlining)]
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         private static ProjectInstance[] GenerateSolutionWrapperUsingOldOM(
         string projectFile,
             IDictionary<string, string> globalProperties,
@@ -3184,7 +3252,8 @@ namespace Microsoft.Build.Execution
             int submissionId = BuildEventContext.InvalidSubmissionId,
             ProjectLoadSettings? projectLoadSettings = null,
             EvaluationContext evaluationContext = null,
-            IDirectoryCacheFactory directoryCacheFactory = null)
+            IDirectoryCacheFactory directoryCacheFactory = null,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             ArgumentNullException.ThrowIfNull(xml);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
@@ -3290,7 +3359,10 @@ namespace Microsoft.Build.Execution
                 sdkResolverService ?? evaluationContext.SdkResolverService, /* Use override ISdkResolverService if specified */
                 submissionId,
                 evaluationContext,
-                interactive: buildParameters.Interactive);
+                interactive: buildParameters.Interactive,
+                evaluationStage: evaluationStage);
+
+            _evaluationStage = evaluationStage;
 
             Assumed.NotEqual(EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }

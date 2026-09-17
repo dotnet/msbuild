@@ -4,6 +4,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
@@ -95,19 +98,32 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool UseTrustedSettings { get; set; }
 
+        /// <summary>
+        /// Prohibits loading XML with embedded DTD. When true (default), an error is raised if a DTD is present.
+        /// When false, DTDs are ignored. Never set to false for untrusted input.
+        /// </summary>
+        public bool ProhibitDtd { get; set; } = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11);
+
         #endregion
 
         /// <summary>
         /// Executes the XslTransform task.
         /// </summary>
         /// <returns>true if transformation succeeds.</returns>
-        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
-            Justification = "The XslTransformation task compiles the user-supplied stylesheet with XslCompiledTransform, which generates IL at runtime and is inherently incompatible with Native AOT.")]
         public override bool Execute()
         {
             XmlInput xmlinput;
             XsltInput xsltinput;
+            int currentXmlInputIndex = -1;
             ArgumentNullException.ThrowIfNull(_outputPaths, "OutputPath");
+
+#if NET
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadError", "Dynamic code generation is not supported in this runtime environment.");
+                return false;
+            }
+#endif
 
             // Load XmlInput, XsltInput parameters
             try
@@ -145,7 +161,7 @@ namespace Microsoft.Build.Tasks
             // Arguments parameters
             try
             {
-                arguments = ProcessXsltArguments(Parameters);
+                arguments = ProcessXsltArguments(Parameters, ProhibitDtd);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -158,7 +174,7 @@ namespace Microsoft.Build.Tasks
             // Load the XSLT
             try
             {
-                xslct = xsltinput.LoadXslt(UseTrustedSettings);
+                xslct = xsltinput.LoadXslt(UseTrustedSettings, ProhibitDtd);
             }
             catch (PlatformNotSupportedException)
             {
@@ -167,7 +183,15 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadError", e.Message);
+                if (XmlTaskUtility.IsDtdProhibitedException(e, ProhibitDtd, xsltinput.ContainsDtd))
+                {
+                    Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadDtdProhibited", nameof(ProhibitDtd), nameof(XslTransformation));
+                }
+                else
+                {
+                    Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadError", e.Message);
+                }
+
                 return false;
             }
 
@@ -181,9 +205,10 @@ namespace Microsoft.Build.Tasks
 
                 for (int i = 0; i < xmlinput.Count; i++)
                 {
+                    currentXmlInputIndex = i;
                     using (XmlWriter xmlWriter = XmlWriter.Create(TaskEnvironment.GetAbsolutePath(_outputPaths[i].ItemSpec), xslct.OutputSettings))
                     {
-                        using (XmlReader xr = xmlinput.CreateReader(i))
+                        using (XmlReader xr = xmlinput.CreateReader(i, ProhibitDtd))
                         {
                             xslct.Transform(xr, arguments, xmlWriter, new XmlUrlResolver());
                         }
@@ -194,7 +219,43 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeAndExceptionFromResources(e, true, true, "XslTransform.TransformError", [e.Message]);
+                bool currentInputContainsDtd = false;
+                if (ProhibitDtd && currentXmlInputIndex >= 0)
+                {
+                    try
+                    {
+                        // Check if input contains DTD.
+                        if (xmlinput.XmlMode == XmlInput.XmlModes.XmlFile)
+                        {
+                            string currentInputPath = XmlInputPaths?[currentXmlInputIndex]?.ItemSpec;
+                            if (!string.IsNullOrEmpty(currentInputPath))
+                            {
+                                currentInputContainsDtd = XmlTaskUtility.ContainsDtd(TaskEnvironment.GetAbsolutePath(currentInputPath));
+                            }
+                        }
+                        else
+                        {
+                            currentInputContainsDtd = XmlTaskUtility.ContainsDtd(XmlContent);
+                        }
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        // If we cannot inspect input, don't classify as DTD-prohibited.
+                        currentInputContainsDtd = false;
+                    }
+                }
+
+                if (currentXmlInputIndex >= 0
+                    && XmlTaskUtility.IsDtdProhibitedException(e, ProhibitDtd, currentInputContainsDtd))
+                {
+                    string offendingPath = XmlInputPaths?[currentXmlInputIndex]?.ItemSpec ?? string.Empty;
+                    Log.LogErrorWithCodeFromResources("XslTransform.TransformDtdProhibited", offendingPath, nameof(ProhibitDtd), nameof(XslTransformation));
+                }
+                else
+                {
+                    Log.LogErrorWithCodeAndExceptionFromResources(e, true, true, "XslTransform.TransformError", [e.Message]);
+                }
+
                 return false;
             }
 
@@ -214,8 +275,9 @@ namespace Microsoft.Build.Tasks
         /// Takes the raw XML and loads XsltArgumentList
         /// </summary>
         /// <param name="xsltParametersXml">The raw XML that holds each parameter as <Parameter Name="" Value="" Namespace="" /> </param>
+        /// <param name="prohibitDtd">True to prohibit DTDs while parsing the parameter XML.</param>
         /// <returns>XsltArgumentList.</returns>
-        private static XsltArgumentList ProcessXsltArguments(string xsltParametersXml)
+        private static XsltArgumentList ProcessXsltArguments(string xsltParametersXml, bool prohibitDtd)
         {
             XsltArgumentList arguments = new XsltArgumentList();
             if (xsltParametersXml == null)
@@ -226,7 +288,7 @@ namespace Microsoft.Build.Tasks
             XmlDocument doc = new XmlDocument();
             try
             {
-                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var settings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
                 using (XmlReader reader = XmlReader.Create(new StringReader("<XsltParameters>" + xsltParametersXml + "</XsltParameters>"), settings))
                 {
                     doc.Load(reader);
@@ -340,15 +402,17 @@ namespace Microsoft.Build.Tasks
             /// Creates correct reader based on the input type.
             /// </summary>
             /// <returns>The XmlReader object</returns>
-            public XmlReader CreateReader(int itemPos)
+            public XmlReader CreateReader(int itemPos, bool prohibitDtd)
             {
+                var settings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
                 if (XmlMode == XmlModes.XmlFile)
                 {
-                    return XmlReader.Create(new StreamReader(_filePaths[itemPos]), new XmlReaderSettings { CloseInput = true }, _filePaths[itemPos]);
+                    settings.CloseInput = true;
+                    return XmlReader.Create(new StreamReader(_filePaths[itemPos]), settings, _filePaths[itemPos]);
                 }
                 else // xmlModes.Xml
                 {
-                    return XmlReader.Create(new StringReader(_xmlContent));
+                    return XmlReader.Create(new StringReader(_xmlContent), settings);
                 }
             }
         }
@@ -464,16 +528,17 @@ namespace Microsoft.Build.Tasks
             [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
             public XslCompiledTransform LoadXslt()
             {
-                return LoadXslt(false);
+                return LoadXslt(false, true);
             }
 
             /// <summary>
             /// Loads the XSLT to XslCompiledTransform. By default uses Default settings instead of trusted settings.
             /// </summary>
             /// <param name="useTrustedSettings">Determines whether or not to use trusted settings.</param>
+            /// <param name="prohibitDtd">True to prohibit DTDs while loading the XSLT.</param>
             /// <returns>A XslCompiledTransform object.</returns>
             [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
-            public XslCompiledTransform LoadXslt(bool useTrustedSettings)
+            public XslCompiledTransform LoadXslt(bool useTrustedSettings, bool prohibitDtd)
             {
                 XslCompiledTransform xslct = new XslCompiledTransform();
 
@@ -482,7 +547,8 @@ namespace Microsoft.Build.Tasks
                     case XslModes.Xslt:
                         {
                             using var sr = new StringReader(_data);
-                            using var xmlReader = XmlReader.Create(sr);
+                            var settings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
+                            using var xmlReader = XmlReader.Create(sr, settings);
                             xslct.Load(xmlReader, XsltSettings.Default, new XmlUrlResolver());
                             break;
                         }
@@ -492,7 +558,8 @@ namespace Microsoft.Build.Tasks
                             _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _filePath.Value.OriginalValue);
                         }
 
-                        using (XmlReader reader = XmlReader.Create(new StreamReader(_filePath.Value), new XmlReaderSettings { CloseInput = true }, _filePath.Value))
+                        var fileSettings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore, CloseInput = true };
+                        using (XmlReader reader = XmlReader.Create(new StreamReader(_filePath.Value), fileSettings, _filePath.Value))
                         {
                             XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
                             // Preserve existing behavior: XSLT files can use local xsl:import/xsl:include paths resolved relative to the stylesheet.
@@ -525,8 +592,17 @@ namespace Microsoft.Build.Tasks
                     default:
                         return Assumed.Unreachable<XslCompiledTransform>();
                 }
-
                 return xslct;
+            }
+
+            public bool ContainsDtd()
+            {
+                return _xslMode switch
+                {
+                    XslModes.Xslt => XmlTaskUtility.ContainsDtd(_data),
+                    XslModes.XsltFile => XmlTaskUtility.ContainsDtd(_filePath.Value),
+                    _ => false,
+                };
             }
 
 #if FEATURE_COMPILED_XSL

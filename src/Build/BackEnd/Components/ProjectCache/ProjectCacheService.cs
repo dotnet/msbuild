@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -99,6 +100,7 @@ namespace Microsoft.Build.ProjectCache
         /// <summary>
         /// Optimization which frontloads plugin initialization since we have an entire graph.
         /// </summary>
+        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         public void InitializePluginsForGraph(
             ProjectGraph projectGraph,
             ICollection<string> requestedTargets,
@@ -125,6 +127,7 @@ namespace Microsoft.Build.ProjectCache
                 cancellationToken);
         }
 
+        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         public void InitializePluginsForVsScenario(
             IEnumerable<ProjectCacheDescriptor> projectCacheDescriptors,
             BuildRequestConfiguration buildRequestConfiguration,
@@ -157,6 +160,7 @@ namespace Microsoft.Build.ProjectCache
                 cancellationToken);
         }
 
+        [RequiresUnreferencedCode("Loads a project cache plugin assembly from disk and reflects over its types, which is incompatible with trimming.")]
         private Task<ProjectCachePlugin> GetProjectCachePluginAsync(
             ProjectCacheDescriptor projectCacheDescriptor,
             ProjectGraph? projectGraph,
@@ -192,6 +196,7 @@ namespace Microsoft.Build.ProjectCache
             }
         }
 
+        [RequiresUnreferencedCode("Loads a project cache plugin assembly from disk and reflects over its types, which is incompatible with trimming.")]
         private async Task<ProjectCachePlugin> CreateAndInitializePluginAsync(
             ProjectCacheDescriptor projectCacheDescriptor,
             ProjectGraph? projectGraph,
@@ -397,7 +402,7 @@ namespace Microsoft.Build.ProjectCache
                         return globalProperties;
                     });
 
-        private static IProjectCachePluginBase CreatePluginInstanceFromType(Type pluginType)
+        private static IProjectCachePluginBase CreatePluginInstanceFromType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type pluginType)
         {
             try
             {
@@ -424,6 +429,8 @@ namespace Microsoft.Build.ProjectCache
             }
         }
 
+        [RequiresUnreferencedCode("Loads a project cache plugin assembly from disk and reflects over its exported types, which is incompatible with trimming.")]
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
         private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)
         {
             Assembly assembly = LoadAssembly(pluginAssemblyPath);
@@ -483,11 +490,9 @@ namespace Microsoft.Build.ProjectCache
                 return false;
             }
 
-            // We need to retrieve the configuration if it's already loaded in order to access the Project property below.
-            if (buildRequestConfiguration.IsCached)
-            {
-                buildRequestConfiguration.RetrieveFromCache();
-            }
+            // Retrieve the project if it is cached and keep it in memory while checking its cache descriptors.
+            using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                buildRequestConfiguration.AcquireProjectInstanceUsage();
 
             // Check if there are any project cache items defined in the project
             return GetProjectCacheDescriptors(buildRequestConfiguration.Project).Any();
@@ -501,6 +506,7 @@ namespace Microsoft.Build.ProjectCache
                 || (buildingProject != null && !ConversionUtilities.ConvertStringToBool(buildingProject, nullOrWhitespaceIsFalse: true));
         }
 
+        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         public void PostCacheRequest(CacheRequest cacheRequest, CancellationToken cancellationToken)
         {
             EnsureNotDisposed();
@@ -522,6 +528,12 @@ namespace Microsoft.Build.ProjectCache
 
             async ValueTask<(CacheResult Result, int ProjectContextId)> ProcessCacheRequestAsync()
             {
+                // The configuration cache is shared with the in-proc node's BuildRequestEngine, which may run a
+                // memory-pressure sweep on its own thread. Keep the project in memory for this entire operation:
+                // the ProjectInstance below is handed to the plugin and is used until the query completes.
+                using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                    cacheRequest.Configuration.AcquireProjectInstanceUsage();
+
                 EvaluateProjectIfNecessary(cacheRequest.Submission, cacheRequest.Configuration);
 
                 BuildRequestData buildRequest = new BuildRequestData(
@@ -569,6 +581,7 @@ namespace Microsoft.Build.ProjectCache
             }
         }
 
+        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         private async ValueTask<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
         {
             Assumed.NotNull(buildRequest.ProjectInstance);
@@ -830,15 +843,13 @@ namespace Microsoft.Build.ProjectCache
                 return;
             }
 
-            // If the ProjectInstance was evicted to disk to save memory, restore it before accessing
-            // the Project property below (whose getter asserts !IsCached).
-            if (requestConfiguration.IsCached)
+            List<ProjectCacheDescriptor> projectCacheDescriptors;
+            // Retrieve the project if it is cached and keep it in memory while determining which plugins apply.
+            using (requestConfiguration.AcquireProjectInstanceUsage())
             {
-                requestConfiguration.RetrieveFromCache();
+                projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();
             }
 
-            // Filter to plugins which apply to the project, if any
-            List<ProjectCacheDescriptor> projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();
             if (projectCacheDescriptors.Count == 0)
             {
                 return;

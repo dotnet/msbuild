@@ -10,9 +10,8 @@ internal sealed record WaitMessage : ServerMessage
 {
     public static WaitMessage Instance { get; } = new();
 
-    public override ServerMessageType MessageType => ServerMessageType.Wait;
-
     private WaitMessage()
+        : base(ServerMessageType.Wait)
     {
     }
 }

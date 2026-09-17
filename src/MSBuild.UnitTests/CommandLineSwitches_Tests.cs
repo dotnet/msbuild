@@ -1124,26 +1124,6 @@ namespace Microsoft.Build.UnitTests
             switches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBe(commandLineArg);
         }
 
-        /// <summary>
-        /// Verifies that the parsing behavior of quoted target properties is not changed when ChangeWave configured.
-        /// </summary>
-        [Fact]
-        public void ParameterizedSwitchTargetQuotedChangeWaveTest()
-        {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.10");
-                ChangeWaves.ResetStateForTests();
-
-                CommandLineSwitches switches = new CommandLineSwitches();
-                switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, "/t:Clean;Build", "\"Clean;Build\"", true, true, false);
-                switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBeTrue();
-
-                switches[CommandLineSwitches.ParameterizedSwitch.Target].Length.ShouldBe(1);
-                switches[CommandLineSwitches.ParameterizedSwitch.Target][0].ShouldBe("Clean;Build");
-            }
-        }
-
         [Fact]
         public void AppendParameterizedSwitchesTests3()
         {

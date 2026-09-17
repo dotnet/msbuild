@@ -213,6 +213,87 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 "An arbitrary external toolsDirectory should produce a different handshake " +
                 "than the BuildEnvironmentHelper default, proving the mismatch scenario.");
         }
+
+        /// <summary>
+        /// Regression test for MSB4216 caused by drive-letter casing differences on Windows. The
+        /// .NET Framework parent passes the SDK directory ($(NetCoreSdkRoot)) as the tools directory
+        /// while the child re-resolves the same directory from its own process path. On hosted CI
+        /// agents these can differ only by drive-letter casing ("D:\..." vs "d:\..."). Because the
+        /// salt is a case-sensitive hash they would mismatch, so the child accepts the parent's
+        /// drive-letter casing. This only widens what the child accepts, so it never rejects a parent
+        /// that connects successfully today.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void Handshake_NetTaskHost_AcceptsDriveLetterCasingDifference()
+        {
+            HandshakeOptions options = GetNetTaskHostHandshakeOptions();
+
+            // The child resolved its own location with one drive-letter casing; the parent supplied
+            // the same directory with the opposite casing.
+            var child = new Handshake(options, @"d:\agent\_work\sdk\11.0.100");
+            var parent = new Handshake(options, @"D:\agent\_work\sdk\11.0.100");
+
+            int childSalt = child.RetrieveHandshakeComponents().Salt;
+            int parentSalt = parent.RetrieveHandshakeComponents().Salt;
+
+            // The raw salts differ because the hash is case-sensitive...
+            parentSalt.ShouldNotBe(childSalt,
+                "Drive-letter casing differences must produce different case-sensitive salts; " +
+                "otherwise this test would not exercise the tolerance.");
+
+            // ...but the child tolerates the parent's drive-letter casing.
+            child.IsNetTaskHostSaltMatch(parentSalt).ShouldBeTrue(
+                "The .NET task host child must accept a parent that resolved the same SDK directory " +
+                "with a different drive-letter casing, otherwise the handshake fails with MSB4216.");
+        }
+
+        /// <summary>
+        /// The drive-letter tolerance must not weaken node-reuse isolation: a genuinely different
+        /// tools directory (not merely a drive-letter casing variant) must still be rejected.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void Handshake_NetTaskHost_RejectsUnrelatedToolsDirectory()
+        {
+            HandshakeOptions options = GetNetTaskHostHandshakeOptions();
+
+            var child = new Handshake(options, @"d:\agent\_work\sdk\11.0.100");
+            var unrelated = new Handshake(options, @"d:\agent\_work\sdk\10.0.200");
+
+            child.IsNetTaskHostSaltMatch(unrelated.RetrieveHandshakeComponents().Salt).ShouldBeFalse(
+                "A different SDK directory is not a drive-letter casing variant and must not be accepted.");
+        }
+
+        /// <summary>
+        /// The drive-letter tolerance is scoped to the .NET task host. Other node types keep
+        /// requiring the exact salt, preserving existing node-reuse isolation.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void Handshake_NonNetTaskHost_DoesNotWidenSaltAcceptance()
+        {
+            var handshake = new Handshake(HandshakeOptions.NodeReuse);
+
+            // Even the node's own salt must not be treated as a drive-letter variant match, because
+            // a non-.NET-task-host node never computes an alternate-casing salt.
+            handshake.IsNetTaskHostSaltMatch(handshake.RetrieveHandshakeComponents().Salt).ShouldBeFalse(
+                "Only the .NET task host computes an alternate-casing salt; other node types must " +
+                "not widen salt acceptance.");
+        }
+
+        private static HandshakeOptions GetNetTaskHostHandshakeOptions()
+        {
+            // Use explicit NET runtime and current architecture to ensure the NET HandshakeOptions
+            // flag is set, which is required for passing toolsDirectory to the Handshake constructor.
+            var netTaskHostParams = new TaskHostParameters(
+                runtime: XMakeAttributes.MSBuildRuntimeValues.net,
+                architecture: XMakeAttributes.GetCurrentMSBuildArchitecture(),
+                dotnetHostPath: null,
+                msBuildAssemblyPath: null);
+
+            return CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: true,
+                taskHostParameters: netTaskHostParams,
+                nodeReuse: false);
+        }
 #endif
 
         /// <summary>

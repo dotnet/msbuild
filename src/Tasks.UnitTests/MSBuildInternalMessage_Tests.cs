@@ -44,7 +44,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var projectFile = env.CreateFile(env.CreateFolder(), "test.csproj", projectContent).Path;
                 Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectFile, touchProject: false);
 
-                string expectedBuildMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(expectedResourceName, formatArgs);
+                string expectedBuildMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(expectedResourceName, formatArgs ?? []);
                 MockLogger logger = new MockLogger(_testOutput);
 
                 project.Build(logger);

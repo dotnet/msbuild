@@ -126,6 +126,19 @@ param(
     [string]$JsonOut
 )
 
+# AWF chroot sessions can expose PowerShell's built-in module files without loading
+# their manifests. Import the required modules directly when command discovery fails.
+if (-not (Get-Command Get-Date -ErrorAction SilentlyContinue)) {
+    Import-Module ([System.IO.Path]::Combine($PSHOME, "Microsoft.PowerShell.Commands.Utility.dll")) -ErrorAction Stop
+}
+if (-not (Get-Command Get-Item -ErrorAction SilentlyContinue)) {
+    Import-Module ([System.IO.Path]::Combine($PSHOME, "Microsoft.PowerShell.Commands.Management.dll")) -ErrorAction Stop
+}
+if (-not (Get-Command Expand-Archive -ErrorAction SilentlyContinue)) {
+    $archiveModule = [System.IO.Path]::Combine($PSHOME, "Modules", "Microsoft.PowerShell.Archive", "Microsoft.PowerShell.Archive.psd1")
+    Import-Module $archiveModule -ErrorAction Stop
+}
+
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"   # large speedup for Invoke-WebRequest
 

@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks);net35</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -12,11 +13,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <SemanticVersioningV1>true</SemanticVersioningV1>
-
     <EnablePackageValidation>true</EnablePackageValidation>
-
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
     <PackageDescription>This package contains the $(AssemblyName) assembly which implements common string-related functionality such as weak interning.</PackageDescription>
@@ -60,4 +58,5 @@
         <TfmSpecificPackageFile Include="$(TargetRefPath);@(FinalDocFile)" PackagePath="ref/$(TargetFramework)" />
       </ItemGroup>
   </Target>
+
 </Project>

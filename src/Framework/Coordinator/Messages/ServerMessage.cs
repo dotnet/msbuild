@@ -8,34 +8,24 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// <summary>
 ///  Base type for all messages sent from the coordinator to an MSBuild client.
 /// </summary>
-internal abstract record ServerMessage
+internal abstract partial record ServerMessage : Message<ServerMessageType>
 {
-    public abstract ServerMessageType MessageType { get; }
+    protected ServerMessage(ServerMessageType messageType)
+        : base(messageType)
+    {
+    }
 
     public static ServerMessage ReadFrom(BinaryReader reader)
     {
-        var messageType = (ServerMessageType)reader.ReadByte();
+        (ServerMessageType messageType, bool hasExtendedFields) = ReadTypeByte(reader);
+        Factory factory = Factory.FromMessageType(messageType);
 
-        return messageType switch
-        {
-            ServerMessageType.HandshakeResponse => ServerHandshakeMessage.ReadPayload(reader),
-            ServerMessageType.NodeGrant => new NodeGrantMessage(grantedNodes: reader.ReadInt32()),
-            ServerMessageType.Wait => WaitMessage.Instance,
-            ServerMessageType.Error => new ErrorMessage(message: reader.ReadString()),
+        byte extendedFields = hasExtendedFields ? ReadExtendedFieldsByte(reader) : (byte)0;
 
-            _ => Assumed.Unreachable<ServerMessage>($"Unknown coordinator message type: {messageType}"),
-        };
-    }
+        // The marker bit is only legal for message types that declare a supported extended-field mask.
+        // The factory validates that the actual field bits are within that mask.
+        Assumed.False(hasExtendedFields && !factory.SupportsExtendedFields, $"Message type {factory.MessageType} does not support extended fields.");
 
-    public void WriteTo(BinaryWriter writer)
-    {
-        writer.Write((byte)MessageType);
-        WritePayload(writer);
-        writer.Flush();
-    }
-
-    protected virtual void WritePayload(BinaryWriter writer)
-    {
-        // Descendants can override.
+        return factory.Create(reader, extendedFields);
     }
 }

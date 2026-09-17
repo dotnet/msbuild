@@ -194,6 +194,29 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        [Fact]
+        public void FindBuildEnvironmentFromSdkRoot()
+        {
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
+            {
+                // Simulate the .NET SDK host publishing the versioned SDK directory through the
+                // "Microsoft.DotNet.Sdk.Root" AppContext value (as it does when hosting MSBuild in a
+                // trimmed / Native AOT process). Nothing else points at MSBuild - the process path,
+                // executing assembly, and AppContext.BaseDirectory all return null - so resolution must
+                // come from the published SDK root.
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false, () => env.BuildDirectory);
+
+                // Make sure we get the right MSBuild entry point.
+                Path.GetFileName(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath).ShouldBe(Constants.MSBuildExecutableName);
+
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
+                BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64.ShouldBe(env.BuildDirectory);
+                BuildEnvironmentHelper.Instance.RunningInVisualStudio.ShouldBeFalse();
+                BuildEnvironmentHelper.Instance.RunningTests.ShouldBeFalse();
+                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.Standalone);
+            }
+        }
+
         [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void FindBuildEnvironmentFromVisualStudioRoot()
         {

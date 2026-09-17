@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -98,6 +99,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             _tracingReporter.AddSetDataSourceStats(stopwatch.Elapsed);
         }
 
+        [RequiresUnreferencedCode("Loads custom build check assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         public void ProcessCheckAcquisition(
             CheckAcquisitionData acquisitionData,
             ICheckContext checkContext)

@@ -13,6 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
@@ -894,6 +895,53 @@ namespace Microsoft.Build.UnitTests.Definition
                 });
 
             evaluationCount.ShouldBe(2);
+        }
+
+        [Fact]
+        public void CachingFileSystemWrapperDistinguishesFileAndDirectoryExistence()
+        {
+            var directory = _env.DefaultTestDirectory.CreateDirectory("subDirectory");
+            var file = _env.DefaultTestDirectory.CreateFile("file");
+            var fileSystem = new CachingFileSystemWrapper(FileSystems.Default);
+
+            fileSystem.FileExists(directory.Path).ShouldBeFalse();
+            fileSystem.DirectoryExists(directory.Path).ShouldBeTrue();
+            fileSystem.FileOrDirectoryExists(directory.Path).ShouldBeTrue();
+
+            fileSystem.DirectoryExists(file.Path).ShouldBeFalse();
+            fileSystem.FileExists(file.Path).ShouldBeTrue();
+            fileSystem.FileOrDirectoryExists(file.Path).ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        public void GetDirectoryNameOfFileAboveWithEmptyFileNameDoesNotPoisonProjectLevelWildcards(EvaluationContext.SharingPolicy policy)
+        {
+            var context = EvaluationContext.Create(policy);
+            _env.DefaultTestDirectory.CreateFile("Source.cs");
+
+            EvaluateProjects(
+                new[]
+                {
+                    """
+                    <Project>
+                      <PropertyGroup>
+                        <SearchedPath>$([MSBuild]::GetDirectoryNameOfFileAbove('$(MSBuildProjectDirectory)', ''))</SearchedPath>
+                      </PropertyGroup>
+                      <ItemGroup>
+                        <i Include="*.cs" />
+                      </ItemGroup>
+                    </Project>
+                    """
+                },
+                context,
+                project =>
+                {
+                    project.GetPropertyValue("SearchedPath").ShouldBeEmpty();
+                    ObjectModelHelpers.AssertItems(["Source.cs"], project.GetItems("i"));
+                });
         }
 
         [Theory]

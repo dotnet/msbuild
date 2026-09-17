@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -59,8 +60,10 @@ namespace Microsoft.Build.Execution
         /// Starts the request and blocks until results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         public abstract TResultData Execute();
 
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         private protected void ExecuteAsync(
             BuildSubmissionCompleteCallbackInternal<TRequestData, TResultData>? callback,
             object? context,
@@ -165,6 +168,7 @@ namespace Microsoft.Build.Execution
         /// Starts the request asynchronously and immediately returns control to the caller.
         /// </summary>
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         public void ExecuteAsync(BuildSubmissionCompleteCallback? callback, object? context)
         {
             void Clb(BuildSubmissionBase<BuildRequestData, BuildResult> submission)
@@ -179,6 +183,7 @@ namespace Microsoft.Build.Execution
         /// Starts the request and blocks until results are available.
         /// </summary>
         /// <exception cref="System.InvalidOperationException">The request has already been started or is already complete.</exception>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         public override BuildResult Execute()
         {
             LegacyThreadingData legacyThreadingData = ((IBuildComponentHost)BuildManager).LegacyThreadingData;
