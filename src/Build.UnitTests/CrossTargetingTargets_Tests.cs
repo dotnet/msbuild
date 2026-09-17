@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("WarnAndContinue", true, true)]
         [InlineData("true", true, true)]
         [InlineData("ErrorAndContinue", false, true)]
-        [InlineData("ErrorAndStop ", false, false)]
+        [InlineData("ErrorAndStop", false, false)]
         [InlineData("false", false, false)]
         [InlineData(null, false, false)]
         public void DispatchToInnerBuildsCanContinueOnError(string? continueOnError, bool expectSuccess, bool expectAfterDispatch)
