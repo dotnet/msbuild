@@ -171,6 +171,9 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     [InlineData(BinaryLogRecordKind.BuildCanceled)]
     [InlineData(BinaryLogRecordKind.LoggersRegistered)]
     [InlineData(BinaryLogRecordKind.MSBuildServerLifecycle)]
+    [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace)]
+    [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails)]
+    [InlineData(BinaryLogRecordKind.AssemblyConflictWarning)]
     public void ReplayFilter_ProtectedAndAuxiliaryKindsAreRejected(BinaryLogRecordKind kind)
     {
         Should.Throw<CommandLineSwitchException>(() => CreateOperation("input.binlog", OutputPath(), $"Exclude={kind}"))

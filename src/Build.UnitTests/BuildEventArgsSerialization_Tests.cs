@@ -1194,6 +1194,342 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripAssemblyResolutionSearchTraceEventArgs()
+        {
+            var args = CreateAssemblyResolutionSearchEvent();
+            args.ProjectFile = "project.proj";
+
+            Roundtrip(
+                args,
+                e => e.RequestedAssemblyName,
+                e => e.TargetProcessorArchitecture,
+                e => e.Importance.ToString(),
+                e => e.ProjectFile,
+                e => e.Message,
+                e => string.Join("|", e.SearchAttempts.Select(
+                    attempt => $"{attempt.SearchPath};{attempt.ParentAssembly};{attempt.FileNameAttempted};{attempt.AssemblyName};{attempt.Result};{attempt.ProcessorArchitecture};{attempt.IsAssemblyFoldersExSearch}")));
+        }
+
+        [Theory]
+        [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace, false)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails, false)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictWarning, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictWarning, false)]
+        public void Replay_EventFilter_HandlesAssemblyResolutionDiagnostics(BinaryLogRecordKind recordKind, bool acceptEvent)
+        {
+            BuildEventArgs original = recordKind switch
+            {
+                BinaryLogRecordKind.AssemblyResolutionSearchTrace => CreateAssemblyResolutionSearchEvent(),
+                BinaryLogRecordKind.AssemblyConflictDependencyDetails => CreateAssemblyConflictDependencyDetailsEvent(),
+                BinaryLogRecordKind.AssemblyConflictWarning => CreateAssemblyConflictWarningEvent(),
+                _ => throw new ArgumentOutOfRangeException(nameof(recordKind))
+            };
+            original.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream);
+            var eventWriter = new BuildEventArgsWriter(writer);
+            eventWriter.Write(original);
+            eventWriter.Write(new BuildFinishedEventArgs("finished", null, succeeded: true));
+            writer.Write((byte)BinaryLogRecordKind.EndOfFile);
+            writer.Flush();
+            stream.Position = 0;
+
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            List<BinaryLogEventMetadata> metadataSeen = [];
+            BinaryLogEventFilter filter = metadata =>
+            {
+                metadataSeen.Add(metadata);
+                return metadata.RecordKind != recordKind || acceptEvent;
+            };
+
+            BuildEventArgs result = reader.Read(filter);
+            if (acceptEvent)
+            {
+                result.GetType().ShouldBe(original.GetType());
+                result.Message.ShouldBe(original.Message);
+                result.Timestamp.ShouldBe(original.Timestamp);
+                result.BuildEventContext.ProjectContextId.ShouldBe(3);
+                result = reader.Read(filter);
+            }
+
+            result.ShouldBeOfType<BuildFinishedEventArgs>().Succeeded.ShouldBeTrue();
+            reader.Read(filter).ShouldBeNull();
+            metadataSeen.Select(metadata => metadata.RecordKind).ShouldBe([recordKind, BinaryLogRecordKind.BuildFinished]);
+            metadataSeen[0].BuildEventContext.ProjectContextId.ShouldBe(3);
+        }
+
+        private static AssemblyResolutionSearchTraceEventArgs CreateAssemblyResolutionSearchEvent()
+            => new(
+                "Requested, Version=1.0.0.0",
+                "MSIL",
+                [
+                    new AssemblyResolutionSearchAttempt(
+                        "first.dll",
+                        "first-path",
+                        parentAssembly: null,
+                        assemblyName: null,
+                        AssemblyResolutionSearchResult.FileNotFound,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: true),
+                    new AssemblyResolutionSearchAttempt(
+                        "second.dll",
+                        "second-path",
+                        "parent.dll",
+                        "Found, Version=2.0.0.0",
+                        AssemblyResolutionSearchResult.FusionNamesDidNotMatch,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: false),
+                    new AssemblyResolutionSearchAttempt(
+                        "third.dll",
+                        "second-path",
+                        "parent.dll",
+                        "Requested, Version=1.0.0.0",
+                        AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch,
+                        "AMD64",
+                        logAssemblyFoldersEx: false),
+                ],
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\search.proj",
+            };
+
+        [Fact]
+        public void RoundtripAssemblyConflictDependencyDetailsMessageEventArgs()
+        {
+            var args = CreateAssemblyConflictDependencyDetailsEvent();
+
+            Roundtrip(
+                args,
+                e => e.Importance.ToString(),
+                e => e.ProjectFile,
+                e => e.Message,
+                e => DescribeConflictReferenceDetails(e.Victor),
+                e => DescribeConflictReferenceDetails(e.Victim));
+        }
+
+        [Fact]
+        public void RoundtripAssemblyConflictWarningEventArgs()
+        {
+            var args = CreateAssemblyConflictWarningEvent();
+
+            Roundtrip(
+                args,
+                e => e.Code,
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
+                e => e.HelpKeyword,
+                e => e.ProjectFile,
+                e => e.SimpleAssemblyName,
+                e => e.LossReason.ToString(),
+                e => e.Message,
+                e => DescribeConflictReferenceDetails(e.Victor),
+                e => DescribeConflictReferenceDetails(e.Victim));
+        }
+
+        [Fact]
+        public void AssemblyConflictMessagesAreFormattedLazily()
+        {
+            AssemblyConflictDependencyDetailsMessageEventArgs details = CreateAssemblyConflictDependencyDetailsEvent();
+            AssemblyConflictWarningEventArgs warning = CreateAssemblyConflictWarningEvent();
+
+            details.IsMessageMaterialized.ShouldBeFalse();
+            warning.IsMessageMaterialized.ShouldBeFalse();
+
+            details.Message.ShouldNotBeNullOrEmpty();
+            warning.Message.ShouldNotBeNullOrEmpty();
+
+            details.IsMessageMaterialized.ShouldBeTrue();
+            warning.IsMessageMaterialized.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void AssemblyConflictMessagesAreInvariant()
+        {
+            CultureInfo originalCulture = CultureInfo.CurrentCulture;
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+
+                CreateAssemblyConflictDependencyDetailsEvent().Message.ShouldStartWith("    References which depend on");
+                CreateAssemblyConflictWarningEvent().Message.ShouldStartWith("Found conflicts between different versions");
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        [Fact]
+        public void AssemblyConflictMessagesCanBeFormattedAndCachedForAnotherCulture()
+        {
+            CultureInfo culture = CultureInfo.GetCultureInfo("fr-FR");
+            AssemblyConflictDependencyDetailsMessageEventArgs details = CreateAssemblyConflictDependencyDetailsEvent();
+            AssemblyConflictWarningEventArgs warning = CreateAssemblyConflictWarningEvent();
+
+            string localizedDetails = details.FormatMessage(culture);
+            string localizedWarning = warning.FormatMessage(culture);
+
+            localizedDetails.ShouldStartWith("    Références qui dépendent de");
+            localizedWarning.ShouldStartWith("détection de conflits");
+            details.FormatMessage(culture).ShouldBeSameAs(localizedDetails);
+            warning.FormatMessage(culture).ShouldBeSameAs(localizedWarning);
+            details.IsMessageMaterialized.ShouldBeFalse();
+            warning.IsMessageMaterialized.ShouldBeFalse();
+        }
+
+        /// <summary>
+        /// Verifies a binary-log round trip for a large structured conflict event.
+        /// The event contains many dependees and source items without one large preformatted string.
+        /// </summary>
+        [Fact]
+        public void RoundtripAssemblyConflictWarningEventArgsWithManyDependees()
+        {
+            const int dependeeCount = 250;
+            const int sourceItemsPerDependee = 4;
+
+            var dependees = new AssemblyConflictDependee[dependeeCount];
+            for (int i = 0; i < dependeeCount; i++)
+            {
+                var sourceItemSpecs = new string[sourceItemsPerDependee];
+                for (int j = 0; j < sourceItemsPerDependee; j++)
+                {
+                    sourceItemSpecs[j] = $"Item{i}_{j}.proj";
+                }
+
+                dependees[i] = new AssemblyConflictDependee($"/deps/Dependee{i}.dll", sourceItemSpecs);
+            }
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/deps/D.dll",
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: [],
+                dependees);
+
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/deps/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+
+            var args = new AssemblyConflictWarningEventArgs(
+                "D",
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                "MSB3277",
+                file: null,
+                lineNumber: 0,
+                columnNumber: 0,
+                helpKeyword: null,
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
+
+            Roundtrip(
+                args,
+                e => e.Message,
+                e => e.Victor.PrimarySourceItemSpecs.Count.ToString(),
+                e => e.Victor.Dependees.Count.ToString(),
+                e => e.Victim.Dependees.Count.ToString(),
+                e => DescribeConflictReferenceDetails(e.Victim));
+
+            // Verify that the reconstructed message contains each dependee in the original order.
+            args.Message.ShouldNotBeNull();
+            for (int i = 0; i < dependeeCount; i++)
+            {
+                args.Message.ShouldContain($"Dependee{i}.dll");
+            }
+        }
+
+        private static string DescribeConflictReferenceDetails(AssemblyConflictReferenceDetails details)
+            => $"{details.FusionName};{details.FullPath};{details.IsPrimary};{details.IsResolved};{details.UnresolvedPrimaryItemSpec};"
+                + $"[{string.Join(",", details.PrimarySourceItemSpecs)}];"
+                + string.Join("|", details.Dependees.Select(d => $"{d.DependeeFullPath}=[{string.Join(",", d.SourceItemSpecs)}]"));
+
+        private static AssemblyConflictDependencyDetailsMessageEventArgs CreateAssemblyConflictDependencyDetailsEvent()
+        {
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                isPrimary: false,
+                isResolved: false,
+                unresolvedPrimaryItemSpec: "D, Version=2.0.0.0",
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B", "B2"])]);
+
+            return new AssemblyConflictDependencyDetailsMessageEventArgs(
+                victor,
+                victim,
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\details.proj",
+            };
+        }
+
+        private static AssemblyConflictWarningEventArgs CreateAssemblyConflictWarningEvent()
+        {
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+
+            return new AssemblyConflictWarningEventArgs(
+                "D",
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                "MSB3277",
+                @"C:\foo\bar.proj",
+                42,
+                7,
+                "MSBuild.ResolveAssemblyReference.FoundConflicts",
+                "ResolveAssemblyReference",
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\warning.proj",
+            };
+        }
+
+        [Fact]
         public void RoundtripProjectEvaluationStartedEventArgs()
         {
             var projectFile = @"C:\foo\bar.proj";
