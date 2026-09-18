@@ -1210,6 +1210,57 @@ namespace Microsoft.Build.UnitTests
                     attempt => $"{attempt.SearchPath};{attempt.ParentAssembly};{attempt.FileNameAttempted};{attempt.AssemblyName};{attempt.Result};{attempt.ProcessorArchitecture};{attempt.IsAssemblyFoldersExSearch}")));
         }
 
+        [Theory]
+        [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace, false)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails, false)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictWarning, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictWarning, false)]
+        public void Replay_EventFilter_HandlesAssemblyResolutionDiagnostics(BinaryLogRecordKind recordKind, bool acceptEvent)
+        {
+            BuildEventArgs original = recordKind switch
+            {
+                BinaryLogRecordKind.AssemblyResolutionSearchTrace => CreateAssemblyResolutionSearchEvent(),
+                BinaryLogRecordKind.AssemblyConflictDependencyDetails => CreateAssemblyConflictDependencyDetailsEvent(),
+                BinaryLogRecordKind.AssemblyConflictWarning => CreateAssemblyConflictWarningEvent(),
+                _ => throw new ArgumentOutOfRangeException(nameof(recordKind))
+            };
+            original.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream);
+            var eventWriter = new BuildEventArgsWriter(writer);
+            eventWriter.Write(original);
+            eventWriter.Write(new BuildFinishedEventArgs("finished", null, succeeded: true));
+            writer.Write((byte)BinaryLogRecordKind.EndOfFile);
+            writer.Flush();
+            stream.Position = 0;
+
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            List<BinaryLogEventMetadata> metadataSeen = [];
+            BinaryLogEventFilter filter = metadata =>
+            {
+                metadataSeen.Add(metadata);
+                return metadata.RecordKind != recordKind || acceptEvent;
+            };
+
+            BuildEventArgs result = reader.Read(filter);
+            if (acceptEvent)
+            {
+                result.GetType().ShouldBe(original.GetType());
+                result.Message.ShouldBe(original.Message);
+                result.Timestamp.ShouldBe(original.Timestamp);
+                result.BuildEventContext.ProjectContextId.ShouldBe(3);
+                result = reader.Read(filter);
+            }
+
+            result.ShouldBeOfType<BuildFinishedEventArgs>().Succeeded.ShouldBeTrue();
+            reader.Read(filter).ShouldBeNull();
+            metadataSeen.Select(metadata => metadata.RecordKind).ShouldBe([recordKind, BinaryLogRecordKind.BuildFinished]);
+            metadataSeen[0].BuildEventContext.ProjectContextId.ShouldBe(3);
+        }
+
         private static AssemblyResolutionSearchTraceEventArgs CreateAssemblyResolutionSearchEvent()
             => new(
                 "Requested, Version=1.0.0.0",

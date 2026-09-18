@@ -101,6 +101,65 @@ namespace Microsoft.Build.UnitTests
             Console.Error.ShouldBeSameAs(state.OriginalError);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ShutdownAcknowledgmentPreservesReuseUnlessConnectionAlreadyFailed(bool connectionAlreadyFailed)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.ShutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+            ImmediateDisconnectEndpoint endpoint = new();
+            state.SubscribeToLinkStatus(endpoint);
+            if (connectionAlreadyFailed)
+            {
+                endpoint.FailConnection();
+            }
+
+            state.Node.SendShutdownNotification(endpoint);
+
+            state.ShutdownReason.ShouldBe(connectionAlreadyFailed
+                ? NodeEngineShutdownReason.ConnectionFailed
+                : NodeEngineShutdownReason.BuildCompleteReuse);
+            endpoint.ClientWillDisconnectCalled.ShouldBe(!connectionAlreadyFailed);
+            if (connectionAlreadyFailed)
+            {
+                endpoint.ShutdownPacket.ShouldBeNull();
+            }
+            else
+            {
+                endpoint.ShutdownPacket.ShouldNotBeNull();
+                endpoint.ShutdownPacket.Reason.ShouldBe(NodeShutdownReason.Requested);
+                endpoint.LinkStatus.ShouldBe(LinkStatus.Failed);
+            }
+        }
+
+        private sealed class ImmediateDisconnectEndpoint : INodeEndpoint
+        {
+            public event LinkStatusChangedDelegate? OnLinkStatusChanged;
+
+            public LinkStatus LinkStatus { get; private set; } = LinkStatus.Active;
+            internal bool ClientWillDisconnectCalled { get; private set; }
+            internal NodeShutdown? ShutdownPacket { get; private set; }
+
+            public void ClientWillDisconnect() => ClientWillDisconnectCalled = true;
+            public void Connect(INodePacketFactory factory) => throw new NotSupportedException();
+            public void Listen(INodePacketFactory factory) => throw new NotSupportedException();
+            public void Disconnect() => throw new NotSupportedException();
+
+            public void SendData(INodePacket packet)
+            {
+                ShutdownPacket = packet.ShouldBeOfType<NodeShutdown>();
+                FailConnection();
+            }
+
+            internal void FailConnection()
+            {
+                LinkStatus = LinkStatus.Failed;
+                OnLinkStatusChanged?.Invoke(this, LinkStatus);
+            }
+        }
+
         private sealed class ThrowingBuildObject : IDisposable
         {
             public void Dispose()
@@ -119,6 +178,11 @@ namespace Microsoft.Build.UnitTests
             internal TextWriter OriginalError { get; } = Console.Error;
             internal RedirectConsoleWriter OutWriter { get; }
             internal RedirectConsoleWriter ErrorWriter { get; }
+            internal NodeEngineShutdownReason ShutdownReason
+            {
+                get => (NodeEngineShutdownReason)typeof(OutOfProcTaskHostNode).GetField("_shutdownReason", InstanceMembers)!.GetValue(Node)!;
+                set => SetField("_shutdownReason", value);
+            }
 
             internal RedirectedNodeState(Action<string> output, Action<string> error)
             {
@@ -157,6 +221,10 @@ namespace Microsoft.Build.UnitTests
 
             internal void SetField(string name, object value) =>
                 typeof(OutOfProcTaskHostNode).GetField(name, InstanceMembers)!.SetValue(Node, value);
+
+            internal void SubscribeToLinkStatus(INodeEndpoint endpoint) =>
+                endpoint.OnLinkStatusChanged += (LinkStatusChangedDelegate)typeof(OutOfProcTaskHostNode)
+                    .GetMethod("OnLinkStatusChanged", InstanceMembers)!.CreateDelegate(typeof(LinkStatusChangedDelegate), Node);
 
             private static void StopTimer(RedirectConsoleWriter writer)
             {

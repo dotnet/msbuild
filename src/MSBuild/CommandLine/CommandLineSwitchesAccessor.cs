@@ -114,6 +114,8 @@ namespace Microsoft.Build.CommandLine.Experimental
 
         public string[]? BinaryLogger => GetParameterizedSwitchValue(ParameterizedSwitch.BinaryLogger);
 
+        public string[]? ReplayFilter => GetParameterizedSwitchValue(ParameterizedSwitch.ReplayFilter);
+
         public string[]? Check => GetParameterizedSwitchValue(ParameterizedSwitch.Check);
 
         public string[]? Restore => GetParameterizedSwitchValue(ParameterizedSwitch.Restore);

@@ -2121,6 +2121,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="Binlog_MissingRecoverableErrorSubscribeError" xml:space="preserve">
     <value>Subscription to RecoverableReadError is mandatory during forward compatible reading.</value>
   </data>
+  <data name="Binlog_EventFilterThrew" xml:space="preserve">
+    <value>The binary log event filter threw an exception.</value>
+  </data>
+  <data name="Binlog_EventFilterThrewWithContext" xml:space="preserve">
+    <value>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</value>
+    <comment>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</comment>
+  </data>
   <data name="Binlog_ImportFileSizeError" xml:space="preserve">
     <value>Imported files archive exceeded 2GB limit and it's not embedded.</value>
   </data>

@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.Debugging;
 using Shouldly;
@@ -35,17 +36,38 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
             endpoint.ClientWillDisconnect();
         }
 
-        DebugUtils.ResetDebugDumpPathInRunningTests = true;
-        _ = DebugUtils.DebugDumpPath;
-        endpoint.RunReadLoop(stream, new ConcurrentQueue<INodePacket>(), packetAvailable, terminate);
+        // Keep the injected failure out of other test processes' crash-log checks.
+        TransientTestFolder debugPath = env.CreateFolder();
+        var transientDebugPath = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath.Path);
 
-        if (throwOnRead)
+        try
         {
-            env.WithTransientTestState(new TransientTestFile(DebugUtils.DebugDumpPath, Path.GetFileName(DebugUtils.DumpFilePath)));
+            FrameworkDebugUtils.SetDebugPath();
             DebugUtils.ResetDebugDumpPathInRunningTests = true;
-        }
+            _ = DebugUtils.DebugDumpPath;
+            endpoint.RunReadLoop(stream, new ConcurrentQueue<INodePacket>(), packetAvailable, terminate);
 
-        endpoint.LinkStatus.ShouldBe(expectedDisconnect ? LinkStatus.Active : LinkStatus.Failed);
+            string[] failureLogs = Directory.GetFiles(debugPath.Path, "MSBuild_*.failure.txt", SearchOption.AllDirectories);
+            if (throwOnRead)
+            {
+                failureLogs.ShouldHaveSingleItem();
+                failureLogs[0].ShouldBe(DebugUtils.DumpFilePath);
+                File.ReadAllText(failureLogs[0]).ShouldContain("Injected pipe read failure.");
+            }
+            else
+            {
+                failureLogs.ShouldBeEmpty();
+            }
+
+            endpoint.LinkStatus.ShouldBe(expectedDisconnect ? LinkStatus.Active : LinkStatus.Failed);
+        }
+        finally
+        {
+            transientDebugPath.Revert();
+            FrameworkDebugUtils.SetDebugPath();
+            DebugUtils.ResetDebugDumpPathInRunningTests = true;
+            _ = DebugUtils.DebugDumpPath;
+        }
     }
 
     private sealed class TestEndpoint : NodeEndpointOutOfProcBase

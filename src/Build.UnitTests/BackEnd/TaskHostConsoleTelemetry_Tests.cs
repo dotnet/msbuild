@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 
@@ -256,9 +258,67 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
 
             if (replacePooledProcess)
             {
-                using Process process = Process.GetProcessById(processId);
-                process.Kill();
-                process.WaitForExit(10_000).ShouldBeTrue();
+                string operation = "PID lookup";
+                try
+                {
+                    using Process process = Process.GetProcessById(processId);
+                    operation = "Kill";
+                    process.Kill();
+                    operation = "WaitForExit";
+                    bool exited = process.WaitForExit(10_000);
+                    try
+                    {
+                        if (!exited && NativeMethodsShared.IsOSX)
+                        {
+                            WriteProcessExitDiagnostics(processId, "Did not exit after Kill and a 10-second wait.");
+                        }
+                    }
+                    finally
+                    {
+                        // Diagnostics must not turn the original timeout into a pass or a different failure.
+                        exited.ShouldBeTrue();
+                    }
+                }
+                catch (Exception e) when (NativeMethodsShared.IsOSX && e is ArgumentException or InvalidOperationException or Win32Exception)
+                {
+                    WriteProcessExitDiagnostics(processId, $"{operation} failed: {e}");
+                    throw;
+                }
+            }
+        }
+    }
+
+    private void WriteProcessExitDiagnostics(int processId, string failure)
+    {
+        int parentProcessId = EnvironmentUtilities.CurrentProcessId;
+        _output.WriteLine($"TaskHost {processId} replacement failed. Parent test process: {parentProcessId}. {failure}");
+        if (Traits.Instance.DebugUnitTests)
+        {
+            _output.WriteLine("Native diagnostics unavailable: the process runner disables timeouts in DebugUnitTests mode.");
+            return;
+        }
+
+        RunDiagnostic("/bin/ps", $"-p {processId},{parentProcessId} -o pid,ppid,state,wchan,etime,comm");
+        RunDiagnostic("/usr/bin/sample", $"{parentProcessId} 1 1 -file /dev/stdout");
+
+        void RunDiagnostic(string executable, string arguments)
+        {
+            try
+            {
+                RunnerUtilities.RunProcessAndGetOutput(
+                    executable,
+                    arguments,
+                    out bool successfulExit,
+                    outputHelper: _output,
+                    timeoutMilliseconds: 5_000);
+                if (!successfulExit)
+                {
+                    _output.WriteLine($"Diagnostic command {executable} returned a nonzero exit code.");
+                }
+            }
+            catch (Exception e) when (e is Win32Exception or TimeoutException or InvalidOperationException or IOException or AggregateException)
+            {
+                _output.WriteLine($"Diagnostic command {executable} failed: {e}");
             }
         }
     }

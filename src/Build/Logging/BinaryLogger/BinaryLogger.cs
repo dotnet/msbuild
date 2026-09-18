@@ -349,6 +349,31 @@ namespace Microsoft.Build.Logging
         /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
         /// </summary>
         public void Initialize(IEventSource eventSource)
+            => InitializeCore(eventSource, outputStream: null);
+
+        /// <summary>
+        /// Initializes the logger to write to the supplied stream instead of the configured log file.
+        /// </summary>
+        /// <param name="eventSource">The source of build events.</param>
+        /// <param name="outputStream">A writable stream, closed by <see cref="Shutdown"/>.</param>
+        /// <remarks>
+        /// The configured file path still identifies the log in metadata and controls import archive paths.
+        /// The caller must dispose the stream if initialization fails.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="outputStream"/> is null.</exception>
+        public void Initialize(IEventSource eventSource, Stream outputStream)
+        {
+            ArgumentNullException.ThrowIfNull(outputStream);
+            InitializeCore(eventSource, outputStream);
+        }
+
+        internal void Initialize(IEventSource eventSource, Stream outputStream, BinaryLoggerParameters parameters, string logFilePath)
+        {
+            ArgumentNullException.ThrowIfNull(outputStream);
+            InitializeCore(eventSource, outputStream, parameters, logFilePath);
+        }
+
+        private void InitializeCore(IEventSource eventSource, Stream outputStream, BinaryLoggerParameters parameters = null, string logFilePath = null)
         {
             _initialTargetOutputLogging = Traits.Instance.EnableTargetOutputLogging;
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
@@ -362,7 +387,7 @@ namespace Microsoft.Build.Logging
             Traits.Instance.EnableTargetOutputLogging = true;
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
-            ProcessParameters(out bool omitInitialInfo);
+            ProcessParameters(parameters, logFilePath, out bool omitInitialInfo);
             var replayEventSource = eventSource as IBinaryLogReplaySource;
 
             try
@@ -383,7 +408,7 @@ namespace Microsoft.Build.Logging
                     Directory.CreateDirectory(logDirectory);
                 }
 
-                stream = new FileStream(FilePath, FileMode.Create);
+                stream = outputStream ?? new FileStream(FilePath, FileMode.Create);
 
                 if (CollectProjectImports != ProjectImportsCollectionMode.None && replayEventSource == null)
                 {
@@ -659,20 +684,25 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <exception cref="LoggerException">
         /// </exception>
-        private void ProcessParameters(out bool omitInitialInfo)
+        private void ProcessParameters(BinaryLoggerParameters parsedParams, string logFilePath, out bool omitInitialInfo)
         {
-            var parsedParams = ParseParameters(Parameters);
+            bool hasParsedParameters = parsedParams is not null;
+            parsedParams ??= ParseParameters(Parameters);
             
             omitInitialInfo = parsedParams.OmitInitialInfo;
             
-            // Only set CollectProjectImports if it was explicitly specified in parameters
-            if (parsedParams.HasProjectImportsParameter)
+            // Parsed configuration is authoritative; text parameters can leave the property unchanged.
+            if (hasParsedParameters || parsedParams.HasProjectImportsParameter)
             {
                 CollectProjectImports = parsedParams.ProjectImportsCollectionMode;
             }
 
             // Handle the file path - expand wildcards if needed
-            if (parsedParams.LogFilePath == null)
+            if (logFilePath is not null)
+            {
+                FilePath = logFilePath;
+            }
+            else if (parsedParams.LogFilePath == null)
             {
                 // Either no path was specified, or it contained wildcards
                 // Check if any parameter was a wildcard path
