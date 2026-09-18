@@ -436,7 +436,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         string directory = Path.Combine(_env.DefaultTestDirectory.Path, "logs;archive");
         Directory.CreateDirectory(directory);
         _env.SetCurrentDirectory(directory);
-        string output = Path.Combine(directory, "filtered.binlog");
+        string output = Path.GetFullPath("filtered.binlog");
 
         Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument("filtered.binlog", parameters),
             "-replayFilter:Exclude=Warning,ProjectImported")
