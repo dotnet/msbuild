@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 #if NET
 using System.Runtime.CompilerServices;
 #endif
@@ -16,7 +16,7 @@ namespace Microsoft.Build.Shared
     /// This class packages information about a type loaded from an assembly: for example,
     /// the GenerateResource task class type or the ConsoleLogger logger class type.
     /// </summary>
-    internal sealed class LoadedType
+    internal sealed partial class LoadedType
     {
         #region Constructor
 
@@ -48,6 +48,7 @@ namespace Microsoft.Build.Shared
             Assembly = assemblyLoadInfo;
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
+            _declaredIOMetadata = ReadMSBuildDeclaredIOAttributes();
             LoadedAssemblyName = loadedAssembly.GetName();
             LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
             Architecture = architecture;
@@ -415,5 +416,6 @@ namespace Microsoft.Build.Shared
         internal AssemblyLoadInfo Assembly { get; private set; }
 
         #endregion
+
     }
 }
