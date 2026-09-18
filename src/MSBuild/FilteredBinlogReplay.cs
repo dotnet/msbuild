@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Framework;
@@ -20,12 +21,20 @@ namespace Microsoft.Build.CommandLine;
 
 internal sealed class FilteredBinlogReplay
 {
+    // As with TerminalLogger initialization, shared source types prevent InternalsVisibleTo.
+    // A delegate avoids wrapping initialization failures in TargetInvocationException.
+    private static readonly Action<BinaryLogger, IEventSource, Stream, BinaryLoggerParameters, string> s_initializeBinaryLogger =
+        (Action<BinaryLogger, IEventSource, Stream, BinaryLoggerParameters, string>)typeof(BinaryLogger)
+            .GetMethod(nameof(BinaryLogger.Initialize), BindingFlags.Instance | BindingFlags.NonPublic, binder: null,
+                types: [typeof(IEventSource), typeof(Stream), typeof(BinaryLoggerParameters), typeof(string)], modifiers: null)!
+            .CreateDelegate(typeof(Action<BinaryLogger, IEventSource, Stream, BinaryLoggerParameters, string>));
+
     private readonly string _inputPath;
     private readonly string _outputPath;
-    private readonly string _loggerParameters;
+    private readonly BinaryLoggerParameters _loggerParameters;
     private readonly HashSet<BinaryLogRecordKind> _excludedKinds;
 
-    private FilteredBinlogReplay(string inputPath, string outputPath, string loggerParameters, HashSet<BinaryLogRecordKind> excludedKinds)
+    private FilteredBinlogReplay(string inputPath, string outputPath, BinaryLoggerParameters loggerParameters, HashSet<BinaryLogRecordKind> excludedKinds)
     {
         _inputPath = inputPath;
         _outputPath = outputPath;
@@ -81,9 +90,7 @@ internal sealed class FilteredBinlogReplay
         }
 
         CommandLineSwitchException.VerifyThrow(!File.Exists(outputPath) && !Directory.Exists(outputPath), "ReplayFilterOutputExists", outputPath);
-        var imports = parameters.ProjectImportsCollectionMode;
-        string loggerParameters = $"LogFile={outputPath};ProjectImports={imports}" + (parameters.OmitInitialInfo ? ";OmitInitialInfo" : string.Empty);
-        return new FilteredBinlogReplay(inputPath, outputPath, loggerParameters, excludedKinds);
+        return new FilteredBinlogReplay(inputPath, outputPath, parameters, excludedKinds);
     }
 
     private static bool CanExclude(BinaryLogRecordKind kind) => kind is
@@ -193,9 +200,8 @@ internal sealed class FilteredBinlogReplay
                     initializedLoggers.Add(logger);
                     if (logger is BinaryLogger binaryLogger)
                     {
-                        binaryLogger.Parameters = _loggerParameters;
                         // Keep the temporary path out of the logger's metadata.
-                        binaryLogger.Initialize(source, output);
+                        s_initializeBinaryLogger(binaryLogger, source, output, _loggerParameters, _outputPath);
                     }
                     else if (logger is INodeLogger nodeLogger)
                     {

@@ -1139,6 +1139,159 @@ namespace Microsoft.Build.UnitTests
 
         #region Event Filter Replay Tests
 
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        [InlineData(null, true)]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        public void Replay_EventFilter_UnknownOpaqueRecordsRecover(bool? acceptEvent, bool includeFollowingEvent)
+        {
+            CreateExpectedLogFile();
+            var metadataSeen = new List<BinaryLogEventMetadata>();
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                AllowForwardCompatibility = true,
+                EventFilter = acceptEvent.HasValue ? metadata =>
+                {
+                    metadataSeen.Add(metadata);
+                    return acceptEvent.Value;
+                } : null
+            };
+            var replayed = new List<BuildEventArgs>();
+            var errors = new List<BinaryLogReaderErrorEventArgs>();
+            var errorMessages = new List<string>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+            replayEventSource.RecoverableReadError += error =>
+            {
+                errors.Add(error);
+                errorMessages.Add(error.GetFormattedMessage());
+            };
+
+            using var stream = CreateUnknownEventFilterTestStream(BinaryLogger.FileFormatVersion + 1, includeFollowingEvent);
+            using var reader = new BinaryReader(stream);
+            replayEventSource.Replay(reader, CancellationToken.None);
+
+            BinaryLogReaderErrorEventArgs error = errors.ShouldHaveSingleItem();
+            error.ErrorType.ShouldBe(ReaderErrorType.UnknownEventType);
+            error.RecordKind.ShouldBe((BinaryLogRecordKind)127);
+            errorMessages.ShouldHaveSingleItem().ShouldBe(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderUnknownType", 0, 10, (BinaryLogRecordKind)127)
+                + " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord"));
+            if (includeFollowingEvent && acceptEvent.HasValue)
+            {
+                BinaryLogEventMetadata metadata = metadataSeen.ShouldHaveSingleItem();
+                metadata.RecordKind.ShouldBe(BinaryLogRecordKind.Message);
+                metadata.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+            }
+            else
+            {
+                metadataSeen.ShouldBeEmpty();
+            }
+
+            if (includeFollowingEvent && acceptEvent != false)
+            {
+                BuildMessageEventArgs message = replayed.ShouldHaveSingleItem().ShouldBeOfType<BuildMessageEventArgs>();
+                message.Message.ShouldBe("message after unknown record");
+                message.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+            }
+            else
+            {
+                replayed.ShouldBeEmpty();
+            }
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Replay_EventFilter_UnknownOpaqueRecordsStillFailInStrictMode(bool? acceptEvent)
+        {
+            CreateExpectedLogFile();
+            int filterCalls = 0;
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                AllowForwardCompatibility = false,
+                EventFilter = acceptEvent.HasValue ? _ =>
+                {
+                    filterCalls++;
+                    return acceptEvent.Value;
+                } : null
+            };
+            var replayed = new List<BuildEventArgs>();
+            var errors = new List<BinaryLogReaderErrorEventArgs>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+            replayEventSource.RecoverableReadError += errors.Add;
+
+            // Use a supported header so strict replay reaches the unknown-record error path.
+            using var stream = CreateUnknownEventFilterTestStream(BinaryLogger.FileFormatVersion, includeFollowingEvent: true);
+            using var reader = new BinaryReader(stream);
+            Should.Throw<InvalidDataException>(() => replayEventSource.Replay(reader, CancellationToken.None))
+                .Message.ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "Binlog_ReaderUnknownType", 0, 10, (BinaryLogRecordKind)127));
+
+            filterCalls.ShouldBe(0);
+            errors.ShouldBeEmpty();
+            replayed.ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Replay_EventFilter_MalformedKnownCommonFieldsAreNotSuppressed(bool acceptEvent)
+        {
+            CreateExpectedLogFile();
+            int filterCalls = 0;
+            int recoverableErrors = 0;
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                AllowForwardCompatibility = true,
+                EventFilter = _ =>
+                {
+                    filterCalls++;
+                    return acceptEvent;
+                }
+            };
+            replayEventSource.AnyEventRaised += (_, _) => { };
+            replayEventSource.RecoverableReadError += _ => recoverableErrors++;
+
+            using var stream = CreateUnknownEventFilterTestStream(BinaryLogger.FileFormatVersion + 1, includeFollowingEvent: false);
+            stream.Position = 2 * sizeof(int);
+            stream.WriteByte((byte)BinaryLogRecordKind.BuildStarted);
+            stream.Position = 0;
+            using var reader = new BinaryReader(stream);
+            Should.Throw<ArgumentOutOfRangeException>(() => replayEventSource.Replay(reader, CancellationToken.None));
+            filterCalls.ShouldBe(0);
+            recoverableErrors.ShouldBe(0);
+        }
+
+        private static Stream CreateUnknownEventFilterTestStream(int fileFormatVersion, bool includeFollowingEvent)
+        {
+            var stream = new MemoryStream();
+            using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                writer.Write(fileFormatVersion);
+                writer.Write(BinaryLogger.ForwardCompatibilityMinimalVersion);
+                // Opaque bytes that would be an invalid timestamp if read as current common fields.
+                byte[] opaqueRecord = [127, 10, 32, 255, 255, 255, 255, 255, 255, 255, 127, 0];
+                writer.Write(opaqueRecord);
+                if (includeFollowingEvent)
+                {
+                    new BuildEventArgsWriter(writer).Write(
+                        new BuildMessageEventArgs("message after unknown record", null, "Sender", MessageImportance.Normal)
+                        {
+                            BuildEventContext = new BuildEventContext(1, 2, SelectedProjectContextId, 4)
+                        });
+                }
+
+                writer.Write((byte)BinaryLogRecordKind.EndOfFile);
+            }
+
+            stream.Position = 0;
+            return stream;
+        }
+
         [Fact]
         public void Replay_EventFilter_SkipsRejectedEventsWithoutDeserializingThem()
         {

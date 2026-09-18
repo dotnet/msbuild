@@ -423,6 +423,49 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     }
 
     [Theory]
+    [InlineData("", true)]
+    [InlineData(";ProjectImports=None", false)]
+    public void ReplayFilter_RelativeOutputInSemicolonDirectory(string parameters, bool expectArchive)
+    {
+        string input = CreateInput(embedImports: true);
+        byte[] originalInput = File.ReadAllBytes(input);
+        File.Delete(Path.Combine(_env.DefaultTestDirectory.Path, "imported.targets"));
+        string directory = Path.Combine(_env.DefaultTestDirectory.Path, "logs;archive");
+        Directory.CreateDirectory(directory);
+        _env.SetCurrentDirectory(directory);
+        string output = Path.Combine(directory, "filtered.binlog");
+
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument("filtered.binlog", parameters),
+            "-replayFilter:Exclude=Warning,ProjectImported")
+            .ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
+
+        BuildEventArgs[] events = ReadEvents(output);
+        events.ShouldNotContain(e => e is BuildWarningEventArgs || e is ProjectImportedEventArgs);
+        events.ShouldContain(e => e.Message == SourceMessage);
+        events.ShouldContain(e => e.Message == $"BinLogFilePath={output}");
+        events.OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem();
+        events.Where(e => e.Message is not null).ShouldNotContain(e => e.Message!.Contains(".msbuild-filter-"));
+        List<string> contents = [];
+        using (var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(output))
+        {
+            reader.ArchiveFileEncountered += args => contents.Add(args.ArchiveData.ToArchiveFile().Content);
+            while (reader.Read() is not null)
+            {
+            }
+        }
+
+        contents.Contains(ImportedContent).ShouldBe(expectArchive);
+        if (!expectArchive)
+        {
+            contents.ShouldBeEmpty();
+        }
+
+        File.ReadAllBytes(input).ShouldBe(originalInput);
+        File.Exists(Path.ChangeExtension(output, ".ProjectImports.zip")).ShouldBeFalse();
+        AssertNoStagingFiles();
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void ReplayFilter_WildcardPublishesOneFileWithFinalPathMetadata(bool omitInitialInfo)
@@ -435,7 +478,6 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
 
         string output = Directory.GetFiles(_env.DefaultTestDirectory.Path, "filtered-*.binlog").ShouldHaveSingleItem();
         Path.GetFileName(output).ShouldNotContain("{}");
-        BinaryLogger.ParseParameters(logger.Parameters).LogFilePath.ShouldBe(output);
         BuildEventArgs[] events = ReadEvents(output);
         if (omitInitialInfo)
         {

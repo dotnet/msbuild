@@ -361,7 +361,13 @@ namespace Microsoft.Build.Logging
             InitializeCore(eventSource, outputStream);
         }
 
-        private void InitializeCore(IEventSource eventSource, Stream outputStream)
+        internal void Initialize(IEventSource eventSource, Stream outputStream, BinaryLoggerParameters parameters, string logFilePath)
+        {
+            ArgumentNullException.ThrowIfNull(outputStream);
+            InitializeCore(eventSource, outputStream, parameters, logFilePath);
+        }
+
+        private void InitializeCore(IEventSource eventSource, Stream outputStream, BinaryLoggerParameters parameters = null, string logFilePath = null)
         {
             _initialTargetOutputLogging = Traits.Instance.EnableTargetOutputLogging;
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
@@ -375,7 +381,7 @@ namespace Microsoft.Build.Logging
             Traits.Instance.EnableTargetOutputLogging = true;
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
-            ProcessParameters(out bool omitInitialInfo);
+            ProcessParameters(parameters, logFilePath, out bool omitInitialInfo);
             var replayEventSource = eventSource as IBinaryLogReplaySource;
 
             try
@@ -672,20 +678,25 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <exception cref="LoggerException">
         /// </exception>
-        private void ProcessParameters(out bool omitInitialInfo)
+        private void ProcessParameters(BinaryLoggerParameters parsedParams, string logFilePath, out bool omitInitialInfo)
         {
-            var parsedParams = ParseParameters(Parameters);
+            bool hasParsedParameters = parsedParams is not null;
+            parsedParams ??= ParseParameters(Parameters);
             
             omitInitialInfo = parsedParams.OmitInitialInfo;
             
-            // Only set CollectProjectImports if it was explicitly specified in parameters
-            if (parsedParams.HasProjectImportsParameter)
+            // Parsed configuration is authoritative; text parameters can leave the property unchanged.
+            if (hasParsedParameters || parsedParams.HasProjectImportsParameter)
             {
                 CollectProjectImports = parsedParams.ProjectImportsCollectionMode;
             }
 
             // Handle the file path - expand wildcards if needed
-            if (parsedParams.LogFilePath == null)
+            if (logFilePath is not null)
+            {
+                FilePath = logFilePath;
+            }
+            else if (parsedParams.LogFilePath == null)
             {
                 // Either no path was specified, or it contained wildcards
                 // Check if any parameter was a wildcard path

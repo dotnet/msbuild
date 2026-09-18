@@ -249,10 +249,11 @@ namespace Microsoft.Build.Logging
                 bool filteredOut = false;
                 try
                 {
+                    var deserializer = GetDeserializer(recordKind);
                     // Legacy records cannot be skipped; TargetSkipped stores its original context in the payload.
                     BinaryLogEventFilter? filterBeforeDeserialization = null;
                     BinaryLogEventFilter? filterAfterDeserialization = null;
-                    if (eventFilter is not null)
+                    if (eventFilter is not null && deserializer is not null)
                     {
                         if (_fileFormatVersion < BinaryLogger.ForwardCompatibilityMinimalVersion ||
                             recordKind == BinaryLogRecordKind.TargetSkipped)
@@ -285,7 +286,7 @@ namespace Microsoft.Build.Logging
                     {
                         try
                         {
-                            result = ReadBuildEventArgs(recordKind);
+                            result = deserializer?.Invoke(this);
                         }
                         finally
                         {
@@ -382,42 +383,42 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private BuildEventArgs? ReadBuildEventArgs(BinaryLogRecordKind recordKind)
+        private static Func<BuildEventArgsReader, BuildEventArgs?>? GetDeserializer(BinaryLogRecordKind recordKind)
             => recordKind switch
             {
-                BinaryLogRecordKind.BuildStarted => ReadBuildStartedEventArgs(),
-                BinaryLogRecordKind.BuildFinished => ReadBuildFinishedEventArgs(),
-                BinaryLogRecordKind.BuildSubmissionStarted => ReadBuildSubmissionStartedEventArgs(),
-                BinaryLogRecordKind.ProjectStarted => ReadProjectStartedEventArgs(),
-                BinaryLogRecordKind.ProjectFinished => ReadProjectFinishedEventArgs(),
-                BinaryLogRecordKind.TargetStarted => ReadTargetStartedEventArgs(),
-                BinaryLogRecordKind.TargetFinished => ReadTargetFinishedEventArgs(),
-                BinaryLogRecordKind.TaskStarted => ReadTaskStartedEventArgs(),
-                BinaryLogRecordKind.TaskFinished => ReadTaskFinishedEventArgs(),
-                BinaryLogRecordKind.Error => ReadBuildErrorEventArgs(),
-                BinaryLogRecordKind.Warning => ReadBuildWarningEventArgs(),
-                BinaryLogRecordKind.Message => ReadBuildMessageEventArgs(),
-                BinaryLogRecordKind.CriticalBuildMessage => ReadCriticalBuildMessageEventArgs(),
-                BinaryLogRecordKind.TaskCommandLine => ReadTaskCommandLineEventArgs(),
-                BinaryLogRecordKind.TaskParameter => ReadTaskParameterEventArgs(),
-                BinaryLogRecordKind.ProjectEvaluationStarted => ReadProjectEvaluationStartedEventArgs(),
-                BinaryLogRecordKind.ProjectEvaluationFinished => ReadProjectEvaluationFinishedEventArgs(),
-                BinaryLogRecordKind.ProjectImported => ReadProjectImportedEventArgs(),
-                BinaryLogRecordKind.TargetSkipped => ReadTargetSkippedEventArgs(),
-                BinaryLogRecordKind.EnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
-                BinaryLogRecordKind.ResponseFileUsed => ReadResponseFileUsedEventArgs(),
-                BinaryLogRecordKind.PropertyReassignment => ReadPropertyReassignmentEventArgs(),
-                BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
-                BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
-                BinaryLogRecordKind.AssemblyLoad => ReadAssemblyLoadEventArgs(),
-                BinaryLogRecordKind.BuildCheckMessage => ReadBuildMessageEventArgs(),
-                BinaryLogRecordKind.BuildCheckWarning => ReadBuildWarningEventArgs(),
-                BinaryLogRecordKind.BuildCheckError => ReadBuildErrorEventArgs(),
-                BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
-                BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
-                BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
-                BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
-                BinaryLogRecordKind.MSBuildServerLifecycle => ReadMSBuildServerLifecycleEventArgs(),
+                BinaryLogRecordKind.BuildStarted => static reader => reader.ReadBuildStartedEventArgs(),
+                BinaryLogRecordKind.BuildFinished => static reader => reader.ReadBuildFinishedEventArgs(),
+                BinaryLogRecordKind.BuildSubmissionStarted => static reader => reader.ReadBuildSubmissionStartedEventArgs(),
+                BinaryLogRecordKind.ProjectStarted => static reader => reader.ReadProjectStartedEventArgs(),
+                BinaryLogRecordKind.ProjectFinished => static reader => reader.ReadProjectFinishedEventArgs(),
+                BinaryLogRecordKind.TargetStarted => static reader => reader.ReadTargetStartedEventArgs(),
+                BinaryLogRecordKind.TargetFinished => static reader => reader.ReadTargetFinishedEventArgs(),
+                BinaryLogRecordKind.TaskStarted => static reader => reader.ReadTaskStartedEventArgs(),
+                BinaryLogRecordKind.TaskFinished => static reader => reader.ReadTaskFinishedEventArgs(),
+                BinaryLogRecordKind.Error => static reader => reader.ReadBuildErrorEventArgs(),
+                BinaryLogRecordKind.Warning => static reader => reader.ReadBuildWarningEventArgs(),
+                BinaryLogRecordKind.Message => static reader => reader.ReadBuildMessageEventArgs(),
+                BinaryLogRecordKind.CriticalBuildMessage => static reader => reader.ReadCriticalBuildMessageEventArgs(),
+                BinaryLogRecordKind.TaskCommandLine => static reader => reader.ReadTaskCommandLineEventArgs(),
+                BinaryLogRecordKind.TaskParameter => static reader => reader.ReadTaskParameterEventArgs(),
+                BinaryLogRecordKind.ProjectEvaluationStarted => static reader => reader.ReadProjectEvaluationStartedEventArgs(),
+                BinaryLogRecordKind.ProjectEvaluationFinished => static reader => reader.ReadProjectEvaluationFinishedEventArgs(),
+                BinaryLogRecordKind.ProjectImported => static reader => reader.ReadProjectImportedEventArgs(),
+                BinaryLogRecordKind.TargetSkipped => static reader => reader.ReadTargetSkippedEventArgs(),
+                BinaryLogRecordKind.EnvironmentVariableRead => static reader => reader.ReadEnvironmentVariableReadEventArgs(),
+                BinaryLogRecordKind.ResponseFileUsed => static reader => reader.ReadResponseFileUsedEventArgs(),
+                BinaryLogRecordKind.PropertyReassignment => static reader => reader.ReadPropertyReassignmentEventArgs(),
+                BinaryLogRecordKind.UninitializedPropertyRead => static reader => reader.ReadUninitializedPropertyReadEventArgs(),
+                BinaryLogRecordKind.PropertyInitialValueSet => static reader => reader.ReadPropertyInitialValueSetEventArgs(),
+                BinaryLogRecordKind.AssemblyLoad => static reader => reader.ReadAssemblyLoadEventArgs(),
+                BinaryLogRecordKind.BuildCheckMessage => static reader => reader.ReadBuildMessageEventArgs(),
+                BinaryLogRecordKind.BuildCheckWarning => static reader => reader.ReadBuildWarningEventArgs(),
+                BinaryLogRecordKind.BuildCheckError => static reader => reader.ReadBuildErrorEventArgs(),
+                BinaryLogRecordKind.BuildCheckTracing => static reader => reader.ReadBuildCheckTracingEventArgs(),
+                BinaryLogRecordKind.BuildCheckAcquisition => static reader => reader.ReadBuildCheckAcquisitionEventArgs(),
+                BinaryLogRecordKind.BuildCanceled => static reader => reader.ReadBuildCanceledEventArgs(),
+                BinaryLogRecordKind.LoggersRegistered => static reader => reader.ReadLoggersRegisteredEventArgs(),
+                BinaryLogRecordKind.MSBuildServerLifecycle => static reader => reader.ReadMSBuildServerLifecycleEventArgs(),
                 _ => null
             };
 

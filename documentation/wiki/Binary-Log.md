@@ -172,6 +172,8 @@ The same arguments work with `MSBuild.exe`. This replays the input; it does not 
 the original project. The destination must not already exist, even if it is distinct
 from the input. Exactly one `-bl` argument is required. A bare `-bl` uses `msbuild.binlog`,
 which must also be a new path. The usual `{}` output-name expansion is supported.
+Relative output paths are resolved from the current directory, including directories
+whose names contain semicolons.
 
 Specify `-replayFilter` once, including any response files. `Exclude=` and event kind
 names are case-insensitive. Separate names with commas; duplicate names within the list
@@ -300,6 +302,11 @@ requires deserializing the payload first. Older formats also filter after deseri
 Auxiliary records, including strings, name/value lists, and embedded content, are still
 read so retained events can be decoded correctly. Cancellation is checked between rejected
 records too, but cannot interrupt a callback already running.
+
+Unknown record kinds are not offered to the filter or interpreted as known event payloads.
+They follow the existing forward-compatibility policy: when recovery is enabled for a
+newer format, they are skipped with a `RecoverableReadError` notification; strict reading
+still rejects them.
 
 If a filter throws, replay stops with `BinaryLogEventFilterException`. This is a callback
 failure, not a recoverable log-format error: `AllowForwardCompatibility` does not suppress
