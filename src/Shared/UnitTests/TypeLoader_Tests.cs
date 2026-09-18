@@ -63,17 +63,22 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        // Instance property (0x28) with no index parameters (0x00) and Int32 (0x08) nested in
+        // single-dimensional arrays (0x1d), exceeding the parser's depth limit of 16.
         [InlineData(new byte[]
         {
             0x28, 0x00, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d,
             0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x1d, 0x08,
         })]
+        // Instance property (0x28) with a compressed index parameter count of 536,870,911
+        // (0xdf 0xff 0xff 0xff), followed by Int32 (0x08). The nonzero count must be rejected.
         [InlineData(new byte[] { 0x28, 0xdf, 0xff, 0xff, 0xff, 0x08 })]
         public unsafe void PropertySignatureClassifierIsBounded(byte[] signature)
         {
             fixed (byte* bytes = signature)
             {
                 BlobReader reader = new(bytes, signature.Length);
+                // Both signatures should be rejected with null rather than throwing.
                 TypeLoader.ReadParameterTypeForExpansion(ref reader, metadataReader: null).ShouldBeNull();
             }
         }
