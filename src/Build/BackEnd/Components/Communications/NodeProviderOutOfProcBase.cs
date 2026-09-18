@@ -193,9 +193,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace($"Shutting down node with pid = {nodeProcess.Id}");
-                    NodeContext nodeContext = RequestNodeShutdown(nodeProcess, nodeStream, terminateNode, result.NegotiatedPacketVersion);
-                    // Idle nodes can be shut down when there is no active build or logging service.
-                    nodeContext.WaitForExitAsync(loggingService: null).GetAwaiter().GetResult();
+                    RequestNodeShutdown(nodeProcess, nodeStream, terminateNode, result.NegotiatedPacketVersion);
                 }
             }
         }
@@ -1532,7 +1530,7 @@ namespace Microsoft.Build.BackEnd
 #if NET
                     await Task.Delay(100, _packetQueueDrainDelayCancellation.Token).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 #else
-                    await Task.WhenAny(Task.Delay(100, _packetQueueDrainDelayCancellation.Token)).ConfigureAwait(false);
+                    await Task.WhenAny(Task.Delay(100, _packetQueueDrainDelayCancellation.Token));
 #endif
                 }
 
