@@ -9,11 +9,32 @@ namespace Microsoft.Build.Coordinator.UnitTests;
 
 internal sealed class TestCoordinatorDebugOutput(ITestOutputHelper testOutput) : ICoordinatorDebugOutput
 {
+    private readonly object _lock = new();
+    private readonly List<string> _lines = [];
+
     public bool IsEnabled => true;
 
+    public IReadOnlyList<string> Lines
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return [.. _lines];
+            }
+        }
+    }
+
     public void WriteLine(string message)
-        => testOutput.WriteLine(message);
+    {
+        lock (_lock)
+        {
+            _lines.Add(message);
+        }
+
+        testOutput.WriteLine(message);
+    }
 
     public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorDebugOutput.WriteLineInterpolatedStringHandler handler)
-        => testOutput.WriteLine(handler.GetFormattedText());
+        => WriteLine(handler.GetFormattedText());
 }
