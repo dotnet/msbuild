@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics.Tracing;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Eventing
 {
@@ -846,7 +847,11 @@ namespace Microsoft.Build.Eventing
         /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
         /// <param name="succeeded">Whether evaluation completed without an error.</param>
         /// <param name="projectFile">Full path to the evaluated project, or an empty string for an unnamed in-memory project.</param>
-        /// <param name="evaluationId">The node-local ID assigned to this evaluation occurrence.</param>
+        /// <param name="evaluationId">
+        /// The ID assigned by the evaluation's logging service, or <see cref="BuildEventContext.InvalidEvaluationId"/> if evaluation failed before the logging context was created.
+        /// Assigned values can repeat across project collections and builds, including after <c>UnregisterAllLoggers</c> recreates the logging service.
+        /// The ID is neither node- nor process-unique and does not identify a project configuration; use it with the project path and event order only within a trace segment whose logging-service lifetime is known.
+        /// </param>
         [Event(113, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
         public void ProjectEvaluationCompleted(double durationSeconds, string stage, string origin, bool succeeded, string projectFile, int evaluationId)
         {
@@ -861,7 +866,11 @@ namespace Microsoft.Build.Eventing
         /// <param name="pass">The completed pass: initial_properties, properties, item_definitions, items, using_tasks, or targets.</param>
         /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
         /// <param name="projectFile">Full path to the evaluated project, or an empty string for an unnamed in-memory project.</param>
-        /// <param name="evaluationId">The node-local ID assigned to this evaluation occurrence.</param>
+        /// <param name="evaluationId">
+        /// The ID assigned by the evaluation's logging service.
+        /// Values can repeat across project collections and builds, including after <c>UnregisterAllLoggers</c> recreates the logging service.
+        /// The ID is neither node- nor process-unique and does not identify a project configuration; use it with the project path and event order only within a trace segment whose logging-service lifetime is known.
+        /// </param>
         [Event(114, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
         public void ProjectEvaluationPassCompleted(double durationSeconds, string stage, string pass, string origin, string projectFile, int evaluationId)
         {

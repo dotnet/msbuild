@@ -187,15 +187,15 @@ public sealed class EvaluationEventSource_Tests : IDisposable
             ProjectEvaluationStage.Full,
             "properties",
             BuildEventContext.InvalidSubmissionId,
-            null!,
-            null!);
+            "",
+            BuildEventContext.InvalidEvaluationId);
         EvaluationInstrumentation.RecordEvaluation(
             0,
             ProjectEvaluationStage.Full,
             BuildEventContext.InvalidSubmissionId,
             succeeded: true,
             "",
-            null!);
+            BuildEventContext.InvalidEvaluationId);
 
         listener.Events.ShouldNotContain(e => e.Id == 114);
         EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();

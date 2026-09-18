@@ -1,12 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
-using System.Threading;
-using Microsoft.Build.BackEnd.Components.Logging;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 
@@ -17,42 +13,17 @@ internal static class EvaluationInstrumentation
     private const string BuildSubmission = "build_submission";
     private const string OutsideBuildSubmission = "outside_build_submission";
 
-    private static int s_disabled;
-
     internal static long StartMeasurement()
-    {
-        if (Volatile.Read(ref s_disabled) != 0)
-        {
-            return 0;
-        }
-
-        try
-        {
-            return IsEnabled() ? Stopwatch.GetTimestamp() : 0;
-        }
-        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-        {
-            Disable();
-            return 0;
-        }
-    }
+        => IsEnabled() ? Stopwatch.GetTimestamp() : 0;
 
     internal static double EndPassMeasurement(long startTimestamp)
     {
-        if (startTimestamp == 0 || Volatile.Read(ref s_disabled) != 0)
+        if (startTimestamp == 0)
         {
             return double.NaN;
         }
 
-        try
-        {
-            return IsEnabled() ? GetElapsedSeconds(startTimestamp) : double.NaN;
-        }
-        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-        {
-            Disable();
-            return double.NaN;
-        }
+        return IsEnabled() ? GetElapsedSeconds(startTimestamp) : double.NaN;
     }
 
     internal static void RecordPass(
@@ -60,30 +31,23 @@ internal static class EvaluationInstrumentation
         ProjectEvaluationStage stage,
         string pass,
         int submissionId,
-        ProjectRootElement projectRootElement,
-        EvaluationLoggingContext evaluationLoggingContext)
+        string projectFile,
+        int evaluationId)
     {
-        if (double.IsNaN(durationSeconds) || Volatile.Read(ref s_disabled) != 0)
+        if (double.IsNaN(durationSeconds))
         {
             return;
         }
 
-        try
+        if (IsEnabled())
         {
-            if (IsEnabled())
-            {
-                MSBuildEventSource.Log.ProjectEvaluationPassCompleted(
-                    durationSeconds,
-                    GetStage(stage),
-                    pass,
-                    GetOrigin(submissionId),
-                    projectRootElement.ProjectFileLocation.File ?? string.Empty,
-                    evaluationLoggingContext.BuildEventContext.EvaluationId);
-            }
-        }
-        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-        {
-            Disable();
+            MSBuildEventSource.Log.ProjectEvaluationPassCompleted(
+                durationSeconds,
+                GetStage(stage),
+                pass,
+                GetOrigin(submissionId),
+                projectFile,
+                evaluationId);
         }
     }
 
@@ -93,36 +57,24 @@ internal static class EvaluationInstrumentation
         int submissionId,
         bool succeeded,
         string projectFile,
-        EvaluationLoggingContext evaluationLoggingContext)
+        int evaluationId)
     {
-        if (Volatile.Read(ref s_disabled) != 0)
+        if (!IsEnabled())
         {
             return;
         }
 
-        try
-        {
-            if (!IsEnabled())
-            {
-                return;
-            }
+        double durationSeconds = startTimestamp == 0
+            ? double.NaN
+            : GetElapsedSeconds(startTimestamp);
 
-            double durationSeconds = startTimestamp == 0
-                ? double.NaN
-                : GetElapsedSeconds(startTimestamp);
-
-            MSBuildEventSource.Log.ProjectEvaluationCompleted(
-                durationSeconds,
-                GetStage(stage),
-                GetOrigin(submissionId),
-                succeeded,
-                projectFile,
-                evaluationLoggingContext?.BuildEventContext.EvaluationId ?? BuildEventContext.InvalidEvaluationId);
-        }
-        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-        {
-            Disable();
-        }
+        MSBuildEventSource.Log.ProjectEvaluationCompleted(
+            durationSeconds,
+            GetStage(stage),
+            GetOrigin(submissionId),
+            succeeded,
+            projectFile,
+            evaluationId);
     }
 
     private static bool IsEnabled()
@@ -143,6 +95,4 @@ internal static class EvaluationInstrumentation
 
     private static double GetElapsedSeconds(long startTimestamp)
         => (Stopwatch.GetTimestamp() - startTimestamp) / (double)Stopwatch.Frequency;
-
-    private static void Disable() => Interlocked.Exchange(ref s_disabled, 1);
 }
