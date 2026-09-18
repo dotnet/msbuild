@@ -1522,15 +1522,9 @@ namespace Microsoft.Build.CommandLine
                 debugWriter?.WriteLine("Failed to restore the original environment: {0}.", ex);
             }
 
-            if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
-            {
-                // Notify the BuildManager that we are done.
-                _nodeEndpoint.SendData(new NodeShutdown(_shutdownReason == NodeEngineShutdownReason.Error ? NodeShutdownReason.Error : NodeShutdownReason.Requested));
+            SendShutdownNotification(_nodeEndpoint);
 
-                // Flush all packets to the pipe and close it down.  This blocks until the shutdown is complete.
-                _nodeEndpoint.OnLinkStatusChanged -= new LinkStatusChangedDelegate(OnLinkStatusChanged);
-            }
-
+            // Flush all packets to the pipe and close it down. This blocks until shutdown is complete.
             _nodeEndpoint.Disconnect();
 
             // Dispose these WaitHandles
@@ -1540,6 +1534,18 @@ namespace Microsoft.Build.CommandLine
             _taskCancelledEvent.Dispose();
 
             return _shutdownReason;
+        }
+
+        internal void SendShutdownNotification(INodeEndpoint endpoint)
+        {
+            if (endpoint.LinkStatus == LinkStatus.Active)
+            {
+                // The parent can close the pipe as soon as it receives this packet. That expected
+                // disconnect must not change BuildCompleteReuse into ConnectionFailed.
+                endpoint.ClientWillDisconnect();
+                endpoint.OnLinkStatusChanged -= new LinkStatusChangedDelegate(OnLinkStatusChanged);
+                endpoint.SendData(new NodeShutdown(_shutdownReason == NodeEngineShutdownReason.Error ? NodeShutdownReason.Error : NodeShutdownReason.Requested));
+            }
         }
 
         private void InitializeConsoleRedirection()

@@ -258,29 +258,40 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
 
             if (replacePooledProcess)
             {
-                using Process process = Process.GetProcessById(processId);
-                process.Kill();
-                bool exited = process.WaitForExit(10_000);
+                string operation = "PID lookup";
                 try
                 {
-                    if (!exited && NativeMethodsShared.IsOSX)
+                    using Process process = Process.GetProcessById(processId);
+                    operation = "Kill";
+                    process.Kill();
+                    operation = "WaitForExit";
+                    bool exited = process.WaitForExit(10_000);
+                    try
                     {
-                        WriteProcessExitDiagnostics(processId);
+                        if (!exited && NativeMethodsShared.IsOSX)
+                        {
+                            WriteProcessExitDiagnostics(processId, "Did not exit after Kill and a 10-second wait.");
+                        }
+                    }
+                    finally
+                    {
+                        // Diagnostics must not turn the original timeout into a pass or a different failure.
+                        exited.ShouldBeTrue();
                     }
                 }
-                finally
+                catch (Exception e) when (NativeMethodsShared.IsOSX && e is ArgumentException or InvalidOperationException or Win32Exception)
                 {
-                    // Diagnostics must not turn the original timeout into a pass or a different failure.
-                    exited.ShouldBeTrue();
+                    WriteProcessExitDiagnostics(processId, $"{operation} failed: {e}");
+                    throw;
                 }
             }
         }
     }
 
-    private void WriteProcessExitDiagnostics(int processId)
+    private void WriteProcessExitDiagnostics(int processId, string failure)
     {
         int parentProcessId = EnvironmentUtilities.CurrentProcessId;
-        _output.WriteLine($"TaskHost {processId} did not exit after Kill and a 10-second wait. Parent test process: {parentProcessId}.");
+        _output.WriteLine($"TaskHost {processId} replacement failed. Parent test process: {parentProcessId}. {failure}");
         if (Traits.Instance.DebugUnitTests)
         {
             _output.WriteLine("Native diagnostics unavailable: the process runner disables timeouts in DebugUnitTests mode.");
