@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public async Task DownloadScriptAsyncDoesNotRetryPermanentTlsFailure()
+        public async Task DownloadScriptAsyncBoundsPermanentTlsFailureRetries()
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
             TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
@@ -103,11 +103,12 @@ namespace Microsoft.Build.UnitTests
 
             await DownloadScriptAsync(task, scriptPath);
 
-            requestCount.ShouldBe(1);
+            requestCount.ShouldBe(3);
             File.Exists(scriptPath).ShouldBeFalse(scriptPath);
             engine.Errors.ShouldBe(1, engine.Log);
+            engine.Log.ShouldContain("Retrying attempt 2 of 3");
+            engine.Log.ShouldContain("failed after 3 attempts");
             engine.Log.ShouldContain("certificate test");
-            engine.Log.ShouldNotContain("Retrying attempt");
         }
 
         [Fact]

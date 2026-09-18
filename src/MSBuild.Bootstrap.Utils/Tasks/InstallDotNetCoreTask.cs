@@ -6,7 +6,6 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Security.Authentication;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -148,7 +147,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                 {
                     string flattenedMessage = GetInnerExceptionMessageString(e);
 
-                    if (attempt < MaxScriptDownloadAttempts && IsTransientTransportFailure(e))
+                    if (attempt < MaxScriptDownloadAttempts)
                     {
                         Log.LogMessage(MessageImportance.Low, $"Install-scripts download from {scriptUrl} failed with a transient transport error. Retrying attempt {attempt + 1} of {MaxScriptDownloadAttempts}. {flattenedMessage}");
                         continue;
@@ -166,28 +165,6 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         private static bool IsScriptDownloadTransportFailure(Exception exception)
         {
             return exception is HttpRequestException or IOException or SocketException;
-        }
-
-        private static bool IsTransientTransportFailure(Exception exception)
-        {
-            if (exception is HttpRequestException httpRequestException)
-            {
-                return httpRequestException.InnerException switch
-                {
-                    AuthenticationException => false,
-                    IOException => true,
-                    SocketException socketException => IsTransientSocketException(socketException),
-                    _ => false
-                };
-            }
-
-            return exception is IOException ||
-                (exception is SocketException directSocketException && IsTransientSocketException(directSocketException));
-        }
-
-        private static bool IsTransientSocketException(SocketException socketException)
-        {
-            return socketException.SocketErrorCode is SocketError.ConnectionReset or SocketError.ConnectionAborted or SocketError.NetworkReset or SocketError.TimedOut;
         }
 
         private static string GetInnerExceptionMessageString(Exception exception)
