@@ -5,6 +5,8 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Threading;
+using Microsoft.Build.BackEnd.Components.Logging;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 
@@ -53,7 +55,13 @@ internal static class EvaluationInstrumentation
         }
     }
 
-    internal static void RecordPass(double durationSeconds, ProjectEvaluationStage stage, string pass, int submissionId)
+    internal static void RecordPass(
+        double durationSeconds,
+        ProjectEvaluationStage stage,
+        string pass,
+        int submissionId,
+        ProjectRootElement projectRootElement,
+        EvaluationLoggingContext evaluationLoggingContext)
     {
         if (double.IsNaN(durationSeconds) || Volatile.Read(ref s_disabled) != 0)
         {
@@ -68,7 +76,9 @@ internal static class EvaluationInstrumentation
                     durationSeconds,
                     GetStage(stage),
                     pass,
-                    GetOrigin(submissionId));
+                    GetOrigin(submissionId),
+                    projectRootElement.ProjectFileLocation.File ?? string.Empty,
+                    evaluationLoggingContext.BuildEventContext.EvaluationId);
             }
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
@@ -77,7 +87,13 @@ internal static class EvaluationInstrumentation
         }
     }
 
-    internal static void RecordEvaluation(long startTimestamp, ProjectEvaluationStage stage, int submissionId, bool succeeded)
+    internal static void RecordEvaluation(
+        long startTimestamp,
+        ProjectEvaluationStage stage,
+        int submissionId,
+        bool succeeded,
+        string projectFile,
+        EvaluationLoggingContext evaluationLoggingContext)
     {
         if (Volatile.Read(ref s_disabled) != 0)
         {
@@ -99,7 +115,9 @@ internal static class EvaluationInstrumentation
                 durationSeconds,
                 GetStage(stage),
                 GetOrigin(submissionId),
-                succeeded);
+                succeeded,
+                projectFile,
+                evaluationLoggingContext?.BuildEventContext.EvaluationId ?? BuildEventContext.InvalidEvaluationId);
         }
         catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
         {

@@ -41,6 +41,15 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         """;
 
     private readonly ProjectCollection _collection = new();
+    private readonly MockLogger _logger;
+    private readonly ITestOutputHelper _output;
+
+    public EvaluationEventSource_Tests(ITestOutputHelper output)
+    {
+        _output = output;
+        _logger = new MockLogger(output);
+        _collection.RegisterLogger(_logger);
+    }
 
     public void Dispose() => _collection.Dispose();
 
@@ -50,25 +59,29 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         AssertEventContract(
             nameof(MSBuildEventSource.ProjectEvaluationCompleted),
             113,
-            ["durationSeconds", "stage", "origin", "succeeded"]);
+            ["durationSeconds", "stage", "origin", "succeeded", "projectFile", "evaluationId"],
+            [typeof(double), typeof(string), typeof(string), typeof(bool), typeof(string), typeof(int)]);
         AssertEventContract(
             nameof(MSBuildEventSource.ProjectEvaluationPassCompleted),
             114,
-            ["durationSeconds", "stage", "pass", "origin"]);
+            ["durationSeconds", "stage", "pass", "origin", "projectFile", "evaluationId"],
+            [typeof(double), typeof(string), typeof(string), typeof(string), typeof(string), typeof(int)]);
 
         using var listener = new EvaluationEventListener();
         listener.Enable(MSBuildEventSource.Keywords.All);
-        MSBuildEventSource.Log.ProjectEvaluationCompleted(1, "full", "outside_build_submission", succeeded: true);
+        MSBuildEventSource.Log.ProjectEvaluationCompleted(1, "full", "outside_build_submission", succeeded: true, "", 1);
         listener.Events.ShouldBeEmpty();
 
         listener.Enable(MSBuildEventSource.Keywords.EvaluationMeasurements);
-        MSBuildEventSource.Log.ProjectEvaluationCompleted(1, "full", "outside_build_submission", succeeded: true);
+        MSBuildEventSource.Log.ProjectEvaluationCompleted(1, "full", "outside_build_submission", succeeded: true, "", 1);
 
         EvaluationEvent observed = listener.Events.ShouldHaveSingleItem();
         observed.Id.ShouldBe(113);
         observed.Level.ShouldBe(EventLevel.Informational);
         observed.Opcode.ShouldBe(EventOpcode.Info);
-        observed.PayloadNames.ShouldBe(["durationSeconds", "stage", "origin", "succeeded"]);
+        observed.PayloadNames.ShouldBe(["durationSeconds", "stage", "origin", "succeeded", "projectFile", "evaluationId"]);
+        observed.Payload.Select(value => value?.GetType()).ShouldBe(
+            [typeof(double), typeof(string), typeof(string), typeof(bool), typeof(string), typeof(int)]);
     }
 
     [Fact]
@@ -110,10 +123,20 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         ]);
 
         EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
+        ProjectEvaluationStartedEventArgs evaluationStarted = _logger.AllBuildEvents
+            .OfType<ProjectEvaluationStartedEventArgs>()
+            .ShouldHaveSingleItem();
+        int evaluationId = evaluationStarted.BuildEventContext!.EvaluationId;
         total.Payload[1].ShouldBe("full");
         total.Payload[2].ShouldBe("outside_build_submission");
         total.Payload[3].ShouldBe(true);
+        total.Payload[4].ShouldBe(string.Empty);
+        total.Payload[5].ShouldBe(evaluationId);
         ((double)total.Payload[0]!).ShouldBeGreaterThanOrEqualTo(0);
+        listener.Events
+            .Where(e => e.Id == 114)
+            .ShouldAllBe(e => (string)e.Payload[4]! == string.Empty
+                && (int)e.Payload[5]! == evaluationId);
     }
 
     [Theory]
@@ -132,6 +155,7 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
         total.Payload[1].ShouldBe(stageName);
         total.Payload[3].ShouldBe(true);
+        AssertEvaluationIdentity(listener, total);
     }
 
     [Fact]
@@ -149,6 +173,7 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         listener.Events.Count(e => e.Id == 114).ShouldBe(1);
         EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
         total.Payload[3].ShouldBe(false);
+        AssertEvaluationIdentity(listener, total);
     }
 
     [Fact]
@@ -157,29 +182,46 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         using var listener = new EvaluationEventListener();
         listener.Enable(MSBuildEventSource.Keywords.EvaluationMeasurements);
 
-        EvaluationInstrumentation.RecordPass(double.NaN, ProjectEvaluationStage.Full, "properties", BuildEventContext.InvalidSubmissionId);
-        EvaluationInstrumentation.RecordEvaluation(0, ProjectEvaluationStage.Full, BuildEventContext.InvalidSubmissionId, succeeded: true);
+        EvaluationInstrumentation.RecordPass(
+            double.NaN,
+            ProjectEvaluationStage.Full,
+            "properties",
+            BuildEventContext.InvalidSubmissionId,
+            null!,
+            null!);
+        EvaluationInstrumentation.RecordEvaluation(
+            0,
+            ProjectEvaluationStage.Full,
+            BuildEventContext.InvalidSubmissionId,
+            succeeded: true,
+            "",
+            null!);
 
         listener.Events.ShouldNotContain(e => e.Id == 114);
         EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
         double.IsNaN((double)total.Payload[0]!).ShouldBeTrue();
+        total.Payload[4].ShouldBe(string.Empty);
+        total.Payload[5].ShouldBe(BuildEventContext.InvalidEvaluationId);
     }
 
     [Fact]
     public void BuildEvaluationRecordsBuildSubmissionOrigin()
     {
-        using TestEnvironment env = TestEnvironment.Create();
+        using TestEnvironment env = TestEnvironment.Create(_output);
         string projectPath = env.CreateFile("event-source.proj", ProjectXml).Path;
         using var listener = new EvaluationEventListener();
         listener.Enable(MSBuildEventSource.Keywords.EvaluationMeasurements);
         using var buildManager = new BuildManager();
 
         BuildResult result = buildManager.Build(
-            new BuildParameters(_collection),
+            new BuildParameters(_collection) { Loggers = [_logger] },
             new BuildRequestData(projectPath, new Dictionary<string, string?>(), null, ["Build"], null));
 
         result.OverallResult.ShouldBe(BuildResultCode.Success);
         listener.Events.ShouldContain(e => e.Id == 113 && (string)e.Payload[2]! == "build_submission");
+        EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
+        total.Payload[4].ShouldBe(projectPath);
+        AssertEvaluationIdentity(listener, total);
     }
 
     [Fact]
@@ -193,8 +235,26 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         project.SetProperty("ReevaluationTrigger", "changed");
         project.ReevaluateIfNecessary();
 
-        listener.Events.Count(e => e.Id == 113).ShouldBe(2);
+        EvaluationEvent[] totals = listener.Events.Where(e => e.Id == 113).ToArray();
+        totals.Length.ShouldBe(2);
         listener.Events.Count(e => e.Id == 114).ShouldBe(12);
+
+        int[] totalEvaluationIds = totals.Select(e => (int)e.Payload[5]!).ToArray();
+        totalEvaluationIds.Distinct().Count().ShouldBe(2);
+        totalEvaluationIds.ShouldBe(
+            _logger.AllBuildEvents
+                .OfType<ProjectEvaluationStartedEventArgs>()
+                .Select(e => e.BuildEventContext!.EvaluationId));
+
+        listener.Events
+            .Where(e => e.Id == 114)
+            .GroupBy(e => (int)e.Payload[5]!)
+            .ToDictionary(group => group.Key, group => group.Count())
+            .ShouldBe(totalEvaluationIds.ToDictionary(id => id, _ => 6));
+
+        listener.Events
+            .Where(e => e.Id is 113 or 114)
+            .ShouldAllBe(e => (string)e.Payload[4]! == string.Empty);
     }
 
     private ProjectInstance Evaluate(ProjectEvaluationStage stage)
@@ -215,7 +275,20 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         return ProjectInstance.FromProjectRootElement(root, new ProjectOptions { ProjectCollection = _collection });
     }
 
-    private static void AssertEventContract(string methodName, int id, string[] parameterNames)
+    private void AssertEvaluationIdentity(EvaluationEventListener listener, EvaluationEvent total)
+    {
+        ProjectEvaluationStartedEventArgs evaluationStarted = _logger.AllBuildEvents
+            .OfType<ProjectEvaluationStartedEventArgs>()
+            .ShouldHaveSingleItem();
+        int evaluationId = evaluationStarted.BuildEventContext!.EvaluationId;
+
+        total.Payload[5].ShouldBe(evaluationId);
+        listener.Events
+            .Where(e => e.Id == 114)
+            .ShouldAllBe(e => (int)e.Payload[5]! == evaluationId);
+    }
+
+    private static void AssertEventContract(string methodName, int id, string[] parameterNames, Type[] parameterTypes)
     {
         MethodInfo method = typeof(MSBuildEventSource).GetMethod(methodName)!;
         EventAttribute attribute = method.GetCustomAttribute<EventAttribute>()!;
@@ -224,7 +297,9 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         attribute.Level.ShouldBe(EventLevel.Informational);
         attribute.Opcode.ShouldBe(EventOpcode.Info);
         attribute.Keywords.ShouldBe(MSBuildEventSource.Keywords.EvaluationMeasurements);
+        attribute.Version.ShouldBe((byte)0);
         method.GetParameters().Select(p => p.Name).ShouldBe(parameterNames);
+        method.GetParameters().Select(p => p.ParameterType).ShouldBe(parameterTypes);
     }
 
     private sealed class EvaluationEventListener : EventListener

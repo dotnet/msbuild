@@ -845,10 +845,12 @@ namespace Microsoft.Build.Eventing
         /// <param name="stage">The requested evaluation stage: properties, item_definitions, items, using_tasks, or full.</param>
         /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
         /// <param name="succeeded">Whether evaluation completed without an error.</param>
+        /// <param name="projectFile">Full path to the evaluated project, or an empty string for an unnamed in-memory project.</param>
+        /// <param name="evaluationId">The node-local ID assigned to this evaluation occurrence.</param>
         [Event(113, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
-        public void ProjectEvaluationCompleted(double durationSeconds, string stage, string origin, bool succeeded)
+        public void ProjectEvaluationCompleted(double durationSeconds, string stage, string origin, bool succeeded, string projectFile, int evaluationId)
         {
-            WriteEvent(113, durationSeconds, stage, origin, succeeded);
+            WriteEvent(113, durationSeconds, stage, origin, succeeded, projectFile, evaluationId);
         }
 
         /// <summary>
@@ -858,10 +860,12 @@ namespace Microsoft.Build.Eventing
         /// <param name="stage">The requested evaluation stage: properties, item_definitions, items, using_tasks, or full.</param>
         /// <param name="pass">The completed pass: initial_properties, properties, item_definitions, items, using_tasks, or targets.</param>
         /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
+        /// <param name="projectFile">Full path to the evaluated project, or an empty string for an unnamed in-memory project.</param>
+        /// <param name="evaluationId">The node-local ID assigned to this evaluation occurrence.</param>
         [Event(114, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
-        public void ProjectEvaluationPassCompleted(double durationSeconds, string stage, string pass, string origin)
+        public void ProjectEvaluationPassCompleted(double durationSeconds, string stage, string pass, string origin, string projectFile, int evaluationId)
         {
-            WriteEvent(114, durationSeconds, stage, pass, origin);
+            WriteEvent(114, durationSeconds, stage, pass, origin, projectFile, evaluationId);
         }
 
         #endregion
