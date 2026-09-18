@@ -166,9 +166,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(bool nodeReuse, NodeContextTerminateDelegate terminateNode)
         {
-            // INodePacketFactory
-            INodePacketFactory factory = new NodePacketFactory();
-
             List<Process> nodeProcesses = GetPossibleRunningNodes().nodeProcesses.ToList();
 
             // Find proper MSBuildTaskHost executable name
@@ -196,10 +193,32 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace($"Shutting down node with pid = {nodeProcess.Id}");
-                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode, result.NegotiatedPacketVersion);
-                    nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
-                    nodeStream.Dispose();
+                    NodeContext nodeContext = RequestNodeShutdown(nodeProcess, nodeStream, terminateNode, result.NegotiatedPacketVersion);
+                    // Idle nodes can be shut down when there is no active build or logging service.
+                    nodeContext.WaitForExitAsync(loggingService: null).GetAwaiter().GetResult();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Transfers the pipe to a context that keeps it open until the node acknowledges shutdown or disconnects.
+        /// </summary>
+        internal static NodeContext RequestNodeShutdown(Process nodeProcess, Stream nodeStream, NodeContextTerminateDelegate terminateNode, byte negotiatedVersion)
+        {
+            NodePacketFactory factory = new();
+            factory.RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, new ShutdownPacketHandler());
+            NodeContext context = new(0, nodeProcess, nodeStream, factory, terminateNode, negotiatedVersion);
+            context.BeginAsyncPacketRead();
+            context.SendData(new NodeBuildComplete(false /* no node reuse */));
+            return context;
+        }
+
+        private sealed class ShutdownPacketHandler : INodePacketHandler
+        {
+            public void PacketReceived(int nodeId, INodePacket packet)
+            {
+                NodeShutdown shutdown = (NodeShutdown)packet;
+                CommunicationsUtilities.Trace(nodeId, $"Shutdown response: {shutdown.Reason}. {shutdown.Exception}");
             }
         }
 
@@ -1513,7 +1532,7 @@ namespace Microsoft.Build.BackEnd
 #if NET
                     await Task.Delay(100, _packetQueueDrainDelayCancellation.Token).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 #else
-                    await Task.WhenAny(Task.Delay(100, _packetQueueDrainDelayCancellation.Token));
+                    await Task.WhenAny(Task.Delay(100, _packetQueueDrainDelayCancellation.Token)).ConfigureAwait(false);
 #endif
                 }
 

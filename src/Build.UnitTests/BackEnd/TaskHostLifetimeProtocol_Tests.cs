@@ -112,6 +112,40 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         context.WaitForSendCompletion(10_000).ShouldBeTrue("a closed idle connection must not retain its sender thread");
     }
 
+    [Fact]
+    public void ShutdownRequestKeepsPipeOpenUntilAcknowledgment()
+    {
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream pipe = new();
+        using ManualResetEventSlim terminated = new();
+        using MemoryStream response = new();
+        using BinaryWriter writer = new(response);
+        writer.Write((byte)NodePacketType.NodeShutdown);
+        writer.Write(0);
+        new NodeShutdown(NodeShutdownReason.Requested).Translate(BinaryTranslator.GetWriteTranslator(response));
+        response.Position = 1;
+        writer.Write(checked((int)response.Length - 5));
+
+        NodeProviderOutOfProcBase.NodeContext context = NodeProviderOutOfProcBase.RequestNodeShutdown(
+            process, pipe, _ => terminated.Set(), NodePacketTypeExtensions.PacketVersion);
+
+        try
+        {
+            pipe.PacketWritten.Wait(10_000).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+            pipe.CanRead.ShouldBeTrue("sending the request must not close the pipe before the node can acknowledge it");
+            terminated.IsSet.ShouldBeFalse();
+        }
+        finally
+        {
+            pipe.CompleteRead(response.ToArray());
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+
+        pipe.CanRead.ShouldBeFalse("the shutdown acknowledgment must close the connection");
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -307,19 +341,47 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     {
         private readonly TaskCompletionSource<int> _read = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly TaskCompletionSource<bool> _packetWritten = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private byte[]? _response;
+        private int _responsePosition;
         public Task PacketWritten => _packetWritten.Task;
-        public void CompleteRead() => _read.TrySetResult(0);
-        public override void Write(byte[] buffer, int offset, int count) => _packetWritten.TrySetResult(true);
-        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => _read.Task;
+        public void CompleteRead(byte[]? response = null)
+        {
+            _response = response;
+            _read.TrySetResult(0);
+        }
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            base.Write(buffer, offset, count);
+            _packetWritten.TrySetResult(true);
+        }
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            await _read.Task.ConfigureAwait(false);
+            return ReadResponse(buffer.AsSpan(offset, count));
+        }
 #if NET
-        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) => new(_read.Task);
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            await _read.Task.ConfigureAwait(false);
+            return ReadResponse(buffer.Span);
+        }
 #endif
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
         {
-            _ = _read.Task.ContinueWith(t => callback?.Invoke(t), TaskScheduler.Default);
-            return _read.Task;
+            Task<int> read = ReadAsync(buffer, offset, count, CancellationToken.None);
+            _ = read.ContinueWith(t => callback?.Invoke(t), TaskScheduler.Default);
+            return read;
         }
-        public override int EndRead(IAsyncResult asyncResult) => _read.Task.GetAwaiter().GetResult();
+        public override int EndRead(IAsyncResult asyncResult) => ((Task<int>)asyncResult).GetAwaiter().GetResult();
+
+        private int ReadResponse(Span<byte> buffer)
+        {
+            ReadOnlySpan<byte> remaining = _response.AsSpan(_responsePosition);
+            int count = Math.Min(buffer.Length, remaining.Length);
+            remaining[..count].CopyTo(buffer);
+            _responsePosition += count;
+            return count;
+        }
     }
 
     private sealed class ShutdownHandler : INodePacketHandler
