@@ -174,7 +174,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 AssemblyLocation,
                 "..",
                 RunnerUtilities.LatestDotNetCoreForMSBuild,
-                Path.GetFileName(typeof(TaskBuilderTestTask).Assembly.Location)));
+                Path.ChangeExtension(Path.GetFileName(typeof(TaskBuilderTestTask).Assembly.Location), ".dll")));
             File.Exists(taskAssembly).ShouldBeTrue(customMessage: taskAssembly);
 
             string relativePath = Path.Combine("folder;name", "file with space.txt");
