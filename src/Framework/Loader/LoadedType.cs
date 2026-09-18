@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 #if NET
@@ -39,6 +40,72 @@ namespace Microsoft.Build.Shared
             string? runtime = null,
             string? architecture = null,
             bool loadedViaMetadataLoadContext = false)
+            : this(
+                type,
+                assemblyLoadInfo,
+                loadedAssembly,
+                iTaskItemType,
+                runtime,
+                architecture,
+                loadedViaMetadataLoadContext,
+                parameterTypeForExpansionResolver: (Func<PropertyInfo, Type?>?)null)
+        {
+        }
+
+        internal static LoadedType CreateWithParameterTypeInfoResolver(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+            Type type,
+            AssemblyLoadInfo assemblyLoadInfo,
+            Assembly loadedAssembly,
+            Type iTaskItemType,
+            string? runtime,
+            string? architecture,
+            bool loadedViaMetadataLoadContext,
+            Func<PropertyInfo, (Type? TypeForExpansion, string? DeclaredTypeName)>? parameterTypeInfoResolver) =>
+            new(
+                type,
+                assemblyLoadInfo,
+                loadedAssembly,
+                iTaskItemType,
+                runtime,
+                architecture,
+                loadedViaMetadataLoadContext,
+                parameterTypeInfoResolver);
+
+        internal LoadedType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+            Type type,
+            AssemblyLoadInfo assemblyLoadInfo,
+            Assembly loadedAssembly,
+            Type iTaskItemType,
+            string? runtime,
+            string? architecture,
+            bool loadedViaMetadataLoadContext,
+            Func<PropertyInfo, Type?>? parameterTypeForExpansionResolver)
+            : this(
+                type,
+                assemblyLoadInfo,
+                loadedAssembly,
+                iTaskItemType,
+                runtime,
+                architecture,
+                loadedViaMetadataLoadContext,
+                parameterTypeInfoResolver: parameterTypeForExpansionResolver is null
+                    ? null
+                    : property => (parameterTypeForExpansionResolver(property), null))
+        {
+        }
+
+        private LoadedType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
+            Type type,
+            AssemblyLoadInfo assemblyLoadInfo,
+            Assembly loadedAssembly,
+            Type iTaskItemType,
+            string? runtime,
+            string? architecture,
+            bool loadedViaMetadataLoadContext,
+            Func<PropertyInfo, (Type? TypeForExpansion, string? DeclaredTypeName)>? parameterTypeInfoResolver)
         {
             Assumed.NotNull(type, "We must have the type.");
             Assumed.NotNull(assemblyLoadInfo, "We must have the assembly the type was loaded from.");
@@ -133,38 +200,50 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
-                // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
-                Type? pt = null;
+                Type propertyType;
+                Type propertyElementType;
                 try
                 {
-                    pt = props[i].PropertyType;
-                    if (pt.IsArray)
-                    {
-                        pt = pt.GetElementType();
-                    }
+                    propertyType = props[i].PropertyType;
+                    propertyElementType = propertyType.IsArray ? propertyType.GetElementType()! : propertyType;
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    // Skip properties that can't be loaded
+                    (Type? TypeForExpansion, string? DeclaredTypeName) parameterTypeInfo =
+                        parameterTypeInfoResolver?.Invoke(props[i]) ?? default;
+                    Properties[i] = new ReflectableTaskPropertyInfo(
+                        props[i],
+                        outputAttribute,
+                        requiredAttribute,
+                        parameterTypeInfo.TypeForExpansion,
+                        parameterTypeInfo.DeclaredTypeName);
                     continue;
                 }
 
                 bool isAssignableToITask = false;
+                bool isTypeUnresolved = false;
                 try
                 {
-                    isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
+                    isAssignableToITask = iTaskItemType.IsAssignableFrom(propertyElementType);
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    // Can't determine assignability, default to false
+                    isTypeUnresolved = true;
                 }
 
-                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
+                Properties[i] = new ReflectableTaskPropertyInfo(
+                    props[i],
+                    propertyType,
+                    outputAttribute,
+                    requiredAttribute,
+                    isAssignableToITask,
+                    loadedViaMetadataLoadContext ? GetParameterTypeForExpansion(propertyType, propertyElementType) : null,
+                    isTypeUnresolved);
                 if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {
                     try
                     {
-                        PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
+                        PropertyAssemblyQualifiedNames[i] = propertyType.AssemblyQualifiedName ?? string.Empty;
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -173,6 +252,33 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
+
+        private static Type? GetParameterTypeForExpansion(Type propertyType, Type elementType)
+        {
+            if (propertyType.IsArray && (propertyType.GetArrayRank() != 1 || elementType.IsArray))
+            {
+                return null;
+            }
+
+            string? typeName = elementType.FullName;
+            Type? expansionType = typeName switch
+            {
+                string name when name == typeof(AbsolutePath).FullName => typeof(AbsolutePath),
+                string name when name == typeof(FileInfo).FullName => typeof(FileInfo),
+                string name when name == typeof(DirectoryInfo).FullName => typeof(DirectoryInfo),
+                _ when elementType.IsValueType || typeName == typeof(string).FullName => typeof(string),
+                _ => null,
+            };
+
+            return propertyType.IsArray ? GetArrayExpansionType(expansionType) : expansionType;
+        }
+
+        internal static Type? GetArrayExpansionType(Type? elementType) =>
+            elementType == typeof(string) ? typeof(string[]) :
+            elementType == typeof(AbsolutePath) ? typeof(AbsolutePath[]) :
+            elementType == typeof(FileInfo) ? typeof(FileInfo[]) :
+            elementType == typeof(DirectoryInfo) ? typeof(DirectoryInfo[]) :
+            null;
 
         #endregion
 

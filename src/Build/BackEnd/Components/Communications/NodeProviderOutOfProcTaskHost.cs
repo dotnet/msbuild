@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Threading;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
@@ -33,8 +35,12 @@ namespace Microsoft.Build.BackEnd
     /// <param name="ForwardConsoleOutput">
     /// Whether the task host forwards console output. Hosts with different forwarding behavior must not share a connection.
     /// </param>
-    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId, bool ForwardConsoleOutput = false);
-
+    /// <param name="SupportsParameterConversion">Whether the host can convert deferred parameter values.</param>
+    internal readonly record struct TaskHostNodeKey(
+        HandshakeOptions HandshakeOptions,
+        int NodeId,
+        bool ForwardConsoleOutput = false,
+        bool SupportsParameterConversion = false);
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
@@ -86,6 +92,9 @@ namespace Microsoft.Build.BackEnd
         /// Store the path for the 64-bit MSBuild so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToArm64Clr4;
+
+        private static readonly ConcurrentDictionary<string, bool> s_parameterConversionCapabilities =
+            new(FileUtilities.PathComparer);
 
         /// <summary>
         /// Name for MSBuild.exe
@@ -779,6 +788,73 @@ namespace Microsoft.Build.BackEnd
             Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
             return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters));
+        }
+
+        /// <summary>
+        /// Determines whether the selected .NET task host supports deferred parameter conversion.
+        /// </summary>
+        /// <returns>True when conversion is supported; false when the host lacks it or its capability cannot be determined.</returns>
+        internal static bool SupportsTaskParameterConversion(in TaskHostParameters taskHostParameters)
+        {
+            if (taskHostParameters.MSBuildAssemblyPath is null)
+            {
+                // No alternate MSBuild was selected. The default host comes from the current
+                // tools directory and is assumed to support conversion.
+                return true;
+            }
+
+            // An explicitly selected SDK may predate parameter conversion.
+            // Inspect its metadata for the conversion method without loading the assembly.
+            try
+            {
+                string assemblyPath = Path.GetFullPath(
+                    Path.Combine(taskHostParameters.MSBuildAssemblyPath, Constants.MSBuildAssemblyName));
+                return s_parameterConversionCapabilities.GetOrAdd(assemblyPath, static path =>
+                {
+                    try
+                    {
+                        using FileStream stream = File.OpenRead(path);
+                        using var peReader = new PEReader(stream);
+                        if (!peReader.HasMetadata)
+                        {
+                            return false;
+                        }
+
+                        MetadataReader reader = peReader.GetMetadataReader();
+                        foreach (TypeDefinitionHandle typeHandle in reader.TypeDefinitions)
+                        {
+                            TypeDefinition type = reader.GetTypeDefinition(typeHandle);
+                            if (!reader.StringComparer.Equals(type.Namespace, "Microsoft.Build.CommandLine")
+                                || !reader.StringComparer.Equals(type.Name, "OutOfProcTaskAppDomainWrapperBase"))
+                            {
+                                continue;
+                            }
+
+                            foreach (MethodDefinitionHandle methodHandle in type.GetMethods())
+                            {
+                                if (reader.StringComparer.Equals(
+                                    reader.GetMethodDefinition(methodHandle).Name,
+                                    "ConvertTaskParameterValue"))
+                                {
+                                    return true;
+                                }
+                            }
+
+                            return false;
+                        }
+
+                        return false;
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        return false;
+                    }
+                });
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                return false;
+            }
         }
 
         private static string GetMSBuildPath(in TaskHostParameters taskHostParameters)
