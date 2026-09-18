@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using System.Threading;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -172,6 +173,7 @@ namespace Microsoft.Build.Tasks
         private readonly WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
 
         private readonly ConcurrentDictionary<string, AssemblyMetadata> _assemblyMetadataCache;
+        private readonly CancellationToken _cancellationToken;
 
         /// <summary>
         /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is.
@@ -231,6 +233,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
         /// <param name="nonCultureResourceDirectories"></param>
         /// <param name="taskEnvironment">TaskEnvironment for thread-safe environment variable access and path resolution.</param>
+        /// <param name="cancellationToken">Token used to stop assembly resolution.</param>
 #else
         /// <summary>
         /// Construct.
@@ -272,6 +275,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
         /// <param name="nonCultureResourceDirectories"></param>
         /// <param name="taskEnvironment">TaskEnvironment for thread-safe environment variable access and path resolution.</param>
+        /// <param name="cancellationToken">Token used to stop assembly resolution.</param>
 #endif
         internal ReferenceTable(
             IBuildEngine buildEngine,
@@ -315,7 +319,8 @@ namespace Microsoft.Build.Tasks
             bool unresolveFrameworkAssembliesFromHigherFrameworks,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
             string[] nonCultureResourceDirectories,
-            TaskEnvironment taskEnvironment)
+            TaskEnvironment taskEnvironment,
+            CancellationToken cancellationToken = default)
         {
             _log = log;
             _findDependencies = findDependencies;
@@ -348,6 +353,7 @@ namespace Microsoft.Build.Tasks
             _nonCultureResourceDirectories = nonCultureResourceDirectories;
             _enableCustomCulture = enableCustomCulture;
             _taskEnvironment = taskEnvironment;
+            _cancellationToken = cancellationToken;
 
             // Set condition for when to check assembly version against the target framework version
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -360,6 +366,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (ITaskItem resolvedSDK in resolvedSDKItems)
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     string sdkName = resolvedSDK.GetMetadata("SDKName");
 
                     if (sdkName.Length > 0)
@@ -388,7 +395,8 @@ namespace Microsoft.Build.Tasks
                     targetedRuntimeVersion,
                     getAssemblyPathInGac,
                     log,
-                    taskEnvironment);
+                    taskEnvironment,
+                    cancellationToken);
         }
 
         /// <summary>
@@ -550,6 +558,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (ITaskItem i in referenceAssemblyFiles)
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     SetPrimaryFileItem(i);
                 }
             }
@@ -560,6 +569,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (ITaskItem n in referenceAssemblyNames)
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     Exception e = SetPrimaryAssemblyReferenceItem(n);
 
                     if (e != null)
@@ -999,6 +1009,7 @@ namespace Microsoft.Build.Tasks
 
                 foreach (string subDirectory in subDirectories)
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     // Is there a candidate satellite in that folder?
                     string cultureName = Path.GetFileName(subDirectory);
 
@@ -1062,40 +1073,49 @@ namespace Microsoft.Build.Tasks
                 out scatterFiles,
                 out FrameworkName frameworkName);
 
+            _cancellationToken.ThrowIfCancellationRequested();
             reference.FrameworkNameAttribute = frameworkName;
 
             var dependencies = new List<AssemblyNameExtension>(dependentAssemblies?.Length ?? 0);
 
             if (dependentAssemblies?.Length > 0)
             {
-                // Re-map immediately so that to the sytem we actually got the remapped version when reading the manifest.
+                // The cached dependency array and its names can be shared by other RAR tasks.
+                // Keep remapping changes in this task's result list.
                 for (int i = 0; i < dependentAssemblies.Length; i++)
                 {
-                    // This will return a clone of the remapped assemblyNameExtension so its ok to party on it.
-                    AssemblyNameExtension remappedExtension = _installedAssemblies?.RemapAssemblyExtension(dependentAssemblies[i]);
+                    _cancellationToken.ThrowIfCancellationRequested();
+                    AssemblyNameExtension dependency = dependentAssemblies[i];
+                    AssemblyNameExtension remappedExtension = _installedAssemblies?.RemapAssemblyExtension(dependency);
                     if (remappedExtension != null)
                     {
-                        AssemblyNameExtension originalExtension = dependentAssemblies[i];
-                        AssemblyNameExtension existingExtension = dependencies.Find(x => x.Equals(remappedExtension));
-                        if (existingExtension != null)
+                        int existingIndex = dependencies.FindIndex(x => x.Equals(remappedExtension));
+                        if (existingIndex >= 0)
                         {
-                            existingExtension.AddRemappedAssemblyName(originalExtension.CloneImmutable());
+                            AssemblyNameExtension existingExtension = dependencies[existingIndex];
+                            // Clone() shares the remapping set, so make a private name and set before merging.
+                            AssemblyNameExtension mergedExtension = new(existingExtension.AssemblyName.CloneIfPossible());
+                            foreach (AssemblyNameExtension priorRemapping in existingExtension.RemappedFromEnumerator)
+                            {
+                                mergedExtension.AddRemappedAssemblyName(priorRemapping);
+                            }
+
+                            mergedExtension.AddRemappedAssemblyName(dependency.CloneImmutable());
+                            dependencies[existingIndex] = mergedExtension;
                             continue;
                         }
-                        else
-                        {
-                            dependentAssemblies[i] = remappedExtension;
-                            dependentAssemblies[i].AddRemappedAssemblyName(originalExtension.CloneImmutable());
-                        }
+
+                        remappedExtension.AddRemappedAssemblyName(dependency.CloneImmutable());
+                        dependency = remappedExtension;
                     }
 
                     // Assemblies which reference WinMD files sometimes will have references to mscorlib version 255.255.255 which is invalid. For this reason
                     // We will remove the dependency to mscorlib from the list of dependencies so it is not used for resolution or unification.
-                    bool isMscorlib = IsPseudoAssembly(dependentAssemblies[i].Name);
+                    bool isMscorlib = IsPseudoAssembly(dependency.Name);
 
-                    if (!isMscorlib || dependentAssemblies[i].Version.Major != 255)
+                    if (!isMscorlib || dependency.Version.Major != 255)
                     {
-                        dependencies.Add(dependentAssemblies[i]);
+                        dependencies.Add(dependency);
                     }
                 }
 
@@ -1114,6 +1134,7 @@ namespace Microsoft.Build.Tasks
         {
             foreach (AssemblyNameExtension preUnificationAssemblyName in preUnificationAssemblyNames)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 // First, unify the assembly name so that we're dealing with the right version.
                 // Not AssemblyNameExtension because we're going to write to it.
                 var dependentAssembly = new AssemblyNameExtension(preUnificationAssemblyName.AssemblyName.CloneIfPossible());
@@ -1323,14 +1344,17 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion, _taskEnvironment)]);
+                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion, _taskEnvironment)
+                {
+                    CancellationToken = _cancellationToken
+                }]);
             }
             else
             {
                 // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
                 if (parentReferenceFolders.Count > 0 && (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name)))
                 {
-                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion, _taskEnvironment));
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion, _taskEnvironment, _cancellationToken));
                 }
 
                 jaggedResolvers.Add(Resolvers);
@@ -1402,6 +1426,7 @@ namespace Microsoft.Build.Tasks
         internal void RemoveReferencesMarkedForExclusion(bool removeOnlyNoWarning, string subsetName)
         {
             MSBuildEventSource.Log.RarRemoveReferencesMarkedForExclusionStart();
+            try
             {
                 // Create a table which will contain the references which are not in the deny list
                 var goodReferences = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
@@ -1420,6 +1445,7 @@ namespace Microsoft.Build.Tasks
                 // Go through each of the references, we go through this table because in general it will be considerably smaller than the denylist. (10's of references vs 100's of deny list items)
                 foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     AssemblyNameExtension assemblyName = assembly.Key;
                     Reference assemblyReference = assembly.Value;
 
@@ -1484,11 +1510,15 @@ namespace Microsoft.Build.Tasks
                 // dependencies of them.
                 foreach (Reference reference in removedReferences)
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     RemoveDependencies(reference, goodReferences, dependencyGraph);
                 }
 
                 // Replace the references table with the list only containing good references.
                 References = goodReferences;
+            }
+            finally
+            {
                 MSBuildEventSource.Log.RarRemoveReferencesMarkedForExclusionStop();
             }
         }
@@ -1655,7 +1685,9 @@ namespace Microsoft.Build.Tasks
             List<Exception> exceptions)
         {
             MSBuildEventSource.Log.RarComputeClosureStart();
+            try
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 References.Clear();
                 _externallyResolvedPrimaryReferences.Clear();
                 SkippedFindingExternallyResolvedDependencies = false;
@@ -1665,7 +1697,10 @@ namespace Microsoft.Build.Tasks
 
                 ComputeClosure();
             }
-            MSBuildEventSource.Log.RarComputeClosureStop();
+            finally
+            {
+                MSBuildEventSource.Log.RarComputeClosureStop();
+            }
         }
 
         /// <summary>
@@ -1684,6 +1719,7 @@ namespace Microsoft.Build.Tasks
                 int dependencyIterations = 0;
                 do
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     // Resolve all references.
                     ResolveAssemblyFilenames();
 
@@ -1726,6 +1762,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (Reference reference in References.Values)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 // If the reference is resolved, but dependencies haven't been found,
                 // then find dependencies.
                 if (reference.IsResolved && !reference.DependenciesFound)
@@ -1807,6 +1844,7 @@ namespace Microsoft.Build.Tasks
             // Add each new dependency found.
             foreach (KeyValuePair<AssemblyNameExtension, Reference> newEntry in newEntries)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 newDependencies = true;
                 AddReference(newEntry.Key, newEntry.Value);
             }
@@ -1821,6 +1859,7 @@ namespace Microsoft.Build.Tasks
         {
             foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 Reference reference = assembly.Value;
 
                 // Has this reference been resolved to a file name?
@@ -1840,6 +1879,7 @@ namespace Microsoft.Build.Tasks
             // Now we have references organized into groups that would conflict.
             foreach (List<AssemblyNameReference> assemblyReferences in baseNameToReferences.Values)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 ResolveConflictsBetweenReferences(assemblyReferences);
             }
         }
@@ -1855,6 +1895,7 @@ namespace Microsoft.Build.Tasks
 
             while (comparisonIndex < assemblyReferences.Count)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 bool isLeftVictim = ResolveAssemblyNameConflict(
                     assemblyReferences[currentWinnerIndex],
                     assemblyReferences[comparisonIndex]) == 0;
@@ -1902,6 +1943,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (AssemblyNameReference assemblyNameReference in references)
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     AssemblyNameExtension assemblyName = assemblyNameReference.assemblyName;
                     Reference reference = assemblyNameReference.reference;
 
@@ -1958,6 +2000,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (AssemblyNameReference assemblyNameReference in assemblyNamesList)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 var remapping = new DependentAssembly
                 {
                     PartialAssemblyName = assemblyNameReference.assemblyName.AssemblyName
@@ -2217,6 +2260,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (KeyValuePair<AssemblyNameExtension, Reference> assemblyNameWithReference in References)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 AssemblyNameExtension assemblyName = assemblyNameWithReference.Key;
                 Reference reference = assemblyNameWithReference.Value;
                 AssemblyNameReference assemblyReference = AssemblyNameReference.Create(assemblyName, reference);
@@ -2627,6 +2671,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (KeyValuePair<AssemblyNameExtension, Reference> kvp in References)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 AssemblyNameExtension assemblyName = kvp.Key;
                 Reference reference = kvp.Value;
 
@@ -3106,6 +3151,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 AssemblyNameExtension assemblyName = assembly.Key;
                 Reference reference = assembly.Value;
                 string assemblyFullName = assemblyName.FullName;

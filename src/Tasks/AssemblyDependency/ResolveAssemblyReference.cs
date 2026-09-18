@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
@@ -32,7 +33,7 @@ namespace Microsoft.Build.Tasks
     /// depend on those assemblyFiles including second and nth-order dependencies too.
     /// </summary>
     [MSBuildMultiThreadableTask]
-    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask, IMultiThreadableTask
+    public class ResolveAssemblyReference : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         /// <summary>
         /// key assembly used to trigger inclusion of facade references.
@@ -62,6 +63,8 @@ namespace Microsoft.Build.Tasks
         /// Cache of system state information, used to optimize performance.
         /// </summary>
         internal SystemState _cache = null;
+
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         /// <summary>
         /// Construct
@@ -1237,6 +1240,7 @@ namespace Microsoft.Build.Tasks
         {
             bool success = true;
             MSBuildEventSource.Log.RarLogResultsStart();
+            try
             {
                 /*
                 PERF NOTE: The Silent flag turns off logging completely from the task side. This means
@@ -1248,6 +1252,7 @@ namespace Microsoft.Build.Tasks
                     // First, loop over primaries and display information.
                     foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        _cancellationTokenSource.Token.ThrowIfCancellationRequested();
                         AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
                         Reference primaryCandidate = assembly.Value;
@@ -1261,6 +1266,7 @@ namespace Microsoft.Build.Tasks
                     // Second, loop over dependencies and display information.
                     foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        _cancellationTokenSource.Token.ThrowIfCancellationRequested();
                         AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
                         Reference dependencyCandidate = assembly.Value;
@@ -1274,6 +1280,7 @@ namespace Microsoft.Build.Tasks
                     // Third, show conflicts and their resolution.
                     foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        _cancellationTokenSource.Token.ThrowIfCancellationRequested();
                         AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
                         Reference conflictCandidate = assembly.Value;
@@ -1348,6 +1355,7 @@ namespace Microsoft.Build.Tasks
                         // A high-priority message for each individual redirect.
                         for (int i = 0; i < idealAssemblyRemappings.Count; i++)
                         {
+                            _cancellationTokenSource.Token.ThrowIfCancellationRequested();
                             DependentAssembly idealRemapping = idealAssemblyRemappings[i];
                             AssemblyName idealRemappingPartialAssemblyName = idealRemapping.PartialAssemblyName;
                             Reference reference = idealAssemblyRemappingsIdentities[i].reference;
@@ -1452,32 +1460,35 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
-            }
-
 #if FEATURE_WIN32_REGISTRY
-            MessageImportance messageImportance = MessageImportance.Low;
-            if (dependencyTable.Resolvers != null && Log.LogsMessagesOfImportance(messageImportance))
-            {
-                foreach (Resolver r in dependencyTable.Resolvers)
+                MessageImportance messageImportance = MessageImportance.Low;
+                if (dependencyTable.Resolvers != null && Log.LogsMessagesOfImportance(messageImportance))
                 {
-                    if (r is AssemblyFoldersExResolver assemblyFoldersExResolver)
+                    foreach (Resolver r in dependencyTable.Resolvers)
                     {
-                        AssemblyFoldersEx assemblyFoldersEx = assemblyFoldersExResolver.AssemblyFoldersExLocations;
-
-                        if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
+                        _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                        if (r is AssemblyFoldersExResolver assemblyFoldersExResolver)
                         {
-                            Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.AssemblyFoldersExSearchLocations", r.SearchPath);
-                            foreach (var path in assemblyFoldersEx.UniqueDirectoryPaths)
+                            AssemblyFoldersEx assemblyFoldersEx = assemblyFoldersExResolver.AssemblyFoldersExLocations;
+
+                            if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
                             {
-                                Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.EightSpaceIndent", path);
+                                Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.AssemblyFoldersExSearchLocations", r.SearchPath);
+                                foreach (var path in assemblyFoldersEx.UniqueDirectoryPaths)
+                                {
+                                    _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                                    Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.EightSpaceIndent", path);
+                                }
                             }
                         }
                     }
                 }
-            }
 #endif
-
-            MSBuildEventSource.Log.RarLogResultsStop();
+            }
+            finally
+            {
+                MSBuildEventSource.Log.RarLogResultsStop();
+            }
 
             return success;
         }
@@ -1656,6 +1667,7 @@ namespace Microsoft.Build.Tasks
             Log.LogMessage(importance, property, "Assemblies");
             foreach (ITaskItem item in Assemblies)
             {
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
                 Log.LogMessage(importance, indent + item.ItemSpec);
                 LogAttribute(item, ItemMetadataNames.privateMetadata);
                 LogAttribute(item, ItemMetadataNames.hintPath);
@@ -1668,6 +1680,7 @@ namespace Microsoft.Build.Tasks
             Log.LogMessage(importance, property, "AssemblyFiles");
             foreach (ITaskItem item in AssemblyFiles)
             {
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
                 Log.LogMessage(importance, indent + item.ItemSpec);
                 LogAttribute(item, ItemMetadataNames.privateMetadata);
                 LogAttribute(item, ItemMetadataNames.fusionName);
@@ -1676,6 +1689,7 @@ namespace Microsoft.Build.Tasks
             Log.LogMessage(importance, property, "CandidateAssemblyFiles");
             foreach (AbsolutePath file in _candidateAssemblyFiles)
             {
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
                 try
                 {
                     if (FileUtilities.HasExtension(file.OriginalValue, _allowedAssemblyExtensions))
@@ -1708,6 +1722,7 @@ namespace Microsoft.Build.Tasks
             Log.LogMessage(importance, property, "SearchPaths");
             foreach (string path in SearchPaths)
             {
+                _cancellationTokenSource.Token.ThrowIfCancellationRequested();
                 Log.LogMessage(importance, indent + path);
             }
 
@@ -2602,6 +2617,11 @@ namespace Microsoft.Build.Tasks
         #endregion
         #region ITask Members
 
+        /// <summary>
+        /// Stop assembly resolution as soon as possible.
+        /// </summary>
+        public void Cancel() => _cancellationTokenSource.Cancel();
+
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Execute the task.
@@ -2656,10 +2676,12 @@ namespace Microsoft.Build.Tasks
             ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader)
         {
             bool success = true;
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
             MSBuildEventSource.Log.RarOverallStart();
             {
                 try
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     FrameworkNameVersioning frameworkMoniker = null;
                     if (!String.IsNullOrEmpty(_targetedFrameworkMoniker))
                     {
@@ -2679,6 +2701,7 @@ namespace Microsoft.Build.Tasks
 
                     // Log task inputs.
                     LogInputs();
+                    cancellationToken.ThrowIfCancellationRequested();
 
                     if (!VerifyInputConditions())
                     {
@@ -2805,12 +2828,19 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Load any prior saved state.
+                    cancellationToken.ThrowIfCancellationRequested();
                     ReadStateFile(fileExists);
+                    cancellationToken.ThrowIfCancellationRequested();
                     _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 
                     // Cache delegates.
                     getAssemblyMetadata = _cache.CacheDelegate(getAssemblyMetadata);
-                    fileExists = _cache.CacheDelegate();
+                    FileExists cachedFileExists = _cache.CacheDelegate();
+                    fileExists = path =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        return cachedFileExists(path);
+                    };
                     directoryExists = _cache.CacheDelegate(directoryExists);
                     getDirectories = _cache.CacheDelegate(getDirectories);
 
@@ -2819,6 +2849,7 @@ namespace Microsoft.Build.Tasks
                     // Wrap the GetLastWriteTime callback with a check for SDK/immutable files.
                     _cache.SetGetLastWriteTime(path =>
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         if (dependencyTable?.IsImmutableFile(path) == true)
                         {
                             // We don't want to perform I/O to see what the actual timestamp on disk is so we return a fixed made up value.
@@ -2832,6 +2863,7 @@ namespace Microsoft.Build.Tasks
                     GetAssemblyName originalGetAssemblyName = getAssemblyName;
                     getAssemblyName = _cache.CacheDelegate(path =>
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         AssemblyNameExtension assemblyName = dependencyTable?.GetImmutableFileAssemblyName(path);
                         return assemblyName ?? originalGetAssemblyName(path);
                     });
@@ -2839,6 +2871,7 @@ namespace Microsoft.Build.Tasks
                     GetAssemblyRuntimeVersion originalGetRuntimeVersion = getRuntimeVersion;
                     getRuntimeVersion = _cache.CacheDelegate(path =>
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         if (dependencyTable?.IsImmutableFile(path) == true)
                         {
                             // There are no WinRT assemblies in the SDK, everything has the .NET metadata version.
@@ -2933,7 +2966,8 @@ namespace Microsoft.Build.Tasks
                         _unresolveFrameworkAssembliesFromHigherFrameworks,
                         assemblyMetadataCache,
                         _nonCultureResourceDirectories,
-                        TaskEnvironment);
+                        TaskEnvironment,
+                        cancellationToken);
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
 
@@ -3018,6 +3052,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Build the output tables.
+                    cancellationToken.ThrowIfCancellationRequested();
                     dependencyTable.GetReferenceItems(
                         out _resolvedFiles,
                         out _resolvedDependencyFiles,
@@ -3042,6 +3077,7 @@ namespace Microsoft.Build.Tasks
                     bool useNetStandard = false;
                     foreach (var reference in dependencyTable.References.Keys)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
                         if (string.Equals(SystemRuntimeAssemblyName, reference.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             useSystemRuntime = true;
@@ -3061,6 +3097,7 @@ namespace Microsoft.Build.Tasks
                         // when we are not producing the (full) dependency graph look for direct dependencies of primary references
                         foreach (var resolvedReference in dependencyTable.References.Values)
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
                             if (FindDependencies && !resolvedReference.ExternallyResolved)
                             {
                                 // if we're finding dependencies and a given reference was not marked as ExternallyResolved
@@ -3096,6 +3133,7 @@ namespace Microsoft.Build.Tasks
                     this.DependsOnSystemRuntime = useSystemRuntime.ToString();
                     this.DependsOnNETStandard = useNetStandard.ToString();
 
+                    cancellationToken.ThrowIfCancellationRequested();
                     WriteStateFile();
 
                     // Save the new state out and put into the file exists if it is actually on disk.
@@ -3105,6 +3143,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Log the results.
+                    cancellationToken.ThrowIfCancellationRequested();
                     success = LogResults(dependencyTable, idealAssemblyRemappings, idealAssemblyRemappingsIdentities, generalResolutionExceptions);
 
                     DumpTargetProfileLists(installedAssemblyTableInfo, inclusionListSubsetTableInfo, dependencyTable);
@@ -3113,6 +3152,7 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (ITaskItem item in _resolvedFiles)
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
                             AssemblyNameExtension assemblyName = null;
 
                             if (fileExists(item.ItemSpec) && !Reference.IsFrameworkFile(item.ItemSpec, _targetFrameworkDirectories))
@@ -3166,7 +3206,11 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                     MSBuildEventSource.Log.RarOverallStop(_assemblyNames?.Length ?? -1, _assemblyFiles?.Length ?? -1, _resolvedFiles?.Length ?? -1, _resolvedDependencyFiles?.Length ?? -1, _copyLocalFiles?.Length ?? -1, _findDependencies);
-                    return success && !Log.HasLoggedErrors;
+                    return success && !Log.HasLoggedErrors && !cancellationToken.IsCancellationRequested;
+                }
+                catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)
+                {
+                    success = false;
                 }
                 catch (ArgumentException e)
                 {
@@ -3184,7 +3228,7 @@ namespace Microsoft.Build.Tasks
 
             MSBuildEventSource.Log.RarOverallStop(_assemblyNames?.Length ?? -1, _assemblyFiles?.Length ?? -1, _resolvedFiles?.Length ?? -1, _resolvedDependencyFiles?.Length ?? -1, _copyLocalFiles?.Length ?? -1, _findDependencies);
 
-            return success && !Log.HasLoggedErrors;
+            return success && !Log.HasLoggedErrors && !cancellationToken.IsCancellationRequested;
         }
 
         /// <summary>
@@ -3210,7 +3254,8 @@ namespace Microsoft.Build.Tasks
                         getAssemblyMetadata(resolvedReference.FullPath, assemblyMetadataCache, out result, out scatterFiles, out frameworkName);
                     }
                 }
-                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e)
+                    && !(e is OperationCanceledException canceled && canceled.CancellationToken == _cancellationTokenSource.Token))
                 {
                 }
             }
