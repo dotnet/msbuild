@@ -145,10 +145,9 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// The completed task packet waiting to be sent by the main thread.
-        /// Only one task can be completing at a time (blocked tasks can't complete
-        /// until they resume, and the resumed task is the only active one).
+        /// Distinct results must survive coalesced completion event signals.
         /// </summary>
-        private TaskHostTaskComplete _taskCompletePacket;
+        private readonly ConcurrentQueue<INodePacket> _taskCompletePackets = new();
 
         /// <summary>
         /// The event which is set when a task is cancelled
@@ -1066,7 +1065,7 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 // Send the request packet to the owning worker node
-                _nodeEndpoint.SendData(request);
+                _nodeEndpoint.SendData(CreateTaskPacket(EffectiveConfiguration, request));
 
                 // Block until the response arrives (via HandleCallbackResponse -> TCS.SetResult)
                 // or the connection is lost (via OnLinkStatusChanged -> TCS.TrySetException).
@@ -1302,12 +1301,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void CompleteTask()
         {
-            if (_nodeEndpoint.LinkStatus == LinkStatus.Active && _taskCompletePacket is not null)
+            if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-                _consoleOutWriter?.Flush();
-                _consoleErrorWriter?.Flush();
-                _nodeEndpoint.SendData(_taskCompletePacket);
-                _taskCompletePacket = null;
+                while (_taskCompletePackets.TryDequeue(out INodePacket packet))
+                {
+                    _consoleOutWriter?.Flush();
+                    _consoleErrorWriter?.Flush();
+                    _nodeEndpoint.SendData(packet);
+                }
             }
 
             // Only clear _currentConfiguration when no tasks remain (active or blocked).
@@ -1456,7 +1457,7 @@ namespace Microsoft.Build.CommandLine
             // Per-task state -- the configuration, the warning sets, the environment flags, the task
             // wrapper and its completion packet -- is assigned unconditionally from each incoming
             // TaskHostConfiguration before it is ever read, so clearing it here would be dead code
-            // and clearing _taskCompletePacket could discard a result that has not been sent yet.
+            // and clearing the completion queue could discard a result that has not been sent yet.
 
             // Defensive, and matches HandleShutdown: a task blocked on a callback would never
             // unblock once the parent stops answering for this build. No-op when nothing is pending.
@@ -1754,6 +1755,7 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                TaskHostTaskComplete taskCompletePacket = null;
                 try
                 {
                     // BlockForCallback/ResumeAfterCallback are always paired, so a task
@@ -1769,7 +1771,7 @@ namespace Microsoft.Build.CommandLine
                         CommunicationsUtilities.AreDictionariesEquivalent(currentEnvironment, taskConfiguration.BuildProcessEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                    _taskCompletePacket = new TaskHostTaskComplete(
+                    taskCompletePacket = new TaskHostTaskComplete(
                         taskResult,
 #if FEATURE_REPORTFILEACCESSES
                         _fileAccessData,
@@ -1778,7 +1780,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (NodePacketTypeExtensions.GetNegotiatedPacketVersion(_parentPacketVersion) >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion && environmentUnchangedByTask)
                     {
-                        _taskCompletePacket.EnvironmentMode = InvariantPayloadTransferMode.Identical;
+                        taskCompletePacket.EnvironmentMode = InvariantPayloadTransferMode.Identical;
                     }
 
 #if FEATURE_APPDOMAIN
@@ -1803,7 +1805,7 @@ namespace Microsoft.Build.CommandLine
                 catch (Exception e)
                 {
                     // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
-                    _taskCompletePacket = new TaskHostTaskComplete(
+                    taskCompletePacket = new TaskHostTaskComplete(
                         new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
 #if FEATURE_REPORTFILEACCESSES
                         _fileAccessData,
@@ -1836,6 +1838,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // The task has now fully completed executing.
+                    _taskCompletePackets.Enqueue(CreateTaskPacket(taskConfiguration, taskCompletePacket));
                     // Guard against ObjectDisposedException if HandleShutdown already disposed
                     // the event (can happen if thread.Join timed out during shutdown).
                     try
@@ -2038,10 +2041,16 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
-                _nodeEndpoint.SendData(logMessage);
+                TaskHostConfiguration configuration = EffectiveConfiguration;
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(configuration.NodeId, e));
+                _nodeEndpoint.SendData(CreateTaskPacket(configuration, logMessage));
             }
         }
+
+        private static INodePacket CreateTaskPacket(TaskHostConfiguration configuration, INodePacket packet)
+            => configuration is not null && configuration.TaskInvocationId != 0
+                ? new TaskHostTaskPacket(configuration.TaskInvocationId, packet)
+                : packet;
 
         /// <summary>
         /// Generates the message event corresponding to a particular resource string and set of args

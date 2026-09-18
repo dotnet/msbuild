@@ -17,6 +17,14 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskHostConfiguration : INodePacket
     {
+        private long _taskInvocationId;
+
+        internal long TaskInvocationId
+        {
+            get => _taskInvocationId;
+            set => _taskInvocationId = value;
+        }
+
         /// <summary>
         /// The node id (of the owning worker node, to make the logging work out)
         /// </summary>
@@ -575,6 +583,10 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+            if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskHostInvocationMinVersion)
+            {
+                translator.Translate(ref _taskInvocationId);
+            }
         }
 
         /// <summary>

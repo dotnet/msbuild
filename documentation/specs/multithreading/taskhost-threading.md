@@ -143,11 +143,38 @@ Two counters track the TaskHost's availability:
 
 **Transition ordering**: When blocking, increment `_blockedTaskCount` BEFORE decrementing `_activeTaskCount`. When resuming, the reverse. This ensures the sum is never zero during transition.
 
-### Handler Stack (Process Reuse)
+### Invocation Ownership (Process Reuse)
 
-`NodeProviderOutOfProcTaskHost` uses a `Stack<INodePacketHandler>` to manage multiple `TaskHostTask` handlers on the same node. Push on nested task dispatch, peek for packet routing, pop on nested task completion.
+With negotiated packet version 8, `TaskHostConfiguration` carries a process-unique
+`TaskInvocationId`. Task-originated log messages, callback requests, and completion
+results are enclosed in `TaskHostTaskPacket`. The provider routes that envelope to
+the registered invocation on the sending connection, rather than the latest
+handler attached to the TaskHost.
+
+This distinction is necessary because callbacks release a virtual node for other
+work. A can block, B can subsequently block in the same TaskHost, and A can finish
+first. Routing A's completion to the top handler B would strand A; if B's child
+requires A's target result, the build deadlocks. Callback response request IDs
+alone do not solve this: they identify the child response inside the TaskHost,
+not the task's eventual completion in the owning engine.
+
+The handler stack remains for legacy traffic and terminal notifications, but
+disconnect removes the exact handler even when it is not at the top. Invocation
+registrations are removed on completion or connection termination. Unknown
+invocation IDs are invalid wire data and use the existing connection-failure path.
+
+Task-local exceptions raised while servicing callbacks do not end the remote
+invocation. The parent sends a failure or conservative reply, retains ownership
+until completion or terminal notification, and then rethrows the original
+exception. Critical exceptions and logger failures retain immediate-abort behavior.
 
 Attachment and terminal notification are synchronized. A terminal failure notifies every attached task and removes its registrations. Each task sends replies and cancellation through its acquired connection, not a reusable lookup key, so a late reply cannot reach a replacement TaskHost.
+
+**Compatibility boundary:** invocation routing requires version-8 task
+configuration framing on both sides. Older protocol versions and the legacy CLR4
+version-0 configuration format retain their existing format and stack routing;
+they do not acquire the new ownership guarantee. Ordinary worker-node packets and
+connection-level shutdown/cleanup messages are not enclosed.
 
 ### Per-Task Isolation (TaskExecutionContext)
 
@@ -176,8 +203,8 @@ stateDiagram-v2
 
 1. **Idle**: `WaitAny()` blocks on the four wait handles. No task thread exists. `_currentConfiguration` is null.
 2. **TaskHostConfiguration arrives**: `HandleTaskHostConfiguration()` stores the config and spawns a task runner thread (stored in `TaskExecutionContext.ExecutingThread`) to call `RunTask()`. The main thread immediately returns to `WaitAny()`.
-3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, collects output parameters, and stores the result in `_taskCompletePacket`. On completion (success or failure), it signals `_taskCompleteEvent`.
-4. **CompleteTask()**: The main thread wakes on index 2, sends `_taskCompletePacket` as a `TaskHostTaskComplete` packet to the owning worker node. When no tasks remain active or blocked, it clears `_currentConfiguration`. The node is now idle again.
+3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, and collects output parameters. After task cleanup, it enqueues the result with the originating invocation identity and signals `_taskCompleteEvent`.
+4. **CompleteTask()**: The main thread wakes on index 2 and drains `_taskCompletePackets` to the owning worker node. Keeping a queue preserves distinct completions even when event signals coalesce. It flushes the process-scoped console writers before each completion, including results enqueued during the drain. Version-8 results are enclosed with their invocation identity; legacy results keep their existing format. When no tasks remain active or blocked, it clears `_currentConfiguration`.
 5. **Back to step 1**: The main thread loops back to `WaitAny()`, ready for another `TaskHostConfiguration` or a `NodeBuildComplete`.
 
 ### State Between Tasks

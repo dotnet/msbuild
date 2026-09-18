@@ -34,11 +34,12 @@ internal static class NodePacketTypeExtensions
     ///    blob are each sent once per connection, then only an "unchanged" marker per task.
     /// 6: Added explicit TaskHost lifetime actions and retained-connection cleanup acknowledgment.
     /// 7: Added console output forwarding from OOP TaskHost.
+    /// 8: Added task invocation identity and task-originated packet envelopes.
     /// 
     /// When incrementing this version, ensure compatibility with existing
     /// task hosts and update the corresponding deserialization logic.
     /// </summary>
-    public const byte PacketVersion = 7;
+    public const byte PacketVersion = 8;
 
     /// <summary>
     /// The minimum negotiated packet version that supports delta transfer of the invariant
@@ -53,6 +54,8 @@ internal static class NodePacketTypeExtensions
     /// The minimum negotiated packet version that supports console output forwarding from OOP TaskHost.
     /// </summary>
     public const byte ConsoleOutputForwardingMinVersion = 7;
+
+    public const byte TaskHostInvocationMinVersion = 8;
 
     // Flag bits in upper 2 bits
     private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000
