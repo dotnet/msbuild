@@ -462,6 +462,104 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
+    public async Task FileInfo_WithAbsolutePathValue_NoDiagnostic()
+    {
+        const string source = """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    new FileInfo(TaskEnvironment.GetAbsolutePath("foo.txt").Value);
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetDiagnosticsAsync(source);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task DirectoryCreate_WithAbsolutePathValueThroughLocal_NoDiagnostic()
+    {
+        const string source = """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    string dir = TaskEnvironment.GetAbsolutePath("out").Value;
+                    Directory.CreateDirectory(dir);
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetDiagnosticsAsync(source);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task FileOpenRead_WithAbsolutePathParameterValue_NoDiagnostic()
+    {
+        const string source = """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                private static void Read(AbsolutePath path) => File.OpenRead(path.Value);
+                public override bool Execute()
+                {
+                    Read(TaskEnvironment.GetAbsolutePath("foo.txt"));
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetDiagnosticsAsync(source);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task FileInfo_WithUnrelatedValueProperty_ReportsDiagnostic()
+    {
+        const string source = """
+            using System.Collections.Generic;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    foreach (KeyValuePair<string, string> entry in new Dictionary<string, string>())
+                    {
+                        new FileInfo(entry.Value);
+                    }
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetDiagnosticsAsync(source);
+
+        diags.ShouldHaveSingleItem().Id.ShouldBe(DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
     public async Task FileDelete_WithNullableAbsolutePathVariable_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -720,9 +818,13 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task GetFullPathLookalike_DoesNotProveAnAbsoluteResult(bool useMetadataReference)
+    [InlineData(false, "GetFullPath(path.Value)")]
+    [InlineData(true, "GetFullPath(path.Value)")]
+    [InlineData(false, "GetDirectoryName(path.Value)")]
+    [InlineData(true, "GetDirectoryName(path.Value)")]
+    [InlineData(false, "Combine(path.Value, \"child.txt\")")]
+    [InlineData(true, "Combine(path.Value, \"child.txt\")")]
+    public async Task PathHelperLookalike_DoesNotProveAnAbsoluteResult(bool useMetadataReference, string invocation)
     {
         const string lookalikeSource = """
             namespace System.IO
@@ -730,10 +832,12 @@ public class MultiThreadableTaskAnalyzerTests
                 public static class Path
                 {
                     public static string GetFullPath(string path) => "relative.txt";
+                    public static string GetDirectoryName(string path) => "relative.txt";
+                    public static string Combine(string path1, string path2) => "relative.txt";
                 }
             }
             """;
-        const string source = """
+        var source = $$"""
             using System.IO;
             using Microsoft.Build.Framework;
             [MSBuildMultiThreadableTask]
@@ -742,7 +846,7 @@ public class MultiThreadableTaskAnalyzerTests
                 public override bool Execute()
                 {
                     AbsolutePath path = new TaskEnvironment().GetAbsolutePath("relative.txt");
-                    File.Exists(Path.GetFullPath(path.Value));
+                    File.Exists(Path.{{invocation}});
                     return true;
                 }
             }

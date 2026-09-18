@@ -186,6 +186,9 @@ File.Exists(item.GetMetadataValue("FullPath"))
 
 // 5. Argument already typed as AbsolutePath
 void Helper(AbsolutePath p) => File.Exists(p);
+
+// 6. AbsolutePath.Value
+File.Exists(abs.Value)
 ```
 
 ### MSBuildTask0004 — Potential Issue (Review Required)
