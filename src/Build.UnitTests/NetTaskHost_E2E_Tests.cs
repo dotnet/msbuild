@@ -9,6 +9,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
@@ -158,6 +159,51 @@ namespace Microsoft.Build.Engine.UnitTests
                 customMessage: output);
             output.ShouldContain(
                 $"PARAMETER_OUTPUTS_OK Date=09/04/2026 Dates=09/04/2026|09/05/2026 File={Path.Combine(projectDirectory, "folder;name", "file.txt")} Files={Path.Combine(projectDirectory, "first.txt")}|{Path.Combine(projectDirectory, "second;part.txt")} Directory={Path.Combine(projectDirectory, "directory with space")} Typed=typed.item:scalar TypedItems=first.item:first|second.item:second Null=",
+                customMessage: output);
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_BindsTaskItemFileInfoParameter()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            // Load the Core test assembly, not the Framework assembly running this test.
+            string taskAssembly = Path.GetFullPath(Path.Combine(
+                AssemblyLocation,
+                "..",
+                RunnerUtilities.LatestDotNetCoreForMSBuild,
+                Path.GetFileName(typeof(TaskBuilderTestTask).Assembly.Location)));
+            File.Exists(taskAssembly).ShouldBeTrue(customMessage: taskAssembly);
+
+            string relativePath = Path.Combine("folder;name", "file with space.txt");
+            string projectContents = $"""
+                <Project>
+                  <UsingTask TaskName="{nameof(TaskBuilderTestTask)}" AssemblyFile="{taskAssembly}" TaskFactory="TaskHostFactory" Runtime="NET" />
+                  <Target Name="TestTypedItemBinding">
+                    <ItemGroup>
+                      <Input Include="{EscapingUtilities.Escape(relativePath)}">
+                        <Kind>input</Kind>
+                      </Input>
+                    </ItemGroup>
+                    <TaskBuilderTestTask ExecuteReturnParam="true" TaskItemFileInfoParam="@(Input)">
+                      <Output TaskParameter="TaskItemFileInfoOutput" ItemName="Result" />
+                    </TaskBuilderTestTask>
+                    <Message Text="TYPED_ITEM_OUTPUT_OK @(Result->'%(Identity)|%(FullPath)|%(Kind)')" Importance="High" />
+                  </Target>
+                </Project>
+                """;
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            string sdkDirectory = Path.Combine(coreDirectory, "sdk", RunnerUtilities.BootstrapSdkVersion);
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{project.ProjectFile}\" -t:TestTypedItemBinding -v:n -nodeReuse:false -p:NetCoreSdkRoot=\"{sdkDirectory}\"",
+                out bool success,
+                outputHelper: _output);
+
+            success.ShouldBeTrue(customMessage: output);
+            output.ShouldContain(
+                $"TYPED_ITEM_OUTPUT_OK {relativePath}|{Path.Combine(project.TestRoot, relativePath)}|input",
                 customMessage: output);
         }
 
