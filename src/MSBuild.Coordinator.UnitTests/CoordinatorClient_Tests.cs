@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO.Pipes;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -12,6 +15,45 @@ namespace Microsoft.Build.Coordinator.UnitTests;
 
 public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
 {
+    public static bool CanUseTaskCache =>
+#if FEATURE_BUILDXL_TASK_CACHE
+        RuntimeInformation.ProcessArchitecture == Architecture.X64;
+#else
+        false;
+#endif
+
+    [ConditionalFact(typeof(CoordinatorClient_Tests), nameof(CanUseTaskCache))]
+    public async Task FailedCacheInitializationReleasesCoordinatorGrant()
+    {
+        using TestEnvironment env = TestEnvironment.Create(testOutput);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 1);
+        Task serverTask = server.RunAsync(_cts.Token);
+        using CoordinatorClient? first = TryConnectToServer(requestedNodes: 1, processId: Pid1);
+        first.ShouldNotBeNull();
+        using BuildManager manager = new();
+        FieldInfo field = typeof(BuildManager).GetField("_coordinatorClient", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        field.SetValue(manager, first);
+        try
+        {
+            Should.Throw<IOException>(() => manager.BeginBuild(new BuildParameters
+            {
+                TaskCache = true,
+                BuildCacheDirectory = env.CreateFile("invalid-cache", "not a directory").Path,
+                Loggers = [new MockLogger(testOutput)],
+            }));
+            field.GetValue(manager).ShouldBeNull();
+            using CoordinatorClient? next = TryConnectToServer(requestedNodes: 1, processId: Pid2);
+            next.ShouldNotBeNull();
+            next.GrantedNodes.ShouldBe(1);
+        }
+        finally
+        {
+            first.Dispose();
+            _cts.Cancel();
+            await serverTask;
+        }
+    }
+
     // Use fake PIDs that won't collide with each other or the real process.
     // The coordinator server only uses PIDs for keying connections and liveness checks.
     private const int Pid1 = 90001;

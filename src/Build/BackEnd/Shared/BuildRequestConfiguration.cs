@@ -223,8 +223,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="data">The data containing the configuration information.</param>
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
-        internal BuildRequestConfiguration(BuildRequestData data, string defaultToolsVersion)
-            : this(0, data, defaultToolsVersion)
+        /// <param name="taskCacheEnabled">Whether file-based evaluations should receive the task-cache global property.</param>
+        internal BuildRequestConfiguration(BuildRequestData data, string defaultToolsVersion, bool? taskCacheEnabled = null)
+            : this(0, data, defaultToolsVersion, taskCacheEnabled)
         {
         }
 
@@ -236,7 +237,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="configId">The configuration ID to assign to this new configuration.</param>
         /// <param name="data">The data containing the configuration information.</param>
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
-        internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion)
+        /// <param name="taskCacheEnabled">Whether file-based evaluations should receive the task-cache global property.</param>
+        internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion, bool? taskCacheEnabled = null)
         {
             ArgumentNullException.ThrowIfNull(data);
             Assumed.NotNullOrEmpty(data.ProjectFullPath);
@@ -246,6 +248,11 @@ namespace Microsoft.Build.BackEnd
             _explicitToolsVersionSpecified = data.ExplicitToolsVersionSpecified;
             _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion);
             _globalProperties = data.GlobalPropertiesDictionary;
+            if (taskCacheEnabled == true && data.ProjectInstance is null)
+            {
+                _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(_globalProperties);
+                _globalProperties.Set(ProjectPropertyInstance.Create(MSBuildConstants.MSBuildTaskCacheEnabled, taskCacheEnabled.Value ? "true" : "false"));
+            }
             _requestedTargets = new List<string>(data.TargetNames);
 
             // The following information only exists when the request is populated with an existing project.

@@ -11,6 +11,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -672,6 +673,17 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, TaskHostParameters taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
+            using TaskCacheDiagnosticCapture diagnosticCapture = _componentHost.BuildParameters.TaskCache
+                && taskLoggingContext.LoggingService is ITaskCacheDiagnosticSource diagnosticSource
+                    ? diagnosticSource.CaptureTaskDiagnostics(taskLoggingContext.BuildEventContext)
+                    : null;
+
+            if (diagnosticCapture is not null)
+            {
+                // Initialization diagnostics must belong to the task being watched.
+                taskHost.LoggingContext = taskLoggingContext;
+            }
+
             if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
@@ -679,15 +691,18 @@ namespace Microsoft.Build.BackEnd
 
             using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
 
+            bool succeeded = false;
             try
             {
                 // UNDONE: Move this and the task host.
                 taskHost.LoggingContext = taskLoggingContext;
-                return await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
+                WorkUnitResult result = await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask, diagnosticCapture);
+                succeeded = result.ResultCode == WorkUnitResultCode.Success;
+                return result;
             }
             finally
             {
-                _taskExecutionHost.CleanupForBatch();
+                _taskExecutionHost.CleanupForBatch(succeeded && !_cancellationToken.IsCancellationRequested, diagnosticCapture);
             }
         }
 
@@ -754,8 +769,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskHost">The task host for the task.</param>
         /// <param name="bucket">The batching bucket</param>
         /// <param name="howToExecuteTask">The task execution mode</param>
+        /// <param name="diagnosticCapture">Raw diagnostics observed since task initialization.</param>
         /// <returns>The result of running the task.</returns>
-        private async ValueTask<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
+        private async ValueTask<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask, TaskCacheDiagnosticCapture diagnosticCapture)
         {
             UpdateContinueOnError(bucket, taskHost);
 
@@ -771,13 +787,19 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
+                bool cacheHit = taskExecutionHost.TryRestoreTaskCache(_taskNode, diagnosticCapture);
                 bool taskReturned = false;
                 Exception taskException = null;
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
                 try
                 {
-                    if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
+                    if (cacheHit)
+                    {
+                        taskExecutionHost.ReplayTaskCacheWarnings();
+                        taskResult = !_cancellationToken.IsCancellationRequested;
+                    }
+                    else if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
                     {
                         // https://github.com/dotnet/msbuild/issues/11025
                         // The metaproject's inner <MSBuild> tasks are generator-authored plumbing,

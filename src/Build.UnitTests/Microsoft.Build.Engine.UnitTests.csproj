@@ -20,6 +20,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <Import Project="$(RepoRoot)eng\TaskCacheDependencies.props" />
+
+  <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <Compile Include="..\MSBuild.Bootstrap.Utils\Tasks\GetTaskCachePackageContents.cs" Link="Packaging\GetTaskCachePackageContents.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
@@ -35,6 +41,7 @@
     </PackageReference>
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Build.TaskCache\Microsoft.Build.TaskCache.csproj" Condition="'$(DotNetBuildSourceOnly)' != 'true'" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full'" Aliases="MSBuildTaskHost" />

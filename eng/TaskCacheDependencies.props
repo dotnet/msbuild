@@ -1,0 +1,7 @@
+<Project>
+  <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <_TaskCachePackageReference Include="Microsoft.BuildXL.Cache.MemoizationStore.Library;RocksDbNative;protobuf-net.Grpc" />
+    <!-- Runtime hosts reference this closure directly; API hosts can opt into Microsoft.Build.TaskCache. -->
+    <PackageReference Include="@(_TaskCachePackageReference)" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
