@@ -1,6 +1,7 @@
 # Template to check if only non-build files have changed (documentation and .github)
 # Sets a pipeline variable 'onlyDocChanged' to 1 if only non-build files changed, 0 otherwise
 # This template should be included at the start of test jobs to determine if tests should run
+# Non-build files include: documentation/**, .github/** (including .github/CODEOWNERS)
 
 steps:
 - powershell: |
