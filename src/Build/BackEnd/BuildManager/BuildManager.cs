@@ -20,6 +20,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -267,6 +268,12 @@ namespace Microsoft.Build.Execution
         private ProjectCacheService? _projectCacheService;
 
         private CoordinatorClient? _coordinatorClient;
+
+        /// <summary>
+        /// The installed multi-threaded strict mode scope, or <see langword="null"/> when strict mode is not active
+        /// for the build in progress.
+        /// </summary>
+        private MultiThreadedStrictModeScope? _multiThreadedStrictModeScope;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
@@ -574,6 +581,7 @@ namespace Microsoft.Build.Execution
                 parameters.LogTaskInputs = true;
             }
 
+            ExceptionDispatchInfo? strictEntryFailure = null;
             lock (_syncLock)
             {
                 AttachDebugger();
@@ -614,6 +622,11 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+                bool strictMode = _buildParameters.MultiThreaded
+                    && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12);
+                var buildEntryDirectory = strictMode
+                    ? MultiThreadedStrictModeScope.CaptureCurrentDirectory()
+                    : default;
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
@@ -635,7 +648,9 @@ namespace Microsoft.Build.Execution
 
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
                 {
-                    _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
+                    _buildParameters.OutputResultsCacheFile = strictMode
+                        ? FileUtilities.NormalizePath(buildEntryDirectory.RestoreTarget, "msbuild-cache")
+                        : FileUtilities.NormalizePath("msbuild-cache");
                 }
 
                 // Launch the RAR node before the detoured launcher overrides the default node launcher.
@@ -750,10 +765,52 @@ namespace Microsoft.Build.Execution
                     _workQueue = new ActionBlock<Action>(action => ProcessWorkQueue(action));
                 }
 
+                // Enter strict mode last: everything above (loggers in particular) still resolves paths against
+                // the directory the build was launched from, and only project execution should see the sentinel.
+                if (strictMode)
+                {
+                    try
+                    {
+                        // EndBuild serializes output caches before restoring CWD. Resolve their paths now.
+                        if (_buildParameters.UsesOutputCache())
+                        {
+                            _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath(buildEntryDirectory.RestoreTarget, _buildParameters.OutputResultsCacheFile);
+                        }
+
+                        _multiThreadedStrictModeScope = MultiThreadedStrictModeScope.Enter(_buildParameters.BuildId, buildEntryDirectory);
+                        loggingService.LogComment(
+                            BuildEventContext.Invalid,
+                            MessageImportance.Low,
+                            "MultiThreadedStrictModeEnabled",
+                            _multiThreadedStrictModeScope.SentinelDirectory);
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        strictEntryFailure = ExceptionDispatchInfo.Capture(e);
+                        _overallBuildSuccess = false;
+                        _buildParameters.OutputResultsCacheFile = null;
+                    }
+                }
+
                 _buildManagerState = BuildManagerState.Building;
 
                 _noActiveSubmissionsEvent!.Set();
                 _noNodesActiveEvent!.Set();
+            }
+
+            if (strictEntryFailure is not null)
+            {
+                // Drain callbacks through normal teardown, outside _syncLock, before allowing another build.
+                try
+                {
+                    EndBuild();
+                }
+                catch (Exception cleanupFailure) when (!ExceptionHandling.IsCriticalException(cleanupFailure))
+                {
+                    throw new AggregateException(strictEntryFailure.SourceException, cleanupFailure);
+                }
+
+                strictEntryFailure.Throw();
             }
 
             ILoggingService InitializeLoggingService()
@@ -1139,6 +1196,54 @@ namespace Microsoft.Build.Execution
                 Assumed.Zero(_buildSubmissions.Count, "All submissions not yet complete.");
                 Assumed.Zero(_activeNodes.Count, "All nodes not yet shut down.");
 
+                if (_multiThreadedStrictModeScope is not null && _overallBuildSuccess)
+                {
+                    // Normal node shutdown also cancels the execution token. Check otherwise-successful builds,
+                    // after callbacks finish and before persisting caches; canceled/failed builds already failed.
+                    projectCacheDispose.Wait();
+                    WaitForAllLoggingServiceEventsToBeProcessed();
+                    string? entries;
+                    bool recovered;
+                    try
+                    {
+                        entries = _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out recovered);
+                    }
+                    catch (InvalidProjectFileException e)
+                    {
+                        ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(BuildEventContext.Invalid, e);
+                        throw;
+                    }
+
+                    if (recovered || entries is not null)
+                    {
+                        ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+                        string? warningCode;
+                        string? helpKeyword;
+                        string message = recovered
+                            ? ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                                out warningCode, out helpKeyword,
+                                "MultiThreadedStrictModeSentinelMissing", _multiThreadedStrictModeScope.SentinelDirectory)
+                            : ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                                out warningCode, out helpKeyword,
+                                "MultiThreadedStrictModeUnresolvedPathWrite", entries, _multiThreadedStrictModeScope.SentinelDirectory);
+                        Assumed.NotNull(warningCode, "The strict-mode warning must have a diagnostic code.");
+                        loggingService.LogWarningFromText(
+                            BuildEventContext.Invalid, null, warningCode, helpKeyword, BuildEventFileInfo.Empty, message);
+                        WaitForAllLoggingServiceEventsToBeProcessed();
+
+                        if (loggingService.ShouldTreatWarningAsError(BuildEventContext.Invalid, warningCode))
+                        {
+                            // Submissions have already completed. An already-logged exception also fails Build() and
+                            // CLI callers that captured their result before EndBuild, without duplicating the diagnostic.
+                            throw new InvalidProjectFileException(
+                                string.Empty, 0, 0, 0, 0, message, null, warningCode, helpKeyword)
+                            {
+                                HasBeenLogged = true,
+                            };
+                        }
+                    }
+                }
+
                 if (_buildParameters!.UsesOutputCache())
                 {
                     SerializeCaches();
@@ -1193,6 +1298,28 @@ namespace Microsoft.Build.Execution
             }
             finally
             {
+                // Restore before logger shutdown. Defer restoration errors until the remaining cleanup completes.
+                try
+                {
+                    if (_multiThreadedStrictModeScope is not null)
+                    {
+                        _multiThreadedStrictModeScope.Exit();
+                    }
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    if (!exceptionsThrownInEndBuild)
+                    {
+                        _threadException ??= ExceptionDispatchInfo.Capture(e);
+                    }
+
+                    exceptionsThrownInEndBuild = true;
+                }
+                finally
+                {
+                    _multiThreadedStrictModeScope = null;
+                }
+
                 try
                 {
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;

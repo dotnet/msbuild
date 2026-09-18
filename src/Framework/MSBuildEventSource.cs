@@ -830,5 +830,27 @@ namespace Microsoft.Build.Eventing
             WriteEvent(112, taskName, succeeded);
         }
         #endregion
+
+        #region Strict mode events
+
+        /// <summary>
+        /// Starts a sentinel-content scan, including scan-lock wait and filesystem work.
+        /// An empty project file identifies the final build scan.
+        /// </summary>
+        [Event(113, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void StrictModeDirectoryScanStart(int buildId, string projectFile)
+        {
+            WriteEvent(113, buildId, projectFile);
+        }
+
+        /// <summary>
+        /// Completes a sentinel-content scan, including scans that fail.
+        /// </summary>
+        [Event(114, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        public void StrictModeDirectoryScanStop(int buildId, string projectFile)
+        {
+            WriteEvent(114, buildId, projectFile);
+        }
+        #endregion
     }
 }
