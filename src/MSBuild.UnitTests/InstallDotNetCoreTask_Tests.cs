@@ -5,9 +5,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Reflection;
-using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 using MSBuild.Bootstrap.Utils.Tasks;
@@ -86,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public async Task DownloadScriptAsyncBoundsPermanentTlsFailureRetries()
+        public async Task DownloadScriptAsyncBoundsHttpRequestExceptionRetries()
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
             TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
@@ -97,7 +95,7 @@ namespace Microsoft.Build.UnitTests
             using MockHttpMessageHandler handler = new MockHttpMessageHandler((message, token) =>
             {
                 requestCount++;
-                throw new HttpRequestException("The SSL connection could not be established, see inner exception.", new AuthenticationException("certificate test"));
+                throw new HttpRequestException("request failure test");
             });
             InstallDotNetCoreTask task = CreateTask(engine, handler);
 
@@ -108,7 +106,7 @@ namespace Microsoft.Build.UnitTests
             engine.Errors.ShouldBe(1, engine.Log);
             engine.Log.ShouldContain("Retrying attempt 2 of 3");
             engine.Log.ShouldContain("failed after 3 attempts");
-            engine.Log.ShouldContain("certificate test");
+            engine.Log.ShouldContain("request failure test");
         }
 
         [Fact]
@@ -165,7 +163,7 @@ namespace Microsoft.Build.UnitTests
         {
             return new HttpRequestException(
                 "The SSL connection could not be established, see inner exception.",
-                new IOException("Unable to read data from the transport connection: connection reset test.", new SocketException((int)SocketError.ConnectionReset)));
+                new IOException("Unable to read data from the transport connection: connection reset test."));
         }
 
         private sealed class MockHttpMessageHandler : HttpMessageHandler

@@ -1,12 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.IO;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -143,41 +140,21 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                 {
                     return await client.GetAsync(scriptUrl).ConfigureAwait(false);
                 }
-                catch (Exception e) when (IsScriptDownloadTransportFailure(e))
+                catch (HttpRequestException e)
                 {
-                    string flattenedMessage = GetInnerExceptionMessageString(e);
-
                     if (attempt < MaxScriptDownloadAttempts)
                     {
-                        Log.LogMessage(MessageImportance.Low, $"Install-scripts download from {scriptUrl} failed with a transient transport error. Retrying attempt {attempt + 1} of {MaxScriptDownloadAttempts}. {flattenedMessage}");
+                        Log.LogMessage(MessageImportance.Low, $"Install-scripts download from {scriptUrl} failed. Retrying attempt {attempt + 1} of {MaxScriptDownloadAttempts}. {e.Message}");
                         continue;
                     }
 
-                    Log.LogError($"Install-scripts download from {scriptUrl} failed after {attempt} {(attempt == 1 ? "attempt" : "attempts")}. {flattenedMessage}");
+                    Log.LogError($"Install-scripts download from {scriptUrl} failed after {attempt} {(attempt == 1 ? "attempt" : "attempts")}. {e.Message}");
                     Log.LogMessage(MessageImportance.Low, e.ToString());
                     return null!;
                 }
             }
 
             return null!;
-        }
-
-        private static bool IsScriptDownloadTransportFailure(Exception exception)
-        {
-            return exception is HttpRequestException or IOException or SocketException;
-        }
-
-        private static string GetInnerExceptionMessageString(Exception exception)
-        {
-            StringBuilder message = new StringBuilder(exception.Message);
-
-            for (Exception current = exception.InnerException; current is not null; current = current.InnerException)
-            {
-                message.Append(' ');
-                message.Append(current.Message);
-            }
-
-            return message.ToString();
         }
 
         /// <summary>
