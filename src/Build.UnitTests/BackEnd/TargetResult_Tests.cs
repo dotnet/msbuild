@@ -106,6 +106,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(result.OriginalBuildEventContext, deserializedResult.OriginalBuildEventContext);
         }
 
+        [Fact]
+        public void TestTranslationPreservesCaseInsensitiveMetadataAndCopyOnWrite()
+        {
+            var item = new TaskItem("foo", "bar.proj");
+            item.SetMetadata("MixedCase", "value");
+            item.SetMetadata("Second", "other");
+
+            var result = new TargetResult(
+                [item],
+                BuildResultUtilities.GetStopWithErrorResult());
+
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            var deserializedItem = (TaskItem)Assert.Single(deserializedResult.Items);
+
+            Assert.Equal("value", deserializedItem.GetMetadata("mixedcase"));
+
+            var destination = new TaskItem("destination", "bar.proj");
+            deserializedItem.CopyMetadataTo(destination, addOriginalItemSpec: false);
+
+            deserializedItem.SetMetadata("MixedCase", "source");
+            destination.SetMetadata("Second", "destination");
+
+            Assert.Equal("source", deserializedItem.GetMetadata("MIXEDCASE"));
+            Assert.Equal("other", deserializedItem.GetMetadata("second"));
+            Assert.Equal("value", destination.GetMetadata("mixedcase"));
+            Assert.Equal("destination", destination.GetMetadata("SECOND"));
+        }
+
         /// <summary>
         /// Tests serialization with an exception in the result.
         /// </summary>
