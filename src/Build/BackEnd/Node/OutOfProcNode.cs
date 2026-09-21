@@ -135,6 +135,7 @@ namespace Microsoft.Build.Execution
         /// The current <see cref="ISdkResolverService"/> instance.
         /// </summary>
         private readonly ISdkResolverService _sdkResolverService;
+        private TaskCacheClient _taskCacheClient;
 
         /// <summary>
         /// Constructor.
@@ -200,6 +201,7 @@ namespace Microsoft.Build.Execution
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ResourceResponse, ResourceResponse.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ResolveSdkResponse, SdkResult.FactoryForDeserialization, _sdkResolverService as INodePacketHandler);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskCacheResponse, TaskCachePacket.ReadResponse, this);
         }
 
         /// <summary>
@@ -390,6 +392,12 @@ namespace Microsoft.Build.Execution
         /// <param name="packet">The packet.</param>
         void INodePacketHandler.PacketReceived(int node, INodePacket packet)
         {
+            if (packet.Type == NodePacketType.TaskCacheResponse)
+            {
+                _taskCacheClient?.PacketReceived(node, packet);
+                return;
+            }
+
             _receivedPackets.Enqueue(packet);
             _packetReceivedEvent.Set();
         }
@@ -470,6 +478,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private NodeEngineShutdownReason HandleShutdown(out Exception exception)
         {
+            _taskCacheClient?.Dispose();
+            _taskCacheClient = null;
             CommunicationsUtilities.Trace($"Shutting down with reason: {_shutdownReason}, and exception: {_shutdownException}.");
 
             MSBuildEventSource.Log.OutOfProcNodeShutDownStart();
@@ -595,6 +605,7 @@ namespace Microsoft.Build.Execution
             {
                 case LinkStatus.ConnectionFailed:
                 case LinkStatus.Failed:
+                    _taskCacheClient?.Dispose();
                     _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
                     _shutdownEvent.Set();
                     break;
@@ -727,6 +738,11 @@ namespace Microsoft.Build.Execution
         {
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
+            if (_buildParameters.TaskCache)
+            {
+                _taskCacheClient = new TaskCacheClient(_buildParameters.BuildCacheDirectory, SendPacket);
+                _buildParameters.TaskCacheBackend = _taskCacheClient;
+            }
 
             s_projectRootElementCacheBase.SetParserIgnoreConfiguration(configuration.BuildParameters.ParserIgnoreConfiguration);
 

@@ -16,6 +16,8 @@ namespace Microsoft.Build.Tasks
     /// Read a list of items from a file.
     /// </summary>
     [MSBuildMultiThreadableTask]
+    [MSBuildDeclaredIOTask]
+    [MSBuildDeclaredIOInput(nameof(File))]
     public class ReadLinesFromFile : TaskExtension, IMultiThreadableTask
     {
         /// <summary>

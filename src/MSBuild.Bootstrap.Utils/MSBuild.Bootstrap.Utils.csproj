@@ -5,6 +5,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Utilities.Core" VersionOverride="15.5.180" ExcludeAssets="runtime" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" PrivateAssets="all" Condition="'$(DotNetBuildSourceOnly)' != 'true'" />
+    <Compile Remove="Tasks\AddBootstrapTaskCacheDependencies.cs" Condition="'$(DotNetBuildSourceOnly)' == 'true'" />
+    <Compile Remove="Tasks\GetTaskCachePackageContents.cs" Condition="'$(DotNetBuildSourceOnly)' == 'true'" />
   </ItemGroup>
 
 </Project>

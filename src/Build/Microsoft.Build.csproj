@@ -44,6 +44,12 @@
     <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
   </ItemGroup>
 
+  <Import Project="$(RepoRoot)eng\TaskCacheDependencies.props" />
+  <Import Project="$(RepoRoot)eng\TaskCachePackaging.targets" />
+  <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <InternalsVisibleTo Include="Microsoft.Build.TaskCache" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
 
@@ -182,6 +188,17 @@
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverServiceException.cs" />
     <Compile Include="BackEnd\Shared\EventsCreatorHelper.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskInvocationCache.cs" />
+    <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.TaskCache.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskCacheStore.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskCacheBackend.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskCacheOwner.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskCacheClient.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskCachePacket.cs" />
+    <Compile Include="BackEnd\Components\Logging\ITaskCacheDiagnosticSource.cs" />
+    <Compile Include="BackEnd\Components\Logging\TaskCacheDiagnosticCapture.cs" />
+    <Compile Include="BackEnd\Components\Logging\TaskCacheWarning.cs" />
+    <Compile Include="BackEnd\Components\Logging\LoggingServiceTaskDiagnostics.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />

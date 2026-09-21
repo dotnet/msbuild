@@ -17,6 +17,10 @@ Review the existing documentation on [Task Writing](https://learn.microsoft.com/
 
 Tasks are generally simple and should not require much effort to develop.  If you find a task becoming very complicated, consider breaking it up into smaller tasks which can be run together in a target.
 
+For file I/O annotations and task-cache author requirements, see
+[Task invocation caching](Task-Cache.md). That documentation applies to task
+authors generally, not just contributors to this repository.
+
 ## Developing unit tests
 Contributed tasks must have unit tests in place to prove they work and to prevent regressions caused by other code changes.  There are a lot of examples in the [Microsoft.Build.Tasks.UnitTests](https://github.com/dotnet/msbuild/tree/main/src/Tasks.UnitTests) project.  Please provide a reasonable amount of test coverage so ensure the quality of the product.
 
@@ -25,5 +29,3 @@ You can document the new task in the [visualstudio-docs](https://github.com/Micr
 
 ## Ship schedule
 MSBuild ships regularly with Visual Studio.  It also is updated in Preview releases.  Once your contribution is merged, expect it to be available in the next release.
-
-

@@ -57,6 +57,59 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("taskCache")]
+        [InlineData("TASKCACHE")]
+        public void TaskCacheSwitchIdentification(string name)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(name, out CommandLineSwitches.ParameterizedSwitch result,
+                out _, out _, out _, out _, out _).ShouldBeTrue();
+            result.ShouldBe(CommandLineSwitches.ParameterizedSwitch.TaskCache);
+        }
+
+        [Theory]
+        [InlineData(null, true)]
+        [InlineData("true", true)]
+        [InlineData("false", false)]
+        public void TaskCacheBooleanSwitch(string value, bool expected)
+        {
+            MSBuildApp.ProcessBooleanSwitch(value is null ? [] : [value], true, "InvalidTaskCacheValue").ShouldBe(expected);
+        }
+
+        [Fact]
+        public void TaskCacheBooleanSwitchRejectsInvalidValue()
+        {
+            Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(["invalid"], true, "InvalidTaskCacheValue"));
+        }
+
+        [Theory]
+        [InlineData("buildCacheDirectory")]
+        [InlineData("BUILDCACHEDIRECTORY")]
+        public void BuildCacheDirectorySwitchIdentification(string name)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(name, out CommandLineSwitches.ParameterizedSwitch result,
+                out string duplicateError, out bool multiple, out string missingError, out bool unquote, out bool empty).ShouldBeTrue();
+            result.ShouldBe(CommandLineSwitches.ParameterizedSwitch.BuildCacheDirectory);
+            duplicateError.ShouldBeNull();
+            multiple.ShouldBeFalse();
+            missingError.ShouldBe("MissingBuildCacheDirectoryError");
+            unquote.ShouldBeTrue();
+            empty.ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("\"cache directory;with,delimiters\"", "cache directory;with,delimiters")]
+        [InlineData("relative-cache", "relative-cache")]
+        [InlineData("\" \t\"", " \t")]
+        public void BuildCacheDirectoryPreservesOneUnquotedPath(string value, string expected)
+        {
+            CommandLineSwitches switches = new();
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.BuildCacheDirectory,
+                "-buildCacheDirectory:" + value, value, multipleParametersAllowed: false,
+                unquoteParameters: true, emptyParametersAllowed: false).ShouldBeTrue();
+            switches[CommandLineSwitches.ParameterizedSwitch.BuildCacheDirectory].ShouldBe([expected]);
+        }
+
+        [Theory]
         [InlineData("help")]
         [InlineData("HELP")]
         [InlineData("Help")]
@@ -1197,6 +1250,8 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         question: false,
+                                        taskCache: false,
+                                        buildCacheDirectory: null,
                                         isTaskAndTargetItemLoggingRequired: false,
                                         isBuildCheckEnabled: false,
                                         inputResultsCaches: null,

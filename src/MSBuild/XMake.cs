@@ -67,6 +67,13 @@ namespace Microsoft.Build.CommandLine
     /// </summary>
     public static class MSBuildApp
     {
+        internal static bool IsTaskCacheSupported =>
+#if FEATURE_BUILDXL_TASK_CACHE
+            System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.X64;
+#else
+            false;
+#endif
+
         /// <summary>
         /// Enumeration of the various ways in which the MSBuild.exe application can exit.
         /// </summary>
@@ -935,6 +942,8 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                bool taskCache = false;
+                string buildCacheDirectory = null;
                 bool isTaskInputLoggingRequired = false;
                 bool isBuildCheckEnabled = false;
                 string[] getProperty = [];
@@ -1001,6 +1010,8 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
+                                            ref taskCache,
+                                            ref buildCacheDirectory,
                                             ref isTaskInputLoggingRequired,
                                             ref isBuildCheckEnabled,
                                             ref getProperty,
@@ -1059,7 +1070,7 @@ namespace Microsoft.Build.CommandLine
                         {
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
-                                // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
+                                // Includes command-line values and any engine-provided mode globals.
                                 collection.PropertiesFromCommandLine = [.. globalProperties.Keys];
 
                                 // -getProperty/-getItem without a target only read data produced by the early
@@ -1145,6 +1156,8 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
+                                    taskCache,
+                                    buildCacheDirectory,
                                     isTaskInputLoggingRequired,
                                     isBuildCheckEnabled,
                                     inputResultsCaches,
@@ -1605,6 +1618,8 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
+            bool taskCache,
+            string buildCacheDirectory,
             bool isTaskAndTargetItemLoggingRequired,
             bool isBuildCheckEnabled,
             string[] inputResultsCaches,
@@ -1702,6 +1717,20 @@ namespace Microsoft.Build.CommandLine
                         // to Initialize. Filter out null loggers (e.g., DistributedFileLogger uses null central logger).
                         .. distributedLoggerRecords.Select(d => d.CentralLogger).Where(l => l is not null)
                     ];
+
+                if (taskCache)
+                {
+                    try
+                    {
+                        buildCacheDirectory = new BuildParameters { BuildCacheDirectory = buildCacheDirectory }.BuildCacheDirectory;
+                    }
+                    catch (Exception e) when (e is ArgumentException or InvalidOperationException || ExceptionHandling.IsIoRelatedException(e))
+                    {
+                        InitializationException.Throw("InvalidBuildCacheDirectory", "-buildCacheDirectory", e, false, e.Message);
+                    }
+
+                    globalProperties[MSBuildConstants.MSBuildTaskCacheEnabled] = "true";
+                }
 
                 projectCollection = new ProjectCollection(
                     globalProperties,
@@ -1813,6 +1842,15 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+                    try
+                    {
+                        parameters.TaskCache = taskCache;
+                        parameters.BuildCacheDirectory = buildCacheDirectory;
+                    }
+                    catch (Exception e) when (e is ArgumentException or InvalidOperationException || ExceptionHandling.IsIoRelatedException(e))
+                    {
+                        InitializationException.Throw("InvalidBuildCacheDirectory", "-buildCacheDirectory", e, false, e.Message);
+                    }
                     parameters.IsBuildCheckEnabled = isBuildCheckEnabled;
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
@@ -1877,7 +1915,14 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
+                    try
+                    {
+                        buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
+                    }
+                    catch (Exception e) when (taskCache && ExceptionHandling.IsIoRelatedException(e))
+                    {
+                        InitializationException.Throw("InvalidBuildCacheDirectory", "-buildCacheDirectory", e, false, e.Message);
+                    }
 
                     Exception exception = null;
                     try
@@ -2453,6 +2498,8 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
+            ref bool taskCache,
+            ref string buildCacheDirectory,
             ref bool isTaskInputLoggingRequired,
             ref bool isBuildCheckEnabled,
             ref string[] getProperty,
@@ -2612,6 +2659,8 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref taskCache,
+                                                           ref buildCacheDirectory,
                                                            ref isTaskInputLoggingRequired,
                                                            ref isBuildCheckEnabled,
                                                            ref getProperty,
@@ -2710,6 +2759,19 @@ namespace Microsoft.Build.CommandLine
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
+                    string[] cacheDirectories = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.BuildCacheDirectory];
+                    buildCacheDirectory = cacheDirectories.Length == 0 ? null : cacheDirectories[cacheDirectories.Length - 1];
+
+                    taskCache = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.TaskCache)
+                        && ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.TaskCache], defaultValue: true, resourceName: "InvalidTaskCacheValue");
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.TaskCache))
+                    {
+                        globalProperties[MSBuildConstants.MSBuildTaskCacheEnabled] = taskCache ? "true" : "false";
+                    }
+                    CommandLineSwitchException.VerifyThrow(!taskCache || IsTaskCacheSupported,
+                        "TaskCacheStorageUnavailable", "-taskCache");
+                    CommandLineSwitchException.VerifyThrow(!taskCache || (!question && inputResultsCaches is null && outputResultsCache is null),
+                        "TaskCacheIncompatibleSwitches", "-taskCache");
 
                     loggers = ProcessLoggingSwitches(
                         commandLineSwitches,
