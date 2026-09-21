@@ -119,9 +119,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new BannedApi("M:System.IO.Path.GetFullPath(System.String,System.String)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetAbsolutePath instead"),
 
-                // Temp helpers - depend on environment variables
+                // Path.GetTempPath - use the task environment's temporary directory
                 new BannedApi("M:System.IO.Path.GetTempPath",
-                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
+                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetTempPath() instead"),
+
+                // Other temp helpers - depend on environment variables
                 new BannedApi("M:System.IO.Path.GetTempFileName",
                     ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; suppress with a justification until a TaskEnvironment alternative is available"),
                 new BannedApi("M:System.IO.Directory.CreateTempSubdirectory(System.String)",
