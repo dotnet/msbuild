@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NET
 using System;
 using System.Globalization;
 using System.IO;
@@ -198,7 +197,7 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
             string trace = File.ReadAllText(traces.Where(path => TraceBelongsToRole(path, role)).ShouldHaveSingleItem());
             foreach (string stage in RequiredStages(role))
             {
-                trace.Contains($"stage={stage}", StringComparison.Ordinal).ShouldBeTrue($"Missing {stage} for {role}.");
+                (trace.IndexOf($"stage={stage}", StringComparison.Ordinal) >= 0).ShouldBeTrue($"Missing {stage} for {role}.");
             }
             trace.ShouldNotContain("GATE_TIMEOUT");
         }
@@ -219,6 +218,9 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
             int.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out int pid).ShouldBeTrue(result);
             pid.ShouldBeGreaterThan(0);
             string tracePath = traces.Where(path => TraceBelongsToRole(path, role)).ShouldHaveSingleItem();
+            (File.ReadAllText(tracePath).IndexOf(
+                $"stage=RUNTIME corelib={typeof(object).Assembly.GetName().Name}", StringComparison.Ordinal) >= 0)
+                .ShouldBeTrue("The task must execute on the same runtime as this test's bootstrap MSBuild.");
             int tracePid = int.Parse(Path.GetFileName(tracePath).Split('-')[1], CultureInfo.InvariantCulture);
             pid.ShouldBe(tracePid, $"Parent {role}'s bound PID must match its own real invocation.");
             foreach (string line in File.ReadAllLines(tracePath))
@@ -347,7 +349,7 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
                     report.AppendLine(Path.GetFileName(tracePath)).AppendLine(trace);
                     foreach (string stage in RequiredStages(role))
                     {
-                        if (!trace.Contains($"stage={stage}", StringComparison.Ordinal))
+                        if (trace.IndexOf($"stage={stage}", StringComparison.Ordinal) < 0)
                         {
                             report.AppendLine($"MISSING {role} stage: {stage}");
                         }
@@ -434,4 +436,3 @@ public sealed class TaskHostNonLifoReentrancy_Tests(ITestOutputHelper output)
         }
     }
 }
-#endif

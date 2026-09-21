@@ -118,15 +118,13 @@ namespace Microsoft.Build.BackEnd
         /// Per-node handler stacks for routing packets from OOP TaskHost processes.
         /// Keyed by communication node ID (one per OOP process). Each node can have
         /// multiple OOP processes for different architectures (x86, x64, ARM64).
-        /// The stack preserves legacy routing and enumerates terminal notification recipients.
-        /// Versioned task packets use invocation ownership instead: blocked callbacks can
-        /// resume and complete in a different order from task dispatch.
+        /// The stack supports nested BuildProjectFile callbacks: when Task A calls
+        /// BuildProjectFile and blocks, Task B is dispatched to the same process --
+        /// handler B is pushed on top. Packets route to Peek() (the active task).
+        /// A callback that reacquires the node moves its handler back to the top,
+        /// since resumption need not follow dispatch order.
         /// </summary>
         private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
-
-        // Protected by _activeNodes, also used for attachment and terminal notifications.
-        private readonly Dictionary<int, Dictionary<long, INodePacketHandler>> _taskInvocationsByNode = [];
-        private static long s_nextTaskInvocationId;
 
         /// <summary>
         /// Communication node IDs explicitly enabled for console forwarding.
@@ -431,14 +429,13 @@ namespace Microsoft.Build.BackEnd
 
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
-            RegisterPacketHandler(NodePacketType.TaskHostTaskPacket, DeserializeTaskInvocationPacket, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ConsoleWrite, ConsoleWritePacket.FactoryForDeserialization, this);
 
             // Register callback request packet types so we can deserialize them when
-            // they arrive from TaskHost processes, either enclosed with invocation ownership
-            // or forwarded through the handler stack for legacy connections.
+            // they arrive from TaskHost processes. These are forwarded to the current
+            // TaskHostTask handler via the handler stack.
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
@@ -500,7 +497,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Takes a serializer, deserializes the packet and routes it to the appropriate handler.
         /// Always uses the local packet factory for deserialization, which routes through
-        /// our PacketReceived method (using invocation ownership or the legacy handler stack).
+        /// our PacketReceived method (using the handler stack).
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
@@ -508,7 +505,7 @@ namespace Microsoft.Build.BackEnd
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             // Always route through our local factory which handles deserialization
-            // and routes to our PacketReceived, which resolves the invocation owner.
+            // and routes to our PacketReceived, which uses the handler stack.
             _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
@@ -523,7 +520,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Routes the specified packet through our PacketReceived method.
+        /// Routes the specified packet through our PacketReceived method (handler stack).
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packet">The packet to route.</param>
@@ -544,23 +541,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            if (packet is TaskHostTaskPacket taskPacket)
-            {
-                lock (_activeNodes)
-                {
-                    if (!_taskInvocationsByNode.TryGetValue(node, out var invocations) ||
-                        !invocations.TryGetValue(taskPacket.InvocationId, out INodePacketHandler handler))
-                    {
-                        // The transport failure path closes the connection and notifies every attached task.
-                        throw new InvalidDataException($"No handler for task invocation {taskPacket.InvocationId} on node {node}.");
-                    }
-
-                    handler.PacketReceived(node, taskPacket.Packet);
-                }
-
-                return;
-            }
-
             if (packet is NodeBuildComplete buildComplete)
             {
                 Assumed.True(buildComplete.PrepareForReuse);
@@ -581,7 +561,6 @@ namespace Microsoft.Build.BackEnd
                 INodePacketHandler[] handlers = [];
                 lock (_activeNodes)
                 {
-                    _taskInvocationsByNode.Remove(node);
                     // Prevent a late acquisition from attaching after the terminal notification.
                     if (_nodeIdToNodeKey.TryRemove(node, out TaskHostNodeKey nodeKey))
                     {
@@ -647,9 +626,6 @@ namespace Microsoft.Build.BackEnd
 
             Assumed.Unreachable($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
         }
-
-        private INodePacket DeserializeTaskInvocationPacket(ITranslator translator)
-            => TaskHostTaskPacket.FactoryForDeserialization(translator, _localPacketFactory);
 
         #endregion
 
@@ -948,8 +924,7 @@ namespace Microsoft.Build.BackEnd
 
                 // A sidecar retained from an earlier build is idle, so re-activate it: shutdown
                 // waits only for nodes marked active, and would otherwise not wait for this one.
-                configuration.TaskInvocationId = Interlocked.Increment(ref s_nextTaskInvocationId);
-                if (!TryAttachTaskHandler(context, handler, configuration.TaskInvocationId))
+                if (!TryAttachTaskHandler(context, handler))
                 {
                     return false;
                 }
@@ -986,48 +961,51 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Selects the existing handler whose build callback has reacquired the owning node.
+        /// A late callback cannot reactivate a retired or replacement connection.
+        /// </summary>
+        internal bool TryReactivateTaskHandler(NodeContext context, INodePacketHandler handler)
+        {
+            lock (_activeNodes)
+            {
+                if (!_nodeIdToNodeKey.ContainsKey(context.NodeId) ||
+                    !_nodeIdToPacketHandlerStack.TryGetValue(context.NodeId, out Stack<INodePacketHandler> handlers))
+                {
+                    return false;
+                }
+
+                lock (handlers)
+                {
+                    if (handlers.Count > 0 && ReferenceEquals(handlers.Peek(), handler))
+                    {
+                        return true;
+                    }
+
+                    if (!RemoveTaskHandler(handlers, handler))
+                    {
+                        return false;
+                    }
+
+                    handlers.Push(handler);
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
         /// Expected to be called when TaskHostTask is done with host of the given context.
         /// </summary>
-        internal void DisconnectFromHost(NodeContext context, INodePacketHandler handler, long invocationId = 0)
+        internal void DisconnectFromHost(NodeContext context, INodePacketHandler handler)
         {
             lock (_activeNodes)
             {
                 int nodeId = context.NodeId;
 
-                if (_taskInvocationsByNode.TryGetValue(nodeId, out var invocations) &&
-                    invocations.TryGetValue(invocationId, out INodePacketHandler registered) &&
-                    ReferenceEquals(registered, handler))
-                {
-                    invocations.Remove(invocationId);
-                    if (invocations.Count == 0)
-                    {
-                        _taskInvocationsByNode.Remove(nodeId);
-                    }
-                }
-
                 if (_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlerStack))
                 {
                     lock (handlerStack)
                     {
-                        if (handlerStack.Count > 0 && ReferenceEquals(handlerStack.Peek(), handler))
-                        {
-                            handlerStack.Pop();
-                        }
-                        else if (handlerStack.Contains(handler))
-                        {
-                            // An older invocation can finish while a later callback is still blocked.
-                            Stack<INodePacketHandler> laterHandlers = new();
-                            while (!ReferenceEquals(handlerStack.Peek(), handler))
-                            {
-                                laterHandlers.Push(handlerStack.Pop());
-                            }
-
-                            handlerStack.Pop();
-                            while (laterHandlers.Count > 0)
-                            {
-                                handlerStack.Push(laterHandlers.Pop());
-                            }
-                        }
+                        RemoveTaskHandler(handlerStack, handler);
 
                         if (handlerStack.Count == 0)
                         {
@@ -1036,6 +1014,39 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+        }
+
+        private static bool RemoveTaskHandler(Stack<INodePacketHandler> handlers, INodePacketHandler handler)
+        {
+            if (handlers.Count == 0)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(handlers.Peek(), handler))
+            {
+                handlers.Pop();
+                return true;
+            }
+
+            Stack<INodePacketHandler> laterHandlers = new();
+            while (handlers.Count > 0 && !ReferenceEquals(handlers.Peek(), handler))
+            {
+                laterHandlers.Push(handlers.Pop());
+            }
+
+            bool removed = handlers.Count > 0;
+            if (removed)
+            {
+                handlers.Pop();
+            }
+
+            while (laterHandlers.Count > 0)
+            {
+                handlers.Push(laterHandlers.Pop());
+            }
+
+            return removed;
         }
 
         /// <summary>
@@ -1233,7 +1244,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        internal bool TryAttachTaskHandler(NodeContext context, INodePacketHandler handler, long invocationId = 0)
+        internal bool TryAttachTaskHandler(NodeContext context, INodePacketHandler handler)
         {
             lock (_activeNodes)
             {
@@ -1246,16 +1257,6 @@ namespace Microsoft.Build.BackEnd
                 lock (handlers)
                 {
                     handlers.Push(handler);
-                }
-                if (invocationId != 0)
-                {
-                    if (!_taskInvocationsByNode.TryGetValue(context.NodeId, out var invocations))
-                    {
-                        invocations = [];
-                        _taskInvocationsByNode.Add(context.NodeId, invocations);
-                    }
-
-                    invocations.Add(invocationId, handler);
                 }
                 return true;
             }
@@ -1277,7 +1278,6 @@ namespace Microsoft.Build.BackEnd
             {
                 RetireNode(nodeId);
                 _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
-                _taskInvocationsByNode.Remove(nodeId);
             }
         }
 

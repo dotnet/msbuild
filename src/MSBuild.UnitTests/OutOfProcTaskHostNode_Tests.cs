@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void CompletionDrainPreservesOwnersAndFlushesConcurrentConsoleOutput(bool enqueueDuringDrain)
+        public void CompletionDrainPreservesResultsAndFlushesConcurrentConsoleOutput(bool enqueueDuringDrain)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
@@ -59,8 +59,8 @@ namespace Microsoft.Build.UnitTests
                     afterErrorFlush?.Invoke();
                 }));
             state.SetField("_nodeEndpoint", endpoint.Node);
-            TaskHostTaskPacket first = CreateCompletion(101);
-            TaskHostTaskPacket second = CreateCompletion(102);
+            TaskHostTaskComplete first = CreateCompletion(TaskCompleteType.Success);
+            TaskHostTaskComplete second = CreateCompletion(TaskCompleteType.Failure);
             state.PendingCompletions.Enqueue(first);
             state.OutWriter.Write("A output");
             state.ErrorWriter.Write("A error");
@@ -92,18 +92,19 @@ namespace Microsoft.Build.UnitTests
                 packets[3].ShouldBeOfType<ConsoleWritePacket>().Text.ShouldBe("B output");
             }
             packets[^1].ShouldBeSameAs(second);
-            packets.OfType<TaskHostTaskPacket>().Select(packet => packet.InvocationId).ToArray().ShouldBe([101L, 102L]);
+            packets.OfType<TaskHostTaskComplete>().Select(packet => packet.TaskResult).ToArray()
+                .ShouldBe([TaskCompleteType.Success, TaskCompleteType.Failure]);
             state.PendingCompletions.ShouldBeEmpty();
             state.CompleteTask();
             endpoint.Packets.Count.ShouldBe(packets.Length, "a second drain must not duplicate either completion");
         }
 
-        private static TaskHostTaskPacket CreateCompletion(long invocationId) =>
-            new(invocationId, new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.Success),
+        private static TaskHostTaskComplete CreateCompletion(TaskCompleteType result) =>
+            new(new OutOfProcTaskHostTaskResult(result),
 #if FEATURE_REPORTFILEACCESSES
                 null,
 #endif
-                null));
+                null);
 
         [Theory]
         [InlineData(false)]
@@ -183,8 +184,8 @@ namespace Microsoft.Build.UnitTests
             internal TextWriter OriginalError { get; } = Console.Error;
             internal RedirectConsoleWriter OutWriter { get; }
             internal RedirectConsoleWriter ErrorWriter { get; }
-            internal ConcurrentQueue<INodePacket> PendingCompletions =>
-                (ConcurrentQueue<INodePacket>)typeof(OutOfProcTaskHostNode).GetField("_taskCompletePackets", InstanceMembers)!.GetValue(Node)!;
+            internal ConcurrentQueue<TaskHostTaskComplete> PendingCompletions =>
+                (ConcurrentQueue<TaskHostTaskComplete>)typeof(OutOfProcTaskHostNode).GetField("_taskCompletePackets", InstanceMembers)!.GetValue(Node)!;
 
             internal RedirectedNodeState(Action<string> output, Action<string> error)
             {

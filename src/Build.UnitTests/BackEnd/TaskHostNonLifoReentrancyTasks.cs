@@ -1,12 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NET
 using System;
 using System.Collections;
 using System.IO;
 using System.Threading;
 using Microsoft.Build.Framework;
+#if NETFRAMEWORK
+using Path = Microsoft.IO.Path;
+#endif
 
 #nullable enable
 
@@ -31,22 +33,23 @@ public abstract class TaskHostNonLifoTracedTask : Microsoft.Build.Utilities.Task
         }
 
         Directory.CreateDirectory(RunDir);
-        _trace = Path.Combine(RunDir, $"{Role}-{Environment.ProcessId}-{Guid.NewGuid():N}.trace");
+        _trace = Path.Combine(RunDir, $"{Role}-{EnvironmentUtilities.CurrentProcessId}-{Guid.NewGuid():N}.trace");
         Record("START");
+        Record($"RUNTIME corelib={typeof(object).Assembly.GetName().Name}");
     }
 
     protected void Record(string stage)
     {
         // Sender-side evidence survives even when the task's logging packets are routed incorrectly.
         File.AppendAllText(_trace,
-            $"{DateTime.UtcNow:O} role={Role} pid={Environment.ProcessId} tid={Environment.CurrentManagedThreadId} stage={stage}{Environment.NewLine}");
+            $"{DateTime.UtcNow:O} role={Role} pid={EnvironmentUtilities.CurrentProcessId} tid={Environment.CurrentManagedThreadId} stage={stage}{Environment.NewLine}");
     }
 
     protected void Message(string stage)
     {
         Record(stage);
         Log.LogMessage(MessageImportance.High,
-            $"PROBE role={Role} pid={Environment.ProcessId} tid={Environment.CurrentManagedThreadId} stage={stage}");
+            $"PROBE role={Role} pid={EnvironmentUtilities.CurrentProcessId} tid={Environment.CurrentManagedThreadId} stage={stage}");
     }
 }
 
@@ -77,7 +80,7 @@ public sealed class TaskHostNonLifoNestedBuild : TaskHostNonLifoTracedTask
         if (success)
         {
             CompletedRole = Role;
-            ProcessId = Environment.ProcessId;
+            ProcessId = EnvironmentUtilities.CurrentProcessId;
         }
 
         Record($"EXECUTE_RETURN success={success}");
@@ -110,7 +113,7 @@ public sealed class TaskHostNonLifoFileGate : TaskHostNonLifoTracedTask
             Record("YIELDED");
             if (Signal.Length != 0)
             {
-                File.WriteAllText(Signal, $"{Role} {Environment.ProcessId}");
+                File.WriteAllText(Signal, $"{Role} {EnvironmentUtilities.CurrentProcessId}");
                 Record($"SIGNAL path={Signal}");
             }
 
@@ -134,4 +137,3 @@ public sealed class TaskHostNonLifoFileGate : TaskHostNonLifoTracedTask
         return opened;
     }
 }
-#endif

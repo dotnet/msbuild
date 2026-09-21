@@ -147,7 +147,7 @@ namespace Microsoft.Build.CommandLine
         /// The completed task packet waiting to be sent by the main thread.
         /// Distinct results must survive coalesced completion event signals.
         /// </summary>
-        private readonly ConcurrentQueue<INodePacket> _taskCompletePackets = new();
+        private readonly ConcurrentQueue<TaskHostTaskComplete> _taskCompletePackets = new();
 
         /// <summary>
         /// The event which is set when a task is cancelled
@@ -1065,7 +1065,7 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 // Send the request packet to the owning worker node
-                _nodeEndpoint.SendData(CreateTaskPacket(EffectiveConfiguration, request));
+                _nodeEndpoint.SendData(request);
 
                 // Block until the response arrives (via HandleCallbackResponse -> TCS.SetResult)
                 // or the connection is lost (via OnLinkStatusChanged -> TCS.TrySetException).
@@ -1303,7 +1303,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-                while (_taskCompletePackets.TryDequeue(out INodePacket packet))
+                while (_taskCompletePackets.TryDequeue(out TaskHostTaskComplete packet))
                 {
                     _consoleOutWriter?.Flush();
                     _consoleErrorWriter?.Flush();
@@ -1838,7 +1838,7 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     // The task has now fully completed executing.
-                    _taskCompletePackets.Enqueue(CreateTaskPacket(taskConfiguration, taskCompletePacket));
+                    _taskCompletePackets.Enqueue(taskCompletePacket);
                     // Guard against ObjectDisposedException if HandleShutdown already disposed
                     // the event (can happen if thread.Join timed out during shutdown).
                     try
@@ -2043,14 +2043,9 @@ namespace Microsoft.Build.CommandLine
 
                 TaskHostConfiguration configuration = EffectiveConfiguration;
                 LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(configuration.NodeId, e));
-                _nodeEndpoint.SendData(CreateTaskPacket(configuration, logMessage));
+                _nodeEndpoint.SendData(logMessage);
             }
         }
-
-        private static INodePacket CreateTaskPacket(TaskHostConfiguration configuration, INodePacket packet)
-            => configuration is not null && configuration.TaskInvocationId != 0
-                ? new TaskHostTaskPacket(configuration.TaskInvocationId, packet)
-                : packet;
 
         /// <summary>
         /// Generates the message event corresponding to a particular resource string and set of args

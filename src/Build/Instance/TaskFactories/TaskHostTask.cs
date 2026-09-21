@@ -14,7 +14,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using ExceptionDispatchInfo = System.Runtime.ExceptionServices.ExceptionDispatchInfo;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
@@ -105,7 +104,6 @@ namespace Microsoft.Build.BackEnd
         /// The ID of the node on which this task is scheduled to run.
         /// </summary>
         private readonly int _scheduledNodeId;
-        private long _taskInvocationId;
 
         /// <summary>
         /// True if currently connected to the task host; false otherwise.
@@ -138,8 +136,6 @@ namespace Microsoft.Build.BackEnd
         /// Did the task succeed?
         /// </summary>
         private bool _taskExecutionSucceeded = false;
-
-        private ExceptionDispatchInfo _callbackException;
 
         /// <summary>
         /// Whether this task host may be launched with node reuse, so that it does not exit at the
@@ -391,7 +387,6 @@ namespace Microsoft.Build.BackEnd
                             out hostProcessId,
                             out wasNewlyCreated,
                             out _taskHostConnection);
-                        _taskInvocationId = hostConfiguration.TaskInvocationId;
                     }
 
                     if (_connectedToTaskHost)
@@ -430,7 +425,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             lock (_taskHostLock)
                             {
-                                _taskHostProvider.DisconnectFromHost(_taskHostConnection, this, _taskInvocationId);
+                                _taskHostProvider.DisconnectFromHost(_taskHostConnection, this);
                                 _connectedToTaskHost = false;
                                 _taskHostConnection = null;
                             }
@@ -449,9 +444,6 @@ namespace Microsoft.Build.BackEnd
                 {
                     LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
                 }
-
-                // A failed callback still has a live remote invocation until completion or shutdown.
-                _callbackException?.Throw();
             }
             finally
             {
@@ -610,7 +602,7 @@ namespace Microsoft.Build.BackEnd
 #endif
 
             // If it crashed, or if it failed, it didn't succeed.
-            _taskExecutionSucceeded = _callbackException is null && taskHostTaskComplete.TaskResult == TaskCompleteType.Success;
+            _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
             // In the TaskHostTaskComplete packet, EnvironmentMode == Identical means the task did not change the
             // environment while running in the task host, so it already matches this node's environment and there is
@@ -628,14 +620,6 @@ namespace Microsoft.Build.BackEnd
             if ((taskHostTaskComplete.TaskResult == TaskCompleteType.CrashedDuringExecution) ||
                 (taskHostTaskComplete.TaskResult == TaskCompleteType.CrashedAfterExecution))
             {
-                if (_callbackException is not null && CanDeferCallbackException(taskHostTaskComplete.TaskException))
-                {
-                    // Preserve the original callback exception (notably CircularDependencyException),
-                    // but do not lose a second failure reported by the remote task.
-                    LogSecondaryTaskFailure(taskHostTaskComplete.TaskException);
-                    return;
-                }
-
                 throw new TargetInvocationException(taskHostTaskComplete.TaskException);
             }
 
@@ -779,19 +763,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleIsRunningMultipleNodesRequest(TaskHostIsRunningMultipleNodesRequest request)
         {
-            bool result = false;
-            try
-            {
-                result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
-            }
-            catch (Exception ex) when (CanDeferCallbackException(ex))
-            {
-                CaptureCallbackException(ex);
-            }
-            finally
-            {
-                _taskHostConnection.SendData(new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result));
-            }
+            bool result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
+            var response = new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result);
+            _taskHostConnection.SendData(response);
         }
 
         /// <summary>
@@ -805,31 +779,23 @@ namespace Microsoft.Build.BackEnd
             // For ReleaseCores, 0 is correct as it's just an acknowledgment.
             int grantedCores = request.IsRelease ? 0 : 1;
 
-            try
+            if (request.IsRelease)
             {
-                if (request.IsRelease)
+                if (_buildEngine is IBuildEngine9 engine9)
                 {
-                    if (_buildEngine is IBuildEngine9 engine9)
-                    {
-                        engine9.ReleaseCores(request.RequestedCores);
-                    }
-                }
-                else
-                {
-                    if (_buildEngine is IBuildEngine9 engine9)
-                    {
-                        grantedCores = engine9.RequestCores(request.RequestedCores);
-                    }
+                    engine9.ReleaseCores(request.RequestedCores);
                 }
             }
-            catch (Exception ex) when (CanDeferCallbackException(ex))
+            else
             {
-                CaptureCallbackException(ex);
+                if (_buildEngine is IBuildEngine9 engine9)
+                {
+                    grantedCores = engine9.RequestCores(request.RequestedCores);
+                }
             }
-            finally
-            {
-                _taskHostConnection.SendData(new TaskHostCoresResponse(request.RequestId, grantedCores));
-            }
+
+            var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
+            _taskHostConnection.SendData(response);
         }
 
         /// <summary>
@@ -870,21 +836,19 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                BuildEngineResult result;
-                try
+                BuildEngineResult result = engine3.BuildProjectFilesInParallel(
+                    request.ProjectFileNames,
+                    request.TargetNames,
+                    globalProperties,
+                    removeGlobalProperties,
+                    request.ToolsVersions,
+                    request.ReturnTargetOutputs);
+
+                // The callback has reacquired this task's node. Select its handler before the
+                // response lets the remote task resume, send another callback, or finish.
+                if (!_taskCancelled && !_taskHostProvider.TryReactivateTaskHandler(_taskHostConnection, this))
                 {
-                    result = engine3.BuildProjectFilesInParallel(
-                        request.ProjectFileNames,
-                        request.TargetNames,
-                        globalProperties,
-                        removeGlobalProperties,
-                        request.ToolsVersions,
-                        request.ReturnTargetOutputs);
-                }
-                catch (Exception ex) when (CanDeferCallbackException(ex))
-                {
-                    CaptureCallbackException(ex);
-                    return;
+                    CommunicationsUtilities.Trace(_taskHostConnection.NodeId, "The returning build callback no longer has an attached TaskHost handler.");
                 }
 
                 response = TaskHostBuildResponse.FromBuildEngineResult(request.RequestId, result);
@@ -893,59 +857,10 @@ namespace Microsoft.Build.BackEnd
             {
                 // Always send a response to prevent the OOP task from hanging.
                 // On success, sends the real result; on exception, sends failure.
-                // Task-local callback exceptions propagate to TaskBuilder only after the
-                // packet pump has processed the remote invocation's completion or shutdown.
+                // Exceptions propagate to TaskBuilder which handles them identically
+                // to the in-proc TaskHost path (CircularDependencyException, etc.).
                 response ??= new TaskHostBuildResponse(request.RequestId, false, null);
                 _taskHostConnection.SendData(response);
-            }
-        }
-
-        private static bool CanDeferCallbackException(Exception exception)
-        {
-            // Logger failures abort the whole build immediately, including when raised inside a callback.
-            if (exception is LoggerException or InternalLoggerException || ExceptionHandling.IsCriticalException(exception))
-            {
-                return false;
-            }
-
-            if (exception is AggregateException aggregateException)
-            {
-                foreach (Exception innerException in aggregateException.InnerExceptions)
-                {
-                    if (!CanDeferCallbackException(innerException))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        private void CaptureCallbackException(Exception exception)
-        {
-            // The conservative reply only unblocks the remote task; Execute must still propagate the failure.
-            if (_callbackException is null)
-            {
-                _callbackException = ExceptionDispatchInfo.Capture(exception);
-            }
-            else
-            {
-                LogSecondaryTaskFailure(exception);
-            }
-        }
-
-        private void LogSecondaryTaskFailure(Exception exception)
-        {
-            // ContinueOnError is true for both continuing modes; only WarnAndContinue converts errors.
-            if (_buildEngine is TaskHost { ConvertErrorsToWarnings: true })
-            {
-                _taskLoggingContext.LogTaskWarningFromException(exception, new BuildEventFileInfo(_taskLocation), _taskType.Type.Name);
-                _taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
-            }
-            else
-            {
-                _taskLoggingContext.LogFatalTaskError(exception, new BuildEventFileInfo(_taskLocation), _taskType.Type.Name);
             }
         }
 
