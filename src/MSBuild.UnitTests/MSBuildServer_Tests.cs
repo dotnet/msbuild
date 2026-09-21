@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
@@ -125,6 +126,57 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         public void Dispose() => _env.Dispose();
+
+        [Fact]
+        public void ServersAreIsolatedByResolvedChangeWave()
+        {
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
+            var project = _env.CreateFile("strict-server.proj", $"""
+                <Project>
+                  <UsingTask TaskName="ProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                  <UsingTask TaskName="StrictModeProbeTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                  <Target Name="Build">
+                    <ProcessIdTask>
+                      <Output PropertyName="PID" TaskParameter="Pid" />
+                    </ProcessIdTask>
+                    <Message Text="Server ID is $(PID)" Importance="high" />
+                    <StrictModeProbeTask Behavior="ChangeCurrentDirectory" />
+                  </Target>
+                </Project>
+                """);
+            Dictionary<int, bool> strictModeByServerPid = [];
+            // Unset and 999.999 resolve identically, so the last request may reuse the first server.
+            (string? DisabledWave, bool StrictModeEnabled)[] requests =
+            [
+                (null, true),
+                ("18.12", false),
+                ("999.999", true),
+            ];
+            foreach ((string? disabledWave, bool strictModeEnabled) in requests)
+            {
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
+                string output = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"\"{project.Path}\" -m:1 -mt -nr:true", out bool success, false, _output);
+                int pid = ParseNumber(output, "Server ID is ");
+                if (strictModeByServerPid.TryGetValue(pid, out bool previousStrictModeEnabled))
+                {
+                    strictModeEnabled.ShouldBe(previousStrictModeEnabled,
+                        "Requests with different resolved change waves must not reuse the same server process.");
+                }
+                else
+                {
+                    _env.WithTransientProcess(pid);
+                    strictModeByServerPid.Add(pid, strictModeEnabled);
+                }
+
+                pid.ShouldNotBe(ParseNumber(output, "Process ID is "));
+                success.ShouldBe(!strictModeEnabled, output);
+                output.Contains("MSB4286").ShouldBe(strictModeEnabled, output);
+            }
+        }
 
         [Fact]
         public void MSBuildServerTest()
