@@ -844,9 +844,10 @@ namespace Microsoft.Build.BackEnd
                     request.ToolsVersions,
                     request.ReturnTargetOutputs);
 
-                // The callback has reacquired this task's node. Select its handler before the
-                // response lets the remote task resume, send another callback, or finish.
-                if (!_taskCancelled && !_taskHostProvider.TryReactivateTaskHandler(_taskHostConnection, this))
+                // Cancellation can return before Cancel() runs, without reacquiring the node.
+                // Only an active request may restore its handler before resuming the remote task.
+                if (!_taskCancelled && _buildEngine is TaskHost { IsRequestActive: true }
+                    && !_taskHostProvider.TryReactivateTaskHandler(_taskHostConnection, this))
                 {
                     CommunicationsUtilities.Trace(_taskHostConnection.NodeId, "The returning build callback no longer has an attached TaskHost handler.");
                 }
