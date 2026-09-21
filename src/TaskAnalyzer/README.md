@@ -173,7 +173,7 @@ private static AbsolutePath CreateTempFile(TaskEnvironment taskEnvironment)
 
             return filePath;
         }
-        catch (IOException) when (attempt < maximumAttempts)
+        catch (IOException) when (attempt < maximumAttempts && File.Exists(filePath))
         {
             // Try another name. The final attempt preserves the I/O exception.
         }
@@ -181,7 +181,7 @@ private static AbsolutePath CreateTempFile(TaskEnvironment taskEnvironment)
 }
 ```
 
-`FileMode.CreateNew` prevents the helper from overwriting an existing file. The retry handles a name collision. The final attempt preserves its I/O exception.
+`FileMode.CreateNew` prevents the helper from overwriting an existing file. The filter retries only when the generated file already exists. Other I/O errors stop the operation immediately.
 
 The caller owns the returned file. Delete the file when the task no longer needs it. MSBuild does not provide a `TaskEnvironment.GetTempFileName()` convenience API.
 

@@ -1484,13 +1484,14 @@ public class MultiThreadableTaskAnalyzerTests
     [Fact]
     public async Task TaskEnvironmentTempFilePattern_NoDiagnostics()
     {
-        var diags = await GetDiagnosticsAsync("""
+        var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
+            """
             using System.IO;
             using Microsoft.Build.Framework;
             [MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
-                public TaskEnvironment TaskEnvironment { get; set; }
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
 
                 public override bool Execute()
                 {
@@ -1518,15 +1519,17 @@ public class MultiThreadableTaskAnalyzerTests
 
                             return filePath;
                         }
-                        catch (IOException) when (attempt < maximumAttempts)
+                        catch (IOException) when (attempt < maximumAttempts && File.Exists(filePath))
                         {
                         }
                     }
                 }
             }
-            """);
+            """,
+            new MultiThreadableTaskAnalyzer());
 
-        diags.ShouldBeEmpty();
+        diagnostics.Where(diagnostic => diagnostic.Id.StartsWith("CS", System.StringComparison.Ordinal)).ShouldBeEmpty();
+        diagnostics.Where(diagnostic => diagnostic.Id.StartsWith("MSBuildTask", System.StringComparison.Ordinal)).ShouldBeEmpty();
     }
 
     [Theory]
