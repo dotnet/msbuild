@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
@@ -65,6 +66,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Build set of file-path types for MSBuildTask0003
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
             var analyzeAllTasksByTree = new ConcurrentDictionary<SyntaxTree, bool>();
+            var possibleMethodReferences = BuildPossibleMethodReferences(
+                compilationContext.Compilation,
+                compilationContext.CancellationToken);
 
             // Use RegisterSymbolStartAction for efficient per-type scoping
             compilationContext.RegisterSymbolStartAction(symbolStartContext =>
@@ -81,16 +85,52 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
 
+                var pathParameterCallSafety = new ConcurrentDictionary<IParameterSymbol, bool>(SymbolEqualityComparer.Default);
+                var deferredPathDiagnostics = new ConcurrentBag<DeferredPathDiagnostic>();
+
+                symbolStartContext.RegisterOperationAction(
+                    context => CollectPathParameterUsageSafety(
+                        context,
+                        taskEnvironmentType,
+                        absolutePathType,
+                        iTaskItemType,
+                        pathParameterCallSafety,
+                        possibleMethodReferences),
+                    OperationKind.Invocation,
+                    OperationKind.MethodReference);
+
                 // Register operation-level analysis within this type
                 symbolStartContext.RegisterOperationAction(
                     ctx => AnalyzeOperation(ctx, bannedApiLookup, filePathTypes, analyzeAsMultiThreadable, analyzeAllTasksByTree,
-                        taskEnvironmentType, absolutePathType, iTaskItemType, consoleType),
+                        taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, possibleMethodReferences, deferredPathDiagnostics),
                     OperationKind.Invocation,
                     OperationKind.ObjectCreation,
                     OperationKind.PropertyReference,
                     OperationKind.FieldReference,
                     OperationKind.MethodReference,
                     OperationKind.EventReference);
+
+                symbolStartContext.RegisterSymbolEndAction(context =>
+                {
+                    foreach (DeferredPathDiagnostic deferredDiagnostic in deferredPathDiagnostics)
+                    {
+                        bool allCallsSafe = true;
+                        foreach (IParameterSymbol parameter in deferredDiagnostic.Parameters)
+                        {
+                            if (!pathParameterCallSafety.TryGetValue(parameter, out bool parameterCallsSafe) ||
+                                !parameterCallsSafe)
+                            {
+                                allCallsSafe = false;
+                                break;
+                            }
+                        }
+
+                        if (!allCallsSafe)
+                        {
+                            context.ReportDiagnostic(deferredDiagnostic.Diagnostic);
+                        }
+                    }
+                });
             }, SymbolKind.NamedType);
         }
 
@@ -103,7 +143,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
-            INamedTypeSymbol? consoleType)
+            INamedTypeSymbol? consoleType,
+            Dictionary<string, ImmutableArray<SimpleNameSyntax>> possibleMethodReferences,
+            ConcurrentBag<DeferredPathDiagnostic> deferredPathDiagnostics)
         {
             ISymbol? referencedSymbol = null;
             ImmutableArray<IArgumentOperation> arguments = default;
@@ -199,12 +241,246 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         : referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
 
                     string hint = "wrap path argument with TaskEnvironment.GetAbsolutePath()";
-                    context.ReportDiagnostic(Diagnostic.Create(
+                    Diagnostic diagnostic = Diagnostic.Create(
                         DiagnosticDescriptors.FilePathRequiresAbsolute,
                         context.Operation.Syntax.GetLocation(),
-                        displayName, hint));
+                        displayName, hint);
+
+                    if (TryGetDeferredPathParameters(
+                        arguments,
+                        taskEnvironmentType,
+                        absolutePathType,
+                        iTaskItemType,
+                        possibleMethodReferences,
+                        out ImmutableArray<IParameterSymbol> parameters))
+                    {
+                        deferredPathDiagnostics.Add(new DeferredPathDiagnostic(diagnostic, parameters));
+                    }
+                    else
+                    {
+                        context.ReportDiagnostic(diagnostic);
+                    }
                 }
             }
+        }
+
+        private static void CollectPathParameterUsageSafety(
+            OperationAnalysisContext context,
+            INamedTypeSymbol? taskEnvironmentType,
+            INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? iTaskItemType,
+            ConcurrentDictionary<IParameterSymbol, bool> pathParameterCallSafety,
+            Dictionary<string, ImmutableArray<SimpleNameSyntax>> possibleMethodReferences)
+        {
+            if (context.Operation is IMethodReferenceOperation methodReference)
+            {
+                foreach (IParameterSymbol parameter in methodReference.Method.Parameters)
+                {
+                    if (parameter.Type.SpecialType == SpecialType.System_String &&
+                        IsPathParameterName(parameter.Name) &&
+                        IsEligiblePathHelperParameter(
+                            parameter,
+                            possibleMethodReferences))
+                    {
+                        pathParameterCallSafety[parameter.OriginalDefinition] = false;
+                    }
+                }
+
+                return;
+            }
+
+            var invocation = (IInvocationOperation)context.Operation;
+            if (invocation.TargetMethod.DeclaringSyntaxReferences.Length == 0)
+            {
+                return;
+            }
+
+            foreach (IArgumentOperation argument in invocation.Arguments)
+            {
+                IParameterSymbol? parameter = argument.Parameter;
+                if (parameter is null ||
+                    parameter.Type.SpecialType != SpecialType.System_String ||
+                    !IsPathParameterName(parameter.Name) ||
+                    !IsEligiblePathHelperParameter(
+                        parameter,
+                        possibleMethodReferences))
+                {
+                    continue;
+                }
+
+                bool isSafe = IsWrappedSafely(
+                    argument.Value,
+                    taskEnvironmentType,
+                    absolutePathType,
+                    iTaskItemType);
+
+                IParameterSymbol parameterKey = parameter.OriginalDefinition;
+                if (isSafe)
+                {
+                    pathParameterCallSafety.TryAdd(parameterKey, true);
+                }
+                else
+                {
+                    pathParameterCallSafety[parameterKey] = false;
+                }
+            }
+        }
+
+        private static bool TryGetDeferredPathParameters(
+            ImmutableArray<IArgumentOperation> arguments,
+            INamedTypeSymbol? taskEnvironmentType,
+            INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? iTaskItemType,
+            Dictionary<string, ImmutableArray<SimpleNameSyntax>> possibleMethodReferences,
+            out ImmutableArray<IParameterSymbol> parameters)
+        {
+            var builder = ImmutableArray.CreateBuilder<IParameterSymbol>();
+            for (int i = 0; i < arguments.Length; i++)
+            {
+                IArgumentOperation argument = arguments[i];
+                IParameterSymbol? targetParameter = argument.Parameter;
+                if (targetParameter is null ||
+                    targetParameter.Type.SpecialType != SpecialType.System_String ||
+                    !IsPathParameterName(targetParameter.Name) ||
+                    IsWrappedSafely(argument.Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                {
+                    continue;
+                }
+
+                IOperation value = argument.Value;
+                while (value is IConversionOperation conversion)
+                {
+                    value = conversion.Operand;
+                }
+
+                if (value is IParameterReferenceOperation parameterReference &&
+                    IsEligiblePathHelperParameter(
+                        parameterReference.Parameter,
+                        possibleMethodReferences))
+                {
+                    builder.Add(parameterReference.Parameter.OriginalDefinition);
+                    continue;
+                }
+
+                parameters = default;
+                return false;
+            }
+
+            parameters = builder.ToImmutable();
+            return parameters.Length > 0;
+        }
+
+        private static bool IsEligiblePathHelperParameter(
+            IParameterSymbol parameter,
+            Dictionary<string, ImmutableArray<SimpleNameSyntax>> possibleMethodReferences)
+        {
+            IMethodSymbol method = (IMethodSymbol)parameter.ContainingSymbol;
+            if (!method.IsStatic ||
+                method.IsVirtual ||
+                method.IsOverride)
+            {
+                return false;
+            }
+
+            if (method.DeclaringSyntaxReferences.Length == 0)
+            {
+                return false;
+            }
+
+            if (method.DeclaredAccessibility is not (Accessibility.Private or Accessibility.Internal or Accessibility.ProtectedAndInternal))
+            {
+                return false;
+            }
+
+            if (!possibleMethodReferences.TryGetValue(method.Name, out ImmutableArray<SimpleNameSyntax> references))
+            {
+                return true;
+            }
+
+            foreach (SimpleNameSyntax reference in references)
+            {
+                if (!IsWithinContainingType(reference, method.ContainingType))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static Dictionary<string, ImmutableArray<SimpleNameSyntax>> BuildPossibleMethodReferences(
+            Compilation compilation,
+            System.Threading.CancellationToken cancellationToken)
+        {
+            var builders = new Dictionary<string, ImmutableArray<SimpleNameSyntax>.Builder>(StringComparer.Ordinal);
+            foreach (SyntaxTree syntaxTree in compilation.SyntaxTrees)
+            {
+                SyntaxNode root = syntaxTree.GetRoot(cancellationToken);
+                foreach (SyntaxNode node in root.DescendantNodes())
+                {
+                    if (node is not SimpleNameSyntax simpleName)
+                    {
+                        continue;
+                    }
+
+                    string name = simpleName.Identifier.ValueText;
+                    if (!builders.TryGetValue(name, out ImmutableArray<SimpleNameSyntax>.Builder? builder))
+                    {
+                        builder = ImmutableArray.CreateBuilder<SimpleNameSyntax>();
+                        builders.Add(name, builder);
+                    }
+
+                    builder.Add(simpleName);
+                }
+            }
+
+            var references = new Dictionary<string, ImmutableArray<SimpleNameSyntax>>(builders.Count, StringComparer.Ordinal);
+            foreach (KeyValuePair<string, ImmutableArray<SimpleNameSyntax>.Builder> pair in builders)
+            {
+                references.Add(pair.Key, pair.Value.ToImmutable());
+            }
+
+            return references;
+        }
+
+        private static bool IsWithinContainingType(SyntaxNode node, INamedTypeSymbol containingType)
+        {
+            BaseTypeDeclarationSyntax? nearestType = null;
+            for (SyntaxNode? ancestor = node.Parent; ancestor is not null; ancestor = ancestor.Parent)
+            {
+                if (ancestor is BaseTypeDeclarationSyntax typeDeclaration)
+                {
+                    nearestType = typeDeclaration;
+                    break;
+                }
+            }
+
+            if (nearestType is null)
+            {
+                return false;
+            }
+
+            if (node.Parent is MemberAccessExpressionSyntax memberAccess &&
+                memberAccess.Name == node &&
+                memberAccess.Expression is not ThisExpressionSyntax)
+            {
+                if (memberAccess.Expression is not IdentifierNameSyntax qualifier ||
+                    qualifier.Identifier.ValueText != containingType.Name)
+                {
+                    return false;
+                }
+            }
+
+            foreach (SyntaxReference declaration in containingType.DeclaringSyntaxReferences)
+            {
+                if (declaration.SyntaxTree == nearestType.SyntaxTree &&
+                    declaration.Span == nearestType.Span)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool ShouldReportEnvironmentRules(
@@ -228,6 +504,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 syntaxTree);
             analyzeAllTasksByTree.TryAdd(syntaxTree, analyzeAllTasks);
             return analyzeAllTasks;
+        }
+
+        private readonly struct DeferredPathDiagnostic
+        {
+            internal DeferredPathDiagnostic(Diagnostic diagnostic, ImmutableArray<IParameterSymbol> parameters)
+            {
+                Diagnostic = diagnostic;
+                Parameters = parameters;
+            }
+
+            internal Diagnostic Diagnostic { get; }
+
+            internal ImmutableArray<IParameterSymbol> Parameters { get; }
         }
 
         private static DiagnosticDescriptor GetDescriptor(BannedApiDefinitions.ApiCategory category)

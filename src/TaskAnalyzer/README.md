@@ -188,7 +188,13 @@ File.Exists(item.GetMetadataValue("FullPath"))
 
 // 5. Argument already typed as AbsolutePath
 void Helper(AbsolutePath p) => File.Exists(p);
+
+// 6. String helper parameter with only proven-absolute callers in the same task type
+void Helper(string p) => File.Exists(p);
+Helper(TaskEnvironment.GetAbsolutePath(relativePath));
 ```
+
+The analyzer checks all calls in the task type before it accepts a string helper parameter. It keeps the diagnostic if any call passes an unproven path. An internal helper is accepted only when no possible reference exists outside its containing type.
 
 ### MSBuildTask0004 — Potential Issue (Review Required)
 
