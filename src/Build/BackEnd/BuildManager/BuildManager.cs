@@ -493,7 +493,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="parameters">The build parameters.  May be null.</param>
         /// <param name="deferredBuildMessages"> Build messages to be logged before the build begins. </param>
-        /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if a build is already in progress, or if file-access reporting and multi-threaded mode are both enabled.
+        /// </exception>
         [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public void BeginBuild(BuildParameters parameters, IEnumerable<DeferredBuildMessage> deferredBuildMessages)
         {
@@ -507,8 +509,14 @@ namespace Microsoft.Build.Execution
 
             // deferredBuildMessages cannot be an optional parameter on a single BeginBuild method because it would break binary compatibility.
             _deferredBuildMessages = deferredBuildMessages;
-            BeginBuild(parameters);
-            _deferredBuildMessages = null;
+            try
+            {
+                BeginBuild(parameters);
+            }
+            finally
+            {
+                _deferredBuildMessages = null;
+            }
         }
 
         private void UpdatePriority(Process p, ProcessPriorityClass priority)
@@ -528,6 +536,12 @@ namespace Microsoft.Build.Execution
         [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public void BeginBuild(BuildParameters parameters)
         {
+#if FEATURE_REPORTFILEACCESSES
+            ErrorUtilities.VerifyThrowInvalidOperation(
+                !parameters.ReportFileAccesses || !parameters.MultiThreaded,
+                "ReportFileAccessesIncompatibleWithMultiThreaded");
+#endif
+
 #if NETFRAMEWORK
             // Collect telemetry unless explicitly opted out via environment variable.
             // The decision to send telemetry is made at EndBuild to avoid eager loading of telemetry assemblies.

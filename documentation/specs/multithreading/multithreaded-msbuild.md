@@ -2,6 +2,12 @@
 
 This is a description of changes that will enable MSBuild to run multiple projects concurrently within the same process, rather than spawning separate processes for each node. This will allow better resource utilization and potentially faster builds, as fewer processes will need to be created, reducing .NET runtime overhead and inter-process communication--but it's nontrivial to implement without breaking existing builds, which we must not do.
 
+## Known incompatibilities
+
+### File-access reporting
+
+Because `/reportfileaccesses` requires detoured out-of-proc worker processes and attributes accesses to the single project executing on each node, it cannot be combined with multithreaded mode.
+
 ## Current state
 
 Currently, MSBuild supports parallel builds (a critical feature for a build system) by spawning worker processes. This made adoption easier because it didn't impose any requirements on tasks: they continue to own the whole process while they are executing, just like they did when the build was single-threaded and running one task at a time. But it's a pretty strange design decision in the modern age, where we assume things are multithreaded and async.
