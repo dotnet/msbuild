@@ -672,14 +672,10 @@ namespace Microsoft.Build.BackEnd
 
                 EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
-                if (parameter.IsAssignableToITask)
-                {
-                    ITaskItem[] outputs = GetItemOutputs(parameter);
-                    GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
-                }
-                else if (parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true }
-                    && TaskInstance is TaskHostTask taskHostTask
-                    && taskHostTask.IsTaskItemOutput(parameter.Name))
+                if (parameter.IsAssignableToITask
+                    || (parameter is ReflectableTaskPropertyInfo { IsTypeUnresolved: true }
+                        && TaskInstance is TaskHostTask taskHostTask
+                        && taskHostTask.IsTaskItemOutput(parameter.Name)))
                 {
                     ITaskItem[] outputs = GetItemOutputs(parameter);
                     GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation, parameter);
@@ -1429,20 +1425,25 @@ namespace Microsoft.Build.BackEnd
                 {
                     EnsureParameterInitialized(parameter, _batchBucket.Lookup);
 
-                    bool needsHostConversion = parameterType is null || RequiresHostConversion(parameterType);
-                    bool rejectUnsupportedHostConversion = false;
-                    if (TaskInstance is TaskHostTask { IsNetTaskHost: true } taskHostTask
+                    bool isSupportedTypedTaskItem = IsSupportedTypedTaskItem(parameterType);
+                    bool needsHostConversion =
+                        parameterType is null
+                        || RequiresHostConversion(parameterType)
+                        || isSupportedTypedTaskItem;
+                    bool requiresHostConversion = false;
+                    Type hostConversionType = null;
+                    if (TaskInstance is TaskHostTask { IsNetTaskHost: true }
                         && needsHostConversion)
                     {
                         bool isEnumArray = IsEnumArray(parameterType);
                         bool supportsLegacyEnumArray = IsLegacyCompatibleEnumArray(parameterType);
-                        rejectUnsupportedHostConversion =
-                            !taskHostTask.SupportsParameterConversion && !supportsLegacyEnumArray;
-                        Type expansionType = (parameter as ReflectableTaskPropertyInfo)?.ParameterTypeForExpansion;
-                        if (expansionType is not null
-                            && (taskHostTask.SupportsParameterConversion || !isEnumArray))
+                        requiresHostConversion = !supportsLegacyEnumArray;
+                        hostConversionType = isSupportedTypedTaskItem
+                            ? parameterType.IsArray ? typeof(ITaskItem[]) : typeof(ITaskItem)
+                            : (parameter as ReflectableTaskPropertyInfo)?.ParameterTypeForExpansion;
+                        if (hostConversionType is not null && !isEnumArray)
                         {
-                            parameterType = expansionType;
+                            parameterType = hostConversionType;
                         }
                     }
 
@@ -1464,7 +1465,7 @@ namespace Microsoft.Build.BackEnd
                             parameterType,
                             parameterValue,
                             parameterLocation,
-                            rejectUnsupportedHostConversion,
+                            requiresHostConversion,
                             out parameterSet);
                     }
                     else if (TaskParameterTypeVerifier.IsValidVectorInputParameter(parameterType))
@@ -1475,7 +1476,8 @@ namespace Microsoft.Build.BackEnd
                             parameterValue,
                             parameterLocation,
                             isRequired,
-                            rejectUnsupportedHostConversion,
+                            requiresHostConversion,
+                            hostConversionType,
                             out parameterSet);
                     }
                     else
@@ -1597,6 +1599,13 @@ namespace Microsoft.Build.BackEnd
                 || (elementType.IsValueType && Type.GetTypeCode(elementType) == TypeCode.Object);
         }
 
+        private static bool IsSupportedTypedTaskItem(Type parameterType)
+        {
+            Type elementType = parameterType?.IsArray == true ? parameterType.GetElementType() : parameterType;
+            return elementType is not null
+                && TaskParameterTypeVerifier.TryGetSupportedTaskItemValueType(elementType, out _);
+        }
+
         private static bool IsEnumArray(Type parameterType) =>
             parameterType?.IsArray == true
             && parameterType.GetElementType()?.IsEnum == true;
@@ -1619,7 +1628,7 @@ namespace Microsoft.Build.BackEnd
             Type parameterType,
             string parameterValue,
             ElementLocation parameterLocation,
-            bool rejectUnsupportedHostConversion,
+            bool requiresHostConversion,
             out bool taskParameterSet)
         {
             taskParameterSet = false;
@@ -1655,7 +1664,7 @@ namespace Microsoft.Build.BackEnd
                                 _taskName);
                         }
 
-                        VerifyTaskHostSupportsParameterConversion(rejectUnsupportedHostConversion, parameter, parameterLocation);
+                        RecordTaskHostParameterConversionRequirement(requiresHostConversion, parameter, parameterLocation);
                         RecordItemForDisconnectIfNecessary(finalTaskItems[0]);
 
                         if (isSupportedTypedTaskItem)
@@ -1682,7 +1691,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        VerifyTaskHostSupportsParameterConversion(rejectUnsupportedHostConversion, parameter, parameterLocation);
+                        RecordTaskHostParameterConversionRequirement(requiresHostConversion, parameter, parameterLocation);
                         success = SetValueParameter(parameter, parameterType, expandedParameterValue);
                         taskParameterSet = true;
                     }
@@ -1760,7 +1769,8 @@ namespace Microsoft.Build.BackEnd
             string parameterValue,
             ElementLocation parameterLocation,
             bool isRequired,
-            bool rejectUnsupportedHostConversion,
+            bool requiresHostConversion,
+            Type hostConversionType,
             out bool taskParameterSet)
         {
             Assumed.NotNull(parameterValue, "Didn't expect null parameterValue in InitializeTaskVectorParameter");
@@ -1783,11 +1793,13 @@ namespace Microsoft.Build.BackEnd
                     && finalTaskItems.Count == 0
                     && IsEnumArray(parameterType)
                     && parameterType.GetArrayRank() == 1;
-                VerifyTaskHostSupportsParameterConversion(
-                    rejectUnsupportedHostConversion && !isRequiredEmptyEnumArray,
+                bool useHostConversion = requiresHostConversion && !isRequiredEmptyEnumArray;
+                RecordTaskHostParameterConversionRequirement(useHostConversion, parameter, parameterLocation);
+                success = SetParameterArray(
                     parameter,
+                    useHostConversion ? hostConversionType ?? typeof(string[]) : parameterType,
+                    finalTaskItems,
                     parameterLocation);
-                success = SetParameterArray(parameter, parameterType, finalTaskItems, parameterLocation);
                 taskParameterSet = true;
             }
             else
@@ -1798,18 +1810,19 @@ namespace Microsoft.Build.BackEnd
             return success;
         }
 
-        private void VerifyTaskHostSupportsParameterConversion(
-            bool rejectUnsupportedHostConversion,
+        private void RecordTaskHostParameterConversionRequirement(
+            bool requiresHostConversion,
             TaskPropertyInfo parameter,
             ElementLocation parameterLocation)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                !rejectUnsupportedHostConversion,
-                parameterLocation,
-                "UnsupportedTaskParameterTypeError",
-                GetTaskParameterTypeName(parameter),
-                parameter.Name,
-                _taskName);
+            if (requiresHostConversion && TaskInstance is TaskHostTask taskHostTask)
+            {
+                taskHostTask.RequireParameterConversion(
+                    GetTaskParameterTypeName(parameter),
+                    parameter.Name,
+                    _taskName,
+                    parameterLocation);
+            }
         }
 
         /// <summary>

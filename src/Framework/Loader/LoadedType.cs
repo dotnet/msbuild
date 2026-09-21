@@ -231,13 +231,22 @@ namespace Microsoft.Build.Shared
                     isTypeUnresolved = true;
                 }
 
+                Type? parameterTypeForExpansion =
+                    loadedViaMetadataLoadContext ? GetParameterTypeForExpansion(propertyType, propertyElementType) : null;
+                if (parameterTypeForExpansion is null
+                    && loadedViaMetadataLoadContext
+                    && propertyElementType.IsGenericType)
+                {
+                    parameterTypeForExpansion = parameterTypeInfoResolver?.Invoke(props[i]).TypeForExpansion;
+                }
+
                 Properties[i] = new ReflectableTaskPropertyInfo(
                     props[i],
                     propertyType,
                     outputAttribute,
                     requiredAttribute,
                     isAssignableToITask,
-                    loadedViaMetadataLoadContext ? GetParameterTypeForExpansion(propertyType, propertyElementType) : null,
+                    parameterTypeForExpansion,
                     isTypeUnresolved);
                 if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {

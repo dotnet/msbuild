@@ -55,6 +55,31 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
+        public void TaskHostNodeKey_Equality_DifferentLaunchIdentity_AreNotEqual()
+        {
+            var key1 = new TaskHostNodeKey(
+                HandshakeOptions.TaskHost | HandshakeOptions.NET,
+                1,
+                LaunchIdentity: "dotnet\0sdk-a\\MSBuild.dll\0dotnet");
+            var key2 = new TaskHostNodeKey(
+                HandshakeOptions.TaskHost | HandshakeOptions.NET,
+                1,
+                LaunchIdentity: "dotnet\0sdk-b\\MSBuild.dll\0dotnet");
+
+            key1.ShouldNotBe(key2);
+            (key1 != key2).ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData(0, false)]
+        [InlineData(7, false)]
+        [InlineData(8, true)]
+        public void ParameterConversionSupportComesFromNegotiatedPacketVersion(byte version, bool expected)
+        {
+            TaskHostTask.CanConvertTaskParameters(version).ShouldBe(expected);
+        }
+
+        [Fact]
         public void TaskHostNodeKey_CanBeUsedAsDictionaryKey()
         {
             var dict = new System.Collections.Generic.Dictionary<TaskHostNodeKey, string>();

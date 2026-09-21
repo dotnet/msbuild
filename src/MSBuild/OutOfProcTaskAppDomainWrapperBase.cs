@@ -493,6 +493,20 @@ namespace Microsoft.Build.CommandLine
                 return convertedArray;
             }
 
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(targetType, out Type taskItemValueType)
+                && value is ITaskItem taskItem)
+            {
+                Type taskItemType = typeof(TaskItem<>).MakeGenericType(taskItemValueType);
+                try
+                {
+                    return Activator.CreateInstance(taskItemType, taskItem);
+                }
+                catch (TargetInvocationException e) when (e.InnerException is ArgumentException)
+                {
+                    throw new TaskParameterConversionException(taskItem.ItemSpec, e.InnerException);
+                }
+            }
+
             if (value is not string stringValue)
             {
                 return value;

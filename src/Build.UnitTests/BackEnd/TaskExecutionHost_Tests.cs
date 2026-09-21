@@ -732,22 +732,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Theory]
         [InlineData("EnumParam", "$(NonExistentProperty)")]
         [InlineData("EnumArrayParam", "@(NonExistentItem)")]
-        public void OldNetTaskHostAllowsOptionalConversionParameterWhenExpansionIsEmpty(string parameterName, string value)
+        public void NetTaskHostDoesNotRequireConversionWhenExpansionIsEmpty(string parameterName, string value)
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            TaskHostTask task = UseTaskHostWithoutParameterConversion(env);
+            TaskHostTask task = UseNetTaskHost();
             var parameters = GetStandardParametersDictionary(true);
             parameters[parameterName] = (value, ElementLocation.Create("foo.proj"));
 
             _host.SetTaskParameters(parameters).ShouldBeTrue();
             GetSetParameters(task).ContainsKey(parameterName).ShouldBeFalse();
+            task.RequiresParameterConversion.ShouldBeFalse();
         }
 
         [Fact]
-        public void OldNetTaskHostAllowsRequiredEmptyNonInt32EnumArray()
+        public void NetTaskHostDoesNotRequireConversionForRequiredEmptyNonInt32EnumArray()
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            TaskHostTask task = UseMetadataLoadedTaskHostWithoutParameterConversion(env, out LoadedType loadedType);
+            TaskHostTask task = UseMetadataLoadedNetTaskHost(out LoadedType loadedType);
 
             loadedType.LoadedViaMetadataLoadContext.ShouldBeTrue();
             loadedType.Properties
@@ -764,49 +763,48 @@ namespace Microsoft.Build.UnitTests.BackEnd
             GetSetParameters(task)[nameof(RequiredByteEnumArrayTask.Values)]
                 .ShouldBeOfType<RequiredByteEnum[]>()
                 .ShouldBeEmpty();
+            task.RequiresParameterConversion.ShouldBeFalse();
         }
 
         [Fact]
-        public void OldNetTaskHostRejectsNonEmptyNonInt32EnumArray()
+        public void NetTaskHostRequiresConversionForNonEmptyNonInt32EnumArray()
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            UseMetadataLoadedTaskHostWithoutParameterConversion(env, out _);
+            TaskHostTask task = UseMetadataLoadedNetTaskHost(out _);
             var parameters = new Dictionary<string, (string, ElementLocation)>(StringComparer.OrdinalIgnoreCase)
             {
                 [nameof(RequiredByteEnumArrayTask.Values)] = (nameof(RequiredByteEnum.Value), ElementLocation.Create("foo.proj")),
             };
 
-            InvalidProjectFileException exception =
-                Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
-            exception.ErrorCode.ShouldBe("MSB4069");
+            _host.SetTaskParameters(parameters).ShouldBeTrue();
+            task.RequiresParameterConversion.ShouldBeTrue();
+            GetSetParameters(task)[nameof(RequiredByteEnumArrayTask.Values)]
+                .ShouldBe(new[] { nameof(RequiredByteEnum.Value) });
         }
 
         [Fact]
-        public void OldNetTaskHostRejectsRequiredEmptyMultidimensionalNonInt32EnumArray()
+        public void NetTaskHostRequiresConversionForRequiredEmptyMultidimensionalNonInt32EnumArray()
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            UseMetadataLoadedTaskHostWithoutParameterConversion(env, out _, useMatrixParameter: true);
+            TaskHostTask task = UseMetadataLoadedNetTaskHost(out _, useMatrixParameter: true);
             var parameters = new Dictionary<string, (string, ElementLocation)>(StringComparer.OrdinalIgnoreCase)
             {
                 [nameof(RequiredByteEnumArrayTask.Matrix)] = ("@(NonExistentItem)", ElementLocation.Create("foo.proj")),
             };
 
-            InvalidProjectFileException exception =
-                Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
-            exception.ErrorCode.ShouldBe("MSB4069");
+            _host.SetTaskParameters(parameters).ShouldBeTrue();
+            task.RequiresParameterConversion.ShouldBeTrue();
         }
 
         [Fact]
-        public void OldNetTaskHostKeepsLegacyInt32EnumArrayTransport()
+        public void NetTaskHostKeepsLegacyInt32EnumArrayTransport()
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            TaskHostTask task = UseTaskHostWithoutParameterConversion(env);
+            TaskHostTask task = UseNetTaskHost();
             var parameters = GetStandardParametersDictionary(true);
             parameters["EnumArrayParam"] = ("First;Second", ElementLocation.Create("foo.proj"));
 
             _host.SetTaskParameters(parameters).ShouldBeTrue();
             GetSetParameters(task)["EnumArrayParam"]
                 .ShouldBe(new[] { TaskBuilderTestTask.TestTaskEnum.First, TaskBuilderTestTask.TestTaskEnum.Second });
+            task.RequiresParameterConversion.ShouldBeFalse();
         }
 
         /// <summary>
@@ -1021,6 +1019,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ValidateTaskParameter("TaskItemFileInfoParam", filePath, new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(filePath)));
         }
 
+        [Fact]
+        public void NetTaskHostTransportsTaskItemFileInfoAsOrdinaryTaskItem()
+        {
+            TaskHostTask task = UseNetTaskHost();
+            string filePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemFileInfoParam"] = (filePath, ElementLocation.Create("foo.proj"));
+
+            _host.SetTaskParameters(parameters).ShouldBeTrue();
+
+            task.RequiresParameterConversion.ShouldBeTrue();
+            ITaskItem item = GetSetParameters(task)["TaskItemFileInfoParam"].ShouldBeAssignableTo<ITaskItem>();
+            item.ItemSpec.ShouldBe(filePath);
+            item.ShouldNotBeAssignableTo<ITaskItem<FileInfo>>();
+        }
+
         /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
@@ -1074,6 +1088,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(path1)),
                 new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(path2))
             });
+        }
+
+        [Fact]
+        public void NetTaskHostTransportsTaskItemFileInfoArrayAsOrdinaryTaskItems()
+        {
+            TaskHostTask task = UseNetTaskHost();
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\file1.txt" : "/tmp/file1.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\file2.txt" : "/tmp/file2.txt";
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemFileInfoArrayParam"] = ($"{path1};{path2}", ElementLocation.Create("foo.proj"));
+
+            _host.SetTaskParameters(parameters).ShouldBeTrue();
+
+            task.RequiresParameterConversion.ShouldBeTrue();
+            ITaskItem[] items = GetSetParameters(task)["TaskItemFileInfoArrayParam"].ShouldBeOfType<ITaskItem[]>();
+            items.Select(item => item.ItemSpec).ShouldBe([path1, path2]);
         }
 
         /// <summary>
@@ -1579,8 +1609,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TaskHostValueTypeArrayPreservesNullOutputPropertySemantics()
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            TaskHostTask task = UseMetadataLoadedTaskHostWithoutParameterConversion(env, out _);
+            TaskHostTask task = UseMetadataLoadedNetTaskHost(out _);
             FileInfo first = new(Path.Combine(Path.GetTempPath(), "a.txt"));
             FileInfo second = new(Path.Combine(Path.GetTempPath(), "b.txt"));
 
@@ -2378,15 +2407,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return parameters;
         }
 
-        private TaskHostTask UseTaskHostWithoutParameterConversion(TestEnvironment env)
+        private TaskHostTask UseNetTaskHost()
         {
-            string hostDirectory = env.CreateFolder().Path;
-            File.WriteAllText(Path.Combine(hostDirectory, Constants.MSBuildAssemblyName), string.Empty);
             var taskHostParameters = new TaskHostParameters(
                 "NET",
                 architecture: null,
                 dotnetHostPath: null,
-                msBuildAssemblyPath: hostDirectory);
+                msBuildAssemblyPath: null);
             var task = new TaskHostTask(
                 ElementLocation.Create("foo.proj"),
                 taskLoggingContext: null,
@@ -2428,8 +2455,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _bucket.Lookup.GetProperty("output").EvaluatedValue.ShouldBe(expectedPropertyValue);
         }
 
-        private TaskHostTask UseMetadataLoadedTaskHostWithoutParameterConversion(
-            TestEnvironment env,
+        private TaskHostTask UseMetadataLoadedNetTaskHost(
             out LoadedType loadedType,
             bool useMatrixParameter = false)
         {
@@ -2448,7 +2474,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 nameof(RequiredByteEnumArrayTask),
                 TaskHostParameters.Empty);
 
-            return UseTaskHostWithoutParameterConversion(env);
+            return UseNetTaskHost();
         }
 
         private static IDictionary<string, object> GetSetParameters(TaskHostTask task) =>

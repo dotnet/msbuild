@@ -96,11 +96,6 @@ namespace Microsoft.Build.BackEnd
         private HandshakeOptions _requiredContext = HandshakeOptions.None;
 
         /// <summary>
-        /// The task host node key identifying the task host we're launching.
-        /// </summary>
-        private TaskHostNodeKey _taskHostNodeKey;
-
-        /// <summary>
         /// The ID of the node on which this task is scheduled to run.
         /// </summary>
         private readonly int _scheduledNodeId;
@@ -169,12 +164,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly TaskEnvironment _taskEnvironment;
 
-        private readonly bool _supportsParameterConversion;
+        private ParameterConversionRequirement? _parameterConversionRequirement;
 
         internal bool IsNetTaskHost =>
             string.Equals(_taskHostParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase);
 
-        internal bool SupportsParameterConversion => _supportsParameterConversion;
+        internal bool RequiresParameterConversion => _parameterConversionRequirement.HasValue;
+
+        internal static bool CanConvertTaskParameters(byte negotiatedPacketVersion)
+            => negotiatedPacketVersion >= NodePacketTypeExtensions.TaskParameterConversionMinVersion;
+
+        private readonly record struct ParameterConversionRequirement(
+            string ParameterType,
+            string ParameterName,
+            string TaskName,
+            IElementLocation Location);
 
         /// <summary>
         /// Constructor.
@@ -210,8 +214,6 @@ namespace Microsoft.Build.BackEnd
             _hostServices = hostServices;
             _projectFile = projectFile;
             _taskHostParameters = taskHostParameters;
-            _supportsParameterConversion = IsNetTaskHost
-                && NodeProviderOutOfProcTaskHost.SupportsTaskParameterConversion(_taskHostParameters);
             _allowNodeReuse = allowNodeReuse;
             _forwardConsoleOutput = forwardConsoleOutput;
             _taskEnvironment = taskEnvironment;
@@ -334,6 +336,16 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal void RequireParameterConversion(
+            string parameterType,
+            string parameterName,
+            string taskName,
+            IElementLocation location)
+        {
+            _parameterConversionRequirement ??=
+                new ParameterConversionRequirement(parameterType, parameterName, taskName, location);
+        }
+
         /// <summary>
         /// Executes the task.
         /// </summary>
@@ -395,11 +407,11 @@ namespace Microsoft.Build.BackEnd
                     int hostProcessId;
                     bool wasNewlyCreated;
                     bool effectiveNodeReuse;
+                    bool parameterConversionUnsupported;
 
                     lock (_taskHostLock)
                     {
                         effectiveNodeReuse = _buildComponentHost.BuildParameters.EnableNodeReuse && _allowNodeReuse;
-
                         _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
                             taskHost: true,
 
@@ -407,20 +419,25 @@ namespace Microsoft.Build.BackEnd
                             nodeReuse: effectiveNodeReuse,
                             taskHostParameters: _taskHostParameters);
 
-                        _taskHostNodeKey = new TaskHostNodeKey(
+                        _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
                             _requiredContext,
                             _scheduledNodeId,
-                            ForwardConsoleOutput: _forwardConsoleOutput,
-                            SupportsParameterConversion: _supportsParameterConversion);
-                        _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
-                            _taskHostNodeKey,
+                            _forwardConsoleOutput,
                             this,
                             this,
                             hostConfiguration,
                             _taskHostParameters,
+                            RequiresParameterConversion,
+                            out parameterConversionUnsupported,
                             out hostProcessId,
                             out wasNewlyCreated,
                             out _taskHostConnection);
+                    }
+
+                    if (parameterConversionUnsupported)
+                    {
+                        LogUnsupportedParameterConversion();
+                        return false;
                     }
 
                     if (_connectedToTaskHost)
@@ -581,6 +598,17 @@ namespace Microsoft.Build.BackEnd
         internal void Cleanup()
         {
             // for now, do nothing.
+        }
+
+        private void LogUnsupportedParameterConversion()
+        {
+            ParameterConversionRequirement requirement = _parameterConversionRequirement.Value;
+            _taskLoggingContext.LogError(
+                new BuildEventFileInfo(requirement.Location),
+                "UnsupportedTaskParameterTypeError",
+                requirement.ParameterType,
+                requirement.ParameterName,
+                requirement.TaskName);
         }
 
         /// <summary>

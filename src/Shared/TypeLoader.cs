@@ -300,6 +300,12 @@ namespace Microsoft.Build.Shared
             return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
         }
 
+        // MetadataLoadContext can expose a PropertyInfo even when resolving PropertyType fails because a
+        // dependency is absent. Reading the PropertySig blob from the declaring assembly avoids resolving that
+        // dependency. The result is only an MSBuild expansion surrogate plus a display name for diagnostics; it
+        // is not the property's executable Type and does not imply that a particular task host supports it.
+        // A default result means the signature could not be classified safely, although individual supported
+        // shapes can still return a declared name with no expansion surrogate.
         private static (Type TypeForExpansion, string DeclaredTypeName) ReadParameterTypeInfo(PropertyInfo propertyInfo)
         {
             try
@@ -332,6 +338,10 @@ namespace Microsoft.Build.Shared
             ref BlobReader signature,
             MetadataReader metadataReader)
         {
+            // ECMA-335 II.23.2.5 defines PropertySig as its calling-convention header, a compressed
+            // parameter count, the property type, and any index parameters. MSBuild task parameters are
+            // non-generic properties without index parameters; their return type follows the Type grammar
+            // in II.23.2.12.
             SignatureHeader header = signature.ReadSignatureHeader();
             if (header.Kind != SignatureKind.Property || header.IsGeneric || signature.ReadCompressedInteger() != 0)
             {
@@ -340,6 +350,7 @@ namespace Microsoft.Build.Shared
 
             (Type TypeForExpansion, string DeclaredTypeName) parameterType =
                 ReadParameterTypeInfo(ref signature, metadataReader, depth: 0);
+            // A successful prefix is not enough: trailing bytes would mean an unsupported or malformed shape.
             return signature.RemainingBytes == 0 ? parameterType : default;
         }
 
@@ -348,26 +359,72 @@ namespace Microsoft.Build.Shared
             MetadataReader metadataReader,
             int depth)
         {
+            // Bound Type nesting independently from the declaring-type walk below.
             if (depth >= 16)
             {
                 return default;
             }
 
+            // This is the Type grammar's element-type tag. Class and value-type tags are followed by a
+            // separately encoded TypeDefOrRef handle, decoded below with ReadTypeHandle.
             int typeCode = signature.ReadCompressedInteger();
             if (typeCode == (int)SignatureTypeCode.SZArray)
             {
+                // Only one-dimensional, zero-based arrays are expansion surrogates. Nested arrays and the
+                // multidimensional ARRAY form remain unsupported. Text-converted elements use string[],
+                // while typed task items retain ITaskItem[] so item identity and metadata survive transport.
                 (Type TypeForExpansion, string DeclaredTypeName) elementType =
                     ReadParameterTypeInfo(ref signature, metadataReader, depth + 1);
                 return (
-                    elementType.TypeForExpansion?.IsArray == false
-                        ? LoadedType.GetArrayExpansionType(elementType.TypeForExpansion)
+                    elementType.TypeForExpansion == typeof(ITaskItem)
+                        ? typeof(ITaskItem[])
+                        : elementType.TypeForExpansion?.IsArray == false
+                            ? LoadedType.GetArrayExpansionType(elementType.TypeForExpansion)
                         : null,
                     elementType.DeclaredTypeName is null ? null : $"{elementType.DeclaredTypeName}[]");
             }
 
             if (typeCode is >= (int)SignatureTypeCode.Boolean and <= (int)SignatureTypeCode.String)
             {
+                // MSBuild expands intrinsic scalar values from text; the normal binder or task host performs
+                // the final conversion to the declared primitive type.
                 return (typeof(string), $"System.{(SignatureTypeCode)typeCode}");
+            }
+
+            if (metadataReader is not null && typeCode == (int)SignatureTypeCode.GenericTypeInstance)
+            {
+                // Per II.23.2.12, GENERICINST is followed by CLASS/VALUETYPE, a TypeDefOrRefEncoded generic
+                // definition, a compressed argument count, and the argument Types. Only the Framework's
+                // supported ITaskItem<T>/TaskItem<T> forms can use ordinary ITaskItem transport. Other generic
+                // forms are rejected; a supported Framework definition with an unsupported argument can still
+                // retain its declared name for the MSB4069 diagnostic.
+                int genericTypeKind = signature.ReadCompressedInteger();
+                if (genericTypeKind is not ((int)SignatureTypeKind.Class) and not ((int)SignatureTypeKind.ValueType))
+                {
+                    return default;
+                }
+
+                EntityHandle genericTypeHandle = signature.ReadTypeHandle();
+                string genericTypeName = genericTypeHandle.Kind is HandleKind.TypeDefinition or HandleKind.TypeReference
+                    ? GetFullName(genericTypeHandle, depth: 0)
+                    : null;
+                if (!IsFrameworkTaskItemType(genericTypeHandle, genericTypeName)
+                    || signature.ReadCompressedInteger() != 1)
+                {
+                    return default;
+                }
+
+                (Type _, string DeclaredTypeName) argumentType =
+                    ReadParameterTypeInfo(ref signature, metadataReader, depth + 1);
+                string declaredTypeName = argumentType.DeclaredTypeName is null
+                    ? null
+                    : $"{genericTypeName}<{argumentType.DeclaredTypeName}>";
+                if (!IsSupportedTaskItemValueType(argumentType.DeclaredTypeName))
+                {
+                    return (null, declaredTypeName);
+                }
+
+                return (typeof(ITaskItem), declaredTypeName);
             }
 
             if (metadataReader is null
@@ -376,6 +433,9 @@ namespace Microsoft.Build.Shared
                 return default;
             }
 
+            // CLASS and VALUETYPE are followed by a TypeDefOrRefEncoded handle. Named path types keep their
+            // path-aware expansion type; other value types expand from strings. Unsupported reference types
+            // have no surrogate, but their recoverable declared name is still useful diagnostically.
             EntityHandle handle = signature.ReadTypeHandle();
             if (handle.Kind is not HandleKind.TypeDefinition and not HandleKind.TypeReference)
             {
@@ -394,6 +454,9 @@ namespace Microsoft.Build.Shared
 
             string GetFullName(EntityHandle typeHandle, int depth)
             {
+                // Bound declaring-type traversal separately from Type nesting. Metadata represents nested
+                // declarations through their enclosing type; diagnostics use reflection's '+' spelling and
+                // omit a namespace prefix for global-namespace types.
                 if (depth >= 16)
                 {
                     return null;
@@ -429,6 +492,50 @@ namespace Microsoft.Build.Shared
 
                 string @namespace = metadataReader.GetString(namespaceHandle);
                 return @namespace.Length == 0 ? name : $"{@namespace}.{name}";
+            }
+
+            bool IsFrameworkTaskItemType(EntityHandle typeHandle, string fullName)
+            {
+                if (typeHandle.Kind != HandleKind.TypeReference
+                    || (fullName != typeof(ITaskItem<>).FullName && fullName != typeof(TaskItem<>).FullName))
+                {
+                    return false;
+                }
+
+                TypeReference typeReference = metadataReader.GetTypeReference((TypeReferenceHandle)typeHandle);
+                if (typeReference.ResolutionScope.Kind != HandleKind.AssemblyReference)
+                {
+                    return false;
+                }
+
+                AssemblyReference assemblyReference =
+                    metadataReader.GetAssemblyReference((AssemblyReferenceHandle)typeReference.ResolutionScope);
+                AssemblyName frameworkAssembly = typeof(ITaskItem).Assembly.GetName();
+                if (!metadataReader.StringComparer.Equals(assemblyReference.Name, frameworkAssembly.Name))
+                {
+                    return false;
+                }
+
+                byte[] expectedToken = frameworkAssembly.GetPublicKeyToken();
+                BlobReader token = metadataReader.GetBlobReader(assemblyReference.PublicKeyOrToken);
+                return expectedToken is not null
+                    && token.Length == expectedToken.Length
+                    && token.ReadBytes(token.Length).SequenceEqual(expectedToken);
+            }
+
+            static bool IsSupportedTaskItemValueType(string fullName)
+            {
+                if (fullName is null)
+                {
+                    return false;
+                }
+
+                Type type = TaskParameterTypeRegistry.TryGetType(fullName)
+                    ?? (fullName == typeof(AbsolutePath).FullName ? typeof(AbsolutePath) :
+                        fullName == typeof(FileInfo).FullName ? typeof(FileInfo) :
+                        fullName == typeof(DirectoryInfo).FullName ? typeof(DirectoryInfo) :
+                        null);
+                return type is not null && ValueTypeParser.IsSupportedType(type);
             }
         }
 

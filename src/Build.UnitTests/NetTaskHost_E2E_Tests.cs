@@ -207,28 +207,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 customMessage: output);
         }
 
-        [WindowsFullFrameworkOnlyFact]
-        public void NetTaskHost_DoesNotSendConvertedParametersToOldHost()
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-            string fakeSdkDirectory = Path.Combine(env.CreateFolder().Path, "10.0.100");
-            Directory.CreateDirectory(fakeSdkDirectory);
-            File.Copy(
-                typeof(NodeProviderOutOfProcTaskHost).Assembly.Location,
-                Path.Combine(fakeSdkDirectory, Constants.MSBuildAssemblyName));
-
-            string project = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestParameterBinding.proj");
-            string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"\"{project}\" -t:TestParameterBinding -v:n -nodeReuse:false -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -p:NetCoreSdkRoot=\"{fakeSdkDirectory}\"",
-                out bool success,
-                outputHelper: _output);
-
-            success.ShouldBeFalse(customMessage: output);
-            output.ShouldContain("MSB4069", customMessage: output);
-            output.ShouldContain("\"DestinationFiles\" parameter", customMessage: output);
-            output.ShouldContain("System.IO.FileInfo[]", customMessage: output);
-        }
-
         [WindowsFullFrameworkOnlyFact] // Verifies that when using the app host, DOTNET_ROOT is properly set for child processes to find the runtime.
         public void NetTaskHostTest_AppHostSetsDotnetRoot()
         {
