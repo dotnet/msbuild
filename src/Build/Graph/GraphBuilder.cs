@@ -153,22 +153,16 @@ namespace Microsoft.Build.Graph
 
                 var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode);
 
-                // Always add direct references. When a direct reference and a synthetic transitive reference resolve to
-                // the same node, whichever edge is added first wins the collision in GraphEdges.AddOrUpdateEdge and keeps
-                // its item type and metadata. Adding every direct reference before any transitive one makes the winner
-                // independent of ProjectReference order.
                 foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
                 {
+                    // Always add direct references.
                     currentNode.AddProjectReference(
                         allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode,
                         referenceInfo.ProjectReferenceItem,
                         edges);
-                }
 
-                // Add transitive references only if the project requires it.
-                if (requiresTransitiveProjectReferences)
-                {
-                    foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
+                    // Add transitive references only if the project requires it.
+                    if (requiresTransitiveProjectReferences)
                     {
                         foreach (var transitiveProjectReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
                         {
@@ -202,7 +196,14 @@ namespace Microsoft.Build.Graph
                 foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
                 {
                     ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
-                    transitiveReferences.Add(reference.GraphNode);
+
+                    // AddInnerBuildEdges replaces an outer-build edge with edges to its inner builds using the
+                    // outer-build edge's metadata. Do not add those same inner edges here with synthetic metadata.
+                    if (parsedProject.GraphNode.ProjectType != ProjectInterpretation.ProjectType.OuterBuild ||
+                        reference.GraphNode.ProjectType != ProjectInterpretation.ProjectType.InnerBuild)
+                    {
+                        transitiveReferences.Add(reference.GraphNode);
+                    }
 
                     // Perf note: avoiding UnionWith to avoid boxing the HashSet enumerator.
                     foreach (ProjectGraphNode transitiveReference in GetTransitiveProjectReferencesExcludingSelf(reference))
@@ -724,16 +725,22 @@ namespace Microsoft.Build.Graph
                         string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
 
+                        ProjectItemInstance itemToKeep =
+                            existingItem.ItemType.Equals(ProjectInterpretation.TransitiveReferenceItemName, StringComparison.OrdinalIgnoreCase) &&
+                            newItem.ItemType.Equals(ItemTypeNames.ProjectReference, StringComparison.OrdinalIgnoreCase)
+                                ? newItem
+                                : existingItem;
+
                         // Bail out if the targets are the same.
                         if (existingTargetsMetadata.Equals(newTargetsMetadata, StringComparison.OrdinalIgnoreCase))
                         {
-                            return existingItem;
+                            return itemToKeep;
                         }
 
                         existingTargetsMetadata = GetEffectiveTargets(key.reference, existingTargetsMetadata);
                         newTargetsMetadata = GetEffectiveTargets(key.reference, newTargetsMetadata);
 
-                        ProjectItemInstance mergedItem = existingItem.DeepClone();
+                        ProjectItemInstance mergedItem = itemToKeep.DeepClone();
                         mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, $"{existingTargetsMetadata};{newTargetsMetadata}");
                         return mergedItem;
 
