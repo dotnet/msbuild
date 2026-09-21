@@ -45,12 +45,14 @@ internal static class TestHelpers
                 public void SetEnvironmentVariable(string name, string? value) { }
                 public System.Collections.Generic.IReadOnlyDictionary<string, string> GetEnvironmentVariables() => new System.Collections.Generic.Dictionary<string, string>();
                 public AbsolutePath GetAbsolutePath(string path) => default;
+                public AbsolutePath GetTempPath() => default;
                 public System.Diagnostics.ProcessStartInfo GetProcessStartInfo() => new();
             }
 
             public struct AbsolutePath : System.IEquatable<AbsolutePath>
             {
                 public AbsolutePath(string path) { Value = path; OriginalValue = path; }
+                public AbsolutePath(string path, AbsolutePath basePath) { Value = System.String.Concat(basePath.Value, path); OriginalValue = path; }
                 public string Value { get; }
                 public string OriginalValue { get; }
                 public static implicit operator string(AbsolutePath p) => p.Value;
