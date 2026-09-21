@@ -287,6 +287,22 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// Adds a trailing directory separator without changing existing path characters.
+        /// </summary>
+        internal static AbsolutePath EnsureTrailingSlashWithoutNormalization(AbsolutePath path)
+        {
+            if (string.IsNullOrEmpty(path.Value) || IsSlash(path.Value[path.Value.Length - 1]))
+            {
+                return path;
+            }
+
+            return new AbsolutePath(
+                path.Value + Path.DirectorySeparatorChar,
+                original: path.OriginalValue,
+                ignoreRootedCheck: true);
+        }
+
+        /// <summary>
         /// Ensures the absolute path does not have a trailing slash.
         /// </summary>
         /// <param name="path">The absolute path to check.</param>
