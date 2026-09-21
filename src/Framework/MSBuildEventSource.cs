@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics.Tracing;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Eventing
 {
@@ -17,10 +18,10 @@ namespace Microsoft.Build.Eventing
         public static class Keywords
         {
             /// <summary>
-            /// Keyword applied to all MSBuild events.
+            /// Keyword applied to general MSBuild tracing events.
             /// </summary>
             /// <remarks>
-            /// Literally every event should define this.
+            /// Dedicated opt-in event families may use their own keyword instead.
             /// </remarks>
             public const EventKeywords All = (EventKeywords)0x1;
 
@@ -33,6 +34,11 @@ namespace Microsoft.Build.Eventing
             /// <see href="https://github.com/dotnet/msbuild/pull/5861">text perf log</see>.
             /// </remarks>
             public const EventKeywords PerformanceLog = (EventKeywords)0x2;
+
+            /// <summary>
+            /// Keyword for opt-in project evaluation duration measurements.
+            /// </summary>
+            public const EventKeywords EvaluationMeasurements = (EventKeywords)0x4;
         }
 
         /// <summary>
@@ -831,25 +837,67 @@ namespace Microsoft.Build.Eventing
         }
         #endregion
 
+        #region Evaluation measurement events
+
+        /// <summary>
+        /// Records one completed project evaluator invocation.
+        /// </summary>
+        /// <param name="durationSeconds">Elapsed wall-clock time in seconds, or NaN if measurement was enabled after evaluation began.</param>
+        /// <param name="stage">The requested evaluation stage: properties, item_definitions, items, using_tasks, or full.</param>
+        /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
+        /// <param name="succeeded">Whether evaluation completed without an error.</param>
+        /// <param name="projectFile">Full path to the evaluated project, or an empty string for an unnamed in-memory project.</param>
+        /// <param name="evaluationId">
+        /// The ID assigned by the evaluation's logging service, or <see cref="BuildEventContext.InvalidEvaluationId"/> if evaluation failed before the logging context was created.
+        /// Assigned values can repeat across project collections and builds, including after <c>UnregisterAllLoggers</c> recreates the logging service.
+        /// The ID is neither node- nor process-unique and does not identify a project configuration; use it with the project path and event order only within a trace segment whose logging-service lifetime is known.
+        /// </param>
+        [Event(113, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
+        public void ProjectEvaluationCompleted(double durationSeconds, string stage, string origin, bool succeeded, string projectFile, int evaluationId)
+        {
+            WriteEvent(113, durationSeconds, stage, origin, succeeded, projectFile, evaluationId);
+        }
+
+        /// <summary>
+        /// Records one completed project evaluation pass.
+        /// </summary>
+        /// <param name="durationSeconds">Elapsed wall-clock time in seconds.</param>
+        /// <param name="stage">The requested evaluation stage: properties, item_definitions, items, using_tasks, or full.</param>
+        /// <param name="pass">The completed pass: initial_properties, properties, item_definitions, items, using_tasks, or targets.</param>
+        /// <param name="origin">Whether evaluation occurred within a build_submission or outside_build_submission.</param>
+        /// <param name="projectFile">Full path to the evaluated project, or an empty string for an unnamed in-memory project.</param>
+        /// <param name="evaluationId">
+        /// The ID assigned by the evaluation's logging service.
+        /// Values can repeat across project collections and builds, including after <c>UnregisterAllLoggers</c> recreates the logging service.
+        /// The ID is neither node- nor process-unique and does not identify a project configuration; use it with the project path and event order only within a trace segment whose logging-service lifetime is known.
+        /// </param>
+        [Event(114, Level = EventLevel.Informational, Opcode = EventOpcode.Info, Keywords = Keywords.EvaluationMeasurements)]
+        public void ProjectEvaluationPassCompleted(double durationSeconds, string stage, string pass, string origin, string projectFile, int evaluationId)
+        {
+            WriteEvent(114, durationSeconds, stage, pass, origin, projectFile, evaluationId);
+        }
+
+        #endregion
+
         #region Strict mode events
 
         /// <summary>
         /// Starts a sentinel-content scan, including scan-lock wait and filesystem work.
         /// An empty project file identifies the final build scan.
         /// </summary>
-        [Event(113, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(115, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void StrictModeDirectoryScanStart(int buildId, string projectFile)
         {
-            WriteEvent(113, buildId, projectFile);
+            WriteEvent(115, buildId, projectFile);
         }
 
         /// <summary>
         /// Completes a sentinel-content scan, including scans that fail.
         /// </summary>
-        [Event(114, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(116, Keywords = Keywords.All | Keywords.PerformanceLog)]
         public void StrictModeDirectoryScanStop(int buildId, string projectFile)
         {
-            WriteEvent(114, buildId, projectFile);
+            WriteEvent(116, buildId, projectFile);
         }
         #endregion
     }

@@ -1699,7 +1699,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             warningEvent.ColumnNumber,
                             warningEvent.EndLineNumber,
                             warningEvent.EndColumnNumber,
-                            warningEvent.Message,
+                            EventArgsFormatting.GetLocalizedMessage(warningEvent),
                             warningEvent.HelpKeyword,
                             warningEvent.SenderName,
                             MessageImportance.Low,
@@ -1744,7 +1744,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             warningEvent.ColumnNumber,
                             warningEvent.EndLineNumber,
                             warningEvent.EndColumnNumber,
-                            warningEvent.Message,
+                            EventArgsFormatting.GetLocalizedMessage(warningEvent),
                             warningEvent.HelpKeyword,
                             warningEvent.SenderName,
                             warningEvent.Timestamp)
