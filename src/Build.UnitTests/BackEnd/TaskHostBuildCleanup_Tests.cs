@@ -82,6 +82,7 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
 
     public override bool Execute()
     {
+        Log.LogMessage(MessageImportance.High, "CleanupProbeStarted Reuse={0} Worker={1} Crash={2}", Reuse, UseWorker, CrashDuringCleanup);
         // TestEnvironment would reset the default BuildManager that is executing this task.
         string? originalForceOutOfProc = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
         if (UseWorker)
@@ -114,8 +115,10 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
         {
             manager.BeginBuild(parameters);
             buildStarted = true;
+            Log.LogMessage(MessageImportance.High, "CleanupProbeBuildStarted");
             BuildResult result = manager.PendBuildRequest(CreateRequest(registerObject: true)).Execute();
             result.OverallResult.ShouldBe(BuildResultCode.Success, logger.FullLog);
+            Log.LogMessage(MessageImportance.High, "CleanupProbeInnerBuildFinished");
             child = Process.GetProcessById(int.Parse(result.ResultsByTarget["Build"].Items[0].ItemSpec, CultureInfo.InvariantCulture));
             if (UseWorker)
             {

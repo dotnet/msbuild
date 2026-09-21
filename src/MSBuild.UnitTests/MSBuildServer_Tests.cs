@@ -42,6 +42,37 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    [MSBuildMultiThreadableTask]
+    public sealed class BusyServerGateTask : Microsoft.Build.Utilities.Task
+    {
+        [Required]
+        public string StartedFile { get; set; } = null!;
+
+        [Required]
+        public string ReleaseFile { get; set; } = null!;
+
+        [Required]
+        public int ExpectedServerPid { get; set; }
+
+        public override bool Execute()
+        {
+            if (EnvironmentUtilities.CurrentProcessId != ExpectedServerPid)
+            {
+                Log.LogError("The gated build did not run on the expected server.");
+                return false;
+            }
+
+            File.WriteAllText(StartedFile, "started");
+            if (!SpinWait.SpinUntil(() => File.Exists(ReleaseFile), TimeSpan.FromSeconds(30)))
+            {
+                Log.LogError("The test did not release the busy-server build.");
+                return false;
+            }
+
+            return true;
+        }
+    }
+
     // Marked multithreadable so that under /mt the engine runs it in-process on a server thread
     // (rather than routing it to a sidecar TaskHost), letting it observe the server process's GC mode.
     // The task only reads its own PID and GCSettings, so it is genuinely thread-safe.
@@ -391,60 +422,61 @@ namespace Microsoft.Build.Engine.UnitTests
         public void BuildsWhileBuildIsRunningOnServer()
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            TransientTestFolder gate = _env.CreateFolder();
+            string startedFile = Path.Combine(gate.Path, "started");
+            string releaseFile = Path.Combine(gate.Path, "release");
+            TransientTestFile gatedProject = _env.CreateFile("gatedProject.proj", $"""
+                <Project>
+                  <UsingTask TaskName="BusyServerGateTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                  <Target Name="Build">
+                    <BusyServerGateTask StartedFile="{startedFile}" ReleaseFile="{releaseFile}" ExpectedServerPid="$(ExpectedServerPid)" />
+                  </Target>
+                </Project>
+                """);
 
-            TransientTestFile markerFile = _env.ExpectFile();
-            TransientTestFile sleepProject = _env.CreateFile("napProject.proj", string.Format(sleepingTaskContentsFormat, markerFile.Path));
-
-            int pidOfServerProcess;
-            Task t;
             // Start a server node and find its PID.
             string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
-            pidOfServerProcess = ParseNumber(output, "Server ID is ");
+            success.ShouldBeTrue(output);
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
             _env.WithTransientProcess(pidOfServerProcess);
 
-            string? dir = Path.GetDirectoryName(markerFile.Path);
-            // mre must be declared before watcher so that it is disposed after watcher.
-            // Reversing this order would allow late FileSystemWatcher callbacks to call
-            // mre.Set() on a disposed ManualResetEvent, causing an ObjectDisposedException.
-            using ManualResetEvent mre = new ManualResetEvent(false);
-            using var watcher = new System.IO.FileSystemWatcher(dir!);
-            watcher.Created += (o, e) =>
+            Task busyBuild = Task.Run(() =>
             {
-                _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started.");
-                mre.Set();
-            };
-            watcher.Filter = Path.GetFileName(markerFile.Path);
-            watcher.EnableRaisingEvents = true;
-            t = Task.Run(() =>
-            {
-                RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _, false, _output);
+                string busyOutput = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"\"{gatedProject.Path}\" /p:ExpectedServerPid={pidOfServerProcess}", out bool busySuccess, false, _output);
+                busySuccess.ShouldBeTrue(busyOutput);
             });
 
-            // The server will soon be in use; make sure we don't try to use it before that happens.
-            _output.WriteLine("Waiting for the server to be in use.");
-            mre.WaitOne();
-            _output.WriteLine("It's OK to go ahead.");
+            try
+            {
+                SpinWait.SpinUntil(() => File.Exists(startedFile) || busyBuild.IsCompleted, TimeSpan.FromSeconds(10))
+                    .ShouldBeTrue("The server build did not reach its gate.");
+                if (busyBuild.IsCompleted)
+                {
+                    busyBuild.GetAwaiter().GetResult();
+                }
+                File.Exists(startedFile).ShouldBeTrue();
 
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+                _env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+                success.ShouldBeTrue(output);
+                ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
-
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
-            pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
-            ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "Process ID and Server ID should coincide.");
-
-            // Clean up process and tasks
-            // 1st kill registered processes
-            _env.Dispose();
-            // 2nd wait for sleep task which will ends as soon as the process is killed above.
-            t.Wait();
+                _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+                output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+                success.ShouldBeTrue(output);
+                pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
+                pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
+                ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "Process ID and Server ID should coincide.");
+            }
+            finally
+            {
+                File.WriteAllText(releaseFile, "release");
+                busyBuild.GetAwaiter().GetResult();
+            }
         }
 
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/14195", TestPlatforms.Windows)]

@@ -203,6 +203,8 @@ A retained sidecar echoes `NodeBuildComplete` after disposal and reset. Its owne
 
 When node reuse is disabled, current same-runtime, same-architecture TaskHosts are retired locally before shutdown is queued. `EndBuild()` does not wait for their disposal or process exit. The sender drains the shutdown request, and the reader closes when the child replies or exits. A retiring host cannot be acquired by the next build, and its late notifications cannot remove a replacement. Attached tasks still receive the terminal notification if retirement occurs during build abort. Legacy and compatibility hosts keep their existing shutdown waits.
 
+The peer can close its pipe before the final, error-free `NodeShutdown(Requested)` notification is flushed. A write failure on an already disconnected pipe in that case is an expected shutdown race, not a crash log. Serialization failures, error-bearing shutdown packets, and writes of other packets retain their failure diagnostics.
+
 The reset releases the build's working directory while the sidecar is idle, so Windows does not keep that directory open. Each task's configuration sets its working directory and environment again before execution.
 
 Because a sidecar stays connected, its owner exiting -- normally, via `dotnet build-server shutdown`, or by crashing -- breaks the pipe, and the `LinkStatus.Failed` handler terminates it. Reaping a sidecar therefore requires no shutdown cascade and no process enumeration: it is reachable through the connection it already holds. A sidecar has no idle timeout; it waits indefinitely on its owner's connection.
