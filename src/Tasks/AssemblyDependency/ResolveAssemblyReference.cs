@@ -2698,8 +2698,16 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
+                    string[] targetFrameworkDirectories = _targetFrameworkDirectories.ToStringArray();
+
                     // Validate the contents of the InstalledAssemblyTables parameter.
-                    AssemblyTableInfo[] installedAssemblyTableInfo = GetInstalledAssemblyTableInfo(_ignoreDefaultInstalledAssemblyTables, _installedAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), TargetFrameworkDirectories);
+                    AssemblyTableInfo[] installedAssemblyTableInfo = GetInstalledAssemblyTableInfo(
+                        _ignoreDefaultInstalledAssemblyTables,
+                        _installedAssemblyTables,
+                        new GetListPath(RedistList.GetRedistListPathsFromDisk),
+                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                            ? targetFrameworkDirectories
+                            : TargetFrameworkDirectories);
                     AssemblyTableInfo[] inclusionListSubsetTableInfo = null;
 
                     InstalledAssemblies installedAssemblies = null;
@@ -2729,7 +2737,13 @@ namespace Microsoft.Build.Tasks
                         {
                             // Based in the target framework subset names find the paths to the files
                             SubsetListFinder inclusionList = new SubsetListFinder(_targetFrameworkSubsets);
-                            inclusionListSubsetTableInfo = GetInstalledAssemblyTableInfo(IgnoreDefaultInstalledAssemblySubsetTables, InstalledAssemblySubsetTables, new GetListPath(inclusionList.GetSubsetListPathsFromDisk), TargetFrameworkDirectories);
+                            inclusionListSubsetTableInfo = GetInstalledAssemblyTableInfo(
+                                IgnoreDefaultInstalledAssemblySubsetTables,
+                                InstalledAssemblySubsetTables,
+                                new GetListPath(inclusionList.GetSubsetListPathsFromDisk),
+                                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                                    ? targetFrameworkDirectories
+                                    : TargetFrameworkDirectories);
                             if (inclusionListSubsetTableInfo.Length > 0 && (redistList?.Count > 0))
                             {
                                 exclusionList = redistList.GenerateDenyList(inclusionListSubsetTableInfo, inclusionListErrors, inclusionListErrorFilesNames);
@@ -2903,7 +2917,7 @@ namespace Microsoft.Build.Tasks
                         _relatedFileExtensions,
                         _candidateAssemblyFiles.ToStringArray(),
                         _resolvedSDKReferences,
-                        _targetFrameworkDirectories.ToStringArray(),
+                        targetFrameworkDirectories,
                         installedAssemblies,
                         processorArchitecture,
                         fileExists,
