@@ -150,10 +150,12 @@ The parent associates a TaskHost with the task currently running in it, so it kn
 which task should receive the TaskHost's messages. Starting another task changes
 that association; resuming a paused task must change it back.
 
-A task waiting for a nested build can resume while a task started later is still
-waiting. When it gets its parent node back, the parent must restore the association
-**before sending back the build results**. Both sides then agree which task is
-running, and its next messages reach the right receiver.
+Completing a nested build does not immediately resume its waiting task. The task
+first waits for the scheduler to give it its owning node back, as with an
+in-process task. It can then resume even if a later-started task is still blocked
+on another nested build. The parent must restore its association with the task
+**before sending the callback response that lets the task continue**. Both sides
+then agree which task is running, and its next messages reach the right receiver.
 
 Attachment and terminal notification are synchronized. A terminal failure notifies every attached task and removes its registrations. Each task sends replies and cancellation through its acquired connection, not a reusable lookup key, so a late reply cannot reach a replacement TaskHost.
 

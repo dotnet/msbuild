@@ -969,24 +969,24 @@ namespace Microsoft.Build.BackEnd
             lock (_activeNodes)
             {
                 if (!_nodeIdToNodeKey.ContainsKey(context.NodeId) ||
-                    !_nodeIdToPacketHandlerStack.TryGetValue(context.NodeId, out Stack<INodePacketHandler> handlers))
+                    !_nodeIdToPacketHandlerStack.TryGetValue(context.NodeId, out Stack<INodePacketHandler> handlerStack))
                 {
                     return false;
                 }
 
-                lock (handlers)
+                lock (handlerStack)
                 {
-                    if (handlers.Count > 0 && ReferenceEquals(handlers.Peek(), handler))
+                    if (handlerStack.Count > 0 && ReferenceEquals(handlerStack.Peek(), handler))
                     {
                         return true;
                     }
 
-                    if (!RemoveTaskHandler(handlers, handler))
+                    if (!RemoveTaskHandler(handlerStack, handler))
                     {
                         return false;
                     }
 
-                    handlers.Push(handler);
+                    handlerStack.Push(handler);
                     return true;
                 }
             }
@@ -1016,34 +1016,34 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static bool RemoveTaskHandler(Stack<INodePacketHandler> handlers, INodePacketHandler handler)
+        private static bool RemoveTaskHandler(Stack<INodePacketHandler> handlerStack, INodePacketHandler handler)
         {
-            if (handlers.Count == 0)
+            if (handlerStack.Count == 0)
             {
                 return false;
             }
 
-            if (ReferenceEquals(handlers.Peek(), handler))
+            if (ReferenceEquals(handlerStack.Peek(), handler))
             {
-                handlers.Pop();
+                handlerStack.Pop();
                 return true;
             }
 
             Stack<INodePacketHandler> laterHandlers = new();
-            while (handlers.Count > 0 && !ReferenceEquals(handlers.Peek(), handler))
+            while (handlerStack.Count > 0 && !ReferenceEquals(handlerStack.Peek(), handler))
             {
-                laterHandlers.Push(handlers.Pop());
+                laterHandlers.Push(handlerStack.Pop());
             }
 
-            bool removed = handlers.Count > 0;
+            bool removed = handlerStack.Count > 0;
             if (removed)
             {
-                handlers.Pop();
+                handlerStack.Pop();
             }
 
             while (laterHandlers.Count > 0)
             {
-                handlers.Push(laterHandlers.Pop());
+                handlerStack.Push(laterHandlers.Pop());
             }
 
             return removed;
