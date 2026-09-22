@@ -19,6 +19,11 @@ using Constants = Microsoft.Build.Framework.Constants;
 
 namespace Microsoft.Build.BackEnd
 {
+    internal readonly record struct TaskHostLaunchIdentity(
+        string ExecutablePath,
+        string CommandLineArgs,
+        string DotnetHostPath);
+
     /// <summary>
     /// Represents a unique key for identifying task host nodes.
     /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
@@ -38,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         HandshakeOptions HandshakeOptions,
         int NodeId,
         bool ForwardConsoleOutput = false,
-        string LaunchIdentity = null);
+        TaskHostLaunchIdentity? LaunchIdentity = null);
     /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
@@ -894,9 +899,7 @@ namespace Microsoft.Build.BackEnd
         /// and configure it for the task.
         /// </summary>
         internal bool AcquireAndSetUpHost(
-            HandshakeOptions hostContext,
-            int scheduledNodeId,
-            bool forwardConsoleOutput,
+            TaskHostNodeKey requestedNodeKey,
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
@@ -918,9 +921,8 @@ namespace Microsoft.Build.BackEnd
                 KeyValuePair<TaskHostNodeKey, NodeContext>? reusableConnection = null;
                 foreach (KeyValuePair<TaskHostNodeKey, NodeContext> existing in _nodeContexts)
                 {
-                    if (existing.Key.HandshakeOptions == hostContext
-                        && existing.Key.NodeId == scheduledNodeId
-                        && existing.Key.ForwardConsoleOutput == forwardConsoleOutput
+                    // A nested request without explicit launch paths may reuse only its unique active outer host.
+                    if ((existing.Key with { LaunchIdentity = requestedNodeKey.LaunchIdentity }) == requestedNodeKey
                         && HasActiveTaskHandler(existing.Value.NodeId))
                     {
                         if (reusableConnection.HasValue)
@@ -955,17 +957,16 @@ namespace Microsoft.Build.BackEnd
             NodeLaunchData nodeLaunchData = default;
             if (nodeKey == default)
             {
-                nodeLaunchData = ResolveNodeLaunchConfiguration(hostContext, taskHostParameters);
+                nodeLaunchData = ResolveNodeLaunchConfiguration(requestedNodeKey.HandshakeOptions, taskHostParameters);
                 if (nodeLaunchData.MSBuildLocation is null)
                 {
                     return false;
                 }
 
-                nodeKey = new TaskHostNodeKey(
-                    hostContext,
-                    scheduledNodeId,
-                    forwardConsoleOutput,
-                    CreateLaunchIdentity(nodeLaunchData, taskHostParameters.DotnetHostPath));
+                nodeKey = requestedNodeKey with
+                {
+                    LaunchIdentity = CreateLaunchIdentity(nodeLaunchData, taskHostParameters.DotnetHostPath),
+                };
             }
 
             if (!_nodeContexts.ContainsKey(nodeKey))
@@ -1108,8 +1109,11 @@ namespace Microsoft.Build.BackEnd
             return new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
         }
 
-        private static string CreateLaunchIdentity(NodeLaunchData launchData, string dotnetHostPath)
-            => $"{NormalizeLaunchPath(launchData.MSBuildLocation)}\0{launchData.CommandLineArgs}\0{NormalizeLaunchPath(dotnetHostPath)}";
+        private static TaskHostLaunchIdentity CreateLaunchIdentity(NodeLaunchData launchData, string dotnetHostPath)
+            => new(
+                NormalizeLaunchPath(launchData.MSBuildLocation),
+                launchData.CommandLineArgs ?? string.Empty,
+                NormalizeLaunchPath(dotnetHostPath));
 
         private static string NormalizeLaunchPath(string path)
         {
@@ -1119,7 +1123,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             string normalizedPath = FileUtilities.NormalizePath(path);
-            return NativeMethodsShared.IsWindows ? normalizedPath.ToUpperInvariant() : normalizedPath;
+            return NativeMethodsShared.IsFileSystemCaseSensitive ? normalizedPath : normalizedPath.ToUpperInvariant();
         }
 
         /// <summary>

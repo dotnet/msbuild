@@ -420,9 +420,7 @@ namespace Microsoft.Build.BackEnd
                             taskHostParameters: _taskHostParameters);
 
                         _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
-                            _requiredContext,
-                            _scheduledNodeId,
-                            _forwardConsoleOutput,
+                            new TaskHostNodeKey(_requiredContext, _scheduledNodeId, _forwardConsoleOutput),
                             this,
                             this,
                             hostConfiguration,

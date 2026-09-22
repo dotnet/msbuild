@@ -166,7 +166,10 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
         provider.InitializeComponent(new MockHost());
         HandshakeOptions hostContext = HandshakeOptions.TaskHost | HandshakeOptions.NET;
-        TaskHostNodeKey key = new(hostContext, 1, LaunchIdentity: "host");
+        TaskHostNodeKey key = new(
+            hostContext,
+            1,
+            LaunchIdentity: new TaskHostLaunchIdentity("host", string.Empty, string.Empty));
         NodeProviderOutOfProcBase.NodeContext context = new(
             1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
             negotiatedPacketVersion, connectionPersistsAcrossBuilds: true);
@@ -176,9 +179,7 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
         try
         {
             provider.AcquireAndSetUpHost(
-                hostContext,
-                scheduledNodeId: 1,
-                forwardConsoleOutput: false,
+                new TaskHostNodeKey(hostContext, 1),
                 provider,
                 new RecordingHandler(),
                 configuration: null,
