@@ -15,7 +15,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         private readonly StringBuilder _standardOutput = new();
 
         [Output]
-        public string VsInstallPath { get; set; }
+        public string VsInstallPath { get; set; } = string.Empty;
 
         protected override string ToolName => "vswhere.exe";
 

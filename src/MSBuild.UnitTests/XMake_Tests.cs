@@ -3432,6 +3432,47 @@ EndGlobal
             exception.Message.ShouldContain("MSB1072");
         }
 
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Regression coverage for https://github.com/dotnet/msbuild/issues/14825.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedAndReportFileAccessesAreRejected()
+        {
+            CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
+                () => MSBuildApp.VerifyBuildModeCompatibility(multiThreaded: true, reportFileAccesses: true));
+
+            exception.Message.ShouldContain("MSB1073");
+            exception.Message.ShouldContain("Multi-threaded mode");
+            exception.Message.ShouldContain("-reportFileAccesses");
+            exception.Message.ShouldContain("MSBUILDFORCEMULTITHREADED");
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public void MultiThreadedOrReportFileAccessesRemainValidIndividually(bool multiThreaded, bool reportFileAccesses)
+        {
+            Should.NotThrow(() => MSBuildApp.VerifyBuildModeCompatibility(multiThreaded, reportFileAccesses));
+        }
+
+        [Fact]
+        public void MultiThreadedAndReportFileAccessesCommandLineReturnsSwitchError()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDENABLEMULTITHREADED", null);
+            string project = testEnvironment.CreateTestProjectWithFiles(
+                "project.proj",
+                "<Project />").ProjectFile;
+
+            MSBuildApp.Execute([BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project, "-mt", "-reportFileAccesses"])
+                .ShouldBe(MSBuildApp.ExitType.SwitchError);
+        }
+
+#endif
+
         [Fact]
         public void MSBuildForceMultiThreadedEnvironmentVariableUnsetDoesNotEnableMultiThreadedMode()
         {

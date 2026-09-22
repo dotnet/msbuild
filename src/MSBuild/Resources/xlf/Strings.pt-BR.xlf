@@ -250,15 +250,11 @@
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
-                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded[:true|false]
+        <target state="needs-review-translation">  -multithreaded[:true|false]
                      Habilita o modo multithread EXPERIMENTAL no MSBuild.
                      Isso significa que o MSBuild usará vários threads
                      para criar projetos em paralelo,
@@ -1943,6 +1939,14 @@ arquivo de resposta.
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
         <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
+        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </note>
       </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
         <source>MSBUILD : error MSB1022: Response file does not exist.</source>

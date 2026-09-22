@@ -664,6 +664,36 @@
         <target state="translated">メタプロジェクト "{0}" が生成されました。</target>
         <note />
       </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
+        <target state="new">MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</target>
+        <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
+        <target state="new">MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
+        <target state="new">Multi-threaded strict mode is enabled. Process current directory: "{0}".</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelMissing">
+        <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
+        <target state="new">MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</target>
+        <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
+        <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
+        <target state="new">MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</target>
+        <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
+        <target state="new">MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</target>
+        <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
@@ -952,6 +982,11 @@
         <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
         <target state="translated">MSB4283: "{0}" タスクは実行できませんでした。タスクの実行にはリフレクションによるタスク アセンブリと型の読み込みが必要ですが、このトリミング済みまたはネイティブ AOT のホストではサポートされていません。タスクを実行するには、JIT ベースの MSBuild でビルドしてください。</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="new">File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
