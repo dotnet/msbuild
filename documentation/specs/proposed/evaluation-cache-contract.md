@@ -2,10 +2,10 @@
 
 ## Status
 
-This document is the **required acceptance contract** for an opt-in evaluation cache.
-The current prototype **does not yet conform** to this contract, and this document makes no claim of
-production readiness. Requirements below are normative; the final section separately describes
-present implementation evidence and known gaps.
+This document is the **required acceptance contract** for an opt-in evaluation cache under the
+timestamp-and-length metadata model described below. The current prototype remains opt-in and makes
+no claim of production readiness. Requirements below are normative within that model; the final
+section separately describes present implementation evidence and known gaps.
 
 The cache reuses a full, file-based project evaluation. It is not a build-output cache: normal target
 scheduling and incremental-build checks still apply after a hit. A feature that works correctly may
@@ -96,19 +96,19 @@ Before accepting an entry, checked mode MUST establish that all evaluation input
 - restore-generated projects, props, targets, assets, and other generated evaluation inputs.
 
 An SDK result retained for validation MUST be immutable, copied into immutable owned data, or make the
-entry non-reusable. Timestamp and length metadata alone do not prove that file content is unchanged.
-Before checked reuse becomes supported, its implementation MUST address same-metadata content edits
-and time-of-check/time-of-use (TOCTOU) races; this contract does not mandate content hashing as the
-sole algorithm. It is not acceptable to silently exclude changes that the chosen algorithm cannot
-detect.
+entry non-reusable. Checked mode validates file and directory kind, last-write timestamp, and file
+length. Its supported operating model assumes relevant edits change timestamp or length and that
+inputs are not concurrently written during validation and materialization. Same-size edits that
+preserve timestamps, timestamp aliasing, and concurrent writers are outside this guarantee. Content
+hashing, file-system watchers, detours, and an atomic file-system snapshot are not requirements of
+this prototype.
 
 If an input is unknown, unstable, or unprovable, the request MUST receive a fresh evaluation and an
 observable bypass reason. That reason belongs in opt-in diagnostic/status output and MUST NOT add
 noise to the default, disabled path.
 
-No implementation can promise an atomic file-system snapshot while inputs are concurrently changing.
-It MUST instead detect and reject inconsistent observations or classify that evaluation as
-non-reusable.
+Conflicting observations detected while recording still make an evaluation non-reusable. The cache
+does not claim correctness for concurrent writers outside the operating assumptions above.
 
 ## Failure behavior
 
@@ -145,8 +145,8 @@ reduce hit rate but never change build results. Entries MUST NOT keep unbounded 
 aliases alive.
 
 The prototype's 256 MiB default is an internal configured cache budget, not a promise that process RSS
-is capped at 256 MiB. Current size estimates exclude some payload and runtime overhead and therefore
-do not yet satisfy this contract.
+is capped at 256 MiB. Conservative estimates cover cache-owned keys, snapshots, and validation
+payloads; allocator, collection-capacity, and general runtime overhead are not an RSS accounting model.
 
 ## Acceptance matrix
 
@@ -158,7 +158,7 @@ performance measurements are not proof of any row.
 | --- | --- |
 | Unchanged eligible full file project | Hit is equivalent in properties, items/metadata, targets, task registrations, and build result. |
 | Root or import changes normally | Old entry is rejected; fresh evaluation observes the change. |
-| Root or import changes with the same timestamp and length | Old content is never accepted merely because metadata matches. |
+| Root or import changes under the supported metadata model | Timestamp or length changes reject the old entry; same-metadata edits are outside the stated guarantee. |
 | Glob set changes or a missing probe appears | Add/delete/rename and missing-now-exists cases reject; fresh evaluation sees the new search set. |
 | Global/command-line properties, load/profile flags, directory, culture, or environment changes | Candidate differs or validation rejects; result matches fresh. |
 | Relevant registry read changes | Validation rejects or the request is explicitly non-reusable. |
@@ -180,9 +180,10 @@ This table records present behavior; it does not weaken the requirements above.
 | Activation | [`Traits.cs`](../../../src/Framework/Traits.cs) implements the four modes, explicit precedence, legacy mapping, and fail-closed invalid parsing. [`BuildManager.cs`](../../../src/Build/BackEnd/BuildManager/BuildManager.cs) intentionally reports explicit `Disabled` status; the unconfigured path is quiet. Activation is not evidence of complete enabled-path correctness. |
 | Identity | [`ProjectInstanceSnapshotCacheKey.cs`](../../../src/Build/BackEnd/Components/Caching/ProjectInstanceSnapshotCacheKey.cs) covers many request, toolset, parser, directory, culture, and environment fields. Key equality is intentionally not reuse permission, and complete effect coverage is not established. |
 | Recorded inputs | [`EvaluationInputs.cs`](../../../src/Build/Evaluation/Context/EvaluationInputs.cs) and [`EvaluationInputRecorder.cs`](../../../src/Build/Evaluation/Context/EvaluationInputRecorder.cs) represent paths, environment/registry observations, SDK results, and non-cacheable reasons. Full changed-input coverage has not been demonstrated. |
-| Validation | [`EvaluationInputValidator.cs`](../../../src/Build/Evaluation/Context/EvaluationInputValidator.cs) and [`ProjectInstanceSnapshotValidator.cs`](../../../src/Build/BackEnd/Components/Caching/ProjectInstanceSnapshotValidator.cs) currently check only `IsCacheable`, key agreement, and recorded path kind, timestamp, and length. The outer key covers many request/environment fields, but recorded environment and registry reads and SDK/resolver results are not all independently validated. |
-| SDK ownership | The recorder currently retains `SdkResult` references, whose result collections may be mutable; immutable validation data or non-reuse is still required. |
-| Integration and provenance | [`BuildRequestConfiguration.cs`](../../../src/Build/BackEnd/Shared/BuildRequestConfiguration.cs) rejects some unsaved/unknown-length cached roots and falls back on non-critical cache errors. Complete provenance, restore, TOCTOU, and strict-working-directory acceptance coverage remains open. |
+| Validation | [`EvaluationInputValidator.cs`](../../../src/Build/Evaluation/Context/EvaluationInputValidator.cs) checks cacheability, direct environment reads using platform environment-name casing, and recorded path kind, timestamp, and length after key agreement. Registry-dependent evaluations are recorded completely but conservatively ineligible. Successful SDK dependencies are re-resolved in their recorded context after cheaper checks and compared before acceptance; failed SDK observations are ineligible because ignored failures emit import diagnostics. |
+| SDK ownership | The recorder copies path, version, additional paths, properties, items and metadata, environment additions, warnings, and errors into immutable owned observations. A rejected SDK validation result is fed to the immediate fresh evaluation so resolver diagnostics are deferred and replayed once rather than emitted during validation or resolved twice. |
+| Diagnostics | Evaluations that emit warnings, errors, or custom SDK logger messages are non-reusable. This avoids silently dropping evaluation diagnostics on a hit without introducing a general diagnostic replay framework. |
+| Integration and provenance | [`BuildRequestConfiguration.cs`](../../../src/Build/BackEnd/Shared/BuildRequestConfiguration.cs) rejects unsaved/unknown-length cached roots for recorded files and rejects any cached root for a recorded-missing path, preserves caller/transferred/in-memory fallback behavior, and propagates cancellation and build aborts. Complete coverage for every host and restore workflow remains an acceptance-matrix gap; the agreed same-metadata and concurrent-writer cases are operating-model exclusions rather than release blockers. |
 | Snapshot isolation | [`ProjectInstanceSnapshotCacheEntry.cs`](../../../src/Build/BackEnd/Components/Caching/ProjectInstanceSnapshotCacheEntry.cs) stores a snapshot plus validation data. Mutation and concurrency equivalence still require the matrix proof. |
-| Memory and lifecycle | [`ProjectInstanceSnapshotCache.cs`](../../../src/Build/BackEnd/Components/Caching/ProjectInstanceSnapshotCache.cs) has LRU eviction, oversize rejection, clear, and shutdown paths, but its retained-size estimate omits owned payload/runtime overhead and is not an RSS cap. |
-| Test coverage | [`ProjectInstanceSnapshotCache_Tests.cs`](../../../src/Build.UnitTests/BackEnd/ProjectInstanceSnapshotCache_Tests.cs) exercises prototype modes and selected cache behavior; the full acceptance matrix above is not established. |
+| Memory and lifecycle | [`ProjectInstanceSnapshotCache.cs`](../../../src/Build/BackEnd/Components/Caching/ProjectInstanceSnapshotCache.cs) has LRU eviction, oversize rejection, clear, and shutdown paths. Admission includes the owned key, snapshot, file/environment manifest, SDK payload, and registry payload with overflow-safe conservative estimates. The configured byte budget remains retained-payload accounting, not an RSS cap. |
+| Test coverage | [`ProjectInstanceSnapshotCache_Tests.cs`](../../../src/Build.UnitTests/BackEnd/ProjectInstanceSnapshotCache_Tests.cs) exercises prototype modes, environment and SDK revalidation, registry ineligibility, diagnostic admission, cancellation, memory accounting, and selected cache behavior. The matrix still does not establish that all projects or hosts are eligible or achieve hits. |

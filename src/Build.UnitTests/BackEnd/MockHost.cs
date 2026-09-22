@@ -192,6 +192,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { _requestBuilder = value; }
         }
 
+        internal ISdkResolverService SdkResolverService
+        {
+            get => _sdkResolverService;
+            set => _sdkResolverService = value;
+        }
+
         /// <summary>
         /// Get the a component based on the request component type
         /// </summary>

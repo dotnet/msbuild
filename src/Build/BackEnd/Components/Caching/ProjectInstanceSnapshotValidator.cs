@@ -2,7 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Framework;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #nullable enable
 
@@ -92,13 +97,183 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
     public ProjectInstanceSnapshotValidationResult Validate(
         ProjectInstanceSnapshotCacheKey key,
         ProjectInstanceSnapshotCacheEntry entry)
+        => Validate(key, entry, validationContext: null);
+
+    internal ProjectInstanceSnapshotValidationResult Validate(
+        ProjectInstanceSnapshotCacheKey key,
+        ProjectInstanceSnapshotCacheEntry entry,
+        ProjectInstanceSnapshotValidationContext? validationContext)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(entry);
-        return entry.ValidationData is EvaluationInputsSnapshotValidationData data
-            && key.Matches(data.Inputs.Key)
-            && EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _)
-                ? ProjectInstanceSnapshotValidationResult.Valid
-                : ProjectInstanceSnapshotValidationResult.Invalid;
+        if (entry.ValidationData is not EvaluationInputsSnapshotValidationData data
+            || !key.Matches(data.Inputs.Key)
+            || !EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _))
+        {
+            return ProjectInstanceSnapshotValidationResult.Invalid;
+        }
+
+        if (data.Inputs.SdkResolutions.Length > 0 && validationContext is null)
+        {
+            return ProjectInstanceSnapshotValidationResult.Invalid;
+        }
+
+        foreach (SdkDependency sdk in data.Inputs.SdkResolutions)
+        {
+            if (!validationContext!.Validate(sdk))
+            {
+                return ProjectInstanceSnapshotValidationResult.Invalid;
+            }
+        }
+
+        return ProjectInstanceSnapshotValidationResult.Valid;
+    }
+}
+
+/// <summary>
+/// Request-scoped services used for SDK validation. Resolved results are retained only long enough to
+/// feed an immediate fresh fallback, preventing a second resolver invocation and replaying deferred diagnostics once.
+/// </summary>
+internal sealed class ProjectInstanceSnapshotValidationContext
+{
+    private readonly ISdkResolverService _sdkResolverService;
+    private readonly ILoggingService _loggingService;
+    private readonly BuildEventContext _buildEventContext;
+    private readonly int _submissionId;
+    private readonly List<PreResolvedSdkResult> _resolved = [];
+
+    internal ProjectInstanceSnapshotValidationContext(
+        ISdkResolverService sdkResolverService,
+        ILoggingService loggingService,
+        BuildEventContext buildEventContext,
+        int submissionId)
+    {
+        ArgumentNullException.ThrowIfNull(sdkResolverService);
+        ArgumentNullException.ThrowIfNull(loggingService);
+        ArgumentNullException.ThrowIfNull(buildEventContext);
+        _sdkResolverService = sdkResolverService;
+        _loggingService = loggingService;
+        _buildEventContext = buildEventContext;
+        _submissionId = submissionId;
+    }
+
+    internal bool Validate(SdkDependency dependency)
+    {
+        LoggingContext deferredLogging = LoggingContext.CreateDeferred(
+            _loggingService,
+            _buildEventContext);
+        SdkResolutionContext context = dependency.Context;
+        SdkResult result = _sdkResolverService.ResolveSdk(
+            _submissionId,
+            dependency.Reference,
+            deferredLogging,
+            context.ReferenceLocation,
+            context.SolutionPath,
+            context.ProjectPath,
+            context.Interactive,
+            context.IsRunningInVisualStudio,
+            context.FailOnUnresolvedSdk);
+        _resolved.Add(new PreResolvedSdkResult(
+            dependency.Reference,
+            context,
+            result,
+            deferredLogging));
+        return !deferredLogging.HasDeferredEvaluationDiagnostics
+            && dependency.Result.Matches(result);
+    }
+
+    internal ISdkResolverService GetResolverForFreshEvaluation() =>
+        _resolved.Count == 0
+            ? _sdkResolverService
+            : new PreResolvedSdkResolverService(_sdkResolverService, _resolved);
+}
+
+internal sealed record PreResolvedSdkResult(
+    SdkReference Reference,
+    SdkResolutionContext Context,
+    SdkResult Result,
+    LoggingContext DeferredLogging)
+{
+    private readonly LockType _lock = new();
+    private bool _diagnosticsReplayed;
+
+    internal void ReplayDiagnostics(LoggingContext loggingContext)
+    {
+        lock (_lock)
+        {
+            if (_diagnosticsReplayed)
+            {
+                return;
+            }
+
+            DeferredLogging.ReplayDeferredEvents(loggingContext);
+            _diagnosticsReplayed = true;
+        }
+    }
+}
+
+internal sealed class PreResolvedSdkResolverService : ISdkResolverService
+{
+    private readonly ISdkResolverService _wrapped;
+    private readonly IReadOnlyList<PreResolvedSdkResult> _resolved;
+
+    internal PreResolvedSdkResolverService(
+        ISdkResolverService wrapped,
+        IReadOnlyList<PreResolvedSdkResult> resolved)
+    {
+        _wrapped = wrapped;
+        _resolved = resolved;
+    }
+
+    public Action<INodePacket> SendPacket => _wrapped.SendPacket;
+
+    public bool IsNodeShutDown
+    {
+        get => _wrapped.IsNodeShutDown;
+        set => _wrapped.IsNodeShutDown = value;
+    }
+
+    public void ClearCache(int submissionId) => _wrapped.ClearCache(submissionId);
+
+    public void ClearCaches() => _wrapped.ClearCaches();
+
+    public SdkResult ResolveSdk(
+        int submissionId,
+        SdkReference sdk,
+        LoggingContext loggingContext,
+        Construction.ElementLocation sdkReferenceLocation,
+        string solutionPath,
+        string projectPath,
+        bool interactive,
+        bool isRunningInVisualStudio,
+        bool failOnUnresolvedSdk)
+    {
+        var requestedContext = new SdkResolutionContext(
+            sdkReferenceLocation,
+            solutionPath,
+            projectPath,
+            interactive,
+            isRunningInVisualStudio,
+            failOnUnresolvedSdk);
+        foreach (PreResolvedSdkResult resolution in _resolved)
+        {
+            if (resolution.Reference.Equals(sdk)
+                && resolution.Context.Matches(requestedContext))
+            {
+                resolution.ReplayDiagnostics(loggingContext);
+                return resolution.Result;
+            }
+        }
+
+        return _wrapped.ResolveSdk(
+            submissionId,
+            sdk,
+            loggingContext,
+            sdkReferenceLocation,
+            solutionPath,
+            projectPath,
+            interactive,
+            isRunningInVisualStudio,
+            failOnUnresolvedSdk);
     }
 }

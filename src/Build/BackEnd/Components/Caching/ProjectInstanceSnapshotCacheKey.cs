@@ -273,6 +273,37 @@ internal sealed class ProjectInstanceSnapshotCacheKey : IEquatable<ProjectInstan
             _environmentFingerprint,
             _parserConfigurationFingerprint);
 
+    internal long RetainedSizeBytes
+    {
+        get
+        {
+            long size = 256;
+            size = RetainedSizeEstimator.AddString(size, _projectFullPath);
+            size = RetainedSizeEstimator.AddString(size, _toolsVersion);
+            size = RetainedSizeEstimator.AddString(size, _subToolsetVersion);
+            size = RetainedSizeEstimator.AddString(size, _startupDirectory);
+            size = RetainedSizeEstimator.AddString(size, _workingDirectory);
+            size = RetainedSizeEstimator.AddString(size, _culture);
+            size = RetainedSizeEstimator.AddString(size, _uiCulture);
+            size = RetainedSizeEstimator.AddString(size, _engineVersion);
+            size = RetainedSizeEstimator.AddString(size, _disabledChangeWave);
+            size = RetainedSizeEstimator.AddString(size, _toolsPath);
+            size = RetainedSizeEstimator.AddString(size, _commandLinePropertyNames);
+            size = RetainedSizeEstimator.AddString(size, _formattedGlobalProperties);
+            foreach (ProjectPropertyInstance property in _globalProperties)
+            {
+                size = RetainedSizeEstimator.AddString(
+                    RetainedSizeEstimator.Add(size, 80),
+                    property.Name);
+                size = RetainedSizeEstimator.AddString(
+                    size,
+                    ((IProperty)property).EvaluatedValueEscaped);
+            }
+
+            return size;
+        }
+    }
+
     private static string FormatGlobalProperties(
         IEnumerable<ProjectPropertyInstance> properties)
     {

@@ -16,6 +16,7 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Microsoft.Win32;
 using Shouldly;
@@ -562,7 +563,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     [Theory]
     [InlineData("second")]
     [InlineData(null)]
-    public void EnvironmentReadIsRecordedButNotRevalidated(string? currentValue)
+    public void EnvironmentReadIsRevalidated(string? currentValue)
     {
         _env.SetEnvironmentVariable("MSBUILD_TEST_INPUT", "first");
         string project = CreateProject("""
@@ -578,9 +579,43 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
         _env.SetEnvironmentVariable("MSBUILD_TEST_INPUT", currentValue);
 
-        IsCurrent(inputs, out string? reason).ShouldBeTrue();
-        reason.ShouldBeNull();
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe("MSBUILD_TEST_INPUT");
         inputs.EnvironmentReads["MSBUILD_TEST_INPUT"].ShouldBe("first");
+    }
+
+    [Fact]
+    public void DirectEnvironmentReadNamesFollowPlatformCasing()
+    {
+        var recorder = new EvaluationInputRecorder();
+        recorder.RecordEnvironmentRead("MSBUILD_TEST_CASE", "upper");
+        recorder.RecordEnvironmentRead("msbuild_test_case", "lower");
+
+        EvaluationInputs inputs = recorder.Freeze(Evaluate(CreateProject("<Project />")).Key);
+
+        inputs.EnvironmentReads.Count.ShouldBe(NativeMethodsShared.IsWindows ? 1 : 2);
+    }
+
+    [UnixOnlyFact]
+    public void EnvironmentReadsWithDifferentCasingAreRevalidatedOnUnix()
+    {
+        _env.SetEnvironmentVariable("MSBUILD_TEST_CASE", "upper");
+        _env.SetEnvironmentVariable("msbuild_test_case", "lower");
+        string project = CreateProject("""
+            <Project>
+              <PropertyGroup>
+                <Upper>$([System.Environment]::GetEnvironmentVariable('MSBUILD_TEST_CASE'))</Upper>
+                <Lower>$([System.Environment]::GetEnvironmentVariable('msbuild_test_case'))</Lower>
+              </PropertyGroup>
+            </Project>
+            """);
+        EvaluationInputs inputs = Evaluate(project);
+
+        inputs.EnvironmentReads.Count.ShouldBe(2);
+        _env.SetEnvironmentVariable("MSBUILD_TEST_CASE", "changed");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe("MSBUILD_TEST_CASE");
     }
 
     [Theory]
@@ -710,7 +745,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         EvaluationInputs inputs = recorded.EvaluationInputs.ShouldNotBeNull();
 
         recorded.GetPropertyValue("First").ShouldBe("first;value%");
-        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.RegistryRead);
         inputs.RegistryReads.Length.ShouldBe(2);
         foreach (RegistryRead read in inputs.RegistryReads)
         {
@@ -732,7 +767,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         registry.Key.SetValue("Value", "changed", RegistryValueKind.String);
 
         inputs.RegistryReads[0].Value.ShouldBe("first;value%");
-        IsCurrent(inputs, out _).ShouldBeTrue();
+        IsCurrent(inputs, out _).ShouldBeFalse();
     }
 
     [WindowsOnlyFact]
@@ -758,7 +793,6 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
         EvaluationInputs inputs = Evaluate(project);
 
-        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
         inputs.RegistryReads.Length.ShouldBe(6);
         inputs.RegistryReads[0].ValueName.ShouldBe(string.Empty);
         inputs.RegistryReads[0].Value.ShouldBe("default");
@@ -768,6 +802,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         inputs.RegistryReads[4].Value.ShouldBe("fallback");
         inputs.RegistryReads[5].KeyName.ShouldBe(keyName + @"\MissingKey");
         inputs.RegistryReads[5].Value.ShouldBe("view fallback");
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.RegistryRead);
     }
 
     [WindowsOnlyTheory]
@@ -818,7 +853,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
                 read.Value.ShouldBe(kind == RegistryValueKind.ExpandString ? "expanded" : value);
             }
         }
-        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.RegistryRead);
     }
 
     [Fact]
@@ -911,7 +946,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         RegistryRead read = inputs.RegistryReads.ShouldHaveSingleItem();
 
         instance.GetPropertyValue("Value").ShouldBe(expected ?? string.Empty);
-        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.RegistryRead);
         read.KeyName.ShouldBe(nullKey ? null : registry.Key.Name);
         read.ValueName.ShouldBe(nullKey ? string.Empty : "Value");
         read.Value.ShouldBe(expected);
@@ -944,7 +979,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         RegistryRead read = inputs.RegistryReads.ShouldHaveSingleItem();
 
         instance.GetPropertyValue("Value").ShouldBe("stored");
-        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.RegistryRead);
         read.Value.ShouldBe("stored");
         read.RequestedViews.ShouldBe(nested
             ? ["RegistryView.Registry64"]
@@ -969,7 +1004,7 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         RegistryRead read = inputs.RegistryReads.ShouldHaveSingleItem();
 
         instance.GetPropertyValue("Value").ShouldBe("fallback");
-        inputs.NonCacheable.ShouldBe(NonCacheableReason.None);
+        inputs.NonCacheable.ShouldBe(NonCacheableReason.RegistryRead);
         read.Value.ShouldBe("fallback");
         read.RequestedViews.ShouldBeEmpty();
     }
@@ -1027,15 +1062,60 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
               </PropertyGroup>
             </Project>
             """);
-        var recorded = new SdkResult(new SdkReference("TestSdk", null, null), sdkFolder.Path, "1.0", warnings: null);
+        var properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ResolverProperty"] = "original",
+        };
+        var metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ResolverMetadata"] = "original",
+        };
+        var item = new SdkResultItem("original-item", metadata);
+        var items = new Dictionary<string, SdkResultItem>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ResolverItem"] = item,
+        };
+        var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["RESOLVER_ENVIRONMENT"] = "original",
+        };
+        var recorded = new SdkResult(
+            new SdkReference("TestSdk", null, null),
+            sdkFolder.Path,
+            "1.0",
+            warnings: null,
+            propertiesToAdd: properties,
+            itemsToAdd: items,
+            environmentVariablesToAdd: environment);
         ProjectOptions options = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(recorded));
         options.ProjectCollection = _env.CreateProjectCollection().Collection;
 
         EvaluationInputs inputs = Evaluate(project, options);
+        var directRecorder = new EvaluationInputRecorder();
+        directRecorder.RecordSdkResolution(
+            recorded.SdkReference,
+            recorded,
+            ElementLocation.Create(project),
+            solutionPath: null,
+            project,
+            interactive: false,
+            isRunningInVisualStudio: false,
+            failOnUnresolvedSdk: true);
+        EvaluationInputs directlyRecorded = directRecorder.Freeze(inputs.Key);
 
         inputs.SdkResolutions.ShouldHaveSingleItem().Reference.Name.ShouldBe("TestSdk");
         inputs.Files[sdkProps].Kind.ShouldBe(PathKind.File);
-        inputs.SdkResolutions[0].Result.ShouldBe(recorded);
+        inputs.SdkResolutions[0].Result.Path.ShouldBe(recorded.Path);
+        recorded.AdditionalPaths = [_folder.Path];
+        properties["ResolverProperty"] = "changed";
+        item.ItemSpec = "changed-item";
+        metadata["ResolverMetadata"] = "changed";
+        environment["RESOLVER_ENVIRONMENT"] = "changed";
+        inputs.SdkResolutions[0].Result.AdditionalPaths.ShouldBeEmpty();
+        inputs.SdkResolutions[0].Result.PropertiesToAdd["ResolverProperty"].ShouldBe("original");
+        inputs.SdkResolutions[0].Result.ItemsToAdd["ResolverItem"].ItemSpec.ShouldBe("original-item");
+        inputs.SdkResolutions[0].Result.ItemsToAdd["ResolverItem"].Metadata["ResolverMetadata"].ShouldBe("original");
+        directlyRecorded.SdkResolutions[0].Result.EnvironmentVariablesToAdd["RESOLVER_ENVIRONMENT"].ShouldBe("original");
         IsCurrent(inputs, out _).ShouldBeTrue();
 
         Touch(sdkProps, "<Project><PropertyGroup><FromSdk>changed</FromSdk></PropertyGroup></Project>");
@@ -1273,8 +1353,8 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
         _env.SetEnvironmentVariable("MSBUILD_TEST_EXPAND_MISSING", "now set");
 
-        IsCurrent(inputs, out string? reason).ShouldBeTrue();
-        reason.ShouldBeNull();
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe("MSBUILD_TEST_EXPAND_MISSING");
         inputs.EnvironmentReads["MSBUILD_TEST_EXPAND_MISSING"].ShouldBeNull();
     }
 

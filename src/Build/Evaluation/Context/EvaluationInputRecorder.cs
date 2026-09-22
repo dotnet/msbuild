@@ -7,8 +7,9 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.NET.StringTools;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
@@ -18,17 +19,20 @@ namespace Microsoft.Build.Evaluation.Context;
 /// Collects the inputs one evaluation consumes. Created only when <see cref="Traits.RecordEvaluationInputs"/> is set,
 /// so the rest of the engine pays one null check per seam when recording is off.
 /// Once the evaluation is known to be non-cacheable, further observations are skipped: the manifest will not be used.
+/// Registry ineligibility is deferred until <see cref="Freeze"/> so record mode retains the complete observation list.
 /// </summary>
 internal sealed class EvaluationInputRecorder
 {
     // Guarded by its own lock: glob expansion enumerates directories in parallel, every other seam runs on the
     // evaluation thread. SDK-style projects record 150 to 250 paths, so one growth covers them.
     private readonly Dictionary<string, FileDependency> _files = new(128, FileUtilities.PathComparer);
-    private readonly Dictionary<string, string?> _environmentReads = new(CommunicationsUtilities.EnvironmentVariableComparer);
-    private readonly Dictionary<SdkReference, SdkResult> _sdkResolutions = [];
+    private readonly Dictionary<string, string?> _environmentReads = new(
+        NativeMethodsShared.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+    private readonly List<RecordedSdkResolution> _sdkResolutions = [];
     private List<RegistryRead>? _registryReads;
     private NonCacheableReason _nonCacheable;
     private string? _nonCacheableDetail;
+    private string? _failedSdkResolution;
     private bool _frozen;
 
     /// <summary>
@@ -54,7 +58,7 @@ internal sealed class EvaluationInputRecorder
         {
             TryGetOrObserve(Canonicalize(path), out _);
         }
-        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+        catch (Exception ex) when (IsRecoverable(ex))
         {
             MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
         }
@@ -89,7 +93,7 @@ internal sealed class EvaluationInputRecorder
                 MarkNonCacheable(NonCacheableReason.ConflictingObservation, path);
             }
         }
-        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+        catch (Exception ex) when (IsRecoverable(ex))
         {
             MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
         }
@@ -114,7 +118,7 @@ internal sealed class EvaluationInputRecorder
                 MarkNonCacheable(NonCacheableReason.ConflictingObservation, fullPath);
             }
         }
-        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+        catch (Exception ex) when (IsRecoverable(ex))
         {
             MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
         }
@@ -194,12 +198,52 @@ internal sealed class EvaluationInputRecorder
         }
     }
 
-    internal void RecordSdkResolution(SdkReference reference, SdkResult result)
+    internal void RecordSdkResolution(
+        SdkReference reference,
+        SdkResult result,
+        ElementLocation referenceLocation,
+        string? solutionPath,
+        string projectPath,
+        bool interactive,
+        bool isRunningInVisualStudio,
+        bool failOnUnresolvedSdk)
     {
-        // Sdk.props and Sdk.targets resolve the same reference; one entry validates both.
-        if (IsRecording && !_sdkResolutions.ContainsKey(reference))
+        if (!IsRecording)
         {
-            _sdkResolutions.Add(reference, result);
+            return;
+        }
+
+        try
+        {
+            if (!result.Success)
+            {
+                _failedSdkResolution ??= reference.ToString();
+            }
+
+            var context = new SdkResolutionContext(
+                referenceLocation,
+                solutionPath,
+                projectPath,
+                interactive,
+                isRunningInVisualStudio,
+                failOnUnresolvedSdk);
+            foreach (RecordedSdkResolution resolution in _sdkResolutions)
+            {
+                if (resolution.Reference.Equals(reference)
+                    && resolution.Context.Matches(context))
+                {
+                    return;
+                }
+            }
+
+            _sdkResolutions.Add(new RecordedSdkResolution(
+                reference,
+                SdkResultSnapshot.Create(result),
+                context));
+        }
+        catch (Exception ex) when (IsRecoverable(ex))
+        {
+            MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
         }
     }
 
@@ -354,11 +398,25 @@ internal sealed class EvaluationInputRecorder
     internal EvaluationInputs Freeze(EvaluationInputKey key)
     {
         _frozen = true;
+        if (_nonCacheable == NonCacheableReason.None && _failedSdkResolution is not null)
+        {
+            _nonCacheable = NonCacheableReason.FailedSdkResolution;
+            _nonCacheableDetail = _failedSdkResolution;
+        }
+        else if (_nonCacheable == NonCacheableReason.None && _registryReads?.Count > 0)
+        {
+            _nonCacheable = NonCacheableReason.RegistryRead;
+            _nonCacheableDetail = _registryReads[0].KeyName;
+        }
+
         var sdkResolutions = new SdkDependency[_sdkResolutions.Count];
         int index = 0;
-        foreach (KeyValuePair<SdkReference, SdkResult> resolution in _sdkResolutions)
+        foreach (RecordedSdkResolution resolution in _sdkResolutions)
         {
-            sdkResolutions[index++] = new SdkDependency(resolution.Key, resolution.Value);
+            sdkResolutions[index++] = new SdkDependency(
+                resolution.Reference,
+                resolution.Result,
+                resolution.Context);
         }
 
         return new EvaluationInputs(
@@ -460,6 +518,16 @@ internal sealed class EvaluationInputRecorder
             ProbeKind.Directory => recorded == PathKind.Directory,
             _ => recorded != PathKind.Missing,
         };
+
+    private static bool IsRecoverable(Exception exception) =>
+        !ExceptionHandling.IsCriticalException(exception)
+        && exception is not OperationCanceledException
+        && exception is not BuildAbortedException;
+
+    private sealed record RecordedSdkResolution(
+        SdkReference Reference,
+        SdkResultSnapshot Result,
+        SdkResolutionContext Context);
 
     /// <summary>
     /// True when the modifier name appears as a metadata reference, not as part of a longer name. The reference grammar

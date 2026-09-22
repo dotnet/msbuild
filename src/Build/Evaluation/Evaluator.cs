@@ -593,6 +593,19 @@ namespace Microsoft.Build.Evaluation
             {
                 evaluator.Evaluate();
                 succeeded = true;
+                if (evaluator._evaluationLoggingContext.HasLoggedErrors
+                    || evaluator._evaluationLoggingContext.HasLoggedWarnings
+                    || evaluator._evaluationLoggingContext.HasLoggedSdkMessages)
+                {
+                    evaluator._inputRecorder?.MarkNonCacheable(
+                        NonCacheableReason.EvaluationDiagnostics,
+                        evaluator._evaluationLoggingContext.HasLoggedErrors
+                            ? "Error"
+                            : evaluator._evaluationLoggingContext.HasLoggedWarnings
+                                ? "Warning"
+                                : "SdkMessage");
+                }
+
                 inputs = evaluator._inputRecorder?.Freeze(
                     evaluationInputKey ?? evaluator.CreateInputKey());
             }
@@ -2159,6 +2172,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.SdkResolution, _sdkResolverService.GetType());
 
+                    bool failOnUnresolvedSdk = !_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports)
+                        || _loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk);
                     sdkResult = _sdkResolverService.ResolveSdk(
                         _submissionId,
                         sdkReference,
@@ -2167,7 +2182,17 @@ namespace Microsoft.Build.Evaluation
                         solutionPath, projectPath,
                         _interactive,
                         _isRunningInVisualStudio,
-                        failOnUnresolvedSdk: !_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) || _loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk));
+                        failOnUnresolvedSdk);
+
+                    _inputRecorder?.RecordSdkResolution(
+                        sdkReference,
+                        sdkResult,
+                        importElement.Location,
+                        solutionPath,
+                        projectPath,
+                        _interactive,
+                        _isRunningInVisualStudio,
+                        failOnUnresolvedSdk);
                 }
                 catch (Exception e) when (e is SdkResolverException or SdkResolverServiceException)
                 {
@@ -2175,8 +2200,6 @@ namespace Microsoft.Build.Evaluation
                     // https://github.com/dotnet/msbuild/pull/6763
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
                 }
-
-                _inputRecorder?.RecordSdkResolution(sdkReference, sdkResult);
 
                 if (!sdkResult.Success)
                 {

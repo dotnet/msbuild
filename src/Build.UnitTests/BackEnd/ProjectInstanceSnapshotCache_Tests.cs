@@ -3,10 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
@@ -17,6 +20,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #nullable enable
 
@@ -317,7 +321,7 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         cache.Remove(firstKey).ShouldBeTrue();
         cache.TryGet(firstKey, out _).ShouldBeFalse();
         cache.Count.ShouldBe(1);
-        cache.CurrentSizeBytes.ShouldBe(second.RetainedSizeBytes);
+        cache.CurrentSizeBytes.ShouldBe(secondKey.RetainedSizeBytes + second.RetainedSizeBytes);
 
         cache.Clear();
         cache.TryGet(secondKey, out _).ShouldBeFalse();
@@ -664,10 +668,13 @@ public sealed class ProjectInstanceSnapshotCache_Tests
     public void ExceedingBoundEvictsLeastRecentlyUsedEntry()
     {
         ProjectInstanceSnapshotCacheEntry entry = CreateEntry("same-size");
-        var cache = new ProjectInstanceSnapshotCache(entry.RetainedSizeBytes * 2L);
         ProjectInstanceSnapshotCacheKey firstKey = EmptyKey("First.csproj");
         ProjectInstanceSnapshotCacheKey secondKey = EmptyKey("Second.csproj");
         ProjectInstanceSnapshotCacheKey thirdKey = EmptyKey("Third.csproj");
+        var cache = new ProjectInstanceSnapshotCache(
+            firstKey.RetainedSizeBytes
+            + secondKey.RetainedSizeBytes
+            + (entry.RetainedSizeBytes * 2L));
 
         cache.AddOrReplace(firstKey, entry).ShouldBeTrue();
         cache.AddOrReplace(secondKey, entry).ShouldBeTrue();
@@ -679,7 +686,10 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         cache.TryGet(secondKey, out _).ShouldBeFalse();
         cache.TryGet(thirdKey, out _).ShouldBeTrue();
         cache.Count.ShouldBe(2);
-        cache.CurrentSizeBytes.ShouldBe(entry.RetainedSizeBytes * 2L);
+        cache.CurrentSizeBytes.ShouldBe(
+            firstKey.RetainedSizeBytes
+            + thirdKey.RetainedSizeBytes
+            + (entry.RetainedSizeBytes * 2L));
     }
 
     [Fact]
@@ -688,11 +698,17 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         ProjectInstanceSnapshotCacheEntry small = CreateEntry("small");
         ProjectInstanceSnapshotCacheEntry large =
             CreateEntry("large", validationDataSizeBytes: 128);
-        var cache = new ProjectInstanceSnapshotCache(
-            small.RetainedSizeBytes + large.RetainedSizeBytes);
         ProjectInstanceSnapshotCacheKey firstKey = EmptyKey("First.csproj");
         ProjectInstanceSnapshotCacheKey secondKey = EmptyKey("Second.csproj");
         ProjectInstanceSnapshotCacheKey thirdKey = EmptyKey("Third.csproj");
+        long initialSize = firstKey.RetainedSizeBytes
+            + secondKey.RetainedSizeBytes
+            + (small.RetainedSizeBytes * 2L);
+        long finalSize = firstKey.RetainedSizeBytes
+            + thirdKey.RetainedSizeBytes
+            + large.RetainedSizeBytes
+            + small.RetainedSizeBytes;
+        var cache = new ProjectInstanceSnapshotCache(Math.Max(initialSize, finalSize));
 
         cache.AddOrReplace(firstKey, small).ShouldBeTrue();
         cache.AddOrReplace(secondKey, small).ShouldBeTrue();
@@ -704,7 +720,7 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         cache.TryGet(secondKey, out _).ShouldBeFalse();
         cache.TryGet(thirdKey, out _).ShouldBeTrue();
         cache.Count.ShouldBe(2);
-        cache.CurrentSizeBytes.ShouldBe(large.RetainedSizeBytes + small.RetainedSizeBytes);
+        cache.CurrentSizeBytes.ShouldBe(finalSize);
     }
 
     [Fact]
@@ -715,9 +731,10 @@ public sealed class ProjectInstanceSnapshotCache_Tests
             CreateEntry(
                 "oversized",
                 validationDataSizeBytes: small.RetainedSizeBytes + 1);
-        var cache = new ProjectInstanceSnapshotCache(small.RetainedSizeBytes);
         ProjectInstanceSnapshotCacheKey retainedKey = EmptyKey("Retained.csproj");
         ProjectInstanceSnapshotCacheKey oversizedKey = EmptyKey("Oversized.csproj");
+        var cache = new ProjectInstanceSnapshotCache(
+            retainedKey.RetainedSizeBytes + small.RetainedSizeBytes);
 
         cache.AddOrReplace(retainedKey, small).ShouldBeTrue();
         cache.AddOrReplace(oversizedKey, oversized).ShouldBeFalse();
@@ -729,6 +746,124 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         cache.TryGet(retainedKey, out _).ShouldBeFalse();
         cache.Count.ShouldBe(0);
         cache.CurrentSizeBytes.ShouldBe(0);
+    }
+
+    [Fact]
+    public void CacheBudgetIncludesKeyPayload()
+    {
+        ProjectInstanceSnapshotCacheEntry entry = CreateEntry("key-budget");
+        var cache = new ProjectInstanceSnapshotCache(entry.RetainedSizeBytes + 512);
+        ProjectInstanceSnapshotCacheKey key = CreateKey(
+            ProjectPath("LargeKey.csproj"),
+            "Current",
+            ProjectLoadSettings.Default,
+            new Dictionary<string, string>
+            {
+                ["LargeProperty"] = new string('x', 4096),
+            });
+
+        cache.AddOrReplace(key, entry).ShouldBeFalse();
+        cache.Count.ShouldBe(0);
+        cache.CurrentSizeBytes.ShouldBe(0);
+    }
+
+    [Fact]
+    public void CacheBudgetIncludesSdkManifestPayload()
+    {
+        ProjectInstanceSnapshotCacheKey key = EmptyKey("SdkPayload.csproj");
+        ProjectInstanceSnapshotCacheEntry baseline = CreateEntry("sdk-budget");
+        var recorder = new EvaluationInputRecorder();
+        var result = new SdkResult(
+            new SdkReference("LargeSdk", null, null),
+            ProjectPath("sdk"),
+            "1.0",
+            warnings: null,
+            propertiesToAdd: new Dictionary<string, string>
+            {
+                ["LargeResolverProperty"] = new string('x', 4096),
+            });
+        recorder.RecordSdkResolution(
+            result.SdkReference,
+            result,
+            ElementLocation.Create(ProjectPath("SdkPayload.csproj")),
+            solutionPath: null,
+            ProjectPath("SdkPayload.csproj"),
+            interactive: false,
+            isRunningInVisualStudio: false,
+            failOnUnresolvedSdk: true);
+        var entry = new ProjectInstanceSnapshotCacheEntry(
+            baseline.Snapshot,
+            new EvaluationInputsSnapshotValidationData(recorder.Freeze(key.ToEvaluationInputKey())));
+        var cache = new ProjectInstanceSnapshotCache(
+            key.RetainedSizeBytes + baseline.RetainedSizeBytes + 512);
+
+        cache.AddOrReplace(key, entry).ShouldBeFalse();
+        cache.CurrentSizeBytes.ShouldBe(0);
+    }
+
+    [Fact]
+    public void CacheBudgetIncludesRegistryManifestPayload()
+    {
+        ProjectInstanceSnapshotCacheKey key = EmptyKey("RegistryPayload.csproj");
+        ProjectInstanceSnapshotCacheEntry baseline = CreateEntry("registry-budget");
+        var recorder = new EvaluationInputRecorder();
+        recorder.RecordRegistryRead(
+            new string('k', 4096),
+            new string('v', 4096),
+            new string('x', 4096),
+            ImmutableArray.Create(new string('r', 4096)));
+        var entry = new ProjectInstanceSnapshotCacheEntry(
+            baseline.Snapshot,
+            new EvaluationInputsSnapshotValidationData(recorder.Freeze(key.ToEvaluationInputKey())));
+        var cache = new ProjectInstanceSnapshotCache(
+            key.RetainedSizeBytes + baseline.RetainedSizeBytes + 512);
+
+        cache.AddOrReplace(key, entry).ShouldBeFalse();
+        cache.CurrentSizeBytes.ShouldBe(0);
+    }
+
+    [Fact]
+    public void CancellationFromValidatorIsNotConvertedToFreshEvaluation()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        TransientTestFile project = env.CreateFile(
+            "project.proj",
+            "<Project><PropertyGroup><Value>stored</Value></PropertyGroup></Project>");
+        var cache = new ProjectInstanceSnapshotCache();
+        var parameters = new BuildParameters
+        {
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters);
+
+        CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+        cache.Validator = new CancelingTestValidator();
+
+        Should.Throw<OperationCanceledException>(() =>
+            CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+                host, BuildRequestDataFlags.None, submissionId: 2, nodeId: 1));
+    }
+
+    [Fact]
+    public void BuildAbortFromValidatorIsNotConvertedToFreshEvaluation()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        TransientTestFile project = env.CreateFile("project.proj", "<Project />");
+        var cache = new ProjectInstanceSnapshotCache();
+        var parameters = new BuildParameters
+        {
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters);
+
+        CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+        cache.Validator = new AbortingTestValidator();
+
+        Should.Throw<BuildAbortedException>(() =>
+            CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+                host, BuildRequestDataFlags.None, submissionId: 2, nodeId: 1));
     }
 
     [Fact]
@@ -1068,6 +1203,219 @@ public sealed class ProjectInstanceSnapshotCache_Tests
     }
 
     [Fact]
+    public void SnapshotFileSystemRevalidatesSdkAndReusesResultForFreshFallback()
+    {
+        const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
+        string? originalMode = Environment.GetEnvironmentVariable(ModeVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(
+                ModeVariable,
+                nameof(EvaluationCacheMode.SnapshotFileSystem));
+            Traits.UpdateFromEnvironment();
+
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder firstSdk = env.CreateFolder();
+            TransientTestFolder secondSdk = env.CreateFolder();
+            env.CreateFile(firstSdk, "Sdk.props", "<Project><PropertyGroup><SdkValue>first</SdkValue></PropertyGroup></Project>");
+            env.CreateFile(firstSdk, "Sdk.targets", "<Project />");
+            env.CreateFile(secondSdk, "Sdk.props", "<Project><PropertyGroup><SdkValue>second</SdkValue></PropertyGroup></Project>");
+            env.CreateFile(secondSdk, "Sdk.targets", "<Project />");
+            TransientTestFile project = env.CreateFile(
+                "project.proj",
+                "<Project Sdk=\"TestSdk\"><PropertyGroup><Value>$(SdkValue)</Value></PropertyGroup></Project>");
+            EvaluationCacheConfiguration mode = Traits.Instance.EvaluationCache;
+            var cache = new ProjectInstanceSnapshotCache();
+            cache.ConfigureValidator(mode.ValidationPolicy);
+            var parameters = new BuildParameters
+            {
+                EvaluationCacheConfiguration = mode,
+                ProjectInstanceSnapshotCache = cache,
+            };
+            var resolver = new ChangingSdkResolverService(firstSdk.Path);
+            var host = new MockHost(parameters)
+            {
+                SdkResolverService = resolver,
+            };
+
+            BuildRequestConfiguration first = CreateFileConfiguration(project.Path, parameters);
+            first.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+            int initialCalls = resolver.Calls;
+            BuildRequestConfiguration unchanged = CreateFileConfiguration(project.Path, parameters);
+            unchanged.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 2, nodeId: 1);
+            resolver.Path = secondSdk.Path;
+
+            BuildRequestConfiguration changed = CreateFileConfiguration(project.Path, parameters);
+            changed.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 3, nodeId: 1);
+
+            first.Project.GetPropertyValue("Value").ShouldBe("first");
+            unchanged.Project.GetPropertyValue("Value").ShouldBe("first");
+            changed.Project.GetPropertyValue("Value").ShouldBe("second");
+            resolver.Calls.ShouldBe(initialCalls + 2);
+            cache.GetStatistics().ValidationAccepted.ShouldBe(1);
+            cache.ValidationRejections.ShouldBe(1);
+            cache.MaterializedEntries.ShouldBe(1);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ModeVariable, originalMode);
+            Traits.UpdateFromEnvironment();
+        }
+    }
+
+    [Fact]
+    public void SdkValidationDiagnosticsAreDeferredAndReplayedOnceOnFreshFallback()
+    {
+        const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
+        string? originalMode = Environment.GetEnvironmentVariable(ModeVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(
+                ModeVariable,
+                nameof(EvaluationCacheMode.SnapshotFileSystem));
+            Traits.UpdateFromEnvironment();
+
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder sdk = env.CreateFolder();
+            env.CreateFile(sdk, "Sdk.props", "<Project />");
+            env.CreateFile(sdk, "Sdk.targets", "<Project />");
+            TransientTestFile project = env.CreateFile("project.proj", "<Project Sdk=\"TestSdk\" />");
+            EvaluationCacheConfiguration mode = Traits.Instance.EvaluationCache;
+            var cache = new ProjectInstanceSnapshotCache();
+            cache.ConfigureValidator(mode.ValidationPolicy);
+            var parameters = new BuildParameters
+            {
+                EvaluationCacheConfiguration = mode,
+                ProjectInstanceSnapshotCache = cache,
+            };
+            var messages = new List<string>();
+            var resolver = new ChangingSdkResolverService(sdk.Path);
+            var host = new MockHost(parameters)
+            {
+                LoggingService = new MockLoggingService(messages.Add),
+                SdkResolverService = resolver,
+            };
+
+            CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+                host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+            int initialCalls = resolver.Calls;
+            resolver.Message = "resolver diagnostic";
+            CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+                host, BuildRequestDataFlags.None, submissionId: 2, nodeId: 1);
+
+            resolver.Calls.ShouldBe(initialCalls + 1);
+            messages.Count(message => message == resolver.Message).ShouldBe(1);
+            cache.ValidationRejections.ShouldBe(1);
+            cache.Count.ShouldBe(0);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ModeVariable, originalMode);
+            Traits.UpdateFromEnvironment();
+        }
+    }
+
+    [Fact]
+    public void SnapshotFileSystemDoesNotStoreEvaluationThatLoggedWarning()
+    {
+        const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
+        string? originalMode = Environment.GetEnvironmentVariable(ModeVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(
+                ModeVariable,
+                nameof(EvaluationCacheMode.SnapshotFileSystem));
+            Traits.UpdateFromEnvironment();
+
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile(
+                "project.proj",
+                "<Project><Import Project=\"project.proj\" /></Project>");
+            EvaluationCacheConfiguration mode = Traits.Instance.EvaluationCache;
+            var cache = new ProjectInstanceSnapshotCache();
+            cache.ConfigureValidator(mode.ValidationPolicy);
+            var parameters = new BuildParameters
+            {
+                EvaluationCacheConfiguration = mode,
+                ProjectInstanceSnapshotCache = cache,
+            };
+            var host = new MockHost(parameters);
+
+            BuildRequestConfiguration configuration = CreateFileConfiguration(project.Path, parameters);
+            configuration.LoadProjectIntoConfiguration(
+                host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+
+            configuration.Project.EvaluationInputs.NonCacheable
+                .ShouldBe(NonCacheableReason.EvaluationDiagnostics);
+            cache.Count.ShouldBe(0);
+            cache.StoredEntries.ShouldBe(0);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ModeVariable, originalMode);
+            Traits.UpdateFromEnvironment();
+        }
+    }
+
+    [Fact]
+    public void SnapshotFileSystemDoesNotStoreIgnoredFailedSdkResolution()
+    {
+        const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
+        string? originalMode = Environment.GetEnvironmentVariable(ModeVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(
+                ModeVariable,
+                nameof(EvaluationCacheMode.SnapshotFileSystem));
+            Traits.UpdateFromEnvironment();
+
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("project.proj", "<Project Sdk=\"MissingSdk\" />");
+            EvaluationCacheConfiguration mode = Traits.Instance.EvaluationCache;
+            var cache = new ProjectInstanceSnapshotCache();
+            cache.ConfigureValidator(mode.ValidationPolicy);
+            var parameters = new BuildParameters
+            {
+                EvaluationCacheConfiguration = mode,
+                ProjectInstanceSnapshotCache = cache,
+            };
+            var resolver = new ChangingSdkResolverService(env.CreateFolder().Path)
+            {
+                Success = false,
+            };
+            var host = new MockHost(parameters)
+            {
+                SdkResolverService = resolver,
+            };
+
+            BuildRequestConfiguration first = CreateFileConfiguration(project.Path, parameters);
+            first.LoadProjectIntoConfiguration(
+                host,
+                BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports,
+                submissionId: 1,
+                nodeId: 1);
+            int initialCalls = resolver.Calls;
+            BuildRequestConfiguration second = CreateFileConfiguration(project.Path, parameters);
+            second.LoadProjectIntoConfiguration(
+                host,
+                BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports,
+                submissionId: 2,
+                nodeId: 1);
+
+            first.Project.EvaluationInputs.NonCacheable.ShouldBe(NonCacheableReason.FailedSdkResolution);
+            second.Project.EvaluationInputs.NonCacheable.ShouldBe(NonCacheableReason.FailedSdkResolution);
+            resolver.Calls.ShouldBeGreaterThan(initialCalls);
+            cache.Count.ShouldBe(0);
+            cache.MaterializedEntries.ShouldBe(0);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ModeVariable, originalMode);
+            Traits.UpdateFromEnvironment();
+        }
+    }
+
+    [Fact]
     public void SnapshotFileSystemRejectsDirtyExplicitRoot()
     {
         const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
@@ -1164,6 +1512,125 @@ public sealed class ProjectInstanceSnapshotCache_Tests
 
             second.Project.GetPropertyValue("Imported").ShouldBe("memory");
             second.Project.EvaluationInputs.NonCacheable.ShouldBe(NonCacheableReason.InMemoryProject);
+            cache.MaterializedEntries.ShouldBe(0);
+            cache.ValidationRejections.ShouldBe(1);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ModeVariable, originalMode);
+            Traits.UpdateFromEnvironment();
+        }
+    }
+
+    [Fact]
+    public void SnapshotFileSystemRejectsUnsavedCachedRootForMissingImport()
+    {
+        const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
+        string? originalMode = Environment.GetEnvironmentVariable(ModeVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(
+                ModeVariable,
+                nameof(EvaluationCacheMode.SnapshotFileSystem));
+            Traits.UpdateFromEnvironment();
+
+            using TestEnvironment env = TestEnvironment.Create();
+            string missingImport = Path.Combine(env.CreateFolder().Path, "missing.props");
+            TransientTestFile project = env.CreateFile(
+                "project.proj",
+                $"<Project><Import Project=\"{missingImport}\" /></Project>");
+            EvaluationCacheConfiguration mode = Traits.Instance.EvaluationCache;
+            var cache = new ProjectInstanceSnapshotCache();
+            cache.ConfigureValidator(mode.ValidationPolicy);
+            var parameters = new BuildParameters
+            {
+                EvaluationCacheConfiguration = mode,
+                ProjectInstanceSnapshotCache = cache,
+            };
+            var host = new MockHost(parameters);
+
+            CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+                host,
+                BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports,
+                submissionId: 1,
+                nodeId: 1);
+            ProjectRootElement inMemoryImport = ProjectRootElement.Create(
+                parameters.ProjectRootElementCache,
+                NewProjectFileOptions.None);
+            inMemoryImport.FullPath = missingImport;
+            inMemoryImport.AddProperty("Imported", "memory");
+            parameters.ProjectRootElementCache.AddEntry(inMemoryImport);
+
+            BuildRequestConfiguration second = CreateFileConfiguration(project.Path, parameters);
+            second.LoadProjectIntoConfiguration(
+                host,
+                BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports,
+                submissionId: 2,
+                nodeId: 1);
+
+            second.Project.GetPropertyValue("Imported").ShouldBe("memory");
+            cache.MaterializedEntries.ShouldBe(0);
+            cache.ValidationRejections.ShouldBe(1);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ModeVariable, originalMode);
+            Traits.UpdateFromEnvironment();
+        }
+    }
+
+    [Fact]
+    public void SnapshotFileSystemRejectsCachedRootForRecordedMissingImport()
+    {
+        const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
+        string? originalMode = Environment.GetEnvironmentVariable(ModeVariable);
+        try
+        {
+            Environment.SetEnvironmentVariable(
+                ModeVariable,
+                nameof(EvaluationCacheMode.SnapshotFileSystem));
+            Traits.UpdateFromEnvironment();
+
+            using TestEnvironment env = TestEnvironment.Create();
+            string missingImport = Path.Combine(env.CreateFolder().Path, "missing.props");
+            TransientTestFile project = env.CreateFile(
+                "project.proj",
+                $"<Project><Import Project=\"{missingImport}\" /></Project>");
+            EvaluationCacheConfiguration mode = Traits.Instance.EvaluationCache;
+            var cache = new ProjectInstanceSnapshotCache();
+            cache.ConfigureValidator(mode.ValidationPolicy);
+            var parameters = new BuildParameters
+            {
+                EvaluationCacheConfiguration = mode,
+                ProjectInstanceSnapshotCache = cache,
+            };
+            var host = new MockHost(parameters);
+
+            CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+                host,
+                BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports,
+                submissionId: 1,
+                nodeId: 1);
+            File.WriteAllText(
+                missingImport,
+                "<Project><PropertyGroup><Imported>cached root</Imported></PropertyGroup></Project>");
+            ProjectRootElement cachedImport = ProjectRootElement.Open(
+                missingImport,
+                parameters.ProjectRootElementCache,
+                isExplicitlyLoaded: true,
+                preserveFormatting: null);
+            cachedImport.HasUnsavedChanges.ShouldBeFalse();
+            cachedImport.FileLengthWhenRead.ShouldNotBeNull();
+            File.Delete(missingImport);
+
+            BuildRequestConfiguration second = CreateFileConfiguration(project.Path, parameters);
+            second.LoadProjectIntoConfiguration(
+                host,
+                BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports,
+                submissionId: 2,
+                nodeId: 1);
+
+            second.Project.GetPropertyValue("Imported").ShouldBe("cached root");
             cache.MaterializedEntries.ShouldBe(0);
             cache.ValidationRejections.ShouldBe(1);
         }
@@ -1808,5 +2275,72 @@ public sealed class ProjectInstanceSnapshotCache_Tests
             ProjectInstanceSnapshotCacheKey key,
             ProjectInstanceSnapshotCacheEntry entry) =>
             throw new InvalidOperationException("Validation failed.");
+    }
+
+    private sealed class CancelingTestValidator : IProjectInstanceSnapshotValidator
+    {
+        public ProjectInstanceSnapshotValidationResult Validate(
+            ProjectInstanceSnapshotCacheKey key,
+            ProjectInstanceSnapshotCacheEntry entry) =>
+            throw new OperationCanceledException("Validation canceled.");
+    }
+
+    private sealed class AbortingTestValidator : IProjectInstanceSnapshotValidator
+    {
+        public ProjectInstanceSnapshotValidationResult Validate(
+            ProjectInstanceSnapshotCacheKey key,
+            ProjectInstanceSnapshotCacheEntry entry) =>
+            throw new BuildAbortedException("Validation aborted.");
+    }
+
+    private sealed class ChangingSdkResolverService : ISdkResolverService, IBuildComponent
+    {
+        internal ChangingSdkResolverService(string path)
+        {
+            Path = path;
+        }
+
+        internal int Calls { get; private set; }
+        internal string Path { get; set; }
+        internal string? Message { get; set; }
+        internal bool Success { get; set; } = true;
+        public Action<INodePacket> SendPacket => _ => { };
+        public bool IsNodeShutDown { get; set; }
+
+        public void ClearCache(int submissionId)
+        {
+        }
+
+        public void ClearCaches()
+        {
+        }
+
+        public SdkResult ResolveSdk(
+            int submissionId,
+            SdkReference sdk,
+            LoggingContext loggingContext,
+            ElementLocation sdkReferenceLocation,
+            string solutionPath,
+            string projectPath,
+            bool interactive,
+            bool isRunningInVisualStudio,
+            bool failOnUnresolvedSdk)
+        {
+            Calls++;
+            if (Message is not null)
+            {
+                loggingContext.LogSdkMessage(MessageImportance.Low, Message);
+            }
+
+            return Success
+                ? new SdkResult(sdk, Path, "1.0", warnings: null)
+                : new SdkResult(sdk, errors: ["not found"], warnings: null);
+        }
+
+        public void InitializeComponent(IBuildComponentHost host)
+        {
+        }
+
+        public void ShutdownComponent() => IsNodeShutDown = true;
     }
 }

@@ -14,6 +14,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
@@ -669,20 +670,33 @@ namespace Microsoft.Build.BackEnd
                             if (cacheHit)
                             {
                                 ProjectInstanceSnapshotValidationResult validationResult;
+                                ProjectInstanceSnapshotValidationContext validationContext = null;
                                 bool validationErrored = false;
                                 try
                                 {
-                                    validationResult =
-                                        evaluationCacheConfiguration?.ValidationPolicy ==
-                                            EvaluationCacheValidationPolicy.FileSystem
-                                        && HasUnverifiableCachedProjectRootElement(
-                                            componentHost.BuildParameters.ProjectRootElementCache,
-                                            projectRootElement,
-                                            cachedEntry)
+                                    if (evaluationCacheConfiguration?.ValidationPolicy ==
+                                        EvaluationCacheValidationPolicy.FileSystem)
+                                    {
+                                        validationContext = new ProjectInstanceSnapshotValidationContext(
+                                            sdkResolverService,
+                                            componentHost.LoggingService,
+                                            buildEventContext,
+                                            submissionId);
+                                        validationResult = HasUnverifiableCachedProjectRootElement(
+                                                componentHost.BuildParameters.ProjectRootElementCache,
+                                                projectRootElement,
+                                                cachedEntry)
                                             ? ProjectInstanceSnapshotValidationResult.Invalid
-                                            : snapshotCache.Validator.Validate(snapshotKey, cachedEntry);
+                                            : snapshotCache.Validator is FileSystemProjectInstanceSnapshotValidator fileSystemValidator
+                                                ? fileSystemValidator.Validate(snapshotKey, cachedEntry, validationContext)
+                                                : snapshotCache.Validator.Validate(snapshotKey, cachedEntry);
+                                    }
+                                    else
+                                    {
+                                        validationResult = snapshotCache.Validator.Validate(snapshotKey, cachedEntry);
+                                    }
                                 }
-                                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                                catch (Exception ex) when (IsRecoverableEvaluationCacheException(ex))
                                 {
                                     if (evaluationCacheConfiguration?.ValidationPolicy ==
                                         EvaluationCacheValidationPolicy.FileSystem)
@@ -723,7 +737,7 @@ namespace Microsoft.Build.BackEnd
                                         snapshotCache.NotifyMaterialized();
                                         return materialized;
                                     }
-                                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                                    catch (Exception ex) when (IsRecoverableEvaluationCacheException(ex))
                                     {
                                         snapshotCache.NotifyFallback();
                                         componentHost.LoggingService.LogComment(
@@ -742,10 +756,13 @@ namespace Microsoft.Build.BackEnd
                                 }
 
                                 snapshotCache.Remove(snapshotKey, cachedEntry);
+                                sdkResolverService =
+                                    validationContext?.GetResolverForFreshEvaluation()
+                                    ?? sdkResolverService;
                             }
                         }
                     }
-                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    catch (Exception ex) when (IsRecoverableEvaluationCacheException(ex))
                     {
                         snapshotKey = null;
                         statisticsCache?.NotifyFallback();
@@ -801,7 +818,7 @@ namespace Microsoft.Build.BackEnd
                                 : new EvaluationInputsSnapshotValidationData(evaluationInputs));
                         snapshotCache.AddOrReplace(snapshotKey, entry);
                     }
-                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    catch (Exception ex) when (IsRecoverableEvaluationCacheException(ex))
                     {
                         snapshotCache.NotifyFallback();
                         componentHost.LoggingService.LogComment(
@@ -834,13 +851,15 @@ namespace Microsoft.Build.BackEnd
 
             foreach (KeyValuePair<string, FileDependency> input in validationData.Inputs.Files)
             {
-                if (input.Value.Kind != PathKind.File)
+                if (input.Value.Kind == PathKind.Directory)
                 {
                     continue;
                 }
 
                 ProjectRootElement cachedRoot = projectRootElementCache.TryGet(input.Key);
-                if (cachedRoot is not null && HasUnverifiableFileProvenance(cachedRoot))
+                if (cachedRoot is not null
+                    && (input.Value.Kind == PathKind.Missing
+                        || HasUnverifiableFileProvenance(cachedRoot)))
                 {
                     return true;
                 }
@@ -851,6 +870,11 @@ namespace Microsoft.Build.BackEnd
 
         private static bool HasUnverifiableFileProvenance(ProjectRootElement root) =>
             root.HasUnsavedChanges || root.FileLengthWhenRead is null;
+
+        private static bool IsRecoverableEvaluationCacheException(Exception exception) =>
+            !ExceptionHandling.IsCriticalException(exception)
+            && exception is not OperationCanceledException
+            && exception is not BuildAbortedException;
 
         private static long ComputeToolsetFingerprint(
             Toolset toolset,

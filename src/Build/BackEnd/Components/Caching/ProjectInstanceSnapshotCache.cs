@@ -298,22 +298,27 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
 
         lock (_lock)
         {
-            if (entry.RetainedSizeBytes > _maximumSizeBytes)
+            var cacheEntry = new CacheEntry(key, entry);
+            if (cacheEntry.SizeBytes > _maximumSizeBytes)
             {
                 RemoveCore(key);
                 _oversizedRejections++;
                 return false;
             }
-
+            RemoveCore(key);
             RemoveCore(key);
 
-            var cacheEntry = new CacheEntry(key, entry);
+            while (_leastRecentlyUsed.Count > 0
+                && _currentSizeBytes > _maximumSizeBytes - cacheEntry.SizeBytes)
+            {
+                EvictLeastRecentlyUsed();
+            }
+
             var node = new LinkedListNode<CacheEntry>(cacheEntry);
             _entries.Add(key, node);
             _leastRecentlyUsed.AddFirst(node);
             _currentSizeBytes += cacheEntry.SizeBytes;
 
-            EvictToSizeLimit();
             _storedEntries++;
             return true;
         }
@@ -423,16 +428,13 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
     }
 
     // Caller must hold _lock.
-    private void EvictToSizeLimit()
+    private void EvictLeastRecentlyUsed()
     {
-        while (_currentSizeBytes > _maximumSizeBytes)
-        {
-            LinkedListNode<CacheEntry> node = _leastRecentlyUsed.Last!;
-            _leastRecentlyUsed.RemoveLast();
-            _entries.Remove(node.Value.Key);
-            _currentSizeBytes -= node.Value.SizeBytes;
-            _evictedEntries++;
-        }
+        LinkedListNode<CacheEntry> node = _leastRecentlyUsed.Last!;
+        _leastRecentlyUsed.RemoveLast();
+        _entries.Remove(node.Value.Key);
+        _currentSizeBytes -= node.Value.SizeBytes;
+        _evictedEntries++;
     }
 
     private sealed class CacheEntry
@@ -449,7 +451,10 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
 
         internal ProjectInstanceSnapshotCacheEntry Entry { get; }
 
-        internal long SizeBytes => Entry.RetainedSizeBytes;
+        internal long SizeBytes =>
+            Microsoft.Build.Evaluation.Context.RetainedSizeEstimator.Add(
+                Key.RetainedSizeBytes,
+                Entry.RetainedSizeBytes);
     }
 }
 
