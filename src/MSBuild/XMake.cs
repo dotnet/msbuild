@@ -1621,6 +1621,12 @@ namespace Microsoft.Build.CommandLine
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
+            if (multiThreaded && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
+            {
+                // Requests are created after BeginBuild enters the sentinel, so resolve the project path now.
+                projectFile = FileUtilities.NormalizePath(projectFile);
+            }
+
             bool success = true;
 
             ProjectCollection projectCollection = null;
@@ -2703,6 +2709,10 @@ namespace Microsoft.Build.CommandLine
                         graphBuild = ProcessGraphBuildSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild]);
                     }
 
+#if FEATURE_REPORTFILEACCESSES
+                    VerifyBuildModeCompatibility(multiThreaded, reportFileAccesses);
+#endif
+
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
@@ -2790,6 +2800,18 @@ namespace Microsoft.Build.CommandLine
 
             return Traits.Instance.EnableMultiThreaded;
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        internal static void VerifyBuildModeCompatibility(bool multiThreaded, bool reportFileAccesses)
+        {
+            if (multiThreaded && reportFileAccesses)
+            {
+                CommandLineSwitchException.Throw(
+                    "ReportFileAccessesIncompatibleWithMultiThreaded",
+                    "-reportFileAccesses");
+            }
+        }
+#endif
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
         {

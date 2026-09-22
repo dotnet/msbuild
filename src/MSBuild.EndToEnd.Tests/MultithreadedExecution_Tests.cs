@@ -131,6 +131,7 @@ namespace Microsoft.Build.EndToEndTests
             string output = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} /bl:\"{binlogPath}\" {CommonMSBuildArgs}",
                 out bool success,
+                outputHelper: _output,
                 timeoutMilliseconds: _timeoutInMilliseconds);
 
             success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\n{output}.");
@@ -143,6 +144,7 @@ namespace Microsoft.Build.EndToEndTests
             string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"\"{binlogPath}\" {CommonMSBuildArgs}",
                 out bool replaySuccess,
+                outputHelper: _output,
                 timeoutMilliseconds: _timeoutInMilliseconds);
 
             replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\n{replayOutput}");

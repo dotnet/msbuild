@@ -83,6 +83,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildCanceledEventArgs buildCanceled = new("message", DateTime.UtcNow);
             WorkerNodeTelemetryEventArgs workerNodeTelemetry = new();
             LoggersRegisteredEventArgs loggersRegistered = new(new List<RegisteredLoggerInfo> { new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }) });
+            AssemblyResolutionSearchTraceEventArgs assemblyResolutionSearch = CreateAssemblyResolutionSearch();
+            AssemblyConflictDependencyDetailsMessageEventArgs assemblyConflictDependencyDetails = CreateAssemblyConflictDependencyDetails();
+            AssemblyConflictWarningEventArgs assemblyConflictWarning = CreateAssemblyConflictWarning();
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -121,6 +124,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(buildCanceled, LoggingEventType.BuildCanceledEvent);
             VerifyLoggingPacket(workerNodeTelemetry, LoggingEventType.WorkerNodeTelemetryEvent);
             VerifyLoggingPacket(loggersRegistered, LoggingEventType.LoggersRegisteredEvent);
+            VerifyLoggingPacket(assemblyResolutionSearch, LoggingEventType.AssemblyResolutionSearchTraceEvent);
+            VerifyLoggingPacket(assemblyConflictDependencyDetails, LoggingEventType.AssemblyConflictDependencyDetailsEvent);
+            VerifyLoggingPacket(assemblyConflictWarning, LoggingEventType.AssemblyConflictWarningEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -338,6 +344,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             verbosity: LoggerVerbosity.Diagnostic,
                             parameters: "LogFile=a.log;LogFile=b.log"),
                     }),
+                    CreateAssemblyResolutionSearch(),
+                    CreateAssemblyConflictDependencyDetails(),
+                    CreateAssemblyConflictWarning(),
                 };
                 foreach (BuildEventArgs arg in testArgs)
                 {
@@ -365,6 +374,78 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             }
+        }
+
+        private static AssemblyResolutionSearchTraceEventArgs CreateAssemblyResolutionSearch()
+            => new(
+                "Requested, Version=1.0.0.0",
+                "MSIL",
+                [
+                    new AssemblyResolutionSearchAttempt(
+                        "first.dll",
+                        "search-path",
+                        "parent.dll",
+                        "Candidate, Version=2.0.0.0",
+                        AssemblyResolutionSearchResult.FusionNamesDidNotMatch,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: true),
+                    new AssemblyResolutionSearchAttempt(
+                        "second.dll",
+                        "search-path",
+                        "parent.dll",
+                        assemblyName: null,
+                        AssemblyResolutionSearchResult.TargetHadNoFusionName,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: true),
+                ],
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+
+        private static AssemblyConflictReferenceDetails CreateAssemblyConflictVictorDetails()
+            => new(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+
+        private static AssemblyConflictReferenceDetails CreateAssemblyConflictVictimDetails()
+            => new(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+
+        private static AssemblyConflictDependencyDetailsMessageEventArgs CreateAssemblyConflictDependencyDetails()
+            => new(
+                CreateAssemblyConflictVictorDetails(),
+                CreateAssemblyConflictVictimDetails(),
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+
+        private static AssemblyConflictWarningEventArgs CreateAssemblyConflictWarning()
+        {
+            AssemblyConflictReferenceDetails victor = CreateAssemblyConflictVictorDetails();
+            AssemblyConflictReferenceDetails victim = CreateAssemblyConflictVictimDetails();
+            return new(
+                "D",
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                "MSB3277",
+                @"C:\foo\bar.proj",
+                42,
+                7,
+                "MSBuild.ResolveAssemblyReference.FoundConflicts",
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
         }
 
         /// <summary>

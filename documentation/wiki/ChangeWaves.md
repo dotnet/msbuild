@@ -36,8 +36,15 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.12
+- [Multi-threaded builds use an empty sentinel current directory, check CWD after tasks, and detect unresolved relative-path writes at project/build completion.](https://github.com/dotnet/msbuild/pull/14917)
 - [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)
 - [Events that a task logs from a TaskHost - extended errors, warnings and messages, critical messages, telemetry, and any other event kind the router did not enumerate - reach the parent process instead of being dropped.](https://github.com/dotnet/msbuild/pull/14876)
+- [RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate.](https://github.com/dotnet/msbuild/pull/14599) This change reduces binary-log size. The event's default message uses the invariant culture, while the console and terminal loggers render it using the current UI culture. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to retain individual candidate messages.
+- RAR now logs structured events for version-conflict dependency details. These events replace large text messages for MSB3277 warnings and low-importance diagnostics.
+  - The events contain victor and victim identities, dependency chains, and source items.
+  - Events render invariant English messages from their structured data without transmitting localized format strings. Built-in user-facing loggers re-render them in the active UI culture; other consumers can use the structured fields to do the same.
+  - Strict readers older than binary-log format 28 reject the newer format. Forward-compatible readers skip the structured conflict records.
+  - Set `MSBUILDDISABLEFEATURESFROMVERSION=18.12` to restore the legacy localized plain-text events.
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)

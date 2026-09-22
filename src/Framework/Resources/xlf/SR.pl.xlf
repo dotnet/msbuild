@@ -218,6 +218,102 @@
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPath">
+        <source>For SearchPath "{0}".</source>
+        <target state="translated">Dla ścieżki wyszukiwania SearchPath „{0}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">Dla elementu SearchPath „{0}” (dodanego przez odwołanie do zestawu „{1}”).</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
+        <source>Considered AssemblyFoldersEx locations.</source>
+        <target state="translated">Wybrano lokalizacje klucza rejestru AssemblyFoldersEx.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">
+        <source>Considered "{0}",
+			but its name "{1}"
+			didn't match the expected name "{2}".</source>
+        <target state="translated">Wybrano element „{0}”,
+			ale jego nazwa „{1}”
+			nie zgadza się z oczekiwaną nazwą „{2}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile">
+        <source>Considered "{0}", but it didn't exist.</source>
+        <target state="translated">Wybrano element „{0}”, ale element nie istnieje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk">
+        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
+        <target state="translated">Potraktowano „{0}” jako nazwę pliku, ale plik nie istnieje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac">
+        <source>Considered "{0}", which was not found in the GAC.</source>
+        <target state="translated">Wybrano element „{0}”, którego nie można odnaleźć w globalnej pamięci podręcznej zestawu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">Brany pod uwagę element „{0}”, który istniał, ale nie był prawidłowym zestawem platformy .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch">
+        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
+        <target state="translated">Wybrano zestaw {0}, który istnieje, ale ma architekturę procesora {1}, która nie odpowiada architekturze procesora {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictFound">
+        <source>There was a conflict between "{0}" and "{1}".</source>
+        <target state="translated">Wystąpił konflikt między „{0}” a „{1}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictHigherVersionChosen">
+        <source>"{0}" was chosen because it had a higher version.</source>
+        <target state="translated">Wybrano „{0}”, ponieważ jest w nowszej wersji.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictPrimaryChosen">
+        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
+        <target state="translated">Wybrano parametr „{0}”, ponieważ jest parametrem podstawowym. Parametr „{1}” nie jest takim parametrem.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictUnsolvable">
+        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
+        <target state="translated">MSB3243: Nie ma sposobu na rozwiązanie konfliktu między „{0}” i „{1}”. Umownie zostanie wybrany parametr „{0}”.</target>
+        <note>{StrBegin="MSB3243: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_FoundConflicts">
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: Znaleziono konflikty między różnymi wersjami elementu „{0}”, których nie można rozstrzygnąć.
+{1}</target>
+        <note>{StrBegin="MSB3277: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ReferenceDependsOn">
+        <source>References which depend on "{0}" [{1}].</source>
+        <target state="translated">Odwołania z zależnością od „{0}” [{1}].</target>
+        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">Odwołania, które są zależne lub zostały ujednolicone dla „{0}” [{1}].</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnResolvedPrimaryItemSpec">
+        <source>Unresolved primary reference with an item include of "{0}".</source>
+        <target state="translated">Nierozpoznane odwołanie podstawowe do zawartości elementu „{0}”.</target>
+        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_PrimarySourceItemsForReference">
+        <source>Project file item includes which caused reference "{0}".</source>
+        <target state="translated">Element pliku projektu zawiera składnik powodujący odwołanie „{0}”.</target>
+        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
