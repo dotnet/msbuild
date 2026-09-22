@@ -682,6 +682,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return false;
         }
 
+        public bool ShouldTreatWarningAsError(BuildEventContext buildEventContext, string warningCode) => false;
+
         public void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry)
         {
             // Mock implementation does nothing

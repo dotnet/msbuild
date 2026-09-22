@@ -793,6 +793,7 @@ namespace Microsoft.Build.CommandLine
             {
 #if FEATURE_DEBUG_LAUNCH
                 case "1":
+                case "4" when s_isServerNode:
                     Debugger.Launch();
                     break;
                 case "3":
@@ -808,6 +809,16 @@ namespace Microsoft.Build.CommandLine
                     Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
                     Console.ReadLine();
 
+                    break;
+
+                case "5" when s_isServerNode:
+                    // The server has connected and redirected its output, but cannot read the client's stdin.
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).");
+                    Console.Out.Flush();
+                    while (!Debugger.IsAttached)
+                    {
+                        Thread.Sleep(100);
+                    }
                     break;
             }
         }
@@ -1608,6 +1619,12 @@ namespace Microsoft.Build.CommandLine
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
+            }
+
+            if (multiThreaded && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
+            {
+                // Requests are created after BeginBuild enters the sentinel, so resolve the project path now.
+                projectFile = FileUtilities.NormalizePath(projectFile);
             }
 
             bool success = true;
@@ -2692,6 +2709,10 @@ namespace Microsoft.Build.CommandLine
                         graphBuild = ProcessGraphBuildSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild]);
                     }
 
+#if FEATURE_REPORTFILEACCESSES
+                    VerifyBuildModeCompatibility(multiThreaded, reportFileAccesses);
+#endif
+
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
 
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
@@ -2779,6 +2800,18 @@ namespace Microsoft.Build.CommandLine
 
             return Traits.Instance.EnableMultiThreaded;
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        internal static void VerifyBuildModeCompatibility(bool multiThreaded, bool reportFileAccesses)
+        {
+            if (multiThreaded && reportFileAccesses)
+            {
+                CommandLineSwitchException.Throw(
+                    "ReportFileAccessesIncompatibleWithMultiThreaded",
+                    "-reportFileAccesses");
+            }
+        }
+#endif
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
         {

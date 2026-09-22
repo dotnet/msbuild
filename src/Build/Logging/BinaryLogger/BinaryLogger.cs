@@ -113,6 +113,12 @@ namespace Microsoft.Build.Logging
         //    - new record kind: LoggersRegisteredEventArgs (reports registered loggers and their output file paths)
         // version 27:
         //    - new record kind: MSBuildServerLifecycleEventArgs (reports how a build related to the MSBuild Server node)
+        // version 28:
+        //    - new record kind: AssemblyResolutionSearchTraceEventArgs
+        //    - new record kinds: AssemblyConflictDependencyDetailsMessageEventArgs, AssemblyConflictWarningEventArgs
+        //    (RAR conflict dependency-list details and MSB3277 warning, structured behind ChangeWave 18.12)
+        //    Forward-compatible readers older than version 28 skip these unknown record kinds.
+        //    Strict readers reject the newer file format.
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.
@@ -123,7 +129,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 27;
+        internal const int FileFormatVersion = 28;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being

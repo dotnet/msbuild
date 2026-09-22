@@ -245,15 +245,11 @@
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
-                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded[:true|false]
+        <target state="needs-review-translation">  -multithreaded[:true|false]
                      MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
                      즉, MSBuild는 여러 스레드를 사용하여
                      프로젝트를 병렬로 빌드합니다.
@@ -1846,6 +1842,14 @@
     reference here, we disallow the same response file from being included twice. This error message would be followed by the
     exact @ switch that resulted in the duplicate response file.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
+        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </note>
       </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
         <source>MSBUILD : error MSB1022: Response file does not exist.</source>
