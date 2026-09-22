@@ -157,6 +157,55 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
     }
 
     [Theory]
+    [InlineData(0)]
+    [InlineData(7)]
+    public void UnsupportedParameterConversionDoesNotAttachOrConfigure(byte negotiatedPacketVersion)
+    {
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream pipe = new();
+        using ManualResetEventSlim terminated = new();
+        NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+        HandshakeOptions hostContext = HandshakeOptions.TaskHost | HandshakeOptions.NET;
+        TaskHostNodeKey key = new(
+            hostContext,
+            1,
+            LaunchIdentity: new TaskHostLaunchIdentity("host", string.Empty, string.Empty));
+        NodeProviderOutOfProcBase.NodeContext context = new(
+            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
+            negotiatedPacketVersion, connectionPersistsAcrossBuilds: true);
+        provider.NodeContextCreated(context, key);
+        provider.TryAttachTaskHandler(context, new RecordingHandler()).ShouldBeTrue();
+
+        try
+        {
+            provider.AcquireAndSetUpHost(
+                new TaskHostNodeKey(hostContext, 1),
+                provider,
+                new RecordingHandler(),
+                configuration: null,
+                TaskHostParameters.Empty,
+                requiresParameterConversion: true,
+                out bool parameterConversionUnsupported,
+                out _,
+                out bool wasNewlyCreated,
+                out NodeProviderOutOfProcBase.NodeContext connection).ShouldBeFalse();
+
+            parameterConversionUnsupported.ShouldBeTrue();
+            wasNewlyCreated.ShouldBeFalse();
+            connection.ShouldBeNull();
+            provider.TaskHandlerRegistrationCount.ShouldBe(1);
+            pipe.PacketWritten.IsCompleted.ShouldBeFalse();
+        }
+        finally
+        {
+            pipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void ReusedConnectionWaitsForCleanupOrFailure(bool failConnection)

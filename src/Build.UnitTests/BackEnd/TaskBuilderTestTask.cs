@@ -722,6 +722,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        public TestTaskEnum[] EnumArrayParam
+        {
+            set
+            {
+                _testTaskHost?.ParameterSet("EnumArrayParam", value);
+            }
+        }
+
         /// <summary>
         /// An AbsolutePath array parameter.
         /// </summary>
