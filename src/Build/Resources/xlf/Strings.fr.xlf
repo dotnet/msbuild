@@ -666,7 +666,7 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeEnabled">
         <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
-        <target state="new">Multi-threaded strict mode is enabled. Process current directory: "{0}".</target>
+        <target state="translated">Le mode strict multithread est activé. Répertoire actuel du processus : "{0}".</target>
         <note>{0} is the full path of the sentinel directory.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeSentinelMissing">

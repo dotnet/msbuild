@@ -656,7 +656,7 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeAlreadyActive">
         <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
-        <target state="new">MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</target>
+        <target state="translated">MSB4289: V tomto procesu je již aktivní jiné striktní sestavení s více vlákny. Dokončete ho před spuštěním jiného sestavení, použijte samostatný proces nebo před zahájením procesu nastavte MSBUILDDISABLEFEATURESFROMVERSION=18.12, abyste zakázali přísné kontroly.</target>
         <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">

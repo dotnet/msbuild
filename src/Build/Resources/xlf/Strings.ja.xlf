@@ -656,7 +656,7 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeAlreadyActive">
         <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
-        <target state="new">MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</target>
+        <target state="translated">MSB4289: このプロセスでは、別のマルチスレッド厳格なビルドが既にアクティブになっています。別のビルドを開始する前に完了するか、別のプロセスを使用するか、プロセスを開始する前に MSBUILDDISABLEFEATURESFROMVERSION=18.12 を設定して厳密なチェックを無効にします。</target>
         <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
@@ -666,7 +666,7 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeEnabled">
         <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
-        <target state="new">Multi-threaded strict mode is enabled. Process current directory: "{0}".</target>
+        <target state="translated">マルチスレッド厳格モードが有効になっています。現在のディレクトリ "{0}" を処理します。</target>
         <note>{0} is the full path of the sentinel directory.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeSentinelMissing">
