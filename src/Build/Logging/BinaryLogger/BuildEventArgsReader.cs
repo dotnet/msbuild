@@ -215,6 +215,8 @@ namespace Microsoft.Build.Logging
         /// </returns>
         public BuildEventArgs? Read() => Read(eventFilter: null);
 
+        internal BinaryLogRecordKind CurrentRecordKind { get; private set; }
+
         /// <summary>
         /// Reads the next event accepted by <paramref name="eventFilter"/>.
         /// </summary>
@@ -352,6 +354,7 @@ namespace Microsoft.Build.Logging
                 }
 
                 _recordNumber += 1;
+                CurrentRecordKind = recordKind;
             }
 
             return result;

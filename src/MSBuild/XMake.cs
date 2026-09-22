@@ -455,7 +455,6 @@ namespace Microsoft.Build.CommandLine
                 bool serverIncompatibleSwitch =
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
-                    commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReplayFilter) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
                     FileUtilities.IsBinaryLogFilename(projectFile);
 
@@ -2556,8 +2555,7 @@ namespace Microsoft.Build.CommandLine
             {
                 ShowHelpMessage();
             }
-            else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode)
-                && !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReplayFilter))
+            else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
                 s_isNodeMode = true;
 
@@ -2651,7 +2649,7 @@ namespace Microsoft.Build.CommandLine
                             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
                             Directory.GetFiles));
 
-                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReplayFilter))
+                    if (FilteredBinlogReplay.IsRequested(projectFile, commandLineSwitches))
                     {
                         filteredReplay = FilteredBinlogReplay.Create(projectFile, commandLineSwitches);
                         string terminalLoggerArgument = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.TerminalLogger].LastOrDefault();
@@ -2761,7 +2759,8 @@ namespace Microsoft.Build.CommandLine
                         cpuCount,
                         out profilerLogger,
                         out enableProfiler,
-                        ref detailedSummary);
+                        ref detailedSummary,
+                        filteredReplay is not null);
 
                     var isLoggerThatRequiresTaskInputsConfigured = loggers.Any(l => l is TerminalLogger || l is BinaryLogger);
                     isTaskInputLoggingRequired = isTaskInputLoggingRequired || isLoggerThatRequiresTaskInputsConfigured || isBuildCheckEnabled;
@@ -3868,7 +3867,8 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             out ProfilerLogger profilerLogger,
             out bool enableProfiler,
-            ref bool detailedSummary)
+            ref bool detailedSummary,
+            bool filteredReplay)
         {
             string[] loggerSwitchParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger];
             string[] distributedLoggerSwitchParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger];
@@ -3902,7 +3902,7 @@ namespace Microsoft.Build.CommandLine
             var loggers = new List<ILogger>();
 
             var binlogVerbosity = verbosity;
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref binlogVerbosity);
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref binlogVerbosity, disableCopies: filteredReplay);
 
             // When returning the result of evaluation from the command line, do not use custom loggers.
             if (!useSimpleErrorLogger)
@@ -3911,10 +3911,12 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Add any loggers which have been specified on the command line
-            // Filtered replay ignores dotnet's injected build logger, validated during preflight.
-            distributedLoggerRecords = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.ReplayFilter)
-                ? []
-                : ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
+            // Replay does not run a build for dotnet's injected logger to track.
+            distributedLoggerRecords = ProcessDistributedLoggerSwitch(
+                filteredReplay
+                    ? distributedLoggerSwitchParameters.Where(parameter => !FilteredBinlogReplay.IsSdkLogger([parameter])).ToArray()
+                    : distributedLoggerSwitchParameters,
+                verbosity);
 
             // Otherwise choose default console logger: None, TerminalLogger, or the older ConsoleLogger
             if (useSimpleErrorLogger)
@@ -4035,7 +4037,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity, bool disableCopies)
         {
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
@@ -4061,7 +4063,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", string.Join(", ", processedParams.DuplicateFilePaths)));
             }
 
-            if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
+            if (!disableCopies && processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
             {
                 // Optimized approach: single logger writing to one file, then copy to additional locations
                 BinaryLogger logger = new() { Parameters = processedParams.DistinctParameterSets[0], AdditionalFilePaths = processedParams.AdditionalFilePaths };

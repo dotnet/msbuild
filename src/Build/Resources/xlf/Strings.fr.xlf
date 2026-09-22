@@ -612,6 +612,11 @@
         <target state="translated">MSB4255: Les fichiers cache des résultats d'entrée suivants n'existent pas : "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerEventFilter">
+        <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="new">MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</target>
+        <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">La chaîne de version n'était pas au format approprié.</target>
@@ -3226,8 +3231,8 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: Paramètre(s) de l’enregistrement d’événements binaire non valide(s) : "{0}". Attendu(s) : ProjectImports={{None,Embed,ZipFile}} et/ou [LogFile=]filePath.binlog (le chemin ou le nom du fichier journal doit avoir l’extension ".binlog").</target>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="needs-review-translation">MSB4234: Paramètre(s) de l’enregistrement d’événements binaire non valide(s) : "{0}". Attendu(s) : ProjectImports={{None,Embed,ZipFile}} et/ou [LogFile=]filePath.binlog (le chemin ou le nom du fichier journal doit avoir l’extension ".binlog").</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">

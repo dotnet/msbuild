@@ -153,29 +153,46 @@ logReader.Replay(path_to_binlog_file);
 
 ```
 
-### Filtering events during replay
+<a id="filtering-events-during-replay"></a>
 
-Use `-replayFilter` to write a binlog with selected event kinds excluded, or the .NET API
-for a custom predicate.
+### Filtering events during builds and replay
 
-#### Produce a filtered binlog from the command line
+Add `Exclude=kind[,kind...]` to a binary logger's parameters to omit selected event kinds.
+The same implementation filters events before serialization during an ordinary build
+and when rewriting an existing binlog. The option affects only that binary logger:
+console output, file loggers, and other binary loggers still receive their own events.
+Excluding errors or warnings does not change the build result.
 
-Use an MSBuild build containing the `-replayFilter` switch. Until this change is released,
-use MSBuild built from this branch; older installed SDKs do not recognize the switch.
-For example, exclude evaluation events and omit embedded project/import files:
+#### Produce filtered binlogs from the command line
+
+Use an MSBuild build containing the `Exclude` binary logger parameter. Until this change
+is released, use MSBuild built from this branch; older installed SDKs do not recognize it.
+For example, filter the original build's log while keeping normal console diagnostics:
 
 ```powershell
-dotnet msbuild "C:\logs\input.binlog" "-bl:C:\logs\filtered.binlog;ProjectImports=None" "-replayFilter:Exclude=ProjectEvaluationStarted,ProjectEvaluationFinished" -noAutoResponse
+dotnet build "C:\src\App\App.csproj" "-bl:C:\logs\filtered.binlog;Exclude=Message,Warning;ProjectImports=None"
 ```
 
-The same arguments work with `MSBuild.exe`. This replays the input; it does not rebuild
-the original project. The destination must not already exist, even if it is distinct
-from the input. Exactly one `-bl` argument is required. A bare `-bl` uses `msbuild.binlog`,
-which must also be a new path. The usual `{}` output-name expansion is supported.
-Relative output paths are resolved from the current directory, including directories
-whose names contain semicolons.
+Use the same parameter when rewriting an existing binlog:
 
-Specify `-replayFilter` once, including any response files. `Exclude=` and event kind
+```powershell
+dotnet msbuild "C:\logs\input.binlog" "-bl:C:\logs\filtered.binlog;Exclude=ProjectEvaluationStarted,ProjectEvaluationFinished;ProjectImports=None" -noAutoResponse
+```
+
+The same arguments work with `MSBuild.exe`. Passing a binlog replays it; it does not rebuild
+the original project. Multiple `-bl` arguments can have independent filters, or no filter:
+
+```powershell
+dotnet msbuild "C:\logs\input.binlog" "-bl:C:\logs\quiet.binlog;Exclude=Message" "-bl:C:\logs\full.binlog" -noAutoResponse
+```
+
+During filtered replay, all binary log destinations must be new paths, including the
+default `msbuild.binlog` when only `-bl:Exclude=...` is specified. Ordinary builds retain
+the binary logger's normal overwrite behavior. The usual `{}` output-name expansion is
+supported. Relative output paths are resolved from the current directory, including
+directories whose names contain semicolons.
+
+Specify `Exclude=` once per logger, including parameters from response files. `Exclude=` and event kind
 names are case-insensitive. Separate names with commas; duplicate names within the list
 are harmless. Empty lists, numeric values, unknown names, auxiliary records, and protected
 event kinds are rejected.
@@ -194,36 +211,45 @@ and correlation records are protected. These restrictions retain the structure n
 by the ordinary console logger; they do not guarantee that every consumer can perform
 the same analyses after data is excluded.
 
-The filter applies to all replay subscribers, including console output. Filtered replay
-uses the ordinary console logger, not the terminal logger. Besides the input, selector,
-and binary logger, supported switches are verbosity (`-v`), console logger parameters
+Filtered replay uses the ordinary console logger, not the terminal logger. Its console
+output is not filtered. Besides binary, custom, file, and distributed loggers, supported
+switches are verbosity (`-v`), console logger parameters
 (`-clp`), `-nologo`, `-m`, `-nr`, `-lowPriority`, `-noAutoResponse`, `-noConsoleLogger`,
 and automatic or disabled terminal selection (`-tl:auto` or `-tl:false`, both using the
-ordinary console logger here). Build-only switches, custom/file/distributed
-loggers, and `-check` are rejected before their outputs are opened. The build logger
-automatically registered by `dotnet msbuild` from the current SDK is ignored; custom
-distributed loggers remain unsupported. Terminal logger parameters (`-tlp`), including
+ordinary console logger here). Build-only switches and `-check` are rejected before their
+outputs are opened. The build logger automatically registered by `dotnet msbuild` from
+the current SDK is ignored. Terminal logger parameters (`-tlp`), including
 those supplied by the SDK, do not configure the ordinary console logger.
 Use `-noAutoResponse`, as above, to avoid
 inheriting build-only switches from automatic response files.
 
 `ProjectImports=Embed` remains the default; `ProjectImports=None` omits the archive.
-`ProjectImports=ZipFile` is unsupported because this operation publishes one file.
+`ProjectImports=ZipFile` is supported during builds, but not during filtered replay because
+its sidecar archive is not part of the staged binary log publication.
 Archives are handled independently of event selection: excluding `ProjectImported` or
-evaluation events does not remove embedded source files. The binary logger can also add
-metadata messages independently of the filter; `OmitInitialInfo` suppresses its initial
-metadata. **Filtering is not redaction**, and does not guarantee a smaller output.
+evaluation events does not remove embedded source files. `Exclude=Message` also excludes
+the binary logger's own metadata messages; `OmitInitialInfo` can suppress initial metadata
+without excluding other messages. **Filtering is not redaction**, and does not guarantee
+a smaller output.
 
 The input must use a format supported by this reader, no newer than its current format.
 Unlike ordinary forward-compatible replay, filtered rewriting does not skip unknown
 records or fields. It writes the current binlog format, not a byte-for-byte copy.
 
-Output is staged in the destination directory and published without overwriting only
+Each binary output is staged in its destination directory and published without overwriting only
 after replay and logger finalization succeed. Cancellation observed before publication,
 read/write failures, and finalization/publication failures produce a nonzero exit status.
 Existing destinations, including files created while replay is running, are preserved.
+Publication is atomic per file, not across all outputs: a later publication failure can
+leave earlier successfully published binlogs. Other logger outputs are not staged.
 Temporary-file cleanup failures are reported. Exit status describes the transformation,
 not whether the build recorded in the input succeeded.
+
+For programmatic per-logger filtering, set `BinaryLogger.Parameters` to include `Exclude=...`
+and initialize it with either a live build event source or a `BinaryLogReplayEventSource`.
+The logger forces structured replay so raw passthrough cannot bypass its filter. Events
+are still deserialized and delivered to other subscribers; use the replay-source API below
+when the same predicate should apply to every subscriber and skip rejected payloads early.
 
 #### Run a filtered replay from a console application
 
@@ -295,7 +321,7 @@ controls import archive paths, but the binlog itself is written to the supplied 
 
 #### Filtering behavior and failures
 
-A filter forces structured reading instead of raw record passthrough. With length-framed
+The replay source's `EventFilter` forces structured reading instead of raw record passthrough. With length-framed
 logs (format version 18 or later), rejected events skip their type-specific payload
 without deserialization. `TargetSkipped` is an exception: its original build context
 requires deserializing the payload first. Older formats also filter after deserialization.

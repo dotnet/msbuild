@@ -612,6 +612,11 @@
         <target state="translated">MSB4255: 以下の入力結果キャッシュ ファイルが存在しません: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerEventFilter">
+        <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="new">MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</target>
+        <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">バージョン文字列の形式が正しくありません。</target>
@@ -3226,8 +3231,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: バイナリ ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="needs-review-translation">MSB4234: バイナリ ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">

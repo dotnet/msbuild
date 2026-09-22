@@ -2126,6 +2126,7 @@ namespace Microsoft.Build.UnitTests
             using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
             var deserializedArgs = (T)buildEventArgsReader.Read();
 
+            buildEventArgsReader.CurrentRecordKind.ShouldBe(BuildEventArgsWriter.GetRecordKind(args));
             Assert.Equal(length, memoryStream.Position);
 
             Assert.NotNull(deserializedArgs);

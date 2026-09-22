@@ -301,6 +301,44 @@ namespace Microsoft.Build.Logging
             WriteToOriginalStream(stream);
         }
 
+        internal static BinaryLogRecordKind GetRecordKind(BuildEventArgs e) => e switch
+        {
+            ResponseFileUsedEventArgs => BinaryLogRecordKind.ResponseFileUsed,
+            TaskParameterEventArgs => BinaryLogRecordKind.TaskParameter,
+            ProjectImportedEventArgs => BinaryLogRecordKind.ProjectImported,
+            TargetSkippedEventArgs => BinaryLogRecordKind.TargetSkipped,
+            PropertyReassignmentEventArgs => BinaryLogRecordKind.PropertyReassignment,
+            TaskCommandLineEventArgs => BinaryLogRecordKind.TaskCommandLine,
+            UninitializedPropertyReadEventArgs => BinaryLogRecordKind.UninitializedPropertyRead,
+            EnvironmentVariableReadEventArgs => BinaryLogRecordKind.EnvironmentVariableRead,
+            PropertyInitialValueSetEventArgs => BinaryLogRecordKind.PropertyInitialValueSet,
+            CriticalBuildMessageEventArgs => BinaryLogRecordKind.CriticalBuildMessage,
+            AssemblyLoadBuildEventArgs => BinaryLogRecordKind.AssemblyLoad,
+            MSBuildServerLifecycleEventArgs => BinaryLogRecordKind.MSBuildServerLifecycle,
+            AssemblyResolutionSearchTraceEventArgs => BinaryLogRecordKind.AssemblyResolutionSearchTrace,
+            AssemblyConflictDependencyDetailsMessageEventArgs => BinaryLogRecordKind.AssemblyConflictDependencyDetails,
+            BuildMessageEventArgs => BinaryLogRecordKind.Message,
+            TaskStartedEventArgs => BinaryLogRecordKind.TaskStarted,
+            TaskFinishedEventArgs => BinaryLogRecordKind.TaskFinished,
+            TargetStartedEventArgs => BinaryLogRecordKind.TargetStarted,
+            TargetFinishedEventArgs => BinaryLogRecordKind.TargetFinished,
+            BuildErrorEventArgs => BinaryLogRecordKind.Error,
+            AssemblyConflictWarningEventArgs => BinaryLogRecordKind.AssemblyConflictWarning,
+            BuildWarningEventArgs => BinaryLogRecordKind.Warning,
+            ProjectStartedEventArgs => BinaryLogRecordKind.ProjectStarted,
+            ProjectFinishedEventArgs => BinaryLogRecordKind.ProjectFinished,
+            BuildSubmissionStartedEventArgs => BinaryLogRecordKind.BuildSubmissionStarted,
+            BuildStartedEventArgs => BinaryLogRecordKind.BuildStarted,
+            BuildFinishedEventArgs => BinaryLogRecordKind.BuildFinished,
+            BuildCanceledEventArgs => BinaryLogRecordKind.BuildCanceled,
+            ProjectEvaluationStartedEventArgs => BinaryLogRecordKind.ProjectEvaluationStarted,
+            ProjectEvaluationFinishedEventArgs => BinaryLogRecordKind.ProjectEvaluationFinished,
+            BuildCheckTracingEventArgs => BinaryLogRecordKind.BuildCheckTracing,
+            BuildCheckAcquisitionEventArgs => BinaryLogRecordKind.BuildCheckAcquisition,
+            LoggersRegisteredEventArgs => BinaryLogRecordKind.LoggersRegistered,
+            _ => BinaryLogRecordKind.Message,
+        };
+
         /// <summary>
         /// Switches the binaryWriter used by the Write* methods to the direct underlying stream writer
         /// until the disposable is disposed. Useful to bypass the currentRecordWriter to write a string,

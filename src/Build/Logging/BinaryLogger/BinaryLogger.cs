@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
@@ -38,6 +39,11 @@ namespace Microsoft.Build.Logging
         /// Gets whether to omit initial info from the log.
         /// </summary>
         public bool OmitInitialInfo { get; internal set; }
+
+        /// <summary>
+        /// Gets the event kinds excluded from this binary logger, during builds or replay.
+        /// </summary>
+        public ImmutableHashSet<BinaryLogRecordKind> ExcludedEventKinds { get; internal set; } = ImmutableHashSet<BinaryLogRecordKind>.Empty;
     }
 
     /// <summary>
@@ -152,6 +158,8 @@ namespace Microsoft.Build.Logging
         private bool _initialTargetOutputLogging;
         private bool _initialLogImports;
         private string _initialIsBinaryLoggerEnabled;
+        private BinaryLogEventFilter _eventFilter;
+        private IBinaryLogReplaySource _replayEventSource;
 
         /// <summary>
         /// Describes whether to collect the project files (including imported project files) used during the build.
@@ -187,6 +195,7 @@ namespace Microsoft.Build.Logging
         /// - LogFile=&lt;path&gt; or just &lt;path&gt; (must end with .binlog): specifies the output file path
         /// - ProjectImports=None|Embed|ZipFile: controls project imports collection
         /// - OmitInitialInfo: omits initial build information
+        /// - Exclude=&lt;kind&gt;[,&lt;kind&gt;...]: excludes event kinds from this logger only
         /// 
         /// Wildcards ({}) in the LogFile path are NOT expanded by this method. The returned LogFilePath
         /// will be null for wildcard patterns, and callers should handle expansion separately if needed.
@@ -203,6 +212,17 @@ namespace Microsoft.Build.Logging
 
             foreach (var parameter in parameters)
             {
+                if (parameter.StartsWith("Exclude=", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (result.ExcludedEventKinds.Count != 0)
+                    {
+                        throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerEventFilter", parameter));
+                    }
+
+                    result.ExcludedEventKinds = ParseExcludedEventKinds(parameter);
+                    continue;
+                }
+
                 if (TryParseProjectImports(parameter, result))
                 {
                     continue;
@@ -225,6 +245,52 @@ namespace Microsoft.Build.Logging
 
             return result;
         }
+
+        private static ImmutableHashSet<BinaryLogRecordKind> ParseExcludedEventKinds(string parameter)
+        {
+            var excludedKinds = ImmutableHashSet.CreateBuilder<BinaryLogRecordKind>();
+            foreach (string entry in parameter.Substring("Exclude=".Length).Split(','))
+            {
+                string name = entry.Trim();
+                if (!Enum.TryParse(name, ignoreCase: true, out BinaryLogRecordKind kind)
+                    || !string.Equals(Enum.GetName(typeof(BinaryLogRecordKind), kind), name, StringComparison.OrdinalIgnoreCase)
+                    || !CanExclude(kind))
+                {
+                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerEventFilter", parameter));
+                }
+
+                excludedKinds.Add(kind);
+            }
+
+            if (excludedKinds.Contains(BinaryLogRecordKind.ProjectEvaluationStarted) != excludedKinds.Contains(BinaryLogRecordKind.ProjectEvaluationFinished))
+            {
+                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerEventFilter", parameter));
+            }
+
+            return excludedKinds.ToImmutable();
+        }
+
+        private static bool CanExclude(BinaryLogRecordKind kind) => kind is
+            BinaryLogRecordKind.Error or
+            BinaryLogRecordKind.Warning or
+            BinaryLogRecordKind.Message or
+            BinaryLogRecordKind.CriticalBuildMessage or
+            BinaryLogRecordKind.TaskCommandLine or
+            BinaryLogRecordKind.ProjectEvaluationStarted or
+            BinaryLogRecordKind.ProjectEvaluationFinished or
+            BinaryLogRecordKind.ProjectImported or
+            BinaryLogRecordKind.PropertyReassignment or
+            BinaryLogRecordKind.UninitializedPropertyRead or
+            BinaryLogRecordKind.EnvironmentVariableRead or
+            BinaryLogRecordKind.PropertyInitialValueSet or
+            BinaryLogRecordKind.TaskParameter or
+            BinaryLogRecordKind.ResponseFileUsed or
+            BinaryLogRecordKind.AssemblyLoad or
+            BinaryLogRecordKind.BuildCheckMessage or
+            BinaryLogRecordKind.BuildCheckWarning or
+            BinaryLogRecordKind.BuildCheckError or
+            BinaryLogRecordKind.BuildCheckTracing or
+            BinaryLogRecordKind.BuildCheckAcquisition;
 
         /// <summary>
         /// Attempts to parse a ProjectImports parameter.
@@ -389,6 +455,7 @@ namespace Microsoft.Build.Logging
 
             ProcessParameters(parameters, logFilePath, out bool omitInitialInfo);
             var replayEventSource = eventSource as IBinaryLogReplaySource;
+            _replayEventSource = replayEventSource;
 
             try
             {
@@ -461,22 +528,25 @@ namespace Microsoft.Build.Logging
                         ProjectImportsCollector.FlushBlobToFile(FilePath, args.ContentStream);
                 }
 
-                // If raw events are provided - let's try to use the advantage.
-                // But other subscribers can later on subscribe to structured events -
-                //  for this reason we do only subscribe delayed.
-                replayEventSource.DeferredInitialize(
-                    // For raw events we cannot write the initial info - as we cannot write
-                    //  at the same time as raw events are being written - this would break the deduplicated strings store.
-                    // But we need to write the version info - but since we read/write raw - let's not change the version info.
-                    () =>
-                    {
-                        binaryWriter.Write(replayEventSource.FileFormatVersion);
-                        binaryWriter.Write(replayEventSource.MinimumReaderVersion);
-                        replayEventSource.RawLogRecordReceived += RawEvents_LogDataSliceReceived;
-                        // Replay separated strings here as well (and do not deduplicate! It would skew string indexes)
-                        replayEventSource.StringReadDone += strArg => eventArgsWriter.WriteStringRecord(strArg.StringToBeUsed);
-                    },
-                    SubscribeToStructuredEvents);
+                if (_eventFilter is not null)
+                {
+                    // Raw passthrough would bypass this logger's filter.
+                    SubscribeToStructuredEvents();
+                }
+                else
+                {
+                    // Defer the raw/structured choice until all other loggers have subscribed.
+                    replayEventSource.DeferredInitialize(
+                        // Raw replay must preserve the version and deduplicated string indexes.
+                        () =>
+                        {
+                            binaryWriter.Write(replayEventSource.FileFormatVersion);
+                            binaryWriter.Write(replayEventSource.MinimumReaderVersion);
+                            replayEventSource.RawLogRecordReceived += RawEvents_LogDataSliceReceived;
+                            replayEventSource.StringReadDone += strArg => eventArgsWriter.WriteStringRecord(strArg.StringToBeUsed);
+                        },
+                        SubscribeToStructuredEvents);
+                }
             }
             else
             {
@@ -624,10 +694,10 @@ namespace Microsoft.Build.Logging
 
         private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
         {
-            Write(e);
+            Write(e, _replayEventSource?.CurrentRecordKind);
         }
 
-        private void Write(BuildEventArgs e)
+        private void Write(BuildEventArgs e, BinaryLogRecordKind? recordKind = null)
         {
             if (stream != null)
             {
@@ -637,6 +707,14 @@ namespace Microsoft.Build.Logging
                 }
 
                 if (DoNotWriteToBinlog(e))
+                {
+                    return;
+                }
+
+                if (_eventFilter is not null && !_eventFilter(new BinaryLogEventMetadata(
+                    recordKind ?? BuildEventArgsWriter.GetRecordKind(e),
+                    e.BuildEventContext,
+                    (e as TargetSkippedEventArgs)?.OriginalBuildEventContext)))
                 {
                     return;
                 }
@@ -690,6 +768,9 @@ namespace Microsoft.Build.Logging
             parsedParams ??= ParseParameters(Parameters);
             
             omitInitialInfo = parsedParams.OmitInitialInfo;
+            _eventFilter = parsedParams.ExcludedEventKinds.Count == 0
+                ? null
+                : metadata => !parsedParams.ExcludedEventKinds.Contains(metadata.RecordKind);
             
             // Parsed configuration is authoritative; text parameters can leave the property unchanged.
             if (hasParsedParameters || parsedParams.HasProjectImportsParameter)

@@ -571,7 +571,11 @@
         attributes. At the end of the message we show the exception text we got trying to use the value.</comment>
   </data>
   <data name="InvalidBinaryLoggerParameters" xml:space="preserve">
-    <value>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</value>
+    <value>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</value>
+  </data>
+  <data name="InvalidBinaryLoggerEventFilter" xml:space="preserve">
+    <value>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</value>
+    <comment>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</comment>
   </data>
   <data name="InvalidContinueOnErrorAttribute" xml:space="preserve">
     <value>MSB4021: The "ContinueOnError" attribute of the "{0}" task is not valid. {1}</value>

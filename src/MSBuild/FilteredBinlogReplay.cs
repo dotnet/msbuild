@@ -30,90 +30,71 @@ internal sealed class FilteredBinlogReplay
             .CreateDelegate(typeof(Action<BinaryLogger, IEventSource, Stream, BinaryLoggerParameters, string>));
 
     private readonly string _inputPath;
-    private readonly string _outputPath;
-    private readonly BinaryLoggerParameters _loggerParameters;
-    private readonly HashSet<BinaryLogRecordKind> _excludedKinds;
 
-    private FilteredBinlogReplay(string inputPath, string outputPath, BinaryLoggerParameters loggerParameters, HashSet<BinaryLogRecordKind> excludedKinds)
+    private sealed class Output(string path, BinaryLoggerParameters parameters)
+    {
+        internal string Path { get; } = path;
+        internal BinaryLoggerParameters Parameters { get; } = parameters;
+        internal string? StagingPath { get; set; }
+        internal FileStream? Stream { get; set; }
+        internal bool OwnsStagingFile { get; set; }
+    }
+
+    private FilteredBinlogReplay(string inputPath)
     {
         _inputPath = inputPath;
-        _outputPath = outputPath;
-        _loggerParameters = loggerParameters;
-        _excludedKinds = excludedKinds;
+    }
+
+    internal static bool IsRequested(string inputPath, CommandLineSwitches switches)
+    {
+        if (FileUtilities.IsBinaryLogFilename(inputPath))
+        {
+            foreach (string parameter in switches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger])
+            {
+                if (BinaryLogger.ParseParameters(parameter).ExcludedEventKinds.Count != 0)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     internal static FilteredBinlogReplay Create(string inputPath, CommandLineSwitches switches)
     {
         ValidateSwitches(switches);
-        CommandLineSwitchException.VerifyThrow(FileUtilities.IsBinaryLogFilename(inputPath), "ReplayFilterInputRequired", inputPath);
-
-        string[] filters = switches[CommandLineSwitches.ParameterizedSwitch.ReplayFilter];
-        CommandLineSwitchException.VerifyThrow(filters.Length == 1, "DuplicateReplayFilter", "-replayFilter");
-        string expression = filters[0];
-        CommandLineSwitchException.VerifyThrow(expression.StartsWith("Exclude=", StringComparison.OrdinalIgnoreCase), "InvalidReplayFilter", expression);
-
-        HashSet<BinaryLogRecordKind> excludedKinds = [];
-        foreach (string entry in expression.Substring("Exclude=".Length).Split(','))
+        var processed = BinaryLogger.ProcessParameters(switches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger]);
+        foreach (string parameter in processed.DistinctParameterSets)
         {
-            string name = entry.Trim();
-            CommandLineSwitchException.VerifyThrow(
-                Enum.TryParse(name, ignoreCase: true, out BinaryLogRecordKind kind)
-                && string.Equals(Enum.GetName(typeof(BinaryLogRecordKind), kind), name, StringComparison.OrdinalIgnoreCase)
-                && CanExclude(kind),
-                "InvalidReplayFilter",
-                name);
-            excludedKinds.Add(kind);
+            CreateOutput(parameter);
         }
 
-        CommandLineSwitchException.VerifyThrow(
-            excludedKinds.Contains(BinaryLogRecordKind.ProjectEvaluationStarted) == excludedKinds.Contains(BinaryLogRecordKind.ProjectEvaluationFinished),
-            "ReplayFilterEvaluationPair",
-            expression);
+        return new FilteredBinlogReplay(inputPath);
+    }
 
-        string[] binaryLoggerParameters = switches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger];
-        CommandLineSwitchException.VerifyThrow(binaryLoggerParameters.Length == 1, "ReplayFilterOutputRequired", "-binaryLogger");
-        var parameters = BinaryLogger.ParseParameters(binaryLoggerParameters[0]);
+    private static Output CreateOutput(string parameter)
+    {
+        var parameters = BinaryLogger.ParseParameters(parameter);
         CommandLineSwitchException.VerifyThrow(
             parameters.ProjectImportsCollectionMode != BinaryLogger.ProjectImportsCollectionMode.ZipFile,
             "ReplayFilterZipNotSupported",
-            binaryLoggerParameters[0]);
+            parameter);
 
         string outputPath;
         try
         {
-            outputPath = Path.GetFullPath(parameters.LogFilePath ?? BinaryLogger.ExtractFilePathFromParameters(binaryLoggerParameters[0]));
+            outputPath = Path.GetFullPath(parameters.LogFilePath ?? BinaryLogger.ExtractFilePathFromParameters(parameter));
         }
         catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
         {
-            CommandLineSwitchException.Throw("ReplayFilterInvalidOutput", binaryLoggerParameters[0], ex.Message);
+            CommandLineSwitchException.Throw("ReplayFilterInvalidOutput", parameter, ex.Message);
             throw;
         }
 
         CommandLineSwitchException.VerifyThrow(!File.Exists(outputPath) && !Directory.Exists(outputPath), "ReplayFilterOutputExists", outputPath);
-        return new FilteredBinlogReplay(inputPath, outputPath, parameters, excludedKinds);
+        return new Output(outputPath, parameters);
     }
-
-    private static bool CanExclude(BinaryLogRecordKind kind) => kind is
-        BinaryLogRecordKind.Error or
-        BinaryLogRecordKind.Warning or
-        BinaryLogRecordKind.Message or
-        BinaryLogRecordKind.CriticalBuildMessage or
-        BinaryLogRecordKind.TaskCommandLine or
-        BinaryLogRecordKind.ProjectEvaluationStarted or
-        BinaryLogRecordKind.ProjectEvaluationFinished or
-        BinaryLogRecordKind.ProjectImported or
-        BinaryLogRecordKind.PropertyReassignment or
-        BinaryLogRecordKind.UninitializedPropertyRead or
-        BinaryLogRecordKind.EnvironmentVariableRead or
-        BinaryLogRecordKind.PropertyInitialValueSet or
-        BinaryLogRecordKind.TaskParameter or
-        BinaryLogRecordKind.ResponseFileUsed or
-        BinaryLogRecordKind.AssemblyLoad or
-        BinaryLogRecordKind.BuildCheckMessage or
-        BinaryLogRecordKind.BuildCheckWarning or
-        BinaryLogRecordKind.BuildCheckError or
-        BinaryLogRecordKind.BuildCheckTracing or
-        BinaryLogRecordKind.BuildCheckAcquisition;
 
     private static void ValidateSwitches(CommandLineSwitches switches)
     {
@@ -126,9 +107,10 @@ internal sealed class FilteredBinlogReplay
             }
 
             CommandLineSwitchException.VerifyThrow(
-                (kind == CommandLineSwitches.ParameterizedSwitch.DistributedLogger && IsSdkLogger(switches[kind]))
-                    || kind is CommandLineSwitches.ParameterizedSwitch.Project
-                    or CommandLineSwitches.ParameterizedSwitch.ReplayFilter
+                kind is CommandLineSwitches.ParameterizedSwitch.Project
+                    or CommandLineSwitches.ParameterizedSwitch.Logger
+                    or CommandLineSwitches.ParameterizedSwitch.DistributedLogger
+                    or >= CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters and <= CommandLineSwitches.ParameterizedSwitch.FileLoggerParameters9
                     or CommandLineSwitches.ParameterizedSwitch.BinaryLogger
                     or CommandLineSwitches.ParameterizedSwitch.Verbosity
                     or CommandLineSwitches.ParameterizedSwitch.ConsoleLoggerParameters
@@ -151,13 +133,15 @@ internal sealed class FilteredBinlogReplay
             }
 
             CommandLineSwitchException.VerifyThrow(
-                kind is CommandLineSwitches.ParameterlessSwitch.NoAutoResponse or CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger,
+                kind is CommandLineSwitches.ParameterlessSwitch.NoAutoResponse
+                    or CommandLineSwitches.ParameterlessSwitch.NoConsoleLogger
+                    or >= CommandLineSwitches.ParameterlessSwitch.FileLogger and <= CommandLineSwitches.ParameterlessSwitch.DistributedFileLogger,
                 "ReplayFilterUnsupportedSwitch",
                 switches.GetParameterlessSwitchCommandLineArg(kind));
         }
     }
 
-    private static bool IsSdkLogger(string[] parameters)
+    internal static bool IsSdkLogger(string[] parameters)
     {
         if (parameters.Length != 1)
         {
@@ -173,43 +157,54 @@ internal sealed class FilteredBinlogReplay
 
     internal bool Replay(ILogger[] loggers, int cpuCount, CancellationToken cancellationToken)
     {
-        string? stagingPath = null;
-        bool ownsStagingFile = false;
+        Dictionary<BinaryLogger, Output> outputs = [];
         try
         {
             using var binaryReader = BinaryLogReplayEventSource.OpenReader(_inputPath);
             using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(binaryReader, closeInput: false);
             cancellationToken.ThrowIfCancellationRequested();
 
-            string directory = Path.GetDirectoryName(_outputPath)!;
-            Directory.CreateDirectory(directory);
-            stagingPath = Path.Combine(directory, $".msbuild-filter-{Guid.NewGuid():N}.binlog");
-            var source = new BinaryLogReplayEventSource
+            HashSet<string> outputPaths = new(NativeMethodsShared.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+            foreach (ILogger logger in loggers)
             {
-                EventFilter = metadata => !_excludedKinds.Contains(metadata.RecordKind)
-            };
+                if (logger is BinaryLogger binaryLogger)
+                {
+                    Output output = CreateOutput(binaryLogger.Parameters);
+                    CommandLineSwitchException.VerifyThrow(outputPaths.Add(output.Path), "ReplayFilterOutputExists", output.Path);
+                    outputs.Add(binaryLogger, output);
+                }
+            }
+
+            var source = new BinaryLogReplayEventSource();
             List<ILogger> initializedLoggers = [];
             bool finalized = true;
-            FileStream? output = null;
             try
             {
-                output = new FileStream(stagingPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-                ownsStagingFile = true;
                 foreach (ILogger logger in loggers)
                 {
-                    initializedLoggers.Add(logger);
                     if (logger is BinaryLogger binaryLogger)
                     {
+                        Output output = outputs[binaryLogger];
+                        string directory = Path.GetDirectoryName(output.Path)!;
+                        Directory.CreateDirectory(directory);
+                        output.StagingPath = Path.Combine(directory, $".msbuild-filter-{Guid.NewGuid():N}.binlog");
+                        output.Stream = new FileStream(output.StagingPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                        output.OwnsStagingFile = true;
                         // Keep the temporary path out of the logger's metadata.
-                        s_initializeBinaryLogger(binaryLogger, source, output, _loggerParameters, _outputPath);
-                    }
-                    else if (logger is INodeLogger nodeLogger)
-                    {
-                        nodeLogger.Initialize(source, cpuCount);
+                        initializedLoggers.Add(logger);
+                        s_initializeBinaryLogger(binaryLogger, source, output.Stream, output.Parameters, output.Path);
                     }
                     else
                     {
-                        logger.Initialize(source);
+                        initializedLoggers.Add(logger);
+                        if (logger is INodeLogger nodeLogger)
+                        {
+                            nodeLogger.Initialize(source, cpuCount);
+                        }
+                        else
+                        {
+                            logger.Initialize(source);
+                        }
                     }
                 }
 
@@ -235,7 +230,18 @@ internal sealed class FilteredBinlogReplay
                 }
                 finally
                 {
-                    output?.Dispose();
+                    foreach (Output output in outputs.Values)
+                    {
+                        try
+                        {
+                            output.Stream?.Dispose();
+                        }
+                        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                        {
+                            ReportFailure(ex);
+                            finalized = false;
+                        }
+                    }
                 }
             }
 
@@ -246,8 +252,11 @@ internal sealed class FilteredBinlogReplay
 
             cancellationToken.ThrowIfCancellationRequested();
             // Same-directory publication must not overwrite a destination created during replay.
-            File.Move(stagingPath, _outputPath);
-            ownsStagingFile = false;
+            foreach (Output output in outputs.Values)
+            {
+                File.Move(output.StagingPath!, output.Path);
+                output.OwnsStagingFile = false;
+            }
             return true;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -262,15 +271,18 @@ internal sealed class FilteredBinlogReplay
         }
         finally
         {
-            if (ownsStagingFile)
+            foreach (Output output in outputs.Values)
             {
-                try
+                if (output.OwnsStagingFile)
                 {
-                    File.Delete(stagingPath!);
-                }
-                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
-                {
-                    ReportFailure(ex);
+                    try
+                    {
+                        File.Delete(output.StagingPath!);
+                    }
+                    catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+                    {
+                        ReportFailure(ex);
+                    }
                 }
             }
         }

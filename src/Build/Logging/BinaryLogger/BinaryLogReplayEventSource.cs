@@ -47,6 +47,11 @@ namespace Microsoft.Build.Logging
         int MinimumReaderVersion { get; }
 
         /// <summary>
+        /// Original record kind while dispatching a structured event.
+        /// </summary>
+        BinaryLogRecordKind? CurrentRecordKind { get; }
+
+        /// <summary>
         /// Raised when the log reader encounters a project import archive (embedded content) in the stream.
         /// The subscriber must read the exactly given length of binary data from the stream - otherwise exception is raised.
         /// If no subscriber is attached, the data is skipped.
@@ -66,6 +71,9 @@ namespace Microsoft.Build.Logging
         private int? _fileFormatVersion;
         private int? _minimumReaderVersion;
         private string? _formatVersionMismatchWarning;
+        private BinaryLogRecordKind? _currentRecordKind;
+
+        BinaryLogRecordKind? IBinaryLogReplaySource.CurrentRecordKind => _currentRecordKind;
 
         public int FileFormatVersion => _fileFormatVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
         public int MinimumReaderVersion => _minimumReaderVersion ?? throw new InvalidOperationException(ResourceUtilities.GetResourceString("Binlog_Source_VersionUninitialized"));
@@ -317,7 +325,15 @@ namespace Microsoft.Build.Logging
 
                 while (!cancellationToken.IsCancellationRequested && reader.Read(EventFilter, cancellationToken) is { } instance)
                 {
-                    Dispatch(instance);
+                    _currentRecordKind = reader.CurrentRecordKind;
+                    try
+                    {
+                        Dispatch(instance);
+                    }
+                    finally
+                    {
+                        _currentRecordKind = null;
+                    }
                 }
             }
             else

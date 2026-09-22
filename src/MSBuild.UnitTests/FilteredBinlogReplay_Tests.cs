@@ -14,6 +14,7 @@ using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 
@@ -33,47 +34,35 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         MSBuildApp.Initialize();
     }
 
-    [Theory]
-    [InlineData("-replayFilter")]
-    [InlineData("-replayFilter:")]
-    public void ReplayFilter_MissingExpressionIsRejected(string argument)
+    [Fact]
+    public void ReplayFilter_StandaloneSwitchIsNotSupported()
     {
-        Should.Throw<CommandLineSwitchException>(() => ParseSwitches(argument))
-            .Message.ShouldContain("MSB1074");
+        Should.Throw<CommandLineSwitchException>(() => ParseSwitches("-replayFilter:Exclude=Message"))
+            .Message.ShouldContain("MSB1001");
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void ReplayFilter_RepeatedSwitchIncludingResponseFileIsRejected(bool useResponseFile)
+    [Fact]
+    public void ReplayFilter_RepeatedParameterIsRejected()
     {
-        string secondArgument = "-replayFilter:Exclude=Warning";
-        if (useResponseFile)
-        {
-            secondArgument = $"@\"{_env.CreateFile("filter.rsp", secondArgument).Path}\"";
-        }
-
-        Should.Throw<CommandLineSwitchException>(
-            () => ParseSwitches("-replayFilter:Exclude=Message", secondArgument))
-            .Message.ShouldContain("MSB1075");
+        Should.Throw<LoggerException>(() => BinaryLogger.ParseParameters("Exclude=Message;Exclude=Warning"))
+            .Message.ShouldContain("Invalid binary logger event filter");
     }
 
     [Theory]
     [InlineData("Exclude=Message,Warning")]
     [InlineData("eXcLuDe=message,WARNING")]
     [InlineData("Exclude= Message , Warning , message ")]
-    public void ReplayFilter_SelectionIsSharedByAllLoggersAndRetainsLifecycle(string expression)
+    public void ReplayFilter_SelectionIsLoggerScopedAndRetainsLifecycle(string expression)
     {
         string input = CreateInput();
         byte[] originalInput = File.ReadAllBytes(input);
         string output = OutputPath();
-        CommandLineSwitches switches = ParseSwitches($"-replayFilter:\"{expression}\"", BinaryLogArgument(output, ";OmitInitialInfo"));
-        switches[CommandLineSwitches.ParameterizedSwitch.ReplayFilter].ShouldBe([expression]);
+        CommandLineSwitches switches = ParseSwitches(BinaryLogArgument(output, $";OmitInitialInfo;{expression}"));
         var first = new CallbackLogger();
         var second = new CallbackLogger();
 
         FilteredBinlogReplay.Create(input, switches)
-            .Replay([new BinaryLogger(), first, second], 2, CancellationToken.None).ShouldBeTrue();
+            .Replay([CreateLogger(output, expression, ";OmitInitialInfo"), first, second], 2, CancellationToken.None).ShouldBeTrue();
 
         BuildEventArgs[] expected = ReadEvents(input)
             .Where(e => e.GetType() != typeof(BuildMessageEventArgs) && e is not BuildWarningEventArgs)
@@ -83,7 +72,9 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         rewritten.Select(e => e.Message).ShouldBe(expected.Select(e => e.Message));
         rewritten.Select(e => e.BuildEventContext?.ProjectContextId).ShouldBe(expected.Select(e => e.BuildEventContext?.ProjectContextId));
         first.Events.ShouldBe(second.Events);
-        first.Events.Select(e => e.GetType()).ShouldBe(rewritten.Select(e => e.GetType()));
+        first.Events.Select(e => e.GetType()).ShouldBe(ReadEvents(input).Select(e => e.GetType()));
+        first.Events.ShouldContain(e => e.Message == SourceMessage);
+        first.Events.ShouldContain(e => e.Message == SourceWarning);
         first.InitializeCount.ShouldBe(1);
         first.ShutdownCount.ShouldBe(1);
         second.ShutdownCount.ShouldBe(1);
@@ -148,8 +139,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     [InlineData("Exclude=UndefinedEvent")]
     public void ReplayFilter_InvalidExpressionIsRejected(string expression)
     {
-        Should.Throw<CommandLineSwitchException>(() => CreateOperation("input.binlog", OutputPath(), expression))
-            .Message.ShouldContain("MSB1076");
+        Should.Throw<LoggerException>(() => CreateOperation("input.binlog", OutputPath(), expression))
+            .Message.ShouldContain("Invalid binary logger");
         AssertNoStagingFiles();
     }
 
@@ -176,8 +167,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     [InlineData(BinaryLogRecordKind.AssemblyConflictWarning)]
     public void ReplayFilter_ProtectedAndAuxiliaryKindsAreRejected(BinaryLogRecordKind kind)
     {
-        Should.Throw<CommandLineSwitchException>(() => CreateOperation("input.binlog", OutputPath(), $"Exclude={kind}"))
-            .Message.ShouldContain("MSB1076");
+        Should.Throw<LoggerException>(() => CreateOperation("input.binlog", OutputPath(), $"Exclude={kind}"))
+            .Message.ShouldContain("Invalid binary logger event filter");
     }
 
     [Theory]
@@ -185,8 +176,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     [InlineData("ProjectEvaluationFinished")]
     public void ReplayFilter_UnpairedEvaluationExclusionIsRejected(string kind)
     {
-        Should.Throw<CommandLineSwitchException>(() => CreateOperation("input.binlog", OutputPath(), $"Exclude={kind}"))
-            .Message.ShouldContain("MSB1083");
+        Should.Throw<LoggerException>(() => CreateOperation("input.binlog", OutputPath(), $"Exclude={kind}"))
+            .Message.ShouldContain("Invalid binary logger event filter");
     }
 
     [Fact]
@@ -195,7 +186,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         string input = CreateInput();
         string output = OutputPath();
         CreateOperation(input, output, "Exclude=ProjectEvaluationStarted,ProjectEvaluationFinished")
-            .Replay([new BinaryLogger()], 1, CancellationToken.None).ShouldBeTrue();
+            .Replay([CreateLogger(output, "Exclude=ProjectEvaluationStarted,ProjectEvaluationFinished")], 1, CancellationToken.None).ShouldBeTrue();
 
         BuildEventArgs[] events = ReadEvents(output);
         events.ShouldNotContain(e => e is ProjectEvaluationStartedEventArgs || e is ProjectEvaluationFinishedEventArgs);
@@ -205,10 +196,6 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     }
 
     [Theory]
-    [InlineData("-logger:Missing.Logger,Missing.Assembly")]
-    [InlineData("-distributedLogger:Missing.Logger,Missing.Assembly")]
-    [InlineData("-fileLogger")]
-    [InlineData("-distributedFileLogger")]
     [InlineData("-check")]
     [InlineData("-target:Build")]
     [InlineData("-property:Name=Value")]
@@ -217,14 +204,13 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     [InlineData("-getItem:Compile")]
     [InlineData("-getTargetResult:Build")]
     [InlineData("-terminalLogger:true")]
-    [InlineData("-nodeMode:1")]
     public void ReplayFilter_IncompatibleSwitchIsRejectedBeforeReplay(string argument)
     {
         string input = _env.CreateFile("input.binlog", "input must not be read or changed").Path;
         byte[] originalInput = File.ReadAllBytes(input);
         string output = OutputPath();
 
-        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output), "-replayFilter:Exclude=Message", argument)
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output, ";Exclude=Message"), argument)
             .ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
 
         diagnostic.ShouldContain("MSB1077");
@@ -237,7 +223,6 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     [InlineData("-preprocess:")]
     [InlineData("-targets:")]
     [InlineData("-getResultOutputFile:")]
-    [InlineData("-fileLoggerParameters:LogFile=")]
     public void ReplayFilter_IncompatibleWriterNeverTruncatesItsDestination(string switchPrefix)
     {
         string input = _env.CreateFile("input.binlog", "unchanged input").Path;
@@ -245,8 +230,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         byte[] originalOutput = File.ReadAllBytes(otherOutput);
         string output = OutputPath();
 
-        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output),
-            "-replayFilter:Exclude=Message", $"{switchPrefix}\"{otherOutput}\"")
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output, ";Exclude=Message"),
+            $"{switchPrefix}\"{otherOutput}\"")
             .ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
 
         diagnostic.ShouldContain("MSB1077");
@@ -256,16 +241,94 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     }
 
     [Theory]
-    [InlineData(".proj")]
-    [InlineData(".sln")]
-    public void ReplayFilter_ProjectAndSolutionInputsAreRejected(string extension)
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BinaryLoggerFilter_LiveBuildLeavesOtherLoggersAndBuildResultUnchanged(bool fail)
     {
-        string input = _env.CreateFile($"input{extension}", "<Project />").Path;
+        string project = _env.CreateFile("live.proj", $"""
+            <Project>
+              <Target Name="Build">
+                <Message Text="{SourceMessage}" Importance="High" />
+                <Warning Text="{SourceWarning}" />
+                <Error Text="{SourceError}" Condition="{fail}" />
+              </Target>
+            </Project>
+            """).Path;
+        string filtered = OutputPath();
+        string full = OutputPath("full.binlog");
+        string text = OutputPath("full.log");
+
+        string diagnostic = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"\"{project}\" -noAutoResponse -nologo -tl:false -v:diag "
+            + BinaryLogArgument(filtered, ";Exclude=Message,Warning,Error;ProjectImports=None") + " "
+            + BinaryLogArgument(full, ";ProjectImports=None") + $" -flp:\"LogFile={text};Verbosity=diagnostic\"",
+            out bool succeeded);
+        succeeded.ShouldBe(!fail, diagnostic);
+
+        BuildEventArgs[] events = ReadEvents(filtered);
+        events.ShouldNotContain(e => e.GetType() == typeof(BuildMessageEventArgs) || e is BuildWarningEventArgs || e is BuildErrorEventArgs);
+        events.OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem().Succeeded.ShouldBe(!fail);
+        events.OfType<ProjectStartedEventArgs>().ShouldHaveSingleItem();
+        events.OfType<ProjectFinishedEventArgs>().ShouldHaveSingleItem();
+        string[] expectedMessages = fail ? [SourceMessage, SourceWarning, SourceError] : [SourceMessage, SourceWarning];
+        foreach (string message in expectedMessages)
+        {
+            diagnostic.ShouldContain(message);
+            File.ReadAllText(text).ShouldContain(message);
+            ReadEvents(full).ShouldContain(e => e.Message != null && e.Message.Contains(message));
+        }
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void BinaryLoggerFilter_UsesSameSelectionForLiveEventsAndReplay(bool replay, bool otherSubscriber)
+    {
+        string input = CreateInput();
+        BuildEventArgs[] original = ReadEvents(input);
         string output = OutputPath();
-        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output), "-replayFilter:Exclude=Message")
-            .ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
-        diagnostic.ShouldContain("MSB1078");
-        File.Exists(output).ShouldBeFalse();
+        EventArgsDispatcher source = replay ? new BinaryLogReplayEventSource() : new EventArgsDispatcher();
+        var other = new CallbackLogger();
+        var binaryLogger = new BinaryLogger { Parameters = $"LogFile={output};Exclude=Message,Warning;OmitInitialInfo;ProjectImports=None" };
+        try
+        {
+            binaryLogger.Initialize(source);
+            if (otherSubscriber)
+            {
+                other.Initialize(source);
+            }
+
+            if (source is BinaryLogReplayEventSource replaySource)
+            {
+                replaySource.Replay(input);
+            }
+            else
+            {
+                foreach (BuildEventArgs e in original)
+                {
+                    source.Dispatch(e);
+                }
+            }
+        }
+        finally
+        {
+            if (otherSubscriber)
+            {
+                other.Shutdown();
+            }
+
+            binaryLogger.Shutdown();
+        }
+
+        BuildEventArgs[] expected = original.Where(e => e.GetType() != typeof(BuildMessageEventArgs) && e is not BuildWarningEventArgs).ToArray();
+        ReadEvents(output).Select(e => e.GetType()).ShouldBe(expected.Select(e => e.GetType()));
+        ReadEvents(output).Select(e => e.Message).ShouldBe(expected.Select(e => e.Message));
+        if (otherSubscriber)
+        {
+            other.Events.Select(e => e.Message).ShouldBe(original.Select(e => e.Message));
+        }
     }
 
     [Fact]
@@ -274,7 +337,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         string first = _env.CreateFile("first.binlog", "first").Path;
         string second = _env.CreateFile("second.binlog", "second").Path;
         string output = OutputPath();
-        Execute(out string diagnostic, $"\"{first}\"", $"\"{second}\"", BinaryLogArgument(output), "-replayFilter:Exclude=Message")
+        Execute(out string diagnostic, $"\"{first}\"", $"\"{second}\"", BinaryLogArgument(output, ";Exclude=Message"))
             .ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
         diagnostic.ShouldContain("MSB1008");
         File.ReadAllText(first).ShouldBe("first");
@@ -282,27 +345,93 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         File.Exists(output).ShouldBeFalse();
     }
 
-    [Theory]
-    [InlineData(0, false)]
-    [InlineData(2, false)]
-    [InlineData(2, true)]
-    public void ReplayFilter_RequiresOneOutputEvenWhenRepeatedPathsAreIdentical(int count, bool duplicate)
+    [Fact]
+    public void BinaryLoggerFilter_DropsUnrecognizedMessagesBeforeSerialization()
     {
-        string input = _env.CreateFile("input.binlog", "unchanged input").Path;
-        string first = OutputPath();
-        string second = OutputPath("second.binlog");
-        List<string> arguments = [$"\"{input}\"", "-replayFilter:Exclude=Message"];
-        if (count > 0)
+        string output = OutputPath();
+        var source = new EventArgsDispatcher();
+        var logger = CreateLogger(output, parameters: ";OmitInitialInfo;ProjectImports=None");
+        try
         {
-            arguments.Add(BinaryLogArgument(first));
-            arguments.Add(BinaryLogArgument(duplicate ? first : second));
+            logger.Initialize(source);
+            source.Dispatch(new MessageThatCannotBeSerialized());
+        }
+        finally
+        {
+            logger.Shutdown();
         }
 
-        Execute(out string diagnostic, arguments.ToArray()).ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
-        diagnostic.ShouldContain("MSB1079");
-        File.ReadAllText(input).ShouldBe("unchanged input");
-        File.Exists(first).ShouldBeFalse();
-        File.Exists(second).ShouldBeFalse();
+        ReadEvents(output).ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ReplayFilter_MultipleOutputsHaveIndependentFilters(bool useResponseFile)
+    {
+        string input = CreateInput();
+        string first = OutputPath();
+        string second = OutputPath("second.binlog");
+        string full = OutputPath("full.binlog");
+        string text = OutputPath("full.log");
+        string secondArgument = BinaryLogArgument(second, ";Exclude=Warning");
+        if (useResponseFile)
+        {
+            secondArgument = $"@\"{_env.CreateFile("filter.rsp", secondArgument).Path}\"";
+        }
+
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(first, ";Exclude=Message"),
+            secondArgument, BinaryLogArgument(full), $"-flp:\"LogFile={text};Verbosity=diagnostic\"")
+            .ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
+        ReadEvents(first).ShouldNotContain(e => e.Message == SourceMessage);
+        ReadEvents(first).ShouldContain(e => e.Message == SourceWarning);
+        ReadEvents(second).ShouldContain(e => e.Message == SourceMessage);
+        ReadEvents(second).ShouldNotContain(e => e.Message == SourceWarning);
+        ReadEvents(full).ShouldContain(e => e.Message == SourceMessage);
+        ReadEvents(full).ShouldContain(e => e.Message == SourceWarning);
+        diagnostic.ShouldContain(SourceMessage);
+        diagnostic.ShouldContain(SourceWarning);
+        File.ReadAllText(text).ShouldContain(SourceMessage);
+        File.ReadAllText(text).ShouldContain(SourceWarning);
+        AssertNoStagingFiles();
+    }
+
+    [Fact]
+    public void ReplayFilter_AdditionalBinaryLoggerUsesItsOwnConfiguration()
+    {
+        string input = CreateInput();
+        string first = OutputPath();
+        string second = OutputPath("additional.binlog");
+        var operation = CreateOperation(input, first);
+        operation.Replay([CreateLogger(second, "Exclude=Warning"), CreateLogger(first)], 1, CancellationToken.None)
+            .ShouldBeTrue();
+
+        ReadEvents(first).ShouldNotContain(e => e.Message == SourceMessage);
+        ReadEvents(first).ShouldContain(e => e.Message == SourceWarning);
+        ReadEvents(second).ShouldContain(e => e.Message == SourceMessage);
+        ReadEvents(second).ShouldNotContain(e => e.Message == SourceWarning);
+        AssertNoStagingFiles();
+    }
+
+    [Fact]
+    public void ReplayFilter_IdenticalFiltersStillPublishEveryOutput()
+    {
+        string input = CreateInput();
+        string first = OutputPath();
+        string second = OutputPath("second.binlog");
+        Execute(out string diagnostic, $"\"{input}\"",
+            BinaryLogArgument(first, ";Exclude=Warning;OmitInitialInfo"),
+            BinaryLogArgument(second, ";Exclude=Warning;OmitInitialInfo"))
+            .ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
+
+        string[] outputs = [first, second];
+        foreach (string output in outputs)
+        {
+            ReadEvents(output).ShouldNotContain(e => e is BuildWarningEventArgs);
+            ReadEvents(output).ShouldContain(e => e.Message == SourceMessage);
+            ReadEvents(output).OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem();
+        }
+
         AssertNoStagingFiles();
     }
 
@@ -334,8 +463,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
             _env.SetCurrentDirectory(_env.DefaultTestDirectory.Path);
         }
 
-        Execute(out string diagnostic, $"\"{input}\"", destination == "default" ? "-bl" : BinaryLogArgument(output),
-            "-replayFilter:Exclude=Message").ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
+        Execute(out string diagnostic, $"\"{input}\"", destination == "default" ? "-bl:Exclude=Message" : BinaryLogArgument(output, ";Exclude=Message"))
+            .ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
 
         diagnostic.ShouldContain("MSB1080");
         File.ReadAllBytes(input).ShouldBe(originalInput);
@@ -377,8 +506,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
             _env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", "true");
         }
 
-        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output, ";ProjectImports=None;OmitInitialInfo"),
-            "-replayFilter:Exclude=Warning", "-verbosity:diagnostic", "-consoleLoggerParameters:NoSummary",
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output, ";Exclude=Warning;ProjectImports=None;OmitInitialInfo"),
+            "-verbosity:diagnostic", "-consoleLoggerParameters:NoSummary",
             "-maxCpuCount:2", "-nodeReuse:false", "-lowPriority:false", loggerArgument)
             .ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
 
@@ -388,7 +517,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         if (loggerArgument != "-noConsoleLogger")
         {
             diagnostic.ShouldContain(SourceMessage);
-            diagnostic.ShouldNotContain(SourceWarning);
+            diagnostic.ShouldContain(SourceWarning);
         }
 
         AssertNoStagingFiles();
@@ -399,7 +528,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     [InlineData("-version")]
     public void ReplayFilter_HelpAndVersionBypassOperationValidation(string argument)
     {
-        Execute(out string diagnostic, "-replayFilter:Exclude=BuildStarted", argument)
+        Execute(out string diagnostic, "-bl:Exclude=BuildStarted", argument)
             .ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
         diagnostic.ShouldNotContain("MSB1076");
         diagnostic.ShouldNotContain("MSB1079");
@@ -415,8 +544,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     {
         string input = CreateInput(succeeded: succeeded, includeError: includeError);
         string output = OutputPath();
-        string filter = excludeError ? "-replayFilter:Exclude=Message,Error" : "-replayFilter:Exclude=Message";
-        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output), filter)
+        string filter = excludeError ? ";Exclude=Message,Error" : ";Exclude=Message";
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output, filter))
             .ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
 
         BuildEventArgs[] events = ReadEvents(output);
@@ -438,8 +567,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         _env.SetCurrentDirectory(directory);
         string output = Path.GetFullPath("filtered.binlog");
 
-        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument("filtered.binlog", parameters),
-            "-replayFilter:Exclude=Warning,ProjectImported")
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument("filtered.binlog", parameters + ";Exclude=Warning,ProjectImported"))
             .ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
 
         BuildEventArgs[] events = ReadEvents(output);
@@ -475,8 +603,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     {
         string input = CreateInput();
         string pattern = OutputPath("filtered-{}.binlog");
-        var logger = new BinaryLogger();
-        CreateOperation(input, pattern, parameters: omitInitialInfo ? ";OmitInitialInfo" : "")
+        var logger = CreateLogger(pattern, "Exclude=Warning", omitInitialInfo ? ";OmitInitialInfo" : "");
+        CreateOperation(input, pattern, "Exclude=Warning", parameters: omitInitialInfo ? ";OmitInitialInfo" : "")
             .Replay([logger], 1, CancellationToken.None).ShouldBeTrue();
 
         string output = Directory.GetFiles(_env.DefaultTestDirectory.Path, "filtered-*.binlog").ShouldHaveSingleItem();
@@ -508,7 +636,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         string output = OutputPath();
 
         CreateOperation(input, output, "Exclude=ProjectImported", parameters)
-            .Replay([new BinaryLogger()], 1, CancellationToken.None).ShouldBeTrue();
+            .Replay([CreateLogger(output, "Exclude=ProjectImported", parameters)], 1, CancellationToken.None).ShouldBeTrue();
 
         ReadEvents(output).ShouldNotContain(e => e is ProjectImportedEventArgs);
         List<string> contents = [];
@@ -530,6 +658,50 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         AssertNoStagingFiles();
     }
 
+    [Theory]
+    [InlineData(BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message, true)]
+    [InlineData(BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message, false)]
+    [InlineData(BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning, true)]
+    [InlineData(BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning, false)]
+    [InlineData(BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error, true)]
+    [InlineData(BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error, false)]
+    public void ReplayFilter_UsesOriginalRecordKindForLegacyBuildCheckDiagnostics(
+        BinaryLogRecordKind recordedKind, BinaryLogRecordKind ordinaryKind, bool excludeRecordedKind)
+    {
+        BuildEventArgs diagnostic = ordinaryKind switch
+        {
+            BinaryLogRecordKind.Warning => new BuildWarningEventArgs("", "", "", 0, 0, 0, 0, SourceMessage, "", ""),
+            BinaryLogRecordKind.Error => new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, SourceMessage, "", ""),
+            _ => new BuildMessageEventArgs(SourceMessage, "", "", MessageImportance.High),
+        };
+        string seed = OutputPath("seed.binlog");
+        WriteEvents(seed, [diagnostic]);
+        string input = OutputPath("buildcheck.binlog");
+        WriteCompressedLog(input, writer =>
+        {
+            using var reader = BinaryLogReplayEventSource.OpenReader(seed);
+            writer.Write(reader.ReadInt32());
+            writer.Write(reader.ReadInt32());
+            BinaryLogRecordKind kind;
+            while ((kind = (BinaryLogRecordKind)reader.Read7BitEncodedInt()) != BinaryLogRecordKind.EndOfFile)
+            {
+                int length = reader.Read7BitEncodedInt();
+                writer.Write7BitEncodedInt((int)(kind == ordinaryKind ? recordedKind : kind));
+                writer.Write7BitEncodedInt(length);
+                writer.Write(reader.ReadBytes(length));
+            }
+
+            writer.Write((byte)BinaryLogRecordKind.EndOfFile);
+        });
+
+        string output = OutputPath();
+        CreateOperation(input, output, $"Exclude={(excludeRecordedKind ? recordedKind : ordinaryKind)}", ";OmitInitialInfo")
+            .Replay([CreateLogger(output, $"Exclude={(excludeRecordedKind ? recordedKind : ordinaryKind)}", ";OmitInitialInfo")], 1, CancellationToken.None).ShouldBeTrue();
+
+        ReadEvents(output).Count(e => e.Message == SourceMessage).ShouldBe(excludeRecordedKind ? 0 : 1);
+        AssertNoStagingFiles();
+    }
+
     [Fact]
     public void ReplayFilter_NewerFormatIsRejectedBeforeCreatingOutputDirectory()
     {
@@ -547,7 +719,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         string directory = Path.Combine(_env.DefaultTestDirectory.Path, "not-created");
         string output = Path.Combine(directory, "output.binlog");
 
-        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output), "-replayFilter:Exclude=Message")
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output, ";Exclude=Message"))
             .ShouldBe(MSBuildApp.ExitType.BuildError, diagnostic);
 
         diagnostic.ShouldContain("MSB1081");
@@ -581,7 +753,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         byte[] originalInput = File.ReadAllBytes(input);
         string output = OutputPath();
 
-        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output), "-replayFilter:Exclude=Message")
+        Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output, ";Exclude=Message"))
             .ShouldBe(MSBuildApp.ExitType.BuildError, diagnostic);
 
         diagnostic.ShouldContain("MSB1081");
@@ -624,7 +796,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         string output = OutputPath();
 
         CreateOperation(input, output, "Exclude=Warning", ";OmitInitialInfo")
-            .Replay([new BinaryLogger()], 1, CancellationToken.None).ShouldBeTrue();
+            .Replay([CreateLogger(output, "Exclude=Warning", ";OmitInitialInfo")], 1, CancellationToken.None).ShouldBeTrue();
 
         BuildMessageEventArgs message = ReadEvents(output).OfType<BuildMessageEventArgs>().ShouldHaveSingleItem();
         message.BuildEventContext!.ProjectContextId.ShouldBe(3);
@@ -650,7 +822,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         var following = new CallbackLogger();
 
         Capture(
-            () => CreateOperation(input, output).Replay([new BinaryLogger(), preceding, failing, following], 1, CancellationToken.None),
+            () => CreateOperation(input, output).Replay([CreateLogger(output), preceding, failing, following], 1, CancellationToken.None),
             out string diagnostic).ShouldBeFalse();
 
         diagnostic.ShouldContain("MSB1081");
@@ -680,13 +852,33 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         }
 
         Capture(
-            () => CreateOperation(input, output).Replay([new BinaryLogger(), logger], 1, cancellation.Token),
+            () => CreateOperation(input, output).Replay([CreateLogger(output), logger], 1, cancellation.Token),
             out string diagnostic).ShouldBeFalse();
 
         diagnostic.ShouldContain("MSB1082");
         logger.InitializeCount.ShouldBe(cancelBeforeReplay ? 0 : 1);
         logger.ShutdownCount.ShouldBe(cancelBeforeReplay ? 0 : 1);
         File.Exists(output).ShouldBeFalse();
+        AssertNoStagingFiles();
+    }
+
+    [Fact]
+    public void ReplayFilter_MultipleOutputsAreNotPublishedWhenFinalizationFails()
+    {
+        string input = CreateInput();
+        string first = OutputPath();
+        string second = OutputPath("second.binlog");
+        var failing = new CallbackLogger { ShutdownAction = () => throw new InvalidOperationException("finalization failed") };
+        var operation = FilteredBinlogReplay.Create(input, ParseSwitches(
+            BinaryLogArgument(first, ";Exclude=Message"),
+            BinaryLogArgument(second, ";Exclude=Warning")));
+
+        Capture(() => operation.Replay([CreateLogger(first), CreateLogger(second, "Exclude=Warning"), failing], 1, CancellationToken.None),
+            out string diagnostic).ShouldBeFalse();
+
+        diagnostic.ShouldContain("finalization failed");
+        File.Exists(first).ShouldBeFalse();
+        File.Exists(second).ShouldBeFalse();
         AssertNoStagingFiles();
     }
 
@@ -716,7 +908,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         };
 
         bool succeeded = Capture(
-            () => CreateOperation(input, output).Replay([new BinaryLogger(), logger], 1, CancellationToken.None),
+            () => CreateOperation(input, output).Replay([CreateLogger(output), logger], 1, CancellationToken.None),
             out string diagnostic);
 
         succeeded.ShouldBe(!createRacingDestination, diagnostic);
@@ -790,8 +982,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         string logger = $"-distributedlogger:Microsoft.DotNet.Cli.Commands.MSBuild.MSBuildLogger,{assemblyPath}"
             + $"*Microsoft.DotNet.Cli.Commands.MSBuild.MSBuildForwardingLogger,{assemblyPath}";
 
-        var result = Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output),
-            "-replayFilter:Exclude=Warning", logger, "-tlp:default=auto", "-tlp:DISABLENODEDISPLAY");
+        var result = Execute(out string diagnostic, $"\"{input}\"", BinaryLogArgument(output, ";Exclude=Warning"),
+            logger, "-tlp:default=auto", "-tlp:DISABLENODEDISPLAY");
 
         if (currentSdk)
         {
@@ -800,8 +992,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         }
         else
         {
-            result.ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
-            diagnostic.ShouldContain("MSB1077");
+            result.ShouldNotBe(MSBuildApp.ExitType.Success, diagnostic);
             File.Exists(output).ShouldBeFalse();
         }
 
@@ -826,7 +1017,10 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
 
     private static FilteredBinlogReplay CreateOperation(
         string input, string output, string expression = "Exclude=Message", string parameters = "")
-        => FilteredBinlogReplay.Create(input, ParseSwitches($"-replayFilter:\"{expression}\"", BinaryLogArgument(output, parameters)));
+        => FilteredBinlogReplay.Create(input, ParseSwitches(BinaryLogArgument(output, $"{parameters};{expression}")));
+
+    private static BinaryLogger CreateLogger(string output, string expression = "Exclude=Message", string parameters = "")
+        => new() { Parameters = $"{output}{parameters};{expression}" };
 
     private static MSBuildApp.ExitType Execute(out string diagnostic, params string[] arguments)
         => Capture(() => MSBuildApp.Execute(["msbuild.exe", "-noAutoResponse", "-nologo", .. arguments]), out diagnostic);
@@ -946,6 +1140,11 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
 
     private void AssertNoStagingFiles()
         => Directory.GetFiles(_env.DefaultTestDirectory.Path, ".msbuild-filter-*.binlog", SearchOption.AllDirectories).ShouldBeEmpty();
+
+    private sealed class MessageThatCannotBeSerialized : BuildEventArgs
+    {
+        public override string Message => throw new InvalidOperationException("The rejected event must not be serialized.");
+    }
 
     private sealed class CallbackLogger : ILogger
     {
