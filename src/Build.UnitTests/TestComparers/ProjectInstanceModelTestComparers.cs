@@ -21,16 +21,31 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
     {
         public class ProjectInstanceComparer : IEqualityComparer<ProjectInstance>
         {
+            private readonly ISet<string> _ignoredProperties;
+
+            public ProjectInstanceComparer(ISet<string> ignoredProperties = null)
+            {
+                _ignoredProperties = ignoredProperties ?? new HashSet<string>();
+            }
+
             public bool Equals(ProjectInstance x, ProjectInstance y)
             {
                 Assert.Equal(x.TranslateEntireState, y.TranslateEntireState);
-                Assert.Equal(x.Properties, y.Properties, EqualityComparer<ProjectPropertyInstance>.Default);
+                Assert.Equal(
+                    x.Properties.Where(property => !_ignoredProperties.Contains(property.Name)),
+                    y.Properties.Where(property => !_ignoredProperties.Contains(property.Name)),
+                    EqualityComparer<ProjectPropertyInstance>.Default);
                 Dictionary<string, ProjectPropertyInstance> yEnvironmentalProperties =
                     y.TestEnvironmentalProperties.ToDictionary(
                         property => property.Name,
                         StringComparer.OrdinalIgnoreCase);
-                Assert.Equal(x.TestEnvironmentalProperties.Count, yEnvironmentalProperties.Count);
-                foreach (ProjectPropertyInstance xProperty in x.TestEnvironmentalProperties)
+                int expectedEnvironmentalPropertyCount = x.TestEnvironmentalProperties.Count(
+                    property => !_ignoredProperties.Contains(property.Name));
+                int actualEnvironmentalPropertyCount = yEnvironmentalProperties.Count(
+                    property => !_ignoredProperties.Contains(property.Key));
+                Assert.Equal(expectedEnvironmentalPropertyCount, actualEnvironmentalPropertyCount);
+                foreach (ProjectPropertyInstance xProperty in x.TestEnvironmentalProperties.Where(
+                    property => !_ignoredProperties.Contains(property.Name)))
                 {
                     Assert.True(
                         yEnvironmentalProperties.TryGetValue(

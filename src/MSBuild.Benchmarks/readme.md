@@ -135,10 +135,12 @@ experiment identity or status record. Explicit `Disabled` still emits the
 baseline record required by the comparison harness.
 
 `SnapshotFileSystem` remains experimental. Its metadata comparison does not
-detect same-size/same-timestamp content changes and does not yet revalidate
-recorded environment, registry, or SDK-resolver results. It rejects reuse when
-the selected project or a recorded import is retained in the XML cache with
-unsaved changes or without authoritative file provenance.
+detect same-size/same-timestamp content changes. It revalidates direct
+environment reads and immutable SDK-result observations; registry-dependent and
+failed-SDK evaluations are recorded but conservatively ineligible. It rejects
+reuse when the selected project or a recorded import is retained in the XML
+cache with unsaved changes or without authoritative file provenance, and when a
+recorded-missing path has any retained XML-cache entry.
 
 The backend constructs the request identity before evaluation for Record and
 both snapshot modes. It uses the effective project-file/explicit toolset,
@@ -147,22 +149,19 @@ global-property values, and command-line provenance. Snapshot materialization
 retains the same recorded-input manifest for diagnostics; only
 SnapshotFileSystem requires that manifest to be cacheable before admission.
 
-Two findings are deferred for the controlled Phase A measurement pilot:
-
-- The admission-size estimate does not account for all retained registry
-  arrays/strings, SDK payloads, environment values, and diagnostic details.
-  Monitor actual process memory; the configured 256 MiB estimate is not a hard
-  retained-memory bound. Account for these payloads before memory-pressure or
-  eviction results are used to draw conclusions.
-- SDK observations retain mutable resolver-result payloads. Deep immutable
-  capture is deferred to Phase B, before those observations are used for SDK
-  validation. The current filesystem validator does not validate SDK results.
+Admission estimates include owned key and manifest strings, environment values,
+registry arrays/strings, and immutable SDK payloads. They remain conservative
+retained-payload accounting rather than a process-RSS limit.
 
 `EvaluationInputRecordingBenchmark` measures what recording evaluation inputs
 (`MSBUILDRECORDEVALUATIONINPUTS=1`) adds to an evaluation, in an isolated and in a shared evaluation
 context. `EvaluationInputValidationBenchmark` separately measures checks of recorded files and
 directories: unchanged, and after a project file, an import, or a glob directory changed.
 Its evaluation and input capture happen outside the timed operations.
+The recording benchmark also compares the unconfigured and explicit-`Disabled`
+control paths. That comparison is a same-build execution/allocation sanity
+check; it is not a comparison with stock `main` and does not establish zero
+overhead.
 
 Both use the same synthetic project and any restored projects listed in
 `MSBUILD_EVALUATION_INPUTS_BENCHMARK_PROJECTS` (path-separator
@@ -185,9 +184,13 @@ The stale-validation cases mutate files or directory membership; use synthetic o
 
 Validation compares path existence, file/directory kind, last-write timestamp, and length.
 Glob membership is checked through the timestamps of the directories traversed.
-Environment reads, SDK results, and registry reads remain recorded but are not revalidated, and the request key
-is not compared. A successful filesystem check alone does not establish that an evaluation result
-can be reused. Incomplete/non-cacheable recording and failed filesystem checks still reject validation.
+Direct environment reads are compared using platform environment-name casing,
+and SDK results are re-resolved in their recorded context and compared with
+immutable owned observations. Registry reads remain recorded but make the
+evaluation ineligible for checked reuse. Request identity is checked separately;
+a successful filesystem check alone does not establish that an evaluation
+result can be reused. Incomplete/non-cacheable recording and failed checks still
+reject validation.
 
 Registry reads through `$(Registry:...)`, `[MSBuild]::GetRegistryValue`, and
 `[MSBuild]::GetRegistryValueFromView` are retained in `EvaluationInputs.RegistryReads`.

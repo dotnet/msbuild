@@ -1897,7 +1897,7 @@ public sealed class ProjectInstanceSnapshotCache_Tests
         {
             Environment.SetEnvironmentVariable(
                 ModeVariable,
-                nameof(EvaluationCacheMode.SnapshotUnsafe));
+                nameof(EvaluationCacheMode.SnapshotFileSystem));
             Environment.SetEnvironmentVariable(LegacyToolsVersionVariable, "1");
             Traits.UpdateFromEnvironment();
             InternalUtilities.RefreshInternalEnvironmentValues();
