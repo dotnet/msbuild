@@ -192,10 +192,14 @@ the binary logger's normal overwrite behavior. The usual `{}` output-name expans
 supported. Relative output paths are resolved from the current directory, including
 directories whose names contain semicolons.
 
-Specify `Exclude=` once per logger, including parameters from response files. `Exclude=` and event kind
-names are case-insensitive. Separate names with commas; duplicate names within the list
-are harmless. Empty lists, numeric values, unknown names, auxiliary records, and protected
-event kinds are rejected.
+Specify `Exclude=` once per logger, including parameters from response files. `Exclude=`
+and event kind names are case-insensitive. Separate names with commas; duplicate names
+within the list are harmless. Empty lists, numeric values, unknown names, auxiliary
+records, and protected event kinds are rejected.
+
+Selection matches exact serialized record kinds, not event-class inheritance. For
+example, `Exclude=Message` does not exclude `CriticalBuildMessage` or `TaskCommandLine`;
+name those kinds explicitly to exclude them too.
 
 | Excludable group | Event kinds |
 | --- | --- |
@@ -232,13 +236,15 @@ the binary logger's own metadata messages; `OmitInitialInfo` can suppress initia
 without excluding other messages. **Filtering is not redaction**, and does not guarantee
 a smaller output.
 
-The input must use a format supported by this reader, no newer than its current format.
+For CLI filtered replay, the input must use a format supported by this reader, no newer
+than its current format.
 Unlike ordinary forward-compatible replay, filtered rewriting does not skip unknown
 records or fields. It writes the current binlog format, not a byte-for-byte copy.
 
-Each binary output is staged in its destination directory and published without overwriting only
-after replay and logger finalization succeed. Cancellation observed before publication,
-read/write failures, and finalization/publication failures produce a nonzero exit status.
+The CLI stages each binary output in its destination directory and publishes it without
+overwriting only after replay and logger finalization succeed. Cancellation observed
+before publication begins, read/write failures, and finalization/publication failures
+produce a nonzero exit status.
 Existing destinations, including files created while replay is running, are preserved.
 Publication is atomic per file, not across all outputs: a later publication failure can
 leave earlier successfully published binlogs. Other logger outputs are not staged.
@@ -251,6 +257,11 @@ The logger forces structured replay so raw passthrough cannot bypass its filter.
 are still deserialized and delivered to other subscribers; use the replay-source API below
 when the same predicate should apply to every subscriber and skip rejected payloads early.
 
+Direct `BinaryLogger` use does not provide the CLI's staging and no-overwrite guarantees.
+Choose distinct input and output paths, and manage output publication and failure cleanup
+in the calling application. `BinaryLogger.Initialize` normally creates or overwrites its
+configured file; the overload taking an output stream writes to that stream instead.
+
 #### Run a filtered replay from a console application
 
 Set `BinaryLogReplayEventSource.EventFilter` when constructing the replay source to select
@@ -259,8 +270,8 @@ the record kind, its `BuildEventContext` (if present), and the original build co
 `TargetSkipped` event. Return `true` to retain an event or `false` to skip it. A `null` filter
 leaves replay unchanged. All `Replay` overloads apply the filter.
 
-The following API example prints only errors and warnings from an existing binlog without rebuilding the
-original project or changing the input file.
+The following API example prints only errors and warnings from an existing binlog without
+rebuilding the original project or changing the input file.
 
 Use a .NET SDK supported by the `Microsoft.Build` package version you are referencing.
 Create a console application and add the package, replacing `VERSION_WITH_EVENT_FILTER`
@@ -321,9 +332,9 @@ controls import archive paths, but the binlog itself is written to the supplied 
 
 #### Filtering behavior and failures
 
-The replay source's `EventFilter` forces structured reading instead of raw record passthrough. With length-framed
-logs (format version 18 or later), rejected events skip their type-specific payload
-without deserialization. `TargetSkipped` is an exception: its original build context
+The replay source's `EventFilter` forces structured reading instead of raw record
+passthrough. With length-framed logs (format version 18 or later), rejected events skip
+their type-specific payload without deserialization. `TargetSkipped` is an exception: its original build context
 requires deserializing the payload first. Older formats also filter after deserialization.
 Auxiliary records, including strings, name/value lists, and embedded content, are still
 read so retained events can be decoded correctly. Cancellation is checked between rejected

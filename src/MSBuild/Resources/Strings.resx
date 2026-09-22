@@ -712,7 +712,7 @@
   </data>
   <data name="HelpMessage_30_BinaryLoggerSwitch" xml:space="preserve">
     <value>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
+                     Serializes build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
                      of the build process that can later be used to reconstruct
@@ -724,10 +724,14 @@
                      Exclude=kind[,kind...] omits the named event kinds from
                      this binary logger during builds and replay. Console and
                      other loggers are unaffected. Names are case-insensitive.
+                     Specify Exclude once per logger. Selection matches exact
+                     record kinds, not all derived message or warning events.
                      Build, project, target and task lifecycle events are
                      protected. Exclude both ProjectEvaluationStarted and
                      ProjectEvaluationFinished together, or neither.
                      Example: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtered replay requires new output paths and does not
+                     support ProjectImports=ZipFile.
                      Filtering is not redaction: embedded files are independent.
 
                      The optional LogFile specifies the path where the
