@@ -120,8 +120,9 @@ namespace Microsoft.Build.BackEnd
         /// multiple OOP processes for different architectures (x86, x64, ARM64).
         /// The stack supports nested BuildProjectFile callbacks: when Task A calls
         /// BuildProjectFile and blocks, Task B is dispatched to the same process --
-        /// handler B is pushed on top. Packets always route to Peek() (the active task).
-        /// When Task B finishes, handler B is popped and Task A's handler is restored.
+        /// handler B is pushed on top. Packets route to Peek() (the active task).
+        /// A callback that reacquires the node moves its handler back to the top,
+        /// since resumption need not follow dispatch order.
         /// </summary>
         private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
 
@@ -960,6 +961,38 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Selects the existing handler whose build callback has reacquired the owning node.
+        /// A late callback cannot reactivate a retired or replacement connection.
+        /// </summary>
+        internal bool TryReactivateTaskHandler(NodeContext context, INodePacketHandler handler)
+        {
+            lock (_activeNodes)
+            {
+                if (!_nodeIdToNodeKey.ContainsKey(context.NodeId) ||
+                    !_nodeIdToPacketHandlerStack.TryGetValue(context.NodeId, out Stack<INodePacketHandler> handlerStack))
+                {
+                    return false;
+                }
+
+                lock (handlerStack)
+                {
+                    if (handlerStack.Count > 0 && ReferenceEquals(handlerStack.Peek(), handler))
+                    {
+                        return true;
+                    }
+
+                    if (!RemoveTaskHandler(handlerStack, handler))
+                    {
+                        return false;
+                    }
+
+                    handlerStack.Push(handler);
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
         /// Expected to be called when TaskHostTask is done with host of the given context.
         /// </summary>
         internal void DisconnectFromHost(NodeContext context, INodePacketHandler handler)
@@ -972,10 +1005,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     lock (handlerStack)
                     {
-                        if (handlerStack.Count > 0 && ReferenceEquals(handlerStack.Peek(), handler))
-                        {
-                            handlerStack.Pop();
-                        }
+                        RemoveTaskHandler(handlerStack, handler);
 
                         if (handlerStack.Count == 0)
                         {
@@ -984,6 +1014,39 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+        }
+
+        private static bool RemoveTaskHandler(Stack<INodePacketHandler> handlerStack, INodePacketHandler handler)
+        {
+            if (handlerStack.Count == 0)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(handlerStack.Peek(), handler))
+            {
+                handlerStack.Pop();
+                return true;
+            }
+
+            Stack<INodePacketHandler> laterHandlers = new();
+            while (handlerStack.Count > 0 && !ReferenceEquals(handlerStack.Peek(), handler))
+            {
+                laterHandlers.Push(handlerStack.Pop());
+            }
+
+            bool removed = handlerStack.Count > 0;
+            if (removed)
+            {
+                handlerStack.Pop();
+            }
+
+            while (laterHandlers.Count > 0)
+            {
+                handlerStack.Push(laterHandlers.Pop());
+            }
+
+            return removed;
         }
 
         /// <summary>

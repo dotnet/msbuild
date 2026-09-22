@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -235,12 +236,14 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
             context.WaitForSendCompletion(10_000).ShouldBeTrue();
             provider.ConnectedNodes.ShouldBeEmpty();
             provider.TryAttachTaskHandler(context, new RecordingHandler()).ShouldBeFalse();
+            provider.TryReactivateTaskHandler(context, retiringHandler).ShouldBeFalse();
             provider.TaskHandlerRegistrationCount.ShouldBe(1, "an aborted task must still receive its connection's terminal notification");
             retiringHandler.ShutdownCount.ShouldBe(0);
 
             provider.NodeContextCreated(replacement, key);
             replacementReadStarted = true;
             provider.TryAttachTaskHandler(replacement, replacementHandler).ShouldBeTrue();
+            provider.TryReactivateTaskHandler(context, retiringHandler).ShouldBeFalse();
             provider.PacketReceived(1, new NodeBuildComplete(true, NodeBuildCompleteAction.ReuseWithConnection));
             provider.PacketReceived(1, new NodeShutdown(NodeShutdownReason.Requested));
             pipe.CompleteRead();
@@ -263,6 +266,64 @@ public sealed class TaskHostLifetimeProtocol_Tests(ITestOutputHelper output)
             context.WaitForSendCompletion(10_000).ShouldBeTrue();
             replacement.WaitForSendCompletion(10_000).ShouldBeTrue();
         }
+    }
+
+    [Fact]
+    public void ReactivationFollowsNodeOwnershipInsteadOfDispatchOrder()
+    {
+        using Process process = Process.GetCurrentProcess();
+        using ControlledReadStream pipe = new();
+        using ManualResetEventSlim terminated = new();
+        var provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(
+            BuildComponentType.OutOfProcTaskHostNodeProvider);
+        provider.InitializeComponent(new MockHost());
+        NodeProviderOutOfProcBase.NodeContext context = new(
+            1, process, pipe, provider, id => { provider.NodeContextTerminated(id); terminated.Set(); },
+            NodePacketTypeExtensions.PacketVersion);
+        provider.NodeContextCreated(context, new TaskHostNodeKey(HandshakeOptions.TaskHost, 1));
+        PacketRecordingHandler first = new();
+        PacketRecordingHandler middle = new();
+        PacketRecordingHandler last = new();
+        try
+        {
+            provider.TryAttachTaskHandler(context, first).ShouldBeTrue();
+            provider.TryAttachTaskHandler(context, middle).ShouldBeTrue();
+            provider.TryAttachTaskHandler(context, last).ShouldBeTrue();
+            INodePacket packet = new TaskHostCoresRequest(1, false);
+            provider.PacketReceived(1, packet);
+            last.Packets.ShouldHaveSingleItem().ShouldBeSameAs(packet);
+
+            provider.TryReactivateTaskHandler(context, first).ShouldBeTrue();
+            provider.PacketReceived(1, packet);
+            first.Packets.ShouldHaveSingleItem().ShouldBeSameAs(packet);
+            middle.Packets.ShouldBeEmpty();
+            last.Packets.Count.ShouldBe(1);
+
+            provider.DisconnectFromHost(context, middle);
+            provider.TryReactivateTaskHandler(context, middle).ShouldBeFalse();
+            provider.PacketReceived(1, packet);
+            first.Packets.Count.ShouldBe(2);
+            provider.DisconnectFromHost(context, first);
+            provider.PacketReceived(1, packet);
+            last.Packets.Count.ShouldBe(2);
+
+            provider.PacketReceived(1, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
+            last.Packets[^1].Type.ShouldBe(NodePacketType.NodeShutdown);
+            provider.TryReactivateTaskHandler(context, last).ShouldBeFalse();
+            provider.TaskHandlerRegistrationCount.ShouldBe(0);
+        }
+        finally
+        {
+            pipe.CompleteRead();
+            terminated.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            context.WaitForSendCompletion(10_000).ShouldBeTrue();
+        }
+    }
+
+    private sealed class PacketRecordingHandler : INodePacketHandler
+    {
+        internal List<INodePacket> Packets { get; } = [];
+        public void PacketReceived(int node, INodePacket packet) => Packets.Add(packet);
     }
 
     [Fact]
