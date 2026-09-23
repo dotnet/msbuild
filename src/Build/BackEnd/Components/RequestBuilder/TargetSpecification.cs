@@ -53,6 +53,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ElementLocation ReferenceLocation => _referenceLocation;
 
+        internal TargetSpecification DeepClone() =>
+            new(_targetName, _referenceLocation, _targetBuiltReason);
+
         void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _targetName);
