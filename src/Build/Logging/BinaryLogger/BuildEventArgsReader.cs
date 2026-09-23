@@ -536,21 +536,54 @@ namespace Microsoft.Build.Logging
                 // Once embedded files are replayed one by one - we can send the resulting stream to subscriber
                 if (EmbeddedContentRead != null)
                 {
-                    projectImportsCollector!.ProcessResult(
-                        streamToEmbed => EmbeddedContentRead(new EmbeddedContentEventArgs(recordKind, streamToEmbed)),
-                        error => throw new InvalidDataException(error));
-                    projectImportsCollector.DeleteArchive();
+                    try
+                    {
+                        projectImportsCollector!.ProcessResult(
+                            streamToEmbed => RaiseEmbeddedContentRead(recordKind, streamToEmbed),
+                            error => throw new InvalidDataException(error));
+                    }
+                    finally
+                    {
+                        projectImportsCollector!.DeleteArchive();
+                    }
                 }
             }
             else if (EmbeddedContentRead != null)
             {
-                EmbeddedContentRead(new EmbeddedContentEventArgs(
-                    recordKind,
-                    _binaryReader.BaseStream.Slice(length)));
+                using Stream contentStream = _binaryReader.BaseStream.Slice(length);
+                RaiseEmbeddedContentRead(recordKind, contentStream);
             }
             else
             {
                 SkipBytes(length);
+            }
+        }
+
+        private void RaiseEmbeddedContentRead(BinaryLogRecordKind recordKind, Stream contentStream)
+        {
+            Delegate[] subscribers = EmbeddedContentRead!.GetInvocationList();
+            if (subscribers.Length == 1)
+            {
+                ((Action<EmbeddedContentEventArgs>)subscribers[0])(new EmbeddedContentEventArgs(recordKind, contentStream));
+                return;
+            }
+
+            // Buffer only multicast archives, on disk so large archives do not exhaust memory.
+            using var bufferedContent = new FileStream(
+                Path.Combine(FileUtilities.TempFileDirectory, Path.GetRandomFileName()),
+                FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, bufferSize: 4096,
+                FileOptions.SequentialScan | FileOptions.DeleteOnClose);
+            contentStream.CopyTo(bufferedContent);
+            if (bufferedContent.Length != contentStream.Length)
+            {
+                throw new EndOfStreamException();
+            }
+
+            foreach (Action<EmbeddedContentEventArgs> subscriber in subscribers)
+            {
+                bufferedContent.Position = 0;
+                using Stream content = bufferedContent.Slice(bufferedContent.Length);
+                subscriber(new EmbeddedContentEventArgs(recordKind, content));
             }
         }
 

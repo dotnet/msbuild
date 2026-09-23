@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -55,6 +56,68 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(BinaryLogRecordKind.ProjectImportArchive, (BinaryLogRecordKind)binaryReader.Read7BitEncodedInt());
             Assert.Equal(bytes.Length, binaryReader.Read7BitEncodedInt());
             Assert.Equal(bytes, binaryReader.ReadBytes(bytes.Length));
+        }
+
+        [Theory]
+        [InlineData(1, false)]
+        [InlineData(2, false)]
+        [InlineData(3, false)]
+        [InlineData(1, true)]
+        [InlineData(2, true)]
+        public void EmbeddedArchiveIsCompleteForEverySubscriber(int subscriberCount, bool rewriteArchive)
+        {
+            using var archiveStream = new MemoryStream();
+            using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                using var content = new StreamWriter(archive.CreateEntry("source.txt").Open());
+                content.Write("original content");
+            }
+
+            archiveStream.Position = 0;
+            using var logStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(logStream, Encoding.UTF8, leaveOpen: true);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+            writer.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, archiveStream);
+            writer.Write(new BuildFinishedEventArgs("after archive", null, true));
+            binaryWriter.Write((byte)BinaryLogRecordKind.EndOfFile);
+            binaryWriter.Flush();
+            logStream.Position = 0;
+
+            using var binaryReader = new BinaryReader(logStream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            if (rewriteArchive)
+            {
+                reader.ArchiveFileEncountered += args =>
+                {
+                    using ArchiveData original = args.ArchiveData;
+                    args.ArchiveData = new ArchiveFile(original.FullPath, "rewritten content");
+                };
+            }
+
+            int archivesRead = 0;
+            for (int i = 0; i < subscriberCount; i++)
+            {
+                reader.EmbeddedContentRead += args =>
+                {
+                    args.ContentKind.ShouldBe(BinaryLogRecordKind.ProjectImportArchive);
+                    using Stream content = args.ContentStream;
+                    content.Position.ShouldBe(0);
+                    using var copy = new MemoryStream();
+                    content.CopyTo(copy);
+                    copy.Length.ShouldBe(content.Length);
+                    copy.Position = 0;
+                    using var archive = new ZipArchive(copy, ZipArchiveMode.Read);
+                    ZipArchiveEntry entry = archive.Entries.ShouldHaveSingleItem();
+                    entry.FullName.ShouldBe("source.txt");
+                    using var text = new StreamReader(entry.Open());
+                    text.ReadToEnd().ShouldBe(rewriteArchive ? "rewritten content" : "original content");
+                    archivesRead++;
+                };
+            }
+
+            reader.Read().ShouldBeOfType<BuildFinishedEventArgs>().Message.ShouldBe("after archive");
+            reader.Read().ShouldBeNull();
+            archivesRead.ShouldBe(subscriberCount);
         }
 
         [Theory]

@@ -428,23 +428,56 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         AssertNoStagingFiles();
     }
 
-    [Fact]
-    public void ReplayFilter_IdenticalFiltersStillPublishEveryOutput()
+    [Theory]
+    [InlineData("Warning", true)]
+    [InlineData("Message", true)]
+    [InlineData(null, true)]
+    [InlineData("Message", false)]
+    public void ReplayFilter_MultipleOutputsPreserveEmbeddedImports(string? secondExclusion, bool embedSecond)
     {
-        string input = CreateInput();
+        string input = CreateInput(embedImports: true);
+        File.Delete(OutputPath("imported.targets"));
         string first = OutputPath();
         string second = OutputPath("second.binlog");
+        string secondParameters = ";OmitInitialInfo";
+        if (secondExclusion is not null)
+        {
+            secondParameters += $";Exclude={secondExclusion}";
+        }
+        if (!embedSecond)
+        {
+            secondParameters += ";ProjectImports=None";
+        }
+
         Execute(out string diagnostic, $"\"{input}\"",
             BinaryLogArgument(first, ";Exclude=Warning;OmitInitialInfo"),
-            BinaryLogArgument(second, ";Exclude=Warning;OmitInitialInfo"))
+            BinaryLogArgument(second, secondParameters))
             .ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
 
         string[] outputs = [first, second];
         foreach (string output in outputs)
         {
-            ReadEvents(output).ShouldNotContain(e => e is BuildWarningEventArgs);
-            ReadEvents(output).ShouldContain(e => e.Message == SourceMessage);
-            ReadEvents(output).OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem();
+            string? exclusion = output == first ? "Warning" : secondExclusion;
+            BuildEventArgs[] events = ReadEvents(output);
+            events.Any(e => e.Message == SourceWarning).ShouldBe(exclusion != "Warning");
+            events.Any(e => e.Message == SourceMessage).ShouldBe(exclusion != "Message");
+            events.OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem();
+
+            List<string> contents = [];
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(output);
+            reader.ArchiveFileEncountered += args => contents.Add(args.ArchiveData.ToArchiveFile().Content);
+            while (reader.Read() is not null)
+            {
+            }
+
+            if (output == first || embedSecond)
+            {
+                contents.ShouldContain(ImportedContent);
+            }
+            else
+            {
+                contents.ShouldBeEmpty();
+            }
         }
 
         AssertNoStagingFiles();

@@ -716,6 +716,11 @@ namespace Microsoft.Build.Logging
                     e.BuildEventContext,
                     (e as TargetSkippedEventArgs)?.OriginalBuildEventContext)))
                 {
+                    if (e is TaskParameterEventArgs taskParameter)
+                    {
+                        eventArgsWriter.CheckForFilesToEmbed(taskParameter);
+                    }
+
                     return;
                 }
 

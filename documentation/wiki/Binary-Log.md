@@ -235,7 +235,10 @@ inheriting build-only switches from automatic response files.
 `ProjectImports=ZipFile` is supported during builds, but not during filtered replay because
 its sidecar archive is not part of the staged binary log publication.
 Archives are handled independently of event selection: excluding `ProjectImported` or
-evaluation events does not remove embedded source files. `Exclude=Message` also excludes
+evaluation events does not remove embedded source files, and `Exclude=TaskParameter`
+does not remove files explicitly requested through `EmbedInBinlog` items.
+Each replay output receives its own complete archive unless `ProjectImports=None` is set.
+`Exclude=Message` also excludes
 the binary logger's own metadata messages; `OmitInitialInfo` can suppress initial metadata
 without excluding other messages. **Filtering is not redaction**, and does not guarantee
 a smaller output.

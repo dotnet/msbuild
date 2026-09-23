@@ -437,24 +437,38 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void BinaryLoggerShouldEmbedFilesAddedInTargets(bool useTaskOutput, bool excludeTaskParameters)
         {
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
-                Parameters = $"LogFile={_logFile}",
+                Parameters = $"LogFile={_logFile}" + (excludeTaskParameters ? ";Exclude=TaskParameter" : ""),
                 CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
             };
-            var testProject = @"
-<Project>
-    <Target Name=""Build"">
-        <WriteLinesToFile File=""testtaskoutputfile.txt"" Lines=""abc;def;ghi""/>
-        <CreateItem Include=""testtaskoutputfile.txt"">
-            <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
-        </CreateItem>
-    </Target>
-</Project>";
+            string embedItems = useTaskOutput
+                ? """
+                  <CreateItem Include="testtaskoutputfile.txt">
+                      <Output TaskParameter="Include" ItemName="EmbedInBinlog" />
+                  </CreateItem>
+                  """
+                : """
+                  <ItemGroup>
+                      <EmbedInBinlog Include="testtaskoutputfile.txt" />
+                  </ItemGroup>
+                  """;
+            string testProject = $"""
+                <Project>
+                    <Target Name="Build">
+                        <WriteLinesToFile File="testtaskoutputfile.txt" Lines="abc;def;ghi" Overwrite="true" />
+                        {embedItems}
+                    </Target>
+                </Project>
+                """;
             ObjectModelHelpers.BuildProjectExpectSuccess(testProject, binaryLogger);
             var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
@@ -464,10 +478,20 @@ namespace Microsoft.Build.UnitTests
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
                 $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(_logFile);
+            bool hasTaskParameters = false;
+            while (reader.Read() is { } e)
+            {
+                hasTaskParameters |= e is TaskParameterEventArgs;
+            }
+            hasTaskParameters.ShouldBe(!excludeTaskParameters);
         }
 
-        [Fact]
-        public void BinaryLoggerShouldEmbedFilesWithRelativePathFromChildProjects()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BinaryLoggerShouldEmbedFilesWithRelativePathFromChildProjects(bool excludeTaskParameters)
         {
             // Repro for https://github.com/dotnet/msbuild/issues/13789: EmbedInBinlog items with a
             // relative Include path emitted by child projects must still be embedded. The binary
@@ -511,7 +535,7 @@ namespace Microsoft.Build.UnitTests
             File.WriteAllText(parentProjectPath, parentProjectContents);
 
             RunnerUtilities.ExecMSBuild(
-                $"\"{parentProjectPath}\" -m:2 -bl:\"{_logFile};ProjectImports=ZipFile\"",
+                $"\"{parentProjectPath}\" -m:2 -bl:\"{_logFile};ProjectImports=ZipFile{(excludeTaskParameters ? ";Exclude=TaskParameter" : "")}\"",
                 out bool success);
             success.ShouldBeTrue();
 

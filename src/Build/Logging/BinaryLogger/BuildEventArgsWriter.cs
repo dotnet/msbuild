@@ -832,12 +832,16 @@ namespace Microsoft.Build.Logging
             WriteTaskItemList(e.Items, e.LogItemMetadata);
             WriteDeduplicatedString(e.ParameterName);
             WriteDeduplicatedString(e.PropertyName);
-            if (e.Kind == TaskParameterMessageKind.AddItem
-               || e.Kind == TaskParameterMessageKind.TaskOutput)
+            CheckForFilesToEmbed(e);
+            return BinaryLogRecordKind.TaskParameter;
+        }
+
+        internal void CheckForFilesToEmbed(TaskParameterEventArgs e)
+        {
+            if (e.Kind is TaskParameterMessageKind.AddItem or TaskParameterMessageKind.TaskOutput)
             {
                 CheckForFilesToEmbed(e.ItemType, e.Items, e.ProjectFile);
             }
-            return BinaryLogRecordKind.TaskParameter;
         }
 
         private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true, bool writeLineAndColumn = false)
