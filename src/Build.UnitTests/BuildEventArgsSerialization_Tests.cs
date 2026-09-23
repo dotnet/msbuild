@@ -9,10 +9,12 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
@@ -1037,6 +1039,100 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void BinaryLogSerializationCachesRepeatedLongStringReferences()
+        {
+            string message = new string('x', 5000);
+            var args = new BuildMessageEventArgs(message, null, null, MessageImportance.High, DateTime.MinValue);
+            using var stream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+            writer.Write(args);
+            binaryWriter.Flush();
+
+#if DEBUG
+            writer.LongStringReferenceCacheHits.ShouldBe(1);
+            writer.StringContentHashComputations.ShouldBe(1);
+#endif
+
+            stream.Position = 0;
+            using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            eventArgsReader.Read().ShouldBeOfType<BuildMessageEventArgs>().Message.ShouldBe(message);
+            eventArgsReader.Read().ShouldBeOfType<BuildMessageEventArgs>().Message.ShouldBe(message);
+            stream.Position.ShouldBe(stream.Length);
+        }
+
+        [Fact]
+        public void BinaryLogSerializationDoesNotIdentityCacheEqualLongStrings()
+        {
+            string firstMessage = new string('x', 5000);
+            string secondMessage = new string(firstMessage.ToCharArray());
+            ReferenceEquals(firstMessage, secondMessage).ShouldBeFalse();
+            using var stream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(new BuildMessageEventArgs(firstMessage, null, null, MessageImportance.High, DateTime.MinValue));
+            writer.Write(new BuildMessageEventArgs(secondMessage, null, null, MessageImportance.High, DateTime.MinValue));
+            binaryWriter.Flush();
+
+#if DEBUG
+            writer.LongStringReferenceCacheHits.ShouldBe(0);
+            writer.StringContentHashComputations.ShouldBe(2);
+#endif
+
+            stream.Position = 0;
+            using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            eventArgsReader.Read().ShouldBeOfType<BuildMessageEventArgs>().Message.ShouldBe(firstMessage);
+            eventArgsReader.Read().ShouldBeOfType<BuildMessageEventArgs>().Message.ShouldBe(secondMessage);
+            stream.Position.ShouldBe(stream.Length);
+
+            stream.ToArray().ShouldBe(SerializeMessages(firstMessage, firstMessage));
+
+            static byte[] SerializeMessages(string first, string second)
+            {
+                using var comparisonStream = new MemoryStream();
+                using var comparisonWriter = new BinaryWriter(comparisonStream, Encoding.UTF8, leaveOpen: true);
+                var comparisonEventWriter = new BuildEventArgsWriter(comparisonWriter);
+                comparisonEventWriter.Write(new BuildMessageEventArgs(first, null, null, MessageImportance.High, DateTime.MinValue));
+                comparisonEventWriter.Write(new BuildMessageEventArgs(second, null, null, MessageImportance.High, DateTime.MinValue));
+                comparisonWriter.Flush();
+                return comparisonStream.ToArray();
+            }
+        }
+
+        [Fact]
+        public void BinaryLogSerializationDoesNotRetainLongStrings()
+        {
+            using var stream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+            WeakReference messageReference = WriteLongString(writer);
+
+            for (int i = 0; messageReference.IsAlive && i < 3; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            }
+
+            messageReference.IsAlive.ShouldBeFalse();
+            GC.KeepAlive(writer);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static WeakReference WriteLongString(BuildEventArgsWriter writer)
+        {
+            string message = new string('x', 1025);
+            var messageReference = new WeakReference(message);
+            writer.Write(new BuildMessageEventArgs(message, null, null, MessageImportance.High, DateTime.MinValue));
+            return messageReference;
+        }
+
+        [Fact]
         public void TaskParameterSerializationReusesSharedBackingMetadata()
         {
             ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata
@@ -1247,6 +1343,45 @@ namespace Microsoft.Build.UnitTests
                     logItemMetadata: true,
                     DateTime.MinValue);
                 var stream = new MemoryStream();
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(writer).Write(args);
+                }
+
+                return stream.ToArray();
+            }
+        }
+
+        [Fact]
+        public void TaskParameterArrayDictionaryPathPreservesSerializedBytes()
+        {
+            var arrayMetadata = new ArrayDictionary<string, string>(3)
+            {
+                { "First", "value" },
+                { "Second", string.Empty },
+                { "Escaped", "value%3b" },
+            };
+            var dictionaryMetadata = new Dictionary<string, string>
+            {
+                ["First"] = "value",
+                ["Second"] = string.Empty,
+                ["Escaped"] = "value%3b",
+            };
+
+            SerializeTaskParameter(new TaskItemData("ItemSpec", arrayMetadata))
+                .ShouldBe(SerializeTaskParameter(new TaskItemData("ItemSpec", dictionaryMetadata)));
+
+            static byte[] SerializeTaskParameter(ITaskItem item)
+            {
+                var args = new TaskParameterEventArgs(
+                    TaskParameterMessageKind.TaskOutput,
+                    "ParameterName",
+                    "PropertyName",
+                    "ItemName",
+                    new ITaskItem[] { item },
+                    logItemMetadata: true,
+                    DateTime.MinValue);
+                using var stream = new MemoryStream();
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
                 {
                     new BuildEventArgsWriter(writer).Write(args);

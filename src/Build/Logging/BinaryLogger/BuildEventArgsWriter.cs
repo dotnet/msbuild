@@ -31,8 +31,8 @@ namespace Microsoft.Build.Logging
     /// </summary>
     internal class BuildEventArgsWriter
     {
-        private const int StringReferenceCacheSize = 256; // Must remain a power of two.
-        private const int MaxCachedStringLength = 4096;
+        private const int StringReferenceCacheSize = 8192; // Must remain a power of two.
+        private const int MaxCachedStringLength = 1024;
 
         private readonly Stream originalStream;
 
@@ -93,6 +93,12 @@ namespace Microsoft.Build.Logging
         private readonly StringReferenceCacheEntry[] stringReferenceCache = new StringReferenceCacheEntry[StringReferenceCacheSize];
 
         /// <summary>
+        /// Avoid repeatedly hashing shared long string instances without retaining them.
+        /// </summary>
+        private readonly ConditionalWeakTable<string, LongStringReferenceCacheEntry> longStringReferenceCache =
+            new ConditionalWeakTable<string, LongStringReferenceCacheEntry>();
+
+        /// <summary>
         /// Hashtable used for deduplicating name-value lists. Same as strings.
         /// </summary>
         private readonly Dictionary<HashKey, int> nameValueListHashes = new Dictionary<HashKey, int>();
@@ -105,6 +111,8 @@ namespace Microsoft.Build.Logging
 
 #if DEBUG
         internal int MetadataReferenceCacheHits { get; private set; }
+        internal int LongStringReferenceCacheHits { get; private set; }
+        internal int StringContentHashComputations { get; private set; }
 #endif
 
         /// <summary>
@@ -353,15 +361,15 @@ namespace Microsoft.Build.Logging
         /// until the disposable is disposed. Useful to bypass the currentRecordWriter to write a string,
         /// blob or NameValueRecord that should precede the record being currently written.
         /// </summary>
-        private IDisposable RedirectWritesToOriginalWriter()
+        private WriterRedirectionScope RedirectWritesToOriginalWriter()
         {
             return RedirectWritesToDifferentWriter(originalBinaryWriter, currentRecordWriter);
         }
 
-        private IDisposable RedirectWritesToDifferentWriter(BinaryWriter inScopeWriter, BinaryWriter afterScopeWriter)
+        private WriterRedirectionScope RedirectWritesToDifferentWriter(BinaryWriter inScopeWriter, BinaryWriter afterScopeWriter)
         {
             binaryWriter = inScopeWriter;
-            return new CleanupScope(() => binaryWriter = afterScopeWriter);
+            return new WriterRedirectionScope(this, afterScopeWriter);
         }
 
         private BinaryLogRecordKind Write(BuildStartedEventArgs e)
@@ -1381,6 +1389,12 @@ namespace Microsoft.Build.Logging
             {
                 if (item is TaskItemData taskItemData)
                 {
+                    if (taskItemData.Metadata.Count == 0)
+                    {
+                        Write((byte)0);
+                        return;
+                    }
+
                     WriteNameValueList(taskItemData.Metadata);
                     return;
                 }
@@ -1555,10 +1569,32 @@ namespace Microsoft.Build.Logging
 
         private HashKey HashAllStrings(IEnumerable<KeyValuePair<string, string>> nameValueList)
         {
+            if (nameValueList is ArrayDictionary<string, string> arrayDictionary)
+            {
+                return HashAllStrings(arrayDictionary);
+            }
+
             HashKey hash = new HashKey();
 
             nameValueIndexListBuffer.Clear();
 
+            foreach (KeyValuePair<string, string> kvp in nameValueList)
+            {
+                var (keyIndex, keyHash) = HashString(kvp.Key);
+                var (valueIndex, valueHash) = HashString(kvp.Value);
+                hash = hash.Add(keyHash);
+                hash = hash.Add(valueHash);
+                nameValueIndexListBuffer.Add(new KeyValuePair<int, int>(keyIndex, valueIndex));
+            }
+
+            return hash;
+        }
+
+        private HashKey HashAllStrings(ArrayDictionary<string, string> nameValueList)
+        {
+            HashKey hash = new HashKey();
+
+            nameValueIndexListBuffer.Clear();
             foreach (KeyValuePair<string, string> kvp in nameValueList)
             {
                 var (keyIndex, keyHash) = HashString(kvp.Key);
@@ -1576,11 +1612,13 @@ namespace Microsoft.Build.Logging
             Write((int)kind);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Write(int value)
         {
             BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Write(long value)
         {
             binaryWriter.Write(value);
@@ -1599,11 +1637,13 @@ namespace Microsoft.Build.Logging
             stream.CopyTo(originalStream);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Write(byte b)
         {
             binaryWriter.Write(b);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Write(bool boolean)
         {
             binaryWriter.Write(boolean);
@@ -1652,7 +1692,17 @@ namespace Microsoft.Build.Logging
                     return (cachedEntry.RecordId, cachedEntry.Hash);
                 }
             }
+            else if (longStringReferenceCache.TryGetValue(text, out LongStringReferenceCacheEntry cachedEntry))
+            {
+#if DEBUG
+                LongStringReferenceCacheHits++;
+#endif
+                return (cachedEntry.RecordId, cachedEntry.Hash);
+            }
 
+#if DEBUG
+            StringContentHashComputations++;
+#endif
             var hash = new HashKey(text);
             if (!stringHashes.TryGetValue(hash, out var recordId))
             {
@@ -1670,6 +1720,16 @@ namespace Microsoft.Build.Logging
                 cachedEntry.RecordId = recordId;
                 cachedEntry.Hash = hash;
                 cachedEntry.Text = text;
+            }
+            else
+            {
+                longStringReferenceCache.Add(
+                    text,
+                    new LongStringReferenceCacheEntry
+                    {
+                        RecordId = recordId,
+                        Hash = hash,
+                    });
             }
 
             return (recordId, hash);
@@ -1741,6 +1801,26 @@ namespace Microsoft.Build.Logging
             internal HashKey Hash;
         }
 
+        private readonly struct WriterRedirectionScope : IDisposable
+        {
+            private readonly BuildEventArgsWriter writer;
+            private readonly BinaryWriter afterScopeWriter;
+
+            internal WriterRedirectionScope(BuildEventArgsWriter writer, BinaryWriter afterScopeWriter)
+            {
+                this.writer = writer;
+                this.afterScopeWriter = afterScopeWriter;
+            }
+
+            public void Dispose() => writer.binaryWriter = afterScopeWriter;
+        }
+
+        private sealed class LongStringReferenceCacheEntry
+        {
+            internal int RecordId;
+            internal HashKey Hash;
+        }
+
         internal readonly struct HashKey : IEquatable<HashKey>
         {
             private readonly long value;
@@ -1762,13 +1842,16 @@ namespace Microsoft.Build.Logging
                 }
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static HashKey Combine(HashKey left, HashKey right)
             {
                 return new HashKey(FowlerNollVo1aHash.Combine64(left.value, right.value));
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public HashKey Add(HashKey other) => Combine(this, other);
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Equals(HashKey other)
             {
                 return value == other.value;
@@ -1784,6 +1867,7 @@ namespace Microsoft.Build.Logging
                 return false;
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public override int GetHashCode()
             {
                 return unchecked((int)value);
