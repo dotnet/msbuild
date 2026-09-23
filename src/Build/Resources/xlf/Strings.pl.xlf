@@ -73,6 +73,13 @@
         <target state="translated">Subskrypcja elementu RecoverableReadError jest obowiązkowa podczas odczytu zgodnego z przekazywaniem.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_PathTraversalInEmbeddedFile">
+        <source>MSB4282: Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
+        <target state="new">MSB4282: Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
+        <note>
+      {StrBegin="MSB4282: "} LOCALIZATION: {0} is the offending embedded file path.
+    </note>
+      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="translated">Numer rekordu BuildEvent {0} (zserializowany rozmiar: {1}) próbował wykonać niedozwolone odczyty (szczegóły: {2}: {3}).</target>
