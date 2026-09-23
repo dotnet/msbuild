@@ -41,6 +41,21 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
             .Message.ShouldContain("MSB1001");
     }
 
+    [Theory]
+    [InlineData("", ";Exclude=Message", false)]
+    [InlineData(";Exclude=Message", "", true)]
+    [InlineData("", ";Exclude=UnknownEvent", false)]
+    public void ReplayFilter_IsRequestedIgnoresDuplicateOutputConfigurations(
+        string firstParameters, string duplicateParameters, bool expected)
+    {
+        string output = OutputPath();
+        CommandLineSwitches switches = ParseSwitches(
+            BinaryLogArgument(output, firstParameters),
+            BinaryLogArgument(output, duplicateParameters));
+
+        FilteredBinlogReplay.IsRequested("input.binlog", switches).ShouldBe(expected);
+    }
+
     [Fact]
     public void ReplayFilter_RepeatedParameterIsRejected()
     {
@@ -430,6 +445,47 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
             ReadEvents(output).ShouldNotContain(e => e is BuildWarningEventArgs);
             ReadEvents(output).ShouldContain(e => e.Message == SourceMessage);
             ReadEvents(output).OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem();
+        }
+
+        AssertNoStagingFiles();
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public void ReplayFilter_DuplicateOutputUsesFirstConfiguration(bool filterFirst, bool includeProperty)
+    {
+        string input = CreateInput();
+        string output = OutputPath();
+        string filtered = BinaryLogArgument(output, ";Exclude=Message");
+        string unfiltered = BinaryLogArgument(output);
+        string[] arguments = [$"\"{input}\"", filterFirst ? filtered : unfiltered, filterFirst ? unfiltered : filtered];
+        if (includeProperty)
+        {
+            arguments = [.. arguments, "-property:ReviewProbe=1"];
+        }
+
+        if (!filterFirst)
+        {
+            File.WriteAllText(output, "ordinary replay may overwrite this output");
+        }
+
+        MSBuildApp.ExitType result = Execute(out string diagnostic, arguments);
+        if (filterFirst && includeProperty)
+        {
+            result.ShouldBe(MSBuildApp.ExitType.SwitchError, diagnostic);
+            diagnostic.ShouldContain("MSB1077");
+            File.Exists(output).ShouldBeFalse();
+        }
+        else
+        {
+            result.ShouldBe(MSBuildApp.ExitType.Success, diagnostic);
+            diagnostic.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", output));
+            BuildEventArgs[] events = ReadEvents(output);
+            events.Count(e => e.Message == SourceMessage).ShouldBe(filterFirst ? 0 : 1);
+            events.ShouldContain(e => e.Message == SourceWarning);
         }
 
         AssertNoStagingFiles();

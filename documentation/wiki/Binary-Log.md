@@ -186,6 +186,10 @@ the original project. Multiple `-bl` arguments can have independent filters, or 
 dotnet msbuild "C:\logs\input.binlog" "-bl:C:\logs\quiet.binlog;Exclude=Message" "-bl:C:\logs\full.binlog" -noAutoResponse
 ```
 
+If multiple `-bl` arguments resolve to the same output path, the first configuration
+wins and later duplicates are ignored with a notice. Only the retained configurations'
+`Exclude` parameters enable filtered replay and its restrictions.
+
 During filtered replay, all binary log destinations must be new paths, including the
 default `msbuild.binlog` when only `-bl:Exclude=...` is specified. Ordinary builds retain
 the binary logger's normal overwrite behavior. The usual `{}` output-name expansion is

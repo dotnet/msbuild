@@ -49,7 +49,8 @@ internal sealed class FilteredBinlogReplay
     {
         if (FileUtilities.IsBinaryLogFilename(inputPath))
         {
-            foreach (string parameter in switches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger])
+            var processed = BinaryLogger.ProcessParameters(switches[CommandLineSwitches.ParameterizedSwitch.BinaryLogger]);
+            foreach (string parameter in processed.DistinctParameterSets)
             {
                 if (BinaryLogger.ParseParameters(parameter).ExcludedEventKinds.Count != 0)
                 {
