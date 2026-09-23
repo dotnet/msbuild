@@ -44,6 +44,9 @@ safe-outputs:
     title-prefix: "[Flaky Test] "
     labels: [flaky-test]
     max: 5
+    # Backstop for the agent-side lookup in Step 4: the safe-outputs job drops any new issue whose
+    # title matches an open or recently-closed issue (it runs with the real token, outside the sandbox).
+    deduplicate-by-title: true
   add-comment:
     target: "*"
     max: 12
@@ -262,14 +265,15 @@ For each likely-flake test to track, first establish whether a tracking issue al
 > already uses for open flaky-test PRs.
 
 ```bash
-# NO --search and NO fixed result cap: --paginate reads every page from the primary Issues REST API.
-# Include every open issue so removing/missing the flaky-test label cannot defeat de-duplication.
-# Closed issues are label-filtered because only this workflow's recently-closed tracking issues matter.
+# NO --search: read the primary Issues REST API. Do NOT use --paginate: the sandbox's gh proxy passes
+# GitHub's absolute next-page URL through unchanged and the firewall rejects it with HTTP 403.
+# One page each is enough: open flaky-test issues are few (the matcher fails if the page is full), and
+# only recently-closed ones matter (sorted by last update). An issue whose label was removed is still
+# caught at filing time by `deduplicate-by-title` (frontmatter).
 set -euo pipefail
-gh api --paginate --slurp \
-  '/repos/dotnet/msbuild/issues?state=open&per_page=100' > open-issue-pages.json
-gh api --paginate --slurp \
-  '/repos/dotnet/msbuild/issues?state=closed&labels=flaky-test&per_page=100' > closed-flaky-issue-pages.json
+gh api '/repos/dotnet/msbuild/issues?state=open&labels=flaky-test&per_page=100' > open-issue-pages.json
+gh api '/repos/dotnet/msbuild/issues?state=closed&labels=flaky-test&sort=updated&direction=desc&per_page=100' \
+  > closed-flaky-issue-pages.json
 
 # The REST issues endpoint also returns pull requests. Match the complete corpus deterministically,
 # then write only the small per-test result — never load every issue body into the agent context.
@@ -295,23 +299,21 @@ short_name_patterns = {
 }
 flaky_title_prefix = "[Flaky Test] "
 
-open_issue_count = 0
 for path, is_open_set in (
     ("open-issue-pages.json", True),
     ("closed-flaky-issue-pages.json", False),
 ):
     with open(path, encoding="utf-8") as stream:
-        pages = json.load(stream)
-    if not isinstance(pages, list) or not all(isinstance(page, list) for page in pages):
-        raise ValueError(f"{path} is not a paginated JSON array")
+        pages = [json.load(stream)]
+    if not isinstance(pages[0], list):
+        raise ValueError(f"{path} is not a JSON array")
+    if is_open_set and len(pages[0]) >= 100:
+        raise ValueError("100+ open flaky-test issues: the single-page listing may be truncated")
 
     for page in pages:
         for item in page:
             if "pull_request" in item:
                 continue
-
-            if is_open_set:
-                open_issue_count += 1
 
             title = item["title"]
             body = item.get("body") or ""
@@ -341,9 +343,6 @@ for path, is_open_set in (
                         "body": body,
                     })
 
-if open_issue_count == 0:
-    raise ValueError("the complete open-issue listing unexpectedly contained no issues")
-
 for result in matches.values():
     result["exactMatches"].sort(key=lambda issue: issue["number"])
     result["legacyCandidates"].sort(key=lambda issue: issue["number"])
@@ -358,7 +357,7 @@ PY
 
 Then, for each candidate test, decide whether it **already has an issue** by matching **locally**
 against its entry in `flaky-issue-matches.json` (never `--search`). Do **not** read or print the
-complete paginated API responses; the deterministic Python step deletes them after emitting only
+raw API responses; the deterministic Python step deletes them after emitting only
 relevant matches. Treat a non-empty `exactMatches` array as "already exists"; those entries matched
 because the issue either:
 - has a **body** containing `flaky-test-id: <testName>` as a **complete line** (an exact whole-line
@@ -378,10 +377,11 @@ Read each match's `state` field to tell OPEN from CLOSED (handled below). The de
 `relatedIssues` may be used as an extra hint, but it does **not** reliably surface recently-filed
 issues, so the local match above is **authoritative**. An empty `flaky-issue-matches.json` object is
 possible only when no tests were provided, which Step 2 handles before reaching this step. **If any
-command in the listing block fails, the complete open-issue set is empty, or
-`flaky-issue-matches.json` is not a valid JSON object containing every candidate test, the
-de-duplication scan is incomplete:** do not create/comment on issues, do not quarantine tests, open
-no PR, and emit a `noop` that identifies the failed issue-list step.
+command in the listing block fails, or `flaky-issue-matches.json` is not a valid JSON object
+containing every candidate test, the de-duplication scan is incomplete:** do not create/comment on
+issues, do not quarantine tests, open no PR, and emit `missing_data` (not `noop`) naming the failed
+step and its error, and listing the detected flaky tests. `missing_data` fails the workflow run, so the
+missed flakes are visible instead of hidden behind a green run.
 
 If multiple exact issues match the same test (pre-existing duplicates), never create another issue.
 Use the oldest OPEN match (lowest issue number) as the canonical tracking issue; mention the other
