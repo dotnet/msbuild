@@ -10,11 +10,22 @@ Tasks that are not thread-safe can still participate in multithreaded builds. MS
 
 ## Thread-Safe Capability Indicators
 
-Task authors can declare thread-safe capabilities in two different ways:
-1. **Interface-Based Thread-Safe Capability Declaration** - Provides access to thread-safe APIs through `TaskEnvironment` to be used in the task code.
-2. **Attribute-Based Thread-Safe Capability Declaration** - Allows existing tasks to declare its ability run in multithreaded mode without code changes. It is a **compatibility bridge option**.
+Thread-safe capability is declared by a single mechanism: the `[MSBuildMultiThreadableTask]` attribute. A task may *additionally* implement the `IMultiThreadableTask` interface to gain access to thread-safe APIs. The two do **different** jobs and are not alternatives:
 
-Tasks that use `TaskEnvironment` cannot load in older MSBuild versions that do not support multithreading features, requiring authors to drop support for older MSBuild versions. To address this challenge, MSBuild provides a compatibility bridge that allows certain tasks targeting older MSBuild versions to participate in multithreaded builds. While correct absolute path resolution can be and should be achieved without accessing `TaskEnvironment` in tasks that use compatibility bridge options, tasks must avoid relying on environment variables or modifying global process state.
+1. **Attribute-Based Thread-Safe Capability Declaration** (`[MSBuildMultiThreadableTask]`) — the **routing** signal. This is the only thing that opts a task into running in-process; without it the task is routed to an out-of-proc TaskHost sidecar regardless of anything else it declares.
+2. **Interface-Based Thread-Safe Capability Declaration** (`IMultiThreadableTask`) — the **injection** signal. It gives the task access to thread-safe APIs through `TaskEnvironment`, which the engine assigns only to tasks implementing the interface.
+
+| Declaration | Effect | Read by |
+| --- | --- | --- |
+| `[MSBuildMultiThreadableTask]` | Runs in-process instead of an out-of-proc TaskHost | `TaskRouter.NeedsTaskHostInMultiThreadedMode` |
+| `IMultiThreadableTask` | Receives a `TaskEnvironment` | `TaskExecutionHost` |
+
+Declaring one without the other is legal, and each half fails quietly:
+
+- **Attribute only** — a complete, properly migrated state for a task that does not resolve relative paths or read environment variables. The task runs in-process without `TaskEnvironment`. If the task *does* declare a `TaskEnvironment` property, MSBuild never assigns it: the property silently retains whatever the task itself initialized it to — commonly `TaskEnvironment.Fallback`, or `null` when there is no initializer — so paths resolve against the shared process working directory. The task-authoring analyzer reports `MSBuildTask0012` for this shape.
+- **Interface only** — a useful intermediate state. The task resolves paths correctly but still pays for a TaskHost. Note that the engine does not assign the property in that TaskHost: the out-of-proc host supplies `TaskEnvironment.Fallback` to a `TaskEnvironment` constructor if the task declares one, and otherwise leaves the property at the task's own default. That is correct there, because `Fallback` is backed by `MultiProcessTaskEnvironmentDriver` and the host process is dedicated to a single task. `MSBuildTask0013` reports this shape, disabled by default.
+
+Tasks that use `TaskEnvironment` cannot load in older MSBuild versions that do not support multithreading features, requiring authors to drop support for older MSBuild versions. To address this challenge, MSBuild provides a compatibility bridge that allows certain tasks targeting older MSBuild versions to participate in multithreaded builds: the attribute is detected by name, so a task can apply it without referencing a new MSBuild assembly, and correct absolute path resolution can be and should be achieved without accessing `TaskEnvironment`. Tasks using that bridge must still avoid relying on environment variables or modifying global process state.
 
 So, task authors who need to support older MSBuild versions will have three choices:
 1. **Maintain separate implementations** - Create and support both thread-safe and legacy versions of the same task.
@@ -23,23 +34,13 @@ So, task authors who need to support older MSBuild versions will have three choi
 
 ### Interface-Based Thread-Safe Capability Declaration
 
-Tasks indicate thread-safety capabilities by implementing the `IMultiThreadableTask` interface.
+Tasks gain access to `TaskEnvironment` by implementing the `IMultiThreadableTask` interface. Implementing it does not by itself cause the task to run in-process — `[MSBuildMultiThreadableTask]` is required for that.
 
 ```csharp
 namespace Microsoft.Build.Framework;
 public interface IMultiThreadableTask : ITask
 {
     TaskEnvironment TaskEnvironment { get; set; }
-}
-```
-
-Similar to how MSBuild provides the abstract `Task` class with default implementations for the `ITask` interface, MSBuild will offer a `MultiThreadableTask` abstract class with default implementations for the `IMultiThreadableTask` interface. Task authors will only need to implement the `Execute` method for the `ITask` interface and use `TaskEnvironment` within it to create their thread-safe tasks.
-
-```csharp
-namespace Microsoft.Build.Utilities;
-public abstract class MultiThreadableTask : Task, IMultiThreadableTask
-{
-    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 }
 ```
 
@@ -87,14 +88,14 @@ Task authors can indicate thread-safety capabilities by marking their task class
 
 ```csharp
 namespace Microsoft.Build.Framework;
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-internal class MSBuildMultiThreadableTaskAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public class MSBuildMultiThreadableTaskAttribute : Attribute
 {
     public MSBuildMultiThreadableTaskAttribute() { }
 }
 ```
 
-MSBuild detects `MSBuildMultiThreadableTaskAttribute` by its namespace and name only, ignoring the defining assembly, which allows customers to define the attribute in their own assemblies alongside their tasks. Since MSBuild does not ship the attribute, customers using newer MSBuild versions should prefer the Interface-Based Thread-Safe Capability Declaration.
+MSBuild detects `MSBuildMultiThreadableTaskAttribute` by its namespace and name only, ignoring the defining assembly, which allows customers to define the attribute in their own assemblies alongside their tasks. The attribute is not inherited (`Inherited = false`, and `TaskRouter` reads it with `inherit: false`), so it must be applied to each concrete task class rather than to a shared base.
 
 For tasks to be eligible for multithreaded execution using this approach, they must satisfy the following conditions:
 - The task must not modify global process state (environment variables, working directory)
@@ -106,6 +107,48 @@ For tasks to be eligible for multithreaded execution using this approach, they m
 [MSBuildMultiThreadableTask]
 public class MyTask : Task {...}
 ```
+
+### Registered task objects
+
+In multithreaded builds, in-process tasks share the `IBuildEngine4` registered-task-object cache across thread nodes. Tasks in worker or TaskHost processes use separate caches.
+
+Using the API is safe when the task accounts for this sharing. Before adding `[MSBuildMultiThreadableTask]`, review that:
+
+* registered objects support concurrent access;
+* keys cannot collide with unrelated tasks;
+* if multiple tasks race to register equal keys, only one object is retained and the task disposes any unretained object that needs cleanup; and
+* correctness does not require two task invocations to use the same cache so the task is functional both in multithreaded and multiprocess modes.
+
+## Validate a task migration
+
+Run a representative build with an MSBuild version that supports
+[strict mode](multithreaded-msbuild.md#strict-mode), and capture a binary log:
+
+```powershell
+dotnet build .\MyProject.csproj -m -mt -nr:false -bl:migration-strict.binlog "-warnAsError:MSB4286;MSB4287;MSB4288"
+```
+
+Ensure [change wave 18.12](../../wiki/ChangeWaves.md#1812) is enabled so the default strict checks are active.
+`MSB4287` and successful sentinel recovery (`MSB4288`) are warnings by default; the command
+promotes them to errors for migration sign-off. Do not suppress `MSB4286`, `MSB4287`, or `MSB4288`
+through `-nowarn` or `MSBuildWarningsAsMessages`.
+Clean the relevant outputs or invoke the required targets so the migrated task actually
+runs. In the binlog, confirm that the expected task assembly was used and the task ran
+in-process, rather than being skipped or using a legacy copy in a TaskHost.
+
+Search the binlog for **`MT-sentinel-CWD`**. The strict-mode enable message
+contains this path by design; use it to confirm the mode was active. Treat every other
+occurrence as a migration violation to investigate before sign-off. In
+particular, a sentinel path in task inputs or outputs, evaluated file paths, tool command
+lines, or file-access errors shows that process-relative state has leaked into the build.
+
+Trace each leak back to the task, its helpers, or the project expression that produced it.
+Fix the path resolution and repeat the build and search. **A successful build alone is
+not enough:** a swallowed exception or an output containing a wrong absolute path can
+leave the build green without MSB4286/MSB4287. CWD is checked after each task, but sentinel
+contents are scanned at project/build completion: a relative file written and deleted by
+different tasks before that scan can escape detection. A clean search only covers the code paths
+and logged values exercised by that build; retain the migration's unit tests and call-chain audit.
 
 ## TaskEnvironment API
 
@@ -122,8 +165,11 @@ public class TaskEnvironment
 { 
     public AbsolutePath ProjectDirectory { get; internal set; }
 
-    // This function resolves paths relative to ProjectDirectory.
+    // These functions resolve relative paths against ProjectDirectory.
     public AbsolutePath GetAbsolutePath(string path);
+
+    // This function uses task-local environment variables in multithreaded mode.
+    public AbsolutePath GetTempPath();
     
     public string? GetEnvironmentVariable(string name);
     public IReadOnlyDictionary<string, string> GetEnvironmentVariables();
@@ -143,11 +189,12 @@ To prevent common thread-safety issues related to path handling, we introduce pa
 namespace Microsoft.Build.Framework;
 public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 {
-    // Default value returns string.Empty for Path property
+    // default(AbsolutePath) has a null Value
     public string Value { get; }
     internal AbsolutePath(string path, bool ignoreRootedCheck) { }
-    public AbsolutePath(string path); // Checks Path.IsPathRooted
+    public AbsolutePath(string path); // Checks Path.IsPathFullyQualified when supported
     public AbsolutePath(string path, AbsolutePath basePath) { }
+    public AbsolutePath GetCanonicalForm();
     public static implicit operator string(AbsolutePath path) { }
     public override string ToString() => Value;
 
@@ -156,6 +203,7 @@ public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 ```
 
 `AbsolutePath` converts implicitly to string for seamless integration with existing File/Directory APIs.
+`GetCanonicalForm()` applies `Path.GetFullPath()` canonicalization to an already fully qualified path, resolving `.` and `..` segments and normalizing directory separators. Use it when migrating code that previously relied on `Path.GetFullPath()`; `TaskEnvironment.GetAbsolutePath()` produces fully qualified paths but intentionally does not canonicalize them.
 
 ### API Usage Example
 
@@ -169,7 +217,7 @@ public bool Execute(...)
     AbsolutePath path = TaskEnvironment.GetAbsolutePath("SomePath");
     string content = File.ReadAllText(path);
     string content2 = File.ReadAllText(path.ToString());
-    string content3 = File.ReadAllText(path.Path);
+    string content3 = File.ReadAllText(path.Value);
     ...
 }
 ```
@@ -187,3 +235,7 @@ The main advantages of API hooking include requiring no action from task authors
 ### Alternative to Attribute-Based Thread-Safe Capability Declaration
 
 We considered making the thread-safety signal using the task declaration (for example, a `ThreadSafe="true"` attribute on `UsingTask`) so that project authors could declare compatibility without changing task assemblies. However, because older MSBuild versions treat unknown attributes in task declarations as errors, this approach would require updating older MSBuild versions or servicing them to ignore the attribute. 
+
+### Alternative: Routing on `IMultiThreadableTask` Instead of the Attribute
+
+We considered using the interface as the routing signal, so that a task implementing `IMultiThreadableTask` would run in-process without also applying the attribute. This does not work: `Microsoft.Build.Utilities.ToolTask` implements `IMultiThreadableTask`, so routing on the interface would silently opt in every `ToolTask`-derived task in the ecosystem, none of which have been reviewed for thread safety.

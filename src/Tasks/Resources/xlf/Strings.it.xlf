@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../Strings.resx">
     <body>
@@ -1834,31 +1834,6 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
-        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
-        <target state="translated">Per SearchPath "{0}" (aggiunto facendo riferimento all'assembly "{1}").</target>
-        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
-        <source>Considered AssemblyFoldersEx locations.</source>
-        <target state="translated">Percorsi AssemblyFoldersEx considerati.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictFound">
-        <source>There was a conflict between "{0}" and "{1}".</source>
-        <target state="translated">Conflitto tra "{0}" e "{1}".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictHigherVersionChosen">
-        <source>"{0}" was chosen because it had a higher version.</source>
-        <target state="translated">È stato scelto "{0}" perché era una versione successiva.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictPrimaryChosen">
-        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
-        <target state="translated">È stato scelto "{0}" perché era primario, mentre "{1}" non lo era.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConflictRedirectSuggestion">
         <source>Consider app.config remapping of assembly "{0}" from Version "{1}" [{2}] to Version "{3}" [{4}] to solve conflict and get rid of warning.</source>
         <target state="translated">Per risolvere il conflitto ed eliminare l'avviso, provare a modificare un mapping con app.config dell'assembly "{0}" dalla versione "{1}" [{2}] alla versione "{3}" [{4}].</target>
@@ -1868,40 +1843,6 @@
                 {2} and {4} are file names correspending to {1} and {3} respectively
                 {0} is an assembly name with no version number like 'D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa'
     </note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch">
-        <source>Considered "{0}",
-			but its name "{1}"
-			didn't match the expected name "{2}".</source>
-        <target state="translated">È stato considerato "{0}",
-			ma il nome "{1}"
-			non corrispondeva al nome previsto "{2}".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">
-        <source>Considered "{0}", but it didn't exist.</source>
-        <target state="translated">È stato considerato "{0}", ma non esisteva.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk">
-        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
-        <target state="translated">Si è tentato di considerare "{0}" come nome di file, ma non esisteva.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac">
-        <source>Considered "{0}", which was not found in the GAC.</source>
-        <target state="translated">È stato considerato "{0}", ma non è stato trovato nella cache assembly globale.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
-        <target state="translated">Considerato "{0}", che esisteva ma non sembra essere un assembly .NET valido.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
-        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
-        <target state="translated">Considerato "{0}", che esiste ma con un'architettura di processore "{1}" non corrispondente all'architettura di processore di destinazione "{2}".</target>
-        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Dependency">
         <source>Dependency "{0}".</source>
@@ -1957,11 +1898,6 @@
         <source>MSB3242: Conflict between mutually exclusive parameters. AutoUnify was 'true' and AppConfigFile was set.</source>
         <target state="translated">MSB3242: conflitto tra parametri che si escludono a vicenda. Il valore di AutoUnify è 'true' ed è stato impostato AppConfigFile.</target>
         <note>{StrBegin="MSB3242: "}</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictUnsolvable">
-        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
-        <target state="translated">MSB3243: non è possibile risolvere il conflitto tra "{0}" e "{1}". Verrà scelto "{0}" in modo arbitrario.</target>
-        <note>{StrBegin="MSB3243: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedToFindDependentFiles">
         <source>MSB3244: Could not find dependent files. {0}</source>
@@ -2103,11 +2039,6 @@
         <target state="translated">È stata trovata un'intestazione PE non valida. Il file di implementazione non verrà usato.</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
-        <source>References which depend on or have been unified to "{0}" [{1}].</source>
-        <target state="translated">Riferimenti che dipendono da o sono stati unificati per "{0}" [{1}].</target>
-        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: architettura del processore sconosciuta. Il file di implementazione "{0}" per "{1}" ha un valore ImageFileMachine pari a "0x{2}". Per usare questo file di implementazione, verificare che la proprietà "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" del progetto sia impostata su "Avviso" o "Nessuno".</target>
@@ -2127,13 +2058,6 @@
         <source>MSB3276: Found conflicts between different versions of the same dependent assembly. Please set the "AutoGenerateBindingRedirects" property to true in the project file. For more information, see http://go.microsoft.com/fwlink/?LinkId=294190.</source>
         <target state="translated">MSB3276: sono stati rilevati conflitti tra versioni diverse dello stesso assembly dipendente. Impostare la proprietà "AutoGenerateBindingRedirects" su true nel file di progetto. Per altre informazioni, vedere http://go.microsoft.com/fwlink/?LinkId=294190.</target>
         <note>{StrBegin="MSB3276: "}</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
-{1}</source>
-        <target state="translated">MSB3277: sono stati rilevati conflitti non risolvibili tra versioni diverse di "{0}".
-{1}</target>
-        <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
         <source>{0} = '{1}'</source>
@@ -2218,21 +2142,6 @@
         <target state="translated">Richiesto da "{0}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ReferenceDependsOn">
-        <source>References which depend on "{0}" [{1}].</source>
-        <target state="translated">Riferimenti che dipendono da "{0}" [{1}].</target>
-        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
-        <source>Unresolved primary reference with an item include of "{0}".</source>
-        <target state="translated">Riferimento primario non risolto con elemento include "{0}".</target>
-        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.PrimarySourceItemsForReference">
-        <source>Project file item includes which caused reference "{0}".</source>
-        <target state="translated">Elementi include del file di progetto che hanno causato il riferimento "{0}".</target>
-        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Resolved">
         <source>Resolved file path is "{0}".</source>
         <target state="translated">Il percorso file risolto è "{0}".</target>
@@ -2241,11 +2150,6 @@
       <trans-unit id="ResolveAssemblyReference.ResolvedFrom">
         <source>Reference found at search path location "{0}".</source>
         <target state="translated">Riferimento trovato nel percorso di ricerca "{0}".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPath">
-        <source>For SearchPath "{0}".</source>
-        <target state="translated">Per SearchPath "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByAppConfig">
@@ -2674,42 +2578,42 @@
       </trans-unit>
       <trans-unit id="TarDirectory.Comment">
         <source>Creating tar archive from directory "{0}" to "{1}".</source>
-        <target state="new">Creating tar archive from directory "{0}" to "{1}".</target>
+        <target state="translated">Creazione dell'archivio tar dalla directory "{0}" in "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
         <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
-        <target state="new">MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB4321: estrazione della directory "{0}" non riuscita perché non esiste oppure non è accessibile.</target>
         <note>{StrBegin="MSB4321: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
         <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
-        <target state="new">MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4325: compressione della directory "{0}" nel file "{1}" non riuscita perché l'archivio non è aggiornato ed è stata richiesta la compilazione incrementale.</target>
         <note>{StrBegin="MSB4325: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailed">
         <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="new">MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</target>
+        <target state="translated">MSB4323: compressione della directory "{0}" nel file "{1}" non riuscita.  {2} {3}</target>
         <note>{StrBegin="MSB4323: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFileExists">
         <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
-        <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <target state="translated">MSB4322: creazione del file tar "{0}" non riuscita perché esiste già.  Eliminare o rinominare il file e riprovare.</target>
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidCompression">
         <source>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</source>
-        <target state="new">MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</target>
+        <target state="translated">MSB4327: il valore Compression "{0}" non è valido. Specificare "None", "GZip" o "ZStandard".</target>
         <note>{StrBegin="MSB4327: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
         <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
-        <target state="new">MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</target>
+        <target state="translated">MSB4324: il valore DeterministicTimestamp "{0}" non è valido. Specificare una data e ora RFC 3339 (ad esempio, "2024-01-01T00:00:00Z") oppure un numero intero di secondi trascorsi dal periodo Unix.</target>
         <note>{StrBegin="MSB4324: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidFormat">
         <source>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</source>
-        <target state="new">MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</target>
+        <target state="translated">MSB4326: il valore Format "{0}" non è valido. Specificare "Pax", "Ustar", "V7" o "Gnu".</target>
         <note>{StrBegin="MSB4326: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
@@ -2819,67 +2723,67 @@
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfEntryType">
         <source>Did not untar entry "{0}" because its entry type "{1}" is not supported.</source>
-        <target state="new">Did not untar entry "{0}" because its entry type "{1}" is not supported.</target>
+        <target state="translated">La voce "{0}" non è stata estratta perché il tipo di voce "{1}" non è supportato.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFileMatch">
         <source>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
-        <target state="new">Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <target state="translated">Il file "{0}" non è stato estratto nel file "{1}" perché il parametro "{2}" è stato impostato su "{3}" nel progetto e le dimensioni e i timestamp dei file corrispondono.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFilter">
         <source>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">Il file "{0}" non è stato estratto perché non corrisponde al filtro di inclusione oppure perché corrisponde al filtro di esclusione.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</source>
-        <target state="new">MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</target>
+        <target state="translated">MSB4331: estrazione nella directory "{0}" non riuscita perché non è stato possibile crearla.  {1}</target>
         <note>{StrBegin="MSB4331: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotExtractFile">
         <source>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</source>
-        <target state="new">MSB4336: Failed to untar file "{0}" to "{1}".  {2}</target>
+        <target state="translated">MSB4336: estrazione del file "{0}" in "{1}" non riuscita.  {2}</target>
         <note>{StrBegin="MSB4336: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotMakeFileWriteable">
         <source>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="new">MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</target>
+        <target state="translated">MSB4335: estrazione del file "{0}" non riuscita perché il file di destinazione "{1}" è di sola lettura e non è possibile impostarlo come scrivibile.  {2} {3}</target>
         <note>{StrBegin="MSB4335: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotOpenFile">
         <source>MSB4333: Failed to open tar file "{0}".  {1}</source>
-        <target state="new">MSB4333: Failed to open tar file "{0}".  {1}</target>
+        <target state="translated">MSB4333: apertura del file tar "{0}" non riuscita.  {1}</target>
         <note>{StrBegin="MSB4333: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorExtractingResultsInFilesOutsideDestination">
         <source>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</source>
-        <target state="new">MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <target state="translated">MSB4334: estrazione del file "{0}" in "{1}" non riuscita perché non è presente nella directory di destinazione.</target>
         <note>{StrBegin="MSB4334: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFileDoesNotExist">
         <source>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</source>
-        <target state="new">MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</target>
+        <target state="translated">MSB4332: estrazione del file "{0}" non riuscita perché non esiste oppure non è accessibile.</target>
         <note>{StrBegin="MSB4332: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternInvalidPath">
         <source>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB4337: analisi del modello "{0}" non riuscita perché contiene un carattere di percorso non valido.</target>
         <note>{StrBegin="MSB4337: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternPropertyReferences">
         <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB4338: analisi del modello "{0}" non riuscita perché contiene il riferimento a una proprietà non supportato.</target>
         <note>{StrBegin="MSB4338: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFailIfNotIncremental">
         <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
-        <target state="new">MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4339: estrazione del file "{0}" in "{1}" non riuscita perché la destinazione non è aggiornata ed è stata richiesta la compilazione incrementale.</target>
         <note>{StrBegin="MSB4339: "}</note>
       </trans-unit>
       <trans-unit id="Untar.FileComment">
         <source>Untarring file "{0}" to "{1}".</source>
-        <target state="new">Untarring file "{0}" to "{1}".</target>
+        <target state="translated">Estrazione del file "{0}" in "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
@@ -3114,7 +3018,7 @@
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputDtdProhibited">
         <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <target state="translated">MSB3733: l'input XML contiene una DTD. Le DTD sono vietate per impostazione predefinita per motivi di sicurezza. Rimuovere la DTD oppure disabilitarla impostando "{0}" su "false" nell'attività "{1}" per ignorare le DTD.</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
@@ -3134,7 +3038,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.TransformDtdProhibited">
         <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
-        <target state="new">MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</target>
+        <target state="translated">MSB3703: non è possibile eseguire la trasformazione perché l'input XML "{0}" contiene una DTD. Le DTD sono vietate per impostazione predefinita per motivi di sicurezza. Rimuovere la DTD oppure, se l'input è considerato attendibile, impostare "{1}" su "false" nell'attività "{2}" per ignorare le DTD.</target>
         <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3169,7 +3073,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadDtdProhibited">
         <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <target state="translated">MSB3704: non è possibile caricare l'XSLT specificato perché contiene una DTD. Le DTD sono vietate per impostazione predefinita per motivi di sicurezza. Rimuovere la DTD oppure, se l'input è considerato attendibile, impostare "{0}" su "false" nell'attività "{1}" per ignorare le DTD.</target>
         <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">

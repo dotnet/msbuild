@@ -2721,7 +2721,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Result is inconclusive if properties are present
-                    if (itemSpec.ItemSpecString.Contains("$("))
+                    if (ExpressionShredder.ContainsPropertyMarker(itemSpec.ItemSpecString))
                     {
                         provenance |= Provenance.Inconclusive;
                     }
