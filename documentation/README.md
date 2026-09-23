@@ -65,6 +65,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 * [SDK resolution](specs/sdk-resolvers-algorithm.md)
 * [RAR core scenarios](specs/rar-core-scenarios.md)
 * [Question/Is Up-To-Date?](specs/question.md)
+* [OrchardCore clean-build performance snapshot](OrchardCore-performance.md)
 
 ### Tasks
 

@@ -30,7 +30,7 @@ namespace Microsoft.Build.Collections
             values = new TValue[capacity];
         }
 
-        public static IDictionary<TKey, TValue> Create(int capacity)
+        public static ArrayDictionary<TKey, TValue> Create(int capacity)
         {
             return new ArrayDictionary<TKey, TValue>(capacity);
         }
@@ -157,10 +157,9 @@ namespace Microsoft.Build.Collections
             throw new NotImplementedException();
         }
 
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
+        public Enumerator GetEnumerator() => new(this);
+
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator() => GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -220,7 +219,7 @@ namespace Microsoft.Build.Collections
             throw new NotImplementedException();
         }
 
-        private struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
+        internal struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
         {
             private readonly ArrayDictionary<TKey, TValue> _dictionary;
             private readonly bool _emitDictionaryEntries;
