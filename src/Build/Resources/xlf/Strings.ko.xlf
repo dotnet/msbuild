@@ -661,7 +661,7 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
         <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
-        <target state="new">MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</target>
+        <target state="translated">MSB4286: 다중 스레드 엄격 모드에서 작업 "{1}"을(를) 확인한 결과, 프로세스의 현재 디렉터리가 "{2}"에 있었습니다. 현재 디렉터리는 "{0}"여야 합니다. 프로세스 디렉터리를 변경하는 대신 TaskEnvironment를 사용하세요. 이 변경은 다른 작업, 로거 또는 이 이벤트의 컨텍스트와 동시에 실행된 호스트 코드에서 발생했을 수 있습니다.</target>
         <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeEnabled">
@@ -671,7 +671,7 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeSentinelMissing">
         <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
-        <target state="new">MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</target>
+        <target state="translated">MSB4288: 디렉터리를 사용할 수 없게 된 후 다중 스레드 엄격 모드가 센티넬 디렉터리 "{0}"과(와) 프로세스의 현재 디렉터리를 복원했습니다. 활성 빌드에서 사용 중인 디렉터리는 제거하지 마세요.</target>
         <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
@@ -681,7 +681,7 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
         <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
-        <target state="new">MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</target>
+        <target state="translated">MSB4287: 프로젝트 또는 빌드가 완료될 때 센티넬 디렉터리 "{0}"에서 다중 스레드 엄격 모드가 "{1}"을(를) 발견했습니다. TaskEnvironment를 사용해 경로를 확인하세요. 쓰기 작업은 다른 프로젝트, 로거 또는 호스트 코드에서 수행되었을 수 있습니다.</target>
         <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">

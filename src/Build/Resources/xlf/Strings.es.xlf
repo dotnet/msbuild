@@ -656,7 +656,7 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeAlreadyActive">
         <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
-        <target state="new">MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</target>
+        <target state="translated">MSB4289: ya hay otra compilación estricta multiproceso activa en este proceso. Finalice antes de iniciar otra compilación, use un proceso independiente o establezca MSBUILDDISABLEFEATURESFROMVERSION=18.12 antes de iniciar el proceso para deshabilitar las comprobaciones estrictas.</target>
         <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
@@ -671,17 +671,17 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeSentinelMissing">
         <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
-        <target state="new">MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</target>
+        <target state="translated">MSB4288: el modo strict multiproceso restauró el directorio sentinel "{0}" y el directorio actual del proceso después de que un directorio dejara de estar disponible. No quite los directorios usados por una compilación activa.</target>
         <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
         <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
-        <target state="new">MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</target>
+        <target state="translated">MSB4290: el modo strict multiproceso no pudo restaurar el directorio sentinel "{0}" y el directorio actual del proceso: {1} asegúrese de que se puede crear y tener acceso al directorio propiedad del motor, o establezca MSBUILDDISABLEFEATURESFROMVERSION=18.12 antes de iniciar el proceso para deshabilitar temporalmente las comprobaciones estrictas.</target>
         <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
         <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
-        <target state="new">MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</target>
+        <target state="translated">MSB4287: el modo strict multiproceso encontró "{0}" en el directorio sentinel "{1}" al finalizar el proyecto o la compilación. Resuelva las rutas de acceso con TaskEnvironment. La escritura puede proceder de otro proyecto, un registrador o código host.</target>
         <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
