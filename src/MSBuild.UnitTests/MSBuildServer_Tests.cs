@@ -233,6 +233,7 @@ namespace Microsoft.Build.Engine.UnitTests
             Regex.Matches(output, Regex.Escape(terminalLoggerMessage)).Count.ShouldBe(initialMessageCount);
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/15093")]
         [WindowsOnlyFact]
         public void ProcessPriorityDoesNotLeakAcrossServerBuilds()
         {
@@ -704,6 +705,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if NET
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/15108", TestPlatforms.Windows)]
         [Fact]
         public void ServerOwnsReusableSidecarsUntilShutdown()
         {
