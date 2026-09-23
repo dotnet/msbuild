@@ -153,6 +153,9 @@ namespace Microsoft.Build.Execution
         /// The name given to this BuildManager as the component host.
         /// </summary>
         private readonly string _hostName;
+        private string? _evaluationCacheBuildManagerId;
+        private long _evaluationCacheBuildsServed;
+        private ProjectInstanceSnapshotCache? _projectInstanceSnapshotCache;
 
         /// <summary>
         /// The parameters with which the build was started.
@@ -317,6 +320,10 @@ namespace Microsoft.Build.Execution
             _nextUnnamedProjectId = 1;
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            _componentFactories.AddFactory(
+                BuildComponentType.ProjectInstanceSnapshotCache,
+                ProjectInstanceSnapshotCache.CreateComponent,
+                BuildComponentFactoryCollection.CreationPattern.Singleton);
             SerializationContractInitializer.Initialize();
             _projectStartedEvents = new Dictionary<int, BuildEventArgs>();
 
@@ -641,6 +648,28 @@ namespace Microsoft.Build.Execution
                 var buildEntryDirectory = strictMode
                     ? MultiThreadedStrictModeScope.CaptureCurrentDirectory()
                     : default;
+                _buildParameters.ProjectInstanceSnapshotCache = null;
+                EvaluationCacheConfiguration evaluationCacheConfiguration =
+                    Traits.Instance.EvaluationCache;
+                _buildParameters.EvaluationCacheConfiguration = evaluationCacheConfiguration;
+                if (evaluationCacheConfiguration.IsConfigured)
+                {
+                    _evaluationCacheBuildManagerId ??= Guid.NewGuid().ToString("N");
+                    _evaluationCacheBuildsServed++;
+                }
+
+                if (evaluationCacheConfiguration.RecordInputs
+                    || Traits.Instance.EnableProjectInstanceSnapshotCache)
+                {
+                    ProjectInstanceSnapshotCache enabledSnapshotCache =
+                        _projectInstanceSnapshotCache ??=
+                            ((IBuildComponentHost)this).GetComponent<ProjectInstanceSnapshotCache>(
+                                BuildComponentType.ProjectInstanceSnapshotCache);
+                    enabledSnapshotCache.ConfigureValidator(
+                        evaluationCacheConfiguration.ValidationPolicy);
+                    enabledSnapshotCache.NotifyBuildStarted();
+                    _buildParameters.ProjectInstanceSnapshotCache = enabledSnapshotCache;
+                }
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
@@ -893,7 +922,7 @@ namespace Microsoft.Build.Execution
 
                 if (!usesInputCaches && (_buildParameters.ResetCaches || _configCache!.IsConfigCacheSizeLargerThanThreshold()))
                 {
-                    ResetCaches();
+                    ResetCachesCore(clearProjectInstanceSnapshotCache: false);
                 }
                 else
                 {
@@ -1046,15 +1075,51 @@ namespace Microsoft.Build.Execution
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
                 ErrorIfState(BuildManagerState.Building, "BuildInProgress");
 
-                _configCache = ((IBuildComponentHost)this).GetComponent<IConfigCache>(BuildComponentType.ConfigCache);
-                _resultsCache = ((IBuildComponentHost)this).GetComponent<IResultsCache>(BuildComponentType.ResultsCache);
-                _resultsCache!.ClearResults();
-
-                // This call clears out the directory.
-                _configCache!.ClearConfigurations();
-
-                _buildParameters?.ProjectRootElementCache.DiscardImplicitReferences();
+                ResetCachesCore(clearProjectInstanceSnapshotCache: true);
             }
+        }
+
+        private void ResetCachesCore(bool clearProjectInstanceSnapshotCache)
+        {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
+            _configCache = ((IBuildComponentHost)this).GetComponent<IConfigCache>(BuildComponentType.ConfigCache);
+            _resultsCache = ((IBuildComponentHost)this).GetComponent<IResultsCache>(BuildComponentType.ResultsCache);
+            _resultsCache!.ClearResults();
+
+            // This call clears out the directory.
+            _configCache!.ClearConfigurations();
+
+            _buildParameters?.ProjectRootElementCache.DiscardImplicitReferences();
+
+            if (clearProjectInstanceSnapshotCache)
+            {
+                _projectInstanceSnapshotCache?.Clear();
+            }
+        }
+
+        private void LogEvaluationCacheExperimentStatus(ILoggingService loggingService)
+        {
+            BuildParameters buildParameters = _buildParameters
+                ?? throw new InternalErrorException("Build parameters are unavailable while ending a build.");
+            EvaluationCacheConfiguration configuration =
+                buildParameters.EvaluationCacheConfiguration
+                ?? EvaluationCacheConfiguration.FromEnvironment();
+            string buildManagerId = _evaluationCacheBuildManagerId
+                ?? throw new InternalErrorException("Evaluation cache identity is unavailable while ending a configured build.");
+            string status = FormattableString.Invariant($"EvaluationCacheExperimentStatus|Version=1|Mode={configuration.Mode}|ConfigurationValid={configuration.ConfigurationValid}|ProcessId={Process.GetCurrentProcess().Id}|BuildManagerId={buildManagerId}|BuildsServed={_evaluationCacheBuildsServed}");
+
+            if (configuration.Mode != EvaluationCacheMode.Disabled)
+            {
+                ProjectInstanceSnapshotCacheStatistics statistics =
+                    buildParameters.ProjectInstanceSnapshotCache?.GetStatistics() ?? default;
+                status += FormattableString.Invariant($"|Entries={statistics.Count}|CurrentSizeBytes={statistics.CurrentSizeBytes}|MaximumSizeBytes={statistics.MaximumSizeBytes}|FreshEvaluations={statistics.FreshEvaluations}|RecordedEvaluations={statistics.RecordedEvaluations}|NonCacheableEvaluations={statistics.NonCacheableEvaluations}|CacheHits={statistics.CacheHits}|CacheMisses={statistics.CacheMisses}|ValidationAttempts={statistics.ValidationAttempts}|ValidationAccepted={statistics.ValidationAccepted}|ValidationRejected={statistics.ValidationRejections}|ValidationErrors={statistics.ValidationErrors}|MaterializedEntries={statistics.MaterializedEntries}|StoredEntries={statistics.StoredEntries}|EvictedEntries={statistics.EvictedEntries}|OversizedRejections={statistics.OversizedRejections}|Fallbacks={statistics.Fallbacks}");
+            }
+
+            loggingService.LogCommentFromText(
+                BuildEventContext.Invalid,
+                MessageImportance.Low,
+                status);
         }
 
         /// <summary>
@@ -1347,6 +1412,21 @@ namespace Microsoft.Build.Execution
                             _overallBuildSuccess = false;
                         }
 
+                        if (_buildParameters?.EvaluationCacheConfiguration is
+                            { ConfigurationValid: false })
+                        {
+                            loggingService.LogComment(
+                                BuildEventContext.Invalid,
+                                MessageImportance.High,
+                                "InvalidEvaluationCacheMode",
+                                _buildParameters.EvaluationCacheConfiguration.Value.InvalidValue);
+                        }
+
+                        if (_buildParameters?.EvaluationCacheConfiguration is
+                            { IsConfigured: true })
+                        {
+                            LogEvaluationCacheExperimentStatus(loggingService);
+                        }
                         loggingService.LogBuildFinished(_overallBuildSuccess);
 
                         if (_buildTelemetry != null)
@@ -1720,12 +1800,24 @@ namespace Microsoft.Build.Execution
         /// <returns>The component</returns>
         IBuildComponent IBuildComponentHost.GetComponent(BuildComponentType type)
         {
-            return _componentFactories.GetComponent(type);
+            IBuildComponent component = _componentFactories.GetComponent(type);
+            if (type == BuildComponentType.ProjectInstanceSnapshotCache)
+            {
+                _projectInstanceSnapshotCache = (ProjectInstanceSnapshotCache)component;
+            }
+
+            return component;
         }
 
         TComponent IBuildComponentHost.GetComponent<TComponent>(BuildComponentType type)
         {
-            return _componentFactories.GetComponent<TComponent>(type);
+            TComponent component = _componentFactories.GetComponent<TComponent>(type);
+            if (type == BuildComponentType.ProjectInstanceSnapshotCache)
+            {
+                _projectInstanceSnapshotCache = (ProjectInstanceSnapshotCache)(IBuildComponent)component;
+            }
+
+            return component;
         }
 
         #endregion

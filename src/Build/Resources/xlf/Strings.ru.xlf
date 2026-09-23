@@ -602,6 +602,13 @@
         <target state="translated">MSB4255: следующие входные файлы кэша результатов не существуют: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidEvaluationCacheMode">
+        <source>The value "{0}" of MSBUILDEVALUATIONCACHEMODE is invalid. Evaluation caching is disabled. Valid values are Disabled, Record, SnapshotUnsafe, and SnapshotFileSystem.</source>
+        <target state="new">The value "{0}" of MSBUILDEVALUATIONCACHEMODE is invalid. Evaluation caching is disabled. Valid values are Disabled, Record, SnapshotUnsafe, and SnapshotFileSystem.</target>
+        <note>
+      LOCALIZATION: {0} is the invalid environment variable value.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">Строка версии имела неверный формат.</target>
@@ -947,6 +954,27 @@
         <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
         <target state="translated">Возникло исключение при добавлении файла "{0}", исключение: "{1}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectInstanceSnapshotCacheReuseFailed">
+        <source>Project instance snapshot cache could not reuse project "{0}": {1}</source>
+        <target state="new">Project instance snapshot cache could not reuse project "{0}": {1}</target>
+        <note>
+      LOCALIZATION: {0} is a project file path. {1} is an exception message.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectInstanceSnapshotCacheStatus">
+        <source>Project instance snapshot cache: build {0}, {1} entries, {2}/{3} retained bytes, {4} stores, {5} hits, {6} misses, {7} rejections, {8} materializations, {9} evictions, {10} oversized rejections.</source>
+        <target state="new">Project instance snapshot cache: build {0}, {1} entries, {2}/{3} retained bytes, {4} stores, {5} hits, {6} misses, {7} rejections, {8} materializations, {9} evictions, {10} oversized rejections.</target>
+        <note>
+      LOCALIZATION: {0} through {10} are non-negative integer counts.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectInstanceSnapshotCacheStoreFailed">
+        <source>Project instance snapshot cache could not store project "{0}": {1}</source>
+        <target state="new">Project instance snapshot cache could not store project "{0}": {1}</target>
+        <note>
+      LOCALIZATION: {0} is a project file path. {1} is an exception message.
+    </note>
       </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>

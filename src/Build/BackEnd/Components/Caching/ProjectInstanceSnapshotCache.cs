@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Build.Framework;
 
 #nullable enable
 
@@ -343,6 +344,16 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
                 && ReferenceEquals(node.Value.Entry, expectedEntry)
                 && RemoveCore(key);
         }
+    }
+
+    internal void ConfigureValidator(EvaluationCacheValidationPolicy policy)
+    {
+        Validator = policy switch
+        {
+            EvaluationCacheValidationPolicy.Unsafe => UnsafeProjectInstanceSnapshotValidator.Instance,
+            EvaluationCacheValidationPolicy.FileSystem => FileSystemProjectInstanceSnapshotValidator.Instance,
+            _ => RejectingProjectInstanceSnapshotValidator.Instance,
+        };
     }
 
     internal void Clear()
