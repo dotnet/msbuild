@@ -720,6 +720,10 @@ namespace Microsoft.Build.Logging
                     {
                         eventArgsWriter.CheckForFilesToEmbed(taskParameter);
                     }
+                    else if (e is ProjectEvaluationFinishedEventArgs evaluationFinished)
+                    {
+                        eventArgsWriter.CheckForFilesToEmbed(evaluationFinished);
+                    }
 
                     return;
                 }

@@ -438,6 +438,81 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("Embed", false)]
+        [InlineData("Embed", true)]
+        [InlineData("ZipFile", false)]
+        [InlineData("ZipFile", true)]
+        [InlineData("None", false)]
+        [InlineData("None", true)]
+        public void BinaryLoggerShouldPreserveEvaluatedEmbeddedFiles(string imports, bool excludeEvaluation)
+        {
+            // ProjectStarted must not duplicate the items and mask missing evaluation collection.
+            _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+            TransientTestFolder projectFolder = _env.CreateFolder();
+            _env.CreateFile(projectFolder, "embedded.txt", "explicit evaluated content");
+            _env.CreateFile(projectFolder, "unrelated.txt", "do not embed");
+            TransientTestFile projectFile = _env.CreateFile(projectFolder, "evaluated.proj", """
+                <Project>
+                    <ItemGroup>
+                        <EmbedInBinlog Include="embedded.txt" />
+                        <None Include="unrelated.txt" />
+                    </ItemGroup>
+                    <Target Name="Build" />
+                </Project>
+                """);
+            string exclusions = excludeEvaluation ? ";Exclude=ProjectEvaluationStarted,ProjectEvaluationFinished" : "";
+            string diagnostic = RunnerUtilities.ExecMSBuild(
+                $"\"{projectFile.Path}\" -noAutoResponse -nologo -nr:false -bl:\"{_logFile};ProjectImports={imports}{exclusions}\"",
+                out bool succeeded);
+            succeeded.ShouldBeTrue(diagnostic);
+
+            List<ArchiveFile> files = [];
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(_logFile);
+            reader.ArchiveFileEncountered += args => files.Add(args.ArchiveData.ToArchiveFile());
+            bool hasEvaluationStarted = false;
+            bool hasEvaluationFinished = false;
+            while (reader.Read() is { } e)
+            {
+                hasEvaluationStarted |= e is ProjectEvaluationStartedEventArgs;
+                hasEvaluationFinished |= e is ProjectEvaluationFinishedEventArgs;
+                if (e is ProjectStartedEventArgs started)
+                {
+                    Internal.Utilities.EnumerateItemsOfType(started.Items, "EmbedInBinlog").ShouldBeEmpty();
+                }
+            }
+            hasEvaluationStarted.ShouldBe(!excludeEvaluation);
+            hasEvaluationFinished.ShouldBe(!excludeEvaluation);
+
+            string zipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
+            if (imports == "ZipFile")
+            {
+                files.ShouldBeEmpty();
+                using var fileStream = new FileStream(zipPath, FileMode.Open);
+                using var archive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    using var content = new StreamReader(entry.Open());
+                    files.Add(new ArchiveFile(entry.FullName, content.ReadToEnd()));
+                }
+            }
+            else
+            {
+                File.Exists(zipPath).ShouldBeFalse();
+            }
+
+            if (imports == "None")
+            {
+                files.ShouldBeEmpty();
+            }
+            else
+            {
+                files.Where(file => file.FullPath.EndsWith("embedded.txt", StringComparison.Ordinal))
+                    .ShouldHaveSingleItem().Content.ShouldBe("explicit evaluated content");
+                files.ShouldNotContain(file => file.FullPath.EndsWith("unrelated.txt", StringComparison.Ordinal));
+            }
+        }
+
+        [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]

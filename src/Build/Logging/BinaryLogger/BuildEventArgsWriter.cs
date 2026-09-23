@@ -844,6 +844,22 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        internal void CheckForFilesToEmbed(ProjectEvaluationFinishedEventArgs e)
+        {
+            if (EmbedFile == null)
+            {
+                return;
+            }
+
+            foreach (var item in Internal.Utilities.EnumerateItems(e.Items))
+            {
+                if (string.Equals(item.Type, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase))
+                {
+                    CheckForFileToEmbed(item.Value, e.ProjectFile);
+                }
+            }
+        }
+
         private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true, bool writeLineAndColumn = false)
         {
             var flags = GetBuildEventArgsFieldFlags(e, writeMessage);
@@ -1262,14 +1278,19 @@ namespace Microsoft.Build.Logging
 
             foreach (var item in list)
             {
-                if (item is ITaskItem taskItem && !string.IsNullOrEmpty(taskItem.ItemSpec))
-                {
-                    EmbedFile.Invoke(ResolveEmbedPath(taskItem.ItemSpec, projectFile));
-                }
-                else if (item is string itemSpec && !string.IsNullOrEmpty(itemSpec))
-                {
-                    EmbedFile.Invoke(ResolveEmbedPath(itemSpec, projectFile));
-                }
+                CheckForFileToEmbed(item, projectFile);
+            }
+        }
+
+        private void CheckForFileToEmbed(object item, string projectFile)
+        {
+            if (item is ITaskItem taskItem && !string.IsNullOrEmpty(taskItem.ItemSpec))
+            {
+                EmbedFile.Invoke(ResolveEmbedPath(taskItem.ItemSpec, projectFile));
+            }
+            else if (item is string itemSpec && !string.IsNullOrEmpty(itemSpec))
+            {
+                EmbedFile.Invoke(ResolveEmbedPath(itemSpec, projectFile));
             }
         }
 

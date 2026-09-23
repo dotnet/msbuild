@@ -1632,6 +1632,47 @@ namespace Microsoft.Build.UnitTests
                 e => TranslationHelpers.GetMultiItemsString(e.Items));
         }
 
+        [Fact]
+        public void EvaluationFilesCanBeCollectedWithoutSerializingTheEvent()
+        {
+            string projectFile = Path.GetFullPath(Path.Combine("evaluated", "source.proj"));
+            var args = new ProjectEvaluationFinishedEventArgs("finished")
+            {
+                ProjectFile = projectFile,
+                Items = new List<DictionaryEntry>
+                {
+                    new("Compile", new MyTaskItem { ItemSpec = "unrelated.txt" }),
+                    new("EmbedInBinlog", new MyTaskItem { ItemSpec = "first.txt" }),
+                    new("EmbedInBinlog", "second.txt"),
+                    new("embedinbinlog", new MyTaskItem { ItemSpec = "third.txt" }),
+                    new("EmbedInBinlog", new MyTaskItem { ItemSpec = "" }),
+                    new("EmbedInBinlog", ""),
+                },
+            };
+            using var writtenStream = new MemoryStream();
+            using var writtenBinaryWriter = new BinaryWriter(writtenStream);
+            var writer = new BuildEventArgsWriter(writtenBinaryWriter);
+            List<string> writtenFiles = [];
+            writer.EmbedFile += writtenFiles.Add;
+            writer.Write(args);
+
+            using var excludedStream = new MemoryStream();
+            using var excludedBinaryWriter = new BinaryWriter(excludedStream);
+            var excludedWriter = new BuildEventArgsWriter(excludedBinaryWriter);
+            List<string> excludedFiles = [];
+            excludedWriter.EmbedFile += excludedFiles.Add;
+            excludedWriter.CheckForFilesToEmbed(args);
+
+            writtenFiles.ShouldBe(new[]
+            {
+                Path.Combine(Path.GetDirectoryName(projectFile), "first.txt"),
+                Path.Combine(Path.GetDirectoryName(projectFile), "second.txt"),
+                Path.Combine(Path.GetDirectoryName(projectFile), "third.txt"),
+            });
+            excludedFiles.ShouldBe(writtenFiles);
+            excludedStream.Length.ShouldBe(0);
+        }
+
         /// <summary>
         /// Tests that items implementing IItemData (like ProjectItem) are properly serialized in binary logs.
         /// This regression test ensures that -getitem properly logs item values instead of type names.
