@@ -63,6 +63,19 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
             .Message.ShouldContain("Invalid binary logger event filter");
     }
 
+    [Fact]
+    public void BinaryLoggerFilter_ExclusionsAreReadOnlyAndDeduplicated()
+    {
+        var parameters = BinaryLogger.ParseParameters("Exclude=Message,warning,Message");
+
+        parameters.ExcludedEventKinds.Count.ShouldBe(2);
+        parameters.ExcludedEventKinds.Contains(BinaryLogRecordKind.Message).ShouldBeTrue();
+        parameters.ExcludedEventKinds.Contains(BinaryLogRecordKind.Warning).ShouldBeTrue();
+        Should.Throw<NotSupportedException>(
+            () => ((ISet<BinaryLogRecordKind>)parameters.ExcludedEventKinds).Add(BinaryLogRecordKind.Error));
+        parameters.ExcludedEventKinds.Count.ShouldBe(2);
+    }
+
     [Theory]
     [InlineData("Exclude=Message,Warning")]
     [InlineData("eXcLuDe=message,WARNING")]

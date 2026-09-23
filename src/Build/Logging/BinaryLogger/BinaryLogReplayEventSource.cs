@@ -273,7 +273,8 @@ namespace Microsoft.Build.Logging
         /// <remarks>
         /// Only events accepted by <see cref="EventFilter"/> are dispatched; see
         /// <see cref="BinaryLogEventFilter"/> for filtering semantics.
-        /// Cancellation is checked between records, but cannot interrupt a running callback.
+        /// Cancellation is polled before the first read and at most every 100 event-record reads,
+        /// including rejected events. It cannot interrupt a running callback or record read.
         /// Filter failures abort replay even with <see cref="AllowForwardCompatibility"/> enabled;
         /// they are not reported through <see cref="RecoverableReadError"/>.
         /// <see cref="BinaryLogEventFilterException"/> preserves the original failure and record diagnostics.
@@ -306,6 +307,7 @@ namespace Microsoft.Build.Logging
             reader.EmbeddedContentRead += _embeddedContentRead;
             reader.ArchiveFileEncountered += _archiveFileEncountered;
             reader.StringReadDone += _stringReadDone;
+            reader.ResetCancellationPolling();
 
             if (structuredReadingOnly)
             {
@@ -323,7 +325,7 @@ namespace Microsoft.Build.Logging
                 reader.SkipUnknownEventParts = skipUnknown;
                 reader.RecoverableReadError += RecoverableReadError;
 
-                while (!cancellationToken.IsCancellationRequested && reader.Read(EventFilter, cancellationToken) is { } instance)
+                while (reader.Read(EventFilter, cancellationToken) is { } instance)
                 {
                     _currentRecordKind = reader.CurrentRecordKind;
                     try
@@ -347,7 +349,7 @@ namespace Microsoft.Build.Logging
                         ResourceUtilities.GetResourceString("Binlog_Source_MissingSubscribeError"));
                 }
 
-                while (!cancellationToken.IsCancellationRequested && reader.ReadRaw() is { } instance &&
+                while (!reader.ShouldCancel(cancellationToken) && reader.ReadRaw() is { } instance &&
                        instance.RecordKind != BinaryLogRecordKind.EndOfFile)
                 {
                     _rawLogRecordReceived?.Invoke(instance.RecordKind, instance.Stream);

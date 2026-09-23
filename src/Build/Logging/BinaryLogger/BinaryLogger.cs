@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
@@ -43,7 +43,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Gets the event kinds excluded from this binary logger, during builds or replay.
         /// </summary>
-        public ImmutableHashSet<BinaryLogRecordKind> ExcludedEventKinds { get; internal set; } = ImmutableHashSet<BinaryLogRecordKind>.Empty;
+        public FrozenSet<BinaryLogRecordKind> ExcludedEventKinds { get; internal set; } = FrozenSet<BinaryLogRecordKind>.Empty;
     }
 
     /// <summary>
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Logging
         private bool _initialTargetOutputLogging;
         private bool _initialLogImports;
         private string _initialIsBinaryLoggerEnabled;
-        private BinaryLogEventFilter _eventFilter;
+        private FrozenSet<BinaryLogRecordKind> _excludedEventKinds;
         private IBinaryLogReplaySource _replayEventSource;
 
         /// <summary>
@@ -246,9 +246,9 @@ namespace Microsoft.Build.Logging
             return result;
         }
 
-        private static ImmutableHashSet<BinaryLogRecordKind> ParseExcludedEventKinds(string parameter)
+        private static FrozenSet<BinaryLogRecordKind> ParseExcludedEventKinds(string parameter)
         {
-            var excludedKinds = ImmutableHashSet.CreateBuilder<BinaryLogRecordKind>();
+            HashSet<BinaryLogRecordKind> excludedKinds = [];
             foreach (string entry in parameter.Substring("Exclude=".Length).Split(','))
             {
                 string name = entry.Trim();
@@ -267,7 +267,7 @@ namespace Microsoft.Build.Logging
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerEventFilter", parameter));
             }
 
-            return excludedKinds.ToImmutable();
+            return excludedKinds.ToFrozenSet();
         }
 
         private static bool CanExclude(BinaryLogRecordKind kind) => kind is
@@ -528,7 +528,7 @@ namespace Microsoft.Build.Logging
                         ProjectImportsCollector.FlushBlobToFile(FilePath, args.ContentStream);
                 }
 
-                if (_eventFilter is not null)
+                if (_excludedEventKinds is not null)
                 {
                     // Raw passthrough would bypass this logger's filter.
                     SubscribeToStructuredEvents();
@@ -711,10 +711,8 @@ namespace Microsoft.Build.Logging
                     return;
                 }
 
-                if (_eventFilter is not null && !_eventFilter(new BinaryLogEventMetadata(
-                    recordKind ?? BuildEventArgsWriter.GetRecordKind(e),
-                    e.BuildEventContext,
-                    (e as TargetSkippedEventArgs)?.OriginalBuildEventContext)))
+                if (_excludedEventKinds is not null
+                    && _excludedEventKinds.Contains(recordKind ?? BuildEventArgsWriter.GetRecordKind(e)))
                 {
                     if (e is TaskParameterEventArgs taskParameter)
                     {
@@ -777,9 +775,9 @@ namespace Microsoft.Build.Logging
             parsedParams ??= ParseParameters(Parameters);
             
             omitInitialInfo = parsedParams.OmitInitialInfo;
-            _eventFilter = parsedParams.ExcludedEventKinds.Count == 0
+            _excludedEventKinds = parsedParams.ExcludedEventKinds.Count == 0
                 ? null
-                : metadata => !parsedParams.ExcludedEventKinds.Contains(metadata.RecordKind);
+                : parsedParams.ExcludedEventKinds;
             
             // Parsed configuration is authoritative; text parameters can leave the property unchanged.
             if (hasParsedParameters || parsedParams.HasProjectImportsParameter)

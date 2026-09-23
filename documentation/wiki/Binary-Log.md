@@ -345,8 +345,10 @@ passthrough. With length-framed logs (format version 18 or later), rejected even
 their type-specific payload without deserialization. `TargetSkipped` is an exception: its original build context
 requires deserializing the payload first. Older formats also filter after deserialization.
 Auxiliary records, including strings, name/value lists, and embedded content, are still
-read so retained events can be decoded correctly. Cancellation is checked between rejected
-records too, but cannot interrupt a callback already running.
+read so retained events can be decoded correctly. Cancellation is polled before the first
+read and at most every 100 event-record reads, including rejected events. It cannot
+interrupt a callback or record read already running. CLI filtered replay also checks
+cancellation before publishing outputs.
 
 Unknown record kinds are not offered to the filter or interpreted as known event payloads.
 They follow the existing forward-compatibility policy: when recovery is enabled for a
@@ -367,8 +369,9 @@ it and `RecoverableReadError` is not raised for it. The exception provides:
 | `FileFormatVersion` | The format version of the source binary log. |
 
 The localized exception message includes the record kind, number, format version, and
-available contexts. The properties remain available across .NET Framework exception
-serialization. When manually constructing the exception with only an inner exception,
+available contexts. Legacy exception serialization is supported only on .NET Framework,
+where these properties are preserved across AppDomain boundaries; modern .NET does not
+declare legacy serialization support. When manually constructing the exception with only an inner exception,
 the record properties are `null` because no record information was supplied.
 
 To log a callback failure explicitly, replace the `logReader.Replay(args[0])` call in

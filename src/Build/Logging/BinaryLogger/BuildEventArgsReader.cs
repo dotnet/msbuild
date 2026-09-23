@@ -26,6 +26,8 @@ namespace Microsoft.Build.Logging
     /// </summary>
     public class BuildEventArgsReader : IBuildEventArgsReaderNotifications, IDisposable
     {
+        internal const int CancellationCheckInterval = 100;
+
         private readonly BinaryReader _binaryReader;
         // This is used to verify that events deserialization is not overreading expected size.
         private readonly TransparentReadStream _readStream;
@@ -33,6 +35,7 @@ namespace Microsoft.Build.Logging
         private long _recordNumber = 0;
         private bool _skipUnknownEvents;
         private bool _skipUnknownEventParts;
+        private int _recordsUntilCancellationCheck;
 
         // Reuse the common fields read for filtering during deserialization.
         private BuildEventArgsFields? _prefetchedFields;
@@ -227,11 +230,31 @@ namespace Microsoft.Build.Logging
         /// </exception>
         public BuildEventArgs? Read(BinaryLogEventFilter? eventFilter) => Read(eventFilter, CancellationToken.None);
 
+        internal void ResetCancellationPolling() => _recordsUntilCancellationCheck = 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool ShouldCancel(CancellationToken cancellationToken)
+        {
+            if (!cancellationToken.CanBeCanceled)
+            {
+                return false;
+            }
+
+            if (_recordsUntilCancellationCheck > 0)
+            {
+                _recordsUntilCancellationCheck--;
+                return false;
+            }
+
+            _recordsUntilCancellationCheck = CancellationCheckInterval - 1;
+            return cancellationToken.IsCancellationRequested;
+        }
+
         internal BuildEventArgs? Read(BinaryLogEventFilter? eventFilter, CancellationToken cancellationToken)
         {
             CheckErrorsSubscribed();
             BuildEventArgs? result = null;
-            while (result == null && !cancellationToken.IsCancellationRequested)
+            while (result == null && !ShouldCancel(cancellationToken))
             {
                 BinaryLogRecordKind recordKind = PreprocessRecordsTillNextEvent(IsAuxiliaryRecord);
 

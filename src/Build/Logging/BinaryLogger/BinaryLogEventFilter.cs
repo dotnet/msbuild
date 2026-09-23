@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NETFRAMEWORK
 using System.Runtime.Serialization;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -57,9 +59,12 @@ public delegate bool BinaryLogEventFilter(BinaryLogEventMetadata metadata);
 /// <remarks>
 /// Filter failures abort replay; they are not recoverable read errors.
 /// The original failure is preserved in <see cref="Exception.InnerException"/>.
-/// Serialization preserves the exception and any supplied record diagnostics.
+/// On .NET Framework, legacy serialization preserves the exception and supplied record diagnostics
+/// when marshaling exceptions across AppDomain boundaries.
 /// </remarks>
+#if NETFRAMEWORK
 [Serializable]
+#endif
 public sealed class BinaryLogEventFilterException : Exception
 {
     /// <summary>
@@ -124,9 +129,7 @@ public sealed class BinaryLogEventFilterException : Exception
     /// </summary>
     public int? FileFormatVersion { get; }
 
-#if NET8_0_OR_GREATER
-    [Obsolete(DiagnosticId = "SYSLIB0051")]
-#endif
+#if NETFRAMEWORK
     private BinaryLogEventFilterException(SerializationInfo info, StreamingContext context)
         : base(info, context)
     {
@@ -145,9 +148,6 @@ public sealed class BinaryLogEventFilterException : Exception
 #if FEATURE_SECURITY_PERMISSIONS
     [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter = true)]
 #endif
-#if NET8_0_OR_GREATER
-    [Obsolete(DiagnosticId = "SYSLIB0051")]
-#endif
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
         base.GetObjectData(info, context);
@@ -157,4 +157,5 @@ public sealed class BinaryLogEventFilterException : Exception
         info.AddValue(nameof(RecordNumber), RecordNumber, typeof(long?));
         info.AddValue(nameof(FileFormatVersion), FileFormatVersion, typeof(int?));
     }
+#endif
 }
