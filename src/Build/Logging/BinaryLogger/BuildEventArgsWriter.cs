@@ -4,9 +4,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -53,6 +55,9 @@ namespace Microsoft.Build.Logging
         /// The binary writer around the currentRecordStream.
         /// </summary>
         private readonly BinaryWriter currentRecordWriter;
+
+        private readonly BinaryWriter nameValueListWriter;
+        private readonly ConditionalWeakTable<ImmutableDictionary<string, string>, MetadataRecord> metadataRecords;
 
         /// <summary>
         /// The binary writer we're currently using. Is pointing at the currentRecordWriter usually,
@@ -122,7 +127,8 @@ namespace Microsoft.Build.Logging
         /// Initializes a new instance of BuildEventArgsWriter with a BinaryWriter
         /// </summary>
         /// <param name="binaryWriter">A BinaryWriter to write the BuildEventArgs instances to</param>
-        public BuildEventArgsWriter(BinaryWriter binaryWriter)
+        /// <param name="cacheMetadata">Whether to enable the immutable metadata snapshot experiment</param>
+        public BuildEventArgsWriter(BinaryWriter binaryWriter, bool cacheMetadata = false)
         {
             originalStream = binaryWriter.BaseStream;
 
@@ -131,6 +137,11 @@ namespace Microsoft.Build.Logging
             this.currentRecordStream = new MemoryStream(65536);
 
             this.nameValueListStream = new MemoryStream(256);
+            this.nameValueListWriter = new BinaryWriter(nameValueListStream);
+            if (cacheMetadata)
+            {
+                metadataRecords = new();
+            }
 
             this.originalBinaryWriter = binaryWriter;
             this.currentRecordWriter = new BinaryWriter(currentRecordStream);
@@ -276,15 +287,20 @@ namespace Microsoft.Build.Logging
         /// until the disposable is disposed. Useful to bypass the currentRecordWriter to write a string,
         /// blob or NameValueRecord that should precede the record being currently written.
         /// </summary>
-        private IDisposable RedirectWritesToOriginalWriter()
+        private WriterRedirection RedirectWritesToOriginalWriter()
         {
             return RedirectWritesToDifferentWriter(originalBinaryWriter, currentRecordWriter);
         }
 
-        private IDisposable RedirectWritesToDifferentWriter(BinaryWriter inScopeWriter, BinaryWriter afterScopeWriter)
+        private WriterRedirection RedirectWritesToDifferentWriter(BinaryWriter inScopeWriter, BinaryWriter afterScopeWriter)
         {
             binaryWriter = inScopeWriter;
-            return new CleanupScope(() => binaryWriter = afterScopeWriter);
+            return new WriterRedirection(this, afterScopeWriter);
+        }
+
+        private readonly struct WriterRedirection(BuildEventArgsWriter owner, BinaryWriter previousWriter) : IDisposable
+        {
+            public void Dispose() => owner.binaryWriter = previousWriter;
         }
 
         private BinaryLogRecordKind Write(BuildStartedEventArgs e)
@@ -1142,6 +1158,28 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
+            if (metadataRecords is not null &&
+                item is ProjectItemInstance or ProjectItemInstance.TaskItem)
+            {
+                // Immutable snapshots change identity on mutation; weak keys do not retain old build items.
+                ImmutableDictionary<string, string> metadata = ((IMetadataContainer)item).BackingMetadata.Dictionary;
+                if (metadataRecords.TryGetValue(metadata, out MetadataRecord record))
+                {
+                    Write(record.Id);
+                    return;
+                }
+
+                foreach (var pair in metadata)
+                {
+                    nameValueListBuffer.Add(new(pair.Key, EscapingUtilities.UnescapeAll(pair.Value)));
+                }
+
+                int id = WriteNameValueList();
+                nameValueListBuffer.Clear();
+                metadataRecords.Add(metadata, new MetadataRecord(id));
+                return;
+            }
+
             // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
             // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
             // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
@@ -1214,12 +1252,12 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void WriteNameValueList()
+        private int WriteNameValueList()
         {
             if (nameValueListBuffer.Count == 0)
             {
                 Write((byte)0);
-                return;
+                return 0;
             }
 
             HashKey hash = HashAllStrings(nameValueListBuffer);
@@ -1234,6 +1272,12 @@ namespace Microsoft.Build.Logging
             }
 
             Write(recordId);
+            return recordId;
+        }
+
+        private sealed class MetadataRecord(int id)
+        {
+            public int Id { get; } = id;
         }
 
         /// <summary>
@@ -1253,9 +1297,8 @@ namespace Microsoft.Build.Logging
             // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
             nameValueListStream.SetLength(0);
-            var nameValueListBw = new BinaryWriter(nameValueListStream);
 
-            using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
+            using (var _ = RedirectWritesToDifferentWriter(nameValueListWriter, binaryWriter))
             {
                 Write(nameValueIndexListBuffer.Count);
                 for (int i = 0; i < nameValueListBuffer.Count; i++)
