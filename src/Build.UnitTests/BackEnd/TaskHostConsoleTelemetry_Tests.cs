@@ -171,6 +171,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         AssertTelemetry(logger, expected);
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/15107")]
     [Theory]
     [InlineData(false, false, false)]
     [InlineData(true, false, false)]
