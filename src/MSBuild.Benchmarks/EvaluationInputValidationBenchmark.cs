@@ -4,6 +4,7 @@
 using BenchmarkDotNet.Attributes;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
+using System.Runtime.InteropServices;
 
 namespace MSBuild.Benchmarks;
 
@@ -17,6 +18,8 @@ public class EvaluationInputValidationBenchmark
     private const string ModeVariable = "MSBUILDEVALUATIONCACHEMODE";
     private const string RecordingVariable = "MSBUILDRECORDEVALUATIONINPUTS";
     private const string SnapshotVariable = "MSBUILDENABLEPROJECTINSTANCESNAPSHOTCACHE";
+    private static readonly StringComparison s_pathComparison =
+        RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
     private readonly string? _originalMode = Environment.GetEnvironmentVariable(ModeVariable);
     private readonly string? _originalRecording = Environment.GetEnvironmentVariable(RecordingVariable);
@@ -159,18 +162,14 @@ public class EvaluationInputValidationBenchmark
     private string? FindNearestImport()
     {
         string projectDirectory = Path.GetDirectoryName(_fixture.ProjectPath)!;
-        string projectDirectoryPrefix = projectDirectory.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
-            ? projectDirectory
-            : projectDirectory + Path.DirectorySeparatorChar;
         string? nearest = null;
         int longestShared = -1;
         foreach (KeyValuePair<string, FileDependency> file in _fixture.Inputs.Files)
         {
             string extension = Path.GetExtension(file.Key);
-            bool underProject = file.Key.StartsWith(projectDirectoryPrefix, StringComparison.OrdinalIgnoreCase);
             if (file.Value.Kind != PathKind.File
-                || !underProject
-                || string.Equals(file.Key, _fixture.ProjectPath, StringComparison.OrdinalIgnoreCase)
+                || !IsPathUnderDirectory(file.Key, projectDirectory, s_pathComparison)
+                || string.Equals(file.Key, _fixture.ProjectPath, s_pathComparison)
                 || !(extension.Equals(".props", StringComparison.OrdinalIgnoreCase) || extension.Equals(".targets", StringComparison.OrdinalIgnoreCase)))
             {
                 continue;
@@ -201,8 +200,8 @@ public class EvaluationInputValidationBenchmark
         string? shallowest = null;
         foreach (KeyValuePair<string, FileDependency> file in _fixture.Inputs.Files)
         {
-            bool underProject = string.Equals(file.Key, projectDirectory, StringComparison.OrdinalIgnoreCase)
-                || file.Key.StartsWith(projectDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+            bool underProject = string.Equals(file.Key, projectDirectory, s_pathComparison)
+                || IsPathUnderDirectory(file.Key, projectDirectory, s_pathComparison);
             if (file.Value.Kind == PathKind.Directory && underProject && (shallowest is null || file.Key.Length < shallowest.Length))
             {
                 shallowest = file.Key;
@@ -210,5 +209,13 @@ public class EvaluationInputValidationBenchmark
         }
 
         return shallowest;
+    }
+
+    internal static bool IsPathUnderDirectory(string path, string directory, StringComparison comparison)
+    {
+        string directoryPrefix = directory.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
+            ? directory
+            : directory + Path.DirectorySeparatorChar;
+        return path.StartsWith(directoryPrefix, comparison);
     }
 }
