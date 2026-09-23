@@ -926,8 +926,15 @@ namespace Microsoft.Build.BackEnd
         /// Wraps the given <paramref name="item"/> into a <c>TaskItem&lt;T&gt;</c> where T is
         /// <paramref name="genericArgument"/>, using a cached compiled constructor delegate.
         /// </summary>
-        private static ITaskItem CreateTaskItemOfT(Type genericArgument, ITaskItem item)
+        private ITaskItem CreateTaskItemOfT(Type genericArgument, ITaskItem item)
         {
+            if (TaskItemTypeDetector.IsSupportedPathType(genericArgument))
+            {
+                // Validate the original identity before TaskItem<T> reads FullPath metadata, which can
+                // resolve a whitespace-only identity to the project directory and hide the invalid input.
+                TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+            }
+
             Func<ITaskItem, ITaskItem> factory = s_taskItemOfTFactories.GetOrAdd(genericArgument, static t =>
             {
 #if NET
@@ -1084,6 +1091,15 @@ namespace Microsoft.Build.BackEnd
 
                     return InternalSetTaskParameter(parameter, finalTaskInputs);
                 }
+            }
+            catch (WhitespaceOnlyPathException)
+            {
+                throw ProjectErrorUtilities.CreateInvalidProjectException(
+                    parameterLocation,
+                    "InvalidTaskPathParameterValueError",
+                    parameter.Name,
+                    parameterType.FullName,
+                    _taskName);
             }
             catch (Exception ex)
             {
@@ -1697,6 +1713,15 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+            catch (WhitespaceOnlyPathException)
+            {
+                throw ProjectErrorUtilities.CreateInvalidProjectException(
+                    parameterLocation,
+                    "InvalidTaskPathParameterValueError",
+                    parameter.Name,
+                    parameterType.FullName,
+                    _taskName);
+            }
             catch (Exception ex)
             {
                 if (ex is InvalidCastException || // invalid type
@@ -1704,10 +1729,11 @@ namespace Microsoft.Build.BackEnd
                     ex is FormatException || // bad string representation of a type
                     ex is OverflowException) // overflow when converting string representation of a numerical type
                 {
+                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
                     ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "InvalidTaskParameterValueError",
-                        _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation),
+                        expandedParameterValue,
                         parameter.Name,
                         parameterType.FullName,
                         _taskName);
