@@ -56,7 +56,6 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private readonly BinaryWriter currentRecordWriter;
 
-        private readonly BinaryWriter nameValueListWriter;
         private readonly ConditionalWeakTable<ImmutableDictionary<string, string>, MetadataRecord> metadataRecords;
 
         /// <summary>
@@ -137,7 +136,6 @@ namespace Microsoft.Build.Logging
             this.currentRecordStream = new MemoryStream(65536);
 
             this.nameValueListStream = new MemoryStream(256);
-            this.nameValueListWriter = new BinaryWriter(nameValueListStream);
             if (cacheMetadata)
             {
                 metadataRecords = new();
@@ -287,20 +285,15 @@ namespace Microsoft.Build.Logging
         /// until the disposable is disposed. Useful to bypass the currentRecordWriter to write a string,
         /// blob or NameValueRecord that should precede the record being currently written.
         /// </summary>
-        private WriterRedirection RedirectWritesToOriginalWriter()
+        private IDisposable RedirectWritesToOriginalWriter()
         {
             return RedirectWritesToDifferentWriter(originalBinaryWriter, currentRecordWriter);
         }
 
-        private WriterRedirection RedirectWritesToDifferentWriter(BinaryWriter inScopeWriter, BinaryWriter afterScopeWriter)
+        private IDisposable RedirectWritesToDifferentWriter(BinaryWriter inScopeWriter, BinaryWriter afterScopeWriter)
         {
             binaryWriter = inScopeWriter;
-            return new WriterRedirection(this, afterScopeWriter);
-        }
-
-        private readonly struct WriterRedirection(BuildEventArgsWriter owner, BinaryWriter previousWriter) : IDisposable
-        {
-            public void Dispose() => owner.binaryWriter = previousWriter;
+            return new CleanupScope(() => binaryWriter = afterScopeWriter);
         }
 
         private BinaryLogRecordKind Write(BuildStartedEventArgs e)
@@ -1297,8 +1290,9 @@ namespace Microsoft.Build.Logging
             // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
             nameValueListStream.SetLength(0);
+            var nameValueListBw = new BinaryWriter(nameValueListStream);
 
-            using (var _ = RedirectWritesToDifferentWriter(nameValueListWriter, binaryWriter))
+            using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
             {
                 Write(nameValueIndexListBuffer.Count);
                 for (int i = 0; i < nameValueListBuffer.Count; i++)

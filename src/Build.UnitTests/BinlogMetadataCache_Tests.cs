@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests;
 
-public class BinlogPerformancePrototypeTests
+public class BinlogMetadataCacheTests
 {
     [Theory]
     [InlineData(false, false)]
@@ -98,79 +98,5 @@ public class BinlogPerformancePrototypeTests
         expectedWriter.Write(e);
         actualWriter.Write(e);
         actual.ToArray().ShouldBe(expected.ToArray());
-    }
-
-    [Fact]
-    public void PipelinePreservesOrderingAndFlushBoundaries()
-    {
-        byte[] bytes = new byte[5 * 1024 * 1024 + 17];
-        new Random(42).NextBytes(bytes);
-        MemoryStream destination = new();
-        using (PipelinedWriteStream pipeline = new(destination))
-        {
-            pipeline.Write(bytes, 0, 13);
-            pipeline.Flush();
-            destination.ToArray().ShouldBe(bytes.Take(13).ToArray());
-            pipeline.Write(bytes, 13, bytes.Length - 13);
-            pipeline.Flush();
-            destination.ToArray().ShouldBe(bytes);
-            pipeline.WriteByte(123);
-        }
-        destination.ToArray().ShouldBe(bytes.Concat(new byte[] { 123 }).ToArray());
-    }
-
-    [Fact]
-    public void PipelinePropagatesFinalizationFailure()
-    {
-        PipelinedWriteStream pipeline = new(new FinalizationFailingStream());
-        pipeline.WriteByte(42);
-        Should.Throw<IOException>(() => pipeline.Dispose()).Message.ShouldBe("expected finalization failure");
-        pipeline.Dispose();
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void PipelinePropagatesWorkerFailures(bool failOnFlush)
-    {
-        PipelinedWriteStream pipeline = new(new FailingStream(failOnFlush));
-        byte[] bytes = new byte[5 * 1024 * 1024];
-        Should.Throw<IOException>(() =>
-        {
-            pipeline.Write(bytes, 0, bytes.Length);
-            pipeline.Flush();
-        }).Message.ShouldBe("expected failure");
-        Should.Throw<IOException>(() => pipeline.Dispose()).Message.ShouldBe("expected failure");
-        pipeline.Dispose();
-    }
-
-    private sealed class FailingStream(bool failOnFlush) : MemoryStream
-    {
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            if (!failOnFlush)
-            {
-                throw new IOException("expected failure");
-            }
-            base.Write(buffer, offset, count);
-        }
-
-        public override void Flush()
-        {
-            if (failOnFlush)
-            {
-                throw new IOException("expected failure");
-            }
-            base.Flush();
-        }
-    }
-
-    private sealed class FinalizationFailingStream : MemoryStream
-    {
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            throw new IOException("expected finalization failure");
-        }
     }
 }

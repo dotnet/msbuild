@@ -344,7 +344,6 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
-            BinlogPrototypeOptions prototypeOptions = BinlogPrototypeConfiguration.Read();
             _initialTargetOutputLogging = Traits.Instance.EnableTargetOutputLogging;
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
             _initialIsBinaryLoggerEnabled = Environment.GetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED");
@@ -404,21 +403,14 @@ namespace Microsoft.Build.Logging
                 throw new LoggerException(message, e, errorCode, helpKeyword);
             }
 
-            stream = new GZipStream(stream, (prototypeOptions & BinlogPrototypeOptions.FastCompression) != 0
-                ? CompressionLevel.Fastest
-                : CompressionLevel.Optimal);
-            if ((prototypeOptions & BinlogPrototypeOptions.AsyncCompression) != 0)
-            {
-                stream = new PipelinedWriteStream(stream);
-            }
+            stream = new GZipStream(stream, CompressionLevel.Optimal);
 
             // wrapping the GZipStream in a buffered stream significantly improves performance
             // and the max throughput is reached with a 32K buffer. See details here:
             // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
             stream = new BufferedStream(stream, bufferSize: 32768);
             binaryWriter = new BinaryWriter(stream);
-            eventArgsWriter = new BuildEventArgsWriter(binaryWriter,
-                cacheMetadata: (prototypeOptions & BinlogPrototypeOptions.MetadataCache) != 0);
+            eventArgsWriter = new BuildEventArgsWriter(binaryWriter, cacheMetadata: true);
 
             if (projectImportsCollector != null)
             {

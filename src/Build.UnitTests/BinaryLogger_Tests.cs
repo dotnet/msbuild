@@ -94,20 +94,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("MetadataCache")]
-        [InlineData("FastCompression")]
-        [InlineData("AsyncCompression")]
-        [InlineData("MetadataCache,FastCompression")]
-        [InlineData("MetadataCache,AsyncCompression")]
-        [InlineData("FastCompression,AsyncCompression")]
-        [InlineData("MetadataCache,FastCompression,AsyncCompression")]
-        public void PerformancePrototypesPreserveRoundtrip(string options)
-        {
-            _env.SetEnvironmentVariable(BinlogPrototypeConfiguration.EnvironmentVariable, options);
-            TestBinaryLoggerRoundtripEquality(s_testProject2, BinlogRoundtripTestReplayMode.Structured);
-        }
-
-        [Theory]
         [InlineData(s_testProject, BinlogRoundtripTestReplayMode.NoReplay)]
         [InlineData(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
         [InlineData(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]

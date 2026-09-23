@@ -44,76 +44,23 @@ If the binary log contains the projects/imports files the MSBuild Structured Log
 
 By default, MSBuild logs only the environment variables that are used to influence MSBuild, which is a subset of what is set in the environment. This reduces, but does not eliminate, the likelihood of leaking sensitive information through logs. This behavior can be changed to log the full environment by setting the environment variable `MSBUILDLOGALLENVIRONMENTVARIABLES=1`.
 
-# Performance prototypes on this experimental branch
+# Metadata cache performance experiment
 
-`MSBUILDBINLOGPROTOTYPE` enables independent experiments in the binary logger.
-These are investigation controls, not supported product settings. Unset the variable
-to disable all three experiments. The allocation-free writer-redirection scopes and
-reused metadata-record writer apply independently of this switch.
+This performance branch enables immutable metadata snapshot caching whenever the
+binary logger is used. No environment variable is required. It reuses metadata record
+IDs for identical immutable engine-metadata dictionaries, bypassing repeated
+enumeration, unescaping, and hashing. Weak cache keys avoid retaining old snapshots;
+metadata mutations create new dictionary identities.
 
-| Value (comma-separated combinations allowed) | Experiment | Tradeoff |
-| --- | --- | --- |
-| `MetadataCache` | Reuse metadata record IDs for identical immutable engine-metadata snapshots, with weak cache keys. | Extra cache lookups; only known engine item implementations are eligible. |
-| `FastCompression` | Use gzip `Fastest` instead of `Optimal`. | Larger files, unchanged event data and gzip/binlog format. |
-| `AsyncCompression` | Feed serialized bytes to a compression worker through eight bounded 256 KiB buffers. | An extra thread and buffer copies; flush/shutdown wait for completion and propagate I/O failures. |
+The branch isolates the cache: gzip remains synchronous at `Optimal`, and the separate
+writer-scope allocation cleanup is not included. The binary log format and intended
+event content are unchanged. This is an experiment for performance infrastructure,
+not a claim of complete compatibility validation.
 
-For example, set `MSBUILDBINLOGPROTOTYPE=MetadataCache,AsyncCompression` before
-running the usual `/bl` command. No events, item metadata, or embedded imports are
-intentionally omitted. The serializer and its interning tables remain single-threaded.
-
-### OrchardCore measurements
-
-These are local experimental results, not general performance guarantees. The workload
-was a warm, no-op build of `OrchardCore.Cms.Web.csproj` and its 196-project dependency
-graph at OrchardCore commit `c86db6a`, using Release MSBuild, `-m:16 -nr:false -mt:true`,
-no restore, no terminal logger, and disabled shared compilation. It is **not** a clean
-compile or the entire OrchardCore solution.
-
-Runs alternated variants in forward/reverse order, using fresh processes and warm
-filesystem caches. The original bootstrap was preserved separately. Wall time excludes
-tracing and instrumentation; CPU accounting includes all descendants in a Windows job.
-All flagged prototypes also include the allocation cleanup.
-
-| Variant | Runs | Median wall (s) | Median binlog (MiB) |
-| --- | ---: | ---: | ---: |
-| Original logger | 8 | 26.74 | 16.58 |
-| Allocation cleanup only | 3 | 26.33 | 16.54 |
-| `MetadataCache` | 5 | 22.95 | 16.53 |
-| `FastCompression` | 3 | 24.85 | 20.51 |
-| `AsyncCompression` | 3 | 25.57 | 16.46 |
-| `MetadataCache,FastCompression` | 3 | 23.27 | 20.43 |
-| `MetadataCache,AsyncCompression` | 5 | 22.89 | 16.49 |
-| All three | 8 | 22.93 | 20.21 |
-| No binlog | 5 | 16.83 | N/A |
-
-Metadata reuse is the clearest useful result: approximately 3.8 seconds / 14% less
-wall time without a size penalty. It bypasses repeated metadata enumeration,
-unescaping, and hashing, rather than dropping events. In two instrumented runs per
-variant, mean writer callback time fell from 18.29 to 13.48 seconds and logging-thread
-allocations from 538.3 to 165.8 MB. Allocation cleanup alone removed 106.6 MB, but had
-no clear wall-time win. Callback time includes scheduling and GC pauses; it is not CPU time.
-
-The combined prototype initially reached a 21.82-second median; later confirmation
-runs were noisier. The aggregate above retains all samples, including final outliers
-of 32.86 seconds for the original and 36.36 seconds for the combination. This was a
-shared machine. The experiments do not establish that the extra compression thread
-is worth its complexity on top of metadata caching. Faster gzip increases file size
-by roughly 22%. Queue-wait stacks remained present in both original and combined traces.
-The compression queue holds at most eight buffers, plus a producer and consumer buffer
-(about 2.5 MiB total); whole-job memory also includes interning, caches, and build state.
-
-With `-mt:false`, three-run medians were 39.67 seconds original, 39.73 seconds with
-metadata caching, and 40.75 seconds with all options: no demonstrated MP wall-time win.
-Most MP items have already been converted into flat metadata representations.
-
-All 47 timed binlogs replayed successfully: each retained 210,642 task-parameter
-events, 1,958,772 parameter-item occurrences, 392 evaluations, and zero `Csc` invocations.
-All 1,222 embedded source files had identical content hashes after normalizing the
-two bootstrap directory prefixes. A separate live-event observer compared cached
-and uncached serialization of 885,231 frozen event snapshots (59,079,862 bytes) with
-byte-for-byte equality. Freezing is necessary because live evaluation collections can
-change between two serializer invocations; unfrozen comparisons are not a valid
-fidelity oracle. Timings from this observer are excluded from the table.
+The earlier combined cache/allocation prototype reduced the local OrchardCore CMS
+warm no-op MT build median from 26.74 to 22.95 seconds without a size penalty. Those
+measurements do not isolate the cache alone; this branch is intended to do so.
+The full prototype and measurement report remain in commit `a970c9c419`.
 
 # Replaying a binary log
 
