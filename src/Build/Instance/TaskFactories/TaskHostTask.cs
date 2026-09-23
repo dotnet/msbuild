@@ -96,11 +96,6 @@ namespace Microsoft.Build.BackEnd
         private HandshakeOptions _requiredContext = HandshakeOptions.None;
 
         /// <summary>
-        /// The task host node key identifying the task host we're launching.
-        /// </summary>
-        private TaskHostNodeKey _taskHostNodeKey;
-
-        /// <summary>
         /// The ID of the node on which this task is scheduled to run.
         /// </summary>
         private readonly int _scheduledNodeId;
@@ -168,6 +163,22 @@ namespace Microsoft.Build.BackEnd
         /// The task environment for virtualized environment operations.
         /// </summary>
         private readonly TaskEnvironment _taskEnvironment;
+
+        private ParameterConversionRequirement? _parameterConversionRequirement;
+
+        internal bool IsNetTaskHost =>
+            string.Equals(_taskHostParameters.Runtime, XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase);
+
+        internal bool RequiresParameterConversion => _parameterConversionRequirement.HasValue;
+
+        internal static bool CanConvertTaskParameters(byte negotiatedPacketVersion)
+            => negotiatedPacketVersion >= NodePacketTypeExtensions.TaskParameterConversionMinVersion;
+
+        private readonly record struct ParameterConversionRequirement(
+            string ParameterType,
+            string ParameterName,
+            string TaskName,
+            IElementLocation Location);
 
         /// <summary>
         /// Constructor.
@@ -269,6 +280,11 @@ namespace Microsoft.Build.BackEnd
         {
             if (_setParameters.TryGetValue(property.Name, out object value))
             {
+                if (value is TaskParameter taskParameter)
+                {
+                    value = taskParameter.WrappedParameter;
+                }
+
                 // If we returned an exception, then we want to throw it when we
                 // do the get.
                 if (value is Exception ex)
@@ -283,6 +299,22 @@ namespace Microsoft.Build.BackEnd
                 PropertyInfo parameter = _taskType.Type.GetProperty(property.Name, BindingFlags.Instance | BindingFlags.Public);
                 return parameter.GetValue(this, null);
             }
+        }
+
+        internal bool IsTaskItemOutput(string parameterName)
+        {
+            if (!_setParameters.TryGetValue(parameterName, out object value)
+                || value is not TaskParameter taskParameter)
+            {
+                return false;
+            }
+
+            if (taskParameter.WrappedParameter is Exception exception)
+            {
+                throw exception;
+            }
+
+            return taskParameter.ParameterType is TaskParameterType.ITaskItem or TaskParameterType.ITaskItemArray;
         }
 
         /// <summary>
@@ -302,6 +334,16 @@ namespace Microsoft.Build.BackEnd
 
                 _taskCancelled = true;
             }
+        }
+
+        internal void RequireParameterConversion(
+            string parameterType,
+            string parameterName,
+            string taskName,
+            IElementLocation location)
+        {
+            _parameterConversionRequirement ??=
+                new ParameterConversionRequirement(parameterType, parameterName, taskName, location);
         }
 
         /// <summary>
@@ -365,11 +407,11 @@ namespace Microsoft.Build.BackEnd
                     int hostProcessId;
                     bool wasNewlyCreated;
                     bool effectiveNodeReuse;
+                    bool parameterConversionUnsupported;
 
                     lock (_taskHostLock)
                     {
                         effectiveNodeReuse = _buildComponentHost.BuildParameters.EnableNodeReuse && _allowNodeReuse;
-
                         _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
                             taskHost: true,
 
@@ -377,16 +419,23 @@ namespace Microsoft.Build.BackEnd
                             nodeReuse: effectiveNodeReuse,
                             taskHostParameters: _taskHostParameters);
 
-                        _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId, _forwardConsoleOutput);
                         _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
-                            _taskHostNodeKey,
+                            new TaskHostNodeKey(_requiredContext, _scheduledNodeId, _forwardConsoleOutput),
                             this,
                             this,
                             hostConfiguration,
                             _taskHostParameters,
+                            RequiresParameterConversion,
+                            out parameterConversionUnsupported,
                             out hostProcessId,
                             out wasNewlyCreated,
                             out _taskHostConnection);
+                    }
+
+                    if (parameterConversionUnsupported)
+                    {
+                        LogUnsupportedParameterConversion();
+                        return false;
                     }
 
                     if (_connectedToTaskHost)
@@ -549,6 +598,17 @@ namespace Microsoft.Build.BackEnd
             // for now, do nothing.
         }
 
+        private void LogUnsupportedParameterConversion()
+        {
+            ParameterConversionRequirement requirement = _parameterConversionRequirement.Value;
+            _taskLoggingContext.LogError(
+                new BuildEventFileInfo(requirement.Location),
+                "UnsupportedTaskParameterTypeError",
+                requirement.ParameterType,
+                requirement.ParameterName,
+                requirement.TaskName);
+        }
+
         /// <summary>
         /// Handles the packets received from the task host.
         /// </summary>
@@ -655,7 +715,7 @@ namespace Microsoft.Build.BackEnd
             // Set the output parameters for later
             foreach (KeyValuePair<string, TaskParameter> outputParam in taskHostTaskComplete.TaskOutputParameters)
             {
-                _setParameters[outputParam.Key] = outputParam.Value?.WrappedParameter;
+                _setParameters[outputParam.Key] = outputParam.Value;
             }
         }
 

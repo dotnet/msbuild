@@ -66,7 +66,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal bool Initialized = false;
 
-        internal bool IsValueTypeOutputParameter { get; private set; }
+        internal bool IsValueTypeOutputParameter { get; set; }
         internal bool IsAssignableToITask { get; set; }
     }
 }
