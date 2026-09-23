@@ -236,12 +236,18 @@ namespace Microsoft.Build.Server
                 {
                     KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState = serverIsAlreadyRunning ? "hot" : "cold";
                 }
+                if (NodeLifecycleJournal.IsEnabled)
+                {
+                    NodeLifecycleJournal.Record(NodeJournalEvent.ReuseDecision, NodeJournalKind.Server, detail: serverIsAlreadyRunning ? "reused" : "new");
+                }
+
                 if (!serverIsAlreadyRunning)
                 {
                     CommunicationsUtilities.Trace("Server was not running. Starting server now.");
                     if (!TryLaunchServer())
                     {
                         _exitResult.MSBuildClientExitType = (_exitResult.MSBuildClientExitType == MSBuildClientExitType.Success) ? MSBuildClientExitType.LaunchError : _exitResult.MSBuildClientExitType;
+                        RecordServerFallback();
                         return _exitResult;
                     }
                 }
@@ -252,14 +258,18 @@ namespace Microsoft.Build.Server
                 {
                     CommunicationsUtilities.Trace("Server is busy, falling back to former behavior.");
                     _exitResult.MSBuildClientExitType = MSBuildClientExitType.ServerBusy;
+                    RecordServerFallback();
                     return _exitResult;
                 }
 
                 // Connect to server.
                 if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : NewServerConnectionTimeoutMilliseconds))
                 {
+                    RecordServerFallback();
                     return _exitResult;
                 }
+
+                NodeLifecycleJournal.Record(NodeJournalEvent.Connected, NodeJournalKind.Server);
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && ex is not PathTooLongException)
             {
@@ -267,6 +277,7 @@ namespace Microsoft.Build.Server
                 CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
                 CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
+                RecordServerFallback();
                 return _exitResult;
             }
 
@@ -284,11 +295,24 @@ namespace Microsoft.Build.Server
 
                 MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString ?? string.Empty);
                 CommunicationsUtilities.Trace("Build finished.");
+
+                if (NodeLifecycleJournal.IsEnabled)
+                {
+                    NodeLifecycleJournal.Record(NodeJournalEvent.BuildEnded, NodeJournalKind.Server, detail: _exitResult.MSBuildClientExitType.ToString());
+                }
             }
 
             NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
             return _exitResult;
+        }
+
+        private void RecordServerFallback()
+        {
+            if (NodeLifecycleJournal.IsEnabled)
+            {
+                NodeLifecycleJournal.Record(NodeJournalEvent.ServerBusyFallback, NodeJournalKind.Server, detail: _exitResult.MSBuildClientExitType.ToString());
+            }
         }
 
         /// <summary>
@@ -625,6 +649,7 @@ namespace Microsoft.Build.Server
         {
             CommunicationsUtilities.Trace("Sending shutdown command to server.");
             _packetPump.ServerWillDisconnect();
+            NodeLifecycleJournal.Record(NodeJournalEvent.ShutdownSent, NodeJournalKind.Server, detail: "shutdown");
             return TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
         }
 

@@ -194,6 +194,17 @@ namespace Microsoft.Build.UnitTests
 
         public MSBuildTestPipelineStartup()
         {
+#if !IS_OM_TESTS
+            // Arm the node lifecycle journal before anything reads Traits, so that NodeScenario tests can point it at
+            // a per-scenario file. It stays disabled in child processes unless a scenario sets MSBUILDNODEJOURNAL.
+            string previousJournal = Environment.GetEnvironmentVariable(Framework.Traits.NodeJournalEnvVarName);
+            Environment.SetEnvironmentVariable(Framework.Traits.NodeJournalEnvVarName, Framework.NodeLifecycleJournal.ArmedWithoutSinkValue);
+            // Not a field access: on .NET Framework the JIT may run the beforefieldinit type initializer of Traits
+            // when it compiles this constructor, before the variable above is set.
+            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(Framework.Traits).TypeHandle);
+            Environment.SetEnvironmentVariable(Framework.Traits.NodeJournalEnvVarName, previousJournal);
+#endif
+
             // Set field to indicate tests are running in the TestInfo class in Microsoft.Build.Framework.
             //  See the comments on the TestInfo class for an explanation of why it works this way.
             var frameworkAssembly = typeof(ITask).Assembly;

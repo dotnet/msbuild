@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -21,10 +19,21 @@ namespace Microsoft.Build.UnitTests;
 
 public sealed class TaskHostBuildCleanup_Tests(ITestOutputHelper output)
 {
+    internal const string ProbeHostName = "TaskHostCleanupProbe";
+    internal const string DisposalGate = "disposal";
+
     private readonly ITestOutputHelper _output = output;
 
-    [ActiveIssue("https://github.com/dotnet/msbuild/issues/15109")]
-    [Theory]
+    /// <summary>
+    /// A TaskHost sidecar that is kept for reuse must finish disposing its build-scoped task objects before
+    /// <see cref="BuildManager.EndBuild"/> returns, while a sidecar that retires must dispose off the caller's critical
+    /// path. Losing the sidecar mid-disposal must release the wait too.
+    /// </summary>
+    /// <remarks>
+    /// The registered task object blocks on a scenario gate while it is disposed, so the test can hold the sidecar in the
+    /// middle of cleanup and read from the node lifecycle journal whether EndBuild finished or not.
+    /// </remarks>
+    [NodeScenarioTheory]
     [InlineData(true, false, false)]
     [InlineData(true, true, false)]
     [InlineData(false, false, false)]
@@ -33,52 +42,99 @@ public sealed class TaskHostBuildCleanup_Tests(ITestOutputHelper output)
     [InlineData(true, true, true)]
     public void EndBuildWaitsForDisposalOnlyWhenReusing(bool reuse, bool useWorker, bool crashDuringCleanup)
     {
-        using TestEnvironment env = TestEnvironment.Create(_output);
-        env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
-        env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "0");
-        env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
-        env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+        using NodeScenario scenario = NodeScenario.Create(_output);
         string assembly = typeof(TaskHostCleanupProbe).Assembly.Location;
-        string gate = Path.Combine(env.CreateFolder().Path, "disposal");
-        TransientTestFile inner = env.CreateFile("cleanup-inner.proj", $"""
+        TransientTestFile inner = scenario.Environment.CreateFile("cleanup-inner.proj", $"""
             <Project>
               <UsingTask TaskName="RegisterGatedTaskObject" AssemblyFile="{assembly}" />
               <Target Name="Build" Returns="$(TaskHostPid)">
-                <RegisterGatedTaskObject Gate="$(Gate)" RegisterObject="$(RegisterObject)">
+                <RegisterGatedTaskObject RegisterObject="$(RegisterObject)">
                   <Output TaskParameter="Pid" PropertyName="TaskHostPid" />
                 </RegisterGatedTaskObject>
               </Target>
             </Project>
             """);
-        TransientTestFile outer = env.CreateFile("cleanup.proj", $"""
+        TransientTestFile outer = scenario.Environment.CreateFile("cleanup.proj", $"""
             <Project>
               <UsingTask TaskName="TaskHostCleanupProbe" AssemblyFile="{assembly}" />
               <Target Name="Build">
-                <TaskHostCleanupProbe Project="{inner.Path}" Gate="{gate}"
-                                      Reuse="{reuse}" UseWorker="{useWorker}" CrashDuringCleanup="{crashDuringCleanup}" />
+                <TaskHostCleanupProbe Project="{inner.Path}" Reuse="{reuse}" UseWorker="{useWorker}" CrashDuringCleanup="{crashDuringCleanup}" />
               </Target>
             </Project>
             """);
 
-        string log = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"\"{outer.Path}\" -m:1 -mt:false -nr:false -low:true",
-            out bool success, outputHelper: _output, timeoutMilliseconds: 90_000);
-        success.ShouldBeTrue(log);
-        log.ShouldContain("CleanupPolicyVerified");
+        NodeScenario.GateHandle disposal = scenario.Gate(DisposalGate);
+        if (crashDuringCleanup)
+        {
+            scenario.Fault(NodeJournalEvent.GateEntered, NodeFaultAction.Crash, NodeJournalKind.TaskHost);
+        }
+
+        NodeScenarioRun run = scenario.StartBootstrapped($"\"{outer.Path}\" -m:1 -mt:false -nr:false -low:true");
+        Func<NodeJournalRecord, bool> probeBuildEnded = NodeScenario.Is(NodeJournalEvent.BuildEnded, detail: ProbeHostName);
+
+        if (crashDuringCleanup)
+        {
+            // The sidecar dies in the middle of disposing: the connection loss has to end the wait.
+            string crashLog = run.WaitForSuccess();
+            crashLog.ShouldContain("CleanupPolicyVerified");
+            scenario.AssertOrder(
+                NodeScenario.Is(NodeJournalEvent.FaultInjected, role: NodeJournalKind.TaskHost), "sidecar crashed during disposal",
+                probeBuildEnded, "EndBuild returned");
+        }
+        else if (reuse)
+        {
+            NodeJournalRecord entered = disposal.AwaitEntered();
+            scenario.AssertNever(probeBuildEnded, "EndBuild returning while the retained sidecar is still disposing", after: entered);
+            NodeJournalRecord released = disposal.Release();
+            run.WaitForSuccess().ShouldContain("CleanupPolicyVerified");
+
+            NodeJournalRecord disposed = scenario.Await(NodeJournalEvent.DisposalEnd, role: NodeJournalKind.TaskHost, processId: entered.ProcessId);
+            NodeJournalRecord ended = scenario.Await(probeBuildEnded, "EndBuild returned");
+            released.Sequence.ShouldBeLessThan(disposed.Sequence);
+            disposed.Sequence.ShouldBeLessThan(ended.Sequence, "EndBuild must wait for the retained sidecar's disposal");
+        }
+        else
+        {
+            NodeJournalRecord entered = disposal.AwaitEntered();
+
+            // The gate is still closed, so this can only succeed if EndBuild does not wait for the disposal.
+            scenario.Await(probeBuildEnded, "EndBuild returned while the retiring sidecar is still disposing");
+            disposal.Release();
+            scenario.Await(NodeJournalEvent.DisposalEnd, role: NodeJournalKind.TaskHost, processId: entered.ProcessId);
+            run.WaitForSuccess().ShouldContain("CleanupPolicyVerified");
+        }
+
+        // One sidecar (reused by the second build when reusing), one worker, and all of them shut down.
+        scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost)).ShouldBe(1);
+        NodeJournalRecord sidecar = scenario.Await(NodeJournalEvent.Launched, NodeJournalKind.TaskHost);
+        if (!crashDuringCleanup)
+        {
+            scenario.Await(NodeJournalEvent.Exited, processId: sidecar.SubjectProcessId);
+        }
+
+        if (useWorker)
+        {
+            scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.Worker)).ShouldBe(1);
+            NodeJournalRecord worker = scenario.Await(NodeJournalEvent.Launched, NodeJournalKind.Worker);
+            scenario.Await(NodeJournalEvent.Exited, processId: worker.SubjectProcessId);
+        }
     }
 }
 
+/// <summary>
+/// Runs inside the bootstrapped MSBuild: builds the inner project with a private <see cref="BuildManager"/> whose tasks
+/// run in a TaskHost sidecar, once or (when reusing) twice, and checks what can only be checked in-process.
+/// Everything that involves timing is asserted by the test from the node lifecycle journal.
+/// </summary>
 public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
 {
     [Required]
     public string Project { get; set; } = null!;
 
-    [Required]
-    public string Gate { get; set; } = null!;
-
     public bool Reuse { get; set; }
+
     public bool UseWorker { get; set; }
+
     public bool CrashDuringCleanup { get; set; }
 
     public override bool Execute()
@@ -90,136 +146,87 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
             Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
         }
 
-        using BuildManager manager = new();
-        if (UseWorker)
-        {
-            ((IBuildComponentHost)manager).RegisterFactory(
-                BuildComponentType.OutOfProcNodeProvider, _ => new RetainingWorkerProvider());
-        }
-        MockLogger logger = new();
-        BuildParameters parameters = new()
-        {
-            MultiThreaded = !UseWorker,
-            DisableInProcNode = UseWorker,
-            MaxNodeCount = 1,
-            EnableNodeReuse = Reuse,
-            LowPriority = true,
-            Loggers = [logger]
-        };
-        Task? endBuild = null;
-        Process? child = null;
-        Process? worker = null;
-        bool buildStarted = false;
-        bool shutdownRequested = false;
         try
         {
-            manager.BeginBuild(parameters);
-            buildStarted = true;
-            BuildResult result = manager.PendBuildRequest(CreateRequest(registerObject: true)).Execute();
-            result.OverallResult.ShouldBe(BuildResultCode.Success, logger.FullLog);
-            child = Process.GetProcessById(int.Parse(result.ResultsByTarget["Build"].Items[0].ItemSpec, CultureInfo.InvariantCulture));
+            using BuildManager manager = new(TaskHostBuildCleanup_Tests.ProbeHostName);
             if (UseWorker)
             {
-                worker = Process.GetProcessById(manager.GetWorkerProcesses().ShouldHaveSingleItem().Id);
+                ((IBuildComponentHost)manager).RegisterFactory(
+                    BuildComponentType.OutOfProcNodeProvider, _ => new RetainingWorkerProvider());
+            }
+
+            MockLogger logger = new();
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = !UseWorker,
+                DisableInProcNode = UseWorker,
+                MaxNodeCount = 1,
+                EnableNodeReuse = Reuse,
+                LowPriority = true,
+                Loggers = [logger]
+            };
+
+            manager.BeginBuild(parameters);
+            BuildResult result = manager.PendBuildRequest(CreateRequest(registerObject: true)).Execute();
+            result.OverallResult.ShouldBe(BuildResultCode.Success, logger.FullLog);
+            string sidecarPid = result.ResultsByTarget["Build"].Items[0].ItemSpec;
+            int? workerPid = null;
+            if (UseWorker)
+            {
+                using Process worker = Process.GetProcessById(manager.GetWorkerProcesses().ShouldHaveSingleItem().Id);
+                workerPid = worker.Id;
                 Log.LogMessage(MessageImportance.High, "WorkerPid={0}; WorkerPriority={1}; RequestedLowPriority={2}",
                     worker.Id, worker.PriorityClass, parameters.LowPriority);
                 worker.PriorityClass.ShouldBe(ProcessPriorityClass.BelowNormal, "the worker's actual priority must match its reuse handshake");
             }
-            endBuild = Task.Run(manager.EndBuild);
 
-            SpinWait.SpinUntil(() => File.Exists(Gate + ".entered") || endBuild.IsFaulted, 30_000).ShouldBeTrue();
-            File.Exists(Gate + ".entered").ShouldBeTrue(logger.FullLog);
-            if (Reuse)
-            {
-                endBuild.Wait(200).ShouldBeFalse("EndBuild must wait for the retained sidecar's disposal");
-            }
-            else
-            {
-                endBuild.Wait(10_000).ShouldBeTrue("a retiring sidecar must dispose off the caller's critical path");
-            }
-            File.Exists(Gate + ".done").ShouldBeFalse();
-            child.HasExited.ShouldBeFalse();
-
-            if (CrashDuringCleanup)
-            {
-                child.Kill();
-            }
-            else
-            {
-                File.WriteAllText(Gate + ".release", "release");
-                SpinWait.SpinUntil(() => File.Exists(Gate + ".done"), 10_000).ShouldBeTrue();
-            }
-            endBuild.Wait(10_000).ShouldBeTrue("connection loss must also release the cleanup wait");
-            buildStarted = false;
+            // Blocks on the disposal gate for as long as the test holds it, when the sidecar is retained.
+            manager.EndBuild();
 
             if (Reuse && !CrashDuringCleanup)
             {
-                worker?.HasExited.ShouldBeFalse("the worker must remain available for the next build");
                 manager.BeginBuild(parameters);
-                buildStarted = true;
-                endBuild = null;
                 BuildResult next = manager.PendBuildRequest(CreateRequest(registerObject: false)).Execute();
                 next.OverallResult.ShouldBe(BuildResultCode.Success, logger.FullLog);
-                next.ResultsByTarget["Build"].Items[0].ItemSpec.ShouldBe(child.Id.ToString(CultureInfo.InvariantCulture));
-                if (worker is not null)
+                next.ResultsByTarget["Build"].Items[0].ItemSpec.ShouldBe(sidecarPid, "the retained sidecar must be reused");
+                if (workerPid is not null)
                 {
-                    manager.GetWorkerProcesses().ShouldHaveSingleItem().Id.ShouldBe(worker.Id, "the recreated node must use the same worker process");
+                    manager.GetWorkerProcesses().ShouldHaveSingleItem().Id.ShouldBe(workerPid.Value, "the recreated node must use the same worker process");
                 }
+
                 manager.EndBuild();
-                buildStarted = false;
-                worker?.HasExited.ShouldBeFalse("the reused worker must stay alive until shutdown");
-                child.HasExited.ShouldBeFalse("the reused sidecar must stay alive with its owner");
             }
 
+            // ShutdownAllNodes gives every candidate one short connection attempt per handshake variant, so a reused node
+            // that is still re-listening after rejecting the other variant is missed. Retry until the reused node is gone.
+            int? reusedPid = !Reuse ? null : workerPid ?? (CrashDuringCleanup ? null : int.Parse(sidecarPid, CultureInfo.InvariantCulture));
             manager.ShutdownAllNodes();
-            shutdownRequested = true;
-            manager.Dispose();
-            worker?.WaitForExit(10_000).ShouldBeTrue("the worker must exit when shutdown is requested");
-            child.WaitForExit(10_000).ShouldBeTrue("the sidecar must still exit after asynchronous retirement");
-            Log.LogMessage(MessageImportance.High, "CleanupPolicyVerified Reuse={0} Worker={1} Crash={2} WorkerPid={3} SidecarPid={4}",
-                Reuse, UseWorker, CrashDuringCleanup, worker?.Id, child.Id);
+            while (reusedPid is int pid && IsRunning(pid))
+            {
+                Thread.Sleep(100);
+                manager.ShutdownAllNodes();
+            }
+
+            Log.LogMessage(MessageImportance.High, "CleanupPolicyVerified Reuse={0} Worker={1} WorkerPid={2} SidecarPid={3}",
+                Reuse, UseWorker, workerPid, sidecarPid);
             return true;
         }
         finally
         {
-            File.WriteAllText(Gate + ".release", "release");
-            try
-            {
-                if (endBuild is not null)
-                {
-                    endBuild.Wait(30_000).ShouldBeTrue();
-                }
-                else if (buildStarted)
-                {
-                    manager.EndBuild();
-                }
-                if (!shutdownRequested)
-                {
-                    manager.ShutdownAllNodes();
-                }
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalForceOutOfProc);
-                if (child is not null)
-                {
-                    if (!child.HasExited)
-                    {
-                        child.Kill();
-                        child.WaitForExit();
-                    }
-                    child.Dispose();
-                }
-                if (worker is not null)
-                {
-                    if (!worker.HasExited)
-                    {
-                        worker.Kill();
-                        worker.WaitForExit();
-                    }
-                    worker.Dispose();
-                }
-            }
+            Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalForceOutOfProc);
+        }
+    }
+
+    private static bool IsRunning(int processId)
+    {
+        try
+        {
+            using Process process = Process.GetProcessById(processId);
+            return !process.HasExited;
+        }
+        catch (ArgumentException)
+        {
+            return false;
         }
     }
 
@@ -227,7 +234,6 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
         Project,
         new Dictionary<string, string?>
         {
-            ["Gate"] = Gate,
             ["RegisterObject"] = registerObject.ToString()
         },
         null,
@@ -242,9 +248,6 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
 
 public sealed class RegisterGatedTaskObject : Microsoft.Build.Utilities.Task
 {
-    [Required]
-    public string Gate { get; set; } = null!;
-
     public bool RegisterObject { get; set; }
 
     [Output]
@@ -257,19 +260,15 @@ public sealed class RegisterGatedTaskObject : Microsoft.Build.Utilities.Task
         {
 #pragma warning disable CA2000 // MSBuild disposes the registered object.
             ((IBuildEngine4)BuildEngine).RegisterTaskObject(
-                Gate, new GatedDisposal(Gate), RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
+                TaskHostBuildCleanup_Tests.DisposalGate, new GatedDisposal(), RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
 #pragma warning restore CA2000
         }
+
         return true;
     }
 
-    private sealed class GatedDisposal(string gate) : IDisposable
+    private sealed class GatedDisposal : IDisposable
     {
-        public void Dispose()
-        {
-            File.WriteAllText(gate + ".entered", "entered");
-            SpinWait.SpinUntil(() => File.Exists(gate + ".release"), 60_000).ShouldBeTrue();
-            File.WriteAllText(gate + ".done", "done");
-        }
+        public void Dispose() => NodeScenarioGate.Enter(TaskHostBuildCleanup_Tests.DisposalGate);
     }
 }

@@ -140,6 +140,10 @@ namespace Microsoft.Build.BackEnd
                 // Use the per-node reuse decision
                 bool reuseThisNode = shouldReuseNode[contextIndex++];
                 nodeContext.SendData(new NodeBuildComplete(reuseThisNode));
+                if (NodeLifecycleJournal.IsEnabled)
+                {
+                    NodeLifecycleJournal.Record(NodeJournalEvent.ShutdownSent, JournalNodeKind, nodeContext.NodeId, nodeContext.Process.Id, reuseThisNode ? "reuse" : "terminate");
+                }
 
                 if (!reuseThisNode || waitForExit)
                 {
@@ -409,6 +413,11 @@ namespace Microsoft.Build.BackEnd
 
                         CreateNodeContext(nodeId, nodeToReuse, nodeStream, result.NegotiatedPacketVersion);
                         MSBuildEventSource.Log.NodeConnectStop(nodeId, nodeToReuseId, isReused: true);
+                        if (NodeLifecycleJournal.IsEnabled)
+                        {
+                            NodeLifecycleJournal.Record(NodeJournalEvent.ReuseDecision, JournalNodeKind, nodeId, nodeToReuseId, "reused");
+                            NodeLifecycleJournal.Record(NodeJournalEvent.Connected, JournalNodeKind, nodeId, nodeToReuseId, "reused");
+                        }
                         return true;
                     }
                 }
@@ -468,6 +477,11 @@ namespace Microsoft.Build.BackEnd
 
                         CreateNodeContext(nodeId, msbuildProcess, nodeStream, result.NegotiatedPacketVersion);
                         MSBuildEventSource.Log.NodeConnectStop(nodeId, msbuildProcess.Id, isReused: false);
+                        if (NodeLifecycleJournal.IsEnabled)
+                        {
+                            NodeLifecycleJournal.Record(NodeJournalEvent.ReuseDecision, JournalNodeKind, nodeId, msbuildProcess.Id, "new");
+                            NodeLifecycleJournal.Record(NodeJournalEvent.Connected, JournalNodeKind, nodeId, msbuildProcess.Id, "new");
+                        }
                         return true;
                     }
 
@@ -514,6 +528,11 @@ namespace Microsoft.Build.BackEnd
         /// pipe for some other process to claim it.
         /// </summary>
         protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions, byte negotiatedVersion) => false;
+
+        /// <summary>
+        /// The kind of node this provider manages, for <see cref="NodeLifecycleJournal"/> records.
+        /// </summary>
+        protected virtual NodeJournalKind JournalNodeKind => NodeJournalKind.Worker;
 
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
@@ -905,6 +924,10 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     CommunicationsUtilities.Trace($"Failed to connect to pipe {pipeName}. {result.ErrorMessage.TrimEnd()}");
+                    if (NodeLifecycleJournal.IsEnabled)
+                    {
+                        NodeLifecycleJournal.Record(NodeJournalEvent.HandshakeRejected, JournalNodeKind, subjectProcessId: nodeProcessId, detail: result.Status.ToString());
+                    }
                     nodeStream?.Dispose();
                     return null;
                 }
