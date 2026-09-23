@@ -199,6 +199,7 @@ public sealed class TaskHostCleanupProbe : Microsoft.Build.Utilities.Task
 
             // ShutdownAllNodes gives every candidate one short connection attempt per handshake variant, so a reused node
             // that is still re-listening after rejecting the other variant is missed. Retry until the reused node is gone.
+            // Workaround for https://github.com/dotnet/msbuild/issues/15118.
             int? reusedPid = !Reuse ? null : workerPid ?? (CrashDuringCleanup ? null : int.Parse(sidecarPid, CultureInfo.InvariantCulture));
             manager.ShutdownAllNodes();
             while (reusedPid is int pid && IsRunning(pid))
