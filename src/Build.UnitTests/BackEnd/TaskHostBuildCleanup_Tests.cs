@@ -23,6 +23,7 @@ public sealed class TaskHostBuildCleanup_Tests(ITestOutputHelper output)
 {
     private readonly ITestOutputHelper _output = output;
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/15109")]
     [Theory]
     [InlineData(true, false, false)]
     [InlineData(true, true, false)]
