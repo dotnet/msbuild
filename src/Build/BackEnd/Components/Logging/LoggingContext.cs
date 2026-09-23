@@ -34,6 +34,8 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool _isValid;
 
         protected bool _hasLoggedErrors;
+        private bool _hasLoggedWarnings;
+        private bool _hasLoggedSdkMessages;
 
         /// <summary>
         /// Constructs the logging context from a logging service and an event context.
@@ -116,6 +118,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal bool HasLoggedErrors { get { return _hasLoggedErrors; } set { _hasLoggedErrors = value; } }
 
+        internal bool HasLoggedWarnings => _hasLoggedWarnings;
+
+        internal bool HasLoggedSdkMessages => _hasLoggedSdkMessages;
+
         /// <summary>
         ///  Helper method to create a message build event from a string resource and some parameters
         /// </summary>
@@ -179,6 +185,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             CheckValidity();
             _loggingService.LogCommentFromText(_eventContext, importance, message, messageArgs);
+        }
+
+        internal void LogSdkMessage(MessageImportance importance, string message)
+        {
+            CheckValidity();
+            _hasLoggedSdkMessages = true;
+            _loggingService.LogCommentFromText(_eventContext, importance, message);
         }
 
         /// <summary>
@@ -251,6 +264,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogWarning(string messageResourceName, params object[] messageArgs)
         {
             CheckValidity();
+            _hasLoggedWarnings = true;
             _loggingService.LogWarning(_eventContext, null, BuildEventFileInfo.Empty, messageResourceName, messageArgs);
         }
 
@@ -264,6 +278,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogWarning(string? subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object?[]? messageArgs)
         {
             CheckValidity();
+            _hasLoggedWarnings = true;
             _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
         }
 
@@ -278,6 +293,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogWarningFromText(string? subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
             CheckValidity();
+            _hasLoggedWarnings = true;
             _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
         }
 
@@ -288,6 +304,8 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogBuildEvent(BuildEventArgs buildEvent)
         {
             CheckValidity();
+            _hasLoggedWarnings |= buildEvent is BuildWarningEventArgs;
+            _hasLoggedErrors |= buildEvent is BuildErrorEventArgs;
             LoggingService.LogBuildEvent(buildEvent);
         }
 
