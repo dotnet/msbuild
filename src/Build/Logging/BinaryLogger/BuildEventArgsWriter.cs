@@ -31,7 +31,7 @@ namespace Microsoft.Build.Logging
     /// </summary>
     internal class BuildEventArgsWriter
     {
-        private const int StringReferenceCacheSize = 8192; // Must remain a power of two.
+        private const int StringReferenceCacheSize = 8192; // Mask-based indexing requires a power of two.
         private const int MaxCachedStringLength = 1024;
 
         private readonly Stream originalStream;
