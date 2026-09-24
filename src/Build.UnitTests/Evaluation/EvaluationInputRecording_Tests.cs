@@ -1072,6 +1072,15 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
         inputs.NonCacheable.ShouldBe(NonCacheableReason.None, inputs.NonCacheableDetail);
         inputs.Files.Count.ShouldBeGreaterThan(5);
+        new[]
+        {
+            "fixture.defaults.props",
+            "fixture.conditional.props",
+            "fixture.items.props",
+            "fixture.build.targets",
+            "fixture.compile.targets",
+            "fixture.prepare.targets",
+        }.ShouldAllBe(path => inputs.Files.ContainsKey(Path.Combine(_folder.Path, path)));
         Evaluate(project).Files.Keys.ShouldBe(inputs.Files.Keys, ignoreOrder: true);
     }
 
@@ -1550,19 +1559,56 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     private string CreateCommonTargetsProject()
     {
         _env.CreateFile(_folder, "Class1.cs", "class C {}");
-        // Keep this cacheable fixture independent of the .NET Framework Windows SDK registry probe.
+        _env.CreateFile(_folder, "fixture.items.props", """
+            <Project>
+              <ItemDefinitionGroup>
+                <Compile>
+                  <FixtureMetadata>$(FixtureConditional)</FixtureMetadata>
+                </Compile>
+              </ItemDefinitionGroup>
+            </Project>
+            """);
+        _env.CreateFile(_folder, "fixture.conditional.props", """
+            <Project>
+              <PropertyGroup>
+                <FixtureConditional Condition="'$(FixtureDefault)' == 'DefaultValue'">ConditionalValue</FixtureConditional>
+              </PropertyGroup>
+              <Import Project="fixture.items.props" />
+            </Project>
+            """);
+        _env.CreateFile(_folder, "fixture.defaults.props", """
+            <Project>
+              <PropertyGroup>
+                <FixtureDefault Condition="'$(FixtureDefault)' == ''">DefaultValue</FixtureDefault>
+              </PropertyGroup>
+              <Import Project="fixture.conditional.props" />
+            </Project>
+            """);
+        _env.CreateFile(_folder, "fixture.prepare.targets", """
+            <Project>
+              <Target Name="PrepareFixture" />
+            </Project>
+            """);
+        _env.CreateFile(_folder, "fixture.compile.targets", """
+            <Project>
+              <Import Project="fixture.prepare.targets" />
+              <Target Name="CompileFixture" DependsOnTargets="PrepareFixture" />
+            </Project>
+            """);
+        _env.CreateFile(_folder, "fixture.build.targets", """
+            <Project>
+              <Import Project="fixture.compile.targets" />
+              <Target Name="Build" DependsOnTargets="CompileFixture" />
+            </Project>
+            """);
+
         return CreateProject("""
             <Project>
-              <Import Project="$(MSBuildBinPath)\Microsoft.Common.props" />
-              <PropertyGroup>
-                <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
-                <OutputType>Library</OutputType>
-                <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-              </PropertyGroup>
+              <Import Project="fixture.defaults.props" />
               <ItemGroup>
                 <Compile Include="**/*.cs" />
               </ItemGroup>
-              <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+              <Import Project="fixture.build.targets" />
             </Project>
             """);
     }
