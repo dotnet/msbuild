@@ -40,6 +40,7 @@ namespace Microsoft.Build.Logging
         /// We will OOM otherwise.
         /// </summary>
         private readonly List<object> stringRecords = new List<object>();
+        private readonly StringSliceSourceCache stringSliceSources = new();
 
         /// <summary>
         /// A list of dictionaries we've encountered so far. Dictionaries are referred to by their order in this list.
@@ -47,6 +48,9 @@ namespace Microsoft.Build.Logging
         /// <remarks>This is designed to not hold on to strings. We just store the string indices and
         /// hydrate the dictionary on demand before returning.</remarks>
         private readonly List<(int keyIndex, int valueIndex)[]> nameValueListRecords = new List<(int, int)[]>();
+
+        private readonly List<byte[]> itemSequenceRecords = [];
+        private int itemSequenceBytes;
 
         /// <summary>
         /// A "page-file" for storing strings we've read so far. Keeping them in memory would OOM the 32-bit MSBuild
@@ -68,12 +72,21 @@ namespace Microsoft.Build.Logging
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
+            if (fileFormatVersion == 29)
+            {
+                throw new NotSupportedException(
+                    ResourceUtilities.GetResourceString("Binlog_IncompatibleExperimentalFormat"));
+            }
+
             this._readStream = TransparentReadStream.EnsureTransparentReadStream(binaryReader.BaseStream);
             // make sure the reader we're going to use wraps the transparent stream wrapper
             this._binaryReader = binaryReader.BaseStream == _readStream
                 ? binaryReader
                 : new BinaryReader(_readStream);
             this._fileFormatVersion = fileFormatVersion;
+            MinimumReaderVersion = fileFormatVersion >= 30
+                ? fileFormatVersion
+                : Math.Min(fileFormatVersion, BinaryLogger.ForwardCompatibilityMinimalVersion);
         }
 
         /// <summary>
@@ -144,7 +157,7 @@ namespace Microsoft.Build.Logging
         public event Action<StringReadEventArgs>? StringReadDone;
 
         internal int FileFormatVersion => _fileFormatVersion;
-        internal int MinimumReaderVersion { get; set; } = BinaryLogger.ForwardCompatibilityMinimalVersion;
+        internal int MinimumReaderVersion { get; set; }
 
         /// <inheritdoc cref="IBinaryLogReplaySource.EmbeddedContentRead"/>
         internal event Action<EmbeddedContentEventArgs>? EmbeddedContentRead;
@@ -358,10 +371,18 @@ namespace Microsoft.Build.Logging
                 {
                     ReadStringRecord();
                 }
+                else if (recordKind == BinaryLogRecordKind.StringSlice)
+                {
+                    ReadStringSliceRecord();
+                }
                 else if (recordKind == BinaryLogRecordKind.NameValueList)
                 {
                     ReadNameValueList();
                     _readStream.BytesCountAllowedToRead = null;
+                }
+                else if (recordKind == BinaryLogRecordKind.ItemSequence)
+                {
+                    ReadItemSequenceRecord();
                 }
                 else if (recordKind == BinaryLogRecordKind.ProjectImportArchive)
                 {
@@ -379,13 +400,16 @@ namespace Microsoft.Build.Logging
         private static bool IsAuxiliaryRecord(BinaryLogRecordKind recordKind)
         {
             return recordKind == BinaryLogRecordKind.String
+                || recordKind == BinaryLogRecordKind.StringSlice
                 || recordKind == BinaryLogRecordKind.NameValueList
+                || recordKind == BinaryLogRecordKind.ItemSequence
                 || recordKind == BinaryLogRecordKind.ProjectImportArchive;
         }
 
         private static bool IsTextualDataRecord(BinaryLogRecordKind recordKind)
         {
             return recordKind == BinaryLogRecordKind.String
+                   || recordKind == BinaryLogRecordKind.StringSlice
                    || recordKind == BinaryLogRecordKind.ProjectImportArchive;
         }
 
@@ -484,6 +508,40 @@ namespace Microsoft.Build.Logging
             nameValueListRecords.Add(list);
         }
 
+        private void ReadItemSequenceRecord()
+        {
+            int length = ReadInt32();
+            if (_fileFormatVersion < 30 ||
+                length < 0 ||
+                length > ItemSequenceCache.MaximumSequenceBytes)
+            {
+                throw new InvalidDataException($"Invalid item sequence record length {length} or format version {_fileFormatVersion}.");
+            }
+
+            if (length == 0)
+            {
+                itemSequenceRecords.Clear();
+                itemSequenceBytes = 0;
+                return;
+            }
+
+            if (length < ItemSequenceCache.MinimumBytes ||
+                itemSequenceRecords.Count == ItemSequenceCache.MaximumEntries ||
+                itemSequenceBytes + length > ItemSequenceCache.MaximumBytes)
+            {
+                throw new InvalidDataException("Item sequence dictionary exceeds its format limits.");
+            }
+
+            byte[] bytes = _binaryReader.ReadBytes(length);
+            if (bytes.Length != length)
+            {
+                throw new EndOfStreamException();
+            }
+
+            itemSequenceRecords.Add(bytes);
+            itemSequenceBytes += length;
+        }
+
         private IDictionary<string, string> GetNameValueList(int id)
         {
             id -= BuildEventArgsWriter.NameValueRecordStartIndex;
@@ -519,7 +577,46 @@ namespace Microsoft.Build.Logging
 
         private void ReadStringRecord()
         {
-            string text = ReadString();
+            string text = _binaryReader.ReadString();
+            if (_fileFormatVersion >= 30)
+            {
+                // Slice offsets refer to the original source, not a possibly length-changing scrubbed value.
+                stringSliceSources.Add(BuildEventArgsWriter.StringStartIndex + stringRecords.Count, text);
+            }
+
+            StoreStringRecord(NotifyStringRead(text));
+        }
+
+        private void ReadStringSliceRecord()
+        {
+            if (_fileFormatVersion < 30)
+            {
+                throw new InvalidDataException($"StringSlice record number {_recordNumber} requires binary log version 30.");
+            }
+
+            int sourceId = ReadInt32();
+            int start = ReadInt32();
+            int length = ReadInt32();
+            string? source = stringSliceSources.GetSource(sourceId);
+            if (source is null || start < 0 || length < 0 || start > source.Length || length > source.Length - start)
+            {
+                throw new InvalidDataException(
+                    $"StringSlice record number {_recordNumber} is invalid: source {sourceId}, start {start}, length {length}.");
+            }
+
+            // Fragments are not string-table entries and must not raise StringReadDone independently.
+            string prefix = _binaryReader.ReadString();
+            string suffix = _binaryReader.ReadString();
+#if NET
+            string text = string.Concat(prefix.AsSpan(), source.AsSpan(start, length), suffix.AsSpan());
+#else
+            string text = new StringBuilder().Append(prefix).Append(source, start, length).Append(suffix).ToString();
+#endif
+            StoreStringRecord(NotifyStringRead(text));
+        }
+
+        private void StoreStringRecord(string text)
+        {
             object storedString = stringStorage.Add(text);
             stringRecords.Add(storedString);
         }
@@ -1813,6 +1910,38 @@ namespace Microsoft.Build.Logging
         private IList<ITaskItem>? ReadTaskItemList()
         {
             int count = ReadInt32();
+            if (_fileFormatVersion >= 30 && count < 0)
+            {
+                int id = ~count;
+                if (id >= itemSequenceRecords.Count)
+                {
+                    throw new InvalidDataException($"Invalid item sequence reference {id}.");
+                }
+
+                using var stream = new MemoryStream(itemSequenceRecords[id], writable: false);
+                using var reader = new BinaryReader(stream);
+                count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
+                if (count < 2 || count > (stream.Length - stream.Position) / 2)
+                {
+                    throw new InvalidDataException($"Invalid item sequence count {count}.");
+                }
+
+                var items = new ITaskItem[count];
+                for (int i = 0; i < count; i++)
+                {
+                    string? itemSpec = GetStringFromRecord(BinaryReaderExtensions.Read7BitEncodedInt(reader));
+                    int metadataId = BinaryReaderExtensions.Read7BitEncodedInt(reader);
+                    items[i] = new TaskItemData(itemSpec, metadataId == 0 ? null : GetNameValueList(metadataId));
+                }
+
+                if (stream.Position != stream.Length)
+                {
+                    throw new InvalidDataException("Item sequence contains trailing data.");
+                }
+
+                return items;
+            }
+
             if (count == 0)
             {
                 return null;
@@ -1853,7 +1982,11 @@ namespace Microsoft.Build.Logging
 
         private string ReadString()
         {
-            string text = _binaryReader.ReadString();
+            return NotifyStringRead(_binaryReader.ReadString());
+        }
+
+        private string NotifyStringRead(string text)
+        {
             if (this.StringReadDone != null)
             {
                 stringReadEventArgs.Reuse(text);

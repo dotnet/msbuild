@@ -1456,6 +1456,10 @@ Errors: {3}</value>
     <value>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</value>
     <comment>{StrBegin="MSB4235: "}</comment>
   </data>
+  <data name="Binlog_IncompatibleExperimentalFormat" xml:space="preserve">
+    <value>Binary log format 29 was used by incompatible standalone experiments. Use the matching experiment's reader; the combined experiment requires format 30.</value>
+    <comment>29 and 30 are binary log format version numbers for local experiments.</comment>
+  </data>
   <data name="UnsupportedTaskParameterTypeError" xml:space="preserve">
     <value>MSB4069: The "{0}" type of the "{1}" parameter of the "{2}" task is not supported by MSBuild.</value>
     <comment>{StrBegin="MSB4069: "}LOCALIZATION: "MSBuild" should not be localized.</comment>

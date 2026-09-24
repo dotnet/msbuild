@@ -173,8 +173,8 @@ namespace Microsoft.Build.Logging
 
             // the log file is written using a newer version of file format
             // that we don't know how to read
-            if (fileFormatVersion > BinaryLogger.FileFormatVersion &&
-                (!allowForwardCompatibility || minimumReaderVersion > BinaryLogger.FileFormatVersion))
+            if (minimumReaderVersion > BinaryLogger.FileFormatVersion ||
+                (fileFormatVersion > BinaryLogger.FileFormatVersion && !allowForwardCompatibility))
             {
                 var text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnsupportedLogFileFormat", fileFormatVersion, minimumReaderVersion, BinaryLogger.FileFormatVersion);
                 throw new NotSupportedException(text);
