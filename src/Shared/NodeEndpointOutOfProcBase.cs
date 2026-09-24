@@ -87,6 +87,15 @@ namespace Microsoft.Build.BackEnd
         private bool _isClientDisconnecting;
 
         /// <summary>
+        /// True once the parent has sent a <see cref="NodeBuildComplete"/> that ends this connection.
+        /// The parent has then finished with the link and may close its end at any time (for example,
+        /// ShutdownAllNodes closes it right after sending), so an I/O failure after this point is the
+        /// expected end of the link rather than a crash worth dumping. Only the packet pump thread reads
+        /// and writes this field.
+        /// </summary>
+        private bool _parentEndedLink;
+
+        /// <summary>
         /// The thread which runs the asynchronous packet pump
         /// </summary>
         private Thread _packetPump;
@@ -194,6 +203,19 @@ namespace Microsoft.Build.BackEnd
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
+        }
+
+        /// <summary>
+        /// Prepares the packet factory and write buffers without creating a pipe, so tests can drive
+        /// <see cref="RunReadLoop"/> directly.
+        /// </summary>
+        internal void InitializeForTesting(INodePacketFactory factory)
+        {
+            _packetFactory = factory;
+            _asyncDataMonitor = new object();
+            _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
+            _packetStream = new MemoryStream();
+            _binaryWriter = new BinaryWriter(_packetStream);
         }
 
         /// <summary>
@@ -367,6 +389,7 @@ namespace Microsoft.Build.BackEnd
             lock (_asyncDataMonitor)
             {
                 _isClientDisconnecting = false;
+                _parentEndedLink = false;
                 _packetPump = new Thread(PacketPumpProc);
                 _packetPump.IsBackground = true;
                 _packetPump.Name = "OutOfProc Endpoint Packet Pump";
@@ -724,7 +747,11 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     // A failed read terminates the connection, just like unexpected EOF.
                                     CommunicationsUtilities.Trace($"Exception reading from server.  {e}");
-                                    DebugUtils.DumpExceptionToFile(e);
+                                    if (!(_parentEndedLink && e is IOException or ObjectDisposedException))
+                                    {
+                                        DebugUtils.DumpExceptionToFile(e);
+                                    }
+
                                     ChangeLinkStatus(LinkStatus.Failed);
                                     exitLoop = true;
                                     break;
@@ -807,7 +834,11 @@ namespace Microsoft.Build.BackEnd
                                     catch (Exception e)
                                     {
                                         CommunicationsUtilities.Trace($"Exception reading packet body from server.  {e}");
-                                        DebugUtils.DumpExceptionToFile(e);
+                                        if (!(_parentEndedLink && e is IOException or ObjectDisposedException))
+                                        {
+                                            DebugUtils.DumpExceptionToFile(e);
+                                        }
+
                                         ChangeLinkStatus(LinkStatus.Failed);
                                         bodyReadFailed = true;
                                     }
@@ -837,7 +868,18 @@ namespace Microsoft.Build.BackEnd
                                     // For Framework task hosts (CLR2/CLR4) without extended headers, defaults to 0.
                                     // For .NET task hosts, read from extended header (>= 1).
                                     readTranslator.NegotiatedPacketVersion = parentVersion;
-                                    _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
+                                    if (packetType == NodePacketType.NodeBuildComplete)
+                                    {
+                                        INodePacket packet = _packetFactory.DeserializePacket(packetType, readTranslator);
+
+                                        // Record it before routing: the node's reply is written on this thread afterwards.
+                                        _parentEndedLink = packet is NodeBuildComplete { Action: not NodeBuildCompleteAction.ReuseWithConnection };
+                                        _packetFactory.RoutePacket(0, packet);
+                                    }
+                                    else
+                                    {
+                                        _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
+                                    }
                                 }
                                 catch (Exception e)
                                 {
@@ -905,6 +947,14 @@ namespace Microsoft.Build.BackEnd
 
                                     localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
                                 }
+                            }
+                            catch (Exception e) when (_parentEndedLink && e is IOException or ObjectDisposedException)
+                            {
+                                // The parent finished with the link and closed its end before our reply arrived.
+                                CommunicationsUtilities.Trace($"Parent closed the link after ending it; dropping the remaining packets: {e.Message}");
+                                ChangeLinkStatus(LinkStatus.Failed);
+                                exitLoop = true;
+                                break;
                             }
                             catch (Exception e)
                             {
