@@ -112,30 +112,12 @@ public class MyTask : Task {...}
 
 `RoslynCodeTaskFactory` tasks declared with `<Code Type="Class">` can opt into
 in-process multithreaded execution by applying `[MSBuildMultiThreadableTask]` to
-the concrete task class. This also applies to classes loaded with `Code Source`,
-in C# or Visual Basic. Implement `IMultiThreadableTask` as well when the task needs
-`TaskEnvironment`; the interface alone does not opt the task into in-process execution.
-Initialize the property to `TaskEnvironment.Fallback` so it is usable when the task
-is run in an isolated TaskHost.
+the concrete task class. Unannotated classes and generated `Fragment`/`Method`
+tasks remain isolated.
 
-The factory still requires a public parameterless constructor. The engine assigns
-the task's environment after construction on the in-process path, so constructors
-and field/property initializers must not depend on an injected environment.
-Constructor injection described above for assembly tasks does not apply to
-`RoslynCodeTaskFactory`.
-
-The attribute asserts that the entire task implementation is safe for concurrent
-execution, including its dependencies and shared state. It does not automatically
-make the code thread-safe. Unannotated classes and generated `Fragment`/`Method`
-tasks continue to use TaskHost isolation in multithreaded builds.
-
-Attribute-aware routing applies only to factories already supported by MSBuild
-in multithreaded mode. An attributed task type does not enable an unsupported
-custom factory: its creation and cleanup code might have concurrency side effects.
-The factory-support check remains in place before task creation.
-
-This routing change does not remove inline compilation costs or change the lifetime
-of the compiled assembly on disk.
+For `TaskEnvironment` access, also implement `IMultiThreadableTask` and initialize
+the property to `TaskEnvironment.Fallback`. A public parameterless constructor is
+still required; the engine injects the environment after construction.
 
 ### Registered task objects
 
