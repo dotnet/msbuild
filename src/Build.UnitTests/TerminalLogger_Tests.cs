@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
     [UseInvariantCulture]
     public class TerminalLogger_Tests
     {
-        private sealed class ResizableTerminal(TextWriter output, int width, int height) : ITerminal
+        private sealed class ResizableTerminal(TextWriter output, int width, int height, bool supportsProgressReporting = false) : ITerminal
         {
             private readonly Terminal _terminal = new(output);
 
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
                 return (Width, Height);
             }
 
-            public bool SupportsProgressReporting => false;
+            public bool SupportsProgressReporting => supportsProgressReporting;
 
             public void BeginUpdate() => _terminal.BeginUpdate();
             public void EndUpdate() => _terminal.EndUpdate();
@@ -1134,6 +1134,186 @@ namespace Microsoft.Build.UnitTests
                 resizedOutput.ShouldStartWith($"{AnsiCodes.CSI}{expectedCursorMove}{AnsiCodes.MoveUpToLineStart}");
                 resizedOutput.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
                 resizedOutput.ShouldContain("project");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ProgressEventsRenderInLiveFrameAndDisappearOnFinish()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(7, "Download package", TaskProgressUnit.Bytes)
+                {
+                    BuildEventContext = context,
+                });
+                eventSource.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(7, 1, 50, 100, "Receiving content")
+                {
+                    BuildEventContext = context,
+                });
+
+                terminalLogger.DisplayNodes();
+                output.ToString().ShouldContain("[#####----- 50 of 100 bytes] Download package: Receiving content");
+                output.ToString().ShouldContain(AnsiCodes.SetProgress(50));
+
+                output.GetStringBuilder().Clear();
+                eventSource.InvokeMessageRaised(new TaskProgressFinishedEventArgs(7, 2, TaskProgressOutcome.Completed, 100, 100, "Complete")
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.Refresh();
+                output.ToString().ShouldContain(AnsiCodes.EraseInDisplay);
+                output.ToString().ShouldContain(AnsiCodes.RemoveProgress);
+                output.ToString().ShouldNotContain("Download package");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ProgressEventsAreIgnoredWhenTerminalDoesNotSupportThem()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(8, "Hidden progress", TaskProgressUnit.Items)
+                {
+                    BuildEventContext = MakeBuildEventContext(),
+                });
+                terminalLogger.Refresh();
+
+                output.ToString().ShouldNotContain("Hidden progress");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ProgressRowsAreBoundedAndResizeWithTheTerminal()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+
+                for (long operationId = 1; operationId <= 9; operationId++)
+                {
+                    eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(operationId, $"Operation {operationId}", TaskProgressUnit.Items)
+                    {
+                        BuildEventContext = context,
+                    });
+                }
+
+                terminalLogger.DisplayNodes();
+                string rendered = output.ToString();
+                rendered.ShouldContain("Operation 1");
+                rendered.ShouldContain("Operation 8");
+                rendered.ShouldNotContain("Operation 9");
+                rendered.ShouldContain(AnsiCodes.SetProgressIndeterminate);
+
+                output.GetStringBuilder().Clear();
+                terminal.Width = 24;
+                terminalLogger.Refresh();
+                output.ToString().ShouldContain(AnsiCodes.EraseInDisplay);
+                output.ToString().ShouldContain("Operation");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ImmediateMessageErasesAndProgressRefreshesAfterward()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(20, "Download", TaskProgressUnit.Bytes)
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.DisplayNodes();
+                output.GetStringBuilder().Clear();
+
+                eventSource.InvokeErrorRaised(MakeErrorEventArgs("Immediate error"));
+                string immediateOutput = output.ToString();
+                immediateOutput.ShouldContain("Immediate error");
+                immediateOutput.ShouldContain(AnsiCodes.EraseInDisplay);
+
+                output.GetStringBuilder().Clear();
+                terminalLogger.Refresh();
+                output.ToString().ShouldContain("Download");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void CanceledProgressIsRemovedFromTheLiveFrame()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(30, "Canceled download", TaskProgressUnit.Bytes)
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.DisplayNodes();
+                output.GetStringBuilder().Clear();
+
+                eventSource.InvokeMessageRaised(new TaskProgressFinishedEventArgs(30, 1, TaskProgressOutcome.Canceled, 0, null, "Canceled")
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.Refresh();
+
+                output.ToString().ShouldContain(AnsiCodes.EraseInDisplay);
+                output.ToString().ShouldNotContain("Canceled download");
             }
             finally
             {

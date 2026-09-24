@@ -34,6 +34,7 @@ public sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
     private const string MSBuildTaskName = "MSBuild";
+    private const int MaxProgressOperations = 8;
 
 #if NET
     private static readonly SearchValues<string> _authProviderMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
@@ -105,6 +106,7 @@ public sealed partial class TerminalLogger : INodeLogger
     private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = [];
 
     private readonly Dictionary<EvalContext, EvalProjectInfo> _projectEvaluations = [];
+    private readonly Dictionary<long, TerminalProgressStatus> _progress = [];
 
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
@@ -458,6 +460,7 @@ public sealed partial class TerminalLogger : INodeLogger
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
+        eventSource.MessageRaised += ProgressMessageRaised;
 
         if (eventSource is IEventSource4 eventSource4)
         {
@@ -465,6 +468,67 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+    private void ProgressMessageRaised(object sender, BuildMessageEventArgs e)
+    {
+        if (!Terminal.SupportsProgressReporting)
+        {
+            return;
+        }
+
+        lock (_lock)
+        {
+            switch (e)
+            {
+                case TaskProgressStartedEventArgs started:
+                    if (_progress.ContainsKey(started.OperationId) || _progress.Count < MaxProgressOperations)
+                    {
+                        int nodeIndex = started.BuildEventContext is { } context ? NodeIndexForContext(context) : -1;
+                        _progress[started.OperationId] = new TerminalProgressStatus(started, nodeIndex);
+                    }
+                    break;
+                case TaskProgressUpdatedEventArgs updated when _progress.TryGetValue(updated.OperationId, out TerminalProgressStatus? active):
+                    active.Update(updated);
+                    break;
+                case TaskProgressFinishedEventArgs finished:
+                    _progress.Remove(finished.OperationId);
+                    break;
+            }
+
+            UpdateTerminalProgress();
+        }
+    }
+
+    private void UpdateTerminalProgress()
+    {
+        if (!Terminal.SupportsProgressReporting || Verbosity == LoggerVerbosity.Quiet)
+        {
+            return;
+        }
+
+        if (_progress.Count == 0)
+        {
+            Terminal.Write(AnsiCodes.RemoveProgress);
+            return;
+        }
+
+        if (_progress.Count != 1)
+        {
+            Terminal.Write(AnsiCodes.SetProgressIndeterminate);
+            return;
+        }
+
+        TerminalProgressStatus progress = _progress.Values.First();
+        if (progress.Total is long total && total > 0)
+        {
+            long calculatedPercent = progress.Completed * 100L / total;
+            int percent = (int)Math.Min(100L, Math.Max(0L, calculatedPercent));
+            Terminal.Write(AnsiCodes.SetProgress(percent));
+        }
+        else
+        {
+            Terminal.Write(AnsiCodes.SetProgressIndeterminate);
+        }
+    }
 
     /// <summary>
     /// Parses out the logger parameters from the Parameters string.
@@ -572,6 +636,11 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void BuildStarted(object sender, BuildStartedEventArgs e)
     {
+        lock (_lock)
+        {
+            _progress.Clear();
+        }
+
         if (!_manualRefresh && _showNodesDisplay)
         {
             _refresher = new Thread(ThreadProc);
@@ -674,6 +743,10 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         _projects.Clear();
+        lock (_lock)
+        {
+            _progress.Clear();
+        }
         _testRunSummaries.Clear();
         _registeredLoggers.Clear();
         _buildErrorsCount = 0;
@@ -1507,7 +1580,7 @@ public sealed partial class TerminalLogger : INodeLogger
         int currentFrameNodesCount;
         lock (_lock)
         {
-            if (_currentFrame.NodesCount == 0 && !HasActiveNodes())
+            if (_currentFrame.NodesCount == 0 && _currentFrame.ProgressCount == 0 && !HasActiveNodes() && _progress.Count == 0)
             {
                 return;
             }
@@ -1522,7 +1595,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             if (!ReferenceEquals(currentFrame, _currentFrame)
                 || currentFrame.NodesCount != currentFrameNodesCount
-                || (_currentFrame.NodesCount == 0 && !HasActiveNodes()))
+                || (_currentFrame.NodesCount == 0 && _currentFrame.ProgressCount == 0 && !HasActiveNodes() && _progress.Count == 0))
             {
                 return;
             }
@@ -1543,7 +1616,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private void DisplayNodes(int width, int height)
     {
-        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
+        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, _progress.Values, width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.TerminalWidth != _currentFrame.TerminalWidth || newFrame.Height != _currentFrame.Height)
@@ -1572,7 +1645,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void EraseNodes()
     {
-        if (_currentFrame.NodesCount == 0)
+        if (_currentFrame.NodesCount == 0 && _currentFrame.ProgressCount == 0)
         {
             return;
         }
@@ -1582,7 +1655,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private void EraseNodes(int terminalWidth)
     {
-        if (_currentFrame.NodesCount == 0)
+        if (_currentFrame.NodesCount == 0 && _currentFrame.ProgressCount == 0)
         {
             return;
         }

@@ -112,6 +112,8 @@ internal static class AnsiCodes
     /// </remarks>
     public const string SetProgressIndeterminate = "\x1b]9;4;3;\x1b\\";
 
+    public static string SetProgress(int percent) => $"\x1b]9;4;1;{percent}\x1b\\";
+
     /// <summary>
     /// Remove progress state, restoring taskbar status to normal. <br/>
     /// Note: this code works only on ConEmu terminals, and conflicts with push a notification code on iTerm2.

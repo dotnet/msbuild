@@ -108,6 +108,12 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
 
     public void MessageRaised(object sender, BuildMessageEventArgs e)
     {
+        if (e is TaskProgressStartedEventArgs or TaskProgressUpdatedEventArgs or TaskProgressFinishedEventArgs)
+        {
+            BuildEventRedirector?.ForwardEvent(e);
+            return;
+        }
+
         // Never forward messages if the verbosity is quiet. High-priority messages are always collected by the central
         // node, while normal-priority messages are only collected if the verbosity is more verbose than normal.
         if (e.BuildEventContext is null ||
