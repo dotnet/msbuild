@@ -1902,83 +1902,86 @@ namespace Microsoft.Build.BackEnd
                     // Only count non-null elements. We sometimes have a single-element array where the element is null
                     bool hasElements = false;
 
-                    foreach (ITaskItem output in outputs)
+                    if (!TryGatherProjectItemInstanceTaskItemOutputs(outputTargetName, outputs, parameterLocation, ref hasElements))
                     {
-                        // if individual items in the array are null, ignore them
-                        if (output != null)
+                        foreach (ITaskItem output in outputs)
                         {
-                            hasElements = true;
-
-                            ProjectItemInstance newItem;
-
-                            TaskItem outputAsProjectItem = output as TaskItem;
-                            string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
-
-                            if (outputAsProjectItem != null)
+                            // if individual items in the array are null, ignore them
+                            if (output != null)
                             {
-                                // The common case -- all items involved are Microsoft.Build.Execution.ProjectItemInstance.TaskItems.
-                                // Furthermore, because that is true, we know by definition that they also implement ITaskItem2.
-                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped);
+                                hasElements = true;
 
-                                newItem.SetMetadata(outputAsProjectItem.MetadataCollection); // copy-on-write!
-                            }
-                            else
-                            {
-                                if (output is ITaskItem2 outputAsITaskItem2)
+                                ProjectItemInstance newItem;
+
+                                TaskItem outputAsProjectItem = output as TaskItem;
+                                string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
+
+                                if (outputAsProjectItem != null)
                                 {
-                                    // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping.
-                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
+                                    // The common case -- all items involved are Microsoft.Build.Execution.ProjectItemInstance.TaskItems.
+                                    // Furthermore, because that is true, we know by definition that they also implement ITaskItem2.
+                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped);
 
-                                    // If found, directly pass the backing copy-on-write dictionary.
-                                    // Otherwise, retrieve a cloned dictionary from the task item.
-                                    IMetadataContainer outputAsMetadataContainer = output as IMetadataContainer;
-                                    SerializableMetadata backingMetadata = outputAsMetadataContainer?.BackingMetadata ?? default;
-
-                                    if (backingMetadata.HasValue)
-                                    {
-                                        newItem.SetMetadataOnTaskOutput(backingMetadata.Dictionary);
-                                    }
-                                    else
-                                    {
-                                        newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
-                                    }
+                                    newItem.SetMetadata(outputAsProjectItem.MetadataCollection); // copy-on-write!
                                 }
                                 else
                                 {
-                                    // Not a ProjectItemInstance.TaskItem or even a ITaskItem2, so we have to fake it.
-                                    // Setting an item spec expects the escaped value, as does setting metadata.
-                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
-
-                                    newItem.SetMetadataOnTaskOutput(EnumerateMetadata(output.CloneCustomMetadata()));
-
-                                    static IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IDictionary customMetadata)
+                                    if (output is ITaskItem2 outputAsITaskItem2)
                                     {
-                                        if (customMetadata is CopyOnWriteDictionary<string> copyOnWriteDictionary)
+                                        // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping.
+                                        newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
+
+                                        // If found, directly pass the backing copy-on-write dictionary.
+                                        // Otherwise, retrieve a cloned dictionary from the task item.
+                                        IMetadataContainer outputAsMetadataContainer = output as IMetadataContainer;
+                                        SerializableMetadata backingMetadata = outputAsMetadataContainer?.BackingMetadata ?? default;
+
+                                        if (backingMetadata.HasValue)
                                         {
-                                            foreach (KeyValuePair<string, string> kvp in copyOnWriteDictionary)
-                                            {
-                                                yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
-                                            }
-                                        }
-                                        else if (customMetadata is Dictionary<string, string> dictionary)
-                                        {
-                                            foreach (KeyValuePair<string, string> kvp in dictionary)
-                                            {
-                                                yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
-                                            }
+                                            newItem.SetMetadataOnTaskOutput(backingMetadata.Dictionary);
                                         }
                                         else
                                         {
-                                            foreach (DictionaryEntry de in customMetadata)
+                                            newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // Not a ProjectItemInstance.TaskItem or even a ITaskItem2, so we have to fake it.
+                                        // Setting an item spec expects the escaped value, as does setting metadata.
+                                        newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
+
+                                        newItem.SetMetadataOnTaskOutput(EnumerateMetadata(output.CloneCustomMetadata()));
+
+                                        static IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IDictionary customMetadata)
+                                        {
+                                            if (customMetadata is CopyOnWriteDictionary<string> copyOnWriteDictionary)
                                             {
-                                                yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                                foreach (KeyValuePair<string, string> kvp in copyOnWriteDictionary)
+                                                {
+                                                    yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
+                                                }
+                                            }
+                                            else if (customMetadata is Dictionary<string, string> dictionary)
+                                            {
+                                                foreach (KeyValuePair<string, string> kvp in dictionary)
+                                                {
+                                                    yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
+                                                }
+                                            }
+                                            else
+                                            {
+                                                foreach (DictionaryEntry de in customMetadata)
+                                                {
+                                                    yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            _batchBucket.Lookup.AddNewItem(newItem);
+                                _batchBucket.Lookup.AddNewItem(newItem);
+                            }
                         }
                     }
 
@@ -2046,6 +2049,39 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+        }
+
+        private bool TryGatherProjectItemInstanceTaskItemOutputs(string outputTargetName, ITaskItem[] outputs, ElementLocation parameterLocation, ref bool hasElements)
+        {
+            List<ProjectItemInstance> newItems = null;
+            string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
+
+            foreach (ITaskItem output in outputs)
+            {
+                if (output == null)
+                {
+                    continue;
+                }
+
+                if (output is not TaskItem outputAsProjectItem)
+                {
+                    return false;
+                }
+
+                hasElements = true;
+                newItems ??= new List<ProjectItemInstance>(outputs.Length);
+
+                var newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped);
+                newItem.SetMetadata(outputAsProjectItem.MetadataCollection); // copy-on-write!
+                newItems.Add(newItem);
+            }
+
+            if (newItems != null)
+            {
+                _batchBucket.Lookup.AddNewItemsOfItemType(outputTargetName, newItems);
+            }
+
+            return true;
         }
 
         /// <summary>
