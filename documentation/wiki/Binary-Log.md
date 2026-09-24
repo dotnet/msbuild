@@ -95,6 +95,104 @@ Compression can be hidden by garbage-collection pauses in one configuration and
 be on the critical path in another. Switching to server GC is a separate runtime
 experiment, not a free reduction in binlog overhead; record its memory cost too.
 
+## OrchardCore prototype measurements (September 24, 2026)
+
+These experiments use main `c32fc908ce2fed255ea5edde09ff46728bbc6c20` plus
+Jeremy Kuhne's serializer changes from `18f77e060da1b9f85191b5dba45eb99887c079b4`
+(local cherry-pick `7d0fa8fc83`). Those existing serializer optimizations are a
+prerequisite, **not a new result of the compression/queue prototypes**.
+The additional prototypes are in `6d623db696`; all switches remain off by default.
+
+The workload is the 196-project dependency graph of
+`src\OrchardCore.Cms.Web\OrchardCore.Cms.Web.csproj` at OrchardCore
+`c86db6ae6e0765fe63f31d810a76c025c2d79ba1`, not a full-solution rebuild.
+The machine has 16 logical processors and 64 GiB RAM. All variants use the same
+SDK/runtime `11.0.100-rc.1.26420.103` / `11.0.0-rc.1.26420.103`, frozen Release
+binaries, previously restored dependencies, quiet console and errors-only file
+logging, `-m:16 -nr:false -tl:off -p:UseSharedCompilation=false`, and fresh
+processes. Timings include the entire private process job, including logger
+shutdown, gzip finalization, task hosts, and server exit.
+
+The candidate combines `MSBUILDLOGGINGCOALESCESIGNALS=1`,
+`MSBUILDBINLOGASYNCCOMPRESSION=1`, and `MSBUILDBINLOGFASTCOMPRESSION=1`.
+The serial and disabled controls use the identical binary with these switches
+set to `0`. Each scenario has an unmeasured warmup of each variant, followed by
+alternating three-way rounds. No individual measured sample is discarded.
+
+| Scenario | Rounds | Disabled median | Serial binlog median | Candidate median | Candidate overhead, ratio of medians |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| MT no-op, explicit server GC / 16 heaps | 7 | 14.361 s | 17.543 s | 15.127 s | +5.34% |
+| MT source recompilation, same GC | 3 | 17.783 s | 20.283 s | 18.482 s | +3.93% |
+| MT no-op, normal transient server / automatic GC settings | 3 | 14.891 s | 18.182 s | 16.297 s | +9.44% |
+| MP no-op, workstation GC | 3 | 35.997 s | 39.424 s | 40.957 s | +13.78% |
+
+For the seven-round confirmation, mean wall time is 14.499 s disabled,
+17.353 s serial, and 15.278 s candidate. The candidate removes about 73% of
+the serial binlog's added wall time, but it does **not** establish a <=5%
+overhead guarantee: mean paired overhead is 5.51%, with a paired percentile
+bootstrap 95% interval of 1.84% to 9.05%. The three-round screens are exploratory;
+the normal-server control has an especially noisy disabled sample.
+The MP candidate is slower than the serial control in every measured round.
+**Do not enable this combination globally based on the MT result.**
+
+Raw complete-job seconds for the seven-round MT confirmation:
+
+| Round | Disabled | Serial | Candidate |
+| --- | ---: | ---: | ---: |
+| 1 | 13.874921 | 17.786920 | 15.620497 |
+| 2 | 14.298446 | 16.678652 | 15.102635 |
+| 3 | 15.018392 | 17.542812 | 15.522905 |
+| 4 | 14.641878 | 17.626420 | 14.918938 |
+| 5 | 15.199926 | 17.202935 | 14.763492 |
+| 6 | 14.360731 | 16.706981 | 15.889911 |
+| 7 | 14.096267 | 17.929779 | 15.127115 |
+
+Explicit server-GC runs use `MSBUILDUSESERVER=0`, `DOTNET_gcServer=1`, and
+`DOTNET_GCHeapCount=10` (hexadecimal 10 means 16 heaps), in **every** variant.
+Peak job memory is approximately 4 GiB, including in the disabled control.
+Normal MT already selects server GC through `MSBuildClient`; that is not a
+feature introduced by this prototype. Its automatic GC settings used about
+1.3 GiB disabled and 1.6 GiB with the candidate. Fastest compression increases
+no-op logs from approximately 16.0 MiB to 19.6 MiB, about 22%.
+The source-work screen refreshes `Program.cs`'s timestamp before every build,
+preserves its bytes and restores its timestamp afterward. Every measured
+source-work binlog contains exactly one `Csc` invocation, taking about 4 s.
+
+An earlier three-round pilot suggested only 2.78% overhead; the larger
+confirmation supersedes that estimate. An intervening seven-round run overlapped
+another session's full build/test suite and produced severe timing swings. Its
+raw results were retained, but it is not the confirmation above. The final runs
+used a coordinated window without other builds/tests/benchmarks and also recorded
+machine CPU outside the measured job. Ordinary system activity was still present.
+
+### Causal findings and fidelity limits
+
+Queue-signal coalescing alone recovered approximately 0.56-0.93 s in prior
+same-binary MT comparisons. It avoids per-event kernel wakeups when the consumer
+is already draining or no producer is waiting for capacity; it does not drop
+events or reduce the event queue's capacity. Smaller queue capacities regressed.
+
+GC changes which work is on the critical path. With an observer around the
+actual binary logger, the workstation-GC configuration spent 25.9% in GC pauses,
+versus 3.7% with explicit server GC. Under server GC, discarding gzip output as a
+diagnostic intervention recovered about 2.0 s; under workstation GC it had not
+improved wall time. This justified overlapping compression with serialization,
+rather than assuming that less compression CPU always means a faster build.
+Discarded-output experiments produce invalid logs and are never candidates.
+Two bounded weak-metadata-cache designs also regressed and were removed.
+
+The retained prototypes do not alter the binlog format or suppress events.
+Deterministic tests compare serialized event bytes after decompression for
+serial/pipelined Optimal/Fastest compression, including data exceeding the queue
+bound. Real no-op logs replay with 1,958,772 task-parameter items and the same
+1,222 embedded-file hashes; source-work logs contain 1,958,531 task items.
+Independent build logs are **not byte-identical**: asynchronous logging already
+observes live evaluation items and task inputs. For example, `FindUnderPath`
+can change logged input paths to absolute paths before serialization, including
+between two unchanged-control runs. Project-reference metadata and evaluation
+items can likewise reflect later mutations. Stream byte-equivalence tests and
+real-build semantic comparisons address different guarantees.
+
 # Binary log file format
 
 The implementation of the binary logger is here:
