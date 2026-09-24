@@ -797,6 +797,27 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
+            /// <inheritdoc />
+            /// <remarks>
+            /// Forwards begin/update/end records to the parent node over the existing logging
+            /// channel (<see cref="SendBuildEvent"/>), which restamps the correlating
+            /// <see cref="BuildEventContext"/> on receipt (see <c>TaskHostTask.HandleLoggedMessage</c>
+            /// and <c>TaskHost.LogMessageEvent</c>). Falls back to a no-op reporter if called outside
+            /// of a task execution (no current task context).
+            /// </remarks>
+            public override ITaskProgressReporter CreateTaskProgressReporter(
+                string title,
+                TaskProgressUnit unit = TaskProgressUnit.Unspecified)
+            {
+                TaskExecutionContext context = _taskHost.GetCurrentTaskContext();
+                if (context is null)
+                {
+                    return base.CreateTaskProgressReporter(title, unit);
+                }
+
+                return context.ProgressManager.CreateReporter(title, unit, BuildEventContext.Invalid, _taskHost.SendBuildEvent);
+            }
+
 #if FEATURE_REPORTFILEACCESSES
             /// <summary>
             /// Reports a file access from a task.

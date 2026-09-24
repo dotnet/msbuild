@@ -69,6 +69,8 @@
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\InvariantPayloadTransferMode.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
+    <Compile Include="..\Shared\TaskProgressManager.cs" />
+    <Compile Include="..\Shared\TaskProgressReporter.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />

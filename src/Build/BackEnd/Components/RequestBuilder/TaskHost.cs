@@ -107,6 +107,11 @@ namespace Microsoft.Build.BackEnd
         private bool _disableInprocNode;
 
         /// <summary>
+        /// Owns all task progress reporters created during this task invocation.
+        /// </summary>
+        private readonly TaskProgressManager _taskProgressManager = new TaskProgressManager();
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="host">The component host</param>
@@ -984,6 +989,12 @@ namespace Microsoft.Build.BackEnd
 
             public override bool IsOutOfProcRarNodeEnabled => _taskHost._host.BuildParameters.EnableRarNode;
 
+            /// <inheritdoc/>
+            public override ITaskProgressReporter CreateTaskProgressReporter(
+                string title,
+                TaskProgressUnit unit = TaskProgressUnit.Unspecified)
+                => _taskHost.CreateTaskProgressReporter(title, unit);
+
 #if FEATURE_REPORTFILEACCESSES
             /// <summary>
             /// Reports a file access from a task.
@@ -1003,6 +1014,19 @@ namespace Microsoft.Build.BackEnd
         public EngineServices EngineServices { get; }
 
         #endregion
+
+        /// <summary>
+        /// Creates a progress reporter in the task host's owning AppDomain.
+        /// </summary>
+        public ITaskProgressReporter CreateTaskProgressReporter(
+            string title,
+            TaskProgressUnit unit = TaskProgressUnit.Unspecified)
+        {
+            TaskLoggingContext loggingContext = _taskLoggingContext;
+            BuildEventContext buildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
+            Action<BuildEventArgs> logEvent = loggingContext is null ? null : loggingContext.LoggingService.LogBuildEvent;
+            return _taskProgressManager.CreateReporter(title, unit, buildEventContext, logEvent);
+        }
 
         /// <summary>
         /// Called by the internal MSBuild task.
@@ -1125,6 +1149,9 @@ namespace Microsoft.Build.BackEnd
                 _activeProxy = false;
 
                 ReleaseAllCores();
+
+                // Close out any progress reporters the task did not explicitly complete, cancel, or fail.
+                _taskProgressManager.AbandonRemaining();
 
                 // Since the task has a pointer to this class it may store it in a static field. Null out
                 // internal data so the leak of this object doesn't lead to a major memory leak.

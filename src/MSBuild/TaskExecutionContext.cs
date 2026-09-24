@@ -96,6 +96,16 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> PendingCallbackRequests { get; } = new();
 
+        private TaskProgressManager? _progressManager;
+
+        /// <summary>
+        /// The task progress manager scoped to this task execution, created on first use.
+        /// </summary>
+        /// <remarks>
+        /// Lazily created so tasks that never request progress reporting incur no overhead.
+        /// </remarks>
+        public TaskProgressManager ProgressManager => _progressManager ??= new TaskProgressManager();
+
         /// <summary>
         /// Creates a new task execution context.
         /// </summary>
@@ -111,6 +121,9 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public void Dispose()
         {
+            // Guarantee every reporter created during this task's execution reaches a terminal
+            // state, even if the task itself leaked one.
+            _progressManager?.AbandonRemaining();
         }
     }
 
