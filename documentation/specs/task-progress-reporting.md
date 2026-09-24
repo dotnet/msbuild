@@ -71,6 +71,37 @@ messages.
 - Inferring progress from arbitrary child-process output.
 - Combining unrelated operations into a mathematically meaningful build-wide percentage.
 - Making task behavior depend on whether visual progress is available.
+- Covering build phases that are not a single long-running task. Progress is scoped to one task
+  invocation, so a phase made of many short tasks has no operation to attach to. See
+  [Coverage limits](#coverage-limits).
+
+## Coverage limits
+
+Because an operation is owned by one task invocation, this protocol can only illuminate work that
+happens *inside* a task. Wall-clock time spent on evaluation, target orchestration, or a long
+sequence of individually short tasks stays silent, and that silence can be a large fraction of a
+real build.
+
+NuGet restore is the clearest worked example. On a 236-project solution, a cold
+`dotnet msbuild -t:Restore` took roughly 75 seconds end to end, but the `RestoreTask` invocation
+that owns the progress operation accounted for only about 28 seconds of it. The preceding ~46
+seconds were restore-graph generation: over a thousand `MSBuild` task calls plus hundreds of
+short-lived helper tasks, none of them individually long enough to justify an operation.
+
+Within the task it owns, the protocol performed well — the operation covered 98% of its own
+lifetime, with a worst-case gap of 1.2 seconds. The limitation is one of scope, not fidelity.
+
+Two conclusions follow:
+
+1. Do not treat a progress bar as a proxy for overall build completion. A task-scoped operation
+   describes one task, and adjacent silence is expected.
+2. Do not add progress reporting to paper over a slow phase that should instead be made faster.
+   Investigating the silent window above surfaced a single `RemoveDuplicates` call costing 10-18
+   seconds, tracked as [dotnet/msbuild#15130](https://github.com/dotnet/msbuild/issues/15130).
+   That is a performance bug to fix, not a gap to decorate.
+
+Extending coverage to non-task phases would require an engine-level progress source, which is
+deliberately out of scope here.
 
 ## Terminology
 
@@ -589,6 +620,35 @@ path cost is negligible.
 `MSBuild` and `CallTarget` should not duplicate engine project/target events as task progress.
 Compiler wrappers should use a deliberate child-process protocol rather than guessed percentages.
 Short metadata and property manipulation tasks have no useful long-running progress to report.
+
+### Validation against a third-party task
+
+NuGet's `RestoreTask` was onboarded out-of-tree as an end-to-end check that the protocol works for
+a task the MSBuild repository does not control. It is the strongest evidence available that the
+design holds outside first-party tasks.
+
+The adopted shape was a single aggregate operation in `Items`, sized by project count and driven
+by NuGet's existing `IRestoreProgressReporter` seam plus package-download status text.
+
+Measured on a 236-project solution, cold, using a logger subscribed to `AnyEventRaised`:
+
+| Property | Result |
+| --- | --- |
+| Updates | 83 |
+| Rate | 3.4 updates/sec |
+| Inter-update gap | median 184 ms, max 1169 ms |
+| Operation lifetime covered | 98% |
+| `Total` known throughout | yes, so a determinate bar renders |
+| Monotonic | yes |
+| Overhead | none measurable, in wall clock or allocations |
+
+Two lessons generalize to other adopters:
+
+- An initial coarse implementation reported only at the end of the task's work, leaving a
+  multi-second frozen bar. Sourcing updates from several phases of the task fixed it. Adopters
+  should check coverage against the *operation's own* lifetime, not against build wall clock.
+- At roughly three updates per second the cost is far below measurement noise. Per-byte reporting
+  is what causes regressions; see [Measured cost](#measured-cost).
 
 ## Rollout plan
 
