@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <PackageId>Microsoft.Build.TaskAuthoring.Analyzer</PackageId>
     <PackageDescription>Provides analyzer guidance for MSBuild task authoring and multithreaded task safety.</PackageDescription>
+    <VersionPrefix>0.1.0</VersionPrefix>
     <AssemblyName>Microsoft.Build.TaskAuthoring.Analyzer</AssemblyName>
     <RootNamespace>Microsoft.Build.TaskAuthoring.Analyzer</RootNamespace>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
@@ -34,5 +35,18 @@
   <ItemGroup>
     <None Include="$(TargetPath)" Pack="true" PackagePath="analyzers/dotnet/cs/%(FileName)%(Extension)" />
   </ItemGroup>
+
+  <Target Name="AddCommitShaToLocalPackageVersion"
+          BeforeTargets="GenerateNuspec"
+          DependsOnTargets="InitializeSourceControlInformation"
+          Condition="'$(ContinuousIntegrationBuild)' != 'true' and '$(OfficialBuild)' != 'true' and '$(DotNetFinalVersionKind)' == ''">
+    <Error Condition="'$(SourceRevisionId)' == ''"
+           Text="A local TaskAnalyzer package requires SourceRevisionId so its package version cannot collide with another build." />
+
+    <PropertyGroup>
+      <_TaskAnalyzerShortCommitSha>$(SourceRevisionId.Substring(0, 10))</_TaskAnalyzerShortCommitSha>
+      <PackageVersion>$(Version).$(_TaskAnalyzerShortCommitSha)</PackageVersion>
+    </PropertyGroup>
+  </Target>
 
 </Project>

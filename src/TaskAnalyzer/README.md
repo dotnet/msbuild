@@ -2,7 +2,7 @@
 
 A Roslyn analyzer that detects unsafe API usage in MSBuild task implementations. It guides task authors toward thread-safe patterns required for MSBuild's multithreaded task execution mode, where multiple tasks may run concurrently in the same process.
 
-The shipping delivery model is a standalone `Microsoft.Build.TaskAuthoring.Analyzer` package. `Microsoft.Build.Framework` references that package so analyzer updates can ship independently of the framework API version. Direct-package references remain useful for local validation, automation, and partner-repo testing.
+`Microsoft.Build.TaskAuthoring.Analyzer` ships independently from `Microsoft.Build.Framework`. Install the analyzer package explicitly. A Framework package reference does not activate the analyzer.
 
 The package also includes a Roslyn diagnostic suppressor for nullable warning `CS8618` on task properties marked with `Microsoft.Build.Framework.RequiredAttribute`, since MSBuild guarantees those inputs are initialized before task execution.
 
@@ -611,13 +611,13 @@ Reference the analyzer project directly:
 </ItemGroup>
 ```
 
-### NuGet Package (future)
+### NuGet Package
 
-When packaged as a NuGet analyzer, add it as a package reference:
+Add the analyzer package as a private package reference:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Microsoft.Build.TaskAuthoring.Analyzer" Version="1.0.0"
+  <PackageReference Include="Microsoft.Build.TaskAuthoring.Analyzer" Version="0.1.0"
                     PrivateAssets="all" />
 </ItemGroup>
 ```
@@ -709,6 +709,6 @@ Unit tests for all rules, safe patterns, edge cases, code fixes, and compiler di
 
 - [Multithreaded Task Execution Spec](https://github.com/dotnet/msbuild/pull/12583)
 - [Analyzer Implementation PR](https://github.com/dotnet/msbuild/pull/12143)
-- [IMultiThreadableTask Interface](../Framework/IMultiThreadableTask.cs)
-- [TaskEnvironment Class](../Framework/TaskEnvironment.cs)
-- [Migration Skill Guide](../../.github/skills/multithreaded-task-migration/SKILL.md)
+- [IMultiThreadableTask Interface](https://github.com/dotnet/msbuild/blob/main/src/Framework/IMultiThreadableTask.cs)
+- [TaskEnvironment Class](https://github.com/dotnet/msbuild/blob/main/src/Framework/TaskEnvironment.cs)
+- [Migration Skill Guide](https://github.com/dotnet/msbuild/blob/main/.github/skills/multithreaded-task-migration/SKILL.md)
