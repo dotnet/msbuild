@@ -152,6 +152,16 @@ namespace Microsoft.Build.Execution
             _taskItem = that._taskItem.DeepClone(newProject.IsImmutable);
         }
 
+        private ProjectItemInstance(
+            ProjectInstance project,
+            string itemType,
+            TaskItem taskItem)
+        {
+            _project = project;
+            _itemType = itemType;
+            _taskItem = taskItem;
+        }
+
         /// <summary>
         /// Constructor for serialization
         /// </summary>
@@ -698,6 +708,14 @@ namespace Microsoft.Build.Execution
             return new ProjectItemInstance(this, newProject);
         }
 
+        internal ProjectItemInstance DeepCloneAllState(ProjectInstance newProject)
+        {
+            return new ProjectItemInstance(
+                newProject,
+                _itemType,
+                _taskItem.DeepCloneAllState(newProject.IsImmutable));
+        }
+
         /// <summary>
         /// Generates a ProjectItemElement representing this instance.
         /// </summary>
@@ -895,6 +913,26 @@ namespace Microsoft.Build.Execution
                 source.CopyMetadataTo(this, addOriginalItemSpec);
                 _cachedModifiers = source._cachedModifiers;
                 _definingFileEscaped = source._definingFileEscaped;
+            }
+
+            private TaskItem(
+                TaskItem source,
+                bool isImmutable,
+                bool cloneAllState)
+            {
+                Assumed.True(cloneAllState);
+                _includeEscaped = source._includeEscaped;
+                _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
+                _directMetadata = source._directMetadata;
+                _cachedModifiers = source._cachedModifiers;
+                _definingFileEscaped = source._definingFileEscaped;
+                _projectDirectory = source._projectDirectory;
+                _isImmutable = isImmutable;
+
+                if (source._itemDefinitions is not null)
+                {
+                    _itemDefinitions = new List<ProjectItemDefinitionInstance>(source._itemDefinitions);
+                }
             }
 
             /// <summary>
@@ -2084,6 +2122,9 @@ namespace Microsoft.Build.Execution
 
                 return clone;
             }
+
+            internal TaskItem DeepCloneAllState(bool isImmutable) =>
+                new(this, isImmutable, cloneAllState: true);
 
             /// <summary>
             /// Helper to get the value of a built-in metadatum with
