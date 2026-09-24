@@ -1621,6 +1621,12 @@ namespace Microsoft.Build.CommandLine
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
+            if (multiThreaded && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
+            {
+                // Requests are created after BeginBuild enters the sentinel, so resolve the project path now.
+                projectFile = FileUtilities.NormalizePath(projectFile);
+            }
+
             bool success = true;
 
             ProjectCollection projectCollection = null;
