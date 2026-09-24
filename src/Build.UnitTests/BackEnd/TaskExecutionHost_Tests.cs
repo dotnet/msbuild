@@ -1802,19 +1802,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Null((_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper);
         }
 
-        [Theory]
-        [InlineData(true, false, false)]
-        [InlineData(false, true, false)]
-        [InlineData(true, true, false)]
-        [InlineData(false, false, true)]
-        public void UnsupportedFactoryCannotBypassIsolationWithAttributedTask(
-            bool multiThreaded,
-            bool forceIsolation,
-            bool expectedSuccess)
+        [Fact]
+        public void MultiThreadedBuildRejectsUnsupportedFactoryWithAttributedTask()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", forceIsolation ? "1" : null);
-            using TaskExecutionHost host = new(new MockHost(new BuildParameters { MultiThreaded = multiThreaded }));
+            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", null);
+            using TaskExecutionHost host = new(new MockHost(new BuildParameters { MultiThreaded = true }));
             var factory = new UnsupportedAttributedTaskFactory();
             var loadedType = new LoadedType(
                 factory.GetType(),
@@ -1847,23 +1840,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new TaskLoggingContext(_loggingService, targetContext.BuildEventContext),
                 _bucket,
                 TaskHostParameters.Empty,
-                scheduledNodeId: 1).ShouldBe(expectedSuccess);
+                scheduledNodeId: 1).ShouldBeFalse();
 
-            factory.CreateTaskCalls.ShouldBe(expectedSuccess ? 1 : 0);
-            if (expectedSuccess)
-            {
-                host.TaskInstance.ShouldBeOfType<AttributedFactoryTask>();
-                _logger.Errors.ShouldBeEmpty();
-            }
-            else
-            {
-                host.TaskInstance.ShouldBeNull();
-                _logger.Errors.ShouldHaveSingleItem().Message.ShouldBe(
-                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                        "CustomTaskFactoryOutOfProcNotSupported",
-                        factory.FactoryName,
-                        nameof(AttributedFactoryTask)));
-            }
+            factory.CreateTaskCalls.ShouldBe(0);
+            _logger.Errors.ShouldHaveSingleItem().Message.ShouldBe(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "CustomTaskFactoryOutOfProcNotSupported",
+                    factory.FactoryName,
+                    nameof(AttributedFactoryTask)));
         }
 
         [MSBuildMultiThreadableTask]

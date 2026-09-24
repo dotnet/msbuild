@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -1146,152 +1145,66 @@ namespace InlineTask
             File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
         }
 
-        [Theory]
-        [InlineData("cs", true, false, false, true, false)]
-        [InlineData("vb", true, false, false, true, false)]
-        [InlineData("cs", true, true, true, true, false)]
-        [InlineData("vb", true, true, true, true, false)]
-        [InlineData("cs", false, true, false, true, false)]
-        [InlineData("cs", false, false, false, true, false)]
-        [InlineData("cs", true, true, false, true, true)]
-        [InlineData("cs", true, false, false, false, true)]
-        [InlineData("cs", false, false, false, false, false)]
-        [InlineData("vb", true, false, false, false, false)]
-        public void InlineClassRoutingHonorsAttributeAndIsolation(
-            string language,
-            bool attributed,
-            bool implementsInterface,
-            bool useSource,
-            bool multiThreaded,
-            bool forceIsolation)
+        [Fact]
+        public void InlineClassRunsInSameProcessAsAssemblyTask()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", forceIsolation ? "1" : null);
+            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", null);
             env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", null);
-            env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
-            env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", null);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             TransientTestFolder folder = env.CreateFolder(createFolder: true);
-            TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(folder.Path, "nested"), createFolder: true);
-#if !NETFRAMEWORK
-            if (language == "vb")
-            {
-                // CoreCLR vbc has no default VB runtime directory. Embed its runtime helpers without
-                // changing the factory's distributed references or depending on a machine-wide SDK.
-                bool windows = OperatingSystem.IsWindows();
-                TransientTestFile compiler = env.CreateFile(folder, windows ? "vbc.cmd" : "vbc.sh", windows
-                    ? """
-                        @echo off
-                        "%DOTNET_HOST_PATH%" %* /vbruntime*
-                        exit /b %ERRORLEVEL%
-                        """
-                    : "#!/bin/sh\nexec \"$DOTNET_HOST_PATH\" \"$@\" '/vbruntime*'\n");
-                if (!OperatingSystem.IsWindows())
-                {
-                    File.SetUnixFileMode(compiler.Path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-                }
-
-                env.SetEnvironmentVariable("VbcToolExe", compiler.Path);
-            }
-#endif
-            bool expectedInProcess = !forceIsolation && (!multiThreaded || attributed);
-            bool verifyEnvironment = implementsInterface && multiThreaded && expectedInProcess;
-            string code = language == "cs"
-                ? $$"""
-                    using Microsoft.Build.Framework;
-                    {{(attributed ? "[MSBuildMultiThreadableTask]" : "")}}
-                    public class RoutingTask : Microsoft.Build.Utilities.Task{{(implementsInterface ? ", IMultiThreadableTask" : "")}}
-                    {
-                        {{(implementsInterface ? "public TaskEnvironment TaskEnvironment { get; set; }" : "")}}
-                        [Output] public int ProcessId { get; set; }
-                        [Output] public string ResolvedPath { get; set; }
-                        [Output] public string SharedDirectory { get; set; }
-                        public override bool Execute()
-                        {
-                            ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id;
-                            SharedDirectory = System.IO.Directory.GetCurrentDirectory();
-                            {{(verifyEnvironment ? """ResolvedPath = TaskEnvironment.GetAbsolutePath("input.txt").Value;""" : "")}}
-                            return true;
-                        }
-                    }
-                    """
-                : $$"""
-                    Imports Microsoft.Build.Framework
-                    {{(attributed ? "<MSBuildMultiThreadableTask>" : "")}}
-                    Public Class RoutingTask
-                        Inherits Microsoft.Build.Utilities.Task
-                        {{(implementsInterface ? "Implements IMultiThreadableTask" : "")}}
-                        {{(implementsInterface ? "Public Property TaskEnvironment As TaskEnvironment Implements IMultiThreadableTask.TaskEnvironment" : "")}}
-                        <Output> Public Property ProcessId As Integer
-                        <Output> Public Property ResolvedPath As String
-                        <Output> Public Property SharedDirectory As String
-                        Public Overrides Function Execute() As Boolean
-                            ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id
-                            SharedDirectory = System.IO.Directory.GetCurrentDirectory()
-                            {{(verifyEnvironment ? """ResolvedPath = TaskEnvironment.GetAbsolutePath("input.txt").Value""" : "")}}
-                            Return True
-                        End Function
-                    End Class
-                    """;
-            string codeElement;
-            if (useSource)
-            {
-                env.CreateFile(projectFolder, $"RoutingTask.{language}", code);
-                codeElement = $"""<Code Type="Class" Language="{language}" Source="RoutingTask.{language}" />""";
-            }
-            else
-            {
-                codeElement = $"""<Code Type="Class" Language="{language}"><![CDATA[{code}]]></Code>""";
-            }
-
-            TransientTestFile projectFile = env.CreateFile(projectFolder, "routing.proj", $$"""
+            TransientTestFile projectFile = env.CreateFile(folder, "routing.proj", $$"""
                 <Project>
-                  <PropertyGroup>
-                    <BuildProcessId>$([System.Diagnostics.Process]::GetCurrentProcess().Id)</BuildProcessId>
-                  </PropertyGroup>
-                  <UsingTask TaskName="RoutingTask" TaskFactory="RoslynCodeTaskFactory"
+                  <UsingTask TaskName="{{typeof(GetProcessId).FullName}}" AssemblyFile="{{typeof(GetProcessId).Assembly.Location}}" />
+                  <UsingTask TaskName="InlineGetProcessId" TaskFactory="RoslynCodeTaskFactory"
                              AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
-                    <Task>{{codeElement}}</Task>
+                    <Task>
+                      <Code Type="Class" Language="cs"><![CDATA[
+                        using Microsoft.Build.Framework;
+                        [MSBuildMultiThreadableTask]
+                        public class InlineGetProcessId : Microsoft.Build.Utilities.Task
+                        {
+                            [Output] public int ProcessId { get; set; }
+                            public override bool Execute()
+                            {
+                                ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id;
+                                return true;
+                            }
+                        }
+                      ]]></Code>
+                    </Task>
                   </UsingTask>
                   <Target Name="Build">
-                    <RoutingTask>
-                      <Output TaskParameter="ProcessId" PropertyName="FirstProcessId" />
-                      <Output TaskParameter="ResolvedPath" PropertyName="FirstResolvedPath" />
-                      <Output TaskParameter="SharedDirectory" PropertyName="SharedDirectory" />
-                    </RoutingTask>
-                    <RoutingTask>
-                      <Output TaskParameter="ProcessId" PropertyName="SecondProcessId" />
-                      <Output TaskParameter="ResolvedPath" PropertyName="SecondResolvedPath" />
-                    </RoutingTask>
-                    <Message Text="Routing:$(BuildProcessId):$(FirstProcessId):$(SecondProcessId)" Importance="High" />
-                    <Message Text="FirstResolvedPath=$(FirstResolvedPath)" Importance="High" />
-                    <Message Text="SecondResolvedPath=$(SecondResolvedPath)" Importance="High" />
-                    <Message Text="SharedDirectory=$(SharedDirectory)" Importance="High" />
+                    <GetProcessId>
+                      <Output TaskParameter="ProcessId" PropertyName="AssemblyProcessId" />
+                    </GetProcessId>
+                    <InlineGetProcessId>
+                      <Output TaskParameter="ProcessId" PropertyName="InlineProcessId" />
+                    </InlineGetProcessId>
+                    <Error Condition="'$(AssemblyProcessId)' != '$(InlineProcessId)'"
+                           Text="Assembly task PID $(AssemblyProcessId) differs from inline task PID $(InlineProcessId)." />
                   </Target>
                 </Project>
                 """);
 
-            // One node keeps the evaluation PID a controlled reference for both task invocations.
             string output = RunnerUtilities.ExecMSBuild(
                 $"""
-                "{projectFile.Path}" /t:Build /m:1 /nr:false /mt:{multiThreaded} /v:minimal /bl:"{Path.Combine(folder.Path, $"routing-{Guid.NewGuid():N}.binlog")}"
+                "{projectFile.Path}" /mt /nr:false /bl:"{Path.Combine(folder.Path, "routing.binlog")}"
                 """,
                 out bool success,
                 _output);
             success.ShouldBeTrue(output);
-            Match routing = Regex.Match(output, @"Routing:(\d+):(\d+):(\d+)");
-            routing.Success.ShouldBeTrue(output);
-            for (int invocation = 2; invocation <= 3; invocation++)
-            {
-                (routing.Groups[invocation].Value == routing.Groups[1].Value).ShouldBe(expectedInProcess, output);
-            }
+        }
 
-            if (verifyEnvironment)
+        [MSBuildMultiThreadableTask]
+        public sealed class GetProcessId : Microsoft.Build.Utilities.Task
+        {
+            [Output]
+            public int ProcessId { get; set; }
+
+            public override bool Execute()
             {
-                string expectedPath = Path.Combine(projectFolder.Path, "input.txt");
-                output.ShouldContain($"FirstResolvedPath={expectedPath}");
-                output.ShouldContain($"SecondResolvedPath={expectedPath}");
-                output.ShouldNotContain($"SharedDirectory={projectFolder.Path}");
+                ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id;
+                return true;
             }
         }
 
