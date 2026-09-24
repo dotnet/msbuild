@@ -127,9 +127,7 @@ Constructor injection described above for assembly tasks does not apply to
 The attribute asserts that the entire task implementation is safe for concurrent
 execution, including its dependencies and shared state. It does not automatically
 make the code thread-safe. Unannotated classes and generated `Fragment`/`Method`
-tasks continue to use TaskHost isolation in multithreaded builds. Setting
-`MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC=1` still forces isolation even for an
-attributed class.
+tasks continue to use TaskHost isolation in multithreaded builds.
 
 Attribute-aware routing applies only to factories already supported by MSBuild
 in multithreaded mode. An attributed task type does not enable an unsupported
