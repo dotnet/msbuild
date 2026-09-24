@@ -137,7 +137,7 @@ namespace Microsoft.Build.Tasks
                                 {
                                     try
                                     {
-                                        Extract(zipArchive, destinationDirectory);
+                                        Extract(zipArchive, destinationDirectory, Path.GetFileName(sourceFilePath.Value));
                                     }
                                     catch (Exception e)
                                     {
@@ -174,12 +174,22 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="sourceArchive">The <see cref="ZipArchive"/> containing the files to extract.</param>
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
-        private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
+        /// <param name="archiveName">The file name of the archive being extracted, used for progress reporting.</param>
+        private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory, string archiveName)
         {
             AbsolutePath fullDestinationDirectoryPath = TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName)).GetCanonicalForm();
 
+            int entryCount = sourceArchive.Entries.Count;
+            int processedEntries = 0;
+            ITaskProgressReporter progress = null;
+
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
+                // Reporting at the start of the iteration keeps a single report site even though the
+                // entry-handling paths below use `continue` for skipped and failed entries.
+                progress?.Report(new TaskProgressUpdate(processedEntries, entryCount, zipArchiveEntry.FullName));
+                processedEntries++;
+
                 if (ShouldSkipEntry(zipArchiveEntry))
                 {
                     Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFilter", zipArchiveEntry.FullName);
@@ -247,6 +257,12 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
 
+                    // Only start an operation once an entry actually needs extracting, so archives that are
+                    // entirely up to date or filtered out do not create a progress operation at all.
+                    progress ??= (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                        $"Extracting {archiveName}",
+                        TaskProgressUnit.Items);
+
 #if NET
                     FileStreamOptions fileStreamOptions = new()
                     {
@@ -290,6 +306,21 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotExtractFile", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
                 }
+            }
+
+            if (progress is not null)
+            {
+                if (_cancellationToken.IsCancellationRequested)
+                {
+                    progress.Cancel();
+                }
+                else
+                {
+                    progress.Report(new TaskProgressUpdate(processedEntries, entryCount));
+                    progress.Complete();
+                }
+
+                progress.Dispose();
             }
         }
 

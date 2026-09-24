@@ -231,7 +231,16 @@ namespace Microsoft.Build.Tasks
 
                     CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-                    foreach ((FileSystemInfo info, string entryName) in EnumerateEntriesInDeterministicOrder())
+                    List<(FileSystemInfo Info, string EntryName)> entries = EnumerateEntriesInDeterministicOrder();
+                    long writtenEntries = 0;
+
+                    using ITaskProgressReporter? progress = entries.Count == 0
+                        ? null
+                        : (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                            $"Creating {_destinationFile.Name}",
+                            TaskProgressUnit.Items);
+
+                    foreach ((FileSystemInfo info, string entryName) in entries)
                     {
                         // Check for cancellation on every iteration so a cancelled build stops promptly rather than
                         // writing out the entire remaining archive.
@@ -251,6 +260,18 @@ namespace Microsoft.Build.Tasks
                             await writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
                                 .ConfigureAwait(continueOnCapturedContext: false);
                         }
+
+                        writtenEntries++;
+                        progress?.Report(new TaskProgressUpdate(writtenEntries, entries.Count, entryName));
+                    }
+
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        progress?.Cancel();
+                    }
+                    else
+                    {
+                        progress?.Complete();
                     }
                 }
 

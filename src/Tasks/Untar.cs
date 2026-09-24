@@ -179,7 +179,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    await ExtractAsync(reader, destinationDirectory).ConfigureAwait(continueOnCapturedContext: false);
+                    await ExtractAsync(reader, destinationDirectory, sourceFile.Name).ConfigureAwait(continueOnCapturedContext: false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -265,10 +265,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="reader">The <see cref="TarReader"/> containing the entries to extract.</param>
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract entries to.</param>
+        /// <param name="archiveName">The file name of the archive being extracted, used for progress reporting.</param>
         /// <returns>A <see cref="System.Threading.Tasks.Task"/> that completes when all entries have been processed.</returns>
-        private async System.Threading.Tasks.Task ExtractAsync(TarReader reader, DirectoryInfo destinationDirectory)
+        private async System.Threading.Tasks.Task ExtractAsync(TarReader reader, DirectoryInfo destinationDirectory, string archiveName)
         {
             AbsolutePath fullDestinationDirectoryPath = TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName)).GetCanonicalForm();
+
+            // A tar archive is read as a stream, so the number of entries is not known up front and progress
+            // is reported without a total.
+            long extractedEntries = 0;
+            ITaskProgressReporter? progress = null;
 
             for (TarEntry? tarEntry = reader.GetNextEntry(); tarEntry is not null && !_cancellationTokenSource.IsCancellationRequested; tarEntry = reader.GetNextEntry())
             {
@@ -357,12 +363,21 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Untar.FileComment", entryName, destinationPath.FullName);
 
+                    // Only start an operation once an entry actually needs extracting, so archives that are
+                    // entirely up to date or filtered out do not create a progress operation at all.
+                    progress ??= (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                        $"Extracting {archiveName}",
+                        TaskProgressUnit.Items);
+
                     // Delegate to the runtime's extraction, which restores the archived modification time and
                     // (on Unix) applies the archived permissions masked to the 9 ownership rwx bits, dropping the
                     // setuid/setgid/sticky bits for security and respecting the process umask. The cancellation
                     // token is flowed through so extraction stops promptly when the task is cancelled.
                     await tarEntry.ExtractToFileAsync(destinationPath.FullName, overwrite: true, _cancellationTokenSource.Token)
                         .ConfigureAwait(continueOnCapturedContext: false);
+
+                    extractedEntries++;
+                    progress?.Report(new TaskProgressUpdate(extractedEntries, total: null, entryName));
                 }
                 catch (Exception e) when (e is IOException or UnauthorizedAccessException)
                 {
@@ -372,6 +387,20 @@ namespace Microsoft.Build.Tasks
                     // destination doesn't abort extraction of the rest of the archive.
                     Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotExtractFile", entryName, destinationPath.FullName, e.Message);
                 }
+            }
+
+            if (progress is not null)
+            {
+                if (_cancellationTokenSource.IsCancellationRequested)
+                {
+                    progress.Cancel();
+                }
+                else
+                {
+                    progress.Complete();
+                }
+
+                progress.Dispose();
             }
         }
 

@@ -63,6 +63,39 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void ReportsArchiveCreationProgress()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "F1.txt", "F1");
+                testEnvironment.CreateFile(sourceFolder, "F2.txt", "F2");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                progress.Updates.ShouldNotBeEmpty();
+                progress.Completed.ShouldBe(2);
+                progress.Total.ShouldBe(2);
+                progress.IsComplete.ShouldBeTrue();
+                _mockEngine.TaskProgressReporterTitle.ShouldBe("Creating test.tar");
+            }
+        }
+
+        [Fact]
         public void CanOverwriteExistingFile()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
