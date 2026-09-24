@@ -267,6 +267,21 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="AssemblyConflictWarningEventArgs"/>.
         /// </summary>
         AssemblyConflictWarningEvent = 47,
+
+        /// <summary>
+        /// Event is <see cref="TaskProgressStartedEventArgs"/>.
+        /// </summary>
+        TaskProgressStartedEvent = 48,
+
+        /// <summary>
+        /// Event is <see cref="TaskProgressUpdatedEventArgs"/>.
+        /// </summary>
+        TaskProgressUpdatedEvent = 49,
+
+        /// <summary>
+        /// Event is <see cref="TaskProgressFinishedEventArgs"/>.
+        /// </summary>
+        TaskProgressFinishedEvent = 50,
     }
     #endregion
 
@@ -525,6 +540,9 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.AssemblyResolutionSearchTraceEvent => new AssemblyResolutionSearchTraceEventArgs(),
                 LoggingEventType.AssemblyConflictDependencyDetailsEvent => new AssemblyConflictDependencyDetailsMessageEventArgs(),
                 LoggingEventType.AssemblyConflictWarningEvent => new AssemblyConflictWarningEventArgs(),
+                LoggingEventType.TaskProgressStartedEvent => new TaskProgressStartedEventArgs(),
+                LoggingEventType.TaskProgressUpdatedEvent => new TaskProgressUpdatedEventArgs(),
+                LoggingEventType.TaskProgressFinishedEvent => new TaskProgressFinishedEventArgs(),
 
                 _ => Assumed.Unreachable<BuildEventArgs>($"Should not get to the default of GetBuildEventArgFromId ID: {_eventType}")
             };
@@ -690,6 +708,18 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(AssemblyConflictWarningEventArgs))
             {
                 return LoggingEventType.AssemblyConflictWarningEvent;
+            }
+            else if (eventType == typeof(TaskProgressStartedEventArgs))
+            {
+                return LoggingEventType.TaskProgressStartedEvent;
+            }
+            else if (eventType == typeof(TaskProgressUpdatedEventArgs))
+            {
+                return LoggingEventType.TaskProgressUpdatedEvent;
+            }
+            else if (eventType == typeof(TaskProgressFinishedEventArgs))
+            {
+                return LoggingEventType.TaskProgressFinishedEvent;
             }
             else if (eventType == typeof(TargetStartedEventArgs))
             {

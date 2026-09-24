@@ -86,6 +86,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AssemblyResolutionSearchTraceEventArgs assemblyResolutionSearch = CreateAssemblyResolutionSearch();
             AssemblyConflictDependencyDetailsMessageEventArgs assemblyConflictDependencyDetails = CreateAssemblyConflictDependencyDetails();
             AssemblyConflictWarningEventArgs assemblyConflictWarning = CreateAssemblyConflictWarning();
+            TaskProgressStartedEventArgs taskProgressStarted = new(1, "Downloading", TaskProgressUnit.Bytes);
+            TaskProgressUpdatedEventArgs taskProgressUpdated = new(1, 1, 50, 100, "Halfway there");
+            TaskProgressFinishedEventArgs taskProgressFinished = new(1, 2, TaskProgressOutcome.Completed, 100, 100, "Done");
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -127,6 +130,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(assemblyResolutionSearch, LoggingEventType.AssemblyResolutionSearchTraceEvent);
             VerifyLoggingPacket(assemblyConflictDependencyDetails, LoggingEventType.AssemblyConflictDependencyDetailsEvent);
             VerifyLoggingPacket(assemblyConflictWarning, LoggingEventType.AssemblyConflictWarningEvent);
+            VerifyLoggingPacket(taskProgressStarted, LoggingEventType.TaskProgressStartedEvent);
+            VerifyLoggingPacket(taskProgressUpdated, LoggingEventType.TaskProgressUpdatedEvent);
+            VerifyLoggingPacket(taskProgressFinished, LoggingEventType.TaskProgressFinishedEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -347,6 +353,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     CreateAssemblyResolutionSearch(),
                     CreateAssemblyConflictDependencyDetails(),
                     CreateAssemblyConflictWarning(),
+                    new TaskProgressStartedEventArgs(1, "Downloading", TaskProgressUnit.Bytes) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7) },
+                    new TaskProgressUpdatedEventArgs(1, 1, 50, 100, "Halfway there") { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7) },
+                    new TaskProgressFinishedEventArgs(1, 2, TaskProgressOutcome.Completed, 100, 100, "Done") { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7) },
                 };
                 foreach (BuildEventArgs arg in testArgs)
                 {
