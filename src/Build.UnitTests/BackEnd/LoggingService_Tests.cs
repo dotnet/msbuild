@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
@@ -15,6 +16,8 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
@@ -35,6 +38,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// used in every test method.
         /// </summary>
         private LoggingService _initializedService;
+        private readonly ITestOutputHelper _output;
 
         #endregion
 
@@ -44,8 +48,9 @@ namespace Microsoft.Build.UnitTests.Logging
         /// This method is run before each test case is run.
         /// We instantiate and initialize a new logging service each time
         /// </summary>
-        public LoggingService_Tests()
+        public LoggingService_Tests(ITestOutputHelper output)
         {
+            _output = output;
             InitializeLoggingService();
         }
 
@@ -1167,9 +1172,13 @@ namespace Microsoft.Build.UnitTests.Logging
         /// the race condition where an external callback (e.g., Process.Exited)
         /// tries to log after ShutdownComponent has nullified internal state.
         /// </summary>
-        [Fact]
-        public void ProcessLoggingEventAfterShutdown_Asynchronous_DoesNotThrow()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ProcessLoggingEventAfterShutdown_Asynchronous_DoesNotThrow(bool coalesceSignals)
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS", coalesceSignals ? "1" : "0");
             BuildParameters parameters = new BuildParameters();
             parameters.MaxNodeCount = 2;
             MockHost mockHost = new MockHost(parameters);
@@ -1228,9 +1237,13 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify that concurrent shutdown and ProcessLoggingEvent calls from multiple
         /// threads do not cause a crash (simulates the race condition scenario).
         /// </summary>
-        [Fact]
-        public void ProcessLoggingEventConcurrentWithShutdown_DoesNotThrow()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ProcessLoggingEventConcurrentWithShutdown_DoesNotThrow(bool coalesceSignals)
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS", coalesceSignals ? "1" : "0");
             BuildParameters parameters = new BuildParameters();
             parameters.MaxNodeCount = 2;
             MockHost mockHost = new MockHost(parameters);
@@ -1283,7 +1296,236 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #endregion
 
+        [Theory]
+        [InlineData(false, 1)]
+        [InlineData(true, 1)]
+        [InlineData(true, 8)]
+        [InlineData(true, 200000)]
+        public async Task CoalescedSignalsPreserveConcurrentProducerOrder(bool coalesceSignals, int capacity)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS", coalesceSignals ? "1" : "0");
+            env.SetEnvironmentVariable("MSBUILDLOGGINGQUEUECAPACITY", capacity.ToString(CultureInfo.InvariantCulture));
+            var logger = new MockLogger(_output);
+            LoggingService service = CreateAsynchronousLoggingService(logger);
+
+            try
+            {
+                Task[] producers = Enumerable.Range(0, 8).Select(producer => Task.Run(() =>
+                {
+                    for (int i = 0; i < 2000; i++)
+                    {
+                        service.ProcessLoggingEvent(new BuildMessageEventArgs($"{producer}:{i}", null, null, MessageImportance.High));
+                    }
+                })).ToArray();
+
+                Task completed = Task.WhenAll(producers);
+                (await Task.WhenAny(completed, Task.Delay(TimeSpan.FromSeconds(30)))).ShouldBeSameAs(completed);
+                await completed;
+                service.WaitForLoggingToProcessEvents();
+
+                logger.BuildMessageEvents.Count.ShouldBe(16000);
+                for (int producer = 0; producer < producers.Length; producer++)
+                {
+                    string prefix = $"{producer}:";
+                    logger.BuildMessageEvents.Where(e => e.Message.StartsWith(prefix, StringComparison.Ordinal)).Select(e => e.Message)
+                        .ShouldBe(Enumerable.Range(0, 2000).Select(i => $"{prefix}{i}"));
+                }
+            }
+            finally
+            {
+                service.ShutdownComponent();
+            }
+        }
+
+        [Fact]
+        public void CoalescedSignalsWakeAfterRepeatedDrains()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS", "1");
+            var logger = new MockLogger(_output);
+            LoggingService service = CreateAsynchronousLoggingService(logger);
+            using var delivered = new AutoResetEvent(false);
+            logger.AdditionalHandlers.Add((_, _) => delivered.Set());
+
+            try
+            {
+                for (int i = 0; i < 1000; i++)
+                {
+                    service.ProcessLoggingEvent(new BuildMessageEventArgs($"{i}", null, null, MessageImportance.High));
+                    delivered.WaitOne(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+                    service.WaitForLoggingToProcessEvents();
+                }
+
+                logger.BuildMessageEvents.Count.ShouldBe(1000);
+            }
+            finally
+            {
+                service.ShutdownComponent();
+            }
+        }
+
+        [Fact]
+        public async Task CoalescedSignalsUnblockFullQueue()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS", "1");
+            env.SetEnvironmentVariable("MSBUILDLOGGINGQUEUECAPACITY", "1");
+            using var entered = new ManualResetEventSlim(false);
+            using var release = new ManualResetEventSlim(false);
+            var logger = new MockLogger(_output);
+            logger.AdditionalHandlers.Add((_, args) =>
+            {
+                if (args.Message == "first")
+                {
+                    entered.Set();
+                    release.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                }
+            });
+            LoggingService service = CreateAsynchronousLoggingService(logger);
+
+            try
+            {
+                service.ProcessLoggingEvent(new BuildMessageEventArgs("first", null, null, MessageImportance.High));
+                entered.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+                service.ProcessLoggingEvent(new BuildMessageEventArgs("second", null, null, MessageImportance.High));
+                Task producer = Task.Run(() =>
+                    service.ProcessLoggingEvent(new BuildMessageEventArgs("third", null, null, MessageImportance.High)));
+                FieldInfo waitingProducers = typeof(LoggingService).GetField("_waitingProducers", BindingFlags.Instance | BindingFlags.NonPublic);
+                SpinWait.SpinUntil(() => (int)waitingProducers.GetValue(service) != 0, TimeSpan.FromSeconds(5)).ShouldBeTrue();
+                producer.IsCompleted.ShouldBeFalse();
+
+                Task drained = Task.Run(service.WaitForLoggingToProcessEvents);
+                drained.IsCompleted.ShouldBeFalse();
+                release.Set();
+                Task completed = Task.WhenAll(producer, drained);
+                (await Task.WhenAny(completed, Task.Delay(TimeSpan.FromSeconds(10)))).ShouldBeSameAs(completed);
+                await completed;
+                service.WaitForLoggingToProcessEvents();
+                logger.BuildMessageEvents.Select(e => e.Message).ShouldBe(["first", "second", "third"]);
+            }
+            finally
+            {
+                release.Set();
+                service.ShutdownComponent();
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task CoalescedSignalsShutdownWaitsForLastCallback(bool coalesceSignals)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS", coalesceSignals ? "1" : "0");
+            using var entered = new ManualResetEventSlim(false);
+            using var release = new ManualResetEventSlim(false);
+            using var shutdownStarted = new ManualResetEventSlim(false);
+            var logger = new MockLogger(_output);
+            logger.AdditionalHandlers.Add((_, _) =>
+            {
+                entered.Set();
+                release.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            });
+            LoggingService service = CreateAsynchronousLoggingService(logger);
+            Task shutdown = null;
+
+            try
+            {
+                service.ProcessLoggingEvent(new BuildMessageEventArgs("last", null, null, MessageImportance.High));
+                entered.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+                shutdown = Task.Run(() =>
+                {
+                    shutdownStarted.Set();
+                    service.ShutdownComponent();
+                });
+                shutdownStarted.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue();
+                (await Task.WhenAny(shutdown, Task.Delay(100))).ShouldNotBeSameAs(shutdown);
+                release.Set();
+                (await Task.WhenAny(shutdown, Task.Delay(TimeSpan.FromSeconds(10)))).ShouldBeSameAs(shutdown);
+                await shutdown;
+                logger.BuildMessageEvents.Select(e => e.Message).ShouldBe(["last"]);
+            }
+            finally
+            {
+                release.Set();
+                if (shutdown is null)
+                {
+                    service.ShutdownComponent();
+                }
+                else
+                {
+                    await shutdown;
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CoalescedSignalsForwardLoggerExceptions(bool coalesceSignals)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output, ignoreBuildErrorFiles: true);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS", coalesceSignals ? "1" : "0");
+            var expected = new InvalidOperationException("Expected logger failure");
+            var logger = new MockLogger(_output);
+            logger.AdditionalHandlers.Add((_, _) => throw expected);
+            LoggingService service = CreateAsynchronousLoggingService(logger);
+            Exception forwarded = null;
+            service.OnLoggingThreadException += exception => forwarded = exception;
+
+            try
+            {
+                service.ProcessLoggingEvent(new BuildMessageEventArgs("throw", null, null, MessageImportance.High));
+                service.WaitForLoggingToProcessEvents();
+                forwarded.ShouldNotBeNull();
+                forwarded.GetBaseException().ShouldBeSameAs(expected);
+            }
+            finally
+            {
+                service.ShutdownComponent();
+                FileUtilities.DeleteNoThrow(DebugUtils.DumpFilePath);
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CoalescedSignalsPreserveReentrantLogging(bool coalesceSignals)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS", coalesceSignals ? "1" : "0");
+            var logger = new MockLogger(_output);
+            LoggingService service = CreateAsynchronousLoggingService(logger);
+            logger.AdditionalHandlers.Add((_, args) =>
+            {
+                if (args.Message == "outer")
+                {
+                    service.ProcessLoggingEvent(new BuildMessageEventArgs("inner", null, null, MessageImportance.High));
+                }
+            });
+
+            try
+            {
+                service.ProcessLoggingEvent(new BuildMessageEventArgs("outer", null, null, MessageImportance.High));
+                service.WaitForLoggingToProcessEvents();
+                logger.BuildMessageEvents.Select(e => e.Message).ShouldBe(["outer", "inner"]);
+            }
+            finally
+            {
+                service.ShutdownComponent();
+            }
+        }
+
         #region PrivateMethods
+
+        private static LoggingService CreateAsynchronousLoggingService(MockLogger logger)
+        {
+            var service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            service.InitializeComponent(new MockHost());
+            service.RegisterLogger(logger);
+            return service;
+        }
 
         /// <summary>
         /// Instantiate and Initialize a new loggingService.

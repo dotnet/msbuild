@@ -276,6 +276,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private AutoResetEvent _enqueueEvent;
 
+        private readonly bool _coalesceLoggingSignals = Environment.GetEnvironmentVariable("MSBUILDLOGGINGCOALESCESIGNALS") == "1";
+        private int _enqueueSignaled;
+        private int _waitingProducers;
+
         /// <summary>
         /// CTS for stopping logging event processing.
         /// </summary>
@@ -1376,12 +1380,34 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Block until queue is not full.
                     while (eventQueue.Count >= _queueCapacity)
                     {
-                        // Block and wait for dequeue event.
-                        dequeueEvent.WaitOne();
+                        if (_coalesceLoggingSignals)
+                        {
+                            Interlocked.Increment(ref _waitingProducers);
+                            try
+                            {
+                                // Register before checking again, so a dequeue cannot lose the wakeup.
+                                if (eventQueue.Count >= _queueCapacity)
+                                {
+                                    dequeueEvent.WaitOne();
+                                }
+                            }
+                            finally
+                            {
+                                Interlocked.Decrement(ref _waitingProducers);
+                            }
+                        }
+                        else
+                        {
+                            dequeueEvent.WaitOne();
+                        }
                     }
 
                     eventQueue.Enqueue(buildEvent);
-                    enqueueEvent.Set();
+                    if (!_coalesceLoggingSignals ||
+                        (Volatile.Read(ref _enqueueSignaled) == 0 && Interlocked.Exchange(ref _enqueueSignaled, 1) == 0))
+                    {
+                        enqueueEvent.Set();
+                    }
                 }
                 catch (ObjectDisposedException)
                 {
@@ -1505,10 +1531,20 @@ namespace Microsoft.Build.BackEnd.Logging
                         if (eventQueue.TryDequeue(out object ev))
                         {
                             LoggingEventProcessor(ev);
-                            dequeueEvent?.Set();
+                            if (!_coalesceLoggingSignals || Volatile.Read(ref _waitingProducers) != 0)
+                            {
+                                dequeueEvent?.Set();
+                            }
                         }
                         else
                         {
+                            if (_coalesceLoggingSignals)
+                            {
+                                // Rearm before checking the queue: a racing enqueue must either be
+                                // visible to IsEmpty below or signal the event before we wait.
+                                Interlocked.Exchange(ref _enqueueSignaled, 0);
+                            }
+
                             emptyQueueEvent?.Set();
 
                             // Wait for next event, or finish.

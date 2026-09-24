@@ -133,6 +133,15 @@ The logging mode is dictated by the `LoggerMode` that is injected into the `Logg
 
 Regardless of the mode used - sequential and isolated delivery of events is always guaranteed (single logger will not receive next event before returning from the previous, any logger will not receive an event while it's being processed by a different logger). The future versions might decide to deliver messages to separate loggers in independent mode - where a processing event by a single logger won't block other loggers.
 
+The experimental `MSBUILDLOGGINGCOALESCESIGNALS=1` switch coalesces asynchronous
+queue wakeups. Producers signal the consumer once per drain rather than once per
+event, and the consumer signals space availability only while producers are
+waiting for capacity. Producers register before rechecking capacity; the consumer
+rearms its notification before rechecking for work. These checks prevent missed
+wakeups. The queue capacity, event content and ordering, logger exception routing,
+and shutdown drain are unchanged. Synchronous logging is unaffected. The switch
+is off by default and is intended for paired performance experiments.
+
 
 ## Notable Loggers
 
@@ -140,4 +149,3 @@ Regardless of the mode used - sequential and isolated delivery of events is alwa
 * [Terminal logger](../terminallogger/)
 * Console logger ([parameters](https://github.com/dotnet/msbuild/blob/66e0371a64e08160e63000fc2ced8cb8bbc6739e/src/MSBuild/Resources/Strings.resx#L353-L388))
 * File logger ([parameters](https://github.com/dotnet/msbuild/blob/66e0371a64e08160e63000fc2ced8cb8bbc6739e/src/MSBuild/Resources/Strings.resx#L593-L620))
-

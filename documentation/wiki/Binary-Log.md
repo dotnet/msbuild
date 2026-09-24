@@ -74,6 +74,27 @@ https://msbuildlog.com/
 
 [see more details](Providing-Binary-Logs.md#capturing-binary-logs-through-visual-studio)
 
+# Experimental compression options
+
+`MSBUILDBINLOGASYNCCOMPRESSION=1` moves gzip compression and file writes to a
+dedicated worker. Event serialization and deduplication remain ordered on the
+logging thread. The pipeline holds at most four queued 64 KiB buffers, plus the
+producer's and consumer's buffers. Flush waits for preceding writes, and shutdown
+waits for the gzip footer and file closure. Write, flush, initialization, import
+archive, and finalization failures must release the worker and surface their
+errors; a finalization failure must not hide an earlier failure.
+An abrupt process termination that bypasses shutdown can lose the bounded,
+not-yet-written tail, in addition to events still in the logging service queue.
+
+`MSBUILDBINLOGFASTCOMPRESSION=1` uses `CompressionLevel.Fastest`, trading larger
+files for less compression CPU. Both options are off by default, can be combined,
+and preserve the existing decompressed binary-log format and content.
+
+Measure against binlogging disabled under the **same runtime/GC configuration**.
+Compression can be hidden by garbage-collection pauses in one configuration and
+be on the critical path in another. Switching to server GC is a separate runtime
+experiment, not a free reduction in binlog overhead; record its memory cost too.
+
 # Binary log file format
 
 The implementation of the binary logger is here:

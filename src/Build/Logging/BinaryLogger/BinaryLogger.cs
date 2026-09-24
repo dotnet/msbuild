@@ -146,6 +146,7 @@ namespace Microsoft.Build.Logging
         private const string ProjectImportsZipFileParameter = "ProjectImports=ZipFile";
 
         private Stream stream;
+        private bool _usePipelinedCompression;
         private BinaryWriter binaryWriter;
         private BuildEventArgsWriter eventArgsWriter;
         private ProjectImportsCollector projectImportsCollector;
@@ -350,6 +351,20 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
+            _usePipelinedCompression = Environment.GetEnvironmentVariable("MSBUILDBINLOGASYNCCOMPRESSION") == "1";
+            try
+            {
+                InitializeCore(eventSource);
+            }
+            catch (Exception exception)
+            {
+                DisposeStreamAfterFailure(exception);
+                throw;
+            }
+        }
+
+        private void InitializeCore(IEventSource eventSource)
+        {
             _initialTargetOutputLogging = Traits.Instance.EnableTargetOutputLogging;
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
             _initialIsBinaryLoggerEnabled = Environment.GetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED");
@@ -409,7 +424,13 @@ namespace Microsoft.Build.Logging
                 throw new LoggerException(message, e, errorCode, helpKeyword);
             }
 
-            stream = new GZipStream(stream, CompressionLevel.Optimal);
+            stream = new GZipStream(stream, Environment.GetEnvironmentVariable("MSBUILDBINLOGFASTCOMPRESSION") == "1"
+                ? CompressionLevel.Fastest
+                : CompressionLevel.Optimal);
+            if (_usePipelinedCompression)
+            {
+                stream = new PipelinedWriteStream(stream);
+            }
 
             // wrapping the GZipStream in a buffered stream significantly improves performance
             // and the max throughput is reached with a 32K buffer. See details here:
@@ -501,6 +522,38 @@ namespace Microsoft.Build.Logging
         /// Closes the underlying file stream.
         /// </summary>
         public void Shutdown()
+        {
+            try
+            {
+                ShutdownCore();
+            }
+            catch (Exception exception)
+            {
+                DisposeStreamAfterFailure(exception);
+                throw;
+            }
+        }
+
+        private void DisposeStreamAfterFailure(Exception failure)
+        {
+            if (!_usePipelinedCompression)
+            {
+                return;
+            }
+
+            Stream streamToDispose = stream;
+            stream = null;
+            try
+            {
+                streamToDispose?.Dispose();
+            }
+            catch (Exception cleanupFailure) when (!ReferenceEquals(failure, cleanupFailure))
+            {
+                throw new AggregateException(failure, cleanupFailure);
+            }
+        }
+
+        private void ShutdownCore()
         {
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging ? "true" : null);
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports ? "1" : null);
