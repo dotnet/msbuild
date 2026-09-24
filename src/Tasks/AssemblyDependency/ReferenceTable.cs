@@ -1077,6 +1077,7 @@ namespace Microsoft.Build.Tasks
             reference.FrameworkNameAttribute = frameworkName;
 
             var dependencies = new List<AssemblyNameExtension>(dependentAssemblies?.Length ?? 0);
+            HashSet<int> ownedRemappingIndices = null;
 
             if (dependentAssemblies?.Length > 0)
             {
@@ -1093,15 +1094,19 @@ namespace Microsoft.Build.Tasks
                         if (existingIndex >= 0)
                         {
                             AssemblyNameExtension existingExtension = dependencies[existingIndex];
-                            // Clone() shares the remapping set, so make a private name and set before merging.
-                            AssemblyNameExtension mergedExtension = new(existingExtension.AssemblyName.CloneIfPossible());
-                            foreach (AssemblyNameExtension priorRemapping in existingExtension.RemappedFromEnumerator)
+                            if ((ownedRemappingIndices ??= []).Add(existingIndex))
                             {
-                                mergedExtension.AddRemappedAssemblyName(priorRemapping);
+                                // Clone() shares the remapping set. Detach it only once, not for every alias.
+                                AssemblyNameExtension mergedExtension = new(existingExtension.AssemblyName.CloneIfPossible());
+                                foreach (AssemblyNameExtension priorRemapping in existingExtension.RemappedFromEnumerator)
+                                {
+                                    mergedExtension.AddRemappedAssemblyName(priorRemapping);
+                                }
+
+                                dependencies[existingIndex] = existingExtension = mergedExtension;
                             }
 
-                            mergedExtension.AddRemappedAssemblyName(dependency.CloneImmutable());
-                            dependencies[existingIndex] = mergedExtension;
+                            existingExtension.AddRemappedAssemblyName(dependency.CloneImmutable());
                             continue;
                         }
 
@@ -1115,6 +1120,11 @@ namespace Microsoft.Build.Tasks
 
                     if (!isMscorlib || dependency.Version.Major != 255)
                     {
+                        if (remappedExtension != null)
+                        {
+                            (ownedRemappingIndices ??= []).Add(dependencies.Count);
+                        }
+
                         dependencies.Add(dependency);
                     }
                 }
@@ -1735,6 +1745,7 @@ namespace Microsoft.Build.Tasks
                 moreResolvable = false;
                 foreach (Reference reference in References.Values)
                 {
+                    _cancellationToken.ThrowIfCancellationRequested();
                     if (!reference.IsResolved)
                     {
                         if (!reference.IsUnresolvable)
@@ -2729,7 +2740,9 @@ namespace Microsoft.Build.Tasks
             scatterFiles = scatterItems.ToArray();
 
             // Sort for stable outputs. (These came from a dictionary, which has undefined enumeration order.)
+            _cancellationToken.ThrowIfCancellationRequested();
             Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.GenericComparer);
+            _cancellationToken.ThrowIfCancellationRequested();
 
             // Find the copy-local items.
             FindCopyLocalItems(primaryFiles, copyLocalItems);
@@ -3040,10 +3053,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Given a list of items, find all that have CopyLocal==true and add it to the list.
         /// </summary>
-        private static void FindCopyLocalItems(ITaskItem[] items, List<ITaskItem> copyLocalItems)
+        private void FindCopyLocalItems(ITaskItem[] items, List<ITaskItem> copyLocalItems)
         {
             foreach (ITaskItem i in items)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
                 bool copyLocal = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                         i,
                         ItemMetadataNames.copyLocal,

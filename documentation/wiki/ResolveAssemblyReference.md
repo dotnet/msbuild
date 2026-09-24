@@ -94,9 +94,9 @@ Direct references that we started with are called Primary references. Indirect a
 
 In-process RAR implements `ICancelableTask`, allowing MSBuild to stop assembly resolution when a build is canceled. Cancellation is cooperative: RAR checks for cancellation while resolving references, traversing dependencies, and producing results. An in-progress synchronous file operation must finish before cancellation can be observed.
 
-A canceled invocation returns `false` without reporting cancellation as an assembly resolution error. This does not cancel an invocation already running in an out-of-process RAR node.
+A canceled invocation returns `false` without reporting cancellation as an assembly resolution error. If cancellation was requested before `Execute()`, RAR returns without starting resolution, including dispatch to an out-of-process RAR node. This does not cancel an invocation already running in an out-of-process RAR node. Resolution outputs may be incomplete when the task returns `false`.
 
-Cancellation is checked before writing the state file, not during serialization. Successfully read assembly metadata remains reusable by later tasks; dependency remapping is kept task-local rather than modifying the shared raw metadata.
+Cancellation is checked before writing the state file, not during serialization or the subsequent recording of that file in `FilesWritten`. A write already in progress may finish before the task returns `false`; the completed file is still reported in `FilesWritten`. Successfully read assembly metadata remains reusable by later tasks; dependency remapping is kept task-local rather than modifying the shared raw metadata.
 
 ## Results
 

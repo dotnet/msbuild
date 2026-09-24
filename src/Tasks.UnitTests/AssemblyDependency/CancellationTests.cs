@@ -7,10 +7,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
@@ -25,20 +27,146 @@ public sealed class CancellationTests(ITestOutputHelper output)
     private readonly ITestOutputHelper _output = output;
 
     [Fact]
-    public void CancelBeforeExecute()
+    public void CanceledEmptyReferenceOutputsStopBeforeSorting()
     {
-        MockEngine engine = new(_output);
-        ResolveAssemblyReference task = new() { BuildEngine = engine };
+        using CancellationTokenSource cancellation = new();
+        ReferenceTable table = CreateReferenceTable(cancellation.Token);
+        cancellation.Cancel();
+
+        Should.Throw<OperationCanceledException>(() =>
+            table.GetReferenceItems(out _, out _, out _, out _, out _, out _, out _))
+            .CancellationToken.ShouldBe(cancellation.Token);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CopyLocalScanStopsAfterCancellation(bool firstItemIsCopyLocal)
+    {
+        using CancellationTokenSource cancellation = new();
+        ReferenceTable table = CreateReferenceTable(cancellation.Token);
+        MethodInfo method = typeof(ReferenceTable).GetMethod("FindCopyLocalItems", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        Type callbackType = typeof(Action<ITaskItem[], List<ITaskItem>>);
+        var findCopyLocalItems = (Action<ITaskItem[], List<ITaskItem>>)method.CreateDelegate(callbackType, table);
+        int metadataReads = 0;
+        ITaskItem[] items =
+        [
+            new CallbackTaskItem("first.dll", () =>
+            {
+                metadataReads++;
+                cancellation.Cancel();
+                return firstItemIsCopyLocal.ToString();
+            }),
+            new CallbackTaskItem("second.dll", () =>
+            {
+                metadataReads++;
+                return "true";
+            })
+        ];
+        List<ITaskItem> copyLocal = [];
+
+        Should.Throw<OperationCanceledException>(() => findCopyLocalItems(items, copyLocal))
+            .CancellationToken.ShouldBe(cancellation.Token);
+        metadataReads.ShouldBe(1);
+        copyLocal.Count.ShouldBe(firstItemIsCopyLocal ? 1 : 0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CancelBeforeExecute(bool outOfProc)
+    {
+        MockEngine engine = new(_output) { SetIsOutOfProcRarNodeEnabled = outOfProc };
+        ResolveAssemblyReference task = new()
+        {
+            BuildEngine = engine,
+            AllowOutOfProcNode = outOfProc,
+            Assemblies = [],
+            SearchPaths = []
+        };
         ICancelableTask cancelable = task;
-
         cancelable.Cancel();
         cancelable.Cancel();
 
-        task.Execute().ShouldBeFalse();
+        bool result = task.Execute();
+        using OutOfProcRarClient? client = engine.GetRegisteredTaskObject(
+            OutOfProcRarClient.TaskObjectCacheKey, RegisteredTaskObjectLifetime.Build) as OutOfProcRarClient;
+        result.ShouldBeFalse();
+        client.ShouldBeNull();
         task.ResolvedFiles.ShouldBeEmpty();
         task.FilesWritten.ShouldBeEmpty();
         engine.Errors.ShouldBe(0);
         engine.Warnings.ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CancelDuringSerializationRecordsCompletedState(bool relativeStatePath)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string directory = env.CreateFolder().Path;
+        ResolveAssemblyReference task = CreateTask(directory);
+        if (relativeStatePath)
+        {
+            env.SetCurrentDirectory(directory);
+            task.StateFile = "references.cache";
+        }
+        bool resolving = false;
+        bool canceled = false;
+        env.WithTransientTestState(new FileSystemScope(path =>
+        {
+            if (resolving && !canceled && path == Path.GetFullPath(task.StateFile))
+            {
+                canceled = true;
+                task.Cancel();
+            }
+        }));
+
+        Execute(task, getAssemblyName: path =>
+        {
+            resolving = true;
+            return GetAssemblyName(path);
+        }).ShouldBeFalse();
+
+        canceled.ShouldBeTrue();
+        File.Exists(task.StateFile).ShouldBeTrue();
+        StateFileBase.DeserializeCache<SystemState>(task.StateFile, task.Log).ShouldNotBeNull();
+        task.FilesWritten.ShouldHaveSingleItem().ItemSpec.ShouldBe(task.StateFile);
+        ((MockEngine)task.BuildEngine).Errors.ShouldBe(0);
+        ((MockEngine)task.BuildEngine).Warnings.ShouldBe(0);
+        byte[] state = File.ReadAllBytes(task.StateFile);
+        ResolveAssemblyReference recovered = CreateTask(directory);
+        Execute(recovered, getAssemblyName: _ => throw new InvalidOperationException("Reuse the completed cache.")).ShouldBeTrue();
+        AssertSameOutputs(task, recovered);
+        File.ReadAllBytes(task.StateFile).ShouldBe(state);
+    }
+
+    [Fact]
+    public void CancelDuringLoggingRecovers()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string directory = env.CreateFolder().Path;
+        ResolveAssemblyReference? canceling = null;
+        bool canceled = false;
+        MockEngine engine = new(new CallbackOutput(_output, _ =>
+        {
+            if (!canceled && canceling!.FilesWritten.Length != 0)
+            {
+                canceled = true;
+                canceling.Cancel();
+            }
+        }));
+        canceling = CreateTask(directory, engine);
+        Execute(canceling).ShouldBeFalse();
+        canceled.ShouldBeTrue();
+        canceling.FilesWritten.ShouldHaveSingleItem().ItemSpec.ShouldBe(canceling.StateFile);
+        StateFileBase.DeserializeCache<SystemState>(canceling.StateFile, canceling.Log).ShouldNotBeNull();
+        engine.Errors.ShouldBe(0);
+        engine.Warnings.ShouldBe(0);
+        ResolveAssemblyReference recovered = CreateTask(directory);
+        Execute(recovered).ShouldBeTrue();
+        AssertSameOutputs(canceling, recovered);
     }
 
     [Theory]
@@ -238,6 +366,67 @@ public sealed class CancellationTests(ITestOutputHelper output)
         existingTarget.RemappedFromEnumerator.ShouldBeEmpty();
         engine.Errors.ShouldBe(0);
         engine.Warnings.ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ManyRemappingAliasesPreserveSharedIdentities(bool targetFirst)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string directory = env.CreateFolder().Path;
+        string redist = env.CreateFile(fileName: "remapping.xml", contents: """
+            <FileList Redist="TestFramework">
+              <File AssemblyName="Unused" Version="1.0.0.0" Culture="neutral" PublicKeyToken="null" InGAC="false" />
+              <Remap>
+                <From AssemblyName="B">
+                  <To AssemblyName="C" Version="1.0.0.0" Culture="neutral" PublicKeyToken="null" />
+                </From>
+              </Remap>
+            </FileList>
+            """).Path;
+        AssemblyNameExtension target = GetAssemblyName("C.dll");
+        AssemblyNameExtension priorAlias = GetAssemblyName("Prior.dll").CloneImmutable();
+        target.AddRemappedAssemblyName(priorAlias);
+        AssemblyNameExtension[] aliases = Enumerable.Range(1, 3)
+            .Select(version => new AssemblyNameExtension($"B, Version={version}.0.0.0, Culture=neutral, PublicKeyToken=null"))
+            .ToArray();
+        AssemblyNameExtension nestedAlias = GetAssemblyName("Nested.dll").CloneImmutable();
+        aliases[0].AddRemappedAssemblyName(nestedAlias);
+        AssemblyNameExtension[] raw = targetFirst ? [target, .. aliases] : [.. aliases, target];
+        AssemblyNameExtension[] originalIdentities = [.. raw];
+        string[] originalNames = raw.Select(name => name.FullName).ToArray();
+        ResolveAssemblyReference task = CreateTask(directory);
+        task.Assemblies = [new TaskItem("A")];
+        task.InstalledAssemblyTables = [new TaskItem(redist)];
+        Execute(task, getAssemblyMetadata: (
+            string path,
+            ConcurrentDictionary<string, AssemblyMetadata> cache,
+            out AssemblyNameExtension[] dependencies,
+            out string[] scatterFiles,
+            out FrameworkName? frameworkName) =>
+        {
+            dependencies = Path.GetFileNameWithoutExtension(path) == "A" ? raw : [];
+            scatterFiles = [];
+            frameworkName = null;
+        }).ShouldBeTrue();
+        task.ResolvedDependencyFiles.ShouldHaveSingleItem().GetMetadata("FusionName").ShouldBe(target.FullName);
+        string log = ((MockEngine)task.BuildEngine).Log;
+        foreach (AssemblyNameExtension alias in aliases)
+        {
+            log.ShouldContain(alias.FullName);
+        }
+        log.ShouldContain(priorAlias.FullName);
+        raw.Select(name => name.FullName).ShouldBe(originalNames);
+        for (int i = 0; i < raw.Length; i++)
+        {
+            raw[i].ShouldBeSameAs(originalIdentities[i]);
+        }
+        target.RemappedFromEnumerator.ShouldHaveSingleItem().ShouldBeSameAs(priorAlias);
+        aliases[0].RemappedFromEnumerator.ShouldHaveSingleItem().ShouldBeSameAs(nestedAlias);
+        aliases.Skip(1).ShouldAllBe(alias => !alias.RemappedFromEnumerator.Any());
+        ((MockEngine)task.BuildEngine).Errors.ShouldBe(0);
+        ((MockEngine)task.BuildEngine).Warnings.ShouldBe(0);
     }
 
     [Theory]
@@ -447,6 +636,16 @@ public sealed class CancellationTests(ITestOutputHelper output)
         assemblyReads.ShouldBeGreaterThan(0);
     }
 
+    private ReferenceTable CreateReferenceTable(CancellationToken cancellationToken) => new(
+        null, false, false, false, false, false, [], [], [], [], [], [], null,
+        System.Reflection.ProcessorArchitecture.None, _ => true, _ => true, (_, _) => [], GetAssemblyName, null,
+#if FEATURE_WIN32_REGISTRY
+        null, null, null,
+#endif
+        null, null, new Version(4, 0), null, new ResolveAssemblyReference { BuildEngine = new MockEngine(_output) }.Log,
+        [], true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None,
+        false, false, null, [], TaskEnvironmentHelper.CreateForTest(), cancellationToken);
+
     private ResolveAssemblyReference CreateTask(string directory, MockEngine? engine = null) => new()
     {
         BuildEngine = engine ?? new MockEngine(_output),
@@ -496,6 +695,68 @@ public sealed class CancellationTests(ITestOutputHelper output)
 
     private static AssemblyNameExtension GetAssemblyName(string path) =>
         new($"{Path.GetFileNameWithoutExtension(path)}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+
+    private sealed class FileSystemScope : TransientTestState, IFileSystem
+    {
+        private readonly IFileSystem _original = FileSystems.Default;
+        private readonly Action<string> _onFileExists;
+
+        public FileSystemScope(Action<string> onFileExists)
+        {
+            _onFileExists = onFileExists;
+            FileSystems.Default = this;
+        }
+
+        public override void Revert() => FileSystems.Default = _original;
+        public bool FileExists(string path)
+        {
+            _onFileExists(path);
+            return _original.FileExists(path);
+        }
+
+        public TextReader ReadFile(string path) => _original.ReadFile(path);
+        public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => _original.GetFileStream(path, mode, access, share);
+        public string ReadFileAllText(string path) => _original.ReadFileAllText(path);
+        public byte[] ReadFileAllBytes(string path) => _original.ReadFileAllBytes(path);
+        public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => _original.EnumerateFiles(path, searchPattern, searchOption);
+        public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => _original.EnumerateDirectories(path, searchPattern, searchOption);
+        public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => _original.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+        public FileAttributes GetAttributes(string path) => _original.GetAttributes(path);
+        public DateTime GetLastWriteTimeUtc(string path) => _original.GetLastWriteTimeUtc(path);
+        public bool DirectoryExists(string path) => _original.DirectoryExists(path);
+        public bool FileOrDirectoryExists(string path) => _original.FileOrDirectoryExists(path);
+    }
+
+    private sealed class CallbackTaskItem(string itemSpec, Func<string> getCopyLocal) : ITaskItem
+    {
+        private readonly TaskItem _item = new(itemSpec);
+        public string ItemSpec { get => _item.ItemSpec; set => _item.ItemSpec = value; }
+        public ICollection MetadataNames => _item.MetadataNames;
+        public int MetadataCount => _item.MetadataCount;
+        public string GetMetadata(string metadataName) =>
+            metadataName == "CopyLocal" ? getCopyLocal() : _item.GetMetadata(metadataName);
+        public void SetMetadata(string metadataName, string metadataValue) => _item.SetMetadata(metadataName, metadataValue);
+        public void RemoveMetadata(string metadataName) => _item.RemoveMetadata(metadataName);
+        public void CopyMetadataTo(ITaskItem destinationItem) => _item.CopyMetadataTo(destinationItem);
+        public IDictionary CloneCustomMetadata() => _item.CloneCustomMetadata();
+    }
+
+    private sealed class CallbackOutput(ITestOutputHelper inner, Action<string> callback) : ITestOutputHelper
+    {
+        public string Output => inner.Output;
+        public void Write(string message)
+        {
+            inner.Write(message);
+            callback(message);
+        }
+        public void Write(string format, params object[] args) => Write(string.Format(format, args));
+        public void WriteLine(string message)
+        {
+            inner.WriteLine(message);
+            callback(message);
+        }
+        public void WriteLine(string format, params object[] args) => WriteLine(string.Format(format, args));
+    }
 
     private static DateTime GetLastWriteTime(string path) =>
         path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)

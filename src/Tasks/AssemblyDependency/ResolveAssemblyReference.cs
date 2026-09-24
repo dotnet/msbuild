@@ -2847,7 +2847,7 @@ namespace Microsoft.Build.Tasks
                     ReferenceTable dependencyTable = null;
 
                     // Wrap the GetLastWriteTime callback with a check for SDK/immutable files.
-                    _cache.SetGetLastWriteTime(path =>
+                    GetLastWriteTime getLastWriteTimeForCache = path =>
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         if (dependencyTable?.IsImmutableFile(path) == true)
@@ -2857,7 +2857,8 @@ namespace Microsoft.Build.Tasks
                             return SystemState.FileState.ImmutableFileLastModifiedMarker;
                         }
                         return getLastWriteTime(path);
-                    });
+                    };
+                    _cache.SetGetLastWriteTime(getLastWriteTimeForCache);
 
                     // Wrap the GetAssemblyName and GetRuntimeVersion callbacks with a check for SDK/immutable files.
                     GetAssemblyName originalGetAssemblyName = getAssemblyName;
@@ -3134,12 +3135,22 @@ namespace Microsoft.Build.Tasks
                     this.DependsOnNETStandard = useNetStandard.ToString();
 
                     cancellationToken.ThrowIfCancellationRequested();
-                    WriteStateFile();
-
-                    // Save the new state out and put into the file exists if it is actually on disk.
-                    if (_stateFile.Value is not null && fileExists(_stateFile.Value))
+                    // Resolution is finished. Neither serialization nor accounting for its completed file may
+                    // observe cancellation, including through SystemState's cached file-existence callback.
+                    _cache.SetGetLastWriteTime(getLastWriteTime);
+                    try
                     {
-                        _filesWritten.Add(new TaskItem(_stateFile.OriginalValue));
+                        WriteStateFile();
+
+                        // Save the new state out and put into the file exists if it is actually on disk.
+                        if (_stateFile.Value is not null && cachedFileExists(_stateFile.Value))
+                        {
+                            _filesWritten.Add(new TaskItem(_stateFile.OriginalValue));
+                        }
+                    }
+                    finally
+                    {
+                        _cache.SetGetLastWriteTime(getLastWriteTimeForCache);
                     }
 
                     // Log the results.
@@ -3771,6 +3782,11 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                return false;
+            }
+
             if (AllowOutOfProcNode
                 && BuildEngine is IBuildEngine10 buildEngine10
                 && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
