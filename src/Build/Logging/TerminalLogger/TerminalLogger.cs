@@ -1626,16 +1626,10 @@ public sealed partial class TerminalLogger : INodeLogger
 
         string rendered = newFrame.Render(_currentFrame);
 
-        // Hide the cursor to prevent it from jumping around as we overwrite the live lines.
-        Terminal.Write(AnsiCodes.HideCursor);
-        try
-        {
-            Terminal.Write(rendered);
-        }
-        finally
-        {
-            Terminal.Write(AnsiCodes.ShowCursor);
-        }
+        // Emit the frame as one write so the terminal cannot present a half-updated block, and ask
+        // terminals that support it to hold the frame until it is complete. The cursor stays hidden
+        // meanwhile so it does not jump around as the live lines are overwritten.
+        Terminal.Write($"{AnsiCodes.BeginSynchronizedUpdate}{AnsiCodes.HideCursor}{rendered}{AnsiCodes.ShowCursor}{AnsiCodes.EndSynchronizedUpdate}");
 
         _currentFrame = newFrame;
     }

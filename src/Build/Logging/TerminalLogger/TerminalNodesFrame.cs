@@ -158,7 +158,10 @@ internal sealed class TerminalNodesFrame
         int previousPhysicalRows = previousFrame.GetPhysicalRows(TerminalWidth);
         sb.AppendLine($"{AnsiCodes.CSI}{previousPhysicalRows + 1}{AnsiCodes.MoveUpToLineStart}");
 
-        bool redrawAll = previousPhysicalRows > previousFrame.NodesCount || ProgressCount > 0 || previousFrame.ProgressCount > 0;
+        // More physical rows than logical lines means something wrapped, and the per-line diff below
+        // cannot track where those extra rows landed.
+        bool previousFrameWrapped = previousPhysicalRows > previousFrame.NodesCount + previousFrame.ProgressCount;
+        bool redrawAll = previousFrameWrapped || ProgressLayoutShifts(previousFrame);
         if (redrawAll)
         {
             sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
@@ -206,11 +209,11 @@ internal sealed class TerminalNodesFrame
             // Show this project's operations underneath it. A trailing block would not say which
             // project each operation belongs to, and several projects often download similarly
             // named files at once.
-            RenderProgressForNode(sb, _nodeIndexes[i]);
+            RenderProgressForNode(sb, _nodeIndexes[i], redrawAll);
         }
 
         // Operations whose project is no longer displayed still have to go somewhere.
-        RenderOrphanedProgress(sb);
+        RenderOrphanedProgress(sb, redrawAll);
 
         // clear no longer used lines
         if (!redrawAll && i < previousFrame.NodesCount)
@@ -221,13 +224,63 @@ internal sealed class TerminalNodesFrame
         return sb.ToString();
     }
 
-    private void RenderProgressForNode(StringBuilder sb, int nodeIndex)
+    /// <summary>
+    /// Returns whether operations move the node rows to different lines than they occupied in
+    /// <paramref name="previousFrame"/>, which is the one case the per-line diff in <see cref="Render"/>
+    /// cannot follow.
+    /// </summary>
+    /// <remarks>
+    /// Operations render between the node rows, so a node row's line depends on how many operations were
+    /// drawn above it. As long as that count is unchanged, every line keeps its place and the text on it
+    /// can be rewritten in place, which avoids erasing and repainting the whole block on each update.
+    /// </remarks>
+    private bool ProgressLayoutShifts(TerminalNodesFrame previousFrame)
+    {
+        if (ProgressCount == 0 && previousFrame.ProgressCount == 0)
+        {
+            return false;
+        }
+
+        if (ProgressCount != previousFrame.ProgressCount)
+        {
+            return true;
+        }
+
+        int commonNodes = Math.Min(NodesCount, previousFrame.NodesCount);
+        for (int i = 0; i < commonNodes; i++)
+        {
+            int nodeIndex = _nodeIndexes[i];
+            if (nodeIndex != previousFrame._nodeIndexes[i]
+                || ProgressCountForNode(nodeIndex) != previousFrame.ProgressCountForNode(nodeIndex))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private int ProgressCountForNode(int nodeIndex)
+    {
+        int count = 0;
+        for (int progressIndex = 0; progressIndex < _progress.Length; progressIndex++)
+        {
+            if (_progress[progressIndex].NodeIndex == nodeIndex)
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    private void RenderProgressForNode(StringBuilder sb, int nodeIndex, bool redrawAll)
     {
         for (int progressIndex = 0; progressIndex < _progress.Length; progressIndex++)
         {
             if (_progress[progressIndex].NodeIndex == nodeIndex)
             {
-                sb.Append(_progress[progressIndex].Render(Math.Max(Width, 1))).AppendLine();
+                AppendProgressLine(sb, _progress[progressIndex], redrawAll);
             }
         }
     }
@@ -236,15 +289,27 @@ internal sealed class TerminalNodesFrame
     /// Renders operations that no displayed node claims, which happens when a task reports progress
     /// without a node or when the project row disappears before the operation ends.
     /// </summary>
-    private void RenderOrphanedProgress(StringBuilder sb)
+    private void RenderOrphanedProgress(StringBuilder sb, bool redrawAll)
     {
         for (int progressIndex = 0; progressIndex < _progress.Length; progressIndex++)
         {
             if (!IsNodeDisplayed(_progress[progressIndex].NodeIndex))
             {
-                sb.Append(_progress[progressIndex].Render(Math.Max(Width, 1))).AppendLine();
+                AppendProgressLine(sb, _progress[progressIndex], redrawAll);
             }
         }
+    }
+
+    private void AppendProgressLine(StringBuilder sb, TerminalProgressStatus progress, bool redrawAll)
+    {
+        // An operation's text shrinks as often as it grows, so clear the rest of the line first.
+        // After a full erase there is nothing left to clear.
+        if (!redrawAll)
+        {
+            sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
+        }
+
+        sb.Append(progress.Render(Math.Max(Width, 1))).AppendLine();
     }
 
     private bool IsNodeDisplayed(int nodeIndex)

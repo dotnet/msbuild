@@ -103,6 +103,20 @@ internal static class AnsiCodes
     public const string ShowCursor = "\x1b[?25h";
 
     /// <summary>
+    /// Asks the terminal to hold rendering until <see cref="EndSynchronizedUpdate"/>, so a frame is
+    /// presented all at once instead of line by line.
+    /// </summary>
+    /// <remarks>
+    /// Terminals that do not implement this mode ignore it, so it is safe to always emit.
+    /// </remarks>
+    public const string BeginSynchronizedUpdate = "\x1b[?2026h";
+
+    /// <summary>
+    /// Ends the update begun by <see cref="BeginSynchronizedUpdate"/> and presents the frame.
+    /// </summary>
+    public const string EndSynchronizedUpdate = "\x1b[?2026l";
+
+    /// <summary>
     /// Set progress state to a busy spinner. <br/>
     /// Note: this code works only on ConEmu terminals, and conflicts with push a notification code on iTerm2.
     /// </summary>

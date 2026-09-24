@@ -66,9 +66,49 @@ public class NodeStatus_Transition_Tests
         rendered.ShouldContain("orphan.zip");
     }
 
+    /// <summary>
+    /// Operations update many times a second, so a frame that keeps every line in place has to update
+    /// those lines rather than erase and repaint the whole block, which the terminal shows as flicker.
+    /// </summary>
     [Fact]
-    public void NodeStatusTargetThrowsForInputWithAnsi()
+    public void ProgressUpdateDoesNotEraseTheWholeBlockWhenLinesKeepTheirPlace()
     {
+        TerminalNodeStatus node = new("Only.Project", null, null, "Build", new MockStopwatch());
+        TaskProgressStartedEventArgs started = new(1, "Downloading main.zip", TaskProgressUnit.Bytes);
+
+        TerminalProgressStatus before = new(started, 0);
+        TerminalNodesFrame previousFrame = new([node], [before], width: 120, height: 10);
+        previousFrame.Render(new TerminalNodesFrame([], width: 120, height: 10));
+
+        TerminalProgressStatus after = new(started, 0);
+        after.Update(new TaskProgressUpdatedEventArgs(1, 2, 512, 1024, "Downloading"));
+        string rendered = new TerminalNodesFrame([node], [after], width: 120, height: 10).Render(previousFrame);
+
+        rendered.ShouldNotContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+        rendered.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
+        rendered.ShouldContain("512 of 1,024 bytes");
+    }
+
+    /// <summary>
+    /// Starting or finishing an operation moves every line below it, so that frame does need a full repaint.
+    /// </summary>
+    [Fact]
+    public void StartingAnotherOperationRedrawsTheWholeBlock()
+    {
+        TerminalNodeStatus node = new("Only.Project", null, null, "Build", new MockStopwatch());
+        TerminalProgressStatus first = new(new TaskProgressStartedEventArgs(1, "Downloading first.zip", TaskProgressUnit.Bytes), 0);
+
+        TerminalNodesFrame previousFrame = new([node], [first], width: 120, height: 10);
+        previousFrame.Render(new TerminalNodesFrame([], width: 120, height: 10));
+
+        TerminalProgressStatus second = new(new TaskProgressStartedEventArgs(2, "Downloading second.zip", TaskProgressUnit.Bytes), 0);
+        string rendered = new TerminalNodesFrame([node], [first, second], width: 120, height: 10).Render(previousFrame);
+
+        rendered.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+    }
+
+    [Fact]
+    public void NodeStatusTargetThrowsForInputWithAnsi()    {
 #if DEBUG
         // This is testing a Debug.Assert, which won't throw in Release mode.
         Func<TerminalNodeStatus> newNodeStatus = () => new TerminalNodeStatus("project", "tfm", "rid", AnsiCodes.Colorize("colorized target", TerminalColor.Green), new MockStopwatch());
