@@ -21,6 +21,15 @@ functions, item timestamp metadata, registry reads, failed SDK resolution, and
 evaluation diagnostics make a manifest non-cacheable. This status is observation
 metadata only; evaluation continues with its existing behavior.
 
+The engine also contains a standalone file-system validator for the recorded
+manifest. It rejects non-cacheable manifests and compares every recorded path's
+kind, last-write time in UTC, and length with a fresh file-system observation.
+This timestamp-and-length model intentionally does not hash content, monitor the
+file system, or protect against concurrent writers, so a same-size content change
+whose timestamp is preserved is not detected. At this layer the helper does not
+validate environment reads or rerun SDK resolvers, and a successful check does not
+authorize reuse of an evaluation result.
+
 The switch is intended for diagnostics and development of later evaluation-cache
 layers. It does not enable an evaluation cache or provide a compatibility contract
 for consuming the internal manifest.
