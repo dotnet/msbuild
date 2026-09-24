@@ -168,6 +168,10 @@
     <Compile Include="BackEnd\Client\MSBuildClientExitResult.cs" />
     <Compile Include="BackEnd\Client\MSBuildClient.cs" />
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
+    <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCache.cs" />
+    <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCacheEntry.cs" />
+    <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCacheKey.cs" />
+    <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotValidator.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\Experimental\*.cs" />
