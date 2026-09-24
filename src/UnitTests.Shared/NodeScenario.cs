@@ -105,6 +105,7 @@ internal sealed class NodeScenario : IDisposable
     private readonly List<BuildManager> _buildManagers = [];
     private readonly List<NodeFaultSpec> _faults = [];
     private readonly HashSet<int> _allowedSurvivors = [];
+    private readonly List<(string ContentSubstring, string Reason)> _allowedFailureDumps = [];
 
     private int _assertionFailures;
     private bool _failureReported;
@@ -303,6 +304,21 @@ internal sealed class NodeScenario : IDisposable
         lock (_lock)
         {
             _allowedSurvivors.Add(processId);
+        }
+    }
+
+    /// <summary>
+    /// Accepts MSBuild failure dumps (<c>MSBuild_pid-*.failure.txt</c>) whose contents contain
+    /// <paramref name="contentSubstring"/>. Without this, any failure dump a scenario process writes fails the test,
+    /// just like <see cref="BuildFailureLogInvariant"/> does for other tests. Always give a reason, ideally an issue link.
+    /// </summary>
+    public void AllowFailureDump(string contentSubstring, string reason)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(contentSubstring);
+        ArgumentException.ThrowIfNullOrEmpty(reason);
+        lock (_lock)
+        {
+            _allowedFailureDumps.Add((contentSubstring, reason));
         }
     }
 
@@ -534,6 +550,16 @@ internal sealed class NodeScenario : IDisposable
             {
                 errors.Add(ex);
             }
+
+            // Only after every process is gone, so no dump can still be written.
+            try
+            {
+                leaks.AddRange(FindUnexpectedFailureDumps());
+            }
+            catch (Exception ex)
+            {
+                errors.Add(ex);
+            }
         }
         finally
         {
@@ -543,7 +569,7 @@ internal sealed class NodeScenario : IDisposable
             if (leaks.Count > 0 || errors.Count > 0 || testFailed)
             {
                 string reason = leaks.Count > 0
-                    ? "Processes leaked from the scenario and were killed:" + System.Environment.NewLine + string.Join(System.Environment.NewLine, leaks)
+                    ? "The scenario left processes or failure dumps behind:" + System.Environment.NewLine + string.Join(System.Environment.NewLine, leaks)
                     : errors.Count > 0 ? "The scenario did not shut down cleanly: " + errors[0] : "The test failed.";
                 report = BuildReport(reason);
                 if (!_failureReported)
@@ -573,6 +599,45 @@ internal sealed class NodeScenario : IDisposable
                 throw new XunitException(report);
             }
         }
+    }
+
+    private List<string> FindUnexpectedFailureDumps()
+    {
+        List<string> unexpected = [];
+        foreach (string directory in new[] { DebugDirectory, TempDirectory })
+        {
+            if (!Directory.Exists(directory))
+            {
+                continue;
+            }
+
+            foreach (string file in Directory.EnumerateFiles(directory, "MSBuild*failure.txt", SearchOption.AllDirectories))
+            {
+                string contents = File.ReadAllText(file);
+                string? allowedBecause = null;
+                lock (_lock)
+                {
+                    foreach ((string substring, string reason) in _allowedFailureDumps)
+                    {
+                        if (contents.Contains(substring))
+                        {
+                            allowedBecause = reason;
+                            break;
+                        }
+                    }
+                }
+
+                if (allowedBecause is not null)
+                {
+                    Log($"Accepted failure dump {Path.GetFileName(file)} ({allowedBecause}).");
+                    continue;
+                }
+
+                unexpected.Add($"  failure dump {Path.GetFileName(file)}:{System.Environment.NewLine}{contents}");
+            }
+        }
+
+        return unexpected;
     }
 
     private List<string> ReapProcesses()
