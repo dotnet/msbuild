@@ -654,7 +654,7 @@ namespace Microsoft.Build.Execution
         /// Assumes the project path is already normalized.
         /// Used by the RequestBuilder.
         /// </summary>
-        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId, ProjectLoadSettings? projectLoadSettings)
+        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId, ProjectLoadSettings? projectLoadSettings, EvaluationInputKey evaluationInputKey = null)
         {
             ArgumentException.ThrowIfNullOrEmpty(projectFile);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -662,7 +662,7 @@ namespace Microsoft.Build.Execution
 
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, false /*Not explicitly loaded*/);
 
-            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId, projectLoadSettings);
+            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId, projectLoadSettings, evaluationInputKey: evaluationInputKey);
         }
 
         /// <summary>
@@ -670,12 +670,12 @@ namespace Microsoft.Build.Execution
         /// Assumes the project path is already normalized.
         /// Used by this class when generating legacy solution wrappers.
         /// </summary>
-        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId)
+        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId, ProjectLoadSettings? projectLoadSettings = null, EvaluationInputKey evaluationInputKey = null)
         {
             ArgumentNullException.ThrowIfNull(xml);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ArgumentNullException.ThrowIfNull(buildParameters);
-            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId);
+            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId, projectLoadSettings, evaluationInputKey: evaluationInputKey);
         }
 
         /// <summary>
@@ -3470,7 +3470,8 @@ namespace Microsoft.Build.Execution
             ProjectLoadSettings? projectLoadSettings = null,
             EvaluationContext evaluationContext = null,
             IDirectoryCacheFactory directoryCacheFactory = null,
-            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full,
+            EvaluationInputKey evaluationInputKey = null)
         {
             ArgumentNullException.ThrowIfNull(xml);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
@@ -3577,7 +3578,8 @@ namespace Microsoft.Build.Execution
                 submissionId,
                 evaluationContext,
                 interactive: buildParameters.Interactive,
-                evaluationStage: evaluationStage);
+                evaluationStage: evaluationStage,
+                evaluationInputKey: evaluationInputKey);
 
             _evaluationStage = evaluationStage;
 

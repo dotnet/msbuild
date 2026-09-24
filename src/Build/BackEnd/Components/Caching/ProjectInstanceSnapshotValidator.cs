@@ -70,6 +70,24 @@ internal sealed class RejectingProjectInstanceSnapshotValidator : IProjectInstan
     }
 }
 
+internal sealed class UnsafeProjectInstanceSnapshotValidator : IProjectInstanceSnapshotValidator
+{
+    internal static UnsafeProjectInstanceSnapshotValidator Instance { get; } = new();
+
+    private UnsafeProjectInstanceSnapshotValidator()
+    {
+    }
+
+    public ProjectInstanceSnapshotValidationResult Validate(
+        ProjectInstanceSnapshotCacheKey key,
+        ProjectInstanceSnapshotCacheEntry entry)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(entry);
+        return ProjectInstanceSnapshotValidationResult.Valid;
+    }
+}
+
 internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInstanceSnapshotValidator
 {
     internal static FileSystemProjectInstanceSnapshotValidator Instance { get; } = new();
