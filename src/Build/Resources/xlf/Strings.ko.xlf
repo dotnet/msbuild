@@ -1150,6 +1150,51 @@ Errors: {3}</source>
         <target state="translated">작업 "{0}"은(는) 호출한 MSBuild 프로세스 {2}(이)가 생성한 TaskHost 프로세스 {1}에서 실행되었습니다. 이 호출에 대해 새 TaskHost가 생성되었습니다: {3}. TaskHost는 재사용 가능한 사이드카입니다: {4}. 노드 재사용: {5}.</target>
         <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
+      <trans-unit id="TaskProgressAbandoned">
+        <source>{0} ended without a reported outcome: {1}</source>
+        <target state="new">{0} ended without a reported outcome: {1}</target>
+        <note>LOCALIZATION: {0} is the title of a task progress operation, for example "Downloading tools.zip". {1} is the amount of work done, for example "512 of 512 bytes".</note>
+      </trans-unit>
+      <trans-unit id="TaskProgressBytes">
+        <source>{0} bytes</source>
+        <target state="new">{0} bytes</target>
+        <note>LOCALIZATION: {0} is the number of bytes processed. The total is not known.</note>
+      </trans-unit>
+      <trans-unit id="TaskProgressBytesOfTotal">
+        <source>{0} of {1} bytes</source>
+        <target state="new">{0} of {1} bytes</target>
+        <note>LOCALIZATION: {0} is the number of bytes processed and {1} is the total number of bytes.</note>
+      </trans-unit>
+      <trans-unit id="TaskProgressCanceled">
+        <source>{0} canceled: {1}</source>
+        <target state="new">{0} canceled: {1}</target>
+        <note>LOCALIZATION: {0} is the title of a task progress operation, for example "Downloading tools.zip". {1} is the amount of work done, for example "512 of 512 bytes".</note>
+      </trans-unit>
+      <trans-unit id="TaskProgressCompleted">
+        <source>{0} completed: {1}</source>
+        <target state="new">{0} completed: {1}</target>
+        <note>LOCALIZATION: {0} is the title of a task progress operation, for example "Downloading tools.zip". {1} is the amount of work done, for example "512 of 512 bytes".</note>
+      </trans-unit>
+      <trans-unit id="TaskProgressFailed">
+        <source>{0} failed: {1}</source>
+        <target state="new">{0} failed: {1}</target>
+        <note>LOCALIZATION: {0} is the title of a task progress operation, for example "Downloading tools.zip". {1} is the amount of work done, for example "512 of 512 bytes".</note>
+      </trans-unit>
+      <trans-unit id="TaskProgressItems">
+        <source>{0} items</source>
+        <target state="new">{0} items</target>
+        <note>LOCALIZATION: {0} is the number of items processed. The total is not known.</note>
+      </trans-unit>
+      <trans-unit id="TaskProgressItemsOfTotal">
+        <source>{0} of {1} items</source>
+        <target state="new">{0} of {1} items</target>
+        <note>LOCALIZATION: {0} is the number of items processed and {1} is the total number of items.</note>
+      </trans-unit>
+      <trans-unit id="TaskProgressOfTotal">
+        <source>{0} of {1}</source>
+        <target state="new">{0} of {1}</target>
+        <note>LOCALIZATION: {0} is the amount of work done and {1} is the total amount of work. The operation did not specify a unit, so no unit name is shown.</note>
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">"{0}" 작업에서 코어 {1}개를 해제했고 지금 총 {2}개의 코어를 보유하고 있습니다.</target>

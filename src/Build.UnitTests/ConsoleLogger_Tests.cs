@@ -661,12 +661,101 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// A console cannot animate a progress row, so the updates in the middle of an operation have
+        /// nothing to draw to. Only the end of the operation is rendered, as one ordinary message.
+        /// </summary>
+        [Fact]
+        public void TaskProgressIsRenderedAsOneMessageWhenTheOperationEnds()
+        {
+            var console = new SimulatedConsole();
+            var eventSource = new EventSourceSink();
+            var logger = new ParallelConsoleLogger(LoggerVerbosity.Normal, console.Write, null, null);
+            logger.Initialize(eventSource);
+
+            var context = new BuildEventContext(1, 2, 3, 4);
+
+            eventSource.Consume(new TaskProgressStartedEventArgs(7, "Downloading tools.zip", TaskProgressUnit.Bytes) { BuildEventContext = context });
+            eventSource.Consume(new TaskProgressUpdatedEventArgs(7, 1, 256, 1024, "halfway there") { BuildEventContext = context });
+            eventSource.Consume(new TaskProgressUpdatedEventArgs(7, 2, 512, 1024, "nearly there") { BuildEventContext = context });
+            eventSource.Consume(new TaskProgressFinishedEventArgs(7, 3, TaskProgressOutcome.Completed, 1024, 1024, "done") { BuildEventContext = context });
+
+            string output = console.ToString();
+
+            output.ShouldContain("Downloading tools.zip");
+            output.ShouldContain("1,024");
+
+            // The started event and the updates must not produce output of their own.
+            output.ShouldNotContain("halfway there");
+            output.ShouldNotContain("nearly there");
+            output.Trim().Split('\n').Length.ShouldBe(1, output);
+        }
+
+        [Theory]
+        [InlineData(TaskProgressOutcome.Completed, "TaskProgressCompleted")]
+        [InlineData(TaskProgressOutcome.Canceled, "TaskProgressCanceled")]
+        [InlineData(TaskProgressOutcome.Failed, "TaskProgressFailed")]
+        [InlineData(TaskProgressOutcome.Abandoned, "TaskProgressAbandoned")]
+        public void TaskProgressRendersTheOutcomeOfTheOperation(TaskProgressOutcome outcome, string expectedResource)
+        {
+            var console = new SimulatedConsole();
+            var eventSource = new EventSourceSink();
+            var logger = new ParallelConsoleLogger(LoggerVerbosity.Normal, console.Write, null, null);
+            logger.Initialize(eventSource);
+
+            var context = new BuildEventContext(1, 2, 3, 4);
+
+            eventSource.Consume(new TaskProgressStartedEventArgs(7, "Copying files", TaskProgressUnit.Items) { BuildEventContext = context });
+            eventSource.Consume(new TaskProgressFinishedEventArgs(7, 1, outcome, 3, 10, null) { BuildEventContext = context });
+
+            string amount = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskProgressItemsOfTotal", "3", "10");
+            console.ToString().ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(expectedResource, "Copying files", amount));
+        }
+
+        /// <summary>
+        /// The unit and the total are only known from the started event, which may never arrive when the
+        /// operation limit is reached. The outcome must still be reported.
+        /// </summary>
+        [Fact]
+        public void TaskProgressIsRenderedWhenTheStartedEventIsMissing()
+        {
+            var console = new SimulatedConsole();
+            var eventSource = new EventSourceSink();
+            var logger = new ParallelConsoleLogger(LoggerVerbosity.Normal, console.Write, null, null);
+            logger.Initialize(eventSource);
+
+            eventSource.Consume(new TaskProgressFinishedEventArgs(7, 1, TaskProgressOutcome.Completed, 42, null, null)
+            {
+                BuildEventContext = new BuildEventContext(1, 2, 3, 4),
+            });
+
+            console.ToString().ShouldContain("42");
+        }
+
+        /// <summary>
+        /// The rendered message is ordinary output, so it obeys the verbosity that hides ordinary output.
+        /// </summary>
+        [Fact]
+        public void TaskProgressIsNotRenderedBelowNormalVerbosity()
+        {
+            var console = new SimulatedConsole();
+            var eventSource = new EventSourceSink();
+            var logger = new ParallelConsoleLogger(LoggerVerbosity.Minimal, console.Write, null, null);
+            logger.Initialize(eventSource);
+
+            var context = new BuildEventContext(1, 2, 3, 4);
+
+            eventSource.Consume(new TaskProgressStartedEventArgs(7, "Downloading tools.zip", TaskProgressUnit.Bytes) { BuildEventContext = context });
+            eventSource.Consume(new TaskProgressFinishedEventArgs(7, 1, TaskProgressOutcome.Completed, 1024, 1024, null) { BuildEventContext = context });
+
+            console.ToString().ShouldNotContain("Downloading tools.zip");
+        }
+
         [InlineData("error", "red")]
         [InlineData("warning", "yellow")]
         [InlineData("message", "darkgray")]
         [Theory]
-        public void ColorTest(string expectedMessageType, string expectedColor)
-        {
+        public void ColorTest(string expectedMessageType, string expectedColor)        {
             const string subcategory = "VBC";
             const string code = "31415";
             const string file = "file.vb";

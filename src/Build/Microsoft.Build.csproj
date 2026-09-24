@@ -603,6 +603,8 @@
     <!-- ######################## -->
     <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
     <Compile Include="Logging\BaseConsoleLogger.cs" />
+    <Compile Include="Logging\ConsoleProgressTracker.cs" />
+    <Compile Include="Logging\TaskProgressFormatter.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogReplayEventSource.cs" />
