@@ -35,6 +35,9 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.13
+- Tasks that report structured progress no longer announce the same operation twice. `DownloadFile` and `TarDirectory` log their "Downloading"/"Creating archive" message at `Normal` importance instead of `High`, because Terminal Logger already renders a live progress row for the same operation. The messages are unchanged in text and are still written to binary logs and to console output at normal verbosity; only the duplicate Terminal Logger line is removed. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.13` to restore `High` importance.
+
 ### 18.12
 - [Multi-threaded builds use an empty sentinel current directory, check CWD after tasks, and detect unresolved relative-path writes at project/build completion.](https://github.com/dotnet/msbuild/pull/14917)
 - [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)
