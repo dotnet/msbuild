@@ -33,6 +33,7 @@ public sealed class TaskHostBuildCleanup_Tests(ITestOutputHelper output)
     /// The registered task object blocks on a scenario gate while it is disposed, so the test can hold the sidecar in the
     /// middle of cleanup and read from the node lifecycle journal whether EndBuild finished or not.
     /// </remarks>
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/15125")]
     [NodeScenarioTheory]
     [InlineData(true, false, false)]
     [InlineData(true, true, false)]
