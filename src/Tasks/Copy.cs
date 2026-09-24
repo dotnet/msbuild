@@ -120,6 +120,18 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _alwaysRetryCopy;
 
+        /// <summary>
+        /// Reports the progress of the current copy operation, or <see langword="null"/> when the host does not
+        /// support progress reporting or there is too little work to be worth reporting.
+        /// </summary>
+        private ITaskProgressReporter _progress;
+
+        /// <summary>
+        /// The number of source files processed so far, incremented atomically because the parallel copy path
+        /// processes partitions on several threads.
+        /// </summary>
+        private int _filesProcessed;
+
         private static readonly bool s_copyInParallel = GetParallelismFromEnvironment();
 
         /// <summary>
@@ -470,6 +482,14 @@ namespace Microsoft.Build.Tasks
             // (no need to create all the parallel infrastructure for that case).
             bool success = false;
 
+            // A single-file copy finishes too quickly for progress to be meaningful, so no operation is started.
+            if (DestinationFiles.Length > 1)
+            {
+                _progress = (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                    DestinationFolder is null ? "Copying files" : $"Copying files to {DestinationFolder.ItemSpec}",
+                    TaskProgressUnit.Items);
+            }
+
             try
             {
                 success = !copyInParallel || DestinationFiles.Length == 1
@@ -478,7 +498,25 @@ namespace Microsoft.Build.Tasks
             }
             catch (OperationCanceledException)
             {
+                _progress?.Cancel();
                 return false;
+            }
+            finally
+            {
+                if (_progress is not null)
+                {
+                    if (_cancellationTokenSource.IsCancellationRequested)
+                    {
+                        _progress.Cancel();
+                    }
+                    else
+                    {
+                        _progress.Complete();
+                    }
+
+                    _progress.Dispose();
+                    _progress = null;
+                }
             }
 
             // copiedFiles contains only the copies that were successful.
@@ -561,9 +599,27 @@ namespace Microsoft.Build.Tasks
                     SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
                     destinationFilesSuccessfullyCopied.Add(DestinationFiles[i]);
                 }
+
+                ReportFileProcessed(destSpec);
             }
 
             return success;
+        }
+
+        /// <summary>
+        /// Records that one source file has been processed and reports the new progress.
+        /// </summary>
+        /// <param name="destinationSpec">The destination path of the file that was just processed.</param>
+        private void ReportFileProcessed(string destinationSpec)
+        {
+            if (_progress is null)
+            {
+                return;
+            }
+
+            // The parallel path calls this from several threads at once, so the counter must be atomic.
+            int processed = Interlocked.Increment(ref _filesProcessed);
+            _progress.Report(new TaskProgressUpdate(processed, SourceFiles.Length, destinationSpec));
         }
 
         private static void ParallelCopyTask(object state)
@@ -732,6 +788,8 @@ namespace Microsoft.Build.Tasks
 
                             // Cache for next iteration's duplicate check
                             prevSourceAbsolutePath = sourceAbsolutePath;
+
+                            ReportFileProcessed(destSpec);
                         }
                     }
                 }

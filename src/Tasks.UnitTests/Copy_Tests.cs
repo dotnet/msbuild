@@ -2126,6 +2126,90 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Copy reports item-count progress across both the parallel and single-threaded paths, counting
+        /// every source file exactly once even when several threads copy at the same time.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReportsCopyProgress(bool isUseSingleThreadedCopy)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destinationFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                // Use enough files that the parallel path partitions work across several threads.
+                const int FileCount = 200;
+                ITaskItem[] sourceFiles = new ITaskItem[FileCount];
+                for (int i = 0; i < FileCount; i++)
+                {
+                    sourceFiles[i] = new TaskItem(testEnvironment.CreateFile(sourceFolder, $"file{i}.txt", $"contents {i}").Path);
+                }
+
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                MockEngine engine = new MockEngine(_testOutputHelper) { TaskProgressReporter = progress };
+
+                Copy copy = new Copy
+                {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1, // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                };
+
+                copy.Execute(CopyFileWithState, !isUseSingleThreadedCopy).ShouldBeTrue(engine.Log);
+
+                progress.Updates.Count.ShouldBe(FileCount);
+                progress.Completed.ShouldBe(FileCount);
+                progress.Total.ShouldBe(FileCount);
+                progress.IsComplete.ShouldBeTrue();
+                progress.IsCanceled.ShouldBeFalse();
+
+                // Every file must be counted exactly once, even though the parallel path reports from
+                // several threads and the updates therefore arrive out of order.
+                progress.Updates.Select(update => update.Completed)
+                    .OrderBy(completed => completed)
+                    .ShouldBe(Enumerable.Range(1, FileCount).Select(value => (long)value));
+            }
+
+            static bool? CopyFileWithState(FileState source, FileState destination) => true;
+        }
+
+        /// <summary>
+        /// A single-file copy is too short-lived for progress to be useful, so no operation is started.
+        /// </summary>
+        [Fact]
+        public void DoesNotReportProgressForSingleFileCopy()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destinationFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                MockEngine engine = new MockEngine(_testOutputHelper) { TaskProgressReporter = progress };
+
+                Copy copy = new Copy
+                {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1, // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = [new TaskItem(testEnvironment.CreateFile(sourceFolder, "only.txt", "only").Path)],
+                    DestinationFolder = new TaskItem(destinationFolder.Path),
+                };
+
+                copy.Execute(CopyFileWithState, copyInParallel: true).ShouldBeTrue(engine.Log);
+
+                progress.Updates.ShouldBeEmpty();
+                progress.IsComplete.ShouldBeFalse();
+            }
+
+            static bool? CopyFileWithState(FileState source, FileState destination) => true;
+        }
+
+        /// <summary>
         /// Copying duplicates should only perform the actual copy once for each unique source/destination pair
         /// but should still produce outputs for all specified source/destination pairs.
         /// </summary>
