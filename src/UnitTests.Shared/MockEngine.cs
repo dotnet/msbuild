@@ -67,6 +67,13 @@ namespace Microsoft.Build.UnitTests
 
         public MockLogger MockLogger { get; }
 
+        public ITaskProgressReporter TaskProgressReporter { get; set; }
+
+        /// <summary>
+        /// Gets the title passed to the most recent <see cref="CreateTaskProgressReporter"/> call.
+        /// </summary>
+        public string TaskProgressReporterTitle { get; private set; }
+
         /// <summary>
         /// Gets or sets whether the mock engine should report multi-threaded build mode.
         /// Used to test ITaskFactoryBuildParameterProvider implementation.
@@ -90,6 +97,12 @@ namespace Microsoft.Build.UnitTests
             _output = output;
             MockLogger = new MockLogger(output);
             _logToConsole = false; // We have a better place to put it.
+        }
+
+        public override ITaskProgressReporter CreateTaskProgressReporter(string title, TaskProgressUnit unit = TaskProgressUnit.Unspecified)
+        {
+            TaskProgressReporterTitle = title;
+            return TaskProgressReporter ?? base.CreateTaskProgressReporter(title, unit);
         }
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)

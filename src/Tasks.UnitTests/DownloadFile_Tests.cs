@@ -1,8 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -11,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -85,6 +88,38 @@ namespace Microsoft.Build.Tasks.UnitTests
                 downloadFile.DownloadedFile.ItemSpec.ShouldBe(file.FullName);
             }
         }
+
+        [Fact]
+        public void ReportsDownloadProgress()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: false);
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+                DownloadFile downloadFile = new DownloadFile
+                {
+                    BuildEngine = _mockEngine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    DestinationFolder = new TaskItem(folder.Path),
+                    HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("Success!"),
+                        RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://success/foo.txt")
+                    }),
+                    SourceUrl = "http://success/foo.txt"
+                };
+
+                downloadFile.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                progress.Updates.ShouldNotBeEmpty();
+                progress.Completed.ShouldBe(8);
+                progress.Total.ShouldBe(8);
+                progress.IsComplete.ShouldBeTrue();
+                _mockEngine.TaskProgressReporterTitle.ShouldBe("Downloading foo.txt");
+            }
+        }
+
 
         [Fact]
         public void CanGetFileNameFromResponseHeader()
@@ -324,6 +359,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
 
                 DownloadFile downloadFile = new DownloadFile
                 {
@@ -350,6 +387,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 downloadFile.Execute().ShouldBeTrue();
 
                 _mockEngine.Log.ShouldContain("Did not download file from \"http://success/foo.txt\"", customMessage: _mockEngine.Log);
+                progress.Updates.ShouldBeEmpty();
+                progress.IsComplete.ShouldBeFalse();
             }
         }
 
