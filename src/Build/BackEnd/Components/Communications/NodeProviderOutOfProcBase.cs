@@ -198,6 +198,10 @@ namespace Microsoft.Build.BackEnd
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace($"Shutting down node with pid = {nodeProcess.Id}");
                     RequestNodeShutdown(nodeProcess, nodeStream, terminateNode, result.NegotiatedPacketVersion);
+                    if (NodeLifecycleJournal.IsEnabled)
+                    {
+                        NodeLifecycleJournal.Record(NodeJournalEvent.ShutdownSent, JournalNodeKind, 0, nodeProcess.Id, "shutdown-all");
+                    }
                 }
             }
         }
