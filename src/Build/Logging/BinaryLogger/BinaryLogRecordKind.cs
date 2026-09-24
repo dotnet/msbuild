@@ -50,5 +50,7 @@ namespace Microsoft.Build.Logging
         AssemblyResolutionSearchTrace,
         AssemblyConflictDependencyDetails,
         AssemblyConflictWarning,
+        TaskProgressStarted,
+        TaskProgressFinished,
     }
 }

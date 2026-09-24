@@ -321,6 +321,42 @@ namespace Microsoft.Build.UnitTests
                 e => e.ThreadId.ToString());
         }
 
+        [Fact]
+        public void RoundtripTaskProgressStartedEventArgs()
+        {
+            var args = new TaskProgressStartedEventArgs(42, "Download", TaskProgressUnit.Bytes, "help", "sender")
+            {
+                BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6),
+            };
+
+            Roundtrip(args,
+                e => e.OperationId.ToString(),
+                e => e.Title,
+                e => e.Unit.ToString(),
+                e => e.HelpKeyword,
+                e => e.SenderName,
+                e => e.Message,
+                e => e.BuildEventContext.ToString());
+        }
+
+        [Fact]
+        public void RoundtripTaskProgressFinishedEventArgs()
+        {
+            var args = new TaskProgressFinishedEventArgs(42, 8, TaskProgressOutcome.Completed, 100, 100, "Complete")
+            {
+                BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6),
+            };
+
+            Roundtrip(args,
+                e => e.OperationId.ToString(),
+                e => e.Sequence.ToString(),
+                e => e.Outcome.ToString(),
+                e => e.Completed.ToString(),
+                e => e.Total.ToString(),
+                e => e.Summary,
+                e => e.BuildEventContext.ToString());
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

@@ -233,6 +233,8 @@ namespace Microsoft.Build.Logging
         {
             switch (e)
             {
+                case TaskProgressStartedEventArgs taskProgressStarted: return Write(taskProgressStarted);
+                case TaskProgressFinishedEventArgs taskProgressFinished: return Write(taskProgressFinished);
                 case BuildMessageEventArgs buildMessage: return Write(buildMessage);
                 case TaskStartedEventArgs taskStarted: return Write(taskStarted);
                 case TaskFinishedEventArgs taskFinished: return Write(taskFinished);
@@ -522,6 +524,34 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.TaskFile);
 
             return BinaryLogRecordKind.TaskFinished;
+        }
+
+        private BinaryLogRecordKind Write(TaskProgressStartedEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+            Write(e.OperationId);
+            WriteDeduplicatedString(e.Title);
+            Write((int)e.Unit);
+
+            return BinaryLogRecordKind.TaskProgressStarted;
+        }
+
+        private BinaryLogRecordKind Write(TaskProgressFinishedEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+            Write(e.OperationId);
+            Write(e.Sequence);
+            Write((int)e.Outcome);
+            Write(e.Completed);
+            Write(e.Total.HasValue);
+            if (e.Total.HasValue)
+            {
+                Write(e.Total.Value);
+            }
+
+            WriteDeduplicatedString(e.Summary);
+
+            return BinaryLogRecordKind.TaskProgressFinished;
         }
 
         private BinaryLogRecordKind Write(BuildErrorEventArgs e)
