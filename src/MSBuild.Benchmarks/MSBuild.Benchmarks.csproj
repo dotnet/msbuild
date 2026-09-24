@@ -11,9 +11,23 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- Opt-in BuildXL Detours comparison for evaluation input recording; Windows x64 only. -->
+  <PropertyGroup Condition="'$(EnableEvaluationInputDetours)' == 'true'">
+    <DefineConstants>$(DefineConstants);EVALUATION_INPUT_DETOURS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(EnableEvaluationInputDetours)' == 'true'">
+    <!-- Keep aligned with eng\dependabot\Directory.Packages.props; CPM is disabled for this project. -->
+    <PackageReference Include="Microsoft.BuildXL.Processes" Version="0.1.0-20260612.4" PrivateAssets="all" />
+    <!-- Cuts the netstandard1.x dependency chain Microsoft.BuildXL.Processes brings in, as Microsoft.Build does. -->
+    <PackageReference Include="NETStandard.Library" Version="2.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" VersionOverride="0.16.0-preview.1" />
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" VersionOverride="0.16.0-preview.1" />
+    <!-- Microsoft.Build references NuGet.Frameworks privately; evaluating real SDK projects needs it beside Microsoft.Build.dll. -->
+    <PackageReference Include="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">

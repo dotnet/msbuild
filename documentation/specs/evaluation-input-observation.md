@@ -26,9 +26,11 @@ manifest. It rejects non-cacheable manifests and compares every recorded path's
 kind, last-write time in UTC, and length with a fresh file-system observation.
 This timestamp-and-length model intentionally does not hash content, monitor the
 file system, or protect against concurrent writers, so a same-size content change
-whose timestamp is preserved is not detected. At this layer the helper does not
-validate environment reads or rerun SDK resolvers, and a successful check does not
-authorize reuse of an evaluation result.
+whose timestamp is preserved is not detected. The helper also validates direct
+environment reads. The checked-reuse validator separately re-resolves recorded SDK
+results and compares their immutable observations. A successful file-system check
+alone does not authorize reuse of an evaluation result, and the recording-only
+switch still does not enable reuse.
 
 The switch is intended for diagnostics and development of later evaluation-cache
 layers. It does not enable an evaluation cache or provide a compatibility contract
