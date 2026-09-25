@@ -1,0 +1,4 @@
+// Legacy servicing branches still read this file from main. Keep the configuration empty to disable merge flows.
+{
+    "merge-flow-configurations": {}
+}
