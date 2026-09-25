@@ -47,6 +47,8 @@ Test assemblies use assembly fixtures (for example, `Microsoft.Build.UnitTests.M
 
 ## Data-Driven and Async Tests
 
+Prefer a focused regression that directly proves the requested behavior over a Boolean matrix covering unrelated modes or languages. For task-routing tests, compare the task's PID with a known in-process assembly task rather than adding indirect routing checks or compiler-launcher infrastructure.
+
 Use `[Theory]` with `[InlineData]` for simple inputs. Use `[MemberData]` or `TheoryData<T>` for complex objects (returning `IEnumerable<object[]>`). If the data type is custom, implement `IXunitSerializable`.
 
 ```csharp

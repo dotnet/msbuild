@@ -35,6 +35,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class TaskExecutionHost_Tests : ITestTaskHost, IBuildEngine2, IDisposable
     {
+        private readonly ITestOutputHelper _output;
+
         /// <summary>
         /// The set of parameters which have been initialized on the task.
         /// </summary>
@@ -118,8 +120,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Prepares the environment for the test.
         /// </summary>
-        public TaskExecutionHost_Tests()
+        public TaskExecutionHost_Tests(ITestOutputHelper output)
         {
+            _output = output;
             InitializeHost();
         }
 
@@ -1799,6 +1802,85 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Null((_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper);
         }
 
+        [Fact]
+        public void MultiThreadedBuildRejectsUnsupportedFactoryWithAttributedTask()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", null);
+            using TaskExecutionHost host = new(new MockHost(new BuildParameters { MultiThreaded = true }));
+            var factory = new UnsupportedAttributedTaskFactory();
+            var loadedType = new LoadedType(
+                factory.GetType(),
+                AssemblyLoadInfo.Create(null, factory.GetType().Assembly.Location),
+                factory.GetType().Assembly,
+                typeof(ITaskFactory));
+            host._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(
+                factory, loadedType, nameof(AttributedFactoryTask), TaskHostParameters.Empty);
+            var targetContext = new TargetLoggingContext(
+                _loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+            host.InitializeForTask(
+                this,
+                targetContext,
+                CreateTestProject(),
+                nameof(AttributedFactoryTask),
+                ElementLocation.Create("factory.proj", 1, 1),
+                null,
+                false,
+                "factory.proj",
+#if FEATURE_APPDOMAIN
+                null,
+#endif
+                null,
+                false,
+                CancellationToken.None,
+                TaskEnvironmentHelper.CreateForTest());
+            host.FindTask(TaskHostParameters.Empty).taskFactoryWrapper.ShouldNotBeNull();
+
+            host.InitializeForBatch(
+                new TaskLoggingContext(_loggingService, targetContext.BuildEventContext),
+                _bucket,
+                TaskHostParameters.Empty,
+                scheduledNodeId: 1).ShouldBeFalse();
+
+            factory.CreateTaskCalls.ShouldBe(0);
+            _logger.Errors.ShouldHaveSingleItem().Message.ShouldBe(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "CustomTaskFactoryOutOfProcNotSupported",
+                    factory.FactoryName,
+                    nameof(AttributedFactoryTask)));
+        }
+
+        [MSBuildMultiThreadableTask]
+        private sealed class AttributedFactoryTask : Utilities.Task
+        {
+            public override bool Execute() => true;
+        }
+
+        private sealed class UnsupportedAttributedTaskFactory : ITaskFactory
+        {
+            public string FactoryName => nameof(UnsupportedAttributedTaskFactory);
+            public Type TaskType => typeof(AttributedFactoryTask);
+            public int CreateTaskCalls { get; private set; }
+
+            public bool Initialize(
+                string taskName,
+                IDictionary<string, TaskPropertyInfo> parameterGroup,
+                string taskBody,
+                IBuildEngine taskFactoryLoggingHost) => true;
+
+            public TaskPropertyInfo[] GetTaskParameters() => [];
+
+            public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
+            {
+                CreateTaskCalls++;
+                return new AttributedFactoryTask();
+            }
+
+            public void CleanupTask(ITask task)
+            {
+            }
+        }
+
         /// <summary>
         /// Test that a using task which specifies an invalid assembly produces an exception.
         /// </summary>
@@ -2104,7 +2186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private void InitializeHost()
         {
             _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-            _logger = new MockLogger();
+            _logger = new MockLogger(_output);
             _loggingService.RegisterLogger(_logger);
             _host = new TaskExecutionHost();
             TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));

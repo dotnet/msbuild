@@ -1145,6 +1145,156 @@ namespace InlineTask
             File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
         }
 
+        [Fact]
+        public void InlineClassRunsInSameProcessAsAssemblyTask()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", null);
+            env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", null);
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            TransientTestFile projectFile = env.CreateFile(folder, "routing.proj", $$"""
+                <Project>
+                  <UsingTask TaskName="{{typeof(GetProcessId).FullName}}" AssemblyFile="{{typeof(GetProcessId).Assembly.Location}}" />
+                  <UsingTask TaskName="InlineGetProcessId" TaskFactory="RoslynCodeTaskFactory"
+                             AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class" Language="cs"><![CDATA[
+                        using Microsoft.Build.Framework;
+                        [MSBuildMultiThreadableTask]
+                        public class InlineGetProcessId : Microsoft.Build.Utilities.Task
+                        {
+                            [Output] public int ProcessId { get; set; }
+                            public override bool Execute()
+                            {
+                                ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id;
+                                return true;
+                            }
+                        }
+                      ]]></Code>
+                    </Task>
+                  </UsingTask>
+                  <Target Name="Build">
+                    <GetProcessId>
+                      <Output TaskParameter="ProcessId" PropertyName="AssemblyProcessId" />
+                    </GetProcessId>
+                    <InlineGetProcessId>
+                      <Output TaskParameter="ProcessId" PropertyName="InlineProcessId" />
+                    </InlineGetProcessId>
+                    <Error Condition="'$(AssemblyProcessId)' != '$(InlineProcessId)'"
+                           Text="Assembly task PID $(AssemblyProcessId) differs from inline task PID $(InlineProcessId)." />
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                $"""
+                "{projectFile.Path}" /mt /nr:false /bl:"{Path.Combine(folder.Path, "routing.binlog")}"
+                """,
+                out bool success,
+                _output);
+            success.ShouldBeTrue(output);
+        }
+
+        [MSBuildMultiThreadableTask]
+        public sealed class GetProcessId : Microsoft.Build.Utilities.Task
+        {
+            [Output]
+            public int ProcessId { get; set; }
+
+            public override bool Execute()
+            {
+                ProcessId = System.Diagnostics.Process.GetCurrentProcess().Id;
+                return true;
+            }
+        }
+
+        [Fact]
+        public void InlineClassResolvesDependencyOnSecondInvocation()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", null);
+            env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", null);
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            TransientTestFile project = env.CreateFile(folder, "resolve.proj", $$"""
+                <Project>
+                  <UsingTask TaskName="ReadDependency" TaskFactory="RoslynCodeTaskFactory"
+                             AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Reference Include="{{GetDependencyAssemblyPath()}}" />
+                      <Code Type="Class" Language="cs"><![CDATA[
+                        using Microsoft.Build.Framework;
+                        using System.Runtime.CompilerServices;
+                        [MSBuildMultiThreadableTask]
+                        public class ReadDependency : Microsoft.Build.Utilities.Task
+                        {
+                            public bool Read { get; set; }
+                            public override bool Execute() => !Read || ReadValue() == "Alpha.GetString";
+                            [MethodImpl(MethodImplOptions.NoInlining)]
+                            private static string ReadValue() => Dependency.Alpha.GetString();
+                        }
+                      ]]></Code>
+                    </Task>
+                  </UsingTask>
+                  <Target Name="Build">
+                    <ReadDependency Read="false" />
+                    <ReadDependency Read="true" />
+                  </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                $"""
+                "{project.Path}" /mt /nr:false /bl:"{Path.Combine(folder.Path, "15.binlog")}"
+                """,
+                out bool success,
+                _output);
+            success.ShouldBeTrue(output);
+        }
+
+        [Fact]
+        public void CachedFactoryKeepsResolverUntilLastTaskIsCleanedUp()
+        {
+            string taskBody = $$"""
+                <Reference Include="{{GetDependencyAssemblyPath()}}" />
+                <Code Type="Class" Language="cs"><![CDATA[
+                  public class ReadDependency : Microsoft.Build.Utilities.Task
+                  {
+                      public override bool Execute() => Dependency.Alpha.GetString() == "Alpha.GetString";
+                  }
+                ]]></Code>
+                """;
+            var engine = new MockEngine(_output);
+            var factory = new RoslynCodeTaskFactory();
+            factory.Initialize("ReadDependency", new Dictionary<string, TaskPropertyInfo>(), taskBody, engine).ShouldBeTrue(engine.Log);
+            factory.CleanupTask(factory.CreateTask(engine));
+
+            var cachedFactory = new RoslynCodeTaskFactory();
+            cachedFactory.Initialize("ReadDependency", new Dictionary<string, TaskPropertyInfo>(), taskBody, engine).ShouldBeTrue(engine.Log);
+            cachedFactory.TaskType.ShouldBeSameAs(factory.TaskType);
+            ITask first = cachedFactory.CreateTask(engine);
+            ITask second = cachedFactory.CreateTask(engine);
+            cachedFactory.CleanupTask(first);
+            // TaskHost cleanup passes a wrapper after cleaning up the original task.
+            cachedFactory.CleanupTask(new GetProcessId());
+            try
+            {
+                second.Execute().ShouldBeTrue();
+            }
+            finally
+            {
+                cachedFactory.CleanupTask(second);
+            }
+        }
+
+        private static string GetDependencyAssemblyPath() => Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory, "..", "..", "..", "Samples", "Dependency",
+#if DEBUG
+            "Debug",
+#else
+            "Release",
+#endif
+            "net472", "Dependency.dll"));
+
         /// <summary>
         /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
         /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.

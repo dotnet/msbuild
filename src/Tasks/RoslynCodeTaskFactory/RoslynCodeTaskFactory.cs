@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
@@ -85,7 +86,7 @@ namespace Microsoft.Build.Tasks
         /// A cache of <see cref="RoslynCodeTaskFactoryTaskInfo"/> objects and their corresponding compiled assembly.  This cache ensures that two of the exact same code task
         /// declarations are not compiled multiple times.
         /// </summary>
-        private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, TaskFactoryUtilities.CachedAssemblyEntry> CompiledAssemblyCache = new ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, TaskFactoryUtilities.CachedAssemblyEntry>();
+        private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, (Assembly Assembly, string AssemblyPath, ResolveEventHandler Resolver)> CompiledAssemblyCache = new();
 
         /// <summary>
         /// Stores the path to the directory that this assembly is located in.
@@ -109,10 +110,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool _compileForOutOfProcess;
 
-        /// <summary>
-        /// Stores functions that were added to the current app domain. Should be removed once we're finished.
-        /// </summary>
-        private ResolveEventHandler handlerAddedToAppDomain = null;
+        private ResolveEventHandler _assemblyResolver;
+
+        // Initialization keeps the resolver registered for metadata inspection until the first task takes ownership.
+        private int _initialResolverRegistration;
 
         /// <summary>
         /// Stores the parameters parsed in the &lt;UsingTask /&gt;.
@@ -136,9 +137,10 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
         public void CleanupTask(ITask task)
         {
-            if (handlerAddedToAppDomain is not null)
+            // The TaskHost path also calls cleanup for its wrapper, which did not acquire a registration.
+            if (task is not null && task.GetType() == TaskType)
             {
-                AppDomain.CurrentDomain.AssemblyResolve -= handlerAddedToAppDomain;
+                AppDomain.CurrentDomain.AssemblyResolve -= _assemblyResolver;
             }
         }
 
@@ -146,20 +148,35 @@ namespace Microsoft.Build.Tasks
         [RequiresUnreferencedCode("Instantiates a task type from an assembly compiled at runtime from user-supplied source, which is incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
-            // The type of the task has already been determined and the assembly is already loaded after compilation so
-            // just create an instance of the type and return it.
-            ITask taskInstance = CreateTaskInstance(TaskType);
-            if (taskInstance is null)
+            // Each instance owns one subscription; removing it leaves overlapping instances' subscriptions intact.
+            if (Interlocked.Exchange(ref _initialResolverRegistration, 0) == 0)
             {
-                TaskLoggingHelper taskInvocationLog = new TaskLoggingHelper(taskFactoryLoggingHost, _taskName)
-                {
-                    TaskResources = AssemblyResources.PrimaryResources,
-                    HelpKeywordPrefix = "MSBuild."
-                };
-                taskInvocationLog.LogErrorWithCodeFromResources("CodeTaskFactory.NeedsITaskInterface", _taskName);
+                AppDomain.CurrentDomain.AssemblyResolve += _assemblyResolver;
             }
 
-            return taskInstance;
+            ITask taskInstance = null;
+            try
+            {
+                taskInstance = CreateTaskInstance(TaskType);
+                if (taskInstance is null)
+                {
+                    TaskLoggingHelper taskInvocationLog = new TaskLoggingHelper(taskFactoryLoggingHost, _taskName)
+                    {
+                        TaskResources = AssemblyResources.PrimaryResources,
+                        HelpKeywordPrefix = "MSBuild."
+                    };
+                    taskInvocationLog.LogErrorWithCodeFromResources("CodeTaskFactory.NeedsITaskInterface", _taskName);
+                }
+
+                return taskInstance;
+            }
+            finally
+            {
+                if (taskInstance is null)
+                {
+                    AppDomain.CurrentDomain.AssemblyResolve -= _assemblyResolver;
+                }
+            }
         }
 
         [RequiresUnreferencedCode("Instantiates a task type from an assembly compiled at runtime from user-supplied source; its parameterless constructor cannot be statically preserved.")]
@@ -196,19 +213,31 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // Attempt to compile an assembly (or get one from the cache)
-            if (!TryCompileAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
+            bool initialized = false;
+            try
             {
-                return false;
-            }
+                // Attempt to compile an assembly (or get one from the cache)
+                if (!TryCompileAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
+                {
+                    return false;
+                }
 
-            if (!TryResolveCompiledTaskType(assembly, parameterGroup, taskInfo, taskName))
+                if (!TryResolveCompiledTaskType(assembly, parameterGroup, taskInfo, taskName))
+                {
+                    return false;
+                }
+
+                initialized = TaskType is not null;
+                _initialResolverRegistration = initialized ? 1 : 0;
+                return initialized;
+            }
+            finally
             {
-                return false;
+                if (!initialized)
+                {
+                    AppDomain.CurrentDomain.AssemblyResolve -= _assemblyResolver;
+                }
             }
-
-            // Initialization succeeded if we found a type matching the task name from the compiled assembly
-            return TaskType != null;
         }
 
         /// <summary>
@@ -645,8 +674,8 @@ namespace Microsoft.Build.Tasks
             // Extract directories from resolved assemblies for assembly resolution and manifest creation
             var directoriesToAddToAppDomain = TaskFactoryUtilities.ExtractUniqueDirectoriesFromAssemblyPaths(resolvedAssemblyReferences.ToList());
 
-            handlerAddedToAppDomain = TaskFactoryUtilities.CreateAssemblyResolver(directoriesToAddToAppDomain);
-            AppDomain.CurrentDomain.AssemblyResolve += handlerAddedToAppDomain;
+            _assemblyResolver = TaskFactoryUtilities.CreateAssemblyResolver(directoriesToAddToAppDomain);
+            AppDomain.CurrentDomain.AssemblyResolve += _assemblyResolver;
 
             // In case of taskhost we cache the resolution to a file placed next to the task assembly
             // so the taskhost can recreate this tryloadassembly logic
@@ -720,7 +749,7 @@ namespace Microsoft.Build.Tasks
         private bool TryCompileAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
         {
             // Try to get from cache
-            if (CompiledAssemblyCache.TryGetValue(taskInfo, out TaskFactoryUtilities.CachedAssemblyEntry cachedEntry))
+            if (CompiledAssemblyCache.TryGetValue(taskInfo, out var cachedEntry))
             {
                 // For out-of-process scenarios, validate the file still exists
                 if (!string.IsNullOrEmpty(cachedEntry.AssemblyPath) && !FileUtilities.FileExistsNoThrow(cachedEntry.AssemblyPath))
@@ -733,6 +762,8 @@ namespace Microsoft.Build.Tasks
                     // Cache entry is valid, use it
                     assembly = cachedEntry.Assembly;
                     _assemblyPath = cachedEntry.AssemblyPath;
+                    _assemblyResolver = cachedEntry.Resolver;
+                    AppDomain.CurrentDomain.AssemblyResolve += _assemblyResolver;
                     return true;
                 }
             }
@@ -841,7 +872,7 @@ namespace Microsoft.Build.Tasks
 
                 // Cache the assembly path if we compiled for out-of-process execution
                 string cachedAssemblyPath = _compileForOutOfProcess ? _assemblyPath : string.Empty;
-                CompiledAssemblyCache.TryAdd(taskInfo, new TaskFactoryUtilities.CachedAssemblyEntry(assembly, cachedAssemblyPath));
+                CompiledAssemblyCache.TryAdd(taskInfo, (assembly, cachedAssemblyPath, _assemblyResolver));
                 return true;
             }
             catch (Exception e)
