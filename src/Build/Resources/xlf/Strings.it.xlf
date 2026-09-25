@@ -671,12 +671,12 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeAlreadyActive">
         <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
-        <target state="new">MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</target>
+        <target state="translated">MSB4289: in questo processo è già attiva un'altra compilazione strict multithreading. Completarlo prima di avviare un'altra compilazione, usare un processo separato o impostare MSBUILDDISABLEFEATURESFROMVERSION=18.12 prima di avviare il processo per disabilitare i controlli rigorosi.</target>
         <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
         <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
-        <target state="new">MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</target>
+        <target state="translated">MSB4286: la modalità strict multithread ha trovato la directory corrente del processo in "{1}" anziché in "{2}" dopo l'attività "{0}". Usare TaskEnvironment invece di modificare la directory del processo. La modifica potrebbe provenire da un'altra attività, da un logger o da codice host eseguito simultaneamente nel contesto di questo evento.</target>
         <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeEnabled">

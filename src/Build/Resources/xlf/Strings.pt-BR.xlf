@@ -671,32 +671,32 @@
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeAlreadyActive">
         <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
-        <target state="new">MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</target>
+        <target state="translated">MSB4289: Já existe outra compilação estrita multi-threaded ativa neste processo. Conclua-a antes de iniciar outra compilação, use um processo separado ou defina MSBUILDDISABLEFEATURESFROMVERSION=18.12 antes de iniciar o processo para desabilitar as verificações estritas.</target>
         <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
         <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
-        <target state="new">MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</target>
+        <target state="translated">MSB4286: o modo estrito multithread localizou o diretório atual do processo em "{1}" em vez de "{2}" após a tarefa "{0}". Use TaskEnvironment em vez de alterar o diretório do processo. A alteração pode vir de outra tarefa, um agente ou código de host que foi executado simultaneamente ao contexto desse evento.</target>
         <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeEnabled">
         <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
-        <target state="new">Multi-threaded strict mode is enabled. Process current directory: "{0}".</target>
+        <target state="translated">O modo estrito multithread está habilitado. Diretório atual do processo: "{0}".</target>
         <note>{0} is the full path of the sentinel directory.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeSentinelMissing">
         <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
-        <target state="new">MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</target>
+        <target state="translated">MSB4288: O modo estrito multi-threaded restaurou o diretório sentinela "{0}" e o diretório atual do processo depois que um diretório ficou indisponível. Não remova os diretórios usados por uma compilação ativa.</target>
         <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
         <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
-        <target state="new">MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</target>
+        <target state="translated">MSB4290: o modo estrito multithread não pôde restaurar o diretório sentinela "{0}" e o diretório atual do processo: {1} Verifique se o diretório de propriedade do mecanismo pode ser criado e acessado ou defina MSBUILDDISABLEFEATURESFROMVERSION=18.12 antes de iniciar o processo para desabilitar temporariamente as verificações estritas.</target>
         <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
       </trans-unit>
       <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
         <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
-        <target state="new">MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</target>
+        <target state="translated">MSB4287: modo estrito multithread encontrado "{0}" no diretório do Sentinel "{1}" na conclusão do projeto ou do build. Resolva caminhos com TaskEnvironment. A gravação pode vir de outro projeto, um agente ou código de host.</target>
         <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
@@ -990,7 +990,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
-        <target state="new">File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</target>
+        <target state="translated">O relatório de acesso a arquivos não pode ser usado com o modo multithread. O relatório de acesso a arquivos requer nós de trabalho isolados do processo para que cada acesso possa ser atribuído a um projeto. Desabilite ReportFileAccesses ou MultiThreaded.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">

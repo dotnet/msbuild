@@ -249,17 +249,13 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded[:true|false]
+        <target state="translated">  -multithreaded[:true|false]
                      MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
                      즉, MSBuild는 여러 스레드를 사용하여
                      프로젝트를 병렬로 빌드합니다.
                      여러 프로세스 대신에 말이죠.
-                     이 옵션은 지원되지 않습니다.
                      사용되는 최대 스레드 수는 에 의해 결정됩니다
                      -maxCpuCount 스위치에 의해 결정됩니다.
-                     다중 스레드 모드가 켜져 있고
-                     MSBUILDFORCEALLTASKSOUTOFPROC=1인 경우
-                     maxCpuCount는 256보다 클 수 없습니다.
                      (약식: -mt)
     </target>
         <note />
@@ -1875,7 +1871,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: 다중 스레드 모드와 -reportFileAccesses는 함께 사용할 수 없습니다. 파일 액세스 보고는 작업자 프로세스당 하나의 프로젝트에 대한 액세스만 기록하지만, 다중 스레드 모드에서는 동일한 프로세스에서 여러 프로젝트를 실행할 수 있습니다. -reportFileAccesses를 제거하거나 -mt:false를 사용해 다중 스레드 모드를 사용하지 않도록 설정하세요. MSBUILDFORCEMULTITHREADED가 설정된 경우 먼저 이를 설정 해제하세요. MSBUILDENABLEMULTITHREADED는 -mt:false로 재정의할 수 있습니다.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.

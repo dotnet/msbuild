@@ -249,17 +249,13 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -wielowątkowy[:true|false]
+        <target state="translated">  -wielowątkowy[:true|false]
                      Włącza tryb EKSPERYMENTALNY wielowątkowości w programie MSBuild.
                      Oznacza to, że program MSBuild będzie używać wielu wątków
                      do równoległego kompilowania projektów,
                      zamiast wielu procesów.
-                     Ta opcja nie jest obsługiwana.
                      Maksymalna liczba używanych wątków jest określana przez
                      przełącznik -maxCpuCount.
-                     W przypadku trybu wielowątkowego włączonego
-                     i MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     Wartość maxCpuCount nie może być większa niż 256.
                      (Krótka forma: -mt)
     </target>
         <note />
@@ -1884,7 +1880,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: trybu wielowątkowego i opcji -reportFileAccesses nie można używać jednocześnie. Raportowanie dostępu do plików rejestruje dostępy dla jednego projektu na proces roboczy, ale tryb wielowątkowy może wykonywać wiele projektów w tym samym procesie. Usuń opcję -reportFileAccesses albo wyłącz tryb wielowątkowy za pomocą opcji -mt:false. Jeśli ustawiono zmienną środowiskową MSBUILDFORCEMULTITHREADED, najpierw usuń jej ustawienie. Ustawienie zmiennej MSBUILDENABLEMULTITHREADED można przesłonić opcją -mt:false.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.

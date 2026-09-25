@@ -249,17 +249,13 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded[:true|false]
+        <target state="translated">  -multithreaded[:true|false]
                      在 MSBuild 中啟用實驗性多執行緒模式。
                      這表示 MSBuild 將使用多個執行緒
                      來平行建置專案，
                      而不是使用多個處理序。
-                     不支援此選項。
                      使用的執行緒數量上限由
-                     -maxCpuCount 參數決定。
-                     若啟用多執行緒模式
-                     且 MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount 不得超過 256。
+                     -maxCpuCount 切換開關決定。
                      (簡短形式: -m)
     </target>
         <note />
@@ -1875,7 +1871,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: 多執行緒模式與 -reportFileAccesses 不能同時使用。檔案存取報告會將存取活動歸屬於每個工作進程中的單一專案，但多執行緒模式可能會在同一個進程中執行多個專案。請移除 -reportFileAccesses，或使用 -mt:false 停用多執行緒模式。如果已設定 MSBUILDFORCEMULTITHREADED，請先取消設定；MSBUILDENABLEMULTITHREADED 可以使用 -mt:false 覆寫。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.

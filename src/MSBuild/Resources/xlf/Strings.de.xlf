@@ -249,17 +249,13 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded[:true|false]
+        <target state="translated">  -multithreaded[:true|false]
                      Aktiviert den EXPERIMENTELLEN Multithreadmodus in MSBuild.
                      Dies bedeutet, dass MSBuild mehrere Threads verwendet,
                      um Projekte parallel zu erstellen,
                      anstatt mehrere Prozesse zu nutzen.
-                     Diese Option wird nicht unterstützt.
                      Die maximale Anzahl der verwendeten Threads wird durch den
                      -maxCpuCount-Schalter bestimmt.
-                     Wenn der Multithreadmodus aktiviert ist auf
-                     und MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     darf maxCpuCount nicht größer als 256 sein.
                      (Kurzform: -mt)
     </target>
         <note />

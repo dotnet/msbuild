@@ -220,7 +220,7 @@
       </trans-unit>
       <trans-unit id="AssemblyResolutionSearchTrace_SearchPath">
         <source>For SearchPath "{0}".</source>
-        <target state="translated">Dla ścieżki wyszukiwania SearchPath „{0}”.</target>
+        <target state="translated">W przypadku ścieżki wyszukiwania SearchPath „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">
@@ -230,7 +230,7 @@
       </trans-unit>
       <trans-unit id="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
-        <target state="translated">Wybrano lokalizacje klucza rejestru AssemblyFoldersEx.</target>
+        <target state="translated">Brane pod uwagę lokalizacje AssemblyFoldersEx.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">

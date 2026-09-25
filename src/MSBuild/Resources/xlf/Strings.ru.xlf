@@ -249,17 +249,13 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded[:true|false]
+        <target state="translated">  -multithreaded[:true|false]
                      Включает ЭКСПЕРИМЕНТАЛЬНЫЙ многопоточный режим в MSBuild.
                      Это означает, что MSBuild будет использовать несколько потоков
                      для параллельной сборки проектов
                      вместо использования нескольких процессов.
-                     Этот параметр не поддерживается.
                      Максимальное количество используемых потоков определяется
                      параметром -maxCpuCount.
-                     Если многопоточный режим включен
-                     и MSBUILDFORCEALLTASKSOUTOFPROC=1,
-                     maxCpuCount не может быть больше 256.
                      (Краткая форма: -mt)
     </target>
         <note />
@@ -1874,7 +1870,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: Многопоточный режим и -reportFileAccesses нельзя использовать вместе. Атрибуты отчетов о доступе к файлам относят доступ к одному проекту на рабочий процесс, но многопоточный режим может выполнять несколько проектов в одном процессе. Удалите -reportFileAccesses или отключите многопоточный режим с помощью -mt:false. Если задана переменная MSBUILDFORCEMULTITHREADED, сначала отмените ее, MSBUILDENABLEMULTITHREADED можно переопределить с помощью -mt:false.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.

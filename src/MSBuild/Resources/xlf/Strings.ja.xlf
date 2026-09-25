@@ -249,17 +249,13 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded[:true|false]
+        <target state="translated">  -multithreaded[:true|false]
                      MSBuild で試験的なマルチスレッド モードを有効にします。
                      これは、MSBuild でプロジェクトのビルドを
                      並列実行する際に、複数のプロセスではなく
                      複数のスレッドが使われることを意味します。
-                     このオプションはサポートされていません。
                      使用されるスレッドの最大数は、
-                     -maxCpuCount スイッチで指定します。
-                     マルチスレッド モードが有効で、
-                     MSBUILDFORCEALLTASKSOUTOFPROC=1 の場合、
-                     maxCpuCount は 256 を超えることはできません。
+                     -maxCpuCount スイッチによって決まります。
                      (短い形式: -mt)
     </target>
         <note />
@@ -1875,7 +1871,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: マルチスレッド モードと -reportFileAccesses を一緒に使用することはできません。ファイル アクセス レポート属性はワーカー プロセスごとに 1 つのプロジェクトにアクセスしますが、マルチスレッド モードでは同じプロセスで複数のプロジェクトを実行できます。-reportFileAccesses を削除するか、-mt:false でマルチスレッド モードを無効にします。MSBUILDFORCEMULTITHREADED が設定されている場合は、最初に設定を解除します。MSBUILDENABLEMULTITHREADED は -mt:false でオーバーライドできます。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
