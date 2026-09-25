@@ -903,7 +903,18 @@ namespace Microsoft.Build.BackEnd
                                     packetStream.Position = 1;
                                     _binaryWriter.Write(packetStreamLength - 5);
 
-                                    localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                    try
+                                    {
+                                        localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                    }
+                                    catch (IOException e) when (packet is NodeShutdown { Reason: NodeShutdownReason.Requested, Exception: null }
+                                        && localPipe is PipeStream { IsConnected: false })
+                                    {
+                                        // Both ends are closing; the parent can disconnect before this final notification is flushed.
+                                        CommunicationsUtilities.Trace($"Parent disconnected during requested shutdown: {e.Message}");
+                                        exitLoop = true;
+                                        break;
+                                    }
                                 }
                             }
                             catch (Exception e)
@@ -913,6 +924,11 @@ namespace Microsoft.Build.BackEnd
                                 DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
+                                break;
+                            }
+
+                            if (exitLoop)
+                            {
                                 break;
                             }
 
