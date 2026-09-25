@@ -606,6 +606,8 @@
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFields.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsWriter.cs" />
+    <Compile Include="Logging\BinaryLogger\StringSliceSourceCache.cs" />
+    <Compile Include="Logging\BinaryLogger\ItemSequenceCache.cs" />
     <Compile Include="Logging\BinaryLogger\ProjectImportsCollector.cs" />
     <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
     <Compile Include="Logging\BinaryLogger\Postprocessing\*.cs" />
