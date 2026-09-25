@@ -267,6 +267,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="AssemblyConflictWarningEventArgs"/>.
         /// </summary>
         AssemblyConflictWarningEvent = 47,
+
+        /// <summary>
+        /// Experimental successful RAR report; keep separate from historical prototype packet IDs.
+        /// </summary>
+        AssemblyResolutionResultEvent = 64,
     }
     #endregion
 
@@ -523,6 +528,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.LoggersRegisteredEvent => new LoggersRegisteredEventArgs(),
                 LoggingEventType.MSBuildServerLifecycleEvent => new MSBuildServerLifecycleEventArgs(),
                 LoggingEventType.AssemblyResolutionSearchTraceEvent => new AssemblyResolutionSearchTraceEventArgs(),
+                LoggingEventType.AssemblyResolutionResultEvent => new AssemblyResolutionResultEventArgs(),
                 LoggingEventType.AssemblyConflictDependencyDetailsEvent => new AssemblyConflictDependencyDetailsMessageEventArgs(),
                 LoggingEventType.AssemblyConflictWarningEvent => new AssemblyConflictWarningEventArgs(),
 
@@ -682,6 +688,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(AssemblyResolutionSearchTraceEventArgs))
             {
                 return LoggingEventType.AssemblyResolutionSearchTraceEvent;
+            }
+            else if (eventType == typeof(AssemblyResolutionResultEventArgs))
+            {
+                return LoggingEventType.AssemblyResolutionResultEvent;
             }
             else if (eventType == typeof(AssemblyConflictDependencyDetailsMessageEventArgs))
             {

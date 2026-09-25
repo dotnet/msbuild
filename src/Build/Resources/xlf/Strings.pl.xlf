@@ -141,6 +141,11 @@
         <target state="translated">Zapisywanie nie jest obsługiwane.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_UnsupportedExperimentalFormat">
+        <source>Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</source>
+        <target state="new">Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
         <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
         <target state="translated">MSB4284: Nie można załadować niestandardowego sprawdzania kompilacji „{0}”, ponieważ ten host MSBuild ma wyłączone sondowanie wtyczek niestandardowych, na przykład w przyciętej lub natywnej kompilacji AOT, i nie może załadować zestawów kontrolnych za pomocą odbicia. Kompiluj za pomocą programu MSBuild opartego na technologii JIT, aby uruchamiać testy niestandardowe.</target>

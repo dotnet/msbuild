@@ -602,6 +602,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _customLogger.NumberOfWarning.ShouldBe(0);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TestLogAssemblyResolutionResultEventMP(bool disableExistingStructuredLoggingWave)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION",
+                disableExistingStructuredLoggingWave ? ChangeWaves.Wave18_12.ToString() : null);
+            ChangeWaves.ResetStateForTests();
+            var result = new AssemblyResolutionResultEventArgs(
+                "Reference", "reference.dll", "{HintPathFromItem}", true, false,
+                "ResolveAssemblyReference", MessageImportance.Low, DateTime.UtcNow);
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+            _taskHost.LogMessageEvent(result);
+            _customLogger.LastMessage.ShouldBeSameAs(result);
+            _customLogger.NumberOfWarning.ShouldBe(0);
+
+            var engine = new MockEngine();
+            TaskHostTask.HandleLoggedMessage(engine,
+                new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, result)));
+            engine.MessageEvents.ShouldHaveSingleItem().ShouldBeSameAs(result);
+        }
+
         private static AssemblyConflictReferenceDetails CreateConflictVictorDetails()
             => new(
                 "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",

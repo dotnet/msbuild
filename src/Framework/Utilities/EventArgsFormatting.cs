@@ -26,6 +26,7 @@ namespace Microsoft.Build.Shared
             return e switch
             {
                 AssemblyResolutionSearchTraceEventArgs searchTrace => searchTrace.FormatMessage(culture),
+                AssemblyResolutionResultEventArgs result => result.FormatMessage(culture),
                 AssemblyConflictDependencyDetailsMessageEventArgs details
                     when details.Victor is not null && details.Victim is not null =>
                     details.FormatMessage(culture),

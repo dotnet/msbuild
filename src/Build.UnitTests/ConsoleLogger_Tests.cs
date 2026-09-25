@@ -625,8 +625,10 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void AssemblyResolutionSearchTraceUsesCurrentUICulture()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void AssemblyResolutionSearchTraceUsesCurrentUICulture(bool resultReport)
         {
             CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
             try
@@ -639,20 +641,22 @@ namespace Microsoft.Build.UnitTests
                 var logger = new ParallelConsoleLogger(LoggerVerbosity.Detailed, console.Write, null, null);
                 logger.Initialize(eventSource);
 
-                var searchEvent = new AssemblyResolutionSearchTraceEventArgs(
-                    "Requested, Version=1.0.0.0",
-                    targetProcessorArchitecture: null,
-                    [new("missing.dll", "path", null, null, AssemblyResolutionSearchResult.FileNotFound, null, false)],
-                    "ResolveAssemblyReference",
-                    MessageImportance.Low,
-                    eventTimestamp: default)
-                {
-                    BuildEventContext = new BuildEventContext(1, 2, 3, 4),
-                };
+                BuildMessageEventArgs searchEvent = resultReport
+                    ? new AssemblyResolutionResultEventArgs(
+                        "Reference", "reference.dll", "{HintPathFromItem}", true, false,
+                        "ResolveAssemblyReference", MessageImportance.Low, default)
+                    : new AssemblyResolutionSearchTraceEventArgs(
+                        "Requested, Version=1.0.0.0",
+                        targetProcessorArchitecture: null,
+                        [new("missing.dll", "path", null, null, AssemblyResolutionSearchResult.FileNotFound, null, false)],
+                        "ResolveAssemblyReference",
+                        MessageImportance.Low,
+                        eventTimestamp: default);
+                searchEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
 
                 eventSource.Consume(searchEvent);
 
-                console.ToString().ShouldContain(searchEvent.FormatMessage(frenchCulture));
+                console.ToString().ShouldContain(EventArgsFormatting.GetLocalizedMessage(searchEvent));
                 console.ToString().ShouldNotContain(searchEvent.Message.ShouldNotBeNull());
             }
             finally

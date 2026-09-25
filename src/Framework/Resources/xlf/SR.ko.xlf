@@ -62,6 +62,33 @@
         <target state="translated">값은 빈 문자열일 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_Dependency">
+        <source>Dependency "{0}".</source>
+        <target state="translated">"{0}" 종속성입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_NotCopyLocalBecauseIncomingItemAttributeOverrode">
+        <source>This reference is not "CopyLocal" because at least one source item had "Private" set to "false" and no source items had "Private" set to "true".</source>
+        <target state="translated">적어도 하나의 소스 항목에 대해 "Private"이 "false"로 설정되었고, "Private"이 "true"로 설정된 소스 항목이 없으므로 이 참조는 "CopyLocal"이 아닙니다.</target>
+        <note>
+            LOCALIZATION: Please don't localize "CopyLocal", "Private", "false", "true".
+        </note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_PrimaryReference">
+        <source>Primary reference "{0}".</source>
+        <target state="translated">기본 참조 "{0}"입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_Resolved">
+        <source>Resolved file path is "{0}".</source>
+        <target state="translated">확인된 파일 경로는 "{0}"입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_ResolvedFrom">
+        <source>Reference found at search path location "{0}".</source>
+        <target state="translated">검색 경로 위치 "{0}"에서 참조를 찾았습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
         <target state="translated">"{0}" 문자열을 부울 값(true/false)으로 변환할 수 없습니다.</target>

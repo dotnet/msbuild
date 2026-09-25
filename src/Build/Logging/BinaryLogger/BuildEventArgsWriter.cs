@@ -573,6 +573,7 @@ namespace Microsoft.Build.Logging
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
                 case MSBuildServerLifecycleEventArgs serverLifecycle: return Write(serverLifecycle);
                 case AssemblyResolutionSearchTraceEventArgs assemblyResolutionSearchTrace: return Write(assemblyResolutionSearchTrace);
+                case AssemblyResolutionResultEventArgs assemblyResolutionResult: return Write(assemblyResolutionResult);
                 case AssemblyConflictDependencyDetailsMessageEventArgs assemblyConflictDependencyDetails: return Write(assemblyConflictDependencyDetails);
 
                 default: // actual BuildMessageEventArgs
@@ -668,6 +669,18 @@ namespace Microsoft.Build.Logging
 
             return BinaryLogRecordKind.AssemblyResolutionSearchTrace;
         }
+
+        private BinaryLogRecordKind Write(AssemblyResolutionResultEventArgs e)
+        {
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
+            WriteDeduplicatedString(e.AssemblyName);
+            WriteDeduplicatedString(e.FullPath);
+            WriteDeduplicatedString(e.ResolvedSearchPath);
+            Write(e.IsPrimary);
+            Write(e.IsCopyLocal);
+            return BinaryLogRecordKind.AssemblyResolutionResult;
+        }
+
         private BinaryLogRecordKind Write(AssemblyConflictDependencyDetailsMessageEventArgs e)
         {
             WriteMessageFields(e, writeMessage: false, writeImportance: true);

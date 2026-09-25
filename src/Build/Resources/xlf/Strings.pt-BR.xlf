@@ -141,6 +141,11 @@
         <target state="translated">Não há suporte para gravação.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_UnsupportedExperimentalFormat">
+        <source>Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</source>
+        <target state="new">Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
         <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
         <target state="translated">MSB4284: não foi possível carregar a verificação de build personalizada "{0}" porque esse host do MSBuild tem a investigação de plug-in personalizado desabilitada, por exemplo, em uma compilação AOT nativo ou reduzido e não pode carregar assemblies de verificação por reflexão. Compile com um MSBuild baseado em JIT para executar verificações personalizadas.</target>

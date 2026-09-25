@@ -62,6 +62,33 @@
         <target state="translated">值不能为空字符串。</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_Dependency">
+        <source>Dependency "{0}".</source>
+        <target state="translated">依赖项“{0}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_NotCopyLocalBecauseIncomingItemAttributeOverrode">
+        <source>This reference is not "CopyLocal" because at least one source item had "Private" set to "false" and no source items had "Private" set to "true".</source>
+        <target state="translated">此引用不是“CopyLocal”，因为至少有一个源项将“Private”设置为“false”，而没有源项将“Private”设置为“true”。</target>
+        <note>
+            LOCALIZATION: Please don't localize "CopyLocal", "Private", "false", "true".
+        </note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_PrimaryReference">
+        <source>Primary reference "{0}".</source>
+        <target state="translated">主引用“{0}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_Resolved">
+        <source>Resolved file path is "{0}".</source>
+        <target state="translated">解析的文件路径为“{0}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_ResolvedFrom">
+        <source>Reference found at search path location "{0}".</source>
+        <target state="translated">在搜索路径位置“{0}”找到引用。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
         <target state="translated">无法将字符串“{0}”转换为布尔值(true/false)。</target>

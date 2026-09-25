@@ -68,6 +68,12 @@ namespace Microsoft.Build.Logging
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
+            if (fileFormatVersion is 29 or 30)
+            {
+                throw new NotSupportedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "Binlog_UnsupportedExperimentalFormat", fileFormatVersion));
+            }
+
             this._readStream = TransparentReadStream.EnsureTransparentReadStream(binaryReader.BaseStream);
             // make sure the reader we're going to use wraps the transparent stream wrapper
             this._binaryReader = binaryReader.BaseStream == _readStream
@@ -333,6 +339,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
                 BinaryLogRecordKind.MSBuildServerLifecycle => ReadMSBuildServerLifecycleEventArgs(),
                 BinaryLogRecordKind.AssemblyResolutionSearchTrace => ReadAssemblyResolutionSearchTraceEventArgs(),
+                BinaryLogRecordKind.AssemblyResolutionResult when _fileFormatVersion >= 31 => ReadAssemblyResolutionResultEventArgs(),
                 BinaryLogRecordKind.AssemblyConflictDependencyDetails => ReadAssemblyConflictDependencyDetailsMessageEventArgs(),
                 BinaryLogRecordKind.AssemblyConflictWarning => ReadAssemblyConflictWarningEventArgs(),
                 _ => null
@@ -560,6 +567,25 @@ namespace Microsoft.Build.Logging
             };
             SetCommonFields(e, fields);
             e.ProjectFile = fields.ProjectFile;
+            return e;
+        }
+
+        private BuildEventArgs ReadAssemblyResolutionResultEventArgs()
+        {
+            BuildEventArgsFields fields = ReadBuildEventArgsFields(readImportance: true);
+            var e = new AssemblyResolutionResultEventArgs(
+                ReadOptionalString() ?? string.Empty,
+                ReadOptionalString() ?? string.Empty,
+                ReadOptionalString() ?? string.Empty,
+                ReadBoolean(),
+                ReadBoolean(),
+                fields.SenderName ?? string.Empty,
+                fields.Importance,
+                fields.Timestamp)
+            {
+                ProjectFile = fields.ProjectFile,
+            };
+            SetCommonFields(e, fields);
             return e;
         }
 

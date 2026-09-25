@@ -62,6 +62,33 @@
         <target state="translated">Значение не может быть пустой строкой.</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_Dependency">
+        <source>Dependency "{0}".</source>
+        <target state="translated">Зависимость "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_NotCopyLocalBecauseIncomingItemAttributeOverrode">
+        <source>This reference is not "CopyLocal" because at least one source item had "Private" set to "false" and no source items had "Private" set to "true".</source>
+        <target state="translated">Данная ссылка не является "CopyLocal" так как хотя бы для одного источника данных параметр "Private" имеет значение "false", и нет источников данных, для которых параметр "Private" имеет значение "true".</target>
+        <note>
+            LOCALIZATION: Please don't localize "CopyLocal", "Private", "false", "true".
+        </note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_PrimaryReference">
+        <source>Primary reference "{0}".</source>
+        <target state="translated">Первичная ссылка "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_Resolved">
+        <source>Resolved file path is "{0}".</source>
+        <target state="translated">Разрешенный путь к файлу - "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_ResolvedFrom">
+        <source>Reference found at search path location "{0}".</source>
+        <target state="translated">Обнаружена ссылка в расположении пути поиска "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
         <target state="translated">Строка "{0}" не может быть преобразована в логическое значение (истина/ложь).</target>

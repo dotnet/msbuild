@@ -260,6 +260,24 @@
             Normal should not be localized.
             Low should not be localized.</comment>
   </data>
+  <data name="AssemblyResolutionResult_PrimaryReference">
+    <value>Primary reference "{0}".</value>
+  </data>
+  <data name="AssemblyResolutionResult_Dependency">
+    <value>Dependency "{0}".</value>
+  </data>
+  <data name="AssemblyResolutionResult_Resolved">
+    <value>Resolved file path is "{0}".</value>
+  </data>
+  <data name="AssemblyResolutionResult_ResolvedFrom">
+    <value>Reference found at search path location "{0}".</value>
+  </data>
+  <data name="AssemblyResolutionResult_NotCopyLocalBecauseIncomingItemAttributeOverrode">
+    <value>This reference is not "CopyLocal" because at least one source item had "Private" set to "false" and no source items had "Private" set to "true".</value>
+    <comment>
+            LOCALIZATION: Please don't localize "CopyLocal", "Private", "false", "true".
+        </comment>
+  </data>
   <data name="AssemblyResolutionSearchTrace_SearchPath">
     <value>For SearchPath "{0}".</value>
   </data>

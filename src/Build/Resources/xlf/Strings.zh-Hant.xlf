@@ -141,6 +141,11 @@
         <target state="translated">不支援寫入。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_UnsupportedExperimentalFormat">
+        <source>Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</source>
+        <target state="new">Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
         <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
         <target state="translated">MSB4284: 無法載入自訂建置檢查 "{0}"，因為此 MSBuild 主機已停用自訂外掛程式探查，例如在已修剪或原生 AOT 建置中，且無法透過反映載入檢查組件。請使用以 JIT 為基礎的 MSBuild 來建置，以執行自訂檢查。</target>

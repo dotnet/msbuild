@@ -62,6 +62,33 @@
         <target state="translated">Il valore non può essere una stringa vuota.</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_Dependency">
+        <source>Dependency "{0}".</source>
+        <target state="translated">Dipendenza "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_NotCopyLocalBecauseIncomingItemAttributeOverrode">
+        <source>This reference is not "CopyLocal" because at least one source item had "Private" set to "false" and no source items had "Private" set to "true".</source>
+        <target state="translated">Questo riferimento non è "CopyLocal". Per almeno un elemento di origine "Private" era stato impostato su "false" e per nessun elemento di origine "Private" era stato impostato su "true".</target>
+        <note>
+            LOCALIZATION: Please don't localize "CopyLocal", "Private", "false", "true".
+        </note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_PrimaryReference">
+        <source>Primary reference "{0}".</source>
+        <target state="translated">Riferimento primario "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_Resolved">
+        <source>Resolved file path is "{0}".</source>
+        <target state="translated">Il percorso file risolto è "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionResult_ResolvedFrom">
+        <source>Reference found at search path location "{0}".</source>
+        <target state="translated">Riferimento trovato nel percorso di ricerca "{0}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
         <target state="translated">Non è possibile convertire la stringa "{0}" in un valore booleano (true/false).</target>
