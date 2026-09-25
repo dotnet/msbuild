@@ -123,6 +123,13 @@ the legacy recording switch retains observation behavior and the legacy
 snapshot switch retains its reject-all validator. Invalid values fail closed to
 `Disabled` and produce a configuration diagnostic.
 
+In snapshot modes, requests carrying the `MSBuildRestoreSessionId` global property
+bypass input recording, snapshot lookup, and snapshot admission. Restore generates a
+new session ID on each invocation, so retaining these snapshots would consume the
+cache budget and evict reusable build evaluations. Explicit `Record` mode still
+records restore inputs. Normal build snapshots remain subject to validation after
+restore; this does not ignore restore-generated input changes or alter cache keys.
+
 Each explicitly configured or legacy-opted-in build logs one low-importance, versioned
 `EvaluationCacheExperimentStatus|` record. It contains the effective mode,
 configuration validity, process and main-`BuildManager` identities, build

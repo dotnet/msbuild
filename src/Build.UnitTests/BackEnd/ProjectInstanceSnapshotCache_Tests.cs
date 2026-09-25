@@ -16,6 +16,7 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -26,8 +27,10 @@ using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.UnitTests.BackEnd;
 
-public sealed class ProjectInstanceSnapshotCache_Tests
+public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
 {
+    private readonly ITestOutputHelper _output = output;
+
     [Fact]
     public void EquivalentEvaluationIdentityProducesEqualKeys()
     {
@@ -1251,6 +1254,106 @@ public sealed class ProjectInstanceSnapshotCache_Tests
             Environment.SetEnvironmentVariable(ModeVariable, originalMode);
             Traits.UpdateFromEnvironment();
         }
+    }
+
+    [Theory]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotFileSystem), "MSBuildRestoreSessionId")]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotFileSystem), "msbuildrestoresessionid")]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotUnsafe), "MSBuildRestoreSessionId")]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotUnsafe), "msbuildrestoresessionid")]
+    public void RestoreRequestsDoNotRecordOrDisplaceBuildSnapshots(string modeName, string sessionProperty)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(EvaluationCacheConfiguration.ModeEnvironmentVariable, modeName);
+        Traits.UpdateFromEnvironment();
+        TransientTestFile project = env.CreateFile(
+            "project.proj",
+            """
+            <Project>
+              <PropertyGroup><Value>unchanged</Value></PropertyGroup>
+            </Project>
+            """);
+        EvaluationCacheConfiguration mode = Traits.Instance.EvaluationCache;
+        var cache = new ProjectInstanceSnapshotCache();
+        cache.ConfigureValidator(mode.ValidationPolicy);
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = mode,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters);
+
+        CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+        cache.Count.ShouldBe(1);
+        long retainedSize = cache.CurrentSizeBytes;
+
+        for (int submissionId = 2; submissionId <= 3; submissionId++)
+        {
+            string sessionId = Guid.NewGuid().ToString();
+            BuildRequestConfiguration restore = CreateFileConfiguration(
+                project.Path,
+                parameters,
+                new Dictionary<string, string?> { [sessionProperty] = sessionId });
+            restore.LoadProjectIntoConfiguration(
+                host, BuildRequestDataFlags.None, submissionId, nodeId: 1);
+            restore.Project.GetPropertyValue(sessionProperty).ShouldBe(sessionId);
+            restore.Project.GetPropertyValue("Value").ShouldBe("unchanged");
+            restore.Project.EvaluationInputs.ShouldBeNull();
+            cache.Count.ShouldBe(1);
+            cache.CurrentSizeBytes.ShouldBe(retainedSize);
+        }
+
+        BuildRequestConfiguration nextBuild = CreateFileConfiguration(project.Path, parameters);
+        nextBuild.LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 4, nodeId: 1);
+
+        nextBuild.Project.GetPropertyValue("Value").ShouldBe("unchanged");
+        nextBuild.Project.EvaluationInputs.ShouldNotBeNull();
+        ProjectInstanceSnapshotCacheStatistics statistics = cache.GetStatistics();
+        statistics.FreshEvaluations.ShouldBe(3);
+        statistics.RecordedEvaluations.ShouldBe(1);
+        statistics.CacheMisses.ShouldBe(1);
+        statistics.CacheHits.ShouldBe(1);
+        statistics.MaterializedEntries.ShouldBe(1);
+        statistics.StoredEntries.ShouldBe(1);
+        statistics.EvictedEntries.ShouldBe(0);
+        statistics.Fallbacks.ShouldBe(0);
+    }
+
+    [Fact]
+    public void RecordModeStillRecordsRestoreRequests()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(
+            EvaluationCacheConfiguration.ModeEnvironmentVariable,
+            nameof(EvaluationCacheMode.Record));
+        Traits.UpdateFromEnvironment();
+        TransientTestFile project = env.CreateFile("project.proj", "<Project />");
+        var cache = new ProjectInstanceSnapshotCache();
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters);
+        BuildRequestConfiguration restore = CreateFileConfiguration(
+            project.Path,
+            parameters,
+            new Dictionary<string, string?> { [MSBuildConstants.MSBuildRestoreSessionId] = "restore-session" });
+
+        restore.LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+
+        restore.Project.EvaluationInputs.ShouldNotBeNull()
+            .Key.GlobalProperties.ShouldContain("MSBUILDRESTORESESSIONID=restore-session\0");
+        ProjectInstanceSnapshotCacheStatistics statistics = cache.GetStatistics();
+        statistics.FreshEvaluations.ShouldBe(1);
+        statistics.RecordedEvaluations.ShouldBe(1);
+        statistics.CacheHits.ShouldBe(0);
+        statistics.CacheMisses.ShouldBe(0);
+        statistics.StoredEntries.ShouldBe(0);
+        statistics.Count.ShouldBe(0);
     }
 
     [Fact]

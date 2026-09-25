@@ -34,6 +34,13 @@ is distinct from leaving the feature unconfigured.
 "Checked mode" means the eventual conforming checked opt-in in this document. It does
 not rename `SnapshotFileSystem` or any public API.
 
+Restore-scoped requests carrying the `MSBuildRestoreSessionId` global property bypass
+recording, snapshot lookup, and admission in snapshot modes. Their per-invocation
+identity prevents cross-restore reuse, so retaining them would evict reusable build
+snapshots. Explicit `Record` mode continues to record these evaluations. Subsequent
+normal builds still validate retained snapshots against current inputs, including
+restore-generated imports; no part of the request key is ignored.
+
 ## Correctness invariant
 
 A cached evaluation MUST be accepted only when it is semantically equivalent to a fresh, current,

@@ -592,11 +592,17 @@ namespace Microsoft.Build.BackEnd
                 bool snapshotModeEnabled =
                     evaluationCacheConfiguration?.EnableSnapshotCache
                     ?? statisticsCache is not null;
+                // Restore gets a new session ID on every invocation, so its snapshots cannot be
+                // reused by the next restore and would evict reusable build evaluations.
+                bool bypassRestoreSnapshot =
+                    snapshotModeEnabled
+                    && globalProperties.ContainsKey(MSBuildConstants.MSBuildRestoreSessionId);
 
                 // Snapshot copies do not retain evaluated item elements, and caller/transferred state
                 // must never be replaced with a reusable file-based evaluation.
                 ProjectInstanceSnapshotCache snapshotCache =
                     snapshotModeEnabled
+                    && !bypassRestoreSnapshot
                     && !projectLoadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements)
                     && _project is null
                     && _transferredState is null
@@ -608,7 +614,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectRootElement projectRootElement = null;
                 bool needsEvaluationKey =
                     snapshotCache is not null
-                    || evaluationCacheConfiguration?.RecordInputs == true;
+                    || (evaluationCacheConfiguration?.RecordInputs == true && !bypassRestoreSnapshot);
                 if (needsEvaluationKey)
                 {
                     try

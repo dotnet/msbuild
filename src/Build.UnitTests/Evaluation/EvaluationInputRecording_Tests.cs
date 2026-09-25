@@ -96,6 +96,44 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         GC.KeepAlive(cachedRoot);
     }
 
+    [Theory]
+    [InlineData(nameof(EvaluationCacheMode.Record), true, false)]
+    [InlineData(nameof(EvaluationCacheMode.Record), true, true)]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotUnsafe), false, false)]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotUnsafe), false, true)]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotFileSystem), false, false)]
+    [InlineData(nameof(EvaluationCacheMode.SnapshotFileSystem), false, true)]
+    [InlineData(nameof(EvaluationCacheMode.Disabled), false, false)]
+    [InlineData(nameof(EvaluationCacheMode.Disabled), false, true)]
+    public void RestoreRecordingRespectsModeAcrossEvaluationApis(string modeName, bool recordsInputs, bool useProject)
+    {
+        _env.SetEnvironmentVariable(EvaluationCacheConfiguration.ModeEnvironmentVariable, modeName);
+        Traits.UpdateFromEnvironment();
+        string path = CreateProject("<Project />");
+        ProjectCollection collection = _env.CreateProjectCollection().Collection;
+        var globals = new Dictionary<string, string>
+        {
+            [MSBuildConstants.MSBuildRestoreSessionId] = "restore-session",
+        };
+
+        EvaluationInputs? inputs = useProject
+            ? new Project(path, globals, null, collection).EvaluationInputs
+            : ProjectInstance.FromFile(path, new ProjectOptions
+            {
+                ProjectCollection = collection,
+                GlobalProperties = globals,
+            }).EvaluationInputs;
+
+        if (recordsInputs)
+        {
+            inputs.ShouldNotBeNull().Key.GlobalProperties.ShouldContain("MSBUILDRESTORESESSIONID=restore-session\0");
+        }
+        else
+        {
+            inputs.ShouldBeNull();
+        }
+    }
+
     [Fact]
     public void EditingRootProjectInvalidates()
     {
