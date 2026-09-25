@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -15,6 +16,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
@@ -1159,6 +1161,411 @@ namespace Microsoft.Build.UnitTests.Logging
         }
         #endregion
 
+        #region Asynchronous Queue Notification Tests
+
+        [Fact]
+        public void AsynchronousQueuePreservesPerProducerOrderAndDeliversEveryEvent()
+        {
+            const int producerCount = 4;
+            const int messagesPerProducer = 250;
+            var logger = new AsyncRecordingLogger();
+            LoggingService loggingService = CreateAsyncLoggingService(logger);
+            using var start = new ManualResetEvent(false);
+            Exception producerException = null;
+            Thread[] producers = new Thread[producerCount];
+
+            try
+            {
+                for (int producer = 0; producer < producerCount; producer++)
+                {
+                    int producerId = producer;
+                    producers[producer] = new Thread(() =>
+                    {
+                        try
+                        {
+                            if (!start.WaitOne(TimeSpan.FromSeconds(10)))
+                            {
+                                throw new TimeoutException("Timed out waiting to start the ordered-event producer.");
+                            }
+
+                            for (int sequence = 0; sequence < messagesPerProducer; sequence++)
+                            {
+                                var context = new BuildEventContext(
+                                    submissionId: producerId,
+                                    nodeId: 1,
+                                    projectInstanceId: sequence,
+                                    projectContextId: producerId,
+                                    targetId: sequence,
+                                    taskId: sequence);
+                                loggingService.ProcessLoggingEvent(CreateMessage($"{producerId}:{sequence}", context));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Interlocked.CompareExchange(ref producerException, ex, null);
+                        }
+                    })
+                    {
+                        IsBackground = true,
+                    };
+                    producers[producer].Start();
+                }
+
+                start.Set();
+                foreach (Thread producer in producers)
+                {
+                    producer.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue("A logging producer did not finish.");
+                }
+
+                producerException.ShouldBeNull();
+                int expectedCount = producerCount * messagesPerProducer;
+                SpinWait.SpinUntil(
+                    () => logger.Count == expectedCount,
+                    TimeSpan.FromSeconds(10)).ShouldBeTrue("The logging queue did not deliver every event.");
+
+                BuildMessageEventArgs[] messages = logger.Snapshot();
+                messages.Length.ShouldBe(expectedCount);
+                var seen = new HashSet<string>(StringComparer.Ordinal);
+                int[] nextSequence = new int[producerCount];
+                foreach (BuildMessageEventArgs messageEvent in messages)
+                {
+                    string message = messageEvent.Message;
+                    seen.Add(message).ShouldBeTrue($"Duplicate message '{message}'.");
+                    string[] parts = message.Split(':');
+                    int producer = int.Parse(parts[0], CultureInfo.InvariantCulture);
+                    int sequence = int.Parse(parts[1], CultureInfo.InvariantCulture);
+                    sequence.ShouldBe(nextSequence[producer]);
+                    messageEvent.BuildEventContext.SubmissionId.ShouldBe(producer);
+                    messageEvent.BuildEventContext.ProjectInstanceId.ShouldBe(sequence);
+                    messageEvent.BuildEventContext.ProjectContextId.ShouldBe(producer);
+                    messageEvent.BuildEventContext.TargetId.ShouldBe(sequence);
+                    messageEvent.BuildEventContext.TaskId.ShouldBe(sequence);
+                    nextSequence[producer]++;
+                }
+
+                foreach (int next in nextSequence)
+                {
+                    next.ShouldBe(messagesPerProducer);
+                }
+            }
+            finally
+            {
+                start.Set();
+                foreach (Thread producer in producers)
+                {
+                    producer?.Join(TimeSpan.FromSeconds(1));
+                }
+
+                ShutdownWithTimeout(loggingService).ShouldBeNull();
+            }
+        }
+
+        [Fact]
+        public void AsynchronousQueueWakesAcrossRepeatedBurstAndDrainTransitions()
+        {
+            const int burstCount = 50;
+            const int messagesPerBurst = 20;
+            var logger = new AsyncRecordingLogger();
+            LoggingService loggingService = CreateAsyncLoggingService(logger);
+
+            try
+            {
+                for (int burst = 0; burst < burstCount; burst++)
+                {
+                    for (int message = 0; message < messagesPerBurst; message++)
+                    {
+                        loggingService.ProcessLoggingEvent(CreateMessage($"{burst}:{message}"));
+                    }
+
+                    int expectedCount = (burst + 1) * messagesPerBurst;
+                    SpinWait.SpinUntil(
+                        () => logger.Count == expectedCount && loggingService.EventQueueCount == 0,
+                        TimeSpan.FromSeconds(10)).ShouldBeTrue($"Burst {burst} did not drain.");
+                }
+            }
+            finally
+            {
+                ShutdownWithTimeout(loggingService).ShouldBeNull();
+            }
+        }
+
+        [Fact]
+        public void AsynchronousQueueDrainsQueuedEventsDuringShutdown()
+        {
+            using var callbackEntered = new ManualResetEvent(false);
+            using var releaseCallback = new ManualResetEvent(false);
+            var logger = new AsyncRecordingLogger(message =>
+            {
+                if (message.Message == "gate")
+                {
+                    callbackEntered.Set();
+                    if (!releaseCallback.WaitOne(TimeSpan.FromSeconds(10)))
+                    {
+                        throw new TimeoutException("Timed out waiting to release the shutdown-drain logger callback.");
+                    }
+                }
+            });
+            LoggingService loggingService = CreateAsyncLoggingService(logger);
+            int centralSinkId = GetPrivateField<int>(loggingService, "_centralForwardingLoggerSinkId");
+            Thread shutdownThread = null;
+            Exception shutdownException = null;
+
+            try
+            {
+                loggingService.ProcessLoggingEvent(
+                    new KeyValuePair<int, BuildEventArgs>(centralSinkId, CreateMessage("gate")));
+                callbackEntered.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue("The logger callback was not entered.");
+
+                for (int i = 0; i < 100; i++)
+                {
+                    loggingService.ProcessLoggingEvent(
+                        new KeyValuePair<int, BuildEventArgs>(centralSinkId, CreateMessage($"queued:{i}")));
+                }
+
+                shutdownThread = new Thread(() =>
+                {
+                    try
+                    {
+                        ((IBuildComponent)loggingService).ShutdownComponent();
+                    }
+                    catch (Exception ex)
+                    {
+                        shutdownException = ex;
+                    }
+                })
+                {
+                    IsBackground = true,
+                };
+                shutdownThread.Start();
+                shutdownThread.Join(TimeSpan.FromMilliseconds(100)).ShouldBeFalse("Shutdown completed while a logger callback was gated.");
+
+                releaseCallback.Set();
+                shutdownThread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue("Shutdown did not drain the logging queue.");
+                shutdownException.ShouldBeNull();
+                logger.Count.ShouldBe(101);
+            }
+            finally
+            {
+                releaseCallback.Set();
+                if (shutdownThread is null)
+                {
+                    ShutdownWithTimeout(loggingService).ShouldBeNull();
+                }
+                else
+                {
+                    shutdownThread.Join(TimeSpan.FromSeconds(10));
+                }
+            }
+        }
+
+        [Fact]
+        public void AsynchronousQueueRelaysLoggerExceptions()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder debugPath = env.CreateFolder();
+            var transientDebugPath = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath.Path);
+            var expected = new LoggerException("Expected asynchronous logger failure.");
+            using var exceptionRaised = new ManualResetEvent(false);
+            Exception observed = null;
+            LoggingService loggingService = null;
+            string exceptionFile = null;
+
+            try
+            {
+                FrameworkDebugUtils.SetDebugPath();
+                DebugUtils.ResetDebugDumpPathInRunningTests = true;
+                _ = DebugUtils.DebugDumpPath;
+
+                var logger = new AsyncRecordingLogger(_ => throw expected);
+                loggingService = CreateAsyncLoggingService(logger);
+                int centralSinkId = GetPrivateField<int>(loggingService, "_centralForwardingLoggerSinkId");
+                loggingService.OnLoggingThreadException += ex =>
+                {
+                    Interlocked.CompareExchange(ref observed, ex, null);
+                    exceptionRaised.Set();
+                };
+
+                loggingService.ProcessLoggingEvent(
+                    new KeyValuePair<int, BuildEventArgs>(centralSinkId, CreateMessage("throw")));
+                exceptionRaised.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue("The logger exception was not relayed.");
+                observed.ShouldBeOfType<LoggerException>();
+                ReferenceEquals(observed, expected).ShouldBeTrue();
+
+                Exception shutdownException = ShutdownWithTimeout(loggingService);
+                loggingService = null;
+                shutdownException.ShouldBeNull();
+
+                string[] exceptionFiles = Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt");
+                exceptionFiles.Length.ShouldBe(1);
+                exceptionFile = exceptionFiles[0];
+                File.ReadAllText(exceptionFile).ShouldContain(expected.ToString());
+            }
+            finally
+            {
+                if (loggingService is not null)
+                {
+                    ShutdownWithTimeout(loggingService).ShouldBeNull();
+                }
+
+                if (exceptionFile is not null)
+                {
+                    File.Delete(exceptionFile);
+                }
+
+                transientDebugPath.Revert();
+                FrameworkDebugUtils.SetDebugPath();
+
+                DebugUtils.ResetDebugDumpPathInRunningTests = true;
+                _ = DebugUtils.DebugDumpPath;
+            }
+        }
+
+        [Fact]
+        public void SmallAsynchronousQueueAllowsWaitingProducersToProgress()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDLOGGINGQUEUECAPACITY", "2");
+            using var callbackEntered = new ManualResetEvent(false);
+            using var releaseCallback = new ManualResetEvent(false);
+            using var start = new ManualResetEvent(false);
+            var logger = new AsyncRecordingLogger(message =>
+            {
+                if (message.Message == "gate")
+                {
+                    callbackEntered.Set();
+                    if (!releaseCallback.WaitOne(TimeSpan.FromSeconds(10)))
+                    {
+                        throw new TimeoutException("Timed out waiting to release the small-queue logger callback.");
+                    }
+                }
+            });
+            LoggingService loggingService = CreateAsyncLoggingService(logger);
+            const int producerCount = 6;
+            const int messagesPerProducer = 20;
+            Thread[] producers = new Thread[producerCount];
+            Exception producerException = null;
+
+            try
+            {
+                loggingService.ProcessLoggingEvent(CreateMessage("gate"));
+                callbackEntered.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue("The logger callback was not entered.");
+
+                for (int producer = 0; producer < producerCount; producer++)
+                {
+                    int producerId = producer;
+                    producers[producer] = new Thread(() =>
+                    {
+                        try
+                        {
+                            if (!start.WaitOne(TimeSpan.FromSeconds(10)))
+                            {
+                                throw new TimeoutException("Timed out waiting to start the small-queue producer.");
+                            }
+
+                            for (int message = 0; message < messagesPerProducer; message++)
+                            {
+                                loggingService.ProcessLoggingEvent(CreateMessage($"{producerId}:{message}"));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Interlocked.CompareExchange(ref producerException, ex, null);
+                        }
+                    })
+                    {
+                        IsBackground = true,
+                    };
+                    producers[producer].Start();
+                }
+
+                start.Set();
+                SpinWait.SpinUntil(
+                    () => loggingService.EventQueueCount >= 2,
+                    TimeSpan.FromSeconds(10)).ShouldBeTrue("The test did not fill the small queue.");
+                releaseCallback.Set();
+
+                foreach (Thread producer in producers)
+                {
+                    producer.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue("A producer waiting for queue capacity did not progress.");
+                }
+
+                producerException.ShouldBeNull();
+                int expectedCount = 1 + (producerCount * messagesPerProducer);
+                SpinWait.SpinUntil(
+                    () => logger.Count == expectedCount,
+                    TimeSpan.FromSeconds(10)).ShouldBeTrue("The small queue did not deliver every event.");
+            }
+            finally
+            {
+                start.Set();
+                releaseCallback.Set();
+                foreach (Thread producer in producers)
+                {
+                    producer?.Join(TimeSpan.FromSeconds(1));
+                }
+
+                ShutdownWithTimeout(loggingService).ShouldBeNull();
+            }
+        }
+
+        [Fact]
+        public void AsynchronousQueueSuppressesRedundantWakeupsWhileNotificationIsPending()
+        {
+            using var callbackEntered = new ManualResetEvent(false);
+            using var releaseCallback = new ManualResetEvent(false);
+            var logger = new AsyncRecordingLogger(message =>
+            {
+                if (message.Message == "gate")
+                {
+                    callbackEntered.Set();
+                    if (!releaseCallback.WaitOne(TimeSpan.FromSeconds(10)))
+                    {
+                        throw new TimeoutException("Timed out waiting to release the wakeup logger callback.");
+                    }
+                }
+            });
+            LoggingService loggingService = CreateAsyncLoggingService(logger);
+            var enqueueEvent = GetPrivateField<AutoResetEvent>(loggingService, "_enqueueEvent");
+
+            try
+            {
+                loggingService.ProcessLoggingEvent(CreateMessage("gate"));
+                callbackEntered.WaitOne(TimeSpan.FromSeconds(10)).ShouldBeTrue("The logger callback was not entered.");
+                GetPrivateField<int>(loggingService, "_enqueueNotificationPending").ShouldBe(1);
+
+                _ = enqueueEvent.WaitOne(0);
+                loggingService.ProcessLoggingEvent(CreateMessage("queued:0"));
+                enqueueEvent.WaitOne(0).ShouldBeFalse("The first queued event emitted a redundant enqueue notification.");
+                for (int i = 1; i <= 10; i++)
+                {
+                    loggingService.ProcessLoggingEvent(CreateMessage($"queued:{i}"));
+                }
+
+                enqueueEvent.WaitOne(TimeSpan.FromMilliseconds(100)).ShouldBeFalse("A redundant enqueue notification was emitted.");
+                GetPrivateField<int>(loggingService, "_enqueueNotificationPending").ShouldBe(1);
+
+                releaseCallback.Set();
+                SpinWait.SpinUntil(
+                    () => logger.Count == 12 && loggingService.EventQueueCount == 0,
+                    TimeSpan.FromSeconds(10)).ShouldBeTrue("The queued messages did not drain.");
+                SpinWait.SpinUntil(
+                    () => GetPrivateField<int>(loggingService, "_enqueueNotificationPending") == 0,
+                    TimeSpan.FromSeconds(10)).ShouldBeTrue("The enqueue notification was not reset after drain.");
+
+                loggingService.ProcessLoggingEvent(CreateMessage("new-burst"));
+                SpinWait.SpinUntil(
+                    () => logger.Count == 13,
+                    TimeSpan.FromSeconds(10)).ShouldBeTrue("A new burst did not wake the logging consumer.");
+            }
+            finally
+            {
+                releaseCallback.Set();
+                ShutdownWithTimeout(loggingService).ShouldBeNull();
+            }
+        }
+
+        #endregion
+
         #region ProcessLoggingEvent After Shutdown Tests
 
         /// <summary>
@@ -1301,6 +1708,52 @@ namespace Microsoft.Build.UnitTests.Logging
             _initializedService = logServiceComponent as LoggingService;
         }
 
+        private static LoggingService CreateAsyncLoggingService(ILogger logger)
+        {
+            var parameters = new BuildParameters
+            {
+                MaxNodeCount = 2,
+            };
+            var loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            ((IBuildComponent)loggingService).InitializeComponent(new MockHost(parameters));
+            loggingService.RegisterLogger(logger);
+            return loggingService;
+        }
+
+        private static BuildMessageEventArgs CreateMessage(string message, BuildEventContext context = null) =>
+            new BuildMessageEventArgs(message, null, null, MessageImportance.Low)
+            {
+                BuildEventContext = context,
+            };
+
+        private static T GetPrivateField<T>(LoggingService loggingService, string fieldName) =>
+            (T)typeof(LoggingService)
+                .GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(loggingService);
+
+        private static Exception ShutdownWithTimeout(LoggingService loggingService)
+        {
+            Exception shutdownException = null;
+            var shutdownThread = new Thread(() =>
+            {
+                try
+                {
+                    ((IBuildComponent)loggingService).ShutdownComponent();
+                }
+                catch (Exception ex)
+                {
+                    shutdownException = ex;
+                }
+            })
+            {
+                IsBackground = true,
+            };
+
+            shutdownThread.Start();
+            shutdownThread.Join(TimeSpan.FromSeconds(10)).ShouldBeTrue("Logging service shutdown timed out.");
+            return shutdownException;
+        }
+
         /// <summary>
         /// Register the correct logger and then call the shutdownComponent method.
         /// This will call shutdown on the loggers, we should expect to see certain exceptions.
@@ -1375,6 +1828,63 @@ namespace Microsoft.Build.UnitTests.Logging
         #endregion
 
         #region HelperClasses
+
+        private sealed class AsyncRecordingLogger : ILogger
+        {
+            private readonly object _sync = new object();
+            private readonly List<BuildMessageEventArgs> _messages = new List<BuildMessageEventArgs>();
+            private readonly Action<BuildMessageEventArgs> _onMessage;
+
+            internal AsyncRecordingLogger(Action<BuildMessageEventArgs> onMessage = null)
+            {
+                _onMessage = onMessage;
+            }
+
+            public LoggerVerbosity Verbosity { get; set; }
+
+            public string Parameters { get; set; }
+
+            internal int Count
+            {
+                get
+                {
+                    lock (_sync)
+                    {
+                        return _messages.Count;
+                    }
+                }
+            }
+
+            public void Initialize(IEventSource eventSource)
+            {
+                eventSource.MessageRaised += OnEventRaised;
+            }
+
+            public void Shutdown()
+            {
+            }
+
+            internal BuildMessageEventArgs[] Snapshot()
+            {
+                lock (_sync)
+                {
+                    return _messages.ToArray();
+                }
+            }
+
+            private void OnEventRaised(object sender, BuildEventArgs args)
+            {
+                if (args is BuildMessageEventArgs message)
+                {
+                    lock (_sync)
+                    {
+                        _messages.Add(message);
+                    }
+
+                    _onMessage?.Invoke(message);
+                }
+            }
+        }
 
         /// <summary>
         /// A forwarding logger which will throw an exception
