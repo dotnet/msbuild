@@ -599,6 +599,13 @@ namespace Microsoft.Build.Evaluation
                         string metadataExpanded = _expander.ExpandIntoStringLeaveEscaped(matchOnMetadataSplit, ExpanderOptions.ExpandPropertiesAndItems, itemElement.MatchOnMetadataLocation);
                         var metadataSplits = ExpressionShredder.SplitSemiColonSeparatedList(metadataExpanded);
                         operationBuilder.MatchOnMetadata.AddRange(metadataSplits);
+                        if (_expander.PropertiesUseTracker.InputRecorder is { } inputRecorder)
+                        {
+                            foreach (string metadataName in metadataSplits)
+                            {
+                                inputRecorder.RecordMetadataName(metadataName);
+                            }
+                        }
                     }
                 }
             }
