@@ -140,15 +140,54 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Environment.GetFolderPath()` | Use `TaskEnvironment.GetEnvironmentVariable()` |
 | `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath()` |
 | `Path.GetTempPath()` | `TaskEnvironment.GetTempPath()` |
-| `Path.GetTempFileName()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
-| `Directory.CreateTempSubdirectory()` (with or without a prefix) | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
+| `Path.GetTempFileName()` | Create a unique file under `TaskEnvironment.GetTempPath()`. See the example below. |
+| `Directory.CreateTempSubdirectory()` (with or without a prefix) | No supported equivalent. Suppress the diagnostic with a justification. |
 | `new TempFileCollection()` | Pass an explicit task-resolved temporary directory, or suppress with a justification. |
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 
 In multithreaded mode, `TaskEnvironment.GetTempPath()` resolves the temporary folder from the isolated task environment. In multi-process mode, it matches `Path.GetTempPath()`.
 
-The other temp helpers above depend on process-wide temporary-directory environment variables. Until a `TaskEnvironment` alternative is available, suppress `MSBuildTask0002` (or `MSBuildTask0005` for a call through a helper) with a justification. `Path.GetRandomFileName()` only generates a name and does not resolve a temporary directory, so it is not banned.
+`Path.GetTempFileName()` creates a unique empty file. `TaskEnvironment.GetTempPath()` only returns the task-local temporary directory. Add this helper to a task class when the task needs the file-creation behavior:
+
+```csharp
+using System.IO;
+using Microsoft.Build.Framework;
+
+private static AbsolutePath CreateTempFile(TaskEnvironment taskEnvironment)
+{
+    const int maximumAttempts = 10;
+    AbsolutePath tempPath = taskEnvironment.GetTempPath();
+
+    for (int attempt = 1; ; attempt++)
+    {
+        AbsolutePath filePath = new(Path.GetRandomFileName(), tempPath);
+
+        try
+        {
+            using FileStream stream = new(
+                filePath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None);
+
+            return filePath;
+        }
+        catch (IOException) when (attempt < maximumAttempts && File.Exists(filePath))
+        {
+            // Try another name. The final attempt preserves the I/O exception.
+        }
+    }
+}
+```
+
+`FileMode.CreateNew` prevents the helper from overwriting an existing file. The filter retries only when the generated file already exists. Other I/O errors stop the operation immediately.
+
+The caller owns the returned file. Delete the file when the task no longer needs it. MSBuild does not provide a `TaskEnvironment.GetTempFileName()` convenience API.
+
+`Directory.CreateTempSubdirectory()` still has no supported task-local equivalent. Suppress `MSBuildTask0002`, or `MSBuildTask0005` for a helper call, with a justification.
+
+`Path.GetRandomFileName()` only generates a name. It does not resolve a temporary directory, so TaskAnalyzer does not ban it.
 
 `TempFileCollection` constructors accepting `tempDir` are not banned because they can use an explicit task-resolved directory. Passing null or empty still falls back to the global temporary directory; this conditional usage is not currently detected.
 
