@@ -1214,9 +1214,12 @@ public sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
-        string? message = e is AssemblyResolutionSearchTraceEventArgs searchTrace
-            ? searchTrace.FormatMessage(CultureInfo.CurrentUICulture)
-            : e.FormatMessageWithoutMutation();
+        string? message = e switch
+        {
+            AssemblyResolutionSearchTraceEventArgs searchTrace => searchTrace.FormatMessage(CultureInfo.CurrentUICulture),
+            AssemblyResolutionResultEventArgs result => result.FormatMessage(CultureInfo.CurrentUICulture),
+            _ => e.FormatMessageWithoutMutation(),
+        };
 
         if (message is not null)
         {

@@ -1452,6 +1452,9 @@ Errors: {3}</value>
     <value>MSB4068: The element &lt;{0}&gt; is unrecognized, or not supported in this context.</value>
     <comment>{StrBegin="MSB4068: "}</comment>
   </data>
+  <data name="Binlog_UnsupportedExperimentalFormat" xml:space="preserve">
+    <value>Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</value>
+  </data>
   <data name="UnsupportedLogFileFormat" xml:space="preserve">
     <value>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</value>
     <comment>{StrBegin="MSB4235: "}</comment>

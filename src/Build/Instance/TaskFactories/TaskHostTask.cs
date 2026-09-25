@@ -744,11 +744,13 @@ namespace Microsoft.Build.BackEnd
         {
             // Before Wave18_12, TaskHostTask dropped event kinds that its switch did not enumerate.
             // Disabling the wave restores that behavior because forwarding a warning can fail /warnAsError builds.
+            // Successful RAR result reports have a separate opt-in and must not be dropped with the wave disabled.
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
                 && logMessagePacket.EventType is not (LoggingEventType.BuildErrorEvent
                     or LoggingEventType.BuildWarningEvent
                     or LoggingEventType.TaskCommandLineEvent
                     or LoggingEventType.BuildMessageEvent
+                    or LoggingEventType.AssemblyResolutionResultEvent
                     or LoggingEventType.CustomEvent))
             {
                 return;

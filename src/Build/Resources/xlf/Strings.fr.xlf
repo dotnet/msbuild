@@ -141,6 +141,11 @@
         <target state="translated">L’écriture n’est pas recommandée.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_UnsupportedExperimentalFormat">
+        <source>Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</source>
+        <target state="new">Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
         <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
         <target state="translated">MSB4284: le contrôle de génération personnalisé « {0} » n’a pas pu être chargé, car cet hôte MSBuild désactive l’exploration des plug-ins personnalisés, par exemple dans une génération tronquée ou Native AOT, et ne peut pas charger les assemblys de contrôle par réflexion. Effectuez la génération avec un MSBuild basé sur JIT pour exécuter des contrôles personnalisés.</target>

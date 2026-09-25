@@ -12,6 +12,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -127,6 +128,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(assemblyResolutionSearch, LoggingEventType.AssemblyResolutionSearchTraceEvent);
             VerifyLoggingPacket(assemblyConflictDependencyDetails, LoggingEventType.AssemblyConflictDependencyDetailsEvent);
             VerifyLoggingPacket(assemblyConflictWarning, LoggingEventType.AssemblyConflictWarningEvent);
+        }
+
+        [Fact]
+        public void AssemblyResolutionResultPacketRoundtrip()
+        {
+            var result = new AssemblyResolutionResultEventArgs(
+                "Reference", "reference.dll", "{HintPathFromItem}", true, false,
+                "ResolveAssemblyReference", MessageImportance.Low, DateTime.UtcNow)
+            {
+                ProjectFile = "project.proj",
+                BuildEventContext = CreateBuildEventContext(),
+            };
+            var packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, result));
+            packet.EventType.ShouldBe(LoggingEventType.AssemblyResolutionResultEvent);
+            ((ITranslatable)packet).Translate(TranslationHelpers.GetWriteTranslator());
+            var received = (LogMessagePacket)LogMessagePacket.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            var replayed = received.NodeBuildEvent.Value.Value.ShouldBeOfType<AssemblyResolutionResultEventArgs>();
+
+            replayed.AssemblyName.ShouldBe(result.AssemblyName);
+            replayed.FullPath.ShouldBe(result.FullPath);
+            replayed.ResolvedSearchPath.ShouldBe(result.ResolvedSearchPath);
+            replayed.IsPrimary.ShouldBe(result.IsPrimary);
+            replayed.IsCopyLocal.ShouldBe(result.IsCopyLocal);
+            replayed.ProjectFile.ShouldBe(result.ProjectFile);
+            replayed.BuildEventContext.ShouldBe(result.BuildEventContext);
+            replayed.Timestamp.ShouldBe(result.Timestamp);
+            replayed.SenderName.ShouldBe(result.SenderName);
+            replayed.Importance.ShouldBe(result.Importance);
+            replayed.Message.ShouldBe(result.Message);
         }
 
         private static BuildEventContext CreateBuildEventContext()

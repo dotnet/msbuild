@@ -119,6 +119,10 @@ namespace Microsoft.Build.Logging
         //    (RAR conflict dependency-list details and MSB3277 warning, structured behind ChangeWave 18.12)
         //    Forward-compatible readers older than version 28 skip these unknown record kinds.
         //    Strict readers reject the newer file format.
+        // experimental version 31:
+        //    - independent AssemblyResolutionResult record (64), enabled by MSBUILDLOGRARRESULTS=1.
+        //    Versions 29/30 belong to unsupported historical prototypes, not this format.
+        //    Forward-compatible readers can skip result records without losing shared table state.
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.
@@ -129,7 +133,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 28;
+        internal const int FileFormatVersion = 31;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being

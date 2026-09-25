@@ -50,5 +50,10 @@ namespace Microsoft.Build.Logging
         AssemblyResolutionSearchTrace,
         AssemblyConflictDependencyDetails,
         AssemblyConflictWarning,
+
+        /// <summary>
+        /// Experimental successful RAR report, introduced in format 31.
+        /// </summary>
+        AssemblyResolutionResult = 64,
     }
 }

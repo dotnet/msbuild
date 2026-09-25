@@ -234,6 +234,7 @@ namespace Microsoft.Build.Tasks
         private bool _copyLocalDependenciesWhenParentReferenceInGac = true;
         private Dictionary<string, MessageImportance> _showAssemblyFoldersExLocations = new Dictionary<string, MessageImportance>(StringComparer.OrdinalIgnoreCase);
         private bool _logVerboseSearchResults = false;
+        private bool? _logReferenceResults;
         private WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
         private bool _unresolveFrameworkAssembliesFromHigherFrameworks = false;
 
@@ -1560,12 +1561,27 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="reference">The reference information</param>
         /// <param name="fusionName">The fusion name of the reference.</param>
-        private void LogReference(Reference reference, string fusionName)
+        internal void LogReference(Reference reference, string fusionName)
         {
             // Set an importance level to be used for secondary messages.
             MessageImportance importance = ChooseReferenceLoggingImportance(reference);
             if (!Log.LogsMessagesOfImportance(importance))
             {
+                return;
+            }
+
+            if ((_logReferenceResults ??= TaskEnvironment.GetEnvironmentVariable("MSBUILDLOGRARRESULTS") == "1") &&
+                CanLogReferenceResult(reference))
+            {
+                BuildEngine.LogMessageEvent(new AssemblyResolutionResultEventArgs(
+                    fusionName,
+                    reference.FullPath,
+                    reference.ResolvedSearchPath,
+                    reference.IsPrimary,
+                    reference.IsCopyLocal,
+                    GetType().Name,
+                    importance,
+                    DateTime.UtcNow));
                 return;
             }
 
@@ -1628,6 +1644,25 @@ namespace Microsoft.Build.Tasks
 
             return importance;
         }
+
+        private static bool CanLogReferenceResult(Reference reference)
+            => reference.IsResolved &&
+                reference.GetErrors().Count == 0 &&
+                !reference.IsBadImage &&
+                !reference.IsUnified &&
+                !reference.IsConflictVictim &&
+                reference.GetConflictVictims().Count == 0 &&
+                reference.RemappedAssemblyNames().Count == 0 &&
+                reference.AssembliesConsideredAndRejected is not { Count: > 0 } &&
+                (reference.IsPrimary || reference.GetSourceItems().Count == 0) &&
+                reference.GetRelatedFileExtensions().Count == 0 &&
+                reference.GetSatelliteFiles().Count == 0 &&
+                reference.GetScatterFiles().Length == 0 &&
+                reference.ImageRuntime == DotNetAssemblyRuntimeVersion &&
+                !reference.IsWinMDFile &&
+                reference.CopyLocal is CopyLocalState.YesBecauseOfHeuristic or
+                    CopyLocalState.YesBecauseReferenceItemHadMetadata or
+                    CopyLocalState.NoBecauseReferenceItemHadMetadata;
 
         /// <summary>
         /// Log all task inputs.
@@ -2655,6 +2690,7 @@ namespace Microsoft.Build.Tasks
             IsWinMDFile isWinMDFile,
             ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader)
         {
+            _logReferenceResults = null;
             bool success = true;
             MSBuildEventSource.Log.RarOverallStart();
             {

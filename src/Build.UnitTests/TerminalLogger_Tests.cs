@@ -594,8 +594,10 @@ namespace Microsoft.Build.UnitTests
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
-        public void AssemblyResolutionSearchTraceUsesCurrentUICulture()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void AssemblyResolutionSearchTraceUsesCurrentUICulture(bool resultReport)
         {
             CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
             try
@@ -605,23 +607,28 @@ namespace Microsoft.Build.UnitTests
                 _terminallogger.Verbosity = LoggerVerbosity.Detailed;
                 _terminallogger.ParseParameters();
 
-                var searchEvent = new AssemblyResolutionSearchTraceEventArgs(
-                    "Requested, Version=1.0.0.0",
-                    targetProcessorArchitecture: null,
-                    [new("missing.dll", "path", null, null, AssemblyResolutionSearchResult.FileNotFound, null, false)],
-                    "ResolveAssemblyReference",
-                    MessageImportance.High,
-                    eventTimestamp: default)
-                {
-                    BuildEventContext = MakeBuildEventContext(),
-                    ProjectFile = _projectFile,
-                };
+                BuildMessageEventArgs searchEvent = resultReport
+                    ? new AssemblyResolutionResultEventArgs(
+                        "Reference", "reference.dll", "{HintPathFromItem}", true, false,
+                        "ResolveAssemblyReference", MessageImportance.High, default)
+                    : new AssemblyResolutionSearchTraceEventArgs(
+                        "Requested, Version=1.0.0.0",
+                        targetProcessorArchitecture: null,
+                        [new("missing.dll", "path", null, null, AssemblyResolutionSearchResult.FileNotFound, null, false)],
+                        "ResolveAssemblyReference",
+                        MessageImportance.High,
+                        eventTimestamp: default);
+                searchEvent.BuildEventContext = MakeBuildEventContext();
+                searchEvent.ProjectFile = _projectFile;
 
                 InvokeLoggerCallbacksForSimpleProject(
                     succeeded: true,
                     () => _centralNodeEventSource.InvokeMessageRaised(searchEvent));
 
-                _outputWriter.ToString().ShouldContain(searchEvent.FormatMessage(frenchCulture));
+                string localizedMessage = searchEvent is AssemblyResolutionResultEventArgs result
+                    ? result.FormatMessage(frenchCulture)
+                    : ((AssemblyResolutionSearchTraceEventArgs)searchEvent).FormatMessage(frenchCulture);
+                _outputWriter.ToString().ShouldContain(localizedMessage);
                 _outputWriter.ToString().ShouldNotContain(searchEvent.Message.ShouldNotBeNull());
             }
             finally

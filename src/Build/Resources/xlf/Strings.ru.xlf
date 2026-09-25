@@ -141,6 +141,11 @@
         <target state="translated">Запись не поддерживается.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_UnsupportedExperimentalFormat">
+        <source>Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</source>
+        <target state="new">Experimental binary log format {0} is not supported by this reader. Use the reader from the experiment that produced this log.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
         <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
         <target state="translated">MSB4284: не удалось загрузить пользовательскую проверку сборки "{0}", так как в этом узле MSBuild, например в обрезанной сборке или сборке с собственным AOT, отключена проверка пользовательских подключаемых модулей и сборки проверок не могут загружаться с помощью отражения. Выполните сборку с помощью MSBuild на основе JIT, чтобы выполнять пользовательские проверки.</target>

@@ -99,6 +99,40 @@ Resolved assemblies are divided into two categories: Primary references and Depe
 
 **Important note:** RAR reads assembly metadata to determine the references of a given assembly. When the C# compiler emits an assembly it only adds references to assemblies that are actually needed. So it may happen that when compiling a certain project the project may specify a unneeded reference that won't be baked into the assembly. It is OK to add references to project that are not needed; they are just ignored.
 
+## Experimental structured result reports
+
+In the candidate D experiment, set the worker-inherited environment variable
+`MSBUILDLOGRARRESULTS=1` before starting fresh MSBuild nodes to group ordinary
+successful reference diagnostics. Leave it unset for the baseline. Do not reuse
+nodes or task hosts from another experimental build.
+
+An eligible reference produces one low-importance `AssemblyResolutionResultEventArgs`
+instead of three messages (primary/dependency identity, resolved file path, search
+source), or four when `Private=false` explains why the reference is not CopyLocal.
+The event formats those same lines lazily, in order, with the original indentation.
+`Message` is invariant; console and terminal loggers use UI-culture resources.
+One timestamp and event context cover the whole report: event cardinality and
+per-line timestamps intentionally change only when opted in. Warning/error events,
+their metadata and warning promotion are unchanged.
+
+Unresolved references, errors, bad images, unification, remapping, conflicts, rejected
+searches, dependency source-item details, related/satellite/scatter files, nondefault
+runtime information, WinMD files, and other CopyLocal reasons retain the legacy
+reporting path. Existing structured rejected-search and conflict behavior is unchanged.
+
+This experiment writes binary log format **31**, with minimum reader version **18**.
+Result records use independent length-delimited kind **64**; forward-compatible older
+readers may skip them, losing those diagnostics but not subsequent records. Strict
+older readers reject the new format. Use this experiment's own reader to retain the
+result reports. Historical prototype formats **29/30** require their originating
+readers and are explicitly rejected here.
+
+For comparisons, count result records separately and expand each into its three or
+four original messages. Preserve the record's context, sender and importance on each
+expanded message; exclude timestamps from equality checks. Measure the eligible
+reference fraction rather than assuming all RAR references take this path. The event
+type is internal for this experiment and is not a new public API contract.
+
 ## CopyLocal item metadata
 
 References can also have the `CopyLocal` metadata or not. If the reference has `CopyLocal = true`, it will later be copied to the output directory by the `CopyFilesToOutputDirectory` target. In this example, DataFlow is CopyLocal while Immutable is not:

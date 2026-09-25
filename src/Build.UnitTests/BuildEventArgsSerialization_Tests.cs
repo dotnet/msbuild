@@ -1210,6 +1210,59 @@ namespace Microsoft.Build.UnitTests
                     attempt => $"{attempt.SearchPath};{attempt.ParentAssembly};{attempt.FileNameAttempted};{attempt.AssemblyName};{attempt.Result};{attempt.ProcessorArchitecture};{attempt.IsAssemblyFoldersExSearch}")));
         }
 
+        [Theory]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void RoundtripAssemblyResolutionResultEventArgs(bool isPrimary, bool isCopyLocal)
+        {
+            var args = new AssemblyResolutionResultEventArgs(
+                "Reference", "reference.dll", "{HintPathFromItem}", isPrimary, isCopyLocal,
+                "ResolveAssemblyReference", MessageImportance.Low, DateTime.UtcNow)
+            {
+                ProjectFile = "project.proj",
+                BuildEventContext = new BuildEventContext(1, 2, 3, 4),
+            };
+
+            Roundtrip(args, e => e.AssemblyName, e => e.FullPath, e => e.ResolvedSearchPath,
+                e => e.IsPrimary.ToString(), e => e.IsCopyLocal.ToString(), e => e.Message,
+                e => e.ProjectFile, e => e.SenderName, e => e.Importance.ToString(),
+                e => e.Timestamp.ToString("O"), e => ToString(e.BuildEventContext));
+        }
+
+        [Theory]
+        [InlineData(29)]
+        [InlineData(30)]
+        public void AssemblyResolutionResultReaderRejectsHistoricalPrototypes(int version)
+        {
+            using var stream = new MemoryStream();
+            using var reader = new BinaryReader(stream);
+            Should.Throw<NotSupportedException>(() => new BuildEventArgsReader(reader, version));
+        }
+
+        [Fact]
+        public void AssemblyResolutionResultCanBeSkippedWithoutLosingFollowingStrings()
+        {
+            using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            var eventWriter = new BuildEventArgsWriter(writer);
+            eventWriter.Write(new AssemblyResolutionResultEventArgs(
+                "Reference", "reference.dll", "{HintPathFromItem}", true, false,
+                "ResolveAssemblyReference", MessageImportance.Low, DateTime.UtcNow));
+            eventWriter.Write(new BuildMessageEventArgs("reference.dll", null, "ResolveAssemblyReference", MessageImportance.Low));
+            writer.Write((byte)BinaryLogRecordKind.EndOfFile);
+            writer.Flush();
+            stream.Position = 0;
+            using var reader = new BinaryReader(stream);
+            // Version 28 uses the same framing, but deliberately does not recognize result records.
+            using var eventReader = new BuildEventArgsReader(reader, 28) { SkipUnknownEvents = true };
+            List<BinaryLogReaderErrorEventArgs> skippedRecords = [];
+            eventReader.RecoverableReadError += skippedRecords.Add;
+            eventReader.Read().ShouldBeOfType<BuildMessageEventArgs>().Message.ShouldBe("reference.dll");
+            eventReader.Read().ShouldBeNull();
+            skippedRecords.ShouldHaveSingleItem().RecordKind.ShouldBe(BinaryLogRecordKind.AssemblyResolutionResult);
+            skippedRecords[0].ErrorType.ShouldBe(ReaderErrorType.UnknownEventType);
+        }
+
         private static AssemblyResolutionSearchTraceEventArgs CreateAssemblyResolutionSearchEvent()
             => new(
                 "Requested, Version=1.0.0.0",
