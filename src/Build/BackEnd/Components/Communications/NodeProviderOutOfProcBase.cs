@@ -174,6 +174,27 @@ namespace Microsoft.Build.BackEnd
             // Search for all instances of msbuildtaskhost process and add them to the process list
             nodeProcesses.AddRange(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName)));
 
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
+            {
+                // Only processes that own a node pipe can be nodes; skipping the rest avoids timed-out connect
+                // attempts to every unrelated process (every dotnet process is a candidate on .NET).
+                HashSet<string> nodePipes = TryGetExistingPipeNames();
+                List<Process> candidates = nodePipes is null
+                    ? nodeProcesses
+                    : nodeProcesses.FindAll(process => HasNodePipe(process.Id, nodePipes));
+
+                // Nodes are independent, so connect to all of them at once instead of paying each connect timeout in turn.
+                Task[] shutdowns = new Task[candidates.Count];
+                for (int i = 0; i < candidates.Count; i++)
+                {
+                    Process nodeProcess = candidates[i];
+                    shutdowns[i] = Task.Run(() => ShutdownNode(nodeProcess, nodeReuse, terminateNode));
+                }
+
+                Task.WaitAll(shutdowns);
+                return;
+            }
+
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
             {
@@ -196,6 +217,94 @@ namespace Microsoft.Build.BackEnd
                     RequestNodeShutdown(nodeProcess, nodeStream, terminateNode, result.NegotiatedPacketVersion);
                 }
             }
+        }
+
+        private void ShutdownNode(Process nodeProcess, bool nodeReuse, NodeContextTerminateDelegate terminateNode)
+        {
+            // A node runs below normal priority exactly when it expects the low-priority handshake. Offering the
+            // matching handshake first matters: a node that rejects a handshake has to listen again, and the
+            // second connect attempt can miss it (https://github.com/dotnet/msbuild/issues/15118).
+            bool lowPriorityFirst = IsBelowNormalPriority(nodeProcess);
+            Stream nodeStream = ConnectForShutdown(
+                nodeProcess.Id,
+                NodeProviderOutOfProc.GetHandshake(nodeReuse, lowPriorityFirst),
+                NodeProviderOutOfProc.GetHandshake(nodeReuse, !lowPriorityFirst),
+                out HandshakeResult result);
+
+            try
+            {
+                if (nodeStream is not null)
+                {
+                    CommunicationsUtilities.Trace($"Shutting down node with pid = {nodeProcess.Id}");
+                    RequestNodeShutdown(nodeProcess, nodeStream, terminateNode, result.NegotiatedPacketVersion);
+
+                    // The shutdown context owns the stream now.
+                    nodeStream = null;
+                }
+            }
+            finally
+            {
+                nodeStream?.Dispose();
+            }
+        }
+
+        private Stream ConnectForShutdown(int processId, Handshake preferred, Handshake fallback, out HandshakeResult result)
+        {
+            // A 2013 comment suggested some nodes take this long to respond, so a smaller timeout would miss nodes.
+            const int ConnectTimeoutMs = 30;
+
+            return TryConnectToProcess(processId, ConnectTimeoutMs, preferred, out result)
+                ?? TryConnectToProcess(processId, ConnectTimeoutMs, fallback, out result);
+        }
+
+        private static bool IsBelowNormalPriority(Process process)
+        {
+            try
+            {
+                return process.PriorityClass == ProcessPriorityClass.BelowNormal;
+            }
+            catch (Exception e) when (e is InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
+            {
+                // The process exited or cannot be queried; try the normal-priority handshake first as before.
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Lists the named pipes on Windows, so node candidates can be checked without connecting to them.
+        /// </summary>
+        /// <returns>The pipe names, or null if they are not available (so every candidate must be tried).</returns>
+        internal static HashSet<string> TryGetExistingPipeNames()
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                // On Unix a node pipe is a socket file, checked per candidate in HasNodePipe.
+                return [];
+            }
+
+            try
+            {
+                HashSet<string> names = new(StringComparer.OrdinalIgnoreCase);
+                foreach (string path in Directory.EnumerateFiles(@"\\.\pipe\"))
+                {
+                    names.Add(Path.GetFileName(path));
+                }
+
+                return names;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                CommunicationsUtilities.Trace($"Could not list named pipes, trying every candidate: {e.Message}");
+                return null;
+            }
+        }
+
+        internal static bool HasNodePipe(int processId, HashSet<string> windowsPipeNames)
+        {
+            string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(processId);
+            return NativeMethodsShared.IsWindows
+                ? windowsPipeNames.Contains(pipeName)
+                : File.Exists(pipeName);
         }
 
         /// <summary>
