@@ -21,6 +21,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -314,83 +315,44 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify if idle nodes are shutdown when BuildManager.ShutdownAllNodes is evoked.
-        /// The final number of nodes has to be less or equal the number of nodes already in
-        /// the system before this method was called.
+        /// Verify that idle nodes are shut down when BuildManager.ShutdownAllNodes is invoked:
+        /// every worker node the build launched has to exit.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1975")]
-#else
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/2057")]
-#endif
-        [InlineData(8, false)]
-        public void ShutdownNodesAfterParallelBuild(int numberOfParallelProjectsToBuild, bool enbaleDebugComm)
+        [NodeScenarioFact]
+        public void ShutdownNodesAfterParallelBuild()
         {
-            // This test has previously been failing silently. With the addition of TestEnvironment the
-            // failure is now noticed (worker node is crashing with "Pipe is broken" exception. See #2057:
-            // https://github.com/dotnet/msbuild/issues/2057
-            _env.ClearTestInvariants();
-
-            // Communications debug log enabled, picked up by TestEnvironment
-            if (enbaleDebugComm)
-            {
-                _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
-            }
-
+            const int NumberOfParallelProjectsToBuild = 8;
+            // The scenario's own temp folder is nested too deep for the generated project paths on .NET Framework.
+            string shutdownProjectDirectory = _env.CreateFolder().Path;
+            using NodeScenario scenario = NodeScenario.Create(_output);
             using var projectCollection = new ProjectCollection();
-
-            // Get number of MSBuild processes currently instantiated
-            int numberProcsOriginally = (new List<Process>(Process.GetProcessesByName("MSBuild"))).Count;
-            _output.WriteLine($"numberProcsOriginally = {numberProcsOriginally}");
-
-            // Generate a theoretically unique directory to put our dummy projects in.
-            string shutdownProjectDirectory = Path.Combine(Path.GetTempPath(), String.Format(CultureInfo.InvariantCulture, "VSNodeShutdown_{0}_UnitTest", Process.GetCurrentProcess().Id));
 
             // Create the dummy projects we'll be "building" as our excuse to connect to and shut down
             // all the nodes.
-            ProjectInstance rootProject = GenerateDummyProjects(shutdownProjectDirectory, numberOfParallelProjectsToBuild, projectCollection);
+            ProjectInstance rootProject = GenerateDummyProjects(shutdownProjectDirectory, NumberOfParallelProjectsToBuild, projectCollection);
 
-            // Build the projects.
             var buildParameters = new BuildParameters(projectCollection)
             {
                 OnlyLogCriticalEvents = true,
-                MaxNodeCount = numberOfParallelProjectsToBuild,
+                MaxNodeCount = NumberOfParallelProjectsToBuild,
                 EnableNodeReuse = true,
                 DisableInProcNode = true,
                 SaveOperatingEnvironment = false,
-                Loggers = new List<ILogger> { new MockLogger(_output) }
+                Loggers = [new MockLogger(_output)]
             };
-
-            // Tell the build manager to not disturb process wide state
-            var requestData = new BuildRequestData(rootProject, new[] { "Build" }, null);
+            var requestData = new BuildRequestData(rootProject, ["Build"], null);
 
             // Use a separate BuildManager for the node shutdown build, so that we don't have
             // to worry about taking dependencies on whether or not the existing ones have already
             // disappeared.
-            using var shutdownManager = new BuildManager("IdleNodeShutdown");
-            shutdownManager.Build(buildParameters, requestData);
+            BuildManager shutdownManager = scenario.CreateBuildManager("IdleNodeShutdown");
+            shutdownManager.Build(buildParameters, requestData).OverallResult.ShouldBe(BuildResultCode.Success);
 
-            // Number of nodes after the build has to be greater than the original number
-            int numberProcsAfterBuild = (new List<Process>(Process.GetProcessesByName("MSBuild"))).Count;
-            _output.WriteLine($"numberProcsAfterBuild = {numberProcsAfterBuild}");
-            Assert.True(numberProcsOriginally < numberProcsAfterBuild, $"Expected '{numberProcsOriginally}' < '{numberProcsAfterBuild}'");
+            scenario.Records.Count(r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.Worker && r.ProcessId == scenario.TestProcessId)
+                .ShouldBeGreaterThan(0, "The build should have run on out-of-proc worker nodes.");
 
-            // Shutdown all nodes
-            shutdownManager.ShutdownAllNodes();
-
-            // Wait until all processes shut down
-            Thread.Sleep(3000);
-
-            // Number of nodes after the shutdown has to be smaller or equal the original number
-            int numberProcsAfterShutdown = (new List<Process>(Process.GetProcessesByName("MSBuild"))).Count;
-            _output.WriteLine($"numberProcsAfterShutdown = {numberProcsAfterShutdown}");
-            Assert.True(numberProcsAfterShutdown <= numberProcsOriginally);
-
-            // Delete directory with the dummy project
-            if (Directory.Exists(shutdownProjectDirectory))
-            {
-                FileUtilities.DeleteWithoutTrailingBackslash(shutdownProjectDirectory, true /* recursive delete */);
-            }
+            // Reused nodes stay alive after the build. ShutdownAllNodes has to end every one of them.
+            scenario.ShutdownNodes(shutdownManager.ShutdownAllNodes);
         }
 
         /// <summary>

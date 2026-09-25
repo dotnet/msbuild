@@ -37,15 +37,15 @@ public sealed class TaskHostCancellation_Tests
         _output = output;
     }
 
-    [Theory]
+    [NodeScenarioTheory]
     [InlineData(nameof(CancellationContextTask), false)]
 #if NETFRAMEWORK
     [InlineData(nameof(IsolatedCancellationContextTask), true)]
 #endif
     public void CancelCallbackCanSetAllowFailureWithoutError(string taskName, bool isolated)
     {
-        using TestEnvironment env = TestEnvironment.Create(_output);
-        env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+        using NodeScenario scenario = NodeScenario.Create(_output);
+        TestEnvironment env = scenario.Environment;
         TransientTestFile cancelled = env.CreateFile("cancelled.txt", string.Empty);
         TransientTestFile binlog = env.CreateFile("cancellation.binlog", string.Empty);
         TransientTestFile project = env.CreateFile("cancellation.proj", $"""
@@ -57,32 +57,21 @@ public sealed class TaskHostCancellation_Tests
             </Project>
             """);
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"\"{project.Path}\" -m:1 -nr:false -bl:\"{binlog.Path}\" -logger:{typeof(CancelOnReadyLogger).FullName},\"{typeof(CancelOnReadyLogger).Assembly.Location}\"",
-            out bool success,
-            outputHelper: _output,
-            timeoutMilliseconds: 30_000);
-
-        Match taskPid = Regex.Match(output, @"CancellationTaskPid=(\d+)");
-        if (taskPid.Success)
-        {
-            env.WithTransientProcess(int.Parse(taskPid.Groups[1].Value, CultureInfo.InvariantCulture));
-        }
+        (bool success, string output) = scenario.RunBootstrapped(
+            $"\"{project.Path}\" -m:1 -nr:false -bl:\"{binlog.Path}\" -logger:{typeof(CancelOnReadyLogger).FullName},\"{typeof(CancelOnReadyLogger).Assembly.Location}\"");
 
         success.ShouldBeFalse(output);
+        Match taskPid = Regex.Match(output, @"CancellationTaskPid=(\d+)");
         taskPid.Success.ShouldBeTrue(output);
+        int taskHostProcessId = int.Parse(taskPid.Groups[1].Value, CultureInfo.InvariantCulture);
         Match clientPid = Regex.Match(output, @"Process ID is (\d+)");
         clientPid.Success.ShouldBeTrue(output);
-        taskPid.Groups[1].Value.ShouldNotBe(clientPid.Groups[1].Value);
-        try
-        {
-            using Process child = Process.GetProcessById(int.Parse(taskPid.Groups[1].Value, CultureInfo.InvariantCulture));
-            child.WaitForExit(10_000).ShouldBeTrue("the cancelled TaskHost must exit");
-        }
-        catch (ArgumentException)
-        {
-            // The TaskHost already exited before the client returned.
-        }
+        int clientProcessId = int.Parse(clientPid.Groups[1].Value, CultureInfo.InvariantCulture);
+        taskHostProcessId.ShouldNotBe(clientProcessId);
+        scenario.Await(
+            r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.TaskHost && r.ProcessId == clientProcessId,
+            "the client launched the TaskHost").SubjectProcessId.ShouldBe(taskHostProcessId);
+        scenario.Await(NodeJournalEvent.Exited, processId: taskHostProcessId);
         output.ShouldContain($"CancellationTaskIsolated={isolated}");
         File.ReadAllText(cancelled.Path).ShouldBe("cancelled");
 
