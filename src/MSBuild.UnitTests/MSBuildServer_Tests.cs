@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -17,29 +17,26 @@ using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
-#if NETFRAMEWORK
-using Microsoft.IO;
-#else
-using System.IO;
-#endif
 using Shouldly;
 using Xunit;
 using Path = System.IO.Path;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
-    public class SleepingTask : Microsoft.Build.Utilities.Task
+    /// <summary>
+    /// Blocks on the <see cref="NodeScenario.Gate"/> named <see cref="Name"/>, so a test can hold a build open in
+    /// whichever process runs this task for exactly as long as it needs to.
+    /// </summary>
+    [MSBuildMultiThreadableTask]
+    public class ScenarioGateTask : Microsoft.Build.Utilities.Task
     {
-        public int SleepTime { get; set; }
+        [Required]
+        public string Name { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Sleep for SleepTime milliseconds.
-        /// </summary>
-        /// <returns>Success on success.</returns>
         public override bool Execute()
         {
-            Thread.Sleep(SleepTime);
-            return !Log.HasLoggedErrors;
+            NodeScenarioGate.Enter(Name);
+            return true;
         }
     }
 
@@ -95,11 +92,17 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
-    public class MSBuildServer_Tests : IDisposable
+    /// <summary>
+    /// MSBuild server behaviour, observed through the node lifecycle journal of a <see cref="NodeScenario"/>. The
+    /// scenario gives every test its own handshake salt, so no test can reuse or shut down another test's server, and
+    /// each test shuts down the servers it started, so none leaks into the next test.
+    /// </summary>
+    public class MSBuildServer_Tests
     {
+        private const string ServerBusyGate = "server-busy";
+
         private readonly ITestOutputHelper _output;
-        private readonly TestEnvironment _env;
-        private static string printPidContents = @$"
+        private static readonly string printPidContents = @$"
 <Project>
 <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
     <Target Name='AccessPID'>
@@ -109,31 +112,27 @@ namespace Microsoft.Build.Engine.UnitTests
         <Message Text=""[Work around Github issue #9667 with --interactive]Server ID is $(PID)"" Importance=""High"" />
     </Target>
 </Project>";
-        private static string sleepingTaskContentsFormat = @$"
+        private static readonly string gatedProjectContents = @$"
 <Project>
-<UsingTask TaskName=""SleepingTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-    <Target Name='Sleep'>
-        <!-- create a marker file that represents the build is started. -->
-        <WriteLinesToFile File=""{{0}}"" />
-        <SleepingTask SleepTime=""100000"" />
+<UsingTask TaskName=""ScenarioGateTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <Target Name='Wait'>
+        <ScenarioGateTask Name=""{ServerBusyGate}"" />
     </Target>
 </Project>";
 
         public MSBuildServer_Tests(ITestOutputHelper output)
         {
             _output = output;
-            _env = TestEnvironment.Create(_output);
         }
 
-        public void Dispose() => _env.Dispose();
+        private static string MSBuildExePath => BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
-        [Fact]
+        [NodeScenarioFact]
         public void ServersAreIsolatedByResolvedChangeWave()
         {
-            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
-            var project = _env.CreateFile("strict-server.proj", $"""
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            var project = scenario.Environment.CreateFile("strict-server.proj", $"""
                 <Project>
                   <UsingTask TaskName="ProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
                   <UsingTask TaskName="StrictModeProbeTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
@@ -156,220 +155,211 @@ namespace Microsoft.Build.Engine.UnitTests
             ];
             foreach ((string? disabledWave, bool strictModeEnabled) in requests)
             {
-                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
-                string output = RunnerUtilities.ExecMSBuild(
-                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
-                    $"\"{project.Path}\" -m:1 -mt -nr:true", out bool success, false, _output);
-                int pid = ParseNumber(output, "Server ID is ");
-                if (strictModeByServerPid.TryGetValue(pid, out bool previousStrictModeEnabled))
+                scenario.Environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
+                ServerBuild build = Build(scenario, $"\"{project.Path}\" -m:1 -mt -nr:true", expectSuccess: !strictModeEnabled);
+                build.ShouldRunOnServer();
+                ParseNumber(build.Output, "Server ID is ").ShouldBe(build.ServerProcessId);
+                if (strictModeByServerPid.TryGetValue(build.ServerProcessId, out bool previousStrictModeEnabled))
                 {
                     strictModeEnabled.ShouldBe(previousStrictModeEnabled,
                         "Requests with different resolved change waves must not reuse the same server process.");
                 }
                 else
                 {
-                    _env.WithTransientProcess(pid);
-                    strictModeByServerPid.Add(pid, strictModeEnabled);
+                    strictModeByServerPid.Add(build.ServerProcessId, strictModeEnabled);
                 }
 
-                pid.ShouldNotBe(ParseNumber(output, "Process ID is "));
-                success.ShouldBe(!strictModeEnabled, output);
-                output.Contains("MSB4286").ShouldBe(strictModeEnabled, output);
+                build.Output.Contains("MSB4286").ShouldBe(strictModeEnabled, build.Output);
             }
+
+            // The change wave is part of the server's identity, so each server has to be shut down with its own.
+            scenario.ShutdownNodes(() =>
+            {
+                foreach ((string? disabledWave, _) in requests)
+                {
+                    scenario.Environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
+                    ChangeWaves.ResetStateForTests();
+                    MSBuildClient.ShutdownServer(CancellationToken.None);
+                }
+
+                scenario.Environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+                ChangeWaves.ResetStateForTests();
+            });
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void MSBuildServerTest()
         {
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
-            success.ShouldBeTrue();
-            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
-            pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            // The server crashes as soon as the gated build below holds it busy.
+            scenario.Fault(NodeJournalEvent.GateEntered, NodeFaultAction.Crash, NodeJournalKind.Server);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
 
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            int newPidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            newPidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
-            newPidOfInitialProcess.ShouldNotBe(pidOfInitialProcess, "Process started by two MSBuild executions should be different.");
-            pidOfServerProcess.ShouldBe(ParseNumber(output, "Server ID is "), "Node used by both the first and second build should be the same.");
+            ServerBuild first = Build(scenario, project.Path);
+            first.ShouldRunOnServer();
+            first.ServerReuseDecision.ShouldBe("new");
 
-            // Prep to kill the long-lived task we're about to start.
-            TransientTestFile markerFile = _env.ExpectFile();
-            string? dir = Path.GetDirectoryName(markerFile.Path);
-            using var watcher = new System.IO.FileSystemWatcher(dir!);
-            watcher.Created += (o, e) =>
-            {
-                _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started. Ready to kill the server.");
-                // Kill the server
-                Process.GetProcessById(pidOfServerProcess).KillTree(1000);
-                _output.WriteLine($"The old server was killed.");
-            };
-            watcher.Filter = Path.GetFileName(markerFile.Path);
-            watcher.EnableRaisingEvents = true;
+            ServerBuild second = Build(scenario, project.Path);
+            second.ShouldRunOnServer();
+            second.ClientProcessId.ShouldNotBe(first.ClientProcessId, "Process started by two MSBuild executions should be different.");
+            second.ServerProcessId.ShouldBe(first.ServerProcessId, "Node used by both the first and second build should be the same.");
+            second.ServerReuseDecision.ShouldBe("reused");
 
-            // Start long-lived task execution
-            TransientTestFile sleepProject = _env.CreateFile("napProject.proj", string.Format(sleepingTaskContentsFormat, markerFile.Path));
-            RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _);
+            // The server dies in the middle of a build.
+            TransientTestFile gatedProject = scenario.Environment.CreateFile("napProject.proj", gatedProjectContents);
+            scenario.Gate(ServerBusyGate);
+            scenario.RunMSBuild(MSBuildExePath, gatedProject.Path);
+            scenario.Await(NodeJournalEvent.FaultInjected, processId: first.ServerProcessId);
 
-            // Ensure that a new build can still succeed and that its server node is different.
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            // A new build can still succeed, on a new server.
+            ServerBuild third = Build(scenario, project.Path);
+            third.ShouldRunOnServer();
+            third.ClientProcessId.ShouldNotBe(first.ClientProcessId, "Process started by two MSBuild executions should be different.");
+            third.ServerProcessId.ShouldNotBe(first.ServerProcessId, "The build after the crash must not use the crashed server.");
+            third.ServerReuseDecision.ShouldBe("new");
 
-            success.ShouldBeTrue();
-            newPidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            int newServerProcessId = ParseNumber(output, "Server ID is ");
-            // Register process to clean up (be killed) after tests ends.
-            _env.WithTransientProcess(newServerProcessId);
-            newPidOfInitialProcess.ShouldNotBe(pidOfInitialProcess, "Process started by two MSBuild executions should be different.");
-            newPidOfInitialProcess.ShouldNotBe(newServerProcessId, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
-            pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
+            scenario.ShutdownNodes();
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14540")]
-        [Fact]
+        [NodeScenarioFact]
         public void ServerSpawnAndReuseAreLoggedToBuildLog()
         {
-            // Ensure a clean slate so the first build below deterministically spawns a new server node.
-            MSBuildClient.ShutdownServer(CancellationToken.None);
-
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
             // First (cold) build: the server node is spawned for this build. The lifecycle message is
             // logged at low importance, so it only appears at diagnostic verbosity (and in a binary log).
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out bool success, false, _output);
-            success.ShouldBeTrue();
-            int serverPid = ParseNumber(output, "Server ID is ");
-            _env.WithTransientProcess(serverPid);
-            ParseNumber(output, "Process ID is ").ShouldNotBe(serverPid, "The build should have run on a separate server node.");
+            ServerBuild first = Build(scenario, $"{project.Path} -verbosity:diagnostic");
+            first.ShouldRunOnServer();
+            first.ServerReuseDecision.ShouldBe("new");
 
-            string spawnedMessage = GetServerStatusMessage("MSBuildServerNodeSpawned", serverPid);
-            string reusedMessage = GetServerStatusMessage("MSBuildServerNodeReused", serverPid);
+            string spawnedMessage = GetServerStatusMessage("MSBuildServerNodeSpawned", first.ServerProcessId);
+            string reusedMessage = GetServerStatusMessage("MSBuildServerNodeReused", first.ServerProcessId);
 
-            output.ShouldContain(spawnedMessage);
-            output.ShouldNotContain(reusedMessage);
+            first.Output.ShouldContain(spawnedMessage);
+            first.Output.ShouldNotContain(reusedMessage);
 
             // Second (warm) build: the running server node is reused.
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out success, false, _output);
-            success.ShouldBeTrue();
-            ParseNumber(output, "Server ID is ").ShouldBe(serverPid, "The second build should reuse the same server node.");
+            ServerBuild second = Build(scenario, $"{project.Path} -verbosity:diagnostic");
+            second.ServerProcessId.ShouldBe(first.ServerProcessId, "The second build should reuse the same server node.");
+            second.ServerReuseDecision.ShouldBe("reused");
 
-            output.ShouldContain(reusedMessage);
-            output.ShouldNotContain(spawnedMessage);
+            second.Output.ShouldContain(reusedMessage);
+            second.Output.ShouldNotContain(spawnedMessage);
+
+            scenario.ShutdownNodes();
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void DeferredLoggerMessagesDoNotAccumulateAcrossServerBuilds()
         {
-            MSBuildClient.ShutdownServer(CancellationToken.None);
-
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            _env.SetEnvironmentVariable("CI", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            scenario.Environment.SetEnvironmentVariable("CI", "1");
 
             string arguments = $"{project.Path} -terminalLogger:auto -verbosity:diagnostic";
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, arguments, out bool success, false, _output);
-            success.ShouldBeTrue();
-            int serverPid = ParseNumber(output, "Server ID is ");
-            _env.WithTransientProcess(serverPid);
+            ServerBuild first = Build(scenario, arguments);
+            first.ShouldRunOnServer();
 
             string terminalLoggerMessage = ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated");
-            int initialMessageCount = Regex.Matches(output, Regex.Escape(terminalLoggerMessage)).Count;
+            int initialMessageCount = Regex.Matches(first.Output, Regex.Escape(terminalLoggerMessage)).Count;
             initialMessageCount.ShouldBeGreaterThan(0);
 
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, arguments, out success, false, _output);
-            success.ShouldBeTrue();
-            ParseNumber(output, "Server ID is ").ShouldBe(serverPid);
-            Regex.Matches(output, Regex.Escape(terminalLoggerMessage)).Count.ShouldBe(initialMessageCount);
+            ServerBuild second = Build(scenario, arguments);
+            second.ServerProcessId.ShouldBe(first.ServerProcessId);
+            Regex.Matches(second.Output, Regex.Escape(terminalLoggerMessage)).Count.ShouldBe(initialMessageCount);
+
+            scenario.ShutdownNodes();
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/15093")]
-        [WindowsOnlyFact]
+        [NodeScenarioFact]
         public void ProcessPriorityDoesNotLeakAcrossServerBuilds()
         {
-            MSBuildClient.ShutdownServer(CancellationToken.None);
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Skip("Process priority classes are Windows-only.");
+            }
+
+            using NodeScenario scenario = NodeScenario.Create(_output);
             ProcessPriorityClass originalPriority = Process.GetCurrentProcess().PriorityClass;
 
             string projectContents = printPidContents.Replace(
                 "</Target>",
                 "<Message Text=\"Server priority is '$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)'\" Importance=\"High\" /></Target>");
-            TransientTestFile project = _env.CreateFile("testProject.proj", projectContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", projectContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
             // System.Diagnostics.Process is not allowlisted for .NET Framework property functions.
-            _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            scenario.Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
 
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -low", out bool success, false, _output);
-            success.ShouldBeTrue();
-            int serverPid = ParseNumber(output, "Server ID is ");
-            _env.WithTransientProcess(serverPid);
-            output.ShouldContain("Server priority is 'BelowNormal'");
+            ServerBuild low = Build(scenario, $"{project.Path} -low");
+            low.ShouldRunOnServer();
+            low.Output.ShouldContain("Server priority is 'BelowNormal'");
 
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            ParseNumber(output, "Server ID is ").ShouldBe(serverPid);
-            output.ShouldContain($"Server priority is '{originalPriority}'");
+            // Build waits until the server released its busy mutex, so this build cannot fall back in-process (#15093).
+            ServerBuild normal = Build(scenario, project.Path);
+            normal.ServerProcessId.ShouldBe(low.ServerProcessId);
+            normal.Output.ShouldContain($"Server priority is '{originalPriority}'");
+
+            scenario.ShutdownNodes();
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void ServerNotUsedReasonIsLoggedToBuildLog()
         {
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
             // MSBuild Server is requested via the environment variable, but /nodereuse:false makes the
             // command line incompatible with the server, so the build falls back to running in-process.
             // The specific reason (node reuse disabled) must be recorded in the build log.
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} /nodereuse:false -verbosity:diagnostic", out bool success, false, _output);
-            success.ShouldBeTrue();
-            ParseNumber(output, "Process ID is ").ShouldBe(ParseNumber(output, "Server ID is "), "The build should have run in-process, not on a server node.");
+            ServerBuild build = Build(scenario, $"{project.Path} /nodereuse:false -verbosity:diagnostic");
+            build.ShouldRunInProc(scenario);
 
             string reason = GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled");
             string notUsedMessage = GetServerStatusMessage("MSBuildServerNotUsedForBuild", reason);
 
-            output.ShouldContain(notUsedMessage);
+            build.Output.ShouldContain(notUsedMessage);
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void ServerShortLivedForMultithreadedWhenNodeReuseOff()
         {
-            // Ensure a clean slate so the build below deterministically spawns a new (short-lived) server node.
-            MSBuildClient.ShutdownServer(CancellationToken.None);
-
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
             // A multithreaded (/mt) build with node reuse off still uses the server (for Server GC), but as a
             // short-lived node that tears itself down after this build. The lifecycle message must say so.
-            _env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} /nodereuse:false -verbosity:diagnostic", out bool success, false, _output);
-            success.ShouldBeTrue();
-            int serverPid = ParseNumber(output, "Server ID is ");
-            _env.WithTransientProcess(serverPid);
-            ParseNumber(output, "Process ID is ").ShouldNotBe(serverPid, "The build should have run on a separate (short-lived) server node.");
+            scenario.Environment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+            ServerBuild build = Build(scenario, $"{project.Path} /nodereuse:false -verbosity:diagnostic");
+            build.ShouldRunOnServer();
 
-            output.ShouldContain(GetServerStatusMessage("MSBuildServerNodeSpawnedShortLived", serverPid));
+            build.Output.ShouldContain(GetServerStatusMessage("MSBuildServerNodeSpawnedShortLived", build.ServerProcessId));
             // The ordinary (resident) spawn message must not appear for a short-lived server.
-            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", serverPid));
+            build.Output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", build.ServerProcessId));
+            scenario.Await(NodeJournalEvent.Exited, processId: build.ServerProcessId);
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void ServerLifecycleMessagesAreAbsentForPlainBuild()
         {
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
 
             // MSBuild Server is not requested for this invocation, so none of the server lifecycle messages
             // should be logged even at diagnostic verbosity (and the build runs in-process).
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "");
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out bool success, false, _output);
-            success.ShouldBeTrue();
-            ParseNumber(output, "Process ID is ").ShouldBe(ParseNumber(output, "Server ID is "), "The build should have run in-process, not on a server node.");
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "");
+            ServerBuild build = Build(scenario, $"{project.Path} -verbosity:diagnostic");
+            build.ShouldRunInProc(scenario);
 
-            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", ParseNumber(output, "Server ID is ")));
-            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeReused", ParseNumber(output, "Server ID is ")));
+            build.Output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", build.ClientProcessId));
+            build.Output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeReused", build.ClientProcessId));
             // The not-used template (with its substituted reason) must not appear because the server was never requested.
-            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNotUsedForBuild", GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled")));
+            build.Output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNotUsedForBuild", GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled")));
         }
 
         /// <summary>
@@ -379,348 +369,183 @@ namespace Microsoft.Build.Engine.UnitTests
         /// captured/redirected, so '-tl:auto' must fall back to the console logger and emit no
         /// TerminalLogger ANSI escape sequences.
         /// </summary>
-        [Fact]
+        [NodeScenarioFact]
         public void TerminalLoggerAutoIsNotSelectedWhenServerOutputIsRedirected()
         {
-            TransientTestFile project = _env.CreateFile("tlAutoProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("tlAutoProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
-            string output = RunnerUtilities.ExecMSBuild(
-                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
-                $"{project.Path} -tl:auto",
-                out bool success,
-                false,
-                _output);
-
-            success.ShouldBeTrue();
-
-            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
-            _env.WithTransientProcess(pidOfServerProcess);
-            pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "The build should have run on a separate server node.");
+            ServerBuild build = Build(scenario, $"{project.Path} -tl:auto");
+            build.ShouldRunOnServer();
 
             // The output is redirected here, so TerminalLogger must not be auto-selected; its
             // characteristic ANSI cursor-hide sequence must not appear in the captured output.
-            output.ShouldNotContain("\x1b[?25l");
+            build.Output.ShouldNotContain("\x1b[?25l");
+
+            scenario.ShutdownNodes();
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void VerifyMixedLegacyBehavior()
         {
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
-            success.ShouldBeTrue();
-            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
-            // Register process to clean up (be killed) after tests ends.
-            _env.WithTransientProcess(pidOfServerProcess);
-            pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
+            ServerBuild first = Build(scenario, project.Path);
+            first.ShouldRunOnServer();
 
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "");
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            pidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            int pidOfNewserverProcess = ParseNumber(output, "Server ID is ");
-            pidOfInitialProcess.ShouldBe(pidOfNewserverProcess, "We did not start a server node to execute the target, so its pid should be the same.");
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "");
+            Build(scenario, project.Path).ShouldRunInProc(scenario);
 
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            pidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            pidOfNewserverProcess = ParseNumber(output, "Server ID is ");
-            pidOfInitialProcess.ShouldNotBe(pidOfNewserverProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
-            pidOfServerProcess.ShouldBe(pidOfNewserverProcess, "Server node should be the same as from earlier.");
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            ServerBuild third = Build(scenario, project.Path);
+            third.ShouldRunOnServer();
+            third.ServerProcessId.ShouldBe(first.ServerProcessId, "Server node should be the same as from earlier.");
 
-            if (pidOfServerProcess != pidOfNewserverProcess)
-            {
-                // Register process to clean up (be killed) after tests ends.
-                _env.WithTransientProcess(pidOfNewserverProcess);
-            }
+            scenario.ShutdownNodes();
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void BuildsWhileBuildIsRunningOnServer()
         {
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            TransientTestFile gatedProject = scenario.Environment.CreateFile("napProject.proj", gatedProjectContents);
 
-            TransientTestFile markerFile = _env.ExpectFile();
-            TransientTestFile sleepProject = _env.CreateFile("napProject.proj", string.Format(sleepingTaskContentsFormat, markerFile.Path));
+            // Start a server node.
+            ServerBuild first = Build(scenario, project.Path);
+            first.ShouldRunOnServer();
 
-            int pidOfServerProcess;
-            Task t;
-            // Start a server node and find its PID.
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
-            pidOfServerProcess = ParseNumber(output, "Server ID is ");
-            _env.WithTransientProcess(pidOfServerProcess);
+            // Hold the server busy with a build that waits on a gate.
+            NodeScenario.GateHandle busy = scenario.Gate(ServerBusyGate);
+            NodeScenarioRun busyRun = scenario.StartMSBuild(MSBuildExePath, gatedProject.Path);
+            busy.AwaitEntered().ProcessId.ShouldBe(first.ServerProcessId, "The gated build should run on the server.");
 
-            string? dir = Path.GetDirectoryName(markerFile.Path);
-            // mre must be declared before watcher so that it is disposed after watcher.
-            // Reversing this order would allow late FileSystemWatcher callbacks to call
-            // mre.Set() on a disposed ManualResetEvent, causing an ObjectDisposedException.
-            using ManualResetEvent mre = new ManualResetEvent(false);
-            using var watcher = new System.IO.FileSystemWatcher(dir!);
-            watcher.Created += (o, e) =>
-            {
-                _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started.");
-                mre.Set();
-            };
-            watcher.Filter = Path.GetFileName(markerFile.Path);
-            watcher.EnableRaisingEvents = true;
-            t = Task.Run(() =>
-            {
-                RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _, false, _output);
-            });
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+            ServerBuild withoutServer = Build(scenario, project.Path);
+            withoutServer.ShouldRunInProc(scenario);
+            withoutServer.FellBackInProc.ShouldBeFalse("The server was not requested, so there is nothing to fall back from.");
 
-            // The server will soon be in use; make sure we don't try to use it before that happens.
-            _output.WriteLine("Waiting for the server to be in use.");
-            mre.WaitOne();
-            _output.WriteLine("It's OK to go ahead.");
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            ServerBuild whileBusy = Build(scenario, project.Path);
+            whileBusy.ShouldRunInProc(scenario);
+            whileBusy.FellBackInProc.ShouldBeTrue("The server is occupied, so the build should fall back in-process.");
 
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
-
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
-
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
-            pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
-            ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "Process ID and Server ID should coincide.");
-
-            // Clean up process and tasks
-            // 1st kill registered processes
-            _env.Dispose();
-            // 2nd wait for sleep task which will ends as soon as the process is killed above.
-            t.Wait();
+            busy.Release();
+            busyRun.WaitForSuccess();
+            scenario.ShutdownNodes();
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14195", TestPlatforms.Windows)]
-        [Theory]
+        [NodeScenarioTheory]
         [InlineData(true)]
         [InlineData(false)]
         public void CanShutdownServerProcess(bool byBuildManager)
         {
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
 
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            ServerBuild build = Build(scenario, project.Path);
+            build.ShouldRunOnServer();
+            scenario.Count(NodeScenario.Is(NodeJournalEvent.Exited, processId: build.ServerProcessId)).ShouldBe(0, "The server should outlive its build.");
 
-            // Start a server node and find its PID.
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
-            success.ShouldBeTrue();
-            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
-            _env.WithTransientProcess(pidOfServerProcess);
-
-            var serverProcess = Process.GetProcessById(pidOfServerProcess);
-
-            serverProcess.HasExited.ShouldBeFalse();
-
+            NodeJournalRecord shutdown = scenario.Marker("Shutdown");
             if (byBuildManager)
             {
                 BuildManager.DefaultBuildManager.ShutdownAllNodes();
             }
             else
             {
-                bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
-                serverIsDown.ShouldBeTrue();
+                MSBuildClient.ShutdownServer(CancellationToken.None).ShouldBeTrue();
             }
 
-            serverProcess.WaitForExit(10_000);
-
-            serverProcess.HasExited.ShouldBeTrue();
+            scenario.AssertOrder(
+                r => r.Sequence == shutdown.Sequence, "shutdown requested",
+                NodeScenario.Is(NodeJournalEvent.Exited, processId: build.ServerProcessId), "server exited");
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void CanShutdownServerProcessWhenNotRunning()
         {
-            bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
-            serverIsDown.ShouldBeTrue();
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            MSBuildClient.ShutdownServer(CancellationToken.None).ShouldBeTrue();
+            scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched)).ShouldBe(0);
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void ServerShouldNotRunWhenNodeReuseEqualsFalse()
         {
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " /nodereuse:false", out bool success, false, _output);
-            success.ShouldBeTrue();
-            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
-            pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when nodereuse is false.");
+            Build(scenario, project.Path + " /nodereuse:false").ShouldRunInProc(scenario);
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void ServerShouldStartWhenBuildIsInteractive()
         {
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -interactive", out bool success, false, _output);
-            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
-            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+            ServerBuild build = Build(scenario, project.Path + " -interactive");
+            build.ShouldRunOnServer();
+            scenario.Count(NodeScenario.Is(NodeJournalEvent.Exited, processId: build.ServerProcessId)).ShouldBe(0, "The server should outlive its build.");
 
-            success.ShouldBeTrue();
-
-            var serverProcess = Process.GetProcessById(pidOfServerProcess);
-
-            serverProcess.HasExited.ShouldBeFalse();
-
-            pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We failed to start a server node when interactive is true.");
-            bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
-            serverIsDown.ShouldBeTrue();
+            MSBuildClient.ShutdownServer(CancellationToken.None).ShouldBeTrue();
+            scenario.Await(NodeJournalEvent.Exited, processId: build.ServerProcessId);
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void ServerStartsWhenMtPresentEvenWithoutEnvVar()
         {
             // Regression test for the "-mt implies MSBuild Server" routing decision
             // (investigation #9379, ShouldUseMSBuildServer / IsMultiThreadedRequested).
             // When MSBUILDUSESERVER is unset and the user passes -mt, the client should engage
-            // the server automatically. Verified by running two builds back-to-back and asserting
-            // the server process PID is the SAME for both — server reuse is the unique signature
-            // of MSBuild server engagement (a non-server build would always get a fresh worker PID).
-            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            // Explicitly clear MSBUILDUSESERVER so we test the -mt-implies-server path, and isolate this
-            // test's server with a unique handshake salt so it can't reuse/shut down an unrelated server.
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
-            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            // the server automatically, and the second build reuses it.
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", printPidContents);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
-            // Make sure we start with no server running.
-            MSBuildClient.ShutdownServer(CancellationToken.None);
+            ServerBuild first = Build(scenario, project.Path + " -mt");
+            first.ShouldRunOnServer();
+            ServerBuild second = Build(scenario, project.Path + " -mt");
+            second.ServerProcessId.ShouldBe(first.ServerProcessId, "When -mt implies server, two consecutive builds should reuse the same server process.");
+            second.ServerReuseDecision.ShouldBe("reused");
 
-            string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success1, false, _output);
-            success1.ShouldBeTrue();
-            int serverPid1 = ParseNumber(output1, "Server ID is ");
-            // Register cleanup before any assertion so the server does not leak if an assertion throws.
-            _env.WithTransientProcess(serverPid1);
-
-            string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success2, false, _output);
-            success2.ShouldBeTrue();
-            int serverPid2 = ParseNumber(output2, "Server ID is ");
-
-            serverPid1.ShouldBe(serverPid2, "When -mt implies server, two consecutive builds should reuse the same server process. PIDs were " + serverPid1 + " and " + serverPid2 + ".");
-
-            // Clean up the server we spun up.
-            MSBuildClient.ShutdownServer(CancellationToken.None);
+            scenario.ShutdownNodes();
         }
 
-        [Fact]
+        [NodeScenarioFact]
         public void ServerStartsWhenMtInResponseFileEvenWithoutEnvVar()
         {
             // Regression test for rainersigwald's review concern (#13758): -mt enabled via a response file
             // (here a project Directory.Build.rsp) - not on the command line - must still implicitly engage the
             // server. This is the expected dogfooding mechanism, so the authoritative, response-file-aware parse
-            // drives the decision. Verified the same way as ServerStartsWhenMtPresentEvenWithoutEnvVar: two builds
-            // back-to-back reuse the SAME server PID, the unique signature of server engagement.
-            TransientTestFolder folder = _env.CreateFolder();
-            TransientTestFile project = _env.CreateFile(folder, "testProject.proj", printPidContents);
+            // drives the decision.
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFolder folder = scenario.Environment.CreateFolder();
+            TransientTestFile project = scenario.Environment.CreateFile(folder, "testProject.proj", printPidContents);
             // -mt comes ONLY from the response file; it is NOT passed on the command line below.
-            _env.CreateFile(folder, "Directory.Build.rsp", "-mt");
+            scenario.Environment.CreateFile(folder, "Directory.Build.rsp", "-mt");
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
-            // Explicitly clear MSBUILDUSESERVER so we test the implicit path, and isolate this test's server with
-            // a unique handshake salt so it can't reuse/shut down an unrelated server.
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
-            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+            ServerBuild first = Build(scenario, project.Path);
+            first.ShouldRunOnServer();
+            ServerBuild second = Build(scenario, project.Path);
+            second.ServerProcessId.ShouldBe(first.ServerProcessId, "When -mt from a response file implies server, two consecutive builds should reuse the same server process.");
+            second.ServerReuseDecision.ShouldBe("reused");
 
-            // Make sure we start with no server running.
-            MSBuildClient.ShutdownServer(CancellationToken.None);
-
-            string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success1, false, _output);
-            success1.ShouldBeTrue();
-            int serverPid1 = ParseNumber(output1, "Server ID is ");
-            // Register cleanup before any assertion so the server does not leak if an assertion throws.
-            _env.WithTransientProcess(serverPid1);
-
-            string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success2, false, _output);
-            success2.ShouldBeTrue();
-            int serverPid2 = ParseNumber(output2, "Server ID is ");
-
-            serverPid1.ShouldBe(serverPid2, "When -mt from a response file implies server, two consecutive builds should reuse the same server process. PIDs were " + serverPid1 + " and " + serverPid2 + ".");
-
-            // Clean up the server we spun up.
-            MSBuildClient.ShutdownServer(CancellationToken.None);
+            scenario.ShutdownNodes();
         }
 
-#if NET
-        /// <summary>
-        /// Disabling node reuse (e.g. <c>-nr:false</c>, as <c>dotnet restore</c> does) must NOT prevent a
-        /// multithreaded (/mt) build from using the server. Instead of skipping the server, the no-reuse intent is
-        /// honored by shutting the server down after the build. This test verifies both halves: the build runs in a
-        /// separate server process, and that process does not survive the build (so a subsequent build gets a fresh server).
-        /// </summary>
-        [Fact]
-        public void MultiThreadedServerIsUsedButShutDownWhenNodeReuseDisabled()
-        {
-            // Clear MSBUILDUSESERVER so we exercise the -mt-implies-server path, and isolate this test's server
-            // with a unique handshake salt and a clean environment.
-            PrepareIsolatedServerEnv(useServer: false);
-            TransientTestFile project = _env.CreateFile("mtNoReuseProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
-
-            // Make sure we start with no server running.
-            MSBuildClient.ShutdownServer(CancellationToken.None);
-
-            try
-            {
-                // -mt forces the server on even though node reuse is disabled.
-                string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt -nr:false", out bool success1, false, _output);
-                success1.ShouldBeTrue();
-                int clientPid1 = ParseNumber(output1, "Process ID is ");
-                int serverPid1 = ParseNumber(output1, "TaskRanInPID=");
-                // Register cleanup before any assertion so the server does not leak if an assertion throws.
-                _env.WithTransientProcess(serverPid1);
-
-                // The build ran in a separate server process: proof the server was engaged despite -nr:false.
-                serverPid1.ShouldNotBe(clientPid1, "Even with node reuse disabled, -mt must run the build in the server node, not the entry process.");
-
-                // Because node reuse is disabled, the server must not persist past the build: its process should exit.
-                WaitForProcessExit(serverPid1).ShouldBeTrue($"Server process {serverPid1} should have been shut down after the build when node reuse is disabled.");
-
-                // A second build cannot reuse the (now gone) server, so it must launch a fresh server process.
-                string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt -nr:false", out bool success2, false, _output);
-                success2.ShouldBeTrue();
-                int serverPid2 = ParseNumber(output2, "TaskRanInPID=");
-                _env.WithTransientProcess(serverPid2);
-                serverPid2.ShouldNotBe(serverPid1, "With node reuse disabled, each -mt build should get a fresh, non-persistent server process.");
-            }
-            finally
-            {
-                // Ensure any server we spun up is torn down even if an assertion above fails.
-                MSBuildClient.ShutdownServer(CancellationToken.None);
-            }
-        }
-
-        /// <summary>
-        /// Waits up to <paramref name="timeoutMs"/> for the process with the given PID to exit. Returns true if
-        /// the process exited (or was already gone), false if it was still running when the timeout elapsed.
-        /// </summary>
-        private static bool WaitForProcessExit(int pid, int timeoutMs = 10000)
-        {
-            try
-            {
-                using Process process = Process.GetProcessById(pid);
-                return process.WaitForExit(timeoutMs);
-            }
-            catch (ArgumentException)
-            {
-                // No process with that PID is running - it has already exited.
-                return true;
-            }
-        }
-#endif
-
-        [Fact]
+        [NodeScenarioFact]
         public void PropertyMSBuildStartupDirectoryOnServer()
         {
-            // This test seems to be flaky, lets enable better logging to investigate it next time
-            // TODO: delete after investigated its flakiness
-            _env.WithTransientDebugEngineForNewProcesses(true);
-
             string reportMSBuildStartupDirectoryProperty = @$"
 <Project>
     <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
@@ -733,45 +558,62 @@ namespace Microsoft.Build.Engine.UnitTests
 	</Target>
 </Project>";
 
-            TransientTestFile project = _env.CreateFile("testProject.proj", reportMSBuildStartupDirectoryProperty);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.proj", reportMSBuildStartupDirectoryProperty);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
             // Start on current working directory
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"/t:DisplayMessages {project.Path}", out bool success, false, _output);
-            success.ShouldBeTrue();
-            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
-            _env.WithTransientProcess(pidOfServerProcess);
-            output.ShouldContain($@":MSBuildStartupDirectory:{Environment.CurrentDirectory}:");
+            ServerBuild first = Build(scenario, $"/t:DisplayMessages {project.Path}");
+            first.ShouldRunOnServer();
+            first.Output.ShouldContain($@":MSBuildStartupDirectory:{Environment.CurrentDirectory}:");
 
             // Start on transient project directory
-            _env.SetCurrentDirectory(Path.GetDirectoryName(project.Path));
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"/t:DisplayMessages {project.Path}", out success, false, _output);
-            int pidOfNewServerProcess = ParseNumber(output, "Server ID is ");
-            if (pidOfServerProcess != pidOfNewServerProcess)
-            {
-                // Register process to clean up (be killed) after tests ends.
-                _env.WithTransientProcess(pidOfNewServerProcess);
-            }
-            pidOfNewServerProcess.ShouldBe(pidOfServerProcess);
-            output.ShouldContain($@":MSBuildStartupDirectory:{Environment.CurrentDirectory}:");
+            scenario.Environment.SetCurrentDirectory(Path.GetDirectoryName(project.Path));
+            ServerBuild second = Build(scenario, $"/t:DisplayMessages {project.Path}");
+            second.ServerProcessId.ShouldBe(first.ServerProcessId);
+            second.Output.ShouldContain($@":MSBuildStartupDirectory:{Environment.CurrentDirectory}:");
+
+            scenario.ShutdownNodes();
         }
 
 #if NET
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/15108", TestPlatforms.Windows)]
-        [Fact]
+        /// <summary>
+        /// Disabling node reuse (e.g. <c>-nr:false</c>, as <c>dotnet restore</c> does) must NOT prevent a
+        /// multithreaded (/mt) build from using the server. Instead of skipping the server, the no-reuse intent is
+        /// honored by shutting the server down after the build. This test verifies both halves: the build runs in a
+        /// separate server process, and that process does not survive the build (so a subsequent build gets a fresh server).
+        /// </summary>
+        [NodeScenarioFact]
+        public void MultiThreadedServerIsUsedButShutDownWhenNodeReuseDisabled()
+        {
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario, useServer: false);
+            TransientTestFile project = scenario.Environment.CreateFile("mtNoReuseProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+
+            // -mt forces the server on even though node reuse is disabled.
+            ServerBuild first = Build(scenario, $"{project.Path} -mt -nr:false");
+            first.ShouldRunOnServer();
+            ParseNumber(first.Output, "TaskRanInPID=").ShouldBe(first.ServerProcessId);
+
+            // Because node reuse is disabled, the server must not persist past the build.
+            scenario.Await(NodeJournalEvent.Exited, processId: first.ServerProcessId);
+
+            // A second build cannot reuse the (now gone) server, so it must launch a fresh server process.
+            ServerBuild second = Build(scenario, $"{project.Path} -mt -nr:false");
+            second.ShouldRunOnServer();
+            second.ServerProcessId.ShouldNotBe(first.ServerProcessId, "With node reuse disabled, each -mt build should get a fresh, non-persistent server process.");
+            scenario.Await(NodeJournalEvent.Exited, processId: second.ServerProcessId);
+        }
+
+        [NodeScenarioFact]
         public void ServerOwnsReusableSidecarsUntilShutdown()
         {
-            PrepareIsolatedServerEnv(useServer: false);
-
-            // A sidecar only exists when node reuse is on: TaskHostTask gates it on
-            // EnableNodeReuse. CI disables node reuse by default, which would silently turn this
-            // into a test of short-lived TaskHosts that exit on their own and never exercise
-            // ownership at all.
-            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario, useServer: false);
 
             const string environmentVariableName = "MSBUILD_SERVER_OWNED_SIDECAR_TEST";
-            _env.SetEnvironmentVariable(environmentVariableName, "first-build");
-            TransientTestFile project = _env.CreateFile(
+            scenario.Environment.SetEnvironmentVariable(environmentVariableName, "first-build");
+            TransientTestFile project = scenario.Environment.CreateFile(
                 "serverOwnedSidecar.proj",
                 $"""
                 <Project>
@@ -792,49 +634,31 @@ namespace Microsoft.Build.Engine.UnitTests
                 </Project>
                 """);
 
+            ServerBuild first = Build(scenario, $"{project.Path} -mt -nodeReuse:true", bootstrapped: true);
+            first.ShouldRunOnServer();
+            first.Output.ShouldContain("Sidecar environment is first-build");
+
+            scenario.Environment.SetEnvironmentVariable(environmentVariableName, "second-build");
+            ServerBuild second = Build(scenario, $"{project.Path} -mt -nodeReuse:true", bootstrapped: true);
+            second.ServerProcessId.ShouldBe(first.ServerProcessId);
+            second.Output.ShouldContain("Sidecar environment is second-build");
+
+            // Every TaskHost the server launched. Whether the second build reused the first one depends on how node
+            // reuse is configured, so assert about all of them rather than about their identity.
+            int[] sidecars = [.. scenario.Records
+                .Where(r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.TaskHost && r.ProcessId == first.ServerProcessId)
+                .Select(r => r.SubjectProcessId)];
+            sidecars.ShouldNotBeEmpty("The server should have launched a sidecar TaskHost.");
+            sidecars.ShouldContain(ParseNumber(first.Output, "Sidecar ID is "));
+            sidecars.ShouldContain(ParseNumber(second.Output, "Sidecar ID is "));
+
             ShutdownBootstrapServer();
+            scenario.Await(NodeJournalEvent.Exited, processId: first.ServerProcessId);
 
-            try
+            // The guarantee under test: no TaskHost the server used may survive it.
+            foreach (int sidecar in sidecars)
             {
-                string firstOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"{project.Path} -mt -nodeReuse:true",
-                    out bool firstSuccess,
-                    false,
-                    _output);
-
-                firstSuccess.ShouldBeTrue();
-                int serverPid = ParseNumber(firstOutput, "Server ID is ");
-                int firstSidecarPid = ParseNumber(firstOutput, "Sidecar ID is ");
-                _env.WithTransientProcess(serverPid);
-                _env.WithTransientProcess(firstSidecarPid);
-                firstOutput.ShouldContain("Sidecar environment is first-build");
-
-                _env.SetEnvironmentVariable(environmentVariableName, "second-build");
-                string secondOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"{project.Path} -mt -nodeReuse:true",
-                    out bool secondSuccess,
-                    false,
-                    _output);
-
-                secondSuccess.ShouldBeTrue();
-                ParseNumber(secondOutput, "Server ID is ").ShouldBe(serverPid);
-                int secondSidecarPid = ParseNumber(secondOutput, "Sidecar ID is ");
-                _env.WithTransientProcess(secondSidecarPid);
-                secondOutput.ShouldContain("Sidecar environment is second-build");
-
-                ShutdownBootstrapServer();
-                WaitForProcessExit(serverPid).ShouldBeTrue($"Server process {serverPid} should exit after build-server shutdown.");
-
-                // The guarantee under test: no TaskHost the server used may survive it. Whether the
-                // second build reused the first TaskHost or got a new one depends on how node reuse
-                // is configured in the environment, so assert about every process the server used
-                // rather than about their identity.
-                WaitForProcessExit(firstSidecarPid).ShouldBeTrue($"TaskHost process {firstSidecarPid} used by the server should exit with it.");
-                WaitForProcessExit(secondSidecarPid).ShouldBeTrue($"TaskHost process {secondSidecarPid} used by the server should exit with it.");
-            }
-            finally
-            {
-                ShutdownBootstrapServer();
+                scenario.Await(NodeJournalEvent.Exited, processId: sidecar);
             }
         }
 
@@ -852,21 +676,17 @@ namespace Microsoft.Build.Engine.UnitTests
                 outputHelper: _output,
                 environmentVariables: RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables());
 
-        [Theory]
+        [NodeScenarioTheory]
         [InlineData(null)]
         [InlineData("18.12")]
         public void SidecarWithoutServerHonorsOwnershipChangeWave(string? disabledWave)
         {
-            PrepareIsolatedServerEnv(useServer: false);
-            _env.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
-            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario, useServer: false);
+            scenario.Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
+            scenario.Environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disabledWave);
 
-            // A sidecar only exists when node reuse is on, and CI disables it by default. Without
-            // this the build would use a short-lived TaskHost that exits on its own, so the test
-            // would pass without ever exercising ownership.
-            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
-
-            TransientTestFile project = _env.CreateFile(
+            TransientTestFile project = scenario.Environment.CreateFile(
                 "unownedSidecar.proj",
                 $"""
                 <Project>
@@ -880,18 +700,26 @@ namespace Microsoft.Build.Engine.UnitTests
                 </Project>
                 """);
 
-            string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{project.Path} -mt -nodeReuse:true",
-                out bool success,
-                false,
-                _output);
+            // A pooled sidecar starts its node loop again once its launcher is gone. Crashing it right there both
+            // proves it was pooled and ends it, since nothing in this test can reach it to shut it down.
+            scenario.Fault(NodeJournalEvent.NodeStarted, NodeFaultAction.Crash, NodeJournalKind.TaskHost, occurrence: 2);
 
-            success.ShouldBeTrue();
-            int sidecarPid = ParseNumber(output, "Sidecar ID is ");
-            _env.WithTransientProcess(sidecarPid);
-
+            ServerBuild build = Build(scenario, $"{project.Path} -mt -nodeReuse:true", bootstrapped: true);
+            build.ShouldRunInProc(scenario);
+            int sidecarPid = ParseNumber(build.Output, "Sidecar ID is ");
+            scenario.Await(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost, processId: build.ClientProcessId), "the client launched the sidecar")
+                .SubjectProcessId.ShouldBe(sidecarPid);
             // Ownership ends the sidecar when its launcher exits. Opting out preserves pooling.
-            WaitForProcessExit(sidecarPid).ShouldBe(disabledWave is null);
+            if (disabledWave is null)
+            {
+                scenario.Await(NodeJournalEvent.Exited, processId: sidecarPid);
+                scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.FaultInjected, processId: sidecarPid), "the owned sidecar returns to the pool");
+            }
+            else
+            {
+                scenario.Await(NodeJournalEvent.FaultInjected, processId: sidecarPid);
+                scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Exited, processId: sidecarPid), "the pooled sidecar exits with its launcher");
+            }
         }
 
         /// <summary>
@@ -900,47 +728,23 @@ namespace Microsoft.Build.Engine.UnitTests
         /// resolved to the same pipe and mutex names, so <c>-mt -nodeReuse:false</c> killed the
         /// resident server every time.
         /// </summary>
-        [Fact]
+        [NodeScenarioFact]
         public void TransientBuildDoesNotShutDownResidentServer()
         {
-            PrepareIsolatedServerEnv(useServer: false);
-            TransientTestFile project = _env.CreateFile("transientVsResident.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario, useServer: false);
+            TransientTestFile project = scenario.Environment.CreateFile("transientVsResident.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
 
-            ShutdownBootstrapServer();
+            ServerBuild resident = Build(scenario, $"{project.Path} -mt -nodeReuse:true", bootstrapped: true);
+            resident.ShouldRunOnServer();
 
-            try
-            {
-                string residentOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"{project.Path} -mt -nodeReuse:true",
-                    out bool residentSuccess,
-                    false,
-                    _output);
-                residentSuccess.ShouldBeTrue();
-                int residentClientPid = ParseNumber(residentOutput, "Process ID is ");
-                int residentPid = ParseNumber(residentOutput, "TaskRanInPID=");
-                _env.WithTransientProcess(residentPid);
-                residentPid.ShouldNotBe(residentClientPid, "The resident build must run in a server, not in-process.");
+            ServerBuild transient = Build(scenario, $"{project.Path} -mt -nodeReuse:false", bootstrapped: true);
+            transient.ShouldRunOnServer();
+            transient.ServerProcessId.ShouldNotBe(resident.ServerProcessId, "A transient build must run in its own server rather than borrowing the resident one.");
+            NodeJournalRecord transientExited = scenario.Await(NodeJournalEvent.Exited, processId: transient.ServerProcessId);
 
-                string transientOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"{project.Path} -mt -nodeReuse:false",
-                    out bool transientSuccess,
-                    false,
-                    _output);
-                transientSuccess.ShouldBeTrue();
-                int transientClientPid = ParseNumber(transientOutput, "Process ID is ");
-                int transientPid = ParseNumber(transientOutput, "TaskRanInPID=");
-                _env.WithTransientProcess(transientPid);
-
-                transientPid.ShouldNotBe(transientClientPid, "The transient build must run in a server, not in-process.");
-                transientPid.ShouldNotBe(residentPid, "A transient build must run in its own server rather than borrowing the resident one.");
-                WaitForProcessExit(transientPid).ShouldBeTrue($"Transient server {transientPid} should tear itself down after its build.");
-
-                IsProcessRunning(residentPid).ShouldBeTrue($"Resident server {residentPid} must survive a transient build.");
-            }
-            finally
-            {
-                ShutdownBootstrapServer();
-            }
+            scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Exited, processId: resident.ServerProcessId), "the resident server exits", transientExited);
+            scenario.ShutdownNodes(ShutdownBootstrapServer);
         }
 
         /// <summary>
@@ -948,88 +752,48 @@ namespace Microsoft.Build.Engine.UnitTests
         /// these contend: the second build would find the first's server holding the running mutex and
         /// fall back in-process, silently losing the server that <c>-mt</c> asked for.
         /// </summary>
-        [Fact]
+        [NodeScenarioFact]
         public void ConcurrentTransientBuildsEachGetTheirOwnServer()
         {
-            PrepareIsolatedServerEnv(useServer: false);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario, useServer: false);
 
-            // Hold each build open so the two genuinely overlap. If they happen not to overlap the
-            // assertions below still hold, so this can only ever under-detect, never flake.
-            TransientTestFile project = _env.CreateFile(
-                "concurrentTransient.proj",
-                $@"
-<Project>
-<UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-<UsingTask TaskName=""SleepingTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
-    <Target Name='Probe'>
-        <ProcessIdTask>
-            <Output PropertyName=""PID"" TaskParameter=""Pid"" />
-        </ProcessIdTask>
-        <Message Text=""TaskRanInPID=$(PID)"" Importance=""High"" />
-        <SleepingTask SleepTime=""4000"" />
-    </Target>
-</Project>");
+            // Both builds wait on the same gate, so they genuinely overlap: the second one starts while the first
+            // one's server is busy.
+            TransientTestFile project = scenario.Environment.CreateFile("concurrentTransient.proj", gatedProjectContents);
+            NodeScenario.GateHandle gate = scenario.Gate(ServerBusyGate);
 
-            ShutdownBootstrapServer();
+            string arguments = $"{project.Path} -mt -nodeReuse:false";
+            NodeScenarioRun first = scenario.StartBootstrapped(arguments);
+            NodeJournalRecord firstEntered = gate.AwaitEntered();
+            NodeScenarioRun second = scenario.StartBootstrapped(arguments);
+            NodeJournalRecord secondEntered = scenario.Await(
+                r => r.Event == NodeJournalEvent.GateEntered && r.Detail == ServerBusyGate && r.ProcessId != firstEntered.ProcessId,
+                "the second build reached the gate");
+            gate.Release();
+            first.WaitForSuccess();
+            second.WaitForSuccess();
 
-            try
-            {
-                string arguments = $"{project.Path} -mt -nodeReuse:false";
-                Task<(bool Success, string Output)> first = Task.Run(() =>
-                {
-                    string output = RunnerUtilities.ExecBootstrapedMSBuild(arguments, out bool success, false, _output);
-                    return (success, output);
-                });
-                Task<(bool Success, string Output)> second = Task.Run(() =>
-                {
-                    string output = RunnerUtilities.ExecBootstrapedMSBuild(arguments, out bool success, false, _output);
-                    return (success, output);
-                });
+            // Falling back in-process is how contention shows up.
+            scenario.Count(NodeScenario.Is(NodeJournalEvent.ServerBusyFallback)).ShouldBe(0, "Neither build may fall back in-process.");
+            firstEntered.Role.ShouldBe(NodeJournalKind.Server, "The first build must run in a server, not in-process.");
+            secondEntered.Role.ShouldBe(NodeJournalKind.Server, "The second build must run in a server, not in-process.");
 
-                Task.WaitAll(first, second);
-
-                first.Result.Success.ShouldBeTrue();
-                second.Result.Success.ShouldBeTrue();
-
-                int firstServerPid = ParseNumber(first.Result.Output, "TaskRanInPID=");
-                int secondServerPid = ParseNumber(second.Result.Output, "TaskRanInPID=");
-                _env.WithTransientProcess(firstServerPid);
-                _env.WithTransientProcess(secondServerPid);
-
-                int firstClientPid = ParseNumber(first.Result.Output, "Process ID is ");
-                int secondClientPid = ParseNumber(second.Result.Output, "Process ID is ");
-
-                // Falling back in-process is how contention shows up, so check that first: it would
-                // otherwise look like success with the two PIDs merely differing.
-                firstServerPid.ShouldNotBe(firstClientPid, "The first build must run in a server, not in-process.");
-                secondServerPid.ShouldNotBe(secondClientPid, "The second build must run in a server, not in-process.");
-                firstServerPid.ShouldNotBe(secondServerPid, "Concurrent transient builds must not share a server.");
-            }
-            finally
-            {
-                ShutdownBootstrapServer();
-            }
+            scenario.Await(NodeJournalEvent.Exited, processId: firstEntered.ProcessId);
+            scenario.Await(NodeJournalEvent.Exited, processId: secondEntered.ProcessId);
         }
 
         /// <summary>
         /// A transient build with node reuse disabled must not adopt the resident server's reusable
         /// TaskHost. It must instead launch a non-reusable TaskHost for its own build.
         /// </summary>
-        /// <remarks>
-        /// This deliberately does not assert that the resident TaskHost is still alive afterwards.
-        /// Its lifetime is independent of the server identity behavior under test, and asserting its
-        /// survival is sensitive to unrelated MSBuild activity elsewhere on the machine.
-        /// </remarks>
-        [Fact]
+        [NodeScenarioFact]
         public void TransientBuildDoesNotAdoptResidentSidecars()
         {
-            PrepareIsolatedServerEnv(useServer: false);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario, useServer: false);
 
-            // A sidecar only exists when node reuse is on, and CI disables it by default; without this
-            // the resident build would use a short-lived TaskHost and the test would prove nothing.
-            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
-
-            TransientTestFile project = _env.CreateFile(
+            TransientTestFile project = scenario.Environment.CreateFile(
                 "residentSidecarVsTransient.proj",
                 $"""
                 <Project>
@@ -1048,57 +812,22 @@ namespace Microsoft.Build.Engine.UnitTests
                 </Project>
                 """);
 
-            ShutdownBootstrapServer();
+            ServerBuild resident = Build(scenario, $"{project.Path} -mt -nodeReuse:true", bootstrapped: true);
+            resident.ShouldRunOnServer();
+            int residentSidecarPid = ParseNumber(resident.Output, "Sidecar ID is ");
 
-            try
-            {
-                string residentOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"{project.Path} -mt -nodeReuse:true",
-                    out bool residentSuccess,
-                    false,
-                    _output);
-                residentSuccess.ShouldBeTrue();
-                int residentPid = ParseNumber(residentOutput, "Server ID is ");
-                int residentSidecarPid = ParseNumber(residentOutput, "Sidecar ID is ");
-                _env.WithTransientProcess(residentPid);
-                _env.WithTransientProcess(residentSidecarPid);
+            ServerBuild transient = Build(scenario, $"{project.Path} -mt -nodeReuse:false", bootstrapped: true);
+            transient.ShouldRunOnServer();
+            int transientSidecarPid = ParseNumber(transient.Output, "Sidecar ID is ");
 
-                string transientOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"{project.Path} -mt -nodeReuse:false",
-                    out bool transientSuccess,
-                    false,
-                    _output);
-                transientSuccess.ShouldBeTrue();
-                int transientPid = ParseNumber(transientOutput, "Server ID is ");
-                int transientSidecarPid = ParseNumber(transientOutput, "Sidecar ID is ");
-                _env.WithTransientProcess(transientPid);
-                _env.WithTransientProcess(transientSidecarPid);
+            transient.ServerProcessId.ShouldNotBe(resident.ServerProcessId, "A transient build must run in its own server rather than borrowing the resident one.");
+            transientSidecarPid.ShouldNotBe(residentSidecarPid, "A transient build must bring its own TaskHost rather than adopting one owned by the resident server.");
+            scenario.Await(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost, processId: transient.ServerProcessId), "the transient server launched its own TaskHost")
+                .SubjectProcessId.ShouldBe(transientSidecarPid);
+            NodeJournalRecord transientExited = scenario.Await(NodeJournalEvent.Exited, processId: transient.ServerProcessId);
+            scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Exited, processId: resident.ServerProcessId), "the resident server exits", transientExited);
 
-                transientPid.ShouldNotBe(residentPid, "A transient build must run in its own server rather than borrowing the resident one.");
-                transientSidecarPid.ShouldNotBe(residentSidecarPid, "A transient build must bring its own TaskHost rather than adopting one owned by the resident server.");
-                IsProcessRunning(residentPid).ShouldBeTrue($"Resident server {residentPid} must survive a transient build.");
-            }
-            finally
-            {
-                ShutdownBootstrapServer();
-            }
-        }
-
-        /// <summary>
-        /// Whether a process with the given PID is still running. Unlike <see cref="WaitForProcessExit"/>
-        /// this does not wait, so it asserts about the present rather than about a timeout elapsing.
-        /// </summary>
-        private static bool IsProcessRunning(int pid)
-        {
-            try
-            {
-                using Process process = Process.GetProcessById(pid);
-                return !process.HasExited;
-            }
-            catch (ArgumentException)
-            {
-                return false;
-            }
+            scenario.ShutdownNodes(ShutdownBootstrapServer);
         }
 
         /// <summary>
@@ -1125,26 +854,24 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// Isolates a server-related test: a unique handshake salt guarantees a freshly launched server
-        /// (so no leftover server from another test or local run is reused), and a clean GC environment
-        /// ensures the server's Server GC comes from the launch injection rather than an ambient
-        /// CI/user setting leaking into child nodes.
+        /// Prepares a server-related test on top of the scenario's isolation (its own handshake salt, so a freshly
+        /// launched server): a clean GC environment ensures the server's Server GC comes from the launch injection
+        /// rather than an ambient CI/user setting leaking into child nodes.
         /// </summary>
-        private void PrepareIsolatedServerEnv(bool useServer = true)
+        private static void PrepareIsolatedServerEnv(NodeScenario scenario, bool useServer = true)
         {
             // Child node launches (TaskHost, worker) need DOTNET_HOST_PATH to locate the runtime.
-            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(_env);
-            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
-            _env.SetEnvironmentVariable("DOTNET_gcServer", null);
-            _env.SetEnvironmentVariable("COMPlus_gcServer", null);
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", useServer ? "1" : null);
+            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(scenario.Environment);
+            scenario.Environment.SetEnvironmentVariable("DOTNET_gcServer", null);
+            scenario.Environment.SetEnvironmentVariable("COMPlus_gcServer", null);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDUSESERVER", useServer ? "1" : null);
         }
 
         /// <summary>
         /// The MSBuild server (build orchestrator) process must be launched with Server GC when the
         /// build is multithreaded (/mt) - that is when the server itself does the project work.
         /// </summary>
-        [Fact]
+        [NodeScenarioFact]
         public void MultiThreadedServerProcessUsesServerGC()
         {
             if (Environment.ProcessorCount < 2)
@@ -1152,43 +879,43 @@ namespace Microsoft.Build.Engine.UnitTests
                 Assert.Skip("Server GC can report as Workstation GC on single-processor machines.");
             }
 
-            PrepareIsolatedServerEnv();
-            TransientTestFile project = _env.CreateFile("serverGcProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt", out bool success, false, _output);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario);
+            TransientTestFile project = scenario.Environment.CreateFile("serverGcProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+            ServerBuild build = Build(scenario, $"{project.Path} -mt");
 
-            success.ShouldBeTrue();
-            int clientPid = ParseNumber(output, "Process ID is ");
-            int serverPid = ParseNumber(output, "TaskRanInPID=");
-            _env.WithTransientProcess(serverPid);
-            serverPid.ShouldNotBe(clientPid, "The build should run in the server node, not the entry process.");
-            output.ShouldContain("TaskNodeServerGC=True", customMessage: "A multithreaded MSBuild server process should run with Server GC.");
+            build.ShouldRunOnServer();
+            ParseNumber(build.Output, "TaskRanInPID=").ShouldBe(build.ServerProcessId, "The build should run in the server node, not the entry process.");
+            build.Output.ShouldContain("TaskNodeServerGC=True", customMessage: "A multithreaded MSBuild server process should run with Server GC.");
+
+            scenario.ShutdownNodes();
         }
 
         /// <summary>
         /// Without /mt the server only orchestrates (project work happens in separate worker nodes),
         /// so the server process must keep the default Workstation GC.
         /// </summary>
-        [Fact]
+        [NodeScenarioFact]
         public void NonMultiThreadedServerProcessDoesNotUseServerGC()
         {
-            PrepareIsolatedServerEnv();
-            TransientTestFile project = _env.CreateFile("serverGcProbeNoMt.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario);
+            TransientTestFile project = scenario.Environment.CreateFile("serverGcProbeNoMt.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+            ServerBuild build = Build(scenario, project.Path);
 
-            success.ShouldBeTrue();
-            int clientPid = ParseNumber(output, "Process ID is ");
-            int serverPid = ParseNumber(output, "TaskRanInPID=");
-            _env.WithTransientProcess(serverPid);
-            serverPid.ShouldNotBe(clientPid, "The build should run in the server node, not the entry process.");
-            output.ShouldContain("TaskNodeServerGC=False", customMessage: "A non-multithreaded MSBuild server process should keep the default Workstation GC.");
+            build.ShouldRunOnServer();
+            ParseNumber(build.Output, "TaskRanInPID=").ShouldBe(build.ServerProcessId, "The build should run in the server node, not the entry process.");
+            build.Output.ShouldContain("TaskNodeServerGC=False", customMessage: "A non-multithreaded MSBuild server process should keep the default Workstation GC.");
+
+            scenario.ShutdownNodes();
         }
 
         /// <summary>
         /// A TaskHost process must keep the default Workstation GC, even though a multithreaded server
-        /// uses Server GC. Runs two /mt builds against the same (uniquely salted) server: one in-proc to
-        /// capture the Server-GC server PID, then one that forces the task into a TaskHost.
+        /// uses Server GC. Runs two /mt builds against the same server: one in-proc to capture the
+        /// Server-GC server PID, then one that forces the task into a TaskHost.
         /// </summary>
-        [Fact]
+        [NodeScenarioFact]
         public void TaskHostProcessDoesNotUseServerGC()
         {
             if (Environment.ProcessorCount < 2)
@@ -1196,53 +923,103 @@ namespace Microsoft.Build.Engine.UnitTests
                 Assert.Skip("Server GC can report as Workstation GC on single-processor machines.");
             }
 
-            PrepareIsolatedServerEnv();
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario);
 
             // First /mt build runs the task in-proc in the server node so we can capture the Server-GC server PID.
-            TransientTestFile serverProbe = _env.CreateFile("serverProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
-            string serverOutput = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{serverProbe.Path} -mt", out bool serverSuccess, false, _output);
-            serverSuccess.ShouldBeTrue();
-            int serverPid = ParseNumber(serverOutput, "TaskRanInPID=");
-            _env.WithTransientProcess(serverPid);
-            serverOutput.ShouldContain("TaskNodeServerGC=True", customMessage: "A multithreaded MSBuild server process should run with Server GC.");
+            TransientTestFile serverProbe = scenario.Environment.CreateFile("serverProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+            ServerBuild server = Build(scenario, $"{serverProbe.Path} -mt");
+            server.ShouldRunOnServer();
+            ParseNumber(server.Output, "TaskRanInPID=").ShouldBe(server.ServerProcessId);
+            server.Output.ShouldContain("TaskNodeServerGC=True", customMessage: "A multithreaded MSBuild server process should run with Server GC.");
 
-            // Second /mt build (same server, reused via the shared handshake salt) forces the task out-of-proc.
-            TransientTestFile taskHostProbe = _env.CreateFile("taskHostProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: true));
-            string taskHostOutput = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{taskHostProbe.Path} -mt", out bool taskHostSuccess, false, _output);
-            taskHostSuccess.ShouldBeTrue();
-            int clientPid = ParseNumber(taskHostOutput, "Process ID is ");
-            int taskHostPid = ParseNumber(taskHostOutput, "TaskRanInPID=");
-            _env.WithTransientProcess(taskHostPid);
+            // Second /mt build (same server) forces the task out-of-proc.
+            TransientTestFile taskHostProbe = scenario.Environment.CreateFile("taskHostProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: true));
+            NodeJournalRecord before = scenario.Marker("TaskHostBuild");
+            ServerBuild taskHost = Build(scenario, $"{taskHostProbe.Path} -mt");
+            taskHost.ServerProcessId.ShouldBe(server.ServerProcessId);
+            int taskHostPid = ParseNumber(taskHost.Output, "TaskRanInPID=");
+            scenario.Records.ShouldContain(
+                r => r.Sequence > before.Sequence && r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.TaskHost && r.SubjectProcessId == taskHostPid,
+                "The task should run out-of-proc in a TaskHost the server launched.");
+            taskHost.Output.ShouldContain("TaskNodeServerGC=False", customMessage: "A TaskHost process must use Workstation GC even when the server uses Server GC.");
 
-            taskHostPid.ShouldNotBe(clientPid, "The task should run out-of-proc in a TaskHost, not the entry process.");
-            taskHostPid.ShouldNotBe(serverPid, "The task should run in a TaskHost, not in the server node.");
-            taskHostOutput.ShouldContain("TaskNodeServerGC=False", customMessage: "A TaskHost process must use Workstation GC even when the server uses Server GC.");
+            scenario.ShutdownNodes();
         }
 
         /// <summary>
         /// An out-of-proc worker node must keep the default Workstation GC.
         /// </summary>
-        [Fact]
+        [NodeScenarioFact]
         public void WorkerNodeDoesNotUseServerGC()
         {
-            PrepareIsolatedServerEnv(useServer: false);
-            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-            TransientTestFile project = _env.CreateFile("workerGcProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} /m:1", out bool success, false, _output);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            PrepareIsolatedServerEnv(scenario, useServer: false);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+            TransientTestFile project = scenario.Environment.CreateFile("workerGcProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+            ServerBuild build = Build(scenario, $"{project.Path} /m:1");
 
-            success.ShouldBeTrue();
-            int clientPid = ParseNumber(output, "Process ID is ");
-            int workerPid = ParseNumber(output, "TaskRanInPID=");
-            _env.WithTransientProcess(workerPid);
-            workerPid.ShouldNotBe(clientPid, "The build should run in an out-of-proc worker node, not the entry process.");
-            output.ShouldContain("TaskNodeServerGC=False", customMessage: "A worker node must use the default Workstation GC.");
+            int workerPid = ParseNumber(build.Output, "TaskRanInPID=");
+            scenario.Records.ShouldContain(
+                r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.Worker && r.ProcessId == build.ClientProcessId && r.SubjectProcessId == workerPid,
+                "The build should run in an out-of-proc worker node, not the entry process.");
+            build.Output.ShouldContain("TaskNodeServerGC=False", customMessage: "A worker node must use the default Workstation GC.");
+
+            scenario.ShutdownNodes();
         }
 #endif
 
-        private int ParseNumber(string searchString, string toFind)
+        /// <summary>
+        /// Runs one build and reads from the journal where it ran. When it ran on a server, this also waits until the
+        /// server has released its busy mutex (or exited), so the next build of the test finds the server idle rather
+        /// than racing its cleanup and falling back in-process (#15093).
+        /// </summary>
+        private ServerBuild Build(NodeScenario scenario, string arguments, bool bootstrapped = false, bool expectSuccess = true)
+        {
+            NodeJournalRecord start = scenario.Marker("Build", arguments);
+            (bool success, string output) = bootstrapped ? scenario.RunBootstrapped(arguments) : scenario.RunMSBuild(MSBuildExePath, arguments);
+            success.ShouldBe(expectSuccess, output);
+
+            NodeJournalRecord[] records = [.. scenario.Records.Where(r => r.Sequence > start.Sequence)];
+            NodeJournalRecord client = records.FirstOrDefault(r => r.Role == NodeJournalKind.Main && r.ProcessId != scenario.TestProcessId)
+                ?? throw scenario.Fail($"The build '{arguments}' left no record of its entry process.");
+            NodeJournalRecord? onServer = records.FirstOrDefault(r => r.Event == NodeJournalEvent.BuildStarted && r.Role == NodeJournalKind.Server);
+            string? reuseDecision = records.FirstOrDefault(r => r.Event == NodeJournalEvent.ReuseDecision && r.Kind == NodeJournalKind.Server && r.ProcessId == client.ProcessId)?.Detail;
+            bool fellBack = records.Any(r => r.Event == NodeJournalEvent.ServerBusyFallback && r.ProcessId == client.ProcessId);
+
+            if (onServer is not null)
+            {
+                scenario.Await(
+                    r => r.Sequence > onServer.Sequence && r.ProcessId == onServer.ProcessId
+                        && (r.Event == NodeJournalEvent.Exited || (r.Event == NodeJournalEvent.BuildEnded && r.Kind == NodeJournalKind.Server)),
+                    $"server {onServer.ProcessId} is idle again");
+            }
+
+            return new ServerBuild(output, client.ProcessId, onServer?.ProcessId ?? 0, reuseDecision, fellBack);
+        }
+
+        private sealed record ServerBuild(string Output, int ClientProcessId, int ServerProcessId, string? ServerReuseDecision, bool FellBackInProc)
+        {
+            public void ShouldRunOnServer()
+            {
+                ServerProcessId.ShouldNotBe(0, $"The build should have run on a server node.{Environment.NewLine}{Output}");
+                ServerProcessId.ShouldNotBe(ClientProcessId);
+            }
+
+            public void ShouldRunInProc(NodeScenario scenario)
+            {
+                ServerProcessId.ShouldBe(0, "The build should have run in-process, not on a server node.");
+                scenario.Records.ShouldContain(
+                    r => r.Event == NodeJournalEvent.BuildStarted && r.Kind == NodeJournalKind.InProc && r.ProcessId == ClientProcessId,
+                    "The build should have run in its entry process.");
+            }
+        }
+
+        private static int ParseNumber(string searchString, string toFind)
         {
             Regex regex = new(@$"{toFind}(\d+)");
             Match match = regex.Match(searchString);
+            match.Success.ShouldBeTrue($"'{toFind}' was not found in the output:{Environment.NewLine}{searchString}");
             return int.Parse(match.Groups[1].Value);
         }
 

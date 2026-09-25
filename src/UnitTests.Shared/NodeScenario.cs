@@ -215,11 +215,26 @@ internal sealed class NodeScenario : IDisposable
     /// killed if it outlives the hang ceiling.
     /// </summary>
     public NodeScenarioRun StartBootstrapped(string arguments)
+        => Start(arguments, timeout => RunnerUtilities.ExecBootstrappedMSBuildAsync(arguments, outputHelper: _output, timeoutMilliseconds: timeout));
+
+    /// <summary>
+    /// Starts the MSBuild at <paramref name="msbuildExePath"/> (for example the one next to the test assembly) with
+    /// <paramref name="arguments"/> without waiting for it. Its process tree is killed if it outlives the hang ceiling.
+    /// </summary>
+    public NodeScenarioRun StartMSBuild(string msbuildExePath, string arguments)
+        => Start(arguments, timeout => RunnerUtilities.ExecMSBuildAsync(msbuildExePath, arguments, _output, timeout));
+
+    /// <summary>
+    /// Runs the MSBuild at <paramref name="msbuildExePath"/> with <paramref name="arguments"/> to completion.
+    /// </summary>
+    public (bool Success, string Output) RunMSBuild(string msbuildExePath, string arguments) => StartMSBuild(msbuildExePath, arguments).Wait();
+
+    private NodeScenarioRun Start(string arguments, Func<int, Task<(bool, string)>> start)
     {
         ThrowIfDisposed();
         int timeout = (int)Math.Max(1_000, (_hangCeiling - _clock.Elapsed).TotalMilliseconds);
         Marker("RunStarted", arguments);
-        Task<(bool, string)> task = RunnerUtilities.ExecBootstrappedMSBuildAsync(arguments, outputHelper: _output, timeoutMilliseconds: timeout);
+        Task<(bool, string)> task = start(timeout);
         var run = new NodeScenarioRun(this, arguments, task);
         lock (_lock)
         {
@@ -285,6 +300,55 @@ internal sealed class NodeScenario : IDisposable
         }
 
         return gate;
+    }
+
+    /// <summary>
+    /// Shuts down every reusable node and server of the scenario and waits until each journaled node process is gone.
+    /// </summary>
+    /// <param name="shutdown">
+    /// How to ask for the shutdown. Defaults to <see cref="BuildManager.ShutdownAllNodes"/> of the test process, which
+    /// reaches the nodes and server of the MSBuild next to the tests (it reads the scenario's handshake salt). Nodes of
+    /// another installation, such as the bootstrap, need a shutdown that runs in that installation.
+    /// </param>
+    /// <remarks>
+    /// The shutdown is repeated while a node is still alive, because a node that is between builds can miss it
+    /// (<see href="https://github.com/dotnet/msbuild/issues/15118"/>). Call it after the runs that use the nodes have completed.
+    /// </remarks>
+    public void ShutdownNodes(Action? shutdown = null)
+    {
+        ThrowIfDisposed();
+        shutdown ??= () => BuildManager.DefaultBuildManager.ShutdownAllNodes();
+        NodeJournalRecord start = Marker("ShutdownNodes");
+        while (true)
+        {
+            shutdown();
+            WaitForQuiescence();
+            List<int> alive = [];
+            foreach (JournaledProcess journaled in GetJournaledProcesses())
+            {
+                using Process? process = journaled.TryOpen();
+                if (process is not null && !process.WaitForExit(0) && !IsRunClient(journaled))
+                {
+                    alive.Add(journaled.ProcessId);
+                }
+            }
+
+            if (alive.Count == 0)
+            {
+                Marker("ShutdownNodes", "done");
+                return;
+            }
+
+            if (_clock.Elapsed > _hangCeiling)
+            {
+                throw Fail($"Hang ceiling of {_hangCeiling.TotalSeconds:0}s reached while shutting down nodes {string.Join(", ", alive)} (since #{start.Sequence}).");
+            }
+
+            Log($"NodeScenario: nodes {string.Join(", ", alive)} are still alive after a shutdown, asking again.");
+        }
+
+        bool IsRunClient(JournaledProcess journaled)
+            => journaled.Role == NodeJournalKind.Main && SnapshotOf(_runs).Any(r => !r.Task.IsCompleted);
     }
 
     /// <summary>Writes a <see cref="NodeJournalEvent.Marker"/> record, e.g. to split a scenario into phases.</summary>

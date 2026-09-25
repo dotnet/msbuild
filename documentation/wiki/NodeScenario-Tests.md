@@ -37,7 +37,7 @@ into one shared, append-only file:
 | `HandshakeRejected` | node providers when probing a candidate, and nodes when a host fails | handshake status |
 | `ReuseDecision` | node providers and `MSBuildClient` | `new` or `reused` |
 | `ServerBusyFallback` | `MSBuildClient`, `OutOfProcServerNode` | reason or exit type |
-| `BuildStarted` / `BuildEnded` | `BuildManager` (kind `InProc`), `MSBuildClient` (kind `Server`) | host name |
+| `BuildStarted` / `BuildEnded` | `BuildManager` (kind `InProc`), `MSBuildClient` (kind `Server`), `OutOfProcServerNode` (`BuildEnded` kind `Server`, detail `idle`, once the server has released its busy mutex and can take the next build) | host name |
 | `ShutdownSent` | node providers, `MSBuildClient` | `reuse`, `terminate`, or the TaskHost action |
 | `DisposalBegin` / `DisposalEnd` | worker and TaskHost nodes, around disposal of build-scoped task objects | |
 | `TaskHostRetired` | the TaskHost node provider | |
@@ -72,7 +72,7 @@ failing seed to reproduce the failure (as far as a delay can).
 
 ## The harness (`src/UnitTests.Shared`)
 
-The harness types are `internal` and visible to the Engine and Framework unit tests.
+The harness types are `internal` and visible to the Engine, Framework and CommandLine (`src/MSBuild.UnitTests`) unit tests.
 
 ```csharp
 [NodeScenarioTheory]
@@ -113,9 +113,15 @@ All of these are restored on `Dispose`.
 
 ### Driving
 
-* `StartBootstrapped(args)` / `RunBootstrapped(args)` run the bootstrapped MSBuild. The process tree is killed if it
-  outlives the hang ceiling.
+* `StartBootstrapped(args)` / `RunBootstrapped(args)` run the bootstrapped MSBuild, and `StartMSBuild(exe, args)` /
+  `RunMSBuild(exe, args)` run a given MSBuild executable (for example `BuildEnvironmentHelper.Instance.CurrentMSBuildExePath`).
+  The process tree is killed if it outlives the hang ceiling.
 * `CreateBuildManager(hostName)` creates an in-process `BuildManager` that the scenario shuts down and disposes at the end.
+* `ShutdownNodes(shutdown)` shuts down the nodes a test left running on purpose (reused nodes, a resident server). It
+  calls `shutdown` (by default `BuildManager.DefaultBuildManager.ShutdownAllNodes()`) until no journaled node process is
+  alive, because a single `ShutdownAllNodes` can miss a node (#15118). Note that `ShutdownAllNodes` only reaches worker
+  nodes and connected sidecars, not TaskHosts waiting in the pool: give those a short `MSBUILDNODECONNECTIONTIMEOUT`
+  so they end on their own.
 * `Fault(point, action, role, occurrence)` arms a fault for every process started afterwards.
 * `Gate(name)` returns a handle. Code running in any scenario process (usually a test task, or a disposable it
   registers) calls `NodeScenarioGate.Enter(name)`, which records `GateEntered` and blocks until the test calls

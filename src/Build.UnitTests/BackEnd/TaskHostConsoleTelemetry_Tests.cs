@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -102,18 +101,19 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         }
     }
 
-    [Theory]
+    [NodeScenarioTheory]
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]
     [InlineData(true, true)]
     public void ForwardsConsoleOutputFromBuildObjectDisposal(bool standardError, bool retainConnection)
     {
-        using TestEnvironment env = TestEnvironment.Create(_output);
-        env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+        using NodeScenario scenario = NodeScenario.Create(_output);
+        TestEnvironment env = scenario.Environment;
         env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
         ChangeWaves.ResetStateForTests();
-        using BuildManager buildManager = new();
+        UseShortTaskHostIdleTimeout(scenario);
+        BuildManager buildManager = scenario.CreateBuildManager();
         MockLogger logger = new(_output);
 
         BuildResult result = buildManager.Build(
@@ -127,8 +127,8 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
             CreateRequest(CreateProject(env, explicitTaskHost: false), standardError, string.Empty, writeOnDispose: true));
 
         result.ShouldHaveSucceeded();
-        env.WithTransientProcess(int.Parse(result.ProjectStateAfterBuild!.GetPropertyValue("TaskHostProcessId")));
         AssertTelemetry(logger, expected: true);
+        scenario.ShutdownNodes(buildManager.ShutdownAllNodes);
     }
 
     [Theory]
@@ -171,8 +171,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         AssertTelemetry(logger, expected);
     }
 
-    [ActiveIssue("https://github.com/dotnet/msbuild/issues/15107")]
-    [Theory]
+    [NodeScenarioTheory]
     [InlineData(false, false, false)]
     [InlineData(true, false, false)]
     [InlineData(false, true, false)]
@@ -181,12 +180,18 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
     [InlineData(true, false, true)]
     public void ResetsBetweenBuildsWithReusedTaskHost(bool standardError, bool retainConnection, bool replacePooledProcess)
     {
-        using TestEnvironment env = TestEnvironment.Create(_output);
-        env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
-        env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
+        using NodeScenario scenario = NodeScenario.Create(_output);
+        scenario.Environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
         ChangeWaves.ResetStateForTests();
-        using BuildManager buildManager = new();
-        string projectFile = CreateProject(env, explicitTaskHost: false);
+        UseShortTaskHostIdleTimeout(scenario);
+        if (replacePooledProcess)
+        {
+            // Every TaskHost dies when it would return to the pool after its first build, so each build needs a new one.
+            scenario.Fault(NodeJournalEvent.NodeStarted, NodeFaultAction.Crash, NodeJournalKind.TaskHost, occurrence: 2);
+        }
+
+        BuildManager buildManager = scenario.CreateBuildManager();
+        string projectFile = CreateProject(scenario.Environment, explicitTaskHost: false);
         int? firstProcessId = null;
         HashSet<int> processIds = [];
         NodeProviderOutOfProcBase.NodeContext? firstConnection = null;
@@ -216,11 +221,8 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
             result.ShouldHaveSucceeded();
             int processId = int.Parse(result.ProjectStateAfterBuild!.GetPropertyValue("TaskHostProcessId"));
             processId.ShouldNotBe(EnvironmentUtilities.CurrentProcessId);
+            scenario.Records.ShouldContain(r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.TaskHost && r.SubjectProcessId == processId);
             bool firstUseOfProcess = processIds.Add(processId);
-            if (firstUseOfProcess)
-            {
-                env.WithTransientProcess(processId);
-            }
 
             if (firstProcessId is null)
             {
@@ -259,70 +261,20 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
 
             if (replacePooledProcess)
             {
-                string operation = "PID lookup";
-                try
-                {
-                    using Process process = Process.GetProcessById(processId);
-                    operation = "Kill";
-                    process.Kill();
-                    operation = "WaitForExit";
-                    bool exited = process.WaitForExit(10_000);
-                    try
-                    {
-                        if (!exited && NativeMethodsShared.IsOSX)
-                        {
-                            WriteProcessExitDiagnostics(processId, "Did not exit after Kill and a 10-second wait.");
-                        }
-                    }
-                    finally
-                    {
-                        // Diagnostics must not turn the original timeout into a pass or a different failure.
-                        exited.ShouldBeTrue();
-                    }
-                }
-                catch (Exception e) when (NativeMethodsShared.IsOSX && e is ArgumentException or InvalidOperationException or Win32Exception)
-                {
-                    WriteProcessExitDiagnostics(processId, $"{operation} failed: {e}");
-                    throw;
-                }
+                scenario.Await(NodeJournalEvent.FaultInjected, processId: processId);
             }
         }
+
+        scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost)).ShouldBe(processIds.Count);
+        scenario.ShutdownNodes(buildManager.ShutdownAllNodes);
     }
 
-    private void WriteProcessExitDiagnostics(int processId, string failure)
-    {
-        int parentProcessId = EnvironmentUtilities.CurrentProcessId;
-        _output.WriteLine($"TaskHost {processId} replacement failed. Parent test process: {parentProcessId}. {failure}");
-        if (Traits.Instance.DebugUnitTests)
-        {
-            _output.WriteLine("Native diagnostics unavailable: the process runner disables timeouts in DebugUnitTests mode.");
-            return;
-        }
-
-        RunDiagnostic("/bin/ps", $"-p {processId},{parentProcessId} -o pid,ppid,state,wchan,etime,comm");
-        RunDiagnostic("/usr/bin/sample", $"{parentProcessId} 1 1 -file /dev/stdout");
-
-        void RunDiagnostic(string executable, string arguments)
-        {
-            try
-            {
-                RunnerUtilities.RunProcessAndGetOutput(
-                    executable,
-                    arguments,
-                    out bool successfulExit,
-                    outputHelper: _output,
-                    timeoutMilliseconds: 5_000);
-                if (!successfulExit)
-                {
-                    _output.WriteLine($"Diagnostic command {executable} returned a nonzero exit code.");
-                }
-            }
-            catch (Exception e) when (e is Win32Exception or TimeoutException or InvalidOperationException or IOException or AggregateException)
-            {
-                _output.WriteLine($"Diagnostic command {executable} failed: {e}");
-            }
-        }
-    }
+    /// <summary>
+    /// <see cref="BuildManager.ShutdownAllNodes"/> reaches connected sidecars but not TaskHosts waiting in the pool, so
+    /// give pooled ones a short idle timeout: they then end on their own once the test stops using them.
+    /// </summary>
+    private static void UseShortTaskHostIdleTimeout(NodeScenario scenario)
+        => scenario.Environment.SetEnvironmentVariable("MSBUILDNODECONNECTIONTIMEOUT", "10000");
 
     private static string CreateProject(TestEnvironment env, bool explicitTaskHost)
     {
