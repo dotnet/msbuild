@@ -94,6 +94,10 @@ A node in the graph is a tuple of the project file and global properties. Each (
 Transitive project references are opt-in per project. Once a project opts-in, transitivity is applied for all ProjectReference items.
 A project opt-ins by setting the property `AddTransitiveProjectReferencesInStaticGraph` to true.
 
+When a project has both a direct `ProjectReference` and an implied transitive reference to the same node, the two collapse into a single edge. The direct reference supplies the edge's item identity and non-`Targets` metadata (for example `SetTargetFramework`), independent of the order the `ProjectReference` items are declared in. `Targets` is additive instead: targets from both references are retained in the order the edges are encountered, so project-reference declaration order can affect target execution order.
+
+For multitargeting references, expansion of an outer-build edge supplies the corresponding edges to its inner builds. Synthetic inner-build edges discovered while calculating the outer build's transitive closure are superseded by that expansion and do not independently request the inner build's default targets.
+
 ### Build dimensions
 
 Build dimensions can be thought of as different ways to build a particular project. For example, a project can be built Debug or Retail, x86 or x64, for .NET Framework 4.7.1 or .NET Core 2.0.

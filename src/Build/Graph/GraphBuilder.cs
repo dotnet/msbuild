@@ -196,7 +196,14 @@ namespace Microsoft.Build.Graph
                 foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
                 {
                     ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
-                    transitiveReferences.Add(reference.GraphNode);
+
+                    // AddInnerBuildEdges replaces an outer-build edge with edges to its inner builds using the
+                    // outer-build edge's metadata. Do not add those same inner edges here with synthetic metadata.
+                    if (parsedProject.GraphNode.ProjectType != ProjectInterpretation.ProjectType.OuterBuild ||
+                        reference.GraphNode.ProjectType != ProjectInterpretation.ProjectType.InnerBuild)
+                    {
+                        transitiveReferences.Add(reference.GraphNode);
+                    }
 
                     // Perf note: avoiding UnionWith to avoid boxing the HashSet enumerator.
                     foreach (ProjectGraphNode transitiveReference in GetTransitiveProjectReferencesExcludingSelf(reference))
@@ -718,16 +725,22 @@ namespace Microsoft.Build.Graph
                         string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
 
+                        ProjectItemInstance itemToKeep =
+                            existingItem.ItemType.Equals(ProjectInterpretation.TransitiveReferenceItemName, StringComparison.OrdinalIgnoreCase) &&
+                            newItem.ItemType.Equals(ItemTypeNames.ProjectReference, StringComparison.OrdinalIgnoreCase)
+                                ? newItem
+                                : existingItem;
+
                         // Bail out if the targets are the same.
                         if (existingTargetsMetadata.Equals(newTargetsMetadata, StringComparison.OrdinalIgnoreCase))
                         {
-                            return existingItem;
+                            return itemToKeep;
                         }
 
                         existingTargetsMetadata = GetEffectiveTargets(key.reference, existingTargetsMetadata);
                         newTargetsMetadata = GetEffectiveTargets(key.reference, newTargetsMetadata);
 
-                        ProjectItemInstance mergedItem = existingItem.DeepClone();
+                        ProjectItemInstance mergedItem = itemToKeep.DeepClone();
                         mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, $"{existingTargetsMetadata};{newTargetsMetadata}");
                         return mergedItem;
 
