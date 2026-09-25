@@ -66,9 +66,9 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
     internal sealed class TaskResultCacheSession
     {
-        internal const string CacheDirectoryPropertyName = "MSBuildTaskCacheDirectory";
-        internal const string CacheEnabledPropertyName = "MSBuildTaskCacheEnabled";
-        internal const string CacheSizeMBPropertyName = "MSBuildTaskCacheSizeMB";
+        internal const string CacheDirectoryPropertyName = "MSBuildContentCacheDirectory";
+        internal const string CacheEnabledPropertyName = "MSBuildContentCacheEnabled";
+        internal const string CacheSizeMBPropertyName = "MSBuildContentCacheSizeMB";
 
         private const long BytesPerMB = 1024 * 1024;
         private const long DefaultCacheSizeMB = 10_000;
@@ -131,7 +131,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                     Environment.SpecialFolder.LocalApplicationData);
             }
 
-            return Path.Combine(userCacheDirectory, "msbuild", "task-result-cache");
+            return Path.Combine(userCacheDirectory, "msbuild", "content-cache");
         }
 
         internal static async ValueTask<TaskResultCacheOpenResponse> TryOpenAsync(
@@ -354,6 +354,9 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                 }
 
                 var temporaryFiles = new string?[outputs.Count];
+                var backupFiles = new string?[outputs.Count];
+                var publishedOutputs = new bool[outputs.Count];
+                bool restoreSucceeded = false;
                 try
                 {
                     for (int i = 0; i < outputs.Count; i++)
@@ -382,6 +385,18 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 
                     for (int i = 0; i < outputs.Count; i++)
                     {
+                        string outputPath = outputs[i].Path;
+                        if (File.Exists(outputPath))
+                        {
+                            string backupFile =
+                                outputPath + "." + Guid.NewGuid().ToString("N") + ".msbuild-cache-backup";
+                            File.Move(outputPath, backupFile);
+                            backupFiles[i] = backupFile;
+                        }
+                    }
+
+                    for (int i = 0; i < outputs.Count; i++)
+                    {
                         CachedOutput output = outputs[i];
                         if (!output.Present)
                         {
@@ -389,8 +404,8 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                             continue;
                         }
 
-                        File.Delete(output.Path);
                         File.Move(temporaryFiles[i]!, output.Path);
+                        publishedOutputs[i] = true;
                         temporaryFiles[i] = null;
                         File.SetLastWriteTimeUtc(output.Path, DateTime.UtcNow);
 #if NET
@@ -401,6 +416,13 @@ namespace Microsoft.Build.BackEnd.Components.Caching
 #endif
                         File.SetAttributes(output.Path, output.Attributes);
                     }
+
+                    restoreSucceeded = true;
+                }
+                catch (Exception e) when (IsExpectedCacheException(e))
+                {
+                    RollbackRestoredOutputs(outputs, backupFiles, publishedOutputs);
+                    throw;
                 }
                 finally
                 {
@@ -412,6 +434,14 @@ namespace Microsoft.Build.BackEnd.Components.Caching
                             File.Delete(temporaryFile);
                         }
                     }
+
+                    if (restoreSucceeded)
+                    {
+                        for (int i = 0; i < backupFiles.Length; i++)
+                        {
+                            DeleteFileBestEffort(backupFiles[i]);
+                        }
+                    }
                 }
 
                 return new TaskResultCacheRestoreResponse(
@@ -421,6 +451,70 @@ namespace Microsoft.Build.BackEnd.Components.Caching
             catch (Exception e) when (IsExpectedCacheException(e))
             {
                 return new TaskResultCacheRestoreResponse(Success: false, Reason: e.Message);
+            }
+        }
+
+        private static void RollbackRestoredOutputs(
+            IReadOnlyList<CachedOutput> outputs,
+            string?[] backupFiles,
+            bool[] publishedOutputs)
+        {
+            Exception? rollbackException = null;
+            for (int i = outputs.Count - 1; i >= 0; i--)
+            {
+                try
+                {
+                    if (publishedOutputs[i])
+                    {
+                        DeleteFile(outputs[i].Path);
+                    }
+
+                    string? backupFile = backupFiles[i];
+                    if (backupFile is not null)
+                    {
+                        File.Move(backupFile, outputs[i].Path);
+                        backupFiles[i] = null;
+                    }
+                }
+                catch (Exception e) when (IsExpectedCacheException(e))
+                {
+                    rollbackException ??= e;
+                }
+            }
+
+            if (rollbackException is not null)
+            {
+                throw new IOException(
+                    "The content cache could not restore the previous output state.",
+                    rollbackException);
+            }
+        }
+
+        private static void DeleteFile(string path)
+        {
+            if (NativeMethodsShared.IsWindows && File.Exists(path))
+            {
+                File.SetAttributes(
+                    path,
+                    File.GetAttributes(path) & ~FileAttributes.ReadOnly);
+            }
+
+            File.Delete(path);
+        }
+
+        private static void DeleteFileBestEffort(string? path)
+        {
+            if (path is null)
+            {
+                return;
+            }
+
+            try
+            {
+                DeleteFile(path);
+            }
+            catch (Exception e) when (IsExpectedCacheException(e))
+            {
             }
         }
 

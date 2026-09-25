@@ -2100,19 +2100,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="TaskResultCacheHit" xml:space="preserve">
-    <value>Task result cache hit for task "{0}" with key "{1}".</value>
+    <value>Content cache hit for task "{0}" with key "{1}".</value>
     <comment>
       LOCALIZATION: {0} is an MSBuild task name. {1} is a hexadecimal content hash and should not be localized.
     </comment>
   </data>
   <data name="TaskResultCacheMiss" xml:space="preserve">
-    <value>Task result cache miss for task "{0}" with key "{1}".</value>
+    <value>Content cache miss for task "{0}" with key "{1}".</value>
     <comment>
       LOCALIZATION: {0} is an MSBuild task name. {1} is a hexadecimal content hash and should not be localized.
     </comment>
   </data>
   <data name="TaskResultCacheFailure" xml:space="preserve">
-    <value>The task result cache could not be used for task "{0}": {1}. Normal task execution is used.</value>
+    <value>The content cache could not be used for task "{0}": {1}. Normal task execution is used.</value>
     <comment>
       LOCALIZATION: {0} is an MSBuild task name. {1} explains the cache failure.
     </comment>

@@ -37,7 +37,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             <Project>
               <PropertyGroup>
                 <WorkspaceRoot>true</WorkspaceRoot>
-                <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
               </PropertyGroup>
               <UsingTask
                   TaskName="{typeof(TaskResultCacheTestTask).FullName}"
@@ -61,7 +61,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         firstLogger.AssertNoErrors();
         firstLogger.WarningCount.ShouldBe(1);
         File.ReadAllText(outputPath).ShouldBe("first!");
-        firstLogger.FullLog.ShouldContain("Task result cache miss");
+        firstLogger.FullLog.ShouldContain("Content cache miss");
 
         File.Delete(outputPath);
 
@@ -69,7 +69,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         secondLogger.AssertNoErrors();
         secondLogger.WarningCount.ShouldBe(1);
         File.ReadAllText(outputPath).ShouldBe("first!");
-        secondLogger.FullLog.ShouldContain("Task result cache hit");
+        secondLogger.FullLog.ShouldContain("Content cache hit");
 
         File.WriteAllText(
             projectPath,
@@ -82,7 +82,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         parameterChangeLogger.AssertNoErrors();
         parameterChangeLogger.WarningCount.ShouldBe(1);
         File.ReadAllText(outputPath).ShouldBe("first?");
-        parameterChangeLogger.FullLog.ShouldContain("Task result cache miss");
+        parameterChangeLogger.FullLog.ShouldContain("Content cache miss");
 
         File.WriteAllText(inputPath, "second");
         File.Delete(outputPath);
@@ -91,7 +91,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         thirdLogger.AssertNoErrors();
         thirdLogger.WarningCount.ShouldBe(1);
         File.ReadAllText(outputPath).ShouldBe("second?");
-        thirdLogger.FullLog.ShouldContain("Task result cache miss");
+        thirdLogger.FullLog.ShouldContain("Content cache miss");
     }
 
     [Theory]
@@ -151,8 +151,8 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             <Project>
               <PropertyGroup>
                 <WorkspaceRoot>true</WorkspaceRoot>
-                <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
-                <MSBuildTaskCacheSizeMB>1</MSBuildTaskCacheSizeMB>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
+                <MSBuildContentCacheSizeMB>1</MSBuildContentCacheSizeMB>
               </PropertyGroup>
               <UsingTask
                   TaskName="{typeof(TaskResultCacheTestTask).FullName}"
@@ -175,7 +175,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         File.WriteAllText(inputPath, firstContents);
         MockLogger firstLogger = BuildCacheProject(projectPath);
         firstLogger.AssertNoErrors();
-        firstLogger.FullLog.ShouldContain("Task result cache miss");
+        firstLogger.FullLog.ShouldContain("Content cache miss");
 
         string firstManifest = Directory.GetFiles(
             cachePath,
@@ -189,7 +189,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         File.Delete(outputPath);
         MockLogger secondLogger = BuildCacheProject(projectPath);
         secondLogger.AssertNoErrors();
-        secondLogger.FullLog.ShouldContain("Task result cache miss");
+        secondLogger.FullLog.ShouldContain("Content cache miss");
         Directory.Exists(firstEntryDirectory).ShouldBeFalse();
         Directory.GetFiles(cachePath, "manifest.bin", SearchOption.AllDirectories)
             .ShouldHaveSingleItem();
@@ -198,7 +198,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         File.Delete(outputPath);
         MockLogger thirdLogger = BuildCacheProject(projectPath);
         thirdLogger.AssertNoErrors();
-        thirdLogger.FullLog.ShouldContain("Task result cache miss");
+        thirdLogger.FullLog.ShouldContain("Content cache miss");
     }
 
     [Fact]
@@ -217,7 +217,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             <Project>
               <PropertyGroup>
                 <WorkspaceRoot>true</WorkspaceRoot>
-                <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
               </PropertyGroup>
               <UsingTask
                   TaskName="{typeof(TaskResultCacheTestTask).FullName}"
@@ -240,14 +240,14 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         MockLogger firstLogger = BuildCacheProject(projectPath);
         firstLogger.AssertNoErrors();
         File.Exists(outputPath).ShouldBeFalse();
-        firstLogger.FullLog.ShouldContain("Task result cache miss");
+        firstLogger.FullLog.ShouldContain("Content cache miss");
 
         File.WriteAllText(outputPath, "stale");
 
         MockLogger secondLogger = BuildCacheProject(projectPath);
         secondLogger.AssertNoErrors();
         File.Exists(outputPath).ShouldBeFalse();
-        secondLogger.FullLog.ShouldContain("Task result cache hit");
+        secondLogger.FullLog.ShouldContain("Content cache hit");
 
         string manifestPath = Directory.GetFiles(
             cachePath,
@@ -259,8 +259,8 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         MockLogger thirdLogger = BuildCacheProject(projectPath);
         thirdLogger.AssertNoErrors();
         File.Exists(outputPath).ShouldBeFalse();
-        thirdLogger.FullLog.ShouldContain("The task result cache could not be used");
-        thirdLogger.FullLog.ShouldContain("Task result cache miss");
+        thirdLogger.FullLog.ShouldContain("The content cache could not be used");
+        thirdLogger.FullLog.ShouldContain("Content cache miss");
     }
 
     [Fact]
@@ -282,7 +282,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
                 <Project>
                   <PropertyGroup>
                     <WorkspaceRoot>true</WorkspaceRoot>
-                    <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+                    <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
                   </PropertyGroup>
                   <UsingTask
                       TaskName="{typeof(TaskResultCacheTestTask).FullName}"
@@ -316,7 +316,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             MockLogger thirdLogger = BuildCacheProject(projectPath);
 
             thirdLogger.AssertNoErrors();
-            thirdLogger.FullLog.ShouldContain("Task result cache hit");
+            thirdLogger.FullLog.ShouldContain("Content cache hit");
             File.ReadAllText(outputPath).ShouldBe("input");
         }
         finally
@@ -374,7 +374,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             $"""
             <Project>
               <PropertyGroup>
-                <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
               </PropertyGroup>
               <UsingTask
                   TaskName="{typeof(TaskResultCacheTestTask).FullName}"
@@ -394,7 +394,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         firstLogger.AssertNoErrors();
         firstLogger.FullLog.ShouldContain(
             "the task parameter \"UncacheableMode\" must be unset");
-        firstLogger.FullLog.ShouldNotContain("Task result cache miss");
+        firstLogger.FullLog.ShouldNotContain("Content cache miss");
 
         File.Delete(outputPath);
 
@@ -402,7 +402,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         secondLogger.AssertNoErrors();
         secondLogger.FullLog.ShouldContain(
             "the task parameter \"UncacheableMode\" must be unset");
-        secondLogger.FullLog.ShouldNotContain("Task result cache hit");
+        secondLogger.FullLog.ShouldNotContain("Content cache hit");
         File.ReadAllText(outputPath).ShouldBe("input");
     }
 
@@ -420,7 +420,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             $"""
             <Project>
               <PropertyGroup>
-                <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
               </PropertyGroup>
               <UsingTask
                   TaskName="{typeof(TaskResultCacheTestTask).FullName}"
@@ -440,7 +440,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
 
         logger.AssertNoErrors();
         logger.FullLog.ShouldContain("declared-input-getter-failure");
-        logger.FullLog.ShouldNotContain("Task result cache miss");
+        logger.FullLog.ShouldNotContain("Content cache miss");
         File.ReadAllText(outputPath).ShouldBe("input");
     }
 
@@ -454,7 +454,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
 
         MockLogger firstLogger = BuildCacheProject(project.ProjectPath);
         firstLogger.AssertNoErrors();
-        firstLogger.FullLog.ShouldContain("Task result cache miss");
+        firstLogger.FullLog.ShouldContain("Content cache miss");
 
         string manifestPath = Directory.GetFiles(
             project.CachePath,
@@ -473,7 +473,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             File.Delete(project.OutputPath);
             MockLogger secondLogger = BuildCacheProject(project.ProjectPath);
             secondLogger.AssertNoErrors();
-            secondLogger.FullLog.ShouldContain("Task result cache miss");
+            secondLogger.FullLog.ShouldContain("Content cache miss");
             Directory.GetDirectories(
                 shardDirectory,
                 "*.delete-*").ShouldHaveSingleItem();
@@ -481,7 +481,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             File.Delete(project.OutputPath);
             MockLogger thirdLogger = BuildCacheProject(project.ProjectPath);
             thirdLogger.AssertNoErrors();
-            thirdLogger.FullLog.ShouldContain("Task result cache hit");
+            thirdLogger.FullLog.ShouldContain("Content cache hit");
             File.ReadAllText(project.OutputPath).ShouldBe("input");
         }
         finally
@@ -501,7 +501,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
         CacheProject project = CreateCacheProject(env);
 
         BuildCacheProject(project.ProjectPath)
-            .FullLog.ShouldContain("Task result cache miss");
+            .FullLog.ShouldContain("Content cache miss");
         string payloadPath = Directory.GetFiles(
             project.CachePath,
             "0.bin",
@@ -510,13 +510,67 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
 
         File.Delete(project.OutputPath);
         BuildCacheProject(project.ProjectPath)
-            .FullLog.ShouldContain("Task result cache miss");
+            .FullLog.ShouldContain("Content cache miss");
         File.ReadAllText(project.OutputPath).ShouldBe("input");
 
         File.Delete(project.OutputPath);
         BuildCacheProject(project.ProjectPath)
-            .FullLog.ShouldContain("Task result cache hit");
+            .FullLog.ShouldContain("Content cache hit");
         File.ReadAllText(project.OutputPath).ShouldBe("input");
+    }
+
+    [Fact]
+    public void MultiOutputRestoreRollsBackBeforeTaskFallback()
+    {
+        using TestEnvironment env = TestEnvironment.Create(testOutput);
+        TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+        string inputPath = Path.Combine(projectFolder.Path, "input.txt");
+        string firstOutputPath = Path.Combine(projectFolder.Path, "first.txt");
+        string secondOutputPath = Path.Combine(projectFolder.Path, "second.txt");
+        string projectPath = Path.Combine(projectFolder.Path, "cache.proj");
+        File.WriteAllText(inputPath, "input");
+        File.WriteAllText(
+            projectPath,
+            $"""
+            <Project>
+              <PropertyGroup>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
+              </PropertyGroup>
+              <UsingTask
+                  TaskName="{typeof(TaskResultCacheTestTask).FullName}"
+                  AssemblyFile="{SecurityElement.Escape(typeof(TaskResultCacheTestTask).Assembly.Location)}" />
+              <ItemGroup>
+                <CacheInput Include="input.txt" />
+                <CacheOutput Include="first.txt;second.txt" />
+              </ItemGroup>
+              <Target Name="Build">
+                <TaskResultCacheTestTask
+                    Input="@(CacheInput)"
+                    OutputFile="first.txt"
+                    AdditionalOutputFile="second.txt"
+                    LogDeclaredOutputState="true"
+                    DeclaredInputs="@(CacheInput)"
+                    DeclaredOutputs="@(CacheOutput)" />
+              </Target>
+            </Project>
+            """);
+
+        MockLogger firstLogger = BuildCacheProject(projectPath);
+        firstLogger.AssertNoErrors();
+        firstLogger.FullLog.ShouldContain("Content cache miss");
+
+        File.WriteAllText(firstOutputPath, "original");
+        File.Delete(secondOutputPath);
+        Directory.CreateDirectory(secondOutputPath);
+
+        MockLogger secondLogger = BuildCacheProject(projectPath);
+
+        secondLogger.AssertNoErrors();
+        secondLogger.FullLog.ShouldContain(
+            "declared-output-state:file:original|directory");
+        secondLogger.FullLog.ShouldContain("The content cache could not be used");
+        File.ReadAllText(firstOutputPath).ShouldBe("input");
+        File.ReadAllText(secondOutputPath).ShouldBe("input");
     }
 
     private static CacheProject CreateCacheProject(TestEnvironment env)
@@ -533,7 +587,7 @@ public sealed class TaskResultCache_Tests(ITestOutputHelper testOutput)
             <Project>
               <PropertyGroup>
                 <WorkspaceRoot>true</WorkspaceRoot>
-                <MSBuildTaskCacheDirectory>cache</MSBuildTaskCacheDirectory>
+                <MSBuildContentCacheDirectory>cache</MSBuildContentCacheDirectory>
               </PropertyGroup>
               <UsingTask
                   TaskName="{typeof(TaskResultCacheTestTask).FullName}"
@@ -594,6 +648,8 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
 
     public ITaskItem OutputFile { get; set; } = null!;
 
+    public ITaskItem? AdditionalOutputFile { get; set; }
+
     public string Marker { get; set; } = String.Empty;
 
     public bool WriteOutput { get; set; } = true;
@@ -603,6 +659,8 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
     public bool UncacheableMode { get; set; }
 
     public bool ThrowOnDeclaredInputsRead { get; set; }
+
+    public bool LogDeclaredOutputState { get; set; }
 
     public ITaskItem[] DeclaredInputs
     {
@@ -616,10 +674,28 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
 
     public override bool Execute()
     {
+        if (LogDeclaredOutputState)
+        {
+            var states = new string[DeclaredOutputs.Length];
+            for (int i = 0; i < DeclaredOutputs.Length; i++)
+            {
+                string path = DeclaredOutputs[i].ItemSpec;
+                states[i] = Directory.Exists(path)
+                    ? "directory"
+                    : File.Exists(path)
+                        ? "file:" + File.ReadAllText(path)
+                        : "missing";
+            }
+
+            Log.LogMessage(
+                MessageImportance.High,
+                "declared-output-state:" + String.Join("|", states));
+        }
+
         Log.LogMessage(
             MessageImportance.Normal,
-            "task-result-cache-test-message");
-        Log.LogWarning("task-result-cache-test-warning");
+            "content-cache-test-message");
+        Log.LogWarning("content-cache-test-warning");
         string? synchronizationMarker = null;
         if (!String.IsNullOrEmpty(SynchronizationDirectory))
         {
@@ -663,6 +739,15 @@ public sealed class TaskResultCacheTestTask : Microsoft.Build.Utilities.Task
         {
             string contents = File.ReadAllText(Input.ItemSpec) + Marker;
             File.WriteAllText(OutputFile.ItemSpec, contents);
+            if (AdditionalOutputFile is not null)
+            {
+                if (Directory.Exists(AdditionalOutputFile.ItemSpec))
+                {
+                    Directory.Delete(AdditionalOutputFile.ItemSpec);
+                }
+
+                File.WriteAllText(AdditionalOutputFile.ItemSpec, contents);
+            }
         }
         else
         {
