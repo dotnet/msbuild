@@ -2099,6 +2099,24 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </comment>
   </data>
+  <data name="TaskResultCacheHit" xml:space="preserve">
+    <value>Content cache hit for task "{0}" with key "{1}".</value>
+    <comment>
+      LOCALIZATION: {0} is an MSBuild task name. {1} is a hexadecimal content hash and should not be localized.
+    </comment>
+  </data>
+  <data name="TaskResultCacheMiss" xml:space="preserve">
+    <value>Content cache miss for task "{0}" with key "{1}".</value>
+    <comment>
+      LOCALIZATION: {0} is an MSBuild task name. {1} is a hexadecimal content hash and should not be localized.
+    </comment>
+  </data>
+  <data name="TaskResultCacheFailure" xml:space="preserve">
+    <value>The content cache could not be used for task "{0}": {1}. Normal task execution is used.</value>
+    <comment>
+      LOCALIZATION: {0} is an MSBuild task name. {1} explains the cache failure.
+    </comment>
+  </data>
   <data name="ProjectCacheNotApplicableWithDefaultTargets" xml:space="preserve">
     <value>Project cache not applicable for "{0}" (default targets).</value>
     <comment>
