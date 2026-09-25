@@ -3,13 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <PackageId>Microsoft.Build.TaskAuthoring.Analyzer</PackageId>
+    <PackageDescription>Provides analyzer guidance for MSBuild task authoring and multithreaded task safety.</PackageDescription>
+    <VersionPrefix>0.1.0</VersionPrefix>
     <AssemblyName>Microsoft.Build.TaskAuthoring.Analyzer</AssemblyName>
     <RootNamespace>Microsoft.Build.TaskAuthoring.Analyzer</RootNamespace>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- Don't ship yet, just make it available to partner repositories. -->
-    <IsShipping>false</IsShipping>
+    <IsShipping>true</IsShipping>
     <IsTestProject>false</IsTestProject>
     <!-- Suppress RS2001: our analyzer rules use custom severities -->
     <NoWarn>$(NoWarn);NU5128;RS1038;RS2001</NoWarn>
@@ -33,5 +35,18 @@
   <ItemGroup>
     <None Include="$(TargetPath)" Pack="true" PackagePath="analyzers/dotnet/cs/%(FileName)%(Extension)" />
   </ItemGroup>
+
+  <Target Name="AddCommitShaToLocalPackageVersion"
+          BeforeTargets="GenerateNuspec"
+          DependsOnTargets="InitializeSourceControlInformation"
+          Condition="'$(ContinuousIntegrationBuild)' != 'true' and '$(OfficialBuild)' != 'true' and '$(DotNetFinalVersionKind)' == ''">
+    <Error Condition="'$(SourceRevisionId)' == ''"
+           Text="A local TaskAnalyzer package requires SourceRevisionId so its package version cannot collide with another build." />
+
+    <PropertyGroup>
+      <_TaskAnalyzerShortCommitSha>$(SourceRevisionId.Substring(0, 10))</_TaskAnalyzerShortCommitSha>
+      <PackageVersion>$(Version).$(_TaskAnalyzerShortCommitSha)</PackageVersion>
+    </PropertyGroup>
+  </Target>
 
 </Project>
