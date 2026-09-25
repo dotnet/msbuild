@@ -1975,24 +1975,46 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if any non-null items were added.</returns>
         private bool GatherProjectItemInstanceTaskItemOutputs(string outputTargetName, ITaskItem[] outputs, ElementLocation parameterLocation)
         {
-            List<ProjectItemInstance> newItems = null;
+            // Cheaply determine whether there is at most one non-null output before allocating anything, so that the
+            // extremely common single-output-item case can skip the batch list entirely and add directly.
+            ITaskItem singleOutput = null;
+            int nonNullCount = 0;
+
+            foreach (ITaskItem output in outputs)
+            {
+                if (output != null)
+                {
+                    singleOutput ??= output;
+
+                    if (++nonNullCount > 1)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            if (nonNullCount == 0)
+            {
+                return false;
+            }
+
             string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
+
+            if (nonNullCount == 1)
+            {
+                _batchBucket.Lookup.AddNewItem(CreateProjectItemInstanceFromTaskItem(singleOutput, outputTargetName, parameterLocationEscaped));
+                return true;
+            }
+
+            List<ProjectItemInstance> newItems = new(outputs.Length);
 
             foreach (ITaskItem output in outputs)
             {
                 // if individual items in the array are null, ignore them
-                if (output == null)
+                if (output != null)
                 {
-                    continue;
+                    newItems.Add(CreateProjectItemInstanceFromTaskItem(output, outputTargetName, parameterLocationEscaped));
                 }
-
-                newItems ??= new List<ProjectItemInstance>(outputs.Length);
-                newItems.Add(CreateProjectItemInstanceFromTaskItem(output, outputTargetName, parameterLocationEscaped));
-            }
-
-            if (newItems == null)
-            {
-                return false;
             }
 
             _batchBucket.Lookup.AddNewItemsOfItemType(outputTargetName, newItems);
@@ -2081,9 +2103,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (outputTargetIsItem)
                 {
-                    // to store the outputs as items, use the string representations of the outputs as item-specs
-                    List<ProjectItemInstance> newItems = null;
-                    string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
+                    // to store the outputs as items, use the string representations of the outputs as item-specs.
+                    // Cheaply determine whether there is at most one qualifying output before allocating anything,
+                    // so that the common single-output case can skip the batch list entirely and add directly.
+                    string singleOutput = null;
+                    int qualifyingCount = 0;
 
                     foreach (string output in outputs)
                     {
@@ -2091,14 +2115,37 @@ namespace Microsoft.Build.BackEnd
                         // attempting to put an empty string into an item is a no-op.
                         if (output?.Length > 0)
                         {
-                            newItems ??= new List<ProjectItemInstance>(outputs.Length);
-                            newItems.Add(new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output), parameterLocationEscaped));
+                            singleOutput ??= output;
+
+                            if (++qualifyingCount > 1)
+                            {
+                                break;
+                            }
                         }
                     }
 
-                    if (newItems != null)
+                    if (qualifyingCount > 0)
                     {
-                        _batchBucket.Lookup.AddNewItemsOfItemType(outputTargetName, newItems);
+                        string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
+
+                        if (qualifyingCount == 1)
+                        {
+                            _batchBucket.Lookup.AddNewItem(new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(singleOutput), parameterLocationEscaped));
+                        }
+                        else
+                        {
+                            List<ProjectItemInstance> newItems = new(outputs.Length);
+
+                            foreach (string output in outputs)
+                            {
+                                if (output?.Length > 0)
+                                {
+                                    newItems.Add(new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output), parameterLocationEscaped));
+                                }
+                            }
+
+                            _batchBucket.Lookup.AddNewItemsOfItemType(outputTargetName, newItems);
+                        }
                     }
 
                     if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0 && parameter.Log)
