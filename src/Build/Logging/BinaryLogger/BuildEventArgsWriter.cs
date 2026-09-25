@@ -170,11 +170,20 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Write a provided instance of BuildEventArgs to the BinaryWriter
         /// </summary>
-        public void Write(BuildEventArgs e)
+        public void Write(BuildEventArgs e, BinaryLogRecordKind? originalRecordKind = null)
         {
             // reset the temp stream (in case last usage forgot to do so).
             this.currentRecordStream.SetLength(0);
             BinaryLogRecordKind eventKind = WriteCore(e);
+
+            // Legacy BuildCheck diagnostics share ordinary payloads, but retain distinct record kinds.
+            eventKind = (originalRecordKind, eventKind) switch
+            {
+                (BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message) => BinaryLogRecordKind.BuildCheckMessage,
+                (BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning) => BinaryLogRecordKind.BuildCheckWarning,
+                (BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error) => BinaryLogRecordKind.BuildCheckError,
+                _ => eventKind,
+            };
 
             FlushRecordToFinalStream(eventKind, currentRecordStream);
         }

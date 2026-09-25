@@ -205,6 +205,11 @@ Selection matches exact serialized record kinds, not event-class inheritance. Fo
 example, `Exclude=Message` does not exclude `CriticalBuildMessage` or `TaskCommandLine`;
 name those kinds explicitly to exclude them too.
 
+Retained `BuildCheckMessage`, `BuildCheckWarning`, and `BuildCheckError` records keep
+their original kinds when a binlog is rewritten, rather than becoming ordinary
+`Message`, `Warning`, and `Error` records. Subsequent filtering therefore continues
+to distinguish BuildCheck diagnostics from ordinary diagnostics.
+
 | Excludable group | Event kinds |
 | --- | --- |
 | Diagnostics | `Error`, `Warning`, `Message`, `CriticalBuildMessage` |

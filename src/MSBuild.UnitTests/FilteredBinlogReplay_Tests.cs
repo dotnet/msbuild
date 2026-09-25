@@ -761,14 +761,17 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     }
 
     [Theory]
-    [InlineData(BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message, true)]
-    [InlineData(BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message, false)]
-    [InlineData(BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning, true)]
-    [InlineData(BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning, false)]
-    [InlineData(BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error, true)]
-    [InlineData(BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error, false)]
+    [InlineData(BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message, BinaryLogRecordKind.BuildCheckMessage)]
+    [InlineData(BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message, BinaryLogRecordKind.Message)]
+    [InlineData(BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message, BinaryLogRecordKind.Warning)]
+    [InlineData(BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning, BinaryLogRecordKind.BuildCheckWarning)]
+    [InlineData(BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning, BinaryLogRecordKind.Warning)]
+    [InlineData(BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning, BinaryLogRecordKind.Message)]
+    [InlineData(BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error, BinaryLogRecordKind.BuildCheckError)]
+    [InlineData(BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error, BinaryLogRecordKind.Error)]
+    [InlineData(BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error, BinaryLogRecordKind.Message)]
     public void ReplayFilter_UsesOriginalRecordKindForLegacyBuildCheckDiagnostics(
-        BinaryLogRecordKind recordedKind, BinaryLogRecordKind ordinaryKind, bool excludeRecordedKind)
+        BinaryLogRecordKind recordedKind, BinaryLogRecordKind ordinaryKind, BinaryLogRecordKind excludedKind)
     {
         BuildEventArgs diagnostic = ordinaryKind switch
         {
@@ -797,11 +800,46 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         });
 
         string output = OutputPath();
-        CreateOperation(input, output, $"Exclude={(excludeRecordedKind ? recordedKind : ordinaryKind)}", ";OmitInitialInfo")
-            .Replay([CreateLogger(output, $"Exclude={(excludeRecordedKind ? recordedKind : ordinaryKind)}", ";OmitInitialInfo")], 1, CancellationToken.None).ShouldBeTrue();
+        string unfiltered = OutputPath("unfiltered.binlog");
+        var operation = FilteredBinlogReplay.Create(input, ParseSwitches(
+            BinaryLogArgument(output, $";OmitInitialInfo;Exclude={excludedKind}"),
+            BinaryLogArgument(unfiltered, ";OmitInitialInfo")));
+        operation.Replay(
+            [CreateLogger(output, $"Exclude={excludedKind}", ";OmitInitialInfo"), CreateLogger(unfiltered, "", ";OmitInitialInfo")],
+            1, CancellationToken.None).ShouldBeTrue();
 
-        ReadEvents(output).Count(e => e.Message == SourceMessage).ShouldBe(excludeRecordedKind ? 0 : 1);
+        AssertDiagnostic(output, expectedPresent: excludedKind != recordedKind);
+        AssertDiagnostic(unfiltered, expectedPresent: true);
+
+        if (excludedKind != recordedKind)
+        {
+            BinaryLogRecordKind[] nextExcludedKinds = [recordedKind, ordinaryKind];
+            foreach (BinaryLogRecordKind nextExcludedKind in nextExcludedKinds)
+            {
+                string rewritten = OutputPath($"rewritten-{nextExcludedKind}.binlog");
+                CreateOperation(output, rewritten, $"Exclude={nextExcludedKind}", ";OmitInitialInfo")
+                    .Replay([CreateLogger(rewritten, $"Exclude={nextExcludedKind}", ";OmitInitialInfo")], 1, CancellationToken.None).ShouldBeTrue();
+
+                AssertDiagnostic(rewritten, expectedPresent: nextExcludedKind != recordedKind);
+            }
+        }
+
         AssertNoStagingFiles();
+
+        void AssertDiagnostic(string path, bool expectedPresent)
+        {
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(path);
+            if (expectedPresent)
+            {
+                reader.Read(metadata =>
+                {
+                    metadata.RecordKind.ShouldBe(recordedKind);
+                    return true;
+                }).ShouldNotBeNull().Message.ShouldBe(SourceMessage);
+            }
+
+            reader.Read().ShouldBeNull();
+        }
     }
 
     [Fact]

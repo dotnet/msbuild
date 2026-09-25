@@ -729,7 +729,7 @@ namespace Microsoft.Build.Logging
                 // TODO: think about queuing to avoid contention
                 lock (eventArgsWriter)
                 {
-                    eventArgsWriter.Write(e);
+                    eventArgsWriter.Write(e, recordKind);
                 }
             }
         }
