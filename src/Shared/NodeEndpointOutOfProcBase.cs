@@ -131,6 +131,11 @@ namespace Microsoft.Build.BackEnd
         private const int MaxRetainedReadBufferSize = 2 * 1024 * 1024; // 2 MB
 
         /// <summary>
+        /// Maximum combined size of already-framed logging packets in a pipe write.
+        /// </summary>
+        internal const int LogPacketBatchSize = 64 * 1024;
+
+        /// <summary>
         /// Represents the version of the parent packet associated with the node instantiation.
         /// </summary>
         private byte _parentPacketVersion;
@@ -680,6 +685,18 @@ namespace Microsoft.Build.BackEnd
 
             byte[] headerByte = new byte[5];
             ITranslator writeTranslator = null;
+            byte[] logPacketBatch = null;
+            int logPacketBatchLength = 0;
+
+            void FlushLogPacketBatch()
+            {
+                if (logPacketBatchLength != 0)
+                {
+                    localPipe.Write(logPacketBatch, 0, logPacketBatchLength);
+                    logPacketBatchLength = 0;
+                }
+            }
+
 #if NET451_OR_GREATER
             Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
 #elif NETCOREAPP
@@ -880,6 +897,13 @@ namespace Microsoft.Build.BackEnd
                                 INodePacket packet;
                                 while (localPacketQueue.TryDequeue(out packet))
                                 {
+                                    bool isLogPacket = packet.Type == NodePacketType.LogMessage;
+                                    if (!isLogPacket)
+                                    {
+                                        // Deliver preceding logs before serializing or sending control traffic.
+                                        FlushLogPacketBatch();
+                                    }
+
                                     var packetStream = _packetStream;
                                     packetStream.SetLength(0);
 
@@ -895,7 +919,24 @@ namespace Microsoft.Build.BackEnd
                                     _binaryWriter.Write(0);
 
                                     // Reset the position in the write buffer.
-                                    packet.Translate(writeTranslator);
+                                    try
+                                    {
+                                        packet.Translate(writeTranslator);
+                                    }
+                                    catch (Exception serializationException)
+                                    {
+                                        // Earlier packets would already have been sent without batching.
+                                        try
+                                        {
+                                            FlushLogPacketBatch();
+                                        }
+                                        catch (Exception writeException)
+                                        {
+                                            throw new AggregateException(serializationException, writeException);
+                                        }
+
+                                        throw;
+                                    }
 
                                     int packetStreamLength = (int)packetStream.Position;
 
@@ -903,8 +944,32 @@ namespace Microsoft.Build.BackEnd
                                     packetStream.Position = 1;
                                     _binaryWriter.Write(packetStreamLength - 5);
 
-                                    localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                    if (!isLogPacket || packetStreamLength >= LogPacketBatchSize)
+                                    {
+                                        FlushLogPacketBatch();
+                                        localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                    }
+                                    else
+                                    {
+                                        if (packetStreamLength > LogPacketBatchSize - logPacketBatchLength)
+                                        {
+                                            FlushLogPacketBatch();
+                                        }
+
+                                        // Keep serialization at offset zero; translators may depend on packet-relative positions.
+                                        logPacketBatch ??= new byte[LogPacketBatchSize];
+                                        Buffer.BlockCopy(packetStream.GetBuffer(), 0, logPacketBatch, logPacketBatchLength, packetStreamLength);
+                                        logPacketBatchLength += packetStreamLength;
+
+                                        if (logPacketBatchLength == LogPacketBatchSize)
+                                        {
+                                            FlushLogPacketBatch();
+                                        }
+                                    }
                                 }
+
+                                // Never retain a batch across a wait, including the termination path.
+                                FlushLogPacketBatch();
                             }
                             catch (Exception e)
                             {
