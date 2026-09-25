@@ -22,7 +22,7 @@ namespace Microsoft.Build.Globbing
     ///     - wildcard directory part: "**/*test*/**/" in "a/b/**/*test*/**/*.cs"
     ///     - file name part: "*.cs" in "a/b/**/*test*/**/*.cs"
     /// </summary>
-    public class MSBuildGlob : IMSBuildGlob
+    public class MSBuildGlob : IMSBuildGlob, IContextAwareGlob
     {
         private readonly struct GlobState
         {
@@ -93,6 +93,15 @@ namespace Microsoft.Build.Globbing
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
+            var context = new GlobMatchContext(stringToMatch);
+            return IsMatch(ref context);
+        }
+
+        bool IContextAwareGlob.IsMatch(ref GlobMatchContext context) => IsMatch(ref context);
+
+        private bool IsMatch(ref GlobMatchContext context)
+        {
+            string stringToMatch = context.StringToMatch;
             ArgumentNullException.ThrowIfNull(stringToMatch);
 
             if (!IsLegal)
@@ -105,13 +114,13 @@ namespace Microsoft.Build.Globbing
                 return false;
             }
 
-            var normalizedString = NormalizeMatchInput(stringToMatch);
+            string normalizedString = context.GetNormalizedInput(_state.Value.GlobRoot);
 
             return _state.Value.Regex.IsMatch(normalizedString);
         }
 
         /// <summary>
-        ///     Similar to <see cref="IsMatch" /> but also provides the match groups for the glob parts
+        ///     Similar to <see cref="IsMatch(string)" /> but also provides the match groups for the glob parts
         /// </summary>
         /// <param name="stringToMatch"></param>
         /// <returns></returns>
@@ -124,7 +133,7 @@ namespace Microsoft.Build.Globbing
                 return MatchInfoResult.Empty;
             }
 
-            string normalizedInput = NormalizeMatchInput(stringToMatch);
+            string normalizedInput = NormalizeMatchInput(_state.Value.GlobRoot, stringToMatch);
 
             FileMatcher.GetRegexMatchInfo(
                 normalizedInput,
@@ -140,9 +149,9 @@ namespace Microsoft.Build.Globbing
             return new MatchInfoResult(isMatch, fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
         }
 
-        private string NormalizeMatchInput(string stringToMatch)
+        internal static string NormalizeMatchInput(string globRoot, string stringToMatch)
         {
-            var rootedInput = Path.Combine(_state.Value.GlobRoot, stringToMatch);
+            var rootedInput = Path.Combine(globRoot, stringToMatch);
             var normalizedInput = FileUtilities.GetFullPathNoThrow(rootedInput);
 
             // Degenerate case when the string to match is empty.
@@ -161,7 +170,7 @@ namespace Microsoft.Build.Globbing
         /// </summary>
         /// <param name="globRoot">
         ///     The root of the glob.
-        ///     The fixed directory part of the glob and the match arguments (<see cref="IsMatch" /> and <see cref="MatchInfo" />)
+        ///     The fixed directory part of the glob and the match arguments (<see cref="IsMatch(string)" /> and <see cref="MatchInfo" />)
         ///     will get normalized against this root.
         ///     If empty, the current working directory is used.
         ///     Cannot be null, and cannot contain invalid path arguments.
