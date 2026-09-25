@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -215,11 +216,26 @@ internal sealed class NodeScenario : IDisposable
     /// killed if it outlives the hang ceiling.
     /// </summary>
     public NodeScenarioRun StartBootstrapped(string arguments)
+        => Start(arguments, timeout => RunnerUtilities.ExecBootstrappedMSBuildAsync(arguments, outputHelper: _output, timeoutMilliseconds: timeout));
+
+    /// <summary>
+    /// Starts the MSBuild at <paramref name="msbuildExePath"/> (for example the one next to the test assembly) with
+    /// <paramref name="arguments"/> without waiting for it. Its process tree is killed if it outlives the hang ceiling.
+    /// </summary>
+    public NodeScenarioRun StartMSBuild(string msbuildExePath, string arguments)
+        => Start(arguments, timeout => RunnerUtilities.ExecMSBuildAsync(msbuildExePath, arguments, _output, timeout));
+
+    /// <summary>
+    /// Runs the MSBuild at <paramref name="msbuildExePath"/> with <paramref name="arguments"/> to completion.
+    /// </summary>
+    public (bool Success, string Output) RunMSBuild(string msbuildExePath, string arguments) => StartMSBuild(msbuildExePath, arguments).Wait();
+
+    private NodeScenarioRun Start(string arguments, Func<int, Task<(bool, string)>> start)
     {
         ThrowIfDisposed();
         int timeout = (int)Math.Max(1_000, (_hangCeiling - _clock.Elapsed).TotalMilliseconds);
         Marker("RunStarted", arguments);
-        Task<(bool, string)> task = RunnerUtilities.ExecBootstrappedMSBuildAsync(arguments, outputHelper: _output, timeoutMilliseconds: timeout);
+        Task<(bool, string)> task = start(timeout);
         var run = new NodeScenarioRun(this, arguments, task);
         lock (_lock)
         {
@@ -285,6 +301,70 @@ internal sealed class NodeScenario : IDisposable
         }
 
         return gate;
+    }
+
+    /// <summary>
+    /// Makes nodes that wait for a host (pooled TaskHosts, reusable workers) exit on their own once they have been idle
+    /// for <paramref name="milliseconds"/>. Call it before starting the runs.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="BuildManager.ShutdownAllNodes"/> reaches neither TaskHosts waiting in the pool nor nodes of another
+    /// installation such as the bootstrap. With a short idle timeout, <see cref="ShutdownNodes"/> with a no-op shutdown
+    /// just waits for them to go. Keep the timeout long enough for the reuse the test expects between its builds.
+    /// </remarks>
+    public void UseShortNodeIdleTimeout(int milliseconds = 10_000)
+    {
+        ThrowIfDisposed();
+        _env.SetEnvironmentVariable("MSBUILDNODECONNECTIONTIMEOUT", milliseconds.ToString(CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// Shuts down every reusable node and server of the scenario and waits until each journaled node process is gone.
+    /// </summary>
+    /// <param name="shutdown">
+    /// How to ask for the shutdown. Defaults to <see cref="BuildManager.ShutdownAllNodes"/> of the test process, which
+    /// reaches the nodes and server of the MSBuild next to the tests (it reads the scenario's handshake salt). Nodes of
+    /// another installation, such as the bootstrap, need a shutdown that runs in that installation.
+    /// </param>
+    /// <remarks>
+    /// The shutdown is repeated while a node is still alive, because a node that is between builds can miss it
+    /// (<see href="https://github.com/dotnet/msbuild/issues/15118"/>). Call it after the runs that use the nodes have completed.
+    /// </remarks>
+    public void ShutdownNodes(Action? shutdown = null)
+    {
+        ThrowIfDisposed();
+        shutdown ??= () => BuildManager.DefaultBuildManager.ShutdownAllNodes();
+        NodeJournalRecord start = Marker("ShutdownNodes");
+        while (true)
+        {
+            shutdown();
+            WaitForQuiescence();
+            List<int> alive = [];
+            foreach (JournaledProcess journaled in GetJournaledProcesses())
+            {
+                using Process? process = journaled.TryOpen();
+                if (process is not null && !process.WaitForExit(0) && !IsRunClient(journaled))
+                {
+                    alive.Add(journaled.ProcessId);
+                }
+            }
+
+            if (alive.Count == 0)
+            {
+                Marker("ShutdownNodes", "done");
+                return;
+            }
+
+            if (_clock.Elapsed > _hangCeiling)
+            {
+                throw Fail($"Hang ceiling of {_hangCeiling.TotalSeconds:0}s reached while shutting down nodes {string.Join(", ", alive)} (since #{start.Sequence}).");
+            }
+
+            Log($"NodeScenario: nodes {string.Join(", ", alive)} are still alive after a shutdown, asking again.");
+        }
+
+        bool IsRunClient(JournaledProcess journaled)
+            => journaled.Role == NodeJournalKind.Main && SnapshotOf(_runs).Any(r => !r.Task.IsCompleted);
     }
 
     /// <summary>Writes a <see cref="NodeJournalEvent.Marker"/> record, e.g. to split a scenario into phases.</summary>
@@ -772,12 +852,52 @@ internal sealed class NodeScenario : IDisposable
         {
             using Process? process = journaled.TryOpen();
             sb.AppendLine($"pid {journaled.ProcessId} ({journaled.Role}): {(process is null ? "exited" : "ALIVE " + process.ProcessName)}{(journaled.RecordedExit ? ", recorded Exited" : string.Empty)}");
+            if (process is not null)
+            {
+                AppendLinuxProcessState(sb, journaled.ProcessId);
+            }
         }
 
         AppendCommTraces(sb);
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Describes why a process is still alive on Linux: its state, its parent and what each of its threads waits on.
+    /// </summary>
+    private static void AppendLinuxProcessState(StringBuilder sb, int processId)
+    {
+        string directory = $"/proc/{processId}";
+        if (!Directory.Exists(directory))
+        {
+            return;
+        }
+
+        try
+        {
+            foreach (string line in File.ReadAllLines(Path.Combine(directory, "status")))
+            {
+                if (line.StartsWith("State:", StringComparison.Ordinal) || line.StartsWith("PPid:", StringComparison.Ordinal) || line.StartsWith("Threads:", StringComparison.Ordinal))
+                {
+                    sb.AppendLine($"    {line}");
+                }
+            }
+
+            foreach (string task in Directory.EnumerateDirectories(Path.Combine(directory, "task")))
+            {
+                string stat = File.ReadAllText(Path.Combine(task, "stat"));
+                int nameEnd = stat.LastIndexOf(')');
+                string name = stat.Substring(stat.IndexOf('(') + 1, nameEnd - stat.IndexOf('(') - 1);
+                char state = stat[nameEnd + 2];
+                string wchan = File.Exists(Path.Combine(task, "wchan")) ? File.ReadAllText(Path.Combine(task, "wchan")) : string.Empty;
+                sb.AppendLine($"    thread {Path.GetFileName(task)} '{name}' state {state} wchan {wchan}");
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            sb.AppendLine($"    (process state unavailable: {ex.Message})");
+        }
+    }
     private IEnumerable<JournaledProcess> GetJournaledProcessesSafe()
     {
         try
@@ -905,7 +1025,7 @@ internal sealed class NodeScenario : IDisposable
             try
             {
                 process = Process.GetProcessById(ProcessId);
-                if (process.HasExited || process.StartTime.ToUniversalTime() > firstSeenUtc.AddSeconds(1))
+                if (process.HasExited || process.StartTime.ToUniversalTime() > firstSeenUtc.AddSeconds(1) || IsZombie(ProcessId))
                 {
                     process.Dispose();
                     return null;
@@ -918,6 +1038,40 @@ internal sealed class NodeScenario : IDisposable
                 process?.Dispose();
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Whether the process has terminated but its parent has not reaped it. The runtime does not always reap
+        /// the nodes the test process started, and until it does they keep their id and look alive to <see cref="Process"/>.
+        /// </summary>
+        private static bool IsZombie(int processId)
+        {
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    string stat = File.ReadAllText($"/proc/{processId}/stat");
+                    int nameEnd = stat.LastIndexOf(')');
+                    return nameEnd >= 0 && nameEnd + 2 < stat.Length && stat[nameEnd + 2] is 'Z' or 'X';
+                }
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    using Process ps = Process.Start(new ProcessStartInfo("/bin/ps", $"-o stat= -p {processId}")
+                    {
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                    })!;
+                    string state = ps.StandardOutput.ReadToEnd();
+                    ps.WaitForExit();
+                    return state.TrimStart().StartsWith("Z", StringComparison.Ordinal);
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception or InvalidOperationException)
+            {
+            }
+
+            return false;
         }
     }
 

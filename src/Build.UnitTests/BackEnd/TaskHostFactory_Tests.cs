@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
+using Microsoft.Build.UnitTests.Shared;
 
 using Shouldly;
 using Xunit;
@@ -29,6 +29,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             typeof(TaskHostFactory_Tests).Assembly.Location
             ?? Path.Combine(AppContext.BaseDirectory, "Microsoft.Build.Engine.UnitTests.dll");
 
+        /// <summary>
+        /// A TaskHost waiting in the pool must outlive the scenario's quiescence wait, and then end promptly on its own.
+        /// </summary>
+        private const int PooledTaskHostIdleTimeoutMs = 20_000;
+
         private ITestOutputHelper _output;
 
         public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
@@ -37,22 +42,21 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that task host nodes properly terminate after a build completes.
-        /// Tests both transient (TaskHostFactory) and sidecar (AssemblyTaskFactory) task hosts
-        /// with different configuration combinations.
+        /// Verifies that task host nodes properly terminate after a build completes when they are transient
+        /// (TaskHostFactory), and stay in the pool for reuse when they are sidecars (AssemblyTaskFactory with
+        /// MSBUILDFORCEALLTASKSOUTOFPROC and node reuse).
         /// </summary>
         /// <param name="taskHostFactorySpecified">Whether to use TaskHostFactory (transient) or AssemblyTaskFactory (sidecar)</param>
         /// <param name="envVariableSpecified">Whether to set MSBUILDFORCEALLTASKSOUTOFPROC environment variable</param>
-        [Theory]
+        [NodeScenarioTheory]
         [InlineData(true, false)]
-        // [InlineData(false, true)] - the process can not be spawned on CI sometimes. A new approach is needed.
+        [InlineData(false, true)]
         [InlineData(true, true)]
         public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
-                string pidTaskProject = $@"
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
+            string pidTaskProject = $@"
 <Project>
     <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""{taskFactory}"" />
     <Target Name='AccessPID'>
@@ -61,146 +65,58 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         </ProcessIdTask>
     </Target>
 </Project>";
-                TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.csproj", pidTaskProject);
 
-                if (envVariableSpecified)
-                {
-                    env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
-                }
-
-                // To execute the task in sidecar mode, both node reuse and the environment variable must be set.
-                BuildParameters buildParameters = new() { EnableNodeReuse = envVariableSpecified && true /* node reuse enabled */ };
-
-                ProjectInstance projectInstance = new(project.Path);
-
-                BuildManager buildManager = BuildManager.DefaultBuildManager;
-                BuildResult buildResult = buildManager.Build(buildParameters, new BuildRequestData(projectInstance, targetsToBuild: ["AccessPID"]));
-
-                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
-
-                string processId = projectInstance.GetPropertyValue("PID");
-                string.IsNullOrEmpty(processId).ShouldBeFalse();
-                Int32.TryParse(processId, out int pid).ShouldBeTrue();
-                Process.GetCurrentProcess().Id.ShouldNotBe(pid);
-
-                if (taskHostFactorySpecified)
-                {
-                    try
-                    {
-                        Process taskHostNode = Process.GetProcessById(pid);
-
-                        // Capture identity up-front so a PID-reuse race (the OS recycled this
-                        // pid to an unrelated process between build-end and GetProcessById) is
-                        // visible in the failure diagnostic rather than looking like the task
-                        // host hung.
-                        string capturedName = SafeGetProcessField(() => taskHostNode.ProcessName);
-                        string capturedStart = SafeGetProcessField(() => taskHostNode.StartTime.ToString("O", CultureInfo.InvariantCulture));
-
-                        // The task host should exit shortly after the build completes. Use a generous
-                        // timeout because slow CI agents have been observed to take up to ~10s for the
-                        // child process to drain stdio and exit.
-                        // TELEMETRY: elapsedMs is logged so a future iteration can tune this back down
-                        // to a tight-but-safe value. If observed elapsed never approaches the timeout,
-                        // shrink TaskHostExitTimeoutMs in a follow-up PR.
-                        const int TaskHostExitTimeoutMs = 15000;
-                        Stopwatch sw = Stopwatch.StartNew();
-                        bool exited = taskHostNode.WaitForExit(TaskHostExitTimeoutMs);
-                        sw.Stop();
-                        _output.WriteLine(
-                            $"TaskHostFactory wait: pid={pid} processName={capturedName} startTime={capturedStart} " +
-                            $"exited={exited} elapsedMs={sw.ElapsedMilliseconds} timeoutMs={TaskHostExitTimeoutMs}");
-
-                        // Wrap HasExited in SafeGetProcessField — Process.HasExited can throw on
-                        // access-denied / transient handle failures, and the message is evaluated
-                        // eagerly even when the assertion passes.
-                        exited.ShouldBeTrue(
-                            $"TaskHost (pid={pid}, name={capturedName}, started={capturedStart}) was still running after {TaskHostExitTimeoutMs}ms. " +
-                            $"elapsedMs={sw.ElapsedMilliseconds} HasExited={SafeGetProcessField(() => taskHostNode.HasExited.ToString())}");
-                    }
-
-                    // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
-                    catch (ArgumentException e)
-                    {
-                        e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
-                    }
-                }
-                else
-                {
-                    Process taskHostNode = Process.GetProcessById(pid);
-
-                    // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
-                    // Wait for process to be responsive. The standard 3 secs can be not enough for the child process to start, let's try several times.
-                    int attempts = 0;
-                    while (attempts < 10)
-                    {
-                        try
-                        {
-                            if (taskHostNode.HasExited)
-                            {
-                                Assert.Fail($"TaskHost exited during startup with code: {taskHostNode.ExitCode}");
-                            }
-
-                            // Check if process has loaded its main module
-                            if (taskHostNode.Modules.Count > 0)
-                            {
-                                break;
-                            }
-                        }
-                        catch
-                        {
-                            // Process not ready yet
-                        }
-
-                        Thread.Sleep(2000);
-                        attempts++;
-                        taskHostNode.Refresh();
-                    }
-
-                    // Now wait to ensure it stays alive
-                    bool processExited = taskHostNode.WaitForExit(3000);
-
-                    processExited.ShouldBeFalse(
-                        processExited
-                            ? $"TaskHost should remain alive after build. TaskHost exited with code: {taskHostNode.ExitCode}"
-                            : "TaskHost should remain alive after build for task host case.");
-
-                    try
-                    {
-                        taskHostNode.Kill();
-                    }
-                    catch
-                    {
-                        // Ignore exceptions from Kill - the process may have exited between the WaitForExit and Kill calls.
-                    }
-                }
-            }
-        }
-
-        // Some Process fields (ProcessName, StartTime) can throw if the process
-        // has already exited or access is denied. We capture them best-effort for
-        // diagnostic output; never let a diagnostic read fail the test.
-        private static string SafeGetProcessField(Func<string> read)
-        {
-            try
+            if (envVariableSpecified)
             {
-                return read();
+                scenario.Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
             }
-            catch (Exception ex)
+
+            if (!taskHostFactorySpecified)
             {
-                return $"<unavailable: {ex.GetType().Name}>";
+                // Nothing in this process reaches a TaskHost waiting in the pool, so it has to end on its own.
+                scenario.UseShortNodeIdleTimeout(PooledTaskHostIdleTimeoutMs);
             }
+
+            // To execute the task in sidecar mode, both node reuse and the environment variable must be set.
+            BuildParameters buildParameters = new() { EnableNodeReuse = envVariableSpecified };
+
+            ProjectInstance projectInstance = new(project.Path);
+
+            BuildManager buildManager = scenario.CreateBuildManager();
+            BuildResult buildResult = buildManager.Build(buildParameters, new BuildRequestData(projectInstance, targetsToBuild: ["AccessPID"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            string processId = projectInstance.GetPropertyValue("PID");
+            string.IsNullOrEmpty(processId).ShouldBeFalse();
+            int.TryParse(processId, out int pid).ShouldBeTrue();
+            scenario.TestProcessId.ShouldNotBe(pid);
+            scenario.Await(NodeJournalEvent.Launched, NodeJournalKind.TaskHost).SubjectProcessId.ShouldBe(pid);
+
+            if (taskHostFactorySpecified)
+            {
+                scenario.Await(NodeJournalEvent.Exited, processId: pid);
+            }
+            else
+            {
+                // This is the sidecar TaskHost case - it should persist after the build is done.
+                scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Exited, processId: pid), "the pooled TaskHost exiting after the build");
+                scenario.ShutdownNodes(buildManager.ShutdownAllNodes);
+            }
+
+            scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost)).ShouldBe(1);
         }
 
         /// <summary>
         /// Verifies that transient (TaskHostFactory) and sidecar (AssemblyTaskFactory) task hosts
         /// can coexist in the same build and operate independently.
         /// </summary>
-        [Fact]
+        [NodeScenarioFact]
         public void TransientAndSidecarNodeCanCoexist()
         {
-            using (TestEnvironment env = TestEnvironment.Create(_output))
-            {
-                string pidTaskProject = $@"
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            string pidTaskProject = $@"
 <Project>
     <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
     <UsingTask TaskName=""ProcessIdTaskSidecar"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""AssemblyTaskFactory"" />
@@ -215,47 +131,35 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>";
 
-                TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
+            TransientTestFile project = scenario.Environment.CreateFile("testProject.csproj", pidTaskProject);
 
-                env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
-                ProjectInstance projectInstance = new(project.Path);
+            scenario.Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+            scenario.UseShortNodeIdleTimeout(PooledTaskHostIdleTimeoutMs);
+            ProjectInstance projectInstance = new(project.Path);
 
-                projectInstance.Build().ShouldBeTrue();
+            projectInstance.Build().ShouldBeTrue();
 
-                string transientPid = projectInstance.GetPropertyValue("PID");
-                string sidecarPid = projectInstance.GetPropertyValue("PID2");
-                sidecarPid.ShouldNotBe(transientPid, "Each task should have it's own TaskHost node.");
+            string transientPid = projectInstance.GetPropertyValue("PID");
+            string sidecarPid = projectInstance.GetPropertyValue("PID2");
+            sidecarPid.ShouldNotBe(transientPid, "Each task should have it's own TaskHost node.");
 
-                string.IsNullOrEmpty(transientPid).ShouldBeFalse();
-                Int32.TryParse(transientPid, out int pid).ShouldBeTrue();
-                Int32.TryParse(sidecarPid, out int pidSidecar).ShouldBeTrue();
+            string.IsNullOrEmpty(transientPid).ShouldBeFalse();
+            int.TryParse(transientPid, out int pid).ShouldBeTrue();
+            int.TryParse(sidecarPid, out int pidSidecar).ShouldBeTrue();
 
-                Process.GetCurrentProcess().Id.ShouldNotBe(pid);
+            scenario.TestProcessId.ShouldNotBe(pid);
+            scenario.AssertOrder(
+                r => IsTaskHostLaunch(r, pid), "transient TaskHost launched",
+                r => IsTaskHostLaunch(r, pidSidecar), "sidecar TaskHost launched");
 
-                try
-                {
-                    Process transientTaskHostNode = Process.GetProcessById(pid);
-                    transientTaskHostNode.WaitForExit(3000).ShouldBeTrue("The node should be dead since this is the transient case.");
-                }
-                catch (ArgumentException e)
-                {
-                    // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
-                    e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
-                }
-
-                try
-                {
-                    // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
-                    Process sidecarTaskHostNode = Process.GetProcessById(pidSidecar);
-                    sidecarTaskHostNode.WaitForExit(3000).ShouldBeFalse($"The node should be alive since it is the sidecar node.");
-                    sidecarTaskHostNode.Kill();
-                }
-                catch (Exception e)
-                {
-                    e.Message.ShouldNotBe($"Process with an Id of {pidSidecar} is not running");
-                }
-            }
+            // The transient TaskHost ends with its task; the sidecar stays in the pool for the next build.
+            scenario.Await(NodeJournalEvent.Exited, processId: pid);
+            scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Exited, processId: pidSidecar), "the sidecar TaskHost exiting after the build");
+            scenario.ShutdownNodes();
         }
+
+        private static bool IsTaskHostLaunch(NodeJournalRecord record, int processId)
+            => record.Event == NodeJournalEvent.Launched && record.Kind == NodeJournalKind.TaskHost && record.SubjectProcessId == processId;
 
         /// <summary>
         /// Regression test for the out-of-proc task host environment-reuse optimization, which lets the host skip

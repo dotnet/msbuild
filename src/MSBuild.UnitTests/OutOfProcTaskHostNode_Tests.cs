@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
+        [NodeScenarioTheory]
         [InlineData(false, nameof(FailureFlagTask))]
         [InlineData(true, nameof(FailureFlagTask))]
 #if NETFRAMEWORK
@@ -339,8 +339,8 @@ namespace Microsoft.Build.UnitTests
 #endif
         public void AllowFailureWithoutError_IsolatedForEachTask(bool runNested, string taskName)
         {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TestEnvironment env = scenario.Environment;
             TransientTestFile project = env.CreateFile("failureFlag.proj", $"""
                 <Project>
                   <UsingTask TaskName="{taskName}" AssemblyFile="{typeof(FailureFlagTask).Assembly.Location}" TaskFactory="TaskHostFactory" />
@@ -354,13 +354,8 @@ namespace Microsoft.Build.UnitTests
                 </Project>
                 """);
 
-            string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"\"{project.Path}\" -m:1 -nr:false", out bool success, outputHelper: _output);
+            (bool success, string output) = scenario.RunBootstrapped($"\"{project.Path}\" -m:1 -nr:false");
             MatchCollection taskPids = Regex.Matches(output, @"FailureFlagTaskPid=(\d+)");
-            foreach (Match match in taskPids)
-            {
-                env.WithTransientProcess(int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture));
-            }
 
             success.ShouldBeTrue(output);
             taskPids.Count.ShouldBe(runNested ? 3 : 2);
@@ -373,6 +368,14 @@ namespace Microsoft.Build.UnitTests
             Match clientPid = Regex.Match(output, @"Process ID is (\d+)");
             clientPid.Success.ShouldBeTrue(output);
             hostPid.ShouldNotBe(clientPid.Groups[1].Value);
+
+            int clientProcessId = int.Parse(clientPid.Groups[1].Value, CultureInfo.InvariantCulture);
+            NodeJournalRecord[] launches = [.. scenario.Records.Where(r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.TaskHost && r.ProcessId == clientProcessId)];
+            launches.Length.ShouldBe(1, "all calls must use the same TaskHost");
+            launches[0].SubjectProcessId.ShouldBe(int.Parse(hostPid, CultureInfo.InvariantCulture));
+
+            // The -nr:false TaskHost has to end with the build; nothing here would shut it down.
+            scenario.ShutdownNodes(static () => { });
         }
 
         [Fact]

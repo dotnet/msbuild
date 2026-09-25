@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -396,18 +397,32 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldNotContain("EXPLICIT-TASKHOST-STDERR");
         }
 
-        [Theory]
+        [NodeScenarioTheory]
         [InlineData(false, false)]
         [InlineData(true, false)]
         [InlineData(false, true)]
         public void ReusedTaskHostDiscardsOutputFromCachedWriter(bool retainConnection, bool replacePooledProcess)
         {
-            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
-            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TestEnvironment env = scenario.Environment;
+            env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
+            ChangeWaves.ResetStateForTests();
 #if NET
-            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(_env);
+            RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
 #endif
+            if (!retainConnection)
+            {
+                // A pooled TaskHost is out of reach of the server shutdown, so it has to end on its own idle timeout.
+                scenario.UseShortNodeIdleTimeout();
+            }
+
+            if (replacePooledProcess)
+            {
+                // The TaskHost dies as it returns to the pool after the first build, so the second build needs a new one.
+                scenario.Fault(NodeJournalEvent.NodeStarted, NodeFaultAction.Crash, NodeJournalKind.TaskHost, occurrence: 2);
+            }
+
             string project = $"""
                 <Project>
                     <UsingTask TaskName="CachedConsoleWriterTestTask" AssemblyFile="{typeof(CachedConsoleWriterTestTask).Assembly.Location}" />
@@ -422,44 +437,25 @@ namespace Microsoft.Build.Engine.UnitTests
                     </Target>
                 </Project>
                 """;
-            TransientTestFile projectFile = _env.CreateFile("cached-console-writer.proj", project);
+            TransientTestFile projectFile = env.CreateFile("cached-console-writer.proj", project);
             string arguments = $"\"{projectFile.Path}\" /m:2 /mt /nodereuse:true";
 
-            string firstOutput = RunnerUtilities.ExecMSBuild(
-                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
-                arguments,
-                out bool firstBuildSucceeded,
-                false,
-                _output);
-
-            firstBuildSucceeded.ShouldBeTrue(firstOutput);
+            string firstOutput = BuildOnServer(scenario, arguments, out int ownerProcessId);
             firstOutput.ShouldContain("ExecutionCount=1");
             firstOutput.ShouldContain("Output through current writer 1");
-            int ownerProcessId = ParseProcessId(firstOutput, "OwnerProcessId=");
-            _env.WithTransientProcess(ownerProcessId);
+            ParseProcessId(firstOutput, "OwnerProcessId=").ShouldBe(ownerProcessId);
             int taskHostProcessId = ParseProcessId(firstOutput, "TaskHostProcessId=");
-            _env.WithTransientProcess(taskHostProcessId);
+            scenario.Await(IsTaskHostLaunchBy(ownerProcessId), "the server launched the TaskHost")
+                .SubjectProcessId.ShouldBe(taskHostProcessId);
 
             if (replacePooledProcess)
             {
-                using Process process = Process.GetProcessById(taskHostProcessId);
-                process.Kill();
-                process.WaitForExit(10_000).ShouldBeTrue();
+                scenario.Await(NodeJournalEvent.FaultInjected, processId: taskHostProcessId);
             }
 
-            string secondOutput = RunnerUtilities.ExecMSBuild(
-                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
-                arguments,
-                out bool secondBuildSucceeded,
-                false,
-                _output);
-
-            secondBuildSucceeded.ShouldBeTrue(secondOutput);
+            string secondOutput = BuildOnServer(scenario, arguments, out int secondOwnerProcessId);
+            secondOwnerProcessId.ShouldBe(ownerProcessId, "Both builds should run on the same server.");
             int secondTaskHostProcessId = ParseProcessId(secondOutput, "TaskHostProcessId=");
-            if (secondTaskHostProcessId != taskHostProcessId)
-            {
-                _env.WithTransientProcess(secondTaskHostProcessId);
-            }
 
             if (retainConnection)
             {
@@ -476,6 +472,35 @@ namespace Microsoft.Build.Engine.UnitTests
             secondOutput.ShouldContain($"Output through current writer {expectedExecutionCount}");
             secondOutput.ShouldNotContain("Output through stale cached writer");
             ParseProcessId(secondOutput, "OwnerProcessId=").ShouldBe(ownerProcessId);
+            scenario.Records.Count(IsTaskHostLaunchBy(ownerProcessId)).ShouldBe(expectedExecutionCount == 2 ? 1 : 2);
+
+            scenario.ShutdownNodes(static () =>
+            {
+                ChangeWaves.ResetStateForTests();
+                MSBuildClient.ShutdownServer(CancellationToken.None);
+            });
+        }
+
+        private static Func<NodeJournalRecord, bool> IsTaskHostLaunchBy(int processId)
+            => r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.TaskHost && r.ProcessId == processId;
+
+        /// <summary>
+        /// Runs a build that must run on the server, and waits until the server is idle again: it releases its busy mutex
+        /// only after it sends the result, so an immediate next build could otherwise fall back in-process (#15093).
+        /// </summary>
+        private static string BuildOnServer(NodeScenario scenario, string arguments, out int serverProcessId)
+        {
+            NodeJournalRecord start = scenario.Marker("Build", arguments);
+            (bool success, string output) = scenario.RunMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, arguments);
+            success.ShouldBeTrue(output);
+            NodeJournalRecord onServer = scenario.Await(
+                r => r.Sequence > start.Sequence && r.Event == NodeJournalEvent.BuildStarted && r.Role == NodeJournalKind.Server,
+                "the build ran on the server");
+            serverProcessId = onServer.ProcessId;
+            scenario.Await(
+                r => r.Sequence > onServer.Sequence && r.ProcessId == onServer.ProcessId && r.Event == NodeJournalEvent.BuildEnded && r.Kind == NodeJournalKind.Server,
+                $"server {onServer.ProcessId} is idle again");
+            return output;
         }
 
         private static int ParseProcessId(string output, string prefix)
