@@ -299,19 +299,45 @@ public sealed class NodeLifecycleJournal_Tests : IDisposable
             byte[] il = record.GetMethodBody().ShouldNotBeNull().GetILAsByteArray().ShouldNotBeNull();
 
             // ldsfld Traits.NodeJournalEnabled; brfalse(.s) ret; ldarg xN; call *Core; ret
-            // (Debug builds add nop/stloc/ldloc around it, which the JIT removes.)
-            int first = 0;
-            while (il[first] == 0x00)
+            // Debug builds add nop/stloc/ldloc around it, which the JIT removes. Code coverage (non-Windows CI) prepends
+            // a hit counter to every method, so find the gate load rather than expecting it at offset 0.
+            int gate = FindGateLoad(il);
+            gate.ShouldBeGreaterThanOrEqualTo(0, $"{record} must load {nameof(Traits.NodeJournalEnabled)}");
+
+            // Coverage also adds a counter per block, so only uninstrumented builds (Windows CI, local) can check the size:
+            // small enough that there is no room for anything but testing the gate and forwarding the arguments.
+            bool instrumented = Array.FindIndex(il, 0, gate, b => b != 0x00) >= 0;
+            if (!instrumented)
             {
-                first++;
+                il.Length.ShouldBeLessThan(40, $"{record} must not do anything but test the gate and forward");
+            }
+        }
+    }
+
+    private static int FindGateLoad(byte[] il)
+    {
+        Module module = typeof(NodeLifecycleJournal).Module;
+        for (int i = 0; i + 5 <= il.Length; i++)
+        {
+            if (il[i] != 0x7E)
+            {
+                continue;
             }
 
-            il[first].ShouldBe((byte)0x7E, $"the first instruction of {record} must load the gate");
-            typeof(NodeLifecycleJournal).Module.ResolveField(BitConverter.ToInt32(il, first + 1)).ShouldNotBeNull().Name.ShouldBe(nameof(Traits.NodeJournalEnabled));
-
-            // Small enough that there is no room for anything but testing the gate and forwarding the arguments.
-            il.Length.ShouldBeLessThan(40, $"{record} must not do anything but test the gate and forward");
+            try
+            {
+                if (module.ResolveField(BitConverter.ToInt32(il, i + 1))?.Name == nameof(Traits.NodeJournalEnabled))
+                {
+                    return i;
+                }
+            }
+            catch (Exception ex) when (ex is ArgumentException or BadImageFormatException)
+            {
+                // 0x7E inside another instruction's operand.
+            }
         }
+
+        return -1;
     }
 
     [Fact]
