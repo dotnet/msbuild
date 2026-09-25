@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -851,12 +852,52 @@ internal sealed class NodeScenario : IDisposable
         {
             using Process? process = journaled.TryOpen();
             sb.AppendLine($"pid {journaled.ProcessId} ({journaled.Role}): {(process is null ? "exited" : "ALIVE " + process.ProcessName)}{(journaled.RecordedExit ? ", recorded Exited" : string.Empty)}");
+            if (process is not null)
+            {
+                AppendLinuxProcessState(sb, journaled.ProcessId);
+            }
         }
 
         AppendCommTraces(sb);
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Describes why a process is still alive on Linux: its state, its parent and what each of its threads waits on.
+    /// </summary>
+    private static void AppendLinuxProcessState(StringBuilder sb, int processId)
+    {
+        string directory = $"/proc/{processId}";
+        if (!Directory.Exists(directory))
+        {
+            return;
+        }
+
+        try
+        {
+            foreach (string line in File.ReadAllLines(Path.Combine(directory, "status")))
+            {
+                if (line.StartsWith("State:", StringComparison.Ordinal) || line.StartsWith("PPid:", StringComparison.Ordinal) || line.StartsWith("Threads:", StringComparison.Ordinal))
+                {
+                    sb.AppendLine($"    {line}");
+                }
+            }
+
+            foreach (string task in Directory.EnumerateDirectories(Path.Combine(directory, "task")))
+            {
+                string stat = File.ReadAllText(Path.Combine(task, "stat"));
+                int nameEnd = stat.LastIndexOf(')');
+                string name = stat.Substring(stat.IndexOf('(') + 1, nameEnd - stat.IndexOf('(') - 1);
+                char state = stat[nameEnd + 2];
+                string wchan = File.Exists(Path.Combine(task, "wchan")) ? File.ReadAllText(Path.Combine(task, "wchan")) : string.Empty;
+                sb.AppendLine($"    thread {Path.GetFileName(task)} '{name}' state {state} wchan {wchan}");
+            }
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            sb.AppendLine($"    (process state unavailable: {ex.Message})");
+        }
+    }
     private IEnumerable<JournaledProcess> GetJournaledProcessesSafe()
     {
         try
@@ -984,7 +1025,7 @@ internal sealed class NodeScenario : IDisposable
             try
             {
                 process = Process.GetProcessById(ProcessId);
-                if (process.HasExited || process.StartTime.ToUniversalTime() > firstSeenUtc.AddSeconds(1))
+                if (process.HasExited || process.StartTime.ToUniversalTime() > firstSeenUtc.AddSeconds(1) || IsZombie(ProcessId))
                 {
                     process.Dispose();
                     return null;
@@ -997,6 +1038,40 @@ internal sealed class NodeScenario : IDisposable
                 process?.Dispose();
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Whether the process has terminated but its parent has not reaped it. The runtime does not always reap
+        /// the nodes the test process started, and until it does they keep their id and look alive to <see cref="Process"/>.
+        /// </summary>
+        private static bool IsZombie(int processId)
+        {
+            try
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    string stat = File.ReadAllText($"/proc/{processId}/stat");
+                    int nameEnd = stat.LastIndexOf(')');
+                    return nameEnd >= 0 && nameEnd + 2 < stat.Length && stat[nameEnd + 2] is 'Z' or 'X';
+                }
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    using Process ps = Process.Start(new ProcessStartInfo("/bin/ps", $"-o stat= -p {processId}")
+                    {
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                    })!;
+                    string state = ps.StandardOutput.ReadToEnd();
+                    ps.WaitForExit();
+                    return state.TrimStart().StartsWith("Z", StringComparison.Ordinal);
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception or InvalidOperationException)
+            {
+            }
+
+            return false;
         }
     }
 
