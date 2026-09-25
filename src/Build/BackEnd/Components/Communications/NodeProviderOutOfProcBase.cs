@@ -166,6 +166,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="terminateNode">Delegate used to tell the node provider that a context has terminated</param>
         protected void ShutdownAllNodes(bool nodeReuse, NodeContextTerminateDelegate terminateNode)
         {
+            bool tracePerfStar = TracePerfStarCollectors("before");
+
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
@@ -184,12 +186,20 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false), out HandshakeResult result);
+                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false), out HandshakeResult result, tracePerfStar);
+                if (tracePerfStar)
+                {
+                    Console.WriteLine($"PERFSTAR_SHUTDOWN pid={nodeProcess.Id} low=false connected={nodeStream is not null} status={result.Status} detail={result.ErrorMessage}");
+                }
 
                 if (nodeStream == null)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true), out result);
+                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true), out result, tracePerfStar);
+                    if (tracePerfStar)
+                    {
+                        Console.WriteLine($"PERFSTAR_SHUTDOWN pid={nodeProcess.Id} low=true connected={nodeStream is not null} status={result.Status} detail={result.ErrorMessage}");
+                    }
                 }
 
                 if (nodeStream != null)
@@ -201,6 +211,53 @@ namespace Microsoft.Build.BackEnd
                     nodeStream.Dispose();
                 }
             }
+
+            if (tracePerfStar)
+            {
+                TracePerfStarCollectors("after");
+            }
+        }
+
+        // Diagnostic perf branch only; not a merge candidate. No waits, kills, or collection bypasses.
+        private static bool TracePerfStarCollectors(string phase)
+        {
+            string directory = Path.Combine(Directory.GetCurrentDirectory(), ".perfstar-evaluation-metrics");
+            if (!Directory.Exists(directory))
+            {
+                return false;
+            }
+
+            try
+            {
+                string[] markers = Directory.GetFiles(directory, "*.active");
+                long freeBytes = new DriveInfo(Path.GetPathRoot(directory)).AvailableFreeSpace;
+                Console.WriteLine($"PERFSTAR_COLLECTORS phase={phase} utc={DateTime.UtcNow:O} directory={directory} markers={markers.Length} freeBytes={freeBytes}");
+                foreach (string marker in markers)
+                {
+                    try
+                    {
+                        string contents = File.ReadAllText(marker);
+                        if (!int.TryParse(contents, NumberStyles.None, CultureInfo.InvariantCulture, out int processId))
+                        {
+                            Console.WriteLine($"PERFSTAR_COLLECTOR phase={phase} marker={Path.GetFileName(marker)} invalidPid={contents}");
+                            continue;
+                        }
+
+                        using Process process = Process.GetProcessById(processId);
+                        Console.WriteLine($"PERFSTAR_COLLECTOR phase={phase} marker={Path.GetFileName(marker)} pid={processId} markerUtc={File.GetLastWriteTimeUtc(marker):O} name={process.ProcessName} startUtc={process.StartTime.ToUniversalTime():O} executable={process.MainModule?.FileName}");
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception)
+                    {
+                        Console.WriteLine($"PERFSTAR_COLLECTOR phase={phase} marker={Path.GetFileName(marker)} readFailure={ex.GetType().Name} detail={ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Console.WriteLine($"PERFSTAR_COLLECTORS phase={phase} readFailure={ex.GetType().Name} detail={ex.Message}");
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -861,7 +918,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake, out HandshakeResult result)
+        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake, out HandshakeResult result, bool traceFailures = false)
         {
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
@@ -900,6 +957,10 @@ namespace Microsoft.Build.BackEnd
                 // TimeoutException -- Couldn't connect, might not be a node.
                 // InvalidOperationException – Couldn’t connect, probably a different build
                 CommunicationsUtilities.Trace($"Failed to connect to pipe {pipeName}. {e.Message.TrimEnd()}");
+                if (traceFailures)
+                {
+                    Console.WriteLine($"PERFSTAR_SHUTDOWN pid={nodeProcessId} exception={e.GetType().Name} detail={e.Message}");
+                }
 
                 // If we don't close any stream, we might hang up the child
                 nodeStream?.Dispose();
