@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.BuildCheck;
@@ -36,6 +37,8 @@ namespace Microsoft.Build.BackEnd.Logging
         protected bool _hasLoggedErrors;
         private bool _hasLoggedWarnings;
         private bool _hasLoggedSdkMessages;
+        private List<Action<LoggingContext>>? _deferredEvents;
+        private bool _hasDeferredEvaluationDiagnostics;
 
         /// <summary>
         /// Constructs the logging context from a logging service and an event context.
@@ -122,6 +125,36 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal bool HasLoggedSdkMessages => _hasLoggedSdkMessages;
 
+        internal bool HasDeferredEvaluationDiagnostics => _hasDeferredEvaluationDiagnostics;
+
+        internal static LoggingContext CreateDeferred(
+            ILoggingService loggingService,
+            BuildEventContext eventContext)
+        {
+            var context = new LoggingContext(loggingService, eventContext)
+            {
+                IsValid = true,
+                _deferredEvents = [],
+            };
+            return context;
+        }
+
+        internal void ReplayDeferredEvents(LoggingContext target)
+        {
+            ArgumentNullException.ThrowIfNull(target);
+            List<Action<LoggingContext>>? events = _deferredEvents;
+            _deferredEvents = null;
+            if (events is null)
+            {
+                return;
+            }
+
+            foreach (Action<LoggingContext> deferredEvent in events)
+            {
+                deferredEvent(target);
+            }
+        }
+
         /// <summary>
         ///  Helper method to create a message build event from a string resource and some parameters
         /// </summary>
@@ -131,6 +164,13 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogComment(MessageImportance importance, string messageResourceName, params object?[]? messageArgs)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogComment(importance, messageResourceName, messageArgs),
+                    isEvaluationDiagnostic: false))
+            {
+                return;
+            }
+
             _loggingService.LogComment(_eventContext, importance, messageResourceName, messageArgs);
         }
 
@@ -144,6 +184,12 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogComment(MessageImportance importance, BuildEventFileInfo file, string messageResourceName, params object?[]? messageArgs)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogComment(importance, file, messageResourceName, messageArgs),
+                    isEvaluationDiagnostic: false))
+            {
+                return;
+            }
 
             _loggingService.LogBuildEvent(new BuildMessageEventArgs(
                 null,
@@ -172,6 +218,13 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogCommentFromText(MessageImportance importance, string message)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogCommentFromText(importance, message),
+                    isEvaluationDiagnostic: false))
+            {
+                return;
+            }
+
             _loggingService.LogCommentFromText(_eventContext, importance, message);
         }
 
@@ -184,6 +237,13 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogCommentFromText(MessageImportance importance, string message, params object[] messageArgs)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogCommentFromText(importance, message, messageArgs),
+                    isEvaluationDiagnostic: false))
+            {
+                return;
+            }
+
             _loggingService.LogCommentFromText(_eventContext, importance, message, messageArgs);
         }
 
@@ -191,6 +251,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             CheckValidity();
             _hasLoggedSdkMessages = true;
+            if (TryDefer(
+                    context => context.LogSdkMessage(importance, message),
+                    isEvaluationDiagnostic: true))
+            {
+                return;
+            }
+
             _loggingService.LogCommentFromText(_eventContext, importance, message);
         }
 
@@ -203,6 +270,14 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogError(BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogError(file, messageResourceName, messageArgs),
+                    isEvaluationDiagnostic: true))
+            {
+                _hasLoggedErrors = true;
+                return;
+            }
+
             _loggingService.LogError(_eventContext, file, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
@@ -217,6 +292,14 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogErrorWithSubcategory(string? subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogErrorWithSubcategory(subcategoryResourceName, file, messageResourceName, messageArgs),
+                    isEvaluationDiagnostic: true))
+            {
+                _hasLoggedErrors = true;
+                return;
+            }
+
             _loggingService.LogError(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
@@ -232,6 +315,14 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogErrorFromText(subcategoryResourceName, errorCode, helpKeyword, file, message),
+                    isEvaluationDiagnostic: true))
+            {
+                _hasLoggedErrors = true;
+                return;
+            }
+
             _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
             _hasLoggedErrors = true;
         }
@@ -243,6 +334,14 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogInvalidProjectFileError(InvalidProjectFileException invalidProjectFileException)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogInvalidProjectFileError(invalidProjectFileException),
+                    isEvaluationDiagnostic: true))
+            {
+                _hasLoggedErrors = true;
+                return;
+            }
+
             _loggingService.LogInvalidProjectFileError(_eventContext, invalidProjectFileException);
             _hasLoggedErrors = true;
         }
@@ -257,6 +356,14 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogFatalError(Exception exception, BuildEventFileInfo file, string messageResourceName, params object?[]? messageArgs)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogFatalError(exception, file, messageResourceName, messageArgs),
+                    isEvaluationDiagnostic: true))
+            {
+                _hasLoggedErrors = true;
+                return;
+            }
+
             _loggingService.LogFatalError(_eventContext, exception, file, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
@@ -265,6 +372,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             CheckValidity();
             _hasLoggedWarnings = true;
+            if (TryDefer(
+                    context => context.LogWarning(messageResourceName, messageArgs),
+                    isEvaluationDiagnostic: true))
+            {
+                return;
+            }
+
             _loggingService.LogWarning(_eventContext, null, BuildEventFileInfo.Empty, messageResourceName, messageArgs);
         }
 
@@ -279,6 +393,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             CheckValidity();
             _hasLoggedWarnings = true;
+            if (TryDefer(
+                    context => context.LogWarning(subcategoryResourceName, file, messageResourceName, messageArgs),
+                    isEvaluationDiagnostic: true))
+            {
+                return;
+            }
+
             _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
         }
 
@@ -294,6 +415,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             CheckValidity();
             _hasLoggedWarnings = true;
+            if (TryDefer(
+                    context => context.LogWarningFromText(subcategoryResourceName, warningCode, helpKeyword, file, message),
+                    isEvaluationDiagnostic: true))
+            {
+                return;
+            }
+
             _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
         }
 
@@ -306,6 +434,17 @@ namespace Microsoft.Build.BackEnd.Logging
             CheckValidity();
             _hasLoggedWarnings |= buildEvent is BuildWarningEventArgs;
             _hasLoggedErrors |= buildEvent is BuildErrorEventArgs;
+            if (TryDefer(
+                    context =>
+                    {
+                        buildEvent.BuildEventContext = context.BuildEventContext;
+                        context.LogBuildEvent(buildEvent);
+                    },
+                    buildEvent is BuildWarningEventArgs or BuildErrorEventArgs))
+            {
+                return;
+            }
+
             LoggingService.LogBuildEvent(buildEvent);
         }
 
@@ -317,6 +456,14 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogFatalBuildError(Exception exception, BuildEventFileInfo file)
         {
             CheckValidity();
+            if (TryDefer(
+                    context => context.LogFatalBuildError(exception, file),
+                    isEvaluationDiagnostic: true))
+            {
+                _hasLoggedErrors = true;
+                return;
+            }
+
             LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
             _hasLoggedErrors = true;
         }
@@ -343,5 +490,19 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private protected void CheckValidity()
             => Assumed.True(_isValid, $"LoggingContext (type: {GetType()}) was not valid during logging attempt.");
+
+        private bool TryDefer(
+            Action<LoggingContext> deferredEvent,
+            bool isEvaluationDiagnostic)
+        {
+            if (_deferredEvents is null)
+            {
+                return false;
+            }
+
+            _deferredEvents.Add(deferredEvent);
+            _hasDeferredEvaluationDiagnostics |= isEvaluationDiagnostic;
+            return true;
+        }
     }
 }
