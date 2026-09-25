@@ -282,26 +282,61 @@ public sealed class NodeLifecycleJournal_Tests : IDisposable
     }
 
     [Fact]
-    public void RecordIsOnlyABranchOnTheGate()
+    public void EveryRecordMethodIsOnlyABranchOnTheGate()
     {
-        MethodInfo record = typeof(NodeLifecycleJournal).GetMethod(nameof(NodeLifecycleJournal.Record), BindingFlags.Public | BindingFlags.Static).ShouldNotBeNull();
-        record.MethodImplementationFlags.HasFlag(MethodImplAttributes.AggressiveInlining).ShouldBeTrue();
+        MethodInfo[] records = typeof(NodeLifecycleJournal)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(m => m.Name.StartsWith(nameof(NodeLifecycleJournal.Record), StringComparison.Ordinal))
+            .ToArray();
+        records.Select(m => m.Name).Distinct().OrderBy(n => n, StringComparer.Ordinal)
+            .ShouldBe([nameof(NodeLifecycleJournal.Record), nameof(NodeLifecycleJournal.RecordLaunched)]);
+        records.Length.ShouldBe(3);
 
-        byte[] il = record.GetMethodBody().ShouldNotBeNull().GetILAsByteArray().ShouldNotBeNull();
-
-        // ldsfld Traits.NodeJournalEnabled; brfalse(.s) ret; ldarg x5; call RecordCore; ret
-        // (Debug builds add nop/stloc/ldloc around it, which the JIT removes.)
-        int first = 0;
-        while (il[first] == 0x00)
+        foreach (MethodInfo record in records)
         {
-            first++;
+            record.MethodImplementationFlags.HasFlag(MethodImplAttributes.AggressiveInlining).ShouldBeTrue(record.ToString());
+
+            byte[] il = record.GetMethodBody().ShouldNotBeNull().GetILAsByteArray().ShouldNotBeNull();
+
+            // ldsfld Traits.NodeJournalEnabled; brfalse(.s) ret; ldarg xN; call *Core; ret
+            // (Debug builds add nop/stloc/ldloc around it, which the JIT removes.)
+            int first = 0;
+            while (il[first] == 0x00)
+            {
+                first++;
+            }
+
+            il[first].ShouldBe((byte)0x7E, $"the first instruction of {record} must load the gate");
+            typeof(NodeLifecycleJournal).Module.ResolveField(BitConverter.ToInt32(il, first + 1)).ShouldNotBeNull().Name.ShouldBe(nameof(Traits.NodeJournalEnabled));
+
+            // Small enough that there is no room for anything but testing the gate and forwarding the arguments.
+            il.Length.ShouldBeLessThan(40, $"{record} must not do anything but test the gate and forward");
+        }
+    }
+
+    [Fact]
+    public void EnumDetailIsFormattedByTheJournal()
+    {
+        string path = NewJournal();
+        string? previous = NodeLifecycleJournal.CurrentSink;
+        NodeLifecycleJournal.SetSinkForCurrentProcess(path).ShouldBeTrue("test assemblies arm the journal at startup");
+        try
+        {
+            NodeLifecycleJournal.Record(NodeJournalEvent.Marker, NodeJournalKind.Worker, 1, 2, NodeJournalKind.TaskHost);
+            NodeLifecycleJournal.RecordLaunched(3, 4, "/nologo /nodemode:2");
+        }
+        finally
+        {
+            NodeLifecycleJournal.SetSinkForCurrentProcess(previous);
         }
 
-        il[first].ShouldBe((byte)0x7E, "the first instruction must load the gate");
-        typeof(NodeLifecycleJournal).Module.ResolveField(BitConverter.ToInt32(il, first + 1)).ShouldNotBeNull().Name.ShouldBe(nameof(Traits.NodeJournalEnabled));
-
-        // Small enough that there is no room for anything but testing the gate and forwarding the arguments.
-        il.Length.ShouldBeLessThan(40, "Record must not do anything but test the gate and forward");
+        List<NodeJournalRecord> records = NodeLifecycleJournalReader.ReadAll(path);
+        records.Count.ShouldBe(2);
+        records[0].Detail.ShouldBe(nameof(NodeJournalKind.TaskHost));
+        records[1].Event.ShouldBe(NodeJournalEvent.Launched);
+        records[1].Kind.ShouldBe(NodeJournalKind.TaskHost);
+        records[1].NodeId.ShouldBe(3);
+        records[1].SubjectProcessId.ShouldBe(4);
     }
 
 #if NET
@@ -319,6 +354,8 @@ public sealed class NodeLifecycleJournal_Tests : IDisposable
             for (int i = 0; i < 1_000; i++)
             {
                 NodeLifecycleJournal.Record(NodeJournalEvent.Marker, NodeJournalKind.Worker, i, i, "detail");
+                NodeLifecycleJournal.Record(NodeJournalEvent.Marker, NodeJournalKind.Worker, i, i, NodeJournalKind.TaskHost);
+                NodeLifecycleJournal.RecordLaunched(i, i, "/nodemode:2");
             }
 
             (GC.GetAllocatedBytesForCurrentThread() - before).ShouldBe(0);

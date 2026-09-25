@@ -340,10 +340,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         RetireNode(context.NodeId);
 
-                        if (NodeLifecycleJournal.IsEnabled)
-                        {
-                            NodeLifecycleJournal.Record(NodeJournalEvent.TaskHostRetired, NodeJournalKind.TaskHost, context.NodeId, context.Process.Id, "build-complete");
-                        }
+                        NodeLifecycleJournal.Record(NodeJournalEvent.TaskHostRetired, NodeJournalKind.TaskHost, context.NodeId, context.Process.Id, "build-complete");
                     }
                     else
                     {
@@ -371,10 +368,7 @@ namespace Microsoft.Build.BackEnd
                         : NodeBuildCompleteAction.Legacy;
                 context.SendData(new NodeBuildComplete(enableReuse, action));
 
-                if (NodeLifecycleJournal.IsEnabled)
-                {
-                    NodeLifecycleJournal.Record(NodeJournalEvent.ShutdownSent, NodeJournalKind.TaskHost, context.NodeId, context.Process.Id, action.ToString());
-                }
+                NodeLifecycleJournal.Record(NodeJournalEvent.ShutdownSent, NodeJournalKind.TaskHost, context.NodeId, context.Process.Id, action);
             }
 
             if (waitForCleanup)

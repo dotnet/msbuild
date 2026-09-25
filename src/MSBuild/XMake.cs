@@ -3540,10 +3540,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
                 {
-                    if (NodeLifecycleJournal.IsEnabled)
-                    {
-                        NodeLifecycleJournal.Record(NodeJournalEvent.Exited, detail: shutdownReason.ToString());
-                    }
+                    NodeLifecycleJournal.Record(NodeJournalEvent.Exited, NodeJournalKind.None, 0, 0, shutdownReason);
 
                     restart = false;
                 }

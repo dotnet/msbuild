@@ -236,10 +236,7 @@ namespace Microsoft.Build.Server
                 {
                     KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState = serverIsAlreadyRunning ? "hot" : "cold";
                 }
-                if (NodeLifecycleJournal.IsEnabled)
-                {
-                    NodeLifecycleJournal.Record(NodeJournalEvent.ReuseDecision, NodeJournalKind.Server, detail: serverIsAlreadyRunning ? "reused" : "new");
-                }
+                NodeLifecycleJournal.Record(NodeJournalEvent.ReuseDecision, NodeJournalKind.Server, detail: serverIsAlreadyRunning ? "reused" : "new");
 
                 if (!serverIsAlreadyRunning)
                 {
@@ -296,10 +293,7 @@ namespace Microsoft.Build.Server
                 MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString ?? string.Empty);
                 CommunicationsUtilities.Trace("Build finished.");
 
-                if (NodeLifecycleJournal.IsEnabled)
-                {
-                    NodeLifecycleJournal.Record(NodeJournalEvent.BuildEnded, NodeJournalKind.Server, detail: _exitResult.MSBuildClientExitType.ToString());
-                }
+                NodeLifecycleJournal.Record(NodeJournalEvent.BuildEnded, NodeJournalKind.Server, 0, 0, _exitResult.MSBuildClientExitType);
             }
 
             NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
@@ -309,10 +303,7 @@ namespace Microsoft.Build.Server
 
         private void RecordServerFallback()
         {
-            if (NodeLifecycleJournal.IsEnabled)
-            {
-                NodeLifecycleJournal.Record(NodeJournalEvent.ServerBusyFallback, NodeJournalKind.Server, detail: _exitResult.MSBuildClientExitType.ToString());
-            }
+            NodeLifecycleJournal.Record(NodeJournalEvent.ServerBusyFallback, NodeJournalKind.Server, 0, 0, _exitResult.MSBuildClientExitType);
         }
 
         /// <summary>

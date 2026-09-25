@@ -110,13 +110,15 @@ internal enum NodeJournalKind : byte
 /// gives a total order of what happened across processes. Tests assert on that order instead of on wall-clock time.
 /// </para>
 /// <para>
-/// Every <see cref="Record"/> call is also a fault point (<c>MSBUILDNODEFAULT=Event[@Role][#Occurrence]:Crash|Hang</c>)
+/// Every record is also a fault point (<c>MSBUILDNODEFAULT=Event[@Role][#Occurrence]:Crash|Hang</c>)
 /// and a chaos point (<c>MSBUILDNODECHAOS=seed</c> adds a reproducible random delay).
 /// </para>
 /// <para>
-/// When the environment variable is not set, <see cref="Record"/> is a single branch on a <see langword="static readonly"/>
-/// field, which the JIT folds away, and it allocates nothing. Callers must not build arguments (for example by string
-/// interpolation) outside an <see cref="IsEnabled"/> check.
+/// When the environment variable is not set, every <c>Record*</c> method is a single branch on a
+/// <see langword="static readonly"/> field, which the JIT folds away, and it allocates nothing. The journal decides
+/// whether to record, so callers never check <see cref="IsEnabled"/> themselves. They pass values they already have
+/// (literals, locals, fields, enum values). Anything that costs work to produce, such as formatting an enum or parsing
+/// a command line, belongs in a <c>Record*</c> overload so it runs only behind the gate.
 /// </para>
 /// </remarks>
 internal static class NodeLifecycleJournal
@@ -149,7 +151,7 @@ internal static class NodeLifecycleJournal
     /// <param name="kind">The kind of node the event is about, if any.</param>
     /// <param name="nodeId">The node id the event is about, if any.</param>
     /// <param name="subjectProcessId">The process the event is about, if it is not the current process.</param>
-    /// <param name="detail">A short reason or value. Must already exist; do not format it unless <see cref="IsEnabled"/>.</param>
+    /// <param name="detail">A short reason or value. Pass an existing string; use the enum overload instead of formatting a value.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Record(
         NodeJournalEvent evt,
@@ -161,6 +163,33 @@ internal static class NodeLifecycleJournal
         if (Traits.NodeJournalEnabled)
         {
             RecordCore(evt, kind, nodeId, subjectProcessId, detail);
+        }
+    }
+
+    /// <summary>
+    /// Like <see cref="Record(NodeJournalEvent, NodeJournalKind, int, int, string?)"/>, with an enum value as the
+    /// detail. The value is only formatted when journaling is on, so callers pass it as is.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Record<TDetail>(NodeJournalEvent evt, NodeJournalKind kind, int nodeId, int subjectProcessId, TDetail detail)
+        where TDetail : struct, Enum
+    {
+        if (Traits.NodeJournalEnabled)
+        {
+            RecordCore(evt, kind, nodeId, subjectProcessId, detail);
+        }
+    }
+
+    /// <summary>
+    /// Records that this process launched node <paramref name="nodeId"/> as <paramref name="processId"/>. The node
+    /// kind is read from <paramref name="commandLineArgs"/>, and the handshake salt is added, only when journaling is on.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RecordLaunched(int nodeId, int processId, string commandLineArgs)
+    {
+        if (Traits.NodeJournalEnabled)
+        {
+            RecordLaunchedCore(nodeId, processId, commandLineArgs);
         }
     }
 
@@ -232,6 +261,30 @@ internal static class NodeLifecycleJournal
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static void RecordCore(NodeJournalEvent evt, NodeJournalKind kind, int nodeId, int subjectProcessId, string? detail)
         => JournalState.Record(evt, kind, nodeId, subjectProcessId, detail);
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void RecordCore<TDetail>(NodeJournalEvent evt, NodeJournalKind kind, int nodeId, int subjectProcessId, TDetail detail)
+        where TDetail : struct, Enum
+    {
+        if (JournalState.Sink is not null)
+        {
+            JournalState.Record(evt, kind, nodeId, subjectProcessId, detail.ToString());
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void RecordLaunchedCore(int nodeId, int processId, string commandLineArgs)
+    {
+        if (JournalState.Sink is not null)
+        {
+            JournalState.Record(
+                NodeJournalEvent.Launched,
+                KindOf(NodeModeHelper.ExtractFromCommandLine(commandLineArgs)),
+                nodeId,
+                processId,
+                Traits.MSBuildNodeHandshakeSalt);
+        }
+    }
 
     /// <summary>
     /// All mutable journal state. Kept out of <see cref="NodeLifecycleJournal"/> so that nothing here, including the

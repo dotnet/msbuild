@@ -106,7 +106,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Whether node lifecycle journaling is on for this process. Read once at startup so that the JIT can fold
-        /// every <see cref="NodeLifecycleJournal.Record"/> call to a single never-taken branch when it is off.
+        /// every <c>NodeLifecycleJournal.Record*</c> call to a single never-taken branch when it is off.
         /// </summary>
         public static readonly bool NodeJournalEnabled = !string.IsNullOrEmpty(NodeJournalPath);
 

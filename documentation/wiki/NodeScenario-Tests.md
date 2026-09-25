@@ -14,8 +14,10 @@ into one shared, append-only file:
 
 * **Opt-in.** Recording is on only when the `MSBUILDNODEJOURNAL` environment variable is set when the process starts
   (`Traits.NodeJournalEnabled`, a `static readonly bool`). When it is off, each call site costs a single branch that the
-  JIT folds away. Nothing is allocated and nothing is initialized. Call sites whose arguments cost anything to compute
-  (`Process.Id`, `ToString()`) are wrapped in `if (NodeLifecycleJournal.IsEnabled)`.
+  JIT folds away. Nothing is allocated and nothing is initialized. The journal decides whether to record, so product code
+  never checks `IsEnabled`. It passes values it already has. Enum details go through the generic `Record` overload, and
+  launches go through `RecordLaunched(nodeId, pid, commandLineArgs)`, so formatting and command-line parsing happen only
+  behind the gate.
 * **Totally ordered across processes.** Writers take a named mutex derived from the file path, read and increment the
   global sequence number kept in a fixed-size header, and append one line of JSON per record. Every record has a
   unique, gap-free `seq`, so "A happened before B" is a comparison of two numbers even when A and B come from different
