@@ -3211,15 +3211,21 @@ EndGlobal
         }
 
         [Theory]
-        [MemberData(nameof(MinimumMessageImportanceTestData))]
-        public void EndToEndMinimumMessageImportance_OutOfProc(string arguments, MessageImportance expectedMinimumMessageImportance)
+        [InlineData("/v:quiet /tl:off")]
+        [InlineData("/v:diagnostic /tl:off")]
+        [InlineData("/v:quiet /bl")]
+        [InlineData("/v:diagnostic /bl")]
+        [InlineData("/v:quiet /check")]
+        [InlineData("/v:diagnostic /check")]
+        [InlineData("/v:quiet /tl:on")]
+        [InlineData("/v:diagnostic /tl:on")]
+        public void EndToEndMinimumMessageImportance_OutOfProc(string arguments)
         {
-            using var testEnvironment = TestEnvironment.Create();
+            using var testEnvironment = TestEnvironment.Create(_output);
 
-            // NOTE for this test: out of proc nodes _always_ log every message, so we rewrite the expected minimum message importance to accept every message.
-            expectedMinimumMessageImportance = MessageImportance.Low;
-
-            string projectContents = GenerateMessageImportanceProjectFile(expectedMinimumMessageImportance);
+            // Out-of-proc nodes always log every message. Cover both verbosity boundaries for
+            // each logger; the in-proc matrix covers the intermediate importance thresholds.
+            string projectContents = GenerateMessageImportanceProjectFile(MessageImportance.Low);
 
             TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
 
