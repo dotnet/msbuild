@@ -303,6 +303,21 @@ internal sealed class NodeScenario : IDisposable
     }
 
     /// <summary>
+    /// Makes nodes that wait for a host (pooled TaskHosts, reusable workers) exit on their own once they have been idle
+    /// for <paramref name="milliseconds"/>. Call it before starting the runs.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="BuildManager.ShutdownAllNodes"/> reaches neither TaskHosts waiting in the pool nor nodes of another
+    /// installation such as the bootstrap. With a short idle timeout, <see cref="ShutdownNodes"/> with a no-op shutdown
+    /// just waits for them to go. Keep the timeout long enough for the reuse the test expects between its builds.
+    /// </remarks>
+    public void UseShortNodeIdleTimeout(int milliseconds = 10_000)
+    {
+        ThrowIfDisposed();
+        _env.SetEnvironmentVariable("MSBUILDNODECONNECTIONTIMEOUT", milliseconds.ToString(CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
     /// Shuts down every reusable node and server of the scenario and waits until each journaled node process is gone.
     /// </summary>
     /// <param name="shutdown">

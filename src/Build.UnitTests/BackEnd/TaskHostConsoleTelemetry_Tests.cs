@@ -112,7 +112,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         TestEnvironment env = scenario.Environment;
         env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
         ChangeWaves.ResetStateForTests();
-        UseShortTaskHostIdleTimeout(scenario);
+        scenario.UseShortNodeIdleTimeout();
         BuildManager buildManager = scenario.CreateBuildManager();
         MockLogger logger = new(_output);
 
@@ -183,7 +183,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         using NodeScenario scenario = NodeScenario.Create(_output);
         scenario.Environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
         ChangeWaves.ResetStateForTests();
-        UseShortTaskHostIdleTimeout(scenario);
+        scenario.UseShortNodeIdleTimeout();
         if (replacePooledProcess)
         {
             // Every TaskHost dies when it would return to the pool after its first build, so each build needs a new one.
@@ -268,13 +268,6 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost)).ShouldBe(processIds.Count);
         scenario.ShutdownNodes(buildManager.ShutdownAllNodes);
     }
-
-    /// <summary>
-    /// <see cref="BuildManager.ShutdownAllNodes"/> reaches connected sidecars but not TaskHosts waiting in the pool, so
-    /// give pooled ones a short idle timeout: they then end on their own once the test stops using them.
-    /// </summary>
-    private static void UseShortTaskHostIdleTimeout(NodeScenario scenario)
-        => scenario.Environment.SetEnvironmentVariable("MSBUILDNODECONNECTIONTIMEOUT", "10000");
 
     private static string CreateProject(TestEnvironment env, bool explicitTaskHost)
     {
