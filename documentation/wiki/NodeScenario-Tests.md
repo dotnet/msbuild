@@ -12,12 +12,10 @@ Part of [#15113](https://github.com/dotnet/msbuild/issues/15113).
 `Microsoft.Build.Framework.NodeLifecycleJournal` (internal) records the lifecycle decisions of every MSBuild process
 into one shared, append-only file:
 
-* **Opt-in.** Recording is on only when the `MSBUILDNODEJOURNAL` environment variable is set when the process starts
-  (`Traits.NodeJournalEnabled`, a `static readonly bool`). When it is off, each call site costs a single branch that the
-  JIT folds away. Nothing is allocated and nothing is initialized. The journal decides whether to record, so product code
-  never checks `IsEnabled`. It passes values it already has. Enum details go through the generic `Record` overload, and
-  launches go through `RecordLaunched(nodeId, pid, commandLineArgs)`, so formatting and command-line parsing happen only
-  behind the gate.
+* **Opt-in and free when off.** Recording is on only when `MSBUILDNODEJOURNAL` is set at process start
+  (`Traits.NodeJournalEnabled`, a `static readonly bool`). When it is off, each call site is a single branch that the JIT
+  folds away, with no allocation. Product code never checks `IsEnabled`: it passes values it already has, and the
+  journal formats enum details and parses launch command lines only behind the gate.
 * **Totally ordered across processes.** Writers take a named mutex derived from the file path, read and increment the
   global sequence number kept in a fixed-size header, and append one line of JSON per record. Every record has a
   unique, gap-free `seq`, so "A happened before B" is a comparison of two numbers even when A and B come from different
@@ -74,7 +72,7 @@ failing seed to reproduce the failure (as far as a delay can).
 
 ## The harness (`src/UnitTests.Shared`)
 
-The harness types are `internal`, and visible to the Engine, CommandLine and Framework unit tests.
+The harness types are `internal` and visible to the Engine and Framework unit tests.
 
 ```csharp
 [NodeScenarioTheory]
@@ -124,8 +122,6 @@ All of these are restored on `Dispose`.
   `Release()`. That records `GateReleased`. A gate holds the system still at an exact point, which is how a test
   asserts on the state *during* an operation.
 * `Marker(name)` writes a free-form record, for example to split the timeline into phases.
-* `AllowSurvivor(pid)` stops teardown from reporting a process that is expected to outlive the scenario. The process
-  is still killed.
 
 ### Observing
 
@@ -155,8 +151,8 @@ ceiling exists to turn a hang into a diagnosable failure, not to time an operati
 3. gives every journaled process that recorded `Exited` time to terminate. Journaled processes are the processes that
    wrote a record plus every `Launched` subject, and a process is matched by pid *and* start time so that pid reuse
    cannot confuse it;
-4. **kills every other journaled process that is still alive and fails the test** with the list of leaks, unless the
-   test has already failed (the original failure is not masked).
+4. **kills every other journaled process that is still alive and fails the test** with the list of leaks. It also
+   fails the test for any `MSBuild_*.failure.txt` dump a scenario process wrote. Neither masks an earlier failure.
 
 Every harness failure reports the full journal timeline, the live or exited state of every journaled process, and the
 tail of every communication trace and `MSBuild_*.txt` failure file in the debug directory.

@@ -3533,7 +3533,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (shutdownReason == NodeEngineShutdownReason.Error)
                 {
-                    NodeLifecycleJournal.Record(NodeJournalEvent.Exited, detail: "Error");
+                    NodeLifecycleJournal.Record(NodeJournalEvent.Exited, NodeJournalKind.None, 0, 0, shutdownReason);
                     Debug.WriteLine("An error has happened, throwing an exception");
                     throw nodeException;
                 }
@@ -3541,7 +3541,6 @@ namespace Microsoft.Build.CommandLine
                 if (shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
                 {
                     NodeLifecycleJournal.Record(NodeJournalEvent.Exited, NodeJournalKind.None, 0, 0, shutdownReason);
-
                     restart = false;
                 }
             }

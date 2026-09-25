@@ -38,8 +38,8 @@ namespace Microsoft.Build.UnitTests.Shared;
 /// has gone quiet, interleavings are forced with <see cref="Gate"/>, and failures are injected with <see cref="Fault"/>.
 /// </para>
 /// <para>
-/// <see cref="Dispose"/> fails the test if any process that appears in the journal is still alive and did not
-/// record that it is exiting, after killing it, so leaks never reach the next test.
+/// <see cref="Dispose"/> kills every journaled process that is still alive and did not record that it is exiting, and
+/// fails the test for each such leak and for any MSBuild failure dump, so leaks never reach the next test.
 /// </para>
 /// <para>See documentation/wiki/NodeScenario-Tests.md.</para>
 /// </remarks>
@@ -104,8 +104,6 @@ internal sealed class NodeScenario : IDisposable
     private readonly List<GateHandle> _gates = [];
     private readonly List<BuildManager> _buildManagers = [];
     private readonly List<NodeFaultSpec> _faults = [];
-    private readonly HashSet<int> _allowedSurvivors = [];
-    private readonly List<(string ContentSubstring, string Reason)> _allowedFailureDumps = [];
 
     private int _assertionFailures;
     private bool _failureReported;
@@ -294,32 +292,6 @@ internal sealed class NodeScenario : IDisposable
     {
         long sequence = _writer.Append(_processId, NodeJournalKind.Main, NodeJournalEvent.Marker, NodeJournalKind.None, 0, 0, detail is null ? name : name + ": " + detail);
         return AwaitSequence(sequence);
-    }
-
-    /// <summary>
-    /// Allows <paramref name="processId"/> to outlive the scenario (it is still killed, but not reported as a leak).
-    /// </summary>
-    public void AllowSurvivor(int processId)
-    {
-        lock (_lock)
-        {
-            _allowedSurvivors.Add(processId);
-        }
-    }
-
-    /// <summary>
-    /// Accepts MSBuild failure dumps (<c>MSBuild_pid-*.failure.txt</c>) whose contents contain
-    /// <paramref name="contentSubstring"/>. Without this, any failure dump a scenario process writes fails the test,
-    /// just like <see cref="BuildFailureLogInvariant"/> does for other tests. Always give a reason, ideally an issue link.
-    /// </summary>
-    public void AllowFailureDump(string contentSubstring, string reason)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(contentSubstring);
-        ArgumentException.ThrowIfNullOrEmpty(reason);
-        lock (_lock)
-        {
-            _allowedFailureDumps.Add((contentSubstring, reason));
-        }
     }
 
     #endregion
@@ -554,7 +526,7 @@ internal sealed class NodeScenario : IDisposable
             // Only after every process is gone, so no dump can still be written.
             try
             {
-                leaks.AddRange(FindUnexpectedFailureDumps());
+                leaks.AddRange(FindFailureDumps());
             }
             catch (Exception ex)
             {
@@ -601,9 +573,9 @@ internal sealed class NodeScenario : IDisposable
         }
     }
 
-    private List<string> FindUnexpectedFailureDumps()
+    private List<string> FindFailureDumps()
     {
-        List<string> unexpected = [];
+        List<string> dumps = [];
         foreach (string directory in new[] { DebugDirectory, TempDirectory })
         {
             if (!Directory.Exists(directory))
@@ -613,49 +585,22 @@ internal sealed class NodeScenario : IDisposable
 
             foreach (string file in Directory.EnumerateFiles(directory, "MSBuild*failure.txt", SearchOption.AllDirectories))
             {
-                string contents = File.ReadAllText(file);
-                string? allowedBecause = null;
-                lock (_lock)
-                {
-                    foreach ((string substring, string reason) in _allowedFailureDumps)
-                    {
-                        if (contents.Contains(substring))
-                        {
-                            allowedBecause = reason;
-                            break;
-                        }
-                    }
-                }
-
-                if (allowedBecause is not null)
-                {
-                    Log($"Accepted failure dump {Path.GetFileName(file)} ({allowedBecause}).");
-                    continue;
-                }
-
-                unexpected.Add($"  failure dump {Path.GetFileName(file)}:{System.Environment.NewLine}{contents}");
+                dumps.Add($"  failure dump {Path.GetFileName(file)}:{System.Environment.NewLine}{File.ReadAllText(file)}");
             }
         }
 
-        return unexpected;
+        return dumps;
     }
 
     private List<string> ReapProcesses()
     {
         List<string> leaks = [];
-        Stopwatch waitForExit = Stopwatch.StartNew();
         foreach (JournaledProcess journaled in GetJournaledProcesses())
         {
             using Process? process = journaled.TryOpen();
             if (process is null)
             {
                 continue;
-            }
-
-            bool allowed;
-            lock (_lock)
-            {
-                allowed = _allowedSurvivors.Contains(journaled.ProcessId);
             }
 
             // A process that recorded that it is exiting only has to finish doing so.
@@ -668,10 +613,7 @@ internal sealed class NodeScenario : IDisposable
                 }
             }
 
-            if (!allowed)
-            {
-                leaks.Add($"  pid {journaled.ProcessId} ({journaled.Role}){(journaled.RecordedExit ? " recorded Exited but did not terminate" : string.Empty)}");
-            }
+            leaks.Add($"  pid {journaled.ProcessId} ({journaled.Role}){(journaled.RecordedExit ? " recorded Exited but did not terminate" : string.Empty)}");
 
             try
             {

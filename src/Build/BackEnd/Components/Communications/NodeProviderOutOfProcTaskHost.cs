@@ -339,7 +339,6 @@ namespace Microsoft.Build.BackEnd
                     if (!enableReuse && SupportsSidecarLifetime(nodeKey.HandshakeOptions, context.NegotiatedPacketVersion))
                     {
                         RetireNode(context.NodeId);
-
                         NodeLifecycleJournal.Record(NodeJournalEvent.TaskHostRetired, NodeJournalKind.TaskHost, context.NodeId, context.Process.Id, "build-complete");
                     }
                     else
@@ -367,7 +366,6 @@ namespace Microsoft.Build.BackEnd
                         ? NodeBuildCompleteAction.ReuseWithConnection
                         : NodeBuildCompleteAction.Legacy;
                 context.SendData(new NodeBuildComplete(enableReuse, action));
-
                 NodeLifecycleJournal.Record(NodeJournalEvent.ShutdownSent, NodeJournalKind.TaskHost, context.NodeId, context.Process.Id, action);
             }
 
