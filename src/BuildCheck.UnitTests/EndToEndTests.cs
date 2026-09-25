@@ -605,13 +605,10 @@ public class EndToEndTests : IDisposable
         string logFile = _env.ExpectFile(".binlog").Path;
 
         _ = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(checkRequested ? "-check" : string.Empty)} -bl:{logFile}",
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False {(checkRequested ? "-check" : string.Empty)} -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
-        if (BC0101Severity != "error")
-        {
-            success.ShouldBeTrue();
-        }
+        success.ShouldBe(!checkRequested || BC0101Severity != "error");
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
          $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic",
@@ -619,10 +616,8 @@ public class EndToEndTests : IDisposable
 
         _env.Output.WriteLine(output);
 
-        if (BC0101Severity != "error")
-        {
-            success.ShouldBeTrue();
-        }
+        // Replaying a valid binlog succeeds even when the recorded build failed.
+        success.ShouldBeTrue();
 
         // The conflicting outputs warning appears - but only if check was requested
         if (checkRequested)
@@ -656,13 +651,10 @@ public class EndToEndTests : IDisposable
         PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check",
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -check",
             out bool success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
-        if (BC0101Severity != "error")
-        {
-            success.ShouldBeTrue();
-        }
+        success.ShouldBe(BC0101Severity != "error");
 
         if (!string.IsNullOrEmpty(expectedOutputValues))
         {
