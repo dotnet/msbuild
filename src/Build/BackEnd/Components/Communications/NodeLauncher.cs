@@ -51,7 +51,11 @@ namespace Microsoft.Build.BackEnd
         {
             // Disable MSBuild server for a child process.
             // In case of starting msbuild server it prevents an infinite recursion. In case of starting msbuild node we also do not want this variable to be set.
-            return DisableMSBuildServer(() => StartInternal(launchData));
+            Process process = DisableMSBuildServer(() => StartInternal(launchData));
+
+            NodeLifecycleJournal.RecordLaunched(nodeId, process.Id, launchData.CommandLineArgs);
+
+            return process;
         }
 
         /// <summary>

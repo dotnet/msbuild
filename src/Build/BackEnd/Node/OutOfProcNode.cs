@@ -493,7 +493,9 @@ namespace Microsoft.Build.Execution
 
             // Dispose of any build registered objects
             IRegisteredTaskObjectCache objectCache = (IRegisteredTaskObjectCache)(_componentFactories.GetComponent(BuildComponentType.RegisteredTaskObjectCache));
+            NodeLifecycleJournal.Record(NodeJournalEvent.DisposalBegin, NodeJournalKind.Worker);
             objectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
+            NodeLifecycleJournal.Record(NodeJournalEvent.DisposalEnd, NodeJournalKind.Worker);
 
             if (_shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
             {
