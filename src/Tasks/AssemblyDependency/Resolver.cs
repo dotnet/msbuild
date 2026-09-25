@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -107,6 +108,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string SearchPath => searchPathElement;
 
+        internal CancellationToken CancellationToken { get; set; }
+
         /// <summary>
         /// Resolve a single file.
         /// </summary>
@@ -157,6 +160,7 @@ namespace Microsoft.Build.Tasks
             string fullPathToCandidateAssembly,
             ResolutionSearchLocation searchLocation)
         {
+            CancellationToken.ThrowIfCancellationRequested();
             if (searchLocation != null)
             {
                 searchLocation.FileNameAttempted = fullPathToCandidateAssembly;
@@ -310,6 +314,7 @@ namespace Microsoft.Build.Tasks
             string fullPathToDirectory,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected)
         {
+            CancellationToken.ThrowIfCancellationRequested();
             if (assemblyName == null)
             {
                 // This can happen if the assembly name is actually a file name.
