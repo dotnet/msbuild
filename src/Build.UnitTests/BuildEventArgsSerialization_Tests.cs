@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -55,6 +56,68 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(BinaryLogRecordKind.ProjectImportArchive, (BinaryLogRecordKind)binaryReader.Read7BitEncodedInt());
             Assert.Equal(bytes.Length, binaryReader.Read7BitEncodedInt());
             Assert.Equal(bytes, binaryReader.ReadBytes(bytes.Length));
+        }
+
+        [Theory]
+        [InlineData(1, false)]
+        [InlineData(2, false)]
+        [InlineData(3, false)]
+        [InlineData(1, true)]
+        [InlineData(2, true)]
+        public void EmbeddedArchiveIsCompleteForEverySubscriber(int subscriberCount, bool rewriteArchive)
+        {
+            using var archiveStream = new MemoryStream();
+            using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                using var content = new StreamWriter(archive.CreateEntry("source.txt").Open());
+                content.Write("original content");
+            }
+
+            archiveStream.Position = 0;
+            using var logStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(logStream, Encoding.UTF8, leaveOpen: true);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+            writer.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, archiveStream);
+            writer.Write(new BuildFinishedEventArgs("after archive", null, true));
+            binaryWriter.Write((byte)BinaryLogRecordKind.EndOfFile);
+            binaryWriter.Flush();
+            logStream.Position = 0;
+
+            using var binaryReader = new BinaryReader(logStream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            if (rewriteArchive)
+            {
+                reader.ArchiveFileEncountered += args =>
+                {
+                    using ArchiveData original = args.ArchiveData;
+                    args.ArchiveData = new ArchiveFile(original.FullPath, "rewritten content");
+                };
+            }
+
+            int archivesRead = 0;
+            for (int i = 0; i < subscriberCount; i++)
+            {
+                reader.EmbeddedContentRead += args =>
+                {
+                    args.ContentKind.ShouldBe(BinaryLogRecordKind.ProjectImportArchive);
+                    using Stream content = args.ContentStream;
+                    content.Position.ShouldBe(0);
+                    using var copy = new MemoryStream();
+                    content.CopyTo(copy);
+                    copy.Length.ShouldBe(content.Length);
+                    copy.Position = 0;
+                    using var archive = new ZipArchive(copy, ZipArchiveMode.Read);
+                    ZipArchiveEntry entry = archive.Entries.ShouldHaveSingleItem();
+                    entry.FullName.ShouldBe("source.txt");
+                    using var text = new StreamReader(entry.Open());
+                    text.ReadToEnd().ShouldBe(rewriteArchive ? "rewritten content" : "original content");
+                    archivesRead++;
+                };
+            }
+
+            reader.Read().ShouldBeOfType<BuildFinishedEventArgs>().Message.ShouldBe("after archive");
+            reader.Read().ShouldBeNull();
+            archivesRead.ShouldBe(subscriberCount);
         }
 
         [Theory]
@@ -1210,6 +1273,57 @@ namespace Microsoft.Build.UnitTests
                     attempt => $"{attempt.SearchPath};{attempt.ParentAssembly};{attempt.FileNameAttempted};{attempt.AssemblyName};{attempt.Result};{attempt.ProcessorArchitecture};{attempt.IsAssemblyFoldersExSearch}")));
         }
 
+        [Theory]
+        [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace, false)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails, false)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictWarning, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictWarning, false)]
+        public void Replay_EventFilter_HandlesAssemblyResolutionDiagnostics(BinaryLogRecordKind recordKind, bool acceptEvent)
+        {
+            BuildEventArgs original = recordKind switch
+            {
+                BinaryLogRecordKind.AssemblyResolutionSearchTrace => CreateAssemblyResolutionSearchEvent(),
+                BinaryLogRecordKind.AssemblyConflictDependencyDetails => CreateAssemblyConflictDependencyDetailsEvent(),
+                BinaryLogRecordKind.AssemblyConflictWarning => CreateAssemblyConflictWarningEvent(),
+                _ => throw new ArgumentOutOfRangeException(nameof(recordKind))
+            };
+            original.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream);
+            var eventWriter = new BuildEventArgsWriter(writer);
+            eventWriter.Write(original);
+            eventWriter.Write(new BuildFinishedEventArgs("finished", null, succeeded: true));
+            writer.Write((byte)BinaryLogRecordKind.EndOfFile);
+            writer.Flush();
+            stream.Position = 0;
+
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            List<BinaryLogEventMetadata> metadataSeen = [];
+            BinaryLogEventFilter filter = metadata =>
+            {
+                metadataSeen.Add(metadata);
+                return metadata.RecordKind != recordKind || acceptEvent;
+            };
+
+            BuildEventArgs result = reader.Read(filter);
+            if (acceptEvent)
+            {
+                result.GetType().ShouldBe(original.GetType());
+                result.Message.ShouldBe(original.Message);
+                result.Timestamp.ShouldBe(original.Timestamp);
+                result.BuildEventContext.ProjectContextId.ShouldBe(3);
+                result = reader.Read(filter);
+            }
+
+            result.ShouldBeOfType<BuildFinishedEventArgs>().Succeeded.ShouldBeTrue();
+            reader.Read(filter).ShouldBeNull();
+            metadataSeen.Select(metadata => metadata.RecordKind).ShouldBe([recordKind, BinaryLogRecordKind.BuildFinished]);
+            metadataSeen[0].BuildEventContext.ProjectContextId.ShouldBe(3);
+        }
+
         private static AssemblyResolutionSearchTraceEventArgs CreateAssemblyResolutionSearchEvent()
             => new(
                 "Requested, Version=1.0.0.0",
@@ -1516,6 +1630,47 @@ namespace Microsoft.Build.UnitTests
                 e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
                 e => TranslationHelpers.GetPropertiesString(e.Properties),
                 e => TranslationHelpers.GetMultiItemsString(e.Items));
+        }
+
+        [Fact]
+        public void EvaluationFilesCanBeCollectedWithoutSerializingTheEvent()
+        {
+            string projectFile = Path.GetFullPath(Path.Combine("evaluated", "source.proj"));
+            var args = new ProjectEvaluationFinishedEventArgs("finished")
+            {
+                ProjectFile = projectFile,
+                Items = new List<DictionaryEntry>
+                {
+                    new("Compile", new MyTaskItem { ItemSpec = "unrelated.txt" }),
+                    new("EmbedInBinlog", new MyTaskItem { ItemSpec = "first.txt" }),
+                    new("EmbedInBinlog", "second.txt"),
+                    new("embedinbinlog", new MyTaskItem { ItemSpec = "third.txt" }),
+                    new("EmbedInBinlog", new MyTaskItem { ItemSpec = "" }),
+                    new("EmbedInBinlog", ""),
+                },
+            };
+            using var writtenStream = new MemoryStream();
+            using var writtenBinaryWriter = new BinaryWriter(writtenStream);
+            var writer = new BuildEventArgsWriter(writtenBinaryWriter);
+            List<string> writtenFiles = [];
+            writer.EmbedFile += writtenFiles.Add;
+            writer.Write(args);
+
+            using var excludedStream = new MemoryStream();
+            using var excludedBinaryWriter = new BinaryWriter(excludedStream);
+            var excludedWriter = new BuildEventArgsWriter(excludedBinaryWriter);
+            List<string> excludedFiles = [];
+            excludedWriter.EmbedFile += excludedFiles.Add;
+            excludedWriter.CheckForFilesToEmbed(args);
+
+            writtenFiles.ShouldBe(new[]
+            {
+                Path.Combine(Path.GetDirectoryName(projectFile), "first.txt"),
+                Path.Combine(Path.GetDirectoryName(projectFile), "second.txt"),
+                Path.Combine(Path.GetDirectoryName(projectFile), "third.txt"),
+            });
+            excludedFiles.ShouldBe(writtenFiles);
+            excludedStream.Length.ShouldBe(0);
         }
 
         /// <summary>
@@ -2075,6 +2230,7 @@ namespace Microsoft.Build.UnitTests
             using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
             var deserializedArgs = (T)buildEventArgsReader.Read();
 
+            buildEventArgsReader.CurrentRecordKind.ShouldBe(BuildEventArgsWriter.GetRecordKind(args));
             Assert.Equal(length, memoryStream.Position);
 
             Assert.NotNull(deserializedArgs);

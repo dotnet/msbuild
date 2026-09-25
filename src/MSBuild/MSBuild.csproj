@@ -97,6 +97,7 @@
     <Compile Include="CommandLine\CommandLineSwitchException.cs" />
     <Compile Include="CommandLine\CommandLineSwitchesAccessor.cs" />
     <Compile Include="DistributedLoggerRecord.cs" />
+    <Compile Include="FilteredBinlogReplay.cs" />
     <Compile Include="InitializationException.cs" />
     <Compile Include="MSBuildClientApp.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />

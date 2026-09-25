@@ -170,11 +170,20 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Write a provided instance of BuildEventArgs to the BinaryWriter
         /// </summary>
-        public void Write(BuildEventArgs e)
+        public void Write(BuildEventArgs e, BinaryLogRecordKind? originalRecordKind = null)
         {
             // reset the temp stream (in case last usage forgot to do so).
             this.currentRecordStream.SetLength(0);
             BinaryLogRecordKind eventKind = WriteCore(e);
+
+            // Legacy BuildCheck diagnostics share ordinary payloads, but retain distinct record kinds.
+            eventKind = (originalRecordKind, eventKind) switch
+            {
+                (BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message) => BinaryLogRecordKind.BuildCheckMessage,
+                (BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning) => BinaryLogRecordKind.BuildCheckWarning,
+                (BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error) => BinaryLogRecordKind.BuildCheckError,
+                _ => eventKind,
+            };
 
             FlushRecordToFinalStream(eventKind, currentRecordStream);
         }
@@ -300,6 +309,44 @@ namespace Microsoft.Build.Logging
             Write((int)stream.Length);
             WriteToOriginalStream(stream);
         }
+
+        internal static BinaryLogRecordKind GetRecordKind(BuildEventArgs e) => e switch
+        {
+            ResponseFileUsedEventArgs => BinaryLogRecordKind.ResponseFileUsed,
+            TaskParameterEventArgs => BinaryLogRecordKind.TaskParameter,
+            ProjectImportedEventArgs => BinaryLogRecordKind.ProjectImported,
+            TargetSkippedEventArgs => BinaryLogRecordKind.TargetSkipped,
+            PropertyReassignmentEventArgs => BinaryLogRecordKind.PropertyReassignment,
+            TaskCommandLineEventArgs => BinaryLogRecordKind.TaskCommandLine,
+            UninitializedPropertyReadEventArgs => BinaryLogRecordKind.UninitializedPropertyRead,
+            EnvironmentVariableReadEventArgs => BinaryLogRecordKind.EnvironmentVariableRead,
+            PropertyInitialValueSetEventArgs => BinaryLogRecordKind.PropertyInitialValueSet,
+            CriticalBuildMessageEventArgs => BinaryLogRecordKind.CriticalBuildMessage,
+            AssemblyLoadBuildEventArgs => BinaryLogRecordKind.AssemblyLoad,
+            MSBuildServerLifecycleEventArgs => BinaryLogRecordKind.MSBuildServerLifecycle,
+            AssemblyResolutionSearchTraceEventArgs => BinaryLogRecordKind.AssemblyResolutionSearchTrace,
+            AssemblyConflictDependencyDetailsMessageEventArgs => BinaryLogRecordKind.AssemblyConflictDependencyDetails,
+            BuildMessageEventArgs => BinaryLogRecordKind.Message,
+            TaskStartedEventArgs => BinaryLogRecordKind.TaskStarted,
+            TaskFinishedEventArgs => BinaryLogRecordKind.TaskFinished,
+            TargetStartedEventArgs => BinaryLogRecordKind.TargetStarted,
+            TargetFinishedEventArgs => BinaryLogRecordKind.TargetFinished,
+            BuildErrorEventArgs => BinaryLogRecordKind.Error,
+            AssemblyConflictWarningEventArgs => BinaryLogRecordKind.AssemblyConflictWarning,
+            BuildWarningEventArgs => BinaryLogRecordKind.Warning,
+            ProjectStartedEventArgs => BinaryLogRecordKind.ProjectStarted,
+            ProjectFinishedEventArgs => BinaryLogRecordKind.ProjectFinished,
+            BuildSubmissionStartedEventArgs => BinaryLogRecordKind.BuildSubmissionStarted,
+            BuildStartedEventArgs => BinaryLogRecordKind.BuildStarted,
+            BuildFinishedEventArgs => BinaryLogRecordKind.BuildFinished,
+            BuildCanceledEventArgs => BinaryLogRecordKind.BuildCanceled,
+            ProjectEvaluationStartedEventArgs => BinaryLogRecordKind.ProjectEvaluationStarted,
+            ProjectEvaluationFinishedEventArgs => BinaryLogRecordKind.ProjectEvaluationFinished,
+            BuildCheckTracingEventArgs => BinaryLogRecordKind.BuildCheckTracing,
+            BuildCheckAcquisitionEventArgs => BinaryLogRecordKind.BuildCheckAcquisition,
+            LoggersRegisteredEventArgs => BinaryLogRecordKind.LoggersRegistered,
+            _ => BinaryLogRecordKind.Message,
+        };
 
         /// <summary>
         /// Switches the binaryWriter used by the Write* methods to the direct underlying stream writer
@@ -794,12 +841,32 @@ namespace Microsoft.Build.Logging
             WriteTaskItemList(e.Items, e.LogItemMetadata);
             WriteDeduplicatedString(e.ParameterName);
             WriteDeduplicatedString(e.PropertyName);
-            if (e.Kind == TaskParameterMessageKind.AddItem
-               || e.Kind == TaskParameterMessageKind.TaskOutput)
+            CheckForFilesToEmbed(e);
+            return BinaryLogRecordKind.TaskParameter;
+        }
+
+        internal void CheckForFilesToEmbed(TaskParameterEventArgs e)
+        {
+            if (e.Kind is TaskParameterMessageKind.AddItem or TaskParameterMessageKind.TaskOutput)
             {
                 CheckForFilesToEmbed(e.ItemType, e.Items, e.ProjectFile);
             }
-            return BinaryLogRecordKind.TaskParameter;
+        }
+
+        internal void CheckForFilesToEmbed(ProjectEvaluationFinishedEventArgs e)
+        {
+            if (EmbedFile == null)
+            {
+                return;
+            }
+
+            foreach (var item in Internal.Utilities.EnumerateItems(e.Items))
+            {
+                if (string.Equals(item.Type, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase))
+                {
+                    CheckForFileToEmbed(item.Value, e.ProjectFile);
+                }
+            }
         }
 
         private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true, bool writeLineAndColumn = false)
@@ -1220,14 +1287,19 @@ namespace Microsoft.Build.Logging
 
             foreach (var item in list)
             {
-                if (item is ITaskItem taskItem && !string.IsNullOrEmpty(taskItem.ItemSpec))
-                {
-                    EmbedFile.Invoke(ResolveEmbedPath(taskItem.ItemSpec, projectFile));
-                }
-                else if (item is string itemSpec && !string.IsNullOrEmpty(itemSpec))
-                {
-                    EmbedFile.Invoke(ResolveEmbedPath(itemSpec, projectFile));
-                }
+                CheckForFileToEmbed(item, projectFile);
+            }
+        }
+
+        private void CheckForFileToEmbed(object item, string projectFile)
+        {
+            if (item is ITaskItem taskItem && !string.IsNullOrEmpty(taskItem.ItemSpec))
+            {
+                EmbedFile.Invoke(ResolveEmbedPath(taskItem.ItemSpec, projectFile));
+            }
+            else if (item is string itemSpec && !string.IsNullOrEmpty(itemSpec))
+            {
+                EmbedFile.Invoke(ResolveEmbedPath(itemSpec, projectFile));
             }
         }
 
