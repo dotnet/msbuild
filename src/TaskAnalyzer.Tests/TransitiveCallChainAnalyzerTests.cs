@@ -214,6 +214,81 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Theory]
+    [InlineData("new FileInfo(path.Value);")]
+    [InlineData("string dir = path.Value; Directory.CreateDirectory(dir);")]
+    [InlineData("using var stream = File.OpenRead(path.Value);")]
+    [InlineData("using var stream = File.OpenRead(Path.Combine(Path.GetDirectoryName(path.Value), \"child.txt\"));")]
+    [InlineData("string full = Path.GetFullPath(path.Value); string dir = Path.GetDirectoryName(full); using var stream = File.OpenRead(Path.Combine(dir, \"child.txt\"));")]
+    public async Task HelperWithAbsolutePathValue_NoDiagnostics(string helperBody)
+    {
+        var source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public static class PathHelper
+            {
+                public static void Read(AbsolutePath path)
+                {
+                    {{helperBody}}
+                }
+            }
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    PathHelper.Read(new TaskEnvironment().GetAbsolutePath("relative.txt"));
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetAllDiagnosticsAsync(source);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData("path.OriginalValue")]
+    [InlineData("other.Value")]
+    [InlineData("path.Value.Substring(1)")]
+    public async Task HelperWithUnsafePathValue_StillProducesDiagnostic(string argument)
+    {
+        var source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            namespace Other
+            {
+                public class AbsolutePath { public string Value => "relative.txt"; }
+            }
+            public static class PathHelper
+            {
+                public static void Read(AbsolutePath path)
+                {
+                    var other = new Other.AbsolutePath();
+                    using var stream = File.OpenRead({{argument}});
+                }
+            }
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    PathHelper.Read(new TaskEnvironment().GetAbsolutePath("relative.txt"));
+                    return true;
+                }
+            }
+            """;
+
+        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        var diags = await GetAllDiagnosticsAsync(source);
+
+        var diagnostic = diags.ShouldHaveSingleItem();
+        diagnostic.Id.ShouldBe(DiagnosticIds.TransitiveUnsafeCall);
+        diagnostic.GetMessage().ShouldContain("File.OpenRead");
+    }
+
+    [Theory]
     [InlineData(false, "GetCanonicalForm")]
     [InlineData(true, "GetCanonicalForm")]
     [InlineData(false, "Normalize")]
