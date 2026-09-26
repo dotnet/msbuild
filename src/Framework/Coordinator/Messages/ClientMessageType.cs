@@ -14,7 +14,7 @@ internal enum ClientMessageType : byte
     Handshake = 1,
 
     /// <summary>
-    ///  Request a node grant. Payload: int requestedNodes.
+    ///  Request a node grant. Payload: optional priority field, int requestedNodes.
     /// </summary>
     RequestNodes = 2,
 
