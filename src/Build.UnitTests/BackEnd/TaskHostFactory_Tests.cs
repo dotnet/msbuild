@@ -102,6 +102,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 // This is the sidecar TaskHost case - it should persist after the build is done.
                 scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Exited, processId: pid), "the pooled TaskHost exiting after the build");
+                scenario.AllowMismatchedProbeBrokenPipeDump();
                 scenario.ShutdownNodes(buildManager.ShutdownAllNodes);
             }
 
@@ -155,6 +156,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // The transient TaskHost ends with its task; the sidecar stays in the pool for the next build.
             scenario.Await(NodeJournalEvent.Exited, processId: pid);
             scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Exited, processId: pidSidecar), "the sidecar TaskHost exiting after the build");
+            scenario.AllowMismatchedProbeBrokenPipeDump();
             scenario.ShutdownNodes();
         }
 

@@ -109,6 +109,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
     public void ForwardsConsoleOutputFromBuildObjectDisposal(bool standardError, bool retainConnection)
     {
         using NodeScenario scenario = NodeScenario.Create(_output);
+        scenario.AllowMismatchedProbeBrokenPipeDump();
         TestEnvironment env = scenario.Environment;
         env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
         ChangeWaves.ResetStateForTests();
@@ -181,6 +182,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
     public void ResetsBetweenBuildsWithReusedTaskHost(bool standardError, bool retainConnection, bool replacePooledProcess)
     {
         using NodeScenario scenario = NodeScenario.Create(_output);
+        scenario.AllowMismatchedProbeBrokenPipeDump();
         scenario.Environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", retainConnection ? null : ChangeWaves.Wave18_12.ToString());
         ChangeWaves.ResetStateForTests();
         scenario.UseShortNodeIdleTimeout();

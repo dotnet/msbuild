@@ -105,6 +105,7 @@ internal sealed class NodeScenario : IDisposable
     private readonly List<GateHandle> _gates = [];
     private readonly List<BuildManager> _buildManagers = [];
     private readonly List<NodeFaultSpec> _faults = [];
+    private readonly List<(string[] RequiredContent, string Reason)> _allowedFailureDumps = [];
 
     private int _assertionFailures;
     private bool _failureReported;
@@ -373,6 +374,43 @@ internal sealed class NodeScenario : IDisposable
         long sequence = _writer.Append(_processId, NodeJournalKind.Main, NodeJournalEvent.Marker, NodeJournalKind.None, 0, 0, detail is null ? name : name + ": " + detail);
         return AwaitSequence(sequence);
     }
+
+    /// <summary>
+    /// Accepts an MSBuild failure dump (<c>MSBuild_pid-*.failure.txt</c>) only when its contents contain every string in
+    /// <paramref name="requiredContent"/>. Without this, any failure dump a scenario process writes fails the test. Use it
+    /// only in tests that can hit a known product race, and always give a reason, ideally an issue link. Every accepted
+    /// dump is written to the test output with the reason.
+    /// </summary>
+    public void AllowFailureDump(string reason, params string[] requiredContent)
+    {
+        if (string.IsNullOrEmpty(reason))
+        {
+            throw new ArgumentException("A reason is required.", nameof(reason));
+        }
+
+        if (requiredContent.Length == 0 || requiredContent.Any(string.IsNullOrEmpty))
+        {
+            throw new ArgumentException("At least one non-empty content string is required.", nameof(requiredContent));
+        }
+
+        lock (_lock)
+        {
+            _allowedFailureDumps.Add((requiredContent, reason));
+        }
+    }
+
+    /// <summary>
+    /// Opts in to <see cref="AllowFailureDump"/> for a known product race: when a client with a mismatched handshake (such as
+    /// the probe of <see cref="BuildManager.ShutdownAllNodes"/>) drops the pipe while a reusable node is rejecting it, the pipe
+    /// stays broken, the next wait for a connection in <c>NodeEndpointOutOfProcBase.PacketPumpProc</c> throws, and the node
+    /// writes a failure dump and exits. Call it only in tests that leave reusable nodes for such a probe.
+    /// </summary>
+    public void AllowMismatchedProbeBrokenPipeDump()
+        => AllowFailureDump(
+            "known product race: a mismatched probe breaks the pipe mid-handshake (proposed issue in #15152)",
+            "System.IO.IOException",
+            "NamedPipeServerStream.CheckConnectOperationsServer",
+            "NodeEndpointOutOfProcBase.PacketPumpProc");
 
     #endregion
 
@@ -665,11 +703,32 @@ internal sealed class NodeScenario : IDisposable
 
             foreach (string file in Directory.EnumerateFiles(directory, "MSBuild*failure.txt", SearchOption.AllDirectories))
             {
-                dumps.Add($"  failure dump {Path.GetFileName(file)}:{System.Environment.NewLine}{File.ReadAllText(file)}");
+                string content = File.ReadAllText(file);
+                string? reason = FindAllowedFailureDumpReason(content);
+                if (reason is not null)
+                {
+                    Log($"NodeScenario: ACCEPTED failure dump {Path.GetFileName(file)} ({reason}):{System.Environment.NewLine}{content}");
+                    continue;
+                }
+
+                dumps.Add($"  failure dump {Path.GetFileName(file)}:{System.Environment.NewLine}{content}");
             }
         }
 
         return dumps;
+    }
+
+    private string? FindAllowedFailureDumpReason(string content)
+    {
+        foreach ((string[] requiredContent, string reason) in SnapshotOf(_allowedFailureDumps))
+        {
+            if (requiredContent.All(content.Contains))
+            {
+                return reason;
+            }
+        }
+
+        return null;
     }
 
     private List<string> ReapProcesses()

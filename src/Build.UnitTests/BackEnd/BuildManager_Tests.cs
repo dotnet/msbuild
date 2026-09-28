@@ -352,6 +352,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .ShouldBeGreaterThan(0, "The build should have run on out-of-proc worker nodes.");
 
             // Reused nodes stay alive after the build. ShutdownAllNodes has to end every one of them.
+            scenario.AllowMismatchedProbeBrokenPipeDump();
             scenario.ShutdownNodes(shutdownManager.ShutdownAllNodes);
         }
 

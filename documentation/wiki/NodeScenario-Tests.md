@@ -160,6 +160,14 @@ ceiling exists to turn a hang into a diagnosable failure, not to time an operati
 4. **kills every other journaled process that is still alive and fails the test** with the list of leaks. It also
    fails the test for any `MSBuild_*.failure.txt` dump a scenario process wrote. Neither masks an earlier failure.
 
+A test that can hit a known product race may accept a specific dump with
+`scenario.AllowFailureDump(reason, requiredContent...)`: a dump is accepted only when it contains *every* required
+string, and each accepted dump is written to the test output with the reason. Any other dump still fails the test.
+This is a per-test opt-in, never a harness-wide allowance. The only current use is
+`AllowMismatchedProbeBrokenPipeDump()`, which the tests that leave reusable nodes for `ShutdownAllNodes` call: a
+mismatched probe that drops the pipe mid-handshake leaves the node's pipe broken, and the next wait for a connection
+in `NodeEndpointOutOfProcBase.PacketPumpProc` throws, dumps and ends the node (proposed issue in #15152).
+
 Every harness failure reports the full journal timeline, the live or exited state of every journaled process, and the
 tail of every communication trace and `MSBuild_*.txt` failure file in the debug directory.
 

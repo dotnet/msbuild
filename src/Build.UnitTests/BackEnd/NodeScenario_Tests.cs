@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -121,6 +122,33 @@ public sealed class NodeScenario_Tests(ITestOutputHelper output)
     {
         using NodeScenario scenario = NodeScenario.Create(_output);
         Should.Throw<InvalidOperationException>(() => NodeScenario.Create(_output));
+    }
+
+    [NodeScenarioFact]
+    public void AllowFailureDumpAcceptsOnlyDumpsWithEveryRequiredString()
+    {
+        const string BrokenPipeDump = """
+            UNHANDLED EXCEPTIONS FROM PROCESS 1:
+            System.IO.IOException: Pipe is broken.
+               at System.IO.Pipes.NamedPipeServerStream.CheckConnectOperationsServer()
+               at Microsoft.Build.BackEnd.NodeEndpointOutOfProcBase.PacketPumpProc()
+            """;
+
+        using (NodeScenario accepting = NodeScenario.Create(_output))
+        {
+            accepting.AllowMismatchedProbeBrokenPipeDump();
+            File.WriteAllText(Path.Combine(accepting.DebugDirectory, "MSBuild_pid-1_accepted.failure.txt"), BrokenPipeDump);
+        }
+
+        XunitException failure = Should.Throw<XunitException>(() =>
+        {
+            using NodeScenario rejecting = NodeScenario.Create(_output);
+            rejecting.AllowMismatchedProbeBrokenPipeDump();
+            File.WriteAllText(
+                Path.Combine(rejecting.DebugDirectory, "MSBuild_pid-2_rejected.failure.txt"),
+                BrokenPipeDump.Replace("NodeEndpointOutOfProcBase.PacketPumpProc", "NodeEndpointOutOfProcBase.RunReadLoop"));
+        });
+        failure.Message.ShouldContain("MSBuild_pid-2_rejected.failure.txt");
     }
 
     [NodeScenarioFact]
