@@ -202,7 +202,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
             ServerBuild second = Build(scenario, project.Path);
             second.ShouldRunOnServer();
-            second.ClientProcessId.ShouldNotBe(first.ClientProcessId, "Process started by two MSBuild executions should be different.");
             second.ServerProcessId.ShouldBe(first.ServerProcessId, "Node used by both the first and second build should be the same.");
             second.ServerReuseDecision.ShouldBe("reused");
 
@@ -215,8 +214,7 @@ namespace Microsoft.Build.Engine.UnitTests
             // A new build can still succeed, on a new server.
             ServerBuild third = Build(scenario, project.Path);
             third.ShouldRunOnServer();
-            third.ClientProcessId.ShouldNotBe(first.ClientProcessId, "Process started by two MSBuild executions should be different.");
-            third.ServerProcessId.ShouldNotBe(first.ServerProcessId, "The build after the crash must not use the crashed server.");
+            third.ServerLaunched.ShouldBeTrue("The build after the crash must not use the crashed server.");
             third.ServerReuseDecision.ShouldBe("new");
 
             scenario.ShutdownNodes();
@@ -601,8 +599,8 @@ namespace Microsoft.Build.Engine.UnitTests
             // A second build cannot reuse the (now gone) server, so it must launch a fresh server process.
             ServerBuild second = Build(scenario, $"{project.Path} -mt -nr:false");
             second.ShouldRunOnServer();
-            second.ServerProcessId.ShouldNotBe(first.ServerProcessId, "With node reuse disabled, each -mt build should get a fresh, non-persistent server process.");
-            scenario.Await(NodeJournalEvent.Exited, processId: second.ServerProcessId);
+            second.ServerLaunched.ShouldBeTrue("With node reuse disabled, each -mt build should get a fresh, non-persistent server process.");
+            scenario.Await(r => r.Sequence > second.Start.Sequence && NodeScenario.Is(NodeJournalEvent.Exited, processId: second.ServerProcessId)(r), $"server {second.ServerProcessId} exits");
         }
 
         [NodeScenarioFact]
@@ -986,6 +984,8 @@ namespace Microsoft.Build.Engine.UnitTests
             NodeJournalRecord? onServer = records.FirstOrDefault(r => r.Event == NodeJournalEvent.BuildStarted && r.Role == NodeJournalKind.Server);
             string? reuseDecision = records.FirstOrDefault(r => r.Event == NodeJournalEvent.ReuseDecision && r.Kind == NodeJournalKind.Server && r.ProcessId == client.ProcessId)?.Detail;
             bool fellBack = records.Any(r => r.Event == NodeJournalEvent.ServerBusyFallback && r.ProcessId == client.ProcessId);
+            bool serverLaunched = onServer is not null
+                && records.Any(r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.Server && r.ProcessId == client.ProcessId && r.SubjectProcessId == onServer.ProcessId);
 
             if (onServer is not null)
             {
@@ -995,10 +995,15 @@ namespace Microsoft.Build.Engine.UnitTests
                     $"server {onServer.ProcessId} is idle again");
             }
 
-            return new ServerBuild(output, client.ProcessId, onServer?.ProcessId ?? 0, reuseDecision, fellBack);
+            return new ServerBuild(output, client.ProcessId, onServer?.ProcessId ?? 0, reuseDecision, fellBack, start, serverLaunched);
         }
 
-        private sealed record ServerBuild(string Output, int ClientProcessId, int ServerProcessId, string? ServerReuseDecision, bool FellBackInProc)
+        /// <param name="Start">The marker written before the build; records after it belong to this build or later.</param>
+        /// <param name="ServerLaunched">
+        /// Whether this build's client launched the server it ran on. Unlike comparing PIDs, this can't be fooled by
+        /// the OS handing a dead server's PID to a new process.
+        /// </param>
+        private sealed record ServerBuild(string Output, int ClientProcessId, int ServerProcessId, string? ServerReuseDecision, bool FellBackInProc, NodeJournalRecord Start, bool ServerLaunched)
         {
             public void ShouldRunOnServer()
             {

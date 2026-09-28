@@ -195,7 +195,7 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         BuildManager buildManager = scenario.CreateBuildManager();
         string projectFile = CreateProject(scenario.Environment, explicitTaskHost: false);
         int? firstProcessId = null;
-        HashSet<int> processIds = [];
+        int launches = 0;
         NodeProviderOutOfProcBase.NodeContext? firstConnection = null;
 
         (string Text, bool UseCachedWriter, bool Expected)[] builds =
@@ -209,6 +209,8 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
         foreach (var build in builds)
         {
             MockLogger logger = new(_output);
+            IReadOnlyList<NodeJournalRecord> recordsBefore = scenario.Records;
+            long buildStart = recordsBefore.Count == 0 ? 0 : recordsBefore[^1].Sequence;
             BuildResult result = buildManager.Build(
                 new BuildParameters
                 {
@@ -224,7 +226,12 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
             int processId = int.Parse(result.ProjectStateAfterBuild!.GetPropertyValue("TaskHostProcessId"));
             processId.ShouldNotBe(EnvironmentUtilities.CurrentProcessId);
             scenario.Records.ShouldContain(r => r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.TaskHost && r.SubjectProcessId == processId);
-            bool firstUseOfProcess = processIds.Add(processId);
+            // The OS can recycle a crashed TaskHost's PID for the next launch, so a new process is identified by its Launched record, not its PID.
+            bool firstUseOfProcess = scenario.Records.Any(r => r.Sequence > buildStart && r.Event == NodeJournalEvent.Launched && r.Kind == NodeJournalKind.TaskHost && r.SubjectProcessId == processId);
+            if (firstUseOfProcess)
+            {
+                launches++;
+            }
 
             if (firstProcessId is null)
             {
@@ -263,11 +270,12 @@ public class TaskHostConsoleTelemetry_Tests(ITestOutputHelper output)
 
             if (replacePooledProcess)
             {
-                scenario.Await(NodeJournalEvent.FaultInjected, processId: processId);
+                Func<NodeJournalRecord, bool> faultInjected = NodeScenario.Is(NodeJournalEvent.FaultInjected, processId: processId);
+                scenario.Await(r => r.Sequence > buildStart && faultInjected(r), $"FaultInjected in pid {processId} after #{buildStart}");
             }
         }
 
-        scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost)).ShouldBe(processIds.Count);
+        scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost)).ShouldBe(launches);
         scenario.ShutdownNodes(buildManager.ShutdownAllNodes);
     }
 

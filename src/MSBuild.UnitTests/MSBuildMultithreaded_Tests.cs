@@ -453,21 +453,26 @@ namespace Microsoft.Build.Engine.UnitTests
                 scenario.Await(NodeJournalEvent.FaultInjected, processId: taskHostProcessId);
             }
 
+            NodeJournalRecord secondBuildStart = scenario.Marker("Build", "second");
             string secondOutput = BuildOnServer(scenario, arguments, out int secondOwnerProcessId);
             secondOwnerProcessId.ShouldBe(ownerProcessId, "Both builds should run on the same server.");
             int secondTaskHostProcessId = ParseProcessId(secondOutput, "TaskHostProcessId=");
 
+            // The OS can hand a crashed TaskHost's PID to its replacement, so a new TaskHost is identified by its launch record.
+            bool reusedTaskHost = !scenario.Records.Any(r => r.Sequence > secondBuildStart.Sequence && IsTaskHostLaunchBy(ownerProcessId)(r) && r.SubjectProcessId == secondTaskHostProcessId);
+
             if (retainConnection)
             {
                 secondTaskHostProcessId.ShouldBe(taskHostProcessId);
+                reusedTaskHost.ShouldBeTrue();
             }
 
             if (replacePooledProcess)
             {
-                secondTaskHostProcessId.ShouldNotBe(taskHostProcessId);
+                reusedTaskHost.ShouldBeFalse();
             }
 
-            int expectedExecutionCount = secondTaskHostProcessId == taskHostProcessId ? 2 : 1;
+            int expectedExecutionCount = reusedTaskHost ? 2 : 1;
             secondOutput.ShouldContain($"ExecutionCount={expectedExecutionCount}");
             secondOutput.ShouldContain($"Output through current writer {expectedExecutionCount}");
             secondOutput.ShouldNotContain("Output through stale cached writer");
