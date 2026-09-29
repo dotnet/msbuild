@@ -23,6 +23,12 @@ internal static class BinaryReaderExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static long? ReadOptionalInt64(this BinaryReader reader)
+    {
+        return reader.ReadByte() == 0 ? null : reader.ReadInt64();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Read7BitEncodedInt(this BinaryReader reader)
     {
         // Read out an Int32 7 bits at a time.  The high bit
