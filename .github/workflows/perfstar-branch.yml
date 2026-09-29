@@ -10,12 +10,14 @@ on:
 concurrency:
   group: perfstar-${{ github.event.pull_request.number }}
   cancel-in-progress: false
+  queue: max
 
 permissions: {}
 
 jobs:
   reconcile-perf-branch:
     permissions:
+      administration: read
       contents: write
       pull-requests: read
     runs-on: ubuntu-latest

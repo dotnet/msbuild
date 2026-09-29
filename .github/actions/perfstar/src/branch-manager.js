@@ -1,4 +1,32 @@
 const EVALUATION_LABEL = 'PerfStar: Evaluate';
+const EVALUATION_PERMISSIONS = new Set(['admin', 'maintain', 'write', 'push']);
+
+async function isAuthorizedEvaluator(github, context, core) {
+  let collaborator;
+
+  try {
+    ({ data: collaborator } = await github.rest.repos.getCollaboratorPermissionLevel({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      username: context.actor,
+    }));
+  } catch (error) {
+    if (error.status !== 404) {
+      throw error;
+    }
+
+    core.notice(`Not queueing PerfStar evaluation: ${context.actor} is not a repository collaborator`);
+    return false;
+  }
+
+  const permission = collaborator.role_name ?? collaborator.permission;
+  if (!EVALUATION_PERMISSIONS.has(permission)) {
+    core.notice(`Not queueing PerfStar evaluation: ${context.actor} has ${permission} permission`);
+    return false;
+  }
+
+  return true;
+}
 
 async function deleteBranch(github, context, core, name) {
   try {
@@ -9,7 +37,10 @@ async function deleteBranch(github, context, core, name) {
     });
     core.notice(`Deleted PerfStar branch ${name}`);
   } catch (error) {
-    if (error.status !== 404) {
+    const isMissingReference = error.status === 404 ||
+      (error.status === 422 && error.response?.data?.message === 'Reference does not exist');
+
+    if (!isMissingReference) {
       throw error;
     }
 
@@ -71,6 +102,10 @@ async function reconcilePerfStarBranch({ github, context, core }) {
       context.payload.label.name !== EVALUATION_LABEL ||
       context.payload.pull_request.head.sha !== pullRequest.head.sha) {
     core.notice('No new PerfStar approval for the current pull request commit');
+    return;
+  }
+
+  if (!await isAuthorizedEvaluator(github, context, core)) {
     return;
   }
 

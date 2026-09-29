@@ -16,6 +16,9 @@ function createHarness({
   action = 'labeled',
   eventHeadSha = initialPullRequest.head.sha,
   existingRefs = [],
+  deleteRefError,
+  actorPermission = 'write',
+  permissionError,
   merge = { sha: 'merged-sha' },
   mergeError,
 } = {}) {
@@ -48,6 +51,9 @@ function createHarness({
         },
         deleteRef: async ({ ref }) => {
           calls.push(['git.deleteRef', ref]);
+          if (deleteRefError) {
+            throw deleteRefError;
+          }
           refs.delete(ref);
         },
         getCommit: async ({ commit_sha }) => {
@@ -60,6 +66,18 @@ function createHarness({
         },
       },
       repos: {
+        getCollaboratorPermissionLevel: async ({ username }) => {
+          calls.push(['repos.getCollaboratorPermissionLevel', username]);
+          if (permissionError) {
+            throw permissionError;
+          }
+          return {
+            data: {
+              permission: actorPermission,
+              role_name: actorPermission,
+            },
+          };
+        },
         merge: async () => {
           calls.push(['repos.merge']);
           if (mergeError) {
@@ -100,6 +118,7 @@ function createHarness({
         head: { sha: eventHeadSha },
       },
     },
+    actor: 'trusted-maintainer',
     repo: { owner: 'dotnet', repo: 'msbuild' },
     serverUrl: 'https://github.com',
   };
@@ -138,6 +157,52 @@ test('updates an existing branch when the label is reapplied', async () => {
     name === 'git.updateRef' && ref === 'heads/perf/pr-42' && sha === 'kickoff-sha'));
 });
 
+test('allows write, maintain, and admin permission to queue evaluation', async t => {
+  for (const permission of ['write', 'push', 'maintain', 'admin']) {
+    await t.test(permission, async () => {
+      const harness = createHarness({ actorPermission: permission });
+
+      await harness.run();
+
+      assert.ok(harness.calls.some(([name]) => name === 'repos.merge'));
+    });
+  }
+});
+
+test('does not queue evaluation when the labeler has triage or read permission', async t => {
+  for (const permission of ['triage', 'read', 'pull']) {
+    await t.test(permission, async () => {
+      const harness = createHarness({ actorPermission: permission });
+
+      await harness.run();
+
+      assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
+      assert.ok(harness.notices.some(message => message.includes(`has ${permission} permission`)));
+    });
+  }
+});
+
+test('does not queue evaluation when the labeler is not a collaborator', async () => {
+  const notCollaboratorError = new Error('Not found');
+  notCollaboratorError.status = 404;
+  const harness = createHarness({ permissionError: notCollaboratorError });
+
+  await harness.run();
+
+  assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
+  assert.ok(harness.notices.some(message => message.includes('not a repository collaborator')));
+});
+
+test('surfaces collaborator permission lookup failures', async () => {
+  const lookupError = new Error('Permission lookup failed');
+  lookupError.status = 403;
+  const harness = createHarness({ permissionError: lookupError });
+
+  await assert.rejects(harness.run(), /Permission lookup failed/);
+
+  assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
+});
+
 test('deletes both branches when the label is absent', async () => {
   const harness = createHarness({
     action: 'unlabeled',
@@ -146,6 +211,7 @@ test('deletes both branches when the label is absent', async () => {
 
   await harness.run();
 
+  assert.ok(!harness.calls.some(([name]) => name === 'repos.getCollaboratorPermissionLevel'));
   assert.deepEqual(
     harness.calls.filter(([name]) => name === 'git.deleteRef').map(([, ref]) => ref),
     ['heads/perf/pr-42', 'heads/perfstar-staging/pr-42'],
@@ -161,10 +227,46 @@ test('deletes both branches when the pull request is closed', async () => {
 
   await harness.run();
 
+  assert.ok(!harness.calls.some(([name]) => name === 'repos.getCollaboratorPermissionLevel'));
   assert.deepEqual(
     harness.calls.filter(([name]) => name === 'git.deleteRef').map(([, ref]) => ref),
     ['heads/perf/pr-42', 'heads/perfstar-staging/pr-42'],
   );
+});
+
+test('treats missing-reference responses as successful cleanup', async () => {
+  const missingReferenceError = new Error('Reference does not exist');
+  missingReferenceError.status = 422;
+  missingReferenceError.response = {
+    data: { message: 'Reference does not exist' },
+  };
+  const harness = createHarness({
+    action: 'closed',
+    deleteRefError: missingReferenceError,
+    pullRequest: { ...initialPullRequest, state: 'closed' },
+  });
+
+  await harness.run();
+
+  assert.equal(
+    harness.notices.filter(message => message.includes('was already deleted')).length,
+    2,
+  );
+});
+
+test('does not suppress other validation errors during cleanup', async () => {
+  const validationError = new Error('Validation failed');
+  validationError.status = 422;
+  validationError.response = {
+    data: { message: 'Validation failed' },
+  };
+  const harness = createHarness({
+    action: 'closed',
+    deleteRefError: validationError,
+    pullRequest: { ...initialPullRequest, state: 'closed' },
+  });
+
+  await assert.rejects(harness.run(), /Validation failed/);
 });
 
 test('does not queue a commit when a push follows label approval', async () => {
