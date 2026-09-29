@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - .github/actions/perfstar/**
+      - .github/workflows/perfstar-branch.yml
       - .github/workflows/perfstar-action-validation.yml
   push:
     branches: [main]
     paths:
       - .github/actions/perfstar/**
+      - .github/workflows/perfstar-branch.yml
       - .github/workflows/perfstar-action-validation.yml
 
 permissions:

@@ -2,67 +2,47 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const { reconcilePerfStarBranch } = require('../src/branch-manager');
 
-const pullRequestNumber = 42;
-const initialPullRequest = {
-  number: pullRequestNumber,
+const HEAD = 'a'.repeat(40);
+const NEXT_HEAD = 'b'.repeat(40);
+const BRANCH = 'heads/perf/pr-42';
+const STAGING = 'heads/perfstar-staging/pr-42';
+const pullRequest = {
+  number: 42,
   state: 'open',
-  head: { sha: 'pr-head-sha' },
+  head: { sha: HEAD },
   base: { ref: 'main' },
-  labels: [{ name: 'PerfStar: Evaluate' }],
 };
 
+function apiError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  error.response = { data: { message } };
+  return error;
+}
+
 function createHarness({
-  pullRequest = initialPullRequest,
-  action = 'labeled',
-  eventHeadSha = initialPullRequest.head.sha,
-  existingRefs = [],
-  deleteRefError,
-  actorPermission = 'write',
+  eventName = 'issue_comment',
+  action = eventName === 'issue_comment' ? 'created' : 'synchronize',
+  body = '/perfstar run',
+  isPullRequest = true,
+  permission = 'write',
   permissionError,
+  pullRequests = [pullRequest],
+  refs = {},
   merge = { sha: 'merged-sha' },
   mergeError,
+  deleteRefError,
 } = {}) {
   const calls = [];
-  const refs = new Set(existingRefs);
+  const references = new Map(Object.entries(refs));
+  let pullReads = 0;
   const github = {
     rest: {
       pulls: {
-        get: async () => {
-          calls.push(['pulls.get']);
-          return { data: pullRequest };
-        },
-      },
-      git: {
-        getRef: async ({ ref }) => {
-          calls.push(['git.getRef', ref]);
-          if (!refs.has(ref)) {
-            const error = new Error('Not found');
-            error.status = 404;
-            throw error;
-          }
-          return {};
-        },
-        createRef: async ({ ref, sha }) => {
-          calls.push(['git.createRef', ref, sha]);
-          refs.add(ref.slice('refs/'.length));
-        },
-        updateRef: async ({ ref, sha }) => {
-          calls.push(['git.updateRef', ref, sha]);
-        },
-        deleteRef: async ({ ref }) => {
-          calls.push(['git.deleteRef', ref]);
-          if (deleteRefError) {
-            throw deleteRefError;
-          }
-          refs.delete(ref);
-        },
-        getCommit: async ({ commit_sha }) => {
-          calls.push(['git.getCommit', commit_sha]);
-          return { data: { tree: { sha: 'tree-sha' } } };
-        },
-        createCommit: async ({ parents }) => {
-          calls.push(['git.createCommit', parents]);
-          return { data: { sha: 'kickoff-sha' } };
+        get: async ({ pull_number }) => {
+          calls.push(['pulls.get', pull_number]);
+          const current = pullRequests[Math.min(pullReads++, pullRequests.length - 1)];
+          return { data: current };
         },
       },
       repos: {
@@ -71,19 +51,55 @@ function createHarness({
           if (permissionError) {
             throw permissionError;
           }
-          return {
-            data: {
-              permission: actorPermission,
-              role_name: actorPermission,
-            },
-          };
+          return { data: { role_name: permission } };
         },
-        merge: async () => {
-          calls.push(['repos.merge']);
+        merge: async ({ base, head }) => {
+          calls.push(['repos.merge', base, head]);
           if (mergeError) {
             throw mergeError;
           }
           return { data: merge };
+        },
+      },
+      git: {
+        getRef: async ({ ref }) => {
+          calls.push(['git.getRef', ref]);
+          if (!references.has(ref)) {
+            throw apiError(404, 'Not Found');
+          }
+          return { data: { ref: `refs/${ref}`, object: { sha: references.get(ref) } } };
+        },
+        createRef: async ({ ref, sha }) => {
+          calls.push(['git.createRef', ref, sha]);
+          references.set(ref.slice('refs/'.length), sha);
+        },
+        updateRef: async ({ ref, sha }) => {
+          calls.push(['git.updateRef', ref, sha]);
+          references.set(ref, sha);
+        },
+        deleteRef: async ({ ref }) => {
+          calls.push(['git.deleteRef', ref]);
+          if (deleteRefError) {
+            throw deleteRefError;
+          }
+          if (!references.delete(ref)) {
+            throw apiError(422, 'Reference does not exist');
+          }
+        },
+        getCommit: async ({ commit_sha }) => {
+          calls.push(['git.getCommit', commit_sha]);
+          return {
+            data: {
+              tree: { sha: 'tree-sha' },
+              message: commit_sha === 'existing-kickoff'
+                ? `Queue PerfStar evaluation for #42\n\nPerfStar-Approved-Head: ${HEAD}`
+                : 'Legacy evaluation commit',
+            },
+          };
+        },
+        createCommit: async ({ message, parents }) => {
+          calls.push(['git.createCommit', message, parents]);
+          return { data: { sha: 'new-kickoff' } };
         },
       },
     },
@@ -95,8 +111,8 @@ function createHarness({
       summaryCalls.push(['addHeading', value]);
       return this;
     },
-    addLink(...args) {
-      summaryCalls.push(['addLink', ...args]);
+    addLink(...values) {
+      summaryCalls.push(['addLink', ...values]);
       return this;
     },
     addRaw(value) {
@@ -105,200 +121,240 @@ function createHarness({
     },
     write: async () => summaryCalls.push(['write']),
   };
-  const core = {
-    notice: message => notices.push(message),
-    summary,
-  };
+  const core = { notice: message => notices.push(message), summary };
   const context = {
-    payload: {
-      action,
-      label: { name: action === 'labeled' ? 'PerfStar: Evaluate' : undefined },
-      pull_request: {
-        number: pullRequestNumber,
-        head: { sha: eventHeadSha },
-      },
-    },
+    eventName,
     actor: 'trusted-maintainer',
     repo: { owner: 'dotnet', repo: 'msbuild' },
     serverUrl: 'https://github.com',
+    payload: eventName === 'issue_comment'
+      ? {
+          action,
+          issue: { number: 42, ...(isPullRequest && { pull_request: {} }) },
+          comment: { body },
+        }
+      : {
+          action,
+          pull_request: { number: 42, head: { sha: HEAD } },
+        },
   };
 
   return {
     calls,
     context,
-    core,
-    github,
     notices,
-    refs,
+    references,
     summaryCalls,
     run: () => reconcilePerfStarBranch({ github, context, core }),
   };
 }
 
-test('queues the branch for a newly labeled current commit', async () => {
+function callsTo(harness, operation) {
+  return harness.calls.filter(([name]) => name === operation);
+}
+
+test('runs a command for the live PR head and records the approved SHA', async () => {
   const harness = createHarness();
 
   await harness.run();
 
-  assert.ok(harness.calls.some(([name]) => name === 'repos.merge'));
-  assert.ok(harness.calls.some(([name, ref]) =>
-    name === 'git.createRef' && ref === 'refs/heads/perf/pr-42'));
-  assert.ok(harness.calls.some(([name, ref]) =>
-    name === 'git.deleteRef' && ref === 'heads/perfstar-staging/pr-42'));
-  assert.ok(harness.notices.some(message => message.includes('kickoff-sha')));
+  assert.deepEqual(callsTo(harness, 'pulls.get'), [
+    ['pulls.get', 42],
+    ['pulls.get', 42],
+  ]);
+  assert.equal(harness.references.get(BRANCH), 'new-kickoff');
+  assert.equal(harness.references.has(STAGING), false);
+  assert.match(callsTo(harness, 'git.createCommit')[0][1], new RegExp(`PerfStar-Approved-Head: ${HEAD}`));
+  assert.equal(harness.summaryCalls.at(-1)[0], 'write');
 });
 
-test('updates an existing branch when the label is reapplied', async () => {
-  const harness = createHarness({ existingRefs: ['heads/perf/pr-42'] });
+test('re-running updates the evaluation branch', async () => {
+  const harness = createHarness({ refs: { [BRANCH]: 'existing-kickoff' } });
 
   await harness.run();
 
-  assert.ok(harness.calls.some(([name, ref, sha]) =>
-    name === 'git.updateRef' && ref === 'heads/perf/pr-42' && sha === 'kickoff-sha'));
+  assert.equal(harness.references.get(BRANCH), 'new-kickoff');
+  assert.deepEqual(callsTo(harness, 'git.updateRef').at(-1), ['git.updateRef', BRANCH, 'new-kickoff']);
 });
 
-test('allows write, maintain, and admin permission to queue evaluation', async t => {
-  for (const permission of ['write', 'push', 'maintain', 'admin']) {
-    await t.test(permission, async () => {
-      const harness = createHarness({ actorPermission: permission });
+test('does not publish a run if the PR changes before branch publication', async () => {
+  const harness = createHarness({
+    pullRequests: [pullRequest, { ...pullRequest, head: { sha: NEXT_HEAD } }],
+  });
+
+  await harness.run();
+
+  assert.equal(harness.references.has(BRANCH), false);
+  assert.equal(harness.references.has(STAGING), false);
+  assert.ok(harness.notices.some(message => message.includes('changed after approval')));
+});
+
+test('does not publish a run if the PR closes during preparation', async () => {
+  const harness = createHarness({
+    pullRequests: [pullRequest, { ...pullRequest, state: 'closed' }],
+  });
+
+  await harness.run();
+
+  assert.equal(harness.references.has(BRANCH), false);
+});
+
+test('denies a run command on a closed PR', async () => {
+  const harness = createHarness({ pullRequests: [{ ...pullRequest, state: 'closed' }] });
+
+  await harness.run();
+
+  assert.equal(callsTo(harness, 'repos.merge').length, 0);
+  assert.ok(harness.notices.some(message => message.includes('is not open')));
+});
+
+test('accepts only exact, newly created PR commands', async t => {
+  for (const options of [
+    { body: 'Please /perfstar run' },
+    { body: '/perfstar run extra' },
+    { body: '/perfstar RUN' },
+    { action: 'edited' },
+    { isPullRequest: false },
+  ]) {
+    await t.test(JSON.stringify(options), async () => {
+      const harness = createHarness(options);
 
       await harness.run();
 
-      assert.ok(harness.calls.some(([name]) => name === 'repos.merge'));
+      assert.deepEqual(harness.calls, []);
     });
   }
 });
 
-test('does not queue evaluation when the labeler has triage or read permission', async t => {
-  for (const permission of ['triage', 'read', 'pull']) {
-    await t.test(permission, async () => {
-      const harness = createHarness({ actorPermission: permission });
+test('checks the comment actor for both commands', async t => {
+  for (const body of ['/perfstar run', '/perfstar cancel']) {
+    for (const permission of ['write', 'push', 'maintain', 'admin']) {
+      await t.test(`${body} as ${permission}`, async () => {
+        const harness = createHarness({ body, permission });
+
+        await harness.run();
+
+        assert.equal(callsTo(harness, 'repos.getCollaboratorPermissionLevel').length, 1);
+        assert.equal(callsTo(harness, body.endsWith('run') ? 'repos.merge' : 'git.deleteRef').length > 0, true);
+      });
+    }
+    for (const permission of ['triage', 'read', 'pull']) {
+      await t.test(`${body} as ${permission}`, async () => {
+        const harness = createHarness({ body, permission });
+
+        await harness.run();
+
+        assert.equal(callsTo(harness, 'repos.merge').length, 0);
+        assert.equal(callsTo(harness, 'git.deleteRef').length, 0);
+      });
+    }
+  }
+});
+
+test('denies non-collaborators and surfaces permission lookup failures', async t => {
+  await t.test('not a collaborator', async () => {
+    const harness = createHarness({ permissionError: apiError(404, 'Not Found') });
+
+    await harness.run();
+
+    assert.equal(callsTo(harness, 'repos.merge').length, 0);
+    assert.ok(harness.notices.some(message => message.includes('not a repository collaborator')));
+  });
+
+  await t.test('API failure', async () => {
+    const harness = createHarness({ permissionError: apiError(403, 'Forbidden') });
+    await assert.rejects(harness.run(), /Forbidden/);
+  });
+});
+
+test('cancel removes both branches even when they are missing', async () => {
+  const harness = createHarness({ body: '/perfstar cancel', refs: { [BRANCH]: 'existing-kickoff' } });
+
+  await harness.run();
+
+  assert.equal(harness.references.size, 0);
+  assert.deepEqual(callsTo(harness, 'git.deleteRef').map(([, ref]) => ref), [BRANCH, STAGING]);
+  assert.equal(callsTo(harness, 'repos.merge').length, 0);
+});
+
+test('closing or merging a PR deletes both branches without a permission check', async t => {
+  for (const merged of [false, true]) {
+    await t.test(merged ? 'merged' : 'closed without merge', async () => {
+      const harness = createHarness({
+        eventName: 'pull_request_target',
+        action: 'closed',
+        pullRequests: [{ ...pullRequest, state: 'closed', merged }],
+        refs: { [BRANCH]: 'existing-kickoff', [STAGING]: HEAD },
+      });
 
       await harness.run();
 
-      assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
-      assert.ok(harness.notices.some(message => message.includes(`has ${permission} permission`)));
+      assert.equal(harness.references.size, 0);
+      assert.deepEqual(callsTo(harness, 'git.deleteRef').map(([, ref]) => ref), [BRANCH, STAGING]);
+      assert.equal(callsTo(harness, 'repos.getCollaboratorPermissionLevel').length, 0);
     });
   }
 });
 
-test('does not queue evaluation when the labeler is not a collaborator', async () => {
-  const notCollaboratorError = new Error('Not found');
-  notCollaboratorError.status = 404;
-  const harness = createHarness({ permissionError: notCollaboratorError });
+test('synchronize deletes only when the approved SHA differs from the live head', async t => {
+  await t.test('new head removes old approval', async () => {
+    const harness = createHarness({
+      eventName: 'pull_request_target',
+      pullRequests: [{ ...pullRequest, head: { sha: NEXT_HEAD } }],
+      refs: { [BRANCH]: 'existing-kickoff' },
+    });
 
-  await harness.run();
+    await harness.run();
 
-  assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
-  assert.ok(harness.notices.some(message => message.includes('not a repository collaborator')));
-});
-
-test('surfaces collaborator permission lookup failures', async () => {
-  const lookupError = new Error('Permission lookup failed');
-  lookupError.status = 403;
-  const harness = createHarness({ permissionError: lookupError });
-
-  await assert.rejects(harness.run(), /Permission lookup failed/);
-
-  assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
-});
-
-test('deletes both branches when the label is absent', async () => {
-  const harness = createHarness({
-    action: 'unlabeled',
-    pullRequest: { ...initialPullRequest, labels: [] },
+    assert.equal(harness.references.has(BRANCH), false);
   });
 
-  await harness.run();
+  await t.test('late synchronize preserves a newer approved run', async () => {
+    const harness = createHarness({
+      eventName: 'pull_request_target',
+      refs: { [BRANCH]: 'existing-kickoff' },
+    });
+    harness.context.payload.pull_request.head.sha = NEXT_HEAD;
 
-  assert.ok(!harness.calls.some(([name]) => name === 'repos.getCollaboratorPermissionLevel'));
-  assert.deepEqual(
-    harness.calls.filter(([name]) => name === 'git.deleteRef').map(([, ref]) => ref),
-    ['heads/perf/pr-42', 'heads/perfstar-staging/pr-42'],
-  );
-  assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
-});
+    await harness.run();
 
-test('deletes both branches when the pull request is closed', async () => {
-  const harness = createHarness({
-    action: 'closed',
-    pullRequest: { ...initialPullRequest, state: 'closed' },
+    assert.equal(harness.references.get(BRANCH), 'existing-kickoff');
+    assert.equal(callsTo(harness, 'git.deleteRef').length, 0);
   });
 
-  await harness.run();
+  await t.test('legacy branch without approval metadata is removed', async () => {
+    const harness = createHarness({
+      eventName: 'pull_request_target',
+      refs: { [BRANCH]: 'legacy-kickoff' },
+    });
 
-  assert.ok(!harness.calls.some(([name]) => name === 'repos.getCollaboratorPermissionLevel'));
-  assert.deepEqual(
-    harness.calls.filter(([name]) => name === 'git.deleteRef').map(([, ref]) => ref),
-    ['heads/perf/pr-42', 'heads/perfstar-staging/pr-42'],
-  );
-});
+    await harness.run();
 
-test('treats missing-reference responses as successful cleanup', async () => {
-  const missingReferenceError = new Error('Reference does not exist');
-  missingReferenceError.status = 422;
-  missingReferenceError.response = {
-    data: { message: 'Reference does not exist' },
-  };
-  const harness = createHarness({
-    action: 'closed',
-    deleteRefError: missingReferenceError,
-    pullRequest: { ...initialPullRequest, state: 'closed' },
+    assert.equal(harness.references.has(BRANCH), false);
   });
 
-  await harness.run();
+  await t.test('no branch is a no-op', async () => {
+    const harness = createHarness({ eventName: 'pull_request_target' });
 
-  assert.equal(
-    harness.notices.filter(message => message.includes('was already deleted')).length,
-    2,
-  );
+    await harness.run();
+
+    assert.equal(callsTo(harness, 'git.deleteRef').length, 0);
+  });
 });
 
-test('does not suppress other validation errors during cleanup', async () => {
-  const validationError = new Error('Validation failed');
-  validationError.status = 422;
-  validationError.response = {
-    data: { message: 'Validation failed' },
-  };
+test('does not swallow other delete errors', async () => {
   const harness = createHarness({
-    action: 'closed',
-    deleteRefError: validationError,
-    pullRequest: { ...initialPullRequest, state: 'closed' },
+    body: '/perfstar cancel',
+    deleteRefError: apiError(422, 'Validation failed'),
   });
 
   await assert.rejects(harness.run(), /Validation failed/);
 });
 
-test('does not queue a commit when a push follows label approval', async () => {
-  const harness = createHarness({ action: 'synchronize' });
-
-  await harness.run();
-
-  assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
-  assert.deepEqual(harness.summaryCalls, []);
-  assert.ok(harness.notices.some(message => message.includes('No new PerfStar approval')));
-});
-
-test('does not queue a stale label event for a newer current commit', async () => {
-  const harness = createHarness({
-    eventHeadSha: 'older-event-sha',
-    pullRequest: {
-      ...initialPullRequest,
-      head: { sha: 'new-current-sha' },
-    },
-  });
-
-  await harness.run();
-
-  assert.ok(!harness.calls.some(([name]) => name === 'repos.merge'));
-  assert.deepEqual(harness.summaryCalls, []);
-});
-
-test('deletes the staging branch if merging fails', async () => {
+test('cleans staging if merge fails', async () => {
   const harness = createHarness({ mergeError: new Error('Merge failed') });
 
   await assert.rejects(harness.run(), /Merge failed/);
 
-  assert.ok(harness.calls.some(([name, ref]) =>
-    name === 'git.deleteRef' && ref === 'heads/perfstar-staging/pr-42'));
+  assert.equal(harness.references.has(STAGING), false);
 });
