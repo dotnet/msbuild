@@ -11,7 +11,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Task = System.Threading.Tasks.Task;
 
-#nullable disable
+#nullable enable
 
 namespace Microsoft.Build.Tasks
 {
@@ -21,24 +21,31 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public sealed class DownloadFile : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// The buffer size <see cref="Stream.CopyToAsync(Stream)"/> uses when the caller does not supply one.
+        /// The overload that accepts a cancellation token but not a buffer size is unavailable on .NET Framework,
+        /// so the default is restated here rather than left to the runtime.
+        /// </summary>
+        private const int DefaultCopyBufferSize = 81920;
+
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary>
         /// Gets or sets an optional filename for the destination file.  By default, the filename is derived from the <see cref="SourceUrl"/> if possible.
         /// </summary>
-        public ITaskItem DestinationFileName { get; set; }
+        public ITaskItem? DestinationFileName { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> that specifies the destination folder to download the file to.
         /// </summary>
         [Required]
-        public ITaskItem DestinationFolder { get; set; }
+        public ITaskItem? DestinationFolder { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> that contains details about the downloaded file.
         /// </summary>
         [Output]
-        public ITaskItem DownloadedFile { get; set; }
+        public ITaskItem? DownloadedFile { get; set; }
 
         /// <summary>
         /// Gets or sets an optional number of times to retry if possible.
@@ -59,7 +66,7 @@ namespace Microsoft.Build.Tasks
         /// Gets or sets the URL to download.
         /// </summary>
         [Required]
-        public string SourceUrl { get; set; }
+        public string SourceUrl { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the number of milliseconds to wait before the request times out.
@@ -74,7 +81,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets a <see cref="HttpMessageHandler"/> to use.  This is used by unit tests to mock a connection to a remote server.
         /// </summary>
-        internal HttpMessageHandler HttpMessageHandler { get; set; }
+        internal HttpMessageHandler? HttpMessageHandler { get; set; }
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -89,54 +96,73 @@ namespace Microsoft.Build.Tasks
 
         private async Task<bool> ExecuteAsync()
         {
-            if (!Uri.TryCreate(SourceUrl, UriKind.Absolute, out Uri uri))
+            if (!Uri.TryCreate(SourceUrl, UriKind.Absolute, out Uri? uri))
             {
                 Log.LogErrorWithCodeFromResources("DownloadFile.ErrorInvalidUrl", SourceUrl);
                 return false;
             }
 
             int retryAttemptCount = 0;
+            ITaskProgressReporter? progress = null;
+
+            ITaskProgressReporter? GetProgressReporter(string filename)
+            {
+                return progress ??= (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                    $"Downloading {filename}",
+                    TaskProgressUnit.Bytes);
+            }
 
             CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-            while (true)
+            try
             {
-                try
+                while (true)
                 {
-                    await DownloadAsync(uri, cancellationToken);
-                    break;
-                }
-                catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)
-                {
-                    // This task is being cancelled. Exit the loop.
-                    break;
-                }
-                catch (Exception e)
-                {
-                    bool canRetry = IsRetriable(e, out Exception actualException) && retryAttemptCount++ < Retries;
-
-                    if (canRetry)
+                    try
                     {
-                        Log.LogWarningWithCodeFromResources("DownloadFile.Retrying", SourceUrl, retryAttemptCount + 1, RetryDelayMilliseconds, actualException.Message);
+                        await DownloadAsync(uri, cancellationToken, GetProgressReporter);
+                        progress?.Complete("Download complete");
+                        break;
+                    }
+                    catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)
+                    {
+                        // This task is being cancelled. Exit the loop.
+                        progress?.Cancel("Download canceled");
+                        break;
+                    }
+                    catch (Exception e)
+                    {
+                        bool canRetry = IsRetriable(e, out Exception actualException) && retryAttemptCount++ < Retries;
 
-                        try
+                        if (canRetry)
                         {
-                            await Task.Delay(RetryDelayMilliseconds, cancellationToken).ConfigureAwait(false);
+                            Log.LogWarningWithCodeFromResources("DownloadFile.Retrying", SourceUrl, retryAttemptCount + 1, RetryDelayMilliseconds, actualException.Message);
+
+                            try
+                            {
+                                await Task.Delay(RetryDelayMilliseconds, cancellationToken).ConfigureAwait(false);
+                            }
+                            catch (OperationCanceledException delayException) when (delayException.CancellationToken == cancellationToken)
+                            {
+                                // This task is being cancelled, exit the loop
+                                progress?.Cancel("Download canceled");
+                                break;
+                            }
                         }
-                        catch (OperationCanceledException delayException) when (delayException.CancellationToken == cancellationToken)
+                        else
                         {
-                            // This task is being cancelled, exit the loop
+                            string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
+                            Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage);
+                            Log.LogMessage(MessageImportance.Low, actualException.ToString());
+                            progress?.Fail("Download failed");
                             break;
                         }
                     }
-                    else
-                    {
-                        string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
-                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage);
-                        Log.LogMessage(MessageImportance.Low, actualException.ToString());
-                        break;
-                    }
                 }
+            }
+            finally
+            {
+                progress?.Dispose();
             }
 
             return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
@@ -147,7 +173,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="uri">The parsed <see cref="Uri"/> of the request.</param>
         /// <param name="cancellationToken">The cancellation token for the task.</param>
-        private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
+        /// <param name="progressFactory">Creates the reporter for the current download operation after the transfer is known to be necessary. Accepts the name of the file being downloaded.</param>
+        private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken, Func<string, ITaskProgressReporter?> progressFactory)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
 #pragma warning disable CA2000 // Dispose objects before losing scope because HttpClientHandler is disposed by HTTPClient.Dispose()
@@ -179,7 +206,7 @@ namespace Microsoft.Build.Tasks
                         return;
                     }
 
-                    AbsolutePath destinationFolderPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec);
+                    AbsolutePath destinationFolderPath = TaskEnvironment.GetAbsolutePath(DestinationFolder!.ItemSpec);
                     DirectoryInfo destinationDirectory = Directory.CreateDirectory(destinationFolderPath);
 
                     var destinationFile = new FileInfo(Path.Combine(destinationDirectory.FullName, filename));
@@ -202,6 +229,8 @@ namespace Microsoft.Build.Tasks
                     try
                     {
                         cancellationToken.ThrowIfCancellationRequested();
+                        ITaskProgressReporter? progress = progressFactory(filename);
+                        progress?.Report(new TaskProgressUpdate(0, response.Content.Headers.ContentLength, "Downloading"));
 
                         using (var target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
@@ -214,7 +243,10 @@ namespace Microsoft.Build.Tasks
                             ).ConfigureAwait(false))
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             {
-                                await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
+                                using (var progressStream = new ProgressReportingStream(target, progress, response.Content.Headers.ContentLength))
+                                {
+                                    await responseStream.CopyToAsync(progressStream, DefaultCopyBufferSize, cancellationToken).ConfigureAwait(false);
+                                }
                             }
 
                             DownloadedFile = new TaskItem(destinationFile.FullName);
@@ -326,8 +358,8 @@ namespace Microsoft.Build.Tasks
             // Not all URIs contain a file name so users will have to specify one
             // Example: http://www.download.com/file/1/
 
-            filename = !string.IsNullOrWhiteSpace(DestinationFileName?.ItemSpec)
-                ? DestinationFileName.ItemSpec // Get the file name from what the user specified
+            filename = DestinationFileName is { ItemSpec: string specifiedName } && !string.IsNullOrWhiteSpace(specifiedName)
+                ? specifiedName // Get the file name from what the user specified
                 : Path.GetFileName(requestUri.LocalPath); // Otherwise attempt to get a file name from the URI
 
             return !string.IsNullOrWhiteSpace(filename);
@@ -349,6 +381,62 @@ namespace Microsoft.Build.Tasks
             public HttpStatusCode StatusCode { get; }
         }
 #endif
+
+        private sealed class ProgressReportingStream : Stream
+        {
+            private readonly Stream _inner;
+            private readonly ITaskProgressReporter? _progress;
+            private readonly long? _total;
+            private long _completed;
+
+            public ProgressReportingStream(Stream inner, ITaskProgressReporter? progress, long? total)
+            {
+                _inner = inner;
+                _progress = progress;
+                _total = total;
+            }
+
+            public override bool CanRead => _inner.CanRead;
+            public override bool CanSeek => _inner.CanSeek;
+            public override bool CanWrite => _inner.CanWrite;
+            public override long Length => _inner.Length;
+            public override long Position { get => _inner.Position; set => _inner.Position = value; }
+
+            public override void Flush() => _inner.Flush();
+
+            public override int Read(byte[] buffer, int offset, int count)
+                => _inner.Read(buffer, offset, count);
+
+            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
+                _inner.ReadAsync(buffer, offset, count, cancellationToken);
+
+            public override long Seek(long offset, SeekOrigin origin) => _inner.Seek(offset, origin);
+            public override void SetLength(long value) => _inner.SetLength(value);
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                _inner.Write(buffer, offset, count);
+                Report(count);
+            }
+
+            public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+#pragma warning disable CA1835 // Use the compatible overload for the .NET Framework target.
+                await _inner.WriteAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+#pragma warning restore CA1835
+                Report(count);
+            }
+
+            private void Report(int bytesRead)
+            {
+                _completed += bytesRead;
+                _progress?.Report(new TaskProgressUpdate(_completed, _total, "Downloading"));
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+            }
+        }
 
         private bool ShouldSkip(HttpResponseMessage response, FileInfo destinationFile)
         {
