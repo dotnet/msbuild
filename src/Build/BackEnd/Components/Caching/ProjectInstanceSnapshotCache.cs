@@ -16,7 +16,7 @@ namespace Microsoft.Build.BackEnd;
 /// </summary>
 internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
 {
-    internal const long DefaultMaximumSizeBytes = 256L * 1024 * 1024;
+    internal const long DefaultMaximumSizeBytes = 1024L * 1024 * 1024;
     internal const string MaximumSizeEnvironmentVariable =
         "MSBUILDPROJECTINSTANCESNAPSHOTCACHEMAXBYTES";
 

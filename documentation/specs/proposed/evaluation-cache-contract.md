@@ -165,9 +165,12 @@ Retention MUST be bounded, with defined, concurrency-safe oversize rejection and
 reduce hit rate but never change build results. Entries MUST NOT keep unbounded shared mutable
 aliases alive.
 
-The prototype's 256 MiB default is an internal configured cache budget, not a promise that process RSS
-is capped at 256 MiB. Conservative estimates cover cache-owned keys, snapshots, and validation
+The prototype's 1 GiB default is an internal configured cache budget, not a promise that process RSS
+is capped at 1 GiB. Conservative estimates cover cache-owned keys, snapshots, and validation
 payloads; allocator, collection-capacity, and general runtime overhead are not an RSS accounting model.
+The bound is measurement headroom for large working sets that thrashed under the former 256 MiB
+default, not an up-front allocation or a production sizing recommendation.
+`MSBUILDPROJECTINSTANCESNAPSHOTCACHEMAXBYTES` continues to override the bound in bytes.
 
 ## Acceptance matrix
 

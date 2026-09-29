@@ -130,6 +130,17 @@ cache budget and evict reusable build evaluations. Explicit `Record` mode still
 records restore inputs. Normal build snapshots remain subject to validation after
 restore; this does not ignore restore-generated input changes or alter cache keys.
 
+The snapshot budget defaults to **1 GiB** in this measurement prototype. The former
+256 MiB limit could not retain a large multi-targeting build's working set: as a
+warm build admitted its first missing snapshots, LRU eviction removed the remaining
+snapshots before their next lookup. Stable keys and inputs therefore still produced
+almost no reuse. The larger bound provides measurement headroom without changing
+activation, validation, admission accounting, or the eviction policy.
+Set `MSBUILDPROJECTINSTANCESNAPSHOTCACHEMAXBYTES` to override the limit in bytes
+(for example, `268435456` preserves 256 MiB on memory-constrained hosts).
+This bounds estimated retained payload, not process RSS, and is not an up-front
+allocation. Inspect eviction diagnostics before interpreting a low warm hit rate.
+
 Each explicitly configured or legacy-opted-in build logs one low-importance, versioned
 `EvaluationCacheExperimentStatus|` record. It contains the effective mode,
 configuration validity, process and main-`BuildManager` identities, build
