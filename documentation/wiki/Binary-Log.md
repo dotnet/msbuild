@@ -168,6 +168,8 @@ Structured Log Viewer displays it as a top-level message node, like other build
 information such as the LongPaths status. The notice is retained even with
 `Exclude=Message` or `OmitInitialInfo`, and is written only to the filtered binary
 logger, not to other loggers attached to the same build or replay.
+When a filtered binlog is filtered again, earlier notices are preserved alongside
+the new notice, so exclusions from every filtering pass remain visible.
 
 #### Produce filtered binlogs from the command line
 

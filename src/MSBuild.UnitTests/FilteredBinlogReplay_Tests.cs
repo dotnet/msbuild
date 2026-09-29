@@ -26,6 +26,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     private const string SourceMessage = "replay-filter source message";
     private const string SourceWarning = "replay-filter source warning";
     private const string SourceError = "replay-filter source error";
+    private const string FilterNoticeHelpKeyword = "MSBuild.BinaryLogger.FilteredLog";
     private const string ImportedContent = "<Project><PropertyGroup><FromArchive>original</FromArchive></PropertyGroup></Project>";
     private readonly TestEnvironment _env;
 
@@ -433,6 +434,62 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
 
         AssertFilterNotice(ReadEvents(output), "Message");
         ReadEvents(output).Select(e => e.Message).ShouldBe(ReadEvents(filtered).Select(e => e.Message));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BinaryLoggerFilter_RepeatedFilteredRewritePreservesNotices(bool omitInitialInfo)
+    {
+        string input = CreateInput(succeeded: false, includeError: true);
+        string parameters = omitInitialInfo ? ";OmitInitialInfo" : "";
+        string[] exclusions = ["Warning", "Message", "Error, Message"];
+        for (int pass = 0; pass < exclusions.Length; pass++)
+        {
+            string output = OutputPath($"filtered-{pass}.binlog");
+            string expression = $"Exclude={exclusions[pass]}";
+            CreateOperation(input, output, expression, parameters)
+                .Replay([CreateLogger(output, expression, parameters)], 1, CancellationToken.None).ShouldBeTrue();
+
+            BuildEventArgs[] events = ReadEvents(output);
+            foreach (string excludedKinds in exclusions.Take(pass + 1))
+            {
+                AssertFilterNotice(events, excludedKinds);
+            }
+
+            input = output;
+        }
+
+        BuildEventArgs[] rewritten = ReadEvents(input);
+        rewritten.ShouldNotContain(e => e.Message == SourceMessage || e.Message == SourceWarning || e.Message == SourceError);
+        rewritten.OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
+        AssertNoStagingFiles();
+    }
+
+    [Theory]
+    [InlineData(FilterNoticeHelpKeyword, true, true)]
+    [InlineData(null, true, false)]
+    [InlineData("AnotherMessage", true, false)]
+    [InlineData(FilterNoticeHelpKeyword, false, false)]
+    public void BinaryLoggerFilter_PreservesNoticesByMetadata(string? helpKeyword, bool buildLevel, bool expectPreserved)
+    {
+        const string priorNoticeText = "Prior filter notice with different localized wording";
+        string input = OutputPath("input.binlog");
+        WriteEvents(input,
+        [
+            new BuildMessageEventArgs(priorNoticeText, helpKeyword, null, MessageImportance.Normal)
+            {
+                BuildEventContext = buildLevel ? BuildEventContext.Invalid : new BuildEventContext(1, 2, 3, 4),
+            },
+        ]);
+        string output = OutputPath();
+        CreateOperation(input, output, parameters: ";OmitInitialInfo")
+            .Replay([CreateLogger(output, parameters: ";OmitInitialInfo")], 1, CancellationToken.None).ShouldBeTrue();
+
+        BuildEventArgs[] events = ReadEvents(output);
+        AssertFilterNotice(events, "Message");
+        events.Any(e => e.Message == priorNoticeText).ShouldBe(expectPreserved);
+        events.Length.ShouldBe(expectPreserved ? 2 : 1);
     }
 
     [Fact]
@@ -1373,6 +1430,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         string expected = string.Format(CultureInfo.CurrentCulture, resources.GetString("Binlog_FilteredLog")!, excludedKinds);
         var notice = events.Where(e => e.Message == expected).ShouldHaveSingleItem().ShouldBeOfType<BuildMessageEventArgs>();
         notice.BuildEventContext.ShouldBe(BuildEventContext.Invalid);
+        notice.HelpKeyword.ShouldBe(FilterNoticeHelpKeyword);
         notice.SenderName.ShouldBeNull();
         notice.Importance.ShouldBe(MessageImportance.Normal);
         return notice;
