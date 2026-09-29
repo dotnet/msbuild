@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../Strings.resx">
     <body>
@@ -3232,7 +3232,7 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="new">MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</target>
+        <target state="needs-review-translation">MSB4234: Paramètre(s) de l’enregistrement d’événements binaire non valide(s) : "{0}". Attendu(s) : ProjectImports={{None,Embed,ZipFile}} et/ou [LogFile=]filePath.binlog (le chemin ou le nom du fichier journal doit avoir l’extension ".binlog").</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">

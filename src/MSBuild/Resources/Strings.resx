@@ -712,7 +712,7 @@
   </data>
   <data name="HelpMessage_30_BinaryLoggerSwitch" xml:space="preserve">
     <value>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
+                     Serializes build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
                      of the build process that can later be used to reconstruct
@@ -720,6 +720,19 @@
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
+
+                     Exclude=kind[,kind...] omits the named event kinds from
+                     this binary logger during builds and replay. Console and
+                     other loggers are unaffected. Names are case-insensitive.
+                     Specify Exclude once per logger. Selection matches exact
+                     record kinds, not all derived message or warning events.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Example: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtered replay requires new output paths and does not
+                     support ProjectImports=ZipFile.
+                     Filtering is not redaction: embedded files are independent.
 
                      The optional LogFile specifies the path where the
                      binary log is saved. To generate a distinct log file
@@ -1043,6 +1056,30 @@
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
     LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
   </comment>
+  </data>
+  <data name="ReplayFilterUnsupportedSwitch" xml:space="preserve">
+    <value>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</comment>
+  </data>
+  <data name="ReplayFilterOutputExists" xml:space="preserve">
+    <value>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1080: "}</comment>
+  </data>
+  <data name="ReplayFilterFailed" xml:space="preserve">
+    <value>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</value>
+    <comment>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</comment>
+  </data>
+  <data name="ReplayFilterCanceled" xml:space="preserve">
+    <value>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1082: "}</comment>
+  </data>
+  <data name="ReplayFilterZipNotSupported" xml:space="preserve">
+    <value>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</value>
+    <comment>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</comment>
+  </data>
+  <data name="ReplayFilterInvalidOutput" xml:space="preserve">
+    <value>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</value>
+    <comment>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</comment>
   </data>
   <data name="HelpMessage_48_TerminalLoggerParametersSwitch" Visibility="Public">
     <value>  -terminalLoggerParameters: &lt;parameters&gt;
@@ -1840,7 +1877,7 @@
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1074.
+        Next error code should be MSB1086.
 
         Don't forget to update this comment after using the new code.
   -->
