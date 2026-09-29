@@ -182,7 +182,7 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         log.ShouldContain("|Reason=CacheUnavailableOnHost|");
         log.ShouldNotContain("|Reason=CacheDisabled|");
         Examples(log).Single().ShouldContain("|Reason=CacheUnavailableOnHost|");
-        if (legacyActivation)
+        if (parameters.EvaluationCacheConfiguration is not { RecordInputs: true })
         {
             AssertPhases(log, ("FreshEvaluation", 1));
         }
