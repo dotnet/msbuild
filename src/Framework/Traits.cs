@@ -275,6 +275,11 @@ namespace Microsoft.Build.Framework
         internal EvaluationCacheConfiguration EvaluationCache { get; } =
             EvaluationCacheConfiguration.FromEnvironment();
 
+        internal const string EvaluationCacheDiagnosticsEnvVarName = "MSBUILDEVALUATIONCACHEDIAGNOSTICS";
+
+        internal readonly bool EnableEvaluationCacheDiagnostics =
+            EnvironmentUtilities.IsValueOneOrTrue(EvaluationCacheDiagnosticsEnvVarName);
+
         internal static bool? ProjectInstanceSnapshotCacheEnabledOverride { get; set; }
 
         public bool EnableProjectInstanceSnapshotCache =>

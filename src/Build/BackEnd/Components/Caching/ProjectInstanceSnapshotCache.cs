@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
 #nullable enable
@@ -15,7 +16,7 @@ namespace Microsoft.Build.BackEnd;
 /// </summary>
 internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
 {
-    internal const long DefaultMaximumSizeBytes = 256L * 1024 * 1024;
+    internal const long DefaultMaximumSizeBytes = 1024L * 1024 * 1024;
     internal const string MaximumSizeEnvironmentVariable =
         "MSBUILDPROJECTINSTANCESNAPSHOTCACHEMAXBYTES";
 
@@ -75,6 +76,35 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
     }
 
     internal long MaximumSizeBytes => _maximumSizeBytes;
+
+    internal EvaluationCacheDiagnostics? Diagnostics { get; private set; }
+
+    internal void ConfigureDiagnostics(
+        bool enabled,
+        string buildManagerId,
+        long buildNumber,
+        EvaluationCacheMode mode,
+        IEnumerable<ProjectPropertyInstance> environment)
+    {
+        lock (_lock)
+        {
+            if (!enabled)
+            {
+                if (Diagnostics is not null)
+                {
+                    Diagnostics = null;
+                    foreach (CacheEntry entry in _leastRecentlyUsed)
+                    {
+                        entry.DiagnosticEnvironment = null;
+                    }
+                }
+                return;
+            }
+
+            Diagnostics ??= new EvaluationCacheDiagnostics();
+            Diagnostics.BeginBuild(buildManagerId, buildNumber, mode, environment);
+        }
+    }
 
     internal long BuildsServed
     {
@@ -272,7 +302,8 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
 
     internal bool TryGet(
         ProjectInstanceSnapshotCacheKey key,
-        out ProjectInstanceSnapshotCacheEntry? entry)
+        out ProjectInstanceSnapshotCacheEntry? entry,
+        EvaluationCacheDiagnostics.Request? diagnosticRequest = null)
     {
         ArgumentNullException.ThrowIfNull(key);
         lock (_lock)
@@ -280,29 +311,43 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
             if (!_entries.TryGetValue(key, out LinkedListNode<CacheEntry>? node))
             {
                 entry = null;
+                if (diagnosticRequest is not null && Diagnostics is not null)
+                {
+                    ExplainMiss(key, diagnosticRequest, Diagnostics);
+                }
                 return false;
             }
 
             MarkMostRecentlyUsed(node);
             entry = node.Value.Entry;
+            diagnosticRequest?.Record("Lookup", "CandidateFound");
             return true;
         }
     }
 
     internal bool AddOrReplace(
         ProjectInstanceSnapshotCacheKey key,
-        ProjectInstanceSnapshotCacheEntry entry)
+        ProjectInstanceSnapshotCacheEntry entry,
+        EvaluationCacheDiagnostics.Request? diagnosticRequest = null)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(entry);
 
         lock (_lock)
         {
-            var cacheEntry = new CacheEntry(key, entry);
+            var cacheEntry = new CacheEntry(key, entry)
+            {
+                DiagnosticEnvironment = Diagnostics?.Environment,
+            };
             if (cacheEntry.SizeBytes > _maximumSizeBytes)
             {
                 RemoveCore(key);
                 _oversizedRejections++;
+                diagnosticRequest?.Record("Admission", "Oversized");
+                if (Diagnostics is not null)
+                {
+                    Diagnostics.Remember(Diagnostics.GetKeyId(key), "Oversized");
+                }
                 return false;
             }
             RemoveCore(key);
@@ -319,6 +364,11 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
             _currentSizeBytes += cacheEntry.SizeBytes;
 
             _storedEntries++;
+            if (Diagnostics is not null)
+            {
+                Diagnostics.Remember(Diagnostics.GetKeyId(key), "Stored");
+            }
+            diagnosticRequest?.Record("Admission", "Stored");
             return true;
         }
     }
@@ -356,10 +406,17 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
         };
     }
 
-    internal void Clear()
+    internal void Clear(string reason = "CacheCleared")
     {
         lock (_lock)
         {
+            if (Diagnostics is not null)
+            {
+                foreach (CacheEntry entry in _leastRecentlyUsed)
+                {
+                    Diagnostics.RecordRemoval(entry.Key, reason);
+                }
+            }
             _entries.Clear();
             _leastRecentlyUsed.Clear();
             _currentSizeBytes = 0;
@@ -377,7 +434,7 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
     /// <summary>
     /// Releases all snapshots owned by this component.
     /// </summary>
-    public void ShutdownComponent() => Clear();
+    public void ShutdownComponent() => Clear("ComponentShutdown");
 
     /// <summary>
     /// Creates the singleton component instance for a build-component host.
@@ -416,6 +473,7 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
         _entries.Remove(key);
         _leastRecentlyUsed.Remove(node);
         _currentSizeBytes -= node.Value.SizeBytes;
+        Diagnostics?.RecordRemoval(node.Value.Key, "EntryRemoved");
         return true;
     }
 
@@ -434,6 +492,47 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
         _entries.Remove(node.Value.Key);
         _currentSizeBytes -= node.Value.SizeBytes;
         _evictedEntries++;
+        Diagnostics?.RecordRemoval(node.Value.Key, "Evicted");
+    }
+
+    // Cache lock precedes the diagnostics lock. Diagnostics only buffer events here;
+    // invoking the logging service is deferred until EndBuild, outside both locks.
+    private void ExplainMiss(
+        ProjectInstanceSnapshotCacheKey key,
+        EvaluationCacheDiagnostics.Request request,
+        EvaluationCacheDiagnostics diagnostics)
+    {
+        string? previous = request.KeyId is null ? null : diagnostics.GetPreviousDisposition(request.KeyId);
+        if (previous is not null && previous != "Stored")
+        {
+            request.Record("Lookup", previous);
+            return;
+        }
+
+        CacheEntry? candidate = null;
+        List<string>? differences = null;
+        foreach (CacheEntry current in _leastRecentlyUsed)
+        {
+            if (!FileUtilities.PathComparer.Equals(key.ProjectFullPath, current.Key.ProjectFullPath))
+            {
+                continue;
+            }
+            List<string> currentDifferences = key.GetDiagnosticDifferences(current.Key);
+            if (differences is null || currentDifferences.Count < differences.Count)
+            {
+                candidate = current;
+                differences = currentDifferences;
+            }
+        }
+
+        if (candidate is not null)
+        {
+            diagnostics.RecordKeyMismatch(request, key, candidate.Key, candidate.DiagnosticEnvironment, differences!);
+        }
+        else
+        {
+            request.Record("Lookup", "NoEntryOrHistory");
+        }
     }
 
     private sealed class CacheEntry
@@ -449,6 +548,8 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
         internal ProjectInstanceSnapshotCacheKey Key { get; }
 
         internal ProjectInstanceSnapshotCacheEntry Entry { get; }
+
+        internal IReadOnlyDictionary<string, long>? DiagnosticEnvironment { get; set; }
 
         internal long SizeBytes =>
             Microsoft.Build.Evaluation.Context.RetainedSizeEstimator.Add(

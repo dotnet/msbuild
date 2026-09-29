@@ -111,7 +111,9 @@ dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.Includ
 > switches. No runtime environment setting is required. Explicit `Disabled`,
 > `Record`, and `SnapshotUnsafe` requests are overridden, so the mode comparisons
 > and activation-mode tests described below require the original, unmodified
-> branch. Validation, the restore bypass, and the 256 MiB default budget are unchanged.
+> branch. Validation, the restore bypass, and the **1 GiB** default budget match
+> the fixes branch. Detailed diagnostics still require
+> `MSBUILDEVALUATIONCACHEDIAGNOSTICS=1`.
 
 The integrated evaluation-cache experiment uses
 `MSBUILDEVALUATIONCACHEMODE` with one of four values:
@@ -137,6 +139,17 @@ cache budget and evict reusable build evaluations. Explicit `Record` mode still
 records restore inputs. Normal build snapshots remain subject to validation after
 restore; this does not ignore restore-generated input changes or alter cache keys.
 
+The snapshot budget defaults to **1 GiB** in this measurement prototype. The former
+256 MiB limit could not retain a large multi-targeting build's working set: as a
+warm build admitted its first missing snapshots, LRU eviction removed the remaining
+snapshots before their next lookup. Stable keys and inputs therefore still produced
+almost no reuse. The larger bound provides measurement headroom without changing
+activation, validation, admission accounting, or the eviction policy.
+Set `MSBUILDPROJECTINSTANCESNAPSHOTCACHEMAXBYTES` to override the limit in bytes
+(for example, `268435456` preserves 256 MiB on memory-constrained hosts).
+This bounds estimated retained payload, not process RSS, and is not an up-front
+allocation. Inspect eviction diagnostics before interpreting a low warm hit rate.
+
 Each explicitly configured or legacy-opted-in build logs one low-importance, versioned
 `EvaluationCacheExperimentStatus|` record. It contains the effective mode,
 configuration validity, process and main-`BuildManager` identities, build
@@ -147,6 +160,56 @@ hit by subtracting an extra diagnostic build.
 With no explicit mode and neither legacy switch set, normal builds create no
 experiment identity or status record. Explicit `Disabled` still emits the
 baseline record required by the comparison harness.
+
+### Diagnosing cache decisions
+
+Set `MSBUILDEVALUATIONCACHEDIAGNOSTICS=1` for an **untimed diagnostic run**.
+This switch does not enable recording or caching; select the mode separately.
+For Hosted PerfStar, use the extra environment variables:
+
+```text
+MSBUILDEVALUATIONCACHEMODE=SnapshotFileSystem;MSBUILDEVALUATIONCACHEDIAGNOSTICS=1
+```
+
+Also select `diagnostics=binlog` so that both priming and measured build logs are
+retained. The new messages have Low importance and are normally absent from minimal
+console output. Do not compare diagnostic-run timing against clean performance runs:
+the opt-in adds environment-name hashing, candidate comparisons, and buffered logging.
+Without it, these captures, comparisons, and buffers are not created.
+
+Search binlogs for `EvaluationCacheDiagnostic|Version=1|` and
+`EvaluationCacheDiagnosticSummary|Version=1|`. Records identify process, owning
+BuildManager, tracing session (`TraceId`), build ordinal, configuration, submission,
+node, project, request, and an opaque key ID where available. Key IDs are HMACs
+with a private per-tracing-session salt; compare them only within the same `TraceId`.
+Turning diagnostics off discards diagnostic state, not snapshots. Re-enabling starts
+a new tracing session. The existing aggregate status schema is unchanged.
+
+`Event`/`Reason` distinguish intentional restore/record-only bypass, unavailable
+host-owned caches, lookup candidates, successful materialization, admission,
+eviction/clear/removal, validation rejection, and recoverable cache failures.
+`KeyMismatch` compares the closest live same-project candidate (fewest different
+fields, MRU tie-break); it is **not proof that this is the intended configuration**.
+Its detail lists differing identity fields and changed global-property/environment
+**names**, never their values. Validation reports the first failing path, environment
+name, SDK name, or safe failure category; it does not repeat validation or SDK resolution.
+`NoEntryOrHistory` means no live same-project candidate or remembered exact disposition,
+not proof that the project has never been evaluated.
+
+The trace retains at most 2,048 key dispositions and 10,000 detailed events between
+flushes, including on hosts without snapshot storage. `ForgottenHistory` and `DroppedEvents` expose truncation; summary reason counts
+continue after detailed-event truncation. Messages flush at EndBuild (or worker build cleanup) outside cache
+locks; abrupt termination may lose them. Lifecycle records between builds are included
+in the next flush. Only backend configuration loads entering this cache integration
+are traced, not all API evaluations or already-loaded caller instances. Worker loads
+without the owning cache emit `CacheUnavailableOnHost` with a host-local trace identity
+and no owning BuildManager ID.
+With diagnostics enabled but caching disabled, `CacheDisabled` and aggregate mode
+status explain that no cache was activated.
+
+New diagnostics omit raw property/environment values, SDK-result payloads, and
+exception messages. Paths and names are visible. This is not a privacy guarantee for
+the whole binlog: ordinary MSBuild logging can still include environment/property values.
 
 `SnapshotFileSystem` remains experimental. Its metadata comparison does not
 detect same-size/same-timestamp content changes. It revalidates direct

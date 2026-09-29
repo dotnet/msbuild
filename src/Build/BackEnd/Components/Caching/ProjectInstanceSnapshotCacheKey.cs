@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -167,6 +168,101 @@ internal sealed class ProjectInstanceSnapshotCacheKey : IEquatable<ProjectInstan
     }
 
     internal bool Matches(EvaluationInputKey key) => GetMismatch(key) is null;
+
+    internal string ProjectFullPath => _projectFullPath;
+
+    internal List<string> GetDiagnosticDifferences(ProjectInstanceSnapshotCacheKey other)
+    {
+        List<string> differences = [];
+        Add(!FileUtilities.PathComparer.Equals(_projectFullPath, other._projectFullPath), "ProjectFullPath");
+        Add(!StringComparer.OrdinalIgnoreCase.Equals(_toolsVersion, other._toolsVersion), "ToolsVersion");
+        Add(_explicitToolsVersionSpecified != other._explicitToolsVersionSpecified, "ExplicitToolsVersion");
+        Add(!StringComparer.OrdinalIgnoreCase.Equals(_subToolsetVersion, other._subToolsetVersion), "SubToolsetVersion");
+        Add(_projectLoadSettings != other._projectLoadSettings, "LoadSettings");
+        Add(_interactive != other._interactive, "Interactive");
+        Add(_maxNodeCount != other._maxNodeCount, "MaxNodeCount");
+        Add(!FileUtilities.PathComparer.Equals(_startupDirectory, other._startupDirectory), "StartupDirectory");
+        Add(!FileUtilities.PathComparer.Equals(_workingDirectory, other._workingDirectory), "WorkingDirectory");
+        Add(_culture != other._culture, "Culture");
+        Add(_uiCulture != other._uiCulture, "UICulture");
+        Add(_engineVersion != other._engineVersion, "EngineVersion");
+        Add(_disabledChangeWave != other._disabledChangeWave, "DisabledChangeWave");
+        Add(_environmentFingerprint != other._environmentFingerprint, "EnvironmentFingerprint");
+        Add(_parserConfigurationFingerprint != other._parserConfigurationFingerprint, "ParserConfigurationFingerprint");
+        Add(_toolsetFingerprint != other._toolsetFingerprint, "ToolsetFingerprint");
+        Add(!FileUtilities.PathComparer.Equals(_toolsPath, other._toolsPath), "ToolsPath");
+        Add(_commandLinePropertyNames != other._commandLinePropertyNames, "CommandLinePropertyNames");
+        Add(!_globalProperties.Equals(other._globalProperties), "GlobalProperties");
+        return differences;
+
+        void Add(bool changed, string name)
+        {
+            if (changed)
+            {
+                differences.Add(name);
+            }
+        }
+    }
+
+    internal List<string> GetChangedGlobalPropertyNames(ProjectInstanceSnapshotCacheKey other)
+    {
+        List<string> names = [];
+        foreach (ProjectPropertyInstance property in _globalProperties)
+        {
+            ProjectPropertyInstance? previous = other._globalProperties.GetProperty(property.Name);
+            if (previous is null
+                || ((IProperty)property).EvaluatedValueEscaped != ((IProperty)previous).EvaluatedValueEscaped)
+            {
+                names.Add(property.Name);
+            }
+        }
+        foreach (ProjectPropertyInstance property in other._globalProperties)
+        {
+            if (!_globalProperties.Contains(property.Name))
+            {
+                names.Add(property.Name);
+            }
+        }
+        names.Sort(StringComparer.Ordinal);
+        return names;
+    }
+
+    // Used only for opt-in diagnostics. Length-prefixed fields avoid ambiguous concatenations;
+    // the caller HMACs this identity and never logs its property values.
+    internal void WriteDiagnosticIdentity(BinaryWriter writer)
+    {
+        writer.Write(NormalizePath(_projectFullPath));
+        writer.Write(_toolsVersion.ToUpperInvariant());
+        writer.Write(_explicitToolsVersionSpecified);
+        writer.Write(_subToolsetVersion is not null);
+        writer.Write(_subToolsetVersion?.ToUpperInvariant() ?? string.Empty);
+        writer.Write((int)_projectLoadSettings);
+        writer.Write(_interactive);
+        writer.Write(_maxNodeCount);
+        writer.Write(NormalizePath(_startupDirectory));
+        writer.Write(NormalizePath(_workingDirectory));
+        writer.Write(_culture);
+        writer.Write(_uiCulture);
+        writer.Write(_engineVersion);
+        writer.Write(_disabledChangeWave is not null);
+        writer.Write(_disabledChangeWave ?? string.Empty);
+        writer.Write(_environmentFingerprint);
+        writer.Write(_parserConfigurationFingerprint);
+        writer.Write(_toolsetFingerprint);
+        writer.Write(NormalizePath(_toolsPath));
+        writer.Write(_commandLinePropertyNames);
+        List<ProjectPropertyInstance> properties = [.. _globalProperties];
+        properties.Sort(static (left, right) => StringComparer.OrdinalIgnoreCase.Compare(left.Name, right.Name));
+        writer.Write(properties.Count);
+        foreach (ProjectPropertyInstance property in properties)
+        {
+            writer.Write(property.Name.ToUpperInvariant());
+            writer.Write(((IProperty)property).EvaluatedValueEscaped);
+        }
+
+        static string NormalizePath(string value) =>
+            FileUtilities.IsFileSystemCaseSensitive ? value : value.ToUpperInvariant();
+    }
 
     internal string? GetMismatch(EvaluationInputKey key)
     {

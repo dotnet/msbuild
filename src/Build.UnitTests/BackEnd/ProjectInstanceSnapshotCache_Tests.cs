@@ -381,11 +381,29 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void DefaultMaximumSizeIs256MiB()
+    public void DefaultMaximumSizeIs1GiB()
     {
         var cache = new ProjectInstanceSnapshotCache();
 
-        cache.MaximumSizeBytes.ShouldBe(256L * 1024 * 1024);
+        cache.MaximumSizeBytes.ShouldBe(1024L * 1024 * 1024);
+    }
+
+    [Theory]
+    [InlineData(null, 1024L * 1024 * 1024)]
+    [InlineData("0", 0L)]
+    [InlineData("268435456", 256L * 1024 * 1024)]
+    [InlineData("2147483648", 2L * 1024 * 1024 * 1024)]
+    [InlineData("-1", 1024L * 1024 * 1024)]
+    [InlineData("invalid", 1024L * 1024 * 1024)]
+    public void FactoryHonorsExplicitBudgetAndDefaults(string? configuredBytes, long expectedBytes)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(ProjectInstanceSnapshotCache.MaximumSizeEnvironmentVariable, configuredBytes);
+
+        var cache = (ProjectInstanceSnapshotCache)ProjectInstanceSnapshotCache.CreateComponent(
+            BuildComponentType.ProjectInstanceSnapshotCache);
+
+        cache.MaximumSizeBytes.ShouldBe(expectedBytes);
     }
 
     [Fact]
@@ -734,6 +752,59 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
             firstKey.RetainedSizeBytes
             + thirdKey.RetainedSizeBytes
             + (entry.RetainedSizeBytes * 2L));
+    }
+
+    [Theory]
+    [InlineData(true, 0)]
+    [InlineData(false, 663)]
+    public void HostedSizedWorkingSetAvoidsCyclicEvictionWithDefaultBudget(
+        bool useFormerBudget,
+        int expectedWarmCandidates)
+    {
+        const int ConfigurationCount = 663;
+        // Model payload accounting without allocating hundreds of MiB in the test.
+        ProjectInstanceSnapshotCacheEntry entry = CreateEntry(
+            "working-set", validationDataSizeBytes: 1024 * 1024);
+        ProjectInstanceSnapshotCacheKey[] keys = Enumerable.Range(0, ConfigurationCount)
+            .Select(index => EmptyKey($"Project{index}.csproj"))
+            .ToArray();
+        var cache = useFormerBudget
+            ? new ProjectInstanceSnapshotCache(256L * 1024 * 1024)
+            : new ProjectInstanceSnapshotCache();
+        long workingSetSizeBytes = 0;
+        foreach (ProjectInstanceSnapshotCacheKey key in keys)
+        {
+            workingSetSizeBytes += key.RetainedSizeBytes + entry.RetainedSizeBytes;
+            cache.AddOrReplace(key, entry).ShouldBeTrue();
+        }
+
+        int warmCandidates = 0;
+        foreach (ProjectInstanceSnapshotCacheKey key in keys)
+        {
+            if (cache.TryGet(key, out ProjectInstanceSnapshotCacheEntry? candidate))
+            {
+                candidate.ShouldBeSameAs(entry);
+                warmCandidates++;
+            }
+            else
+            {
+                cache.AddOrReplace(key, entry).ShouldBeTrue();
+            }
+        }
+
+        warmCandidates.ShouldBe(expectedWarmCandidates);
+        cache.CurrentSizeBytes.ShouldBeLessThanOrEqualTo(cache.MaximumSizeBytes);
+        if (useFormerBudget)
+        {
+            workingSetSizeBytes.ShouldBeGreaterThan(cache.MaximumSizeBytes);
+            cache.GetStatistics().EvictedEntries.ShouldBeGreaterThan(ConfigurationCount);
+        }
+        else
+        {
+            cache.Count.ShouldBe(ConfigurationCount);
+            cache.CurrentSizeBytes.ShouldBe(workingSetSizeBytes);
+            cache.GetStatistics().EvictedEntries.ShouldBe(0);
+        }
     }
 
     [Fact]

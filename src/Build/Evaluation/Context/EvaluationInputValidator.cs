@@ -9,6 +9,11 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Evaluation.Context;
 
 /// <summary>
+/// A validation failure with a category and privacy-safe detail, never captured values or diagnostic text.
+/// </summary>
+internal readonly record struct EvaluationInputValidationFailure(string? Reason, string? Detail);
+
+/// <summary>
 /// Checks recorded inputs that can be validated without rerunning external resolvers.
 /// </summary>
 internal static class EvaluationInputValidator
@@ -20,10 +25,32 @@ internal static class EvaluationInputValidator
     /// <param name="inputs">The recorded inputs.</param>
     /// <param name="reason">The first input that differs, or the non-cacheable reason.</param>
     internal static bool IsFileSystemCurrent(EvaluationInputs inputs, out string? reason)
+        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _);
+
+    /// <summary>
+    /// Checks recorded inputs, retaining the legacy reason separately from privacy-safe failure details.
+    /// </summary>
+    internal static bool IsFileSystemCurrent(
+        EvaluationInputs inputs,
+        out string? reason,
+        out EvaluationInputValidationFailure failure)
+        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure);
+
+    private static bool IsFileSystemCurrentCore(
+        EvaluationInputs inputs,
+        bool captureDetails,
+        out string? reason,
+        out EvaluationInputValidationFailure failure)
     {
+        failure = default;
         if (!inputs.IsCacheable)
         {
             reason = $"{inputs.NonCacheable}: {inputs.NonCacheableDetail}";
+            if (captureDetails)
+            {
+                failure = new("NonCacheable", inputs.NonCacheable.ToString());
+            }
+
             return false;
         }
 
@@ -37,15 +64,36 @@ internal static class EvaluationInputValidator
                         StringComparison.Ordinal))
                 {
                     reason = environmentRead.Key;
+                    if (captureDetails)
+                    {
+                        failure = new("EnvironmentReadChanged", environmentRead.Key);
+                    }
+
                     return false;
                 }
             }
 
             foreach (KeyValuePair<string, FileDependency> file in inputs.Files)
             {
-                if (!EvaluationInputRecorder.TryStat(file.Key, out FileDependency current) || current != file.Value)
+                if (!EvaluationInputRecorder.TryStat(file.Key, out FileDependency current))
                 {
                     reason = file.Key;
+                    if (captureDetails)
+                    {
+                        failure = new("FileSystemInputUnstatable", file.Key);
+                    }
+
+                    return false;
+                }
+
+                if (current != file.Value)
+                {
+                    reason = file.Key;
+                    if (captureDetails)
+                    {
+                        failure = new("FileSystemInputChanged", file.Key);
+                    }
+
                     return false;
                 }
             }
@@ -57,6 +105,11 @@ internal static class EvaluationInputValidator
         {
             // A failed check is a miss, never a failed build.
             reason = ex.Message;
+            if (captureDetails)
+            {
+                failure = new("MetadataCheckException", ex.GetType().Name);
+            }
+
             return false;
         }
 

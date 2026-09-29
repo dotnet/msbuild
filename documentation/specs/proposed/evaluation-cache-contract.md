@@ -6,7 +6,8 @@
 > `SnapshotFileSystem`, including when activation variables are unset or request
 > another mode. This deliberately overrides the activation contract below for
 > measurement only; it must not be merged as a production default. Input validation,
-> restore-scoped bypass, and the default cache budget are unchanged.
+> restore-scoped bypass, and the 1 GiB default cache budget match the fixes branch.
+> Detailed diagnostics remain a separate opt-in.
 
 This document is the **required acceptance contract** for an opt-in evaluation cache under the
 timestamp-and-length metadata model described below. The current prototype remains opt-in and makes
@@ -46,6 +47,19 @@ identity prevents cross-restore reuse, so retaining them would evict reusable bu
 snapshots. Explicit `Record` mode continues to record these evaluations. Subsequent
 normal builds still validate retained snapshots against current inputs, including
 restore-generated imports; no part of the request key is ignored.
+
+`MSBUILDEVALUATIONCACHEDIAGNOSTICS=1` separately opts into detailed, low-importance
+decision tracing. It MUST NOT activate caching, change candidate identity or validation,
+or emit warnings/errors. It reports bypass/admission/lookup/validation/reuse/lifecycle
+reasons as ordinary versioned messages, preserving binary-log event compatibility.
+Key comparison discloses field and property/environment names, not their values;
+safe validation details disclose paths/names or exception types, not exception text
+or SDK result payloads. Per-tracing-session opaque IDs are not reusable cache keys.
+Diagnostic history and event buffers are bounded, with explicit forgotten/dropped
+counts. Candidate comparisons and absent history MUST NOT be presented as proven
+causes for a particular previous configuration. See the benchmark
+[diagnostic instructions](../../../src/MSBuild.Benchmarks/readme.md#diagnosing-cache-decisions)
+for scope, limits, and collection. Diagnostic overhead is excluded from clean benchmarks.
 
 ## Correctness invariant
 
@@ -146,7 +160,8 @@ invalidate all owned entries consistently. Out-of-proc transfer MUST not implici
 ownership.
 
 When the feature is unconfigured or `Disabled`, no recorder or snapshot cache may be created for it.
-The unconfigured path MUST NOT emit cache status. Explicit `Disabled` may emit truthful opt-in status,
+The unconfigured path without diagnostics MUST NOT emit cache status. Explicit `Disabled` or the
+separate diagnostics opt-in may emit truthful status,
 without doing recording or cache work. Shared changes to project provenance, globbing, or evaluation
 seams still require compatibility validation; this contract does not claim literally zero total overhead.
 
@@ -157,9 +172,12 @@ Retention MUST be bounded, with defined, concurrency-safe oversize rejection and
 reduce hit rate but never change build results. Entries MUST NOT keep unbounded shared mutable
 aliases alive.
 
-The prototype's 256 MiB default is an internal configured cache budget, not a promise that process RSS
-is capped at 256 MiB. Conservative estimates cover cache-owned keys, snapshots, and validation
+The prototype's 1 GiB default is an internal configured cache budget, not a promise that process RSS
+is capped at 1 GiB. Conservative estimates cover cache-owned keys, snapshots, and validation
 payloads; allocator, collection-capacity, and general runtime overhead are not an RSS accounting model.
+The bound is measurement headroom for large working sets that thrashed under the former 256 MiB
+default, not an up-front allocation or a production sizing recommendation.
+`MSBUILDPROJECTINSTANCESNAPSHOTCACHEMAXBYTES` continues to override the bound in bytes.
 
 ## Acceptance matrix
 
