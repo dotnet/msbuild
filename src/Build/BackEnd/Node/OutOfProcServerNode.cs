@@ -390,6 +390,9 @@ namespace Microsoft.Build.Server
                 try
                 {
                     HandleServerNodeBuildCommand(command);
+
+                    // The busy mutex is released now, so the next client can build here instead of falling back.
+                    NodeLifecycleJournal.Record(NodeJournalEvent.BuildEnded, NodeJournalKind.Server, detail: "idle");
                 }
                 catch (Exception e)
                 {

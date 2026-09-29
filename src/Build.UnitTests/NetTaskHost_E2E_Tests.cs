@@ -428,21 +428,24 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [WindowsFullFrameworkOnlyFact]
+        [Trait(NodeScenario.TraitName, NodeScenario.TraitValue)]
         public void NetTaskHost_TaskHostProcessReuse_SameProcessForNestedBuild()
         {
-            using TestEnvironment env = TestEnvironment.Create(_output);
+            using NodeScenario scenario = NodeScenario.Create(_output);
+            TestEnvironment env = scenario.Environment;
             env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            // The bootstrap's pooled .NET TaskHost cannot be reached from here, so it ends on its idle timeout.
+            scenario.UseShortNodeIdleTimeout();
 
             var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
             env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskHostReuse", "TestNetTaskHostReuse.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -t:TestTaskHostReuse", out bool successTestTask);
+            (bool successTestTask, string testTaskOutput) = scenario.RunBootstrapped($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -t:TestTaskHostReuse");
 
-            _output.WriteLine(testTaskOutput);
-
-            successTestTask.ShouldBeTrue();
+            successTestTask.ShouldBeTrue(testTaskOutput);
 
             // Both the parent task and child task should report TASKHOST_PID
             // Extract PIDs from output and verify they match (same process reused)
@@ -456,6 +459,12 @@ namespace Microsoft.Build.Engine.UnitTests
             string childPid = childPidMatch.Groups[1].Value;
 
             parentPid.ShouldBe(childPid, $"Parent PID ({parentPid}) and child PID ({childPid}) should match -- same TaskHost process should be reused for nested build");
+
+            // The nested build must not have launched a second TaskHost.
+            NodeJournalRecord launched = scenario.Await(NodeJournalEvent.Launched, NodeJournalKind.TaskHost);
+            launched.SubjectProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture).ShouldBe(parentPid);
+            scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost)).ShouldBe(1);
+            scenario.ShutdownNodes(static () => { });
         }
 
 #if NET

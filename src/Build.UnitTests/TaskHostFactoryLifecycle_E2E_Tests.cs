@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -30,6 +31,11 @@ namespace Microsoft.Build.Engine.UnitTests
         private const string CurrentRuntime = "CurrentRuntime";
         private const string NetRuntime = "NET";
 
+        /// <summary>
+        /// A sidecar waiting in the pool must outlive the scenario's quiescence wait, and then end promptly on its own.
+        /// </summary>
+        private const int PooledTaskHostIdleTimeoutMs = 20_000;
+
         private readonly ITestOutputHelper _output;
 
         public TaskHostFactoryLifecycle_E2E_Tests(ITestOutputHelper output)
@@ -48,7 +54,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// </summary>
         /// <param name="runtimeToUse">The runtime to use for the task (CurrentRuntime or NET)</param>
         /// <param name="taskFactoryToUse">The task factory to use (TaskHostFactory or AssemblyTaskFactory)</param>
-        [Theory]
+        [NodeScenarioTheory]
 #if NET
         [InlineData(CurrentRuntime, AssemblyTaskFactory)] // Match + No Explicit → in-proc
         [InlineData(CurrentRuntime, TaskHostFactory)] // Match + Explicit → short-lived out-of-proc
@@ -61,11 +67,41 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             bool? expectedNodeReuse = DetermineExpectedNodeReuse(runtimeToUse, taskFactoryToUse);
 
-            using TestEnvironment env = TestEnvironment.Create(_output);
+            using NodeScenario scenario = NodeScenario.Create(_output);
 
-            string buildOutput = ExecuteBuildWithTaskHost(runtimeToUse, taskFactoryToUse);
+            if (expectedNodeReuse == true)
+            {
+                // A long-lived sidecar of the bootstrap cannot be reached from here, so it ends on its idle timeout.
+                // A short-lived TaskHost gets no such help: it has to exit on its own.
+                scenario.UseShortNodeIdleTimeout(PooledTaskHostIdleTimeoutMs);
+            }
+
+            string buildOutput = ExecuteBuildWithTaskHost(scenario, runtimeToUse, taskFactoryToUse);
 
             ValidateTaskHostBehavior(buildOutput, expectedNodeReuse);
+            ValidateTaskHostLifetime(scenario, expectedNodeReuse);
+        }
+
+        private static void ValidateTaskHostLifetime(NodeScenario scenario, bool? expectedNodeReuse)
+        {
+            if (expectedNodeReuse is null)
+            {
+                scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost), "a TaskHost launched for an in-proc task");
+                return;
+            }
+
+            int taskHost = scenario.Await(NodeJournalEvent.Launched, NodeJournalKind.TaskHost).SubjectProcessId;
+            scenario.Count(NodeScenario.Is(NodeJournalEvent.Launched, NodeJournalKind.TaskHost)).ShouldBe(1);
+            if (expectedNodeReuse.Value)
+            {
+                // The long-lived sidecar stays for the next build after this one has completed. (A .NET TaskHost of the
+                // resolved SDK, rather than of the bootstrap, does not journal, so this can only catch a bootstrap one.)
+                scenario.AssertNever(NodeScenario.Is(NodeJournalEvent.Exited, processId: taskHost), "the long-lived sidecar exiting after the build");
+            }
+
+            // Nothing asks the TaskHost to shut down, and only a long-lived one has a short idle timeout: a short-lived
+            // TaskHost that stayed would reach the scenario's hang ceiling here.
+            scenario.ShutdownNodes(static () => { });
         }
 
         private static bool? DetermineExpectedNodeReuse(string runtimeToUse, string taskFactoryToUse)
@@ -89,14 +125,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 _ => throw new ArgumentException($"Unknown combination: runtime={runtimeToUse}, factory={taskFactoryToUse}")
             };
 
-        private string ExecuteBuildWithTaskHost(string runtimeToUse, string taskFactoryToUse)
+        private static string ExecuteBuildWithTaskHost(NodeScenario scenario, string runtimeToUse, string taskFactoryToUse)
         {
             string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
 
-            string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
-                out bool success,
-                outputHelper: _output);
+            (bool success, string output) = scenario.RunBootstrapped(
+                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}");
 
             success.ShouldBeTrue("Build should succeed");
 

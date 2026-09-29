@@ -104,6 +104,20 @@ namespace Microsoft.Build.UnitTests.Shared
             return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables: GetMSBuildEnvironmentVariables(useBootstrapHost: false));
         }
 
+        /// <summary>
+        /// Invoke msbuild.exe at <paramref name="pathToMsBuildExe"/> on a background thread, with an explicit timeout.
+        /// </summary>
+        internal static Task<(bool SuccessfulExit, string BuildOutput)> ExecMSBuildAsync(
+            string pathToMsBuildExe,
+            string msbuildParameters,
+            ITestOutputHelper outputHelper,
+            int timeoutMilliseconds)
+            => Task.Run(() =>
+            {
+                string buildOutput = RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out bool successfulExit, outputHelper: outputHelper, timeoutMilliseconds: timeoutMilliseconds, environmentVariables: GetMSBuildEnvironmentVariables(useBootstrapHost: false));
+                return (successfulExit, buildOutput);
+            });
+
         public static Task<(bool SuccessfulExit, string BuildOutput)> ExecBootstrappedMSBuildAsync(
             string msbuildParameters,
             bool shellExecute = false,
