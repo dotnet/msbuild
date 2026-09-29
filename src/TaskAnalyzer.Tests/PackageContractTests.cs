@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Packaging;
@@ -18,7 +17,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 public sealed class PackageContractTests
 {
     private const string TestCommit = "abcdef0123456789abcdef0123456789abcdef01";
-    private const string ShortTestCommit = "abcdef0123";
     private readonly ITestOutputHelper _output;
 
     public PackageContractTests(ITestOutputHelper output)
@@ -29,7 +27,7 @@ public sealed class PackageContractTests
     [Fact]
     public async Task GeneratedPackagesHaveExpectedShippingContract()
     {
-        string repositoryRoot = FindRepositoryRoot();
+        string repositoryRoot = TaskAnalyzerTestsConstants.RepoRoot;
         string packageOutput = Path.Combine(Path.GetTempPath(), $"{nameof(PackageContractTests)}-{Guid.NewGuid():N}");
         Directory.CreateDirectory(packageOutput);
 
@@ -51,6 +49,9 @@ public sealed class PackageContractTests
             using var analyzerPackage = new PackageArchiveReader(analyzerPackagePath);
             using var frameworkPackage = new PackageArchiveReader(frameworkPackagePath);
 
+            analyzerPackage.NuspecReader.GetIdentity().Version.ShouldBe(
+                frameworkPackage.NuspecReader.GetIdentity().Version,
+                "TaskAnalyzer should use the repository-wide package version.");
             VerifyAnalyzerPackage(repositoryRoot, analyzerPackage);
             VerifyFrameworkPackage(frameworkPackage);
             VerifyMatchingIcons(analyzerPackage, frameworkPackage);
@@ -68,12 +69,9 @@ public sealed class PackageContractTests
     private static void VerifyAnalyzerPackage(string repositoryRoot, PackageArchiveReader package)
     {
         var identity = package.NuspecReader.GetIdentity();
-        string version = identity.Version.ToNormalizedString();
         string[] files = package.GetFiles().ToArray();
 
         identity.Id.ShouldBe("Microsoft.Build.TaskAuthoring.Analyzer");
-        Regex.IsMatch(version, $@"^0\.1\.0-dev\.\d+\.\d+\.{ShortTestCommit}$").ShouldBeTrue(
-            $"Expected a local 0.1.0 development version with commit SHA, but found '{version}'.");
         package.NuspecReader.GetRepositoryMetadata().Commit.ShouldBe(TestCommit);
         package.NuspecReader.GetDescription().ShouldBe(
             "Provides analyzer guidance for MSBuild task authoring and multithreaded task safety.");
@@ -170,6 +168,17 @@ public sealed class PackageContractTests
         string packageOutput,
         bool metadataOnly = false)
     {
+        if (metadataOnly)
+        {
+            await RunDotNet(
+                repositoryRoot,
+                repositoryRoot,
+                "restore",
+                projectPath,
+                "--nologo",
+                "--disable-build-servers");
+        }
+
         string[] arguments =
         [
             "pack",
@@ -252,21 +261,6 @@ public sealed class PackageContractTests
 
         process.ExitCode.ShouldBe(0, $"dotnet {string.Join(' ', arguments)} failed.");
         return $"{output}{Environment.NewLine}{error}";
-    }
-
-    private static string FindRepositoryRoot()
-    {
-        for (DirectoryInfo? directory = new(AppContext.BaseDirectory);
-            directory is not null;
-            directory = directory.Parent)
-        {
-            if (File.Exists(Path.Combine(directory.FullName, "MSBuild.slnx")))
-            {
-                return directory.FullName;
-            }
-        }
-
-        throw new DirectoryNotFoundException("Could not find the MSBuild repository root.");
     }
 
     private static string GetSinglePackage(string packageOutput, string packageId)

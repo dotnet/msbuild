@@ -617,7 +617,7 @@ Add the analyzer package as a private package reference:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Microsoft.Build.TaskAuthoring.Analyzer" Version="0.1.0"
+  <PackageReference Include="Microsoft.Build.TaskAuthoring.Analyzer" Version="18.13.0"
                     PrivateAssets="all" />
 </ItemGroup>
 ```
