@@ -37,6 +37,7 @@ public sealed class TaskHostOwnerLifetime_Tests(ITestOutputHelper output)
         env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "0");
         env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
         scenario.UseShortNodeIdleTimeout();
+        scenario.AllowShutdownReplyBrokenPipeDump();
         string assembly = typeof(SidecarProcessProbe).Assembly.Location;
         TransientTestFile outerPid = env.CreateFile("outer.pid", "");
         TransientTestFile replacementPid = env.CreateFile("replacement.pid", "");

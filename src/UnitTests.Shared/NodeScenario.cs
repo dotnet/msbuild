@@ -412,6 +412,18 @@ internal sealed class NodeScenario : IDisposable
             "NamedPipeServerStream.CheckConnectOperationsServer",
             "NodeEndpointOutOfProcBase.PacketPumpProc");
 
+    /// <summary>
+    /// Opts in to <see cref="AllowFailureDump"/> for a known product race: when a build ends, the parent sends a TaskHost
+    /// <c>Shutdown</c> and can exit before the TaskHost has written its last packets, so the write in
+    /// <c>NodeEndpointOutOfProcBase.RunReadLoop</c> hits a broken pipe and the TaskHost writes a failure dump. Call it only
+    /// in tests whose bootstrapped build ends with a TaskHost still connected.
+    /// </summary>
+    public void AllowShutdownReplyBrokenPipeDump()
+        => AllowFailureDump(
+            "known product race: a TaskHost writes to the pipe after its exiting parent closed it (proposed issue in #15152)",
+            "System.IO.IOException",
+            "NodeEndpointOutOfProcBase.RunReadLoop");
+
     #endregion
 
     #region Observing the scenario
