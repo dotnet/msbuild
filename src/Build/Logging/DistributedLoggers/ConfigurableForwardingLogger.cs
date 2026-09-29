@@ -352,6 +352,22 @@ namespace Microsoft.Build.Logging
         /// <param name="e">event arguments</param>
         private void MessageHandler(object sender, BuildMessageEventArgs e)
         {
+            if (e is TaskProgressStartedEventArgs or TaskProgressFinishedEventArgs)
+            {
+                // A central logger describes a finished operation as an ordinary message, and it needs
+                // the started event because only that event carries the title and the unit. Both events
+                // are low importance because they are written for a live display, so the rules below
+                // would drop them everywhere except detailed verbosity. Forward them wherever ordinary
+                // messages are wanted instead. The updates in between are high volume and are only
+                // useful to a live display, so they keep following the ordinary rules.
+                if (_forwardNormalImportanceMessages)
+                {
+                    ForwardToCentralLogger(e);
+                }
+
+                return;
+            }
+
             bool forwardEvent =
                 (_forwardLowImportanceMessages && e.Importance == MessageImportance.Low) ||
                 (_forwardNormalImportanceMessages && e.Importance == MessageImportance.Normal) ||
