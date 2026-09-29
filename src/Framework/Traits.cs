@@ -277,8 +277,8 @@ namespace Microsoft.Build.Framework
 
         internal const string EvaluationCacheDiagnosticsEnvVarName = "MSBUILDEVALUATIONCACHEDIAGNOSTICS";
 
-        internal readonly bool EnableEvaluationCacheDiagnostics =
-            EnvironmentUtilities.IsValueOneOrTrue(EvaluationCacheDiagnosticsEnvVarName);
+        // Temporary diagnostic perf branch: collect timings without remote environment wiring.
+        internal readonly bool EnableEvaluationCacheDiagnostics = true;
 
         internal static bool? ProjectInstanceSnapshotCacheEnabledOverride { get; set; }
 

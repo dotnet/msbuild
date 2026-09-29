@@ -106,14 +106,16 @@ dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.Includ
 
 ## Evaluation Input Recording
 
-> **Temporary cache-on performance branch:** this branch hardcodes
+> **Temporary cache-on diagnostic performance branch:** this branch hardcodes
 > `SnapshotFileSystem`, regardless of `MSBUILDEVALUATIONCACHEMODE` or the legacy
 > switches. No runtime environment setting is required. Explicit `Disabled`,
 > `Record`, and `SnapshotUnsafe` requests are overridden, so the mode comparisons
 > and activation-mode tests described below require the original, unmodified
 > branch. Validation, the restore bypass, and the **1 GiB** default budget match
-> the fixes branch. Detailed diagnostics still require
-> `MSBUILDEVALUATIONCACHEDIAGNOSTICS=1`.
+> the fixes branch. Detailed diagnostics and console phase timings are also
+> hardcoded on, regardless of `MSBUILDEVALUATIONCACHEDIAGNOSTICS`.
+> This branch is for investigation, not clean timing comparisons. Use
+> `perf/dev/veronikao/evaluation-prototype-cache-on` for uninstrumented measurements.
 
 The integrated evaluation-cache experiment uses
 `MSBUILDEVALUATIONCACHEMODE` with one of four values:

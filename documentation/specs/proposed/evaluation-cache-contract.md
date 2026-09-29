@@ -7,7 +7,8 @@
 > another mode. This deliberately overrides the activation contract below for
 > measurement only; it must not be merged as a production default. Input validation,
 > restore-scoped bypass, and the 1 GiB default cache budget match the fixes branch.
-> Detailed diagnostics remain a separate opt-in.
+> This diagnostic branch also always enables detailed cache decisions and phase
+> timings. It is not suitable for clean performance comparisons.
 
 This document is the **required acceptance contract** for an opt-in evaluation cache under the
 timestamp-and-length metadata model described below. The current prototype remains opt-in and makes

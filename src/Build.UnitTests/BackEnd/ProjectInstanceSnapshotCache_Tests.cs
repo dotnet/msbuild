@@ -32,6 +32,24 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
     private readonly ITestOutputHelper _output = output;
 
     [Theory]
+    [InlineData(null)]
+    [InlineData("0")]
+    [InlineData("1")]
+    [InlineData("false")]
+    [InlineData("true")]
+    [InlineData("invalid")]
+    public void DiagnosticPerformanceBranchAlwaysCollectsCacheDiagnostics(string? requestedDiagnostics)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(Traits.EvaluationCacheDiagnosticsEnvVarName, requestedDiagnostics);
+        Traits.UpdateFromEnvironment();
+
+        Traits.Instance.EnableEvaluationCacheDiagnostics.ShouldBeTrue();
+        Environment.GetEnvironmentVariable(Traits.EvaluationCacheDiagnosticsEnvVarName)
+            .ShouldBe(requestedDiagnostics);
+    }
+
+    [Theory]
     [InlineData(null, null, null)]
     [InlineData("Disabled", null, null)]
     [InlineData("Record", "1", null)]
