@@ -162,11 +162,13 @@ For Hosted PerfStar, use the extra environment variables:
 MSBUILDEVALUATIONCACHEMODE=SnapshotFileSystem;MSBUILDEVALUATIONCACHEDIAGNOSTICS=1
 ```
 
-Also select `diagnostics=binlog` so that both priming and measured build logs are
-retained. The new messages have Low importance and are normally absent from minimal
-console output. Do not compare diagnostic-run timing against clean performance runs:
-the opt-in adds environment-name hashing, candidate comparisons, and buffered logging.
-Without it, these captures, comparisons, and buffers are not created.
+The console retains compact High-importance timing summaries and bounded examples,
+even with `diagnostics=none` and minimal verbosity. Select `diagnostics=binlog` when
+the complete Low-importance decision trace is needed and artifacts can be retrieved.
+Do not compare diagnostic-run timing against clean performance runs: the opt-in adds
+timestamp reads, synchronized timing accumulation, environment-name hashing,
+candidate comparisons, formatting, and buffered logging. Without it, these captures,
+comparisons, buffers, and timestamp reads are not performed. Diagnostics never enable caching.
 
 Search binlogs for `EvaluationCacheDiagnostic|Version=1|` and
 `EvaluationCacheDiagnosticSummary|Version=1|`. Records identify process, owning
@@ -174,7 +176,53 @@ BuildManager, tracing session (`TraceId`), build ordinal, configuration, submiss
 node, project, request, and an opaque key ID where available. Key IDs are HMACs
 with a private per-tracing-session salt; compare them only within the same `TraceId`.
 Turning diagnostics off discards diagnostic state, not snapshots. Re-enabling starts
-a new tracing session. The existing aggregate status schema is unchanged.
+a new tracing session. The existing aggregate status schema is unchanged; only while
+diagnostics are active, `EvaluationCacheExperimentStatus|` is promoted to High importance
+to expose cumulative counters, entry count, retained bytes, and configured capacity.
+
+Search console logs for `EvaluationCacheTimingSummary|Version=1|`:
+
+| Record | Fields |
+| --- | --- |
+| `Kind=Counts` (one per flush) | Process, BuildManager, TraceId, build ordinal and mode; `Requests`, `DroppedEvents`, `ForgottenHistory`, `SuppressedExamples`, `StopwatchFrequency`, and the same `Counts` reason totals as the original diagnostic summary. |
+| `Kind=Phase` (at most eleven per flush, only entered phases) | The same owner identities; `Phase`, `NestedUnder`, `Count`, `TotalTicks`, `MaxTicks`, invariant `TotalMilliseconds`/`MaxMilliseconds`, and `SlowestProject`. Ticks use `Stopwatch.GetTimestamp`, not `TimeSpan` ticks. |
+
+The nonoverlapping top-level phases within a request are:
+
+| Phase | Scope |
+| --- | --- |
+| `RequestKey` | Open the requested root, select toolset, construct cache/input identities (including the existing environment fingerprint). |
+| `CacheLookup` | Look up a candidate, including opt-in miss explanation. |
+| `Validation` | Provenance checks and the selected validator. |
+| `Materialization` | Materialize an accepted snapshot. |
+| `FallbackPreparation` | After validation rejection or failed materialization, discard implicit XML-cache references when appropriate and prepare the fresh-evaluation SDK resolver. Excludes candidate removal (`CacheAdmission`) and reopening the root (`FreshEvaluation`). |
+| `FreshEvaluation` | Open the root if still needed and evaluate a normal request, including recording when enabled. |
+| `RestoreEvaluation` | The same work for a request carrying `MSBuildRestoreSessionId`, distinguished even in Disabled or Record mode. |
+| `SnapshotCreation` | Check admission eligibility, freeze the snapshot, create validation data and calculate its retained-size admission estimate. Rejected eligibility checks count as attempts. |
+| `CacheAdmission` | Add/replace/evict a snapshot, or remove a rejected candidate. A rejected candidate followed by a new admission counts twice. |
+
+`ManifestValidation` (filesystem/environment manifest checks) and `SdkValidation`
+(one scope around the SDK loop, only for SDK-bearing manifests reached after cheaper
+checks) are nested within `Validation`, identified by `NestedUnder=Validation`.
+SDK resolution and validators are not rerun for timing. Counts include unsuccessful
+attempts; scopes end on success, early rejection, fallback, and exception unwinding.
+The phases exclude some request setup/diagnostic/fallback plumbing and are not an
+exhaustive build timeline. Nested durations are already included in their parent.
+Different requests/nodes can run in parallel: **neither nested sums nor parallel
+sums are additive wall time or CPU time**. These are elapsed operation durations
+with diagnostic overhead, not synthetic project-evaluation events or clean benchmarks.
+
+`EvaluationCacheTimingExample|Version=1|` contains owner/request/configuration/
+submission/node identities, project, opaque key (if available), event, reason and
+safe detail. It selects at most three examples per stable `Event.Reason`, and at most
+96 overall per flush, for validation rejection, admission rejection, explained misses,
+unavailable host cache and fallback. Routine restore bypass, cold misses and accepted
+reuse have no High-importance per-project examples. Reason counts continue without
+sampling; `SuppressedExamples` counts eligible examples omitted by either limit.
+Project/detail fields and the slowest-project display are limited to 512 UTF-16 code
+units (then delimiter-escaped), backing off by one rather than splitting a surrogate
+pair, with `<truncated>` when shortened. The eleven timing
+accumulators retain only one slowest-project path each, not per-project timing history.
 
 `Event`/`Reason` distinguish intentional restore/record-only bypass, unavailable
 host-owned caches, lookup candidates, successful materialization, admission,
@@ -189,7 +237,10 @@ not proof that the project has never been evaluated.
 
 The trace retains at most 2,048 key dispositions and 10,000 detailed events between
 flushes, including on hosts without snapshot storage. `ForgottenHistory` and `DroppedEvents` expose truncation; summary reason counts
-continue after detailed-event truncation. Messages flush at EndBuild (or worker build cleanup) outside cache
+continue after detailed-event truncation. Timing counts/totals/maxima, slowest paths,
+example limits, and reason/event counters reset together on flush; key history survives.
+An in-flight timer is counted in the flush after it finishes. Messages flush at EndBuild
+(or worker build cleanup), with logging callbacks outside both cache and diagnostic
 locks; abrupt termination may lose them. Lifecycle records between builds are included
 in the next flush. Only backend configuration loads entering this cache integration
 are traced, not all API evaluations or already-loaded caller instances. Worker loads
@@ -198,9 +249,10 @@ and no owning BuildManager ID.
 With diagnostics enabled but caching disabled, `CacheDisabled` and aggregate mode
 status explain that no cache was activated.
 
-New diagnostics omit raw property/environment values, SDK-result payloads, and
-exception messages. Paths and names are visible. This is not a privacy guarantee for
-the whole binlog: ordinary MSBuild logging can still include environment/property values.
+All these opt-in diagnostics omit raw property/environment values, SDK-result payloads,
+and exception messages. Paths, names and exception types are visible, including in
+console examples and slowest-project fields. This is not a privacy guarantee for the
+whole console log or binlog: ordinary MSBuild logging can still include sensitive values.
 
 `SnapshotFileSystem` remains experimental. Its metadata comparison does not
 detect same-size/same-timestamp content changes. It revalidates direct
