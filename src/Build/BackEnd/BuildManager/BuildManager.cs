@@ -649,10 +649,11 @@ namespace Microsoft.Build.Execution
                     ? MultiThreadedStrictModeScope.CaptureCurrentDirectory()
                     : default;
                 _buildParameters.ProjectInstanceSnapshotCache = null;
+                _buildParameters.EvaluationCacheDiagnostics = null;
                 EvaluationCacheConfiguration evaluationCacheConfiguration =
                     Traits.Instance.EvaluationCache;
                 _buildParameters.EvaluationCacheConfiguration = evaluationCacheConfiguration;
-                if (evaluationCacheConfiguration.IsConfigured)
+                if (evaluationCacheConfiguration.IsConfigured || Traits.Instance.EnableEvaluationCacheDiagnostics)
                 {
                     _evaluationCacheBuildManagerId ??= Guid.NewGuid().ToString("N");
                     _evaluationCacheBuildsServed++;
@@ -668,7 +669,32 @@ namespace Microsoft.Build.Execution
                     enabledSnapshotCache.ConfigureValidator(
                         evaluationCacheConfiguration.ValidationPolicy);
                     enabledSnapshotCache.NotifyBuildStarted();
+                    if (Traits.Instance.EnableEvaluationCacheDiagnostics || enabledSnapshotCache.Diagnostics is not null)
+                    {
+                        enabledSnapshotCache.ConfigureDiagnostics(
+                            Traits.Instance.EnableEvaluationCacheDiagnostics,
+                            _evaluationCacheBuildManagerId!,
+                            _evaluationCacheBuildsServed,
+                            evaluationCacheConfiguration.Mode,
+                            _buildParameters.EnvironmentPropertiesInternal);
+                    }
                     _buildParameters.ProjectInstanceSnapshotCache = enabledSnapshotCache;
+                }
+                else if (_projectInstanceSnapshotCache?.Diagnostics is not null)
+                {
+                    _projectInstanceSnapshotCache.ConfigureDiagnostics(
+                        false, string.Empty, 0, evaluationCacheConfiguration.Mode, _buildParameters.EnvironmentPropertiesInternal);
+                }
+                if (Traits.Instance.EnableEvaluationCacheDiagnostics)
+                {
+                    EvaluationCacheDiagnostics? diagnostics = _buildParameters.ProjectInstanceSnapshotCache?.Diagnostics;
+                    if (diagnostics is null)
+                    {
+                        diagnostics = new EvaluationCacheDiagnostics();
+                        diagnostics.BeginBuild(_evaluationCacheBuildManagerId!, _evaluationCacheBuildsServed,
+                            evaluationCacheConfiguration.Mode, []);
+                    }
+                    _buildParameters.EvaluationCacheDiagnostics = diagnostics;
                 }
 
                 // Initialize additional build parameters.
@@ -1423,10 +1449,11 @@ namespace Microsoft.Build.Execution
                         }
 
                         if (_buildParameters?.EvaluationCacheConfiguration is
-                            { IsConfigured: true })
+                            { IsConfigured: true } || Traits.Instance.EnableEvaluationCacheDiagnostics)
                         {
                             LogEvaluationCacheExperimentStatus(loggingService);
                         }
+                        _buildParameters?.EvaluationCacheDiagnostics?.Flush(loggingService);
                         loggingService.LogBuildFinished(_overallBuildSuccess);
 
                         if (_buildTelemetry != null)

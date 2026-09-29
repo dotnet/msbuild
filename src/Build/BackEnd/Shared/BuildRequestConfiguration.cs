@@ -533,6 +533,11 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.False(IsLoaded, $"Already loaded the project for this configuration id {ConfigurationId}.");
 
+            EvaluationCacheDiagnostics.Request diagnosticRequest =
+                (componentHost.BuildParameters.EvaluationCacheDiagnostics
+                    ?? componentHost.BuildParameters.ProjectInstanceSnapshotCache?.Diagnostics)?.StartRequest(
+                    ProjectFullPath, ConfigurationId, submissionId, nodeId);
+
             InitializeProject(componentHost.BuildParameters, () =>
             {
                 // Strict mode keeps the sentinel as process CWD throughout project execution.
@@ -609,6 +614,19 @@ namespace Microsoft.Build.BackEnd
                     && _transferredProperties is null
                         ? statisticsCache
                         : null;
+                if (diagnosticRequest is not null && snapshotCache is null)
+                {
+                    EvaluationCacheConfiguration effectiveConfiguration =
+                        evaluationCacheConfiguration ?? Traits.Instance.EvaluationCache;
+                    diagnosticRequest.Record("Bypass",
+                        bypassRestoreSnapshot ? "RestoreRequest"
+                        : statisticsCache is null
+                            ? effectiveConfiguration.EnableSnapshotCache || effectiveConfiguration.RecordInputs
+                                ? "CacheUnavailableOnHost" : "CacheDisabled"
+                        : !snapshotModeEnabled ? "RecordOnly"
+                        : projectLoadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements) ? "EvaluatedItemElements"
+                        : "CallerOrTransferredState");
+                }
                 ProjectInstanceSnapshotCacheKey snapshotKey = null;
                 EvaluationInputKey snapshotInputKey = null;
                 ProjectRootElement projectRootElement = null;
@@ -666,12 +684,14 @@ namespace Microsoft.Build.BackEnd
                                 requestToolset?.ToolsPath,
                                 FormatCommandLinePropertyNames(componentHost.BuildParameters.PropertiesFromCommandLine));
                         snapshotInputKey = snapshotKey.ToEvaluationInputKey();
+                        diagnosticRequest?.BindKey(snapshotKey);
 
                         if (snapshotCache is not null)
                         {
                             bool cacheHit = snapshotCache.TryGet(
                                 snapshotKey,
-                                out ProjectInstanceSnapshotCacheEntry cachedEntry);
+                                out ProjectInstanceSnapshotCacheEntry cachedEntry,
+                                diagnosticRequest);
                             snapshotCache.NotifyCacheLookup(cacheHit);
                             if (cacheHit)
                             {
@@ -679,6 +699,7 @@ namespace Microsoft.Build.BackEnd
                                 ProjectInstanceSnapshotValidationContext validationContext = null;
                                 bool hasUnverifiableCachedProjectRootElement = false;
                                 bool validationErrored = false;
+                                EvaluationInputValidationFailure diagnosticFailure = default;
                                 try
                                 {
                                     if (evaluationCacheConfiguration?.ValidationPolicy ==
@@ -693,11 +714,14 @@ namespace Microsoft.Build.BackEnd
                                             HasUnverifiableCachedProjectRootElement(
                                                 componentHost.BuildParameters.ProjectRootElementCache,
                                                 projectRootElement,
-                                                cachedEntry);
+                                                cachedEntry,
+                                                out diagnosticFailure);
                                         validationResult = hasUnverifiableCachedProjectRootElement
                                             ? ProjectInstanceSnapshotValidationResult.Invalid
                                             : snapshotCache.Validator is FileSystemProjectInstanceSnapshotValidator fileSystemValidator
-                                                ? fileSystemValidator.Validate(snapshotKey, cachedEntry, validationContext)
+                                                ? diagnosticRequest is null
+                                                    ? fileSystemValidator.Validate(snapshotKey, cachedEntry, validationContext)
+                                                    : fileSystemValidator.Validate(snapshotKey, cachedEntry, validationContext, out diagnosticFailure)
                                                 : snapshotCache.Validator.Validate(snapshotKey, cachedEntry);
                                     }
                                     else
@@ -718,6 +742,7 @@ namespace Microsoft.Build.BackEnd
                                         snapshotCache.NotifyValidationRejected();
                                     }
                                     snapshotCache.NotifyFallback();
+                                    diagnosticRequest?.Record("Fallback", "ValidationError", ex.GetType().FullName);
                                     componentHost.LoggingService.LogComment(
                                         buildEventContext,
                                         MessageImportance.Low,
@@ -730,6 +755,10 @@ namespace Microsoft.Build.BackEnd
 
                                 if (validationResult == ProjectInstanceSnapshotValidationResult.Valid)
                                 {
+                                    diagnosticRequest?.Record("Validation",
+                                        evaluationCacheConfiguration?.ValidationPolicy == EvaluationCacheValidationPolicy.Unsafe
+                                            ? "UnsafeBypass"
+                                            : "Accepted");
                                     if (evaluationCacheConfiguration?.ValidationPolicy ==
                                         EvaluationCacheValidationPolicy.FileSystem)
                                     {
@@ -744,11 +773,13 @@ namespace Microsoft.Build.BackEnd
                                             componentHost.LoggingService,
                                             buildEventContext);
                                         snapshotCache.NotifyMaterialized();
+                                        diagnosticRequest?.Record("Reuse", "Materialized");
                                         return materialized;
                                     }
                                     catch (Exception ex) when (IsRecoverableEvaluationCacheException(ex))
                                     {
                                         snapshotCache.NotifyFallback();
+                                        diagnosticRequest?.Record("Fallback", "MaterializationError", ex.GetType().FullName);
                                         componentHost.LoggingService.LogComment(
                                             buildEventContext,
                                             MessageImportance.Low,
@@ -762,6 +793,9 @@ namespace Microsoft.Build.BackEnd
                                     EvaluationCacheValidationPolicy.Unsafe)
                                 {
                                     snapshotCache.NotifyValidationRejected();
+                                    diagnosticRequest?.Record("Validation",
+                                        diagnosticFailure.Reason ?? "ValidatorRejected",
+                                        diagnosticFailure.Detail);
                                 }
 
                                 snapshotCache.Remove(snapshotKey, cachedEntry);
@@ -780,6 +814,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         snapshotKey = null;
                         statisticsCache?.NotifyFallback();
+                        diagnosticRequest?.Record("Fallback", "KeyOrLookupError", ex.GetType().FullName);
                         componentHost.LoggingService.LogComment(
                             buildEventContext,
                             MessageImportance.Low,
@@ -808,6 +843,10 @@ namespace Microsoft.Build.BackEnd
                     snapshotInputKey);
 
                 statisticsCache?.NotifyFreshEvaluation(project.EvaluationInputs);
+                diagnosticRequest?.Record("Evaluation",
+                    project.EvaluationInputs is null ? "NotRecorded"
+                    : project.EvaluationInputs.IsCacheable ? "Cacheable" : "NonCacheable",
+                    project.EvaluationInputs?.IsCacheable == false ? project.EvaluationInputs.NonCacheable.ToString() : null);
 
                 if (snapshotCache is not null && snapshotKey is not null)
                 {
@@ -820,6 +859,12 @@ namespace Microsoft.Build.BackEnd
                                 EvaluationCacheValidationPolicy.FileSystem
                                 && evaluationInputs?.IsCacheable != true))
                         {
+                            string admissionReason = evaluationInputs is null
+                                ? "MissingManifest"
+                                : "NonCacheable";
+                            diagnosticRequest?.Record("Admission", admissionReason,
+                                evaluationInputs?.NonCacheable.ToString());
+                            diagnosticRequest?.Remember(admissionReason);
                             return project;
                         }
 
@@ -830,11 +875,13 @@ namespace Microsoft.Build.BackEnd
                             evaluationInputs is null
                                 ? EmptyProjectInstanceSnapshotValidationData.Instance
                                 : new EvaluationInputsSnapshotValidationData(evaluationInputs));
-                        snapshotCache.AddOrReplace(snapshotKey, entry);
+                        snapshotCache.AddOrReplace(snapshotKey, entry, diagnosticRequest);
                     }
                     catch (Exception ex) when (IsRecoverableEvaluationCacheException(ex))
                     {
                         snapshotCache.NotifyFallback();
+                        diagnosticRequest?.Record("Fallback", "SnapshotStoreError", ex.GetType().FullName);
+                        diagnosticRequest?.Remember("SnapshotStoreError");
                         componentHost.LoggingService.LogComment(
                             buildEventContext,
                             MessageImportance.Low,
@@ -851,15 +898,21 @@ namespace Microsoft.Build.BackEnd
         private static bool HasUnverifiableCachedProjectRootElement(
             ProjectRootElementCacheBase projectRootElementCache,
             ProjectRootElement selectedRoot,
-            ProjectInstanceSnapshotCacheEntry entry)
+            ProjectInstanceSnapshotCacheEntry entry,
+            out EvaluationInputValidationFailure failure)
         {
+            failure = default;
             if (HasUnverifiableFileProvenance(selectedRoot))
             {
+                failure = new EvaluationInputValidationFailure(
+                    selectedRoot.HasUnsavedChanges ? "UnsavedProjectXml" : "UnverifiableProjectXml",
+                    selectedRoot.FullPath);
                 return true;
             }
 
             if (entry.ValidationData is not EvaluationInputsSnapshotValidationData validationData)
             {
+                failure = new EvaluationInputValidationFailure("MissingManifest", null);
                 return true;
             }
 
@@ -875,6 +928,10 @@ namespace Microsoft.Build.BackEnd
                     && (input.Value.Kind == PathKind.Missing
                         || HasUnverifiableFileProvenance(cachedRoot)))
                 {
+                    failure = new EvaluationInputValidationFailure(
+                        input.Value.Kind == PathKind.Missing ? "CachedMissingInput"
+                        : cachedRoot.HasUnsavedChanges ? "UnsavedProjectXml" : "UnverifiableProjectXml",
+                        input.Key);
                     return true;
                 }
             }
