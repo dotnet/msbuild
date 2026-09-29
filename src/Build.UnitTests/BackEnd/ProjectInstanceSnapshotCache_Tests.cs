@@ -1459,8 +1459,10 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
         statistics.Count.ShouldBe(0);
     }
 
-    [Fact]
-    public void SnapshotFileSystemRevalidatesSdkAndReusesResultForFreshFallback()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SnapshotFileSystemRevalidatesSdkAndReusesResultForFreshFallback(bool diagnosticsEnabled)
     {
         const string ModeVariable = EvaluationCacheConfiguration.ModeEnvironmentVariable;
         string? originalMode = Environment.GetEnvironmentVariable(ModeVariable);
@@ -1471,7 +1473,7 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
                 nameof(EvaluationCacheMode.SnapshotFileSystem));
             Traits.UpdateFromEnvironment();
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
             TransientTestFolder firstSdk = env.CreateFolder();
             TransientTestFolder secondSdk = env.CreateFolder();
             env.CreateFile(firstSdk, "Sdk.props", "<Project><PropertyGroup><SdkValue>first</SdkValue></PropertyGroup></Project>");
@@ -1489,10 +1491,12 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
                 EvaluationCacheConfiguration = mode,
                 ProjectInstanceSnapshotCache = cache,
             };
+            cache.ConfigureDiagnostics(diagnosticsEnabled, "manager", 1, mode.Mode, parameters.EnvironmentPropertiesInternal);
             var resolver = new ChangingSdkResolverService(firstSdk.Path);
             var host = new MockHost(parameters)
             {
                 SdkResolverService = resolver,
+                LoggingService = new MockLoggingService(_output.WriteLine),
             };
 
             BuildRequestConfiguration first = CreateFileConfiguration(project.Path, parameters);
@@ -1512,6 +1516,22 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
             cache.GetStatistics().ValidationAccepted.ShouldBe(1);
             cache.ValidationRejections.ShouldBe(1);
             cache.MaterializedEntries.ShouldBe(1);
+            if (diagnosticsEnabled)
+            {
+                List<string> messages = [];
+                cache.Diagnostics!.Flush(new MockLoggingService(messages.Add));
+                string log = string.Join(Environment.NewLine, messages);
+                EvaluationCacheDiagnostics_Tests.AssertPhases(log,
+                    ("RequestKey", 3), ("CacheLookup", 3), ("Validation", 2), ("ManifestValidation", 2), ("SdkValidation", 2),
+                    ("Materialization", 1), ("FreshEvaluation", 2), ("SnapshotCreation", 2), ("CacheAdmission", 3),
+                    ("FallbackPreparation", 1));
+                messages.Single(message => message.StartsWith("EvaluationCacheTimingExample|", StringComparison.Ordinal))
+                    .ShouldContain("|Event=Validation|Reason=SdkResultChanged|Detail=TestSdk");
+            }
+            else
+            {
+                cache.Diagnostics.ShouldBeNull();
+            }
         }
         finally
         {
@@ -2268,10 +2288,12 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
         }
     }
 
-    [Fact]
-    public void MaterializationFailureDoesNotChangeValidationCounters()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MaterializationFailureDoesNotChangeValidationCounters(bool diagnosticsEnabled)
     {
-        using TestEnvironment env = TestEnvironment.Create();
+        using TestEnvironment env = TestEnvironment.Create(_output);
         TransientTestFile project = env.CreateFile("project.proj", "<Project />");
         var cache = new ProjectInstanceSnapshotCache
         {
@@ -2287,7 +2309,8 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
         {
             ProjectInstanceSnapshotCache = cache,
         };
-        var host = new MockHost(parameters);
+        cache.ConfigureDiagnostics(diagnosticsEnabled, "manager", 1, EvaluationCacheMode.SnapshotUnsafe, parameters.EnvironmentPropertiesInternal);
+        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
 
         CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
             host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
@@ -2299,6 +2322,21 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
         statistics.ValidationErrors.ShouldBe(0);
         statistics.MaterializedEntries.ShouldBe(0);
         statistics.Fallbacks.ShouldBe(1);
+        if (diagnosticsEnabled)
+        {
+            List<string> messages = [];
+            cache.Diagnostics!.Flush(new MockLoggingService(messages.Add));
+            string log = string.Join(Environment.NewLine, messages);
+            EvaluationCacheDiagnostics_Tests.AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1),
+                ("Materialization", 1), ("FreshEvaluation", 1), ("SnapshotCreation", 1), ("CacheAdmission", 2),
+                ("FallbackPreparation", 1));
+            messages.Single(message => message.StartsWith("EvaluationCacheTimingExample|", StringComparison.Ordinal))
+                .ShouldContain("|Event=Fallback|Reason=MaterializationError|");
+        }
+        else
+        {
+            cache.Diagnostics.ShouldBeNull();
+        }
     }
     [Fact]
     public void InvalidModeLogsDiagnosticAndDisablesCache()

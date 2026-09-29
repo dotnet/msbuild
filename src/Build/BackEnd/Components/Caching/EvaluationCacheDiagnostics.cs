@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,13 +18,32 @@ using Microsoft.NET.StringTools;
 namespace Microsoft.Build.BackEnd;
 
 /// <summary>
-/// Bounded, opt-in decision tracing. This state never participates in cache acceptance or admission.
+/// Bounded, opt-in decision and phase tracing. This state never participates in cache acceptance or admission.
 /// </summary>
 internal sealed class EvaluationCacheDiagnostics
 {
     internal const string EnvironmentVariable = Traits.EvaluationCacheDiagnosticsEnvVarName;
     internal const int MaximumHistoryEntries = 2048;
     internal const int MaximumEventsPerBuild = 10000;
+    internal const int MaximumExamplesPerReason = 3;
+    internal const int MaximumExamplesPerBuild = 96;
+    internal const int MaximumExampleFieldLength = 512;
+
+    internal enum Phase
+    {
+        RequestKey,
+        CacheLookup,
+        Validation,
+        Materialization,
+        FreshEvaluation,
+        RestoreEvaluation,
+        SnapshotCreation,
+        CacheAdmission,
+        FallbackPreparation,
+        ManifestValidation,
+        SdkValidation,
+        Count,
+    }
 
     private readonly LockType _lock = new();
     private readonly byte[] _hashKey = new byte[32];
@@ -33,6 +53,10 @@ internal sealed class EvaluationCacheDiagnostics
     private readonly Queue<string> _historyOrder = new();
     private readonly List<string> _events = [];
     private readonly SortedDictionary<string, long> _counts = new(StringComparer.Ordinal);
+    private readonly PhaseTiming[] _timings = new PhaseTiming[(int)Phase.Count];
+    private readonly List<string> _examples = [];
+    private readonly Dictionary<string, int> _exampleCounts = new(StringComparer.Ordinal);
+    private long _suppressedExamples;
     private string _buildManagerId = string.Empty;
     private long _buildNumber;
     private long _nextRequestId;
@@ -173,10 +197,29 @@ internal sealed class EvaluationCacheDiagnostics
         }
     }
 
+    internal void RecordTiming(Phase phase, string project, long elapsedTicks)
+    {
+        lock (_lock)
+        {
+            ref PhaseTiming timing = ref _timings[(int)phase];
+            timing.Count++;
+            timing.TotalTicks += elapsedTicks;
+            if (timing.SlowestProject is null || elapsedTicks > timing.MaxTicks)
+            {
+                timing.MaxTicks = elapsedTicks;
+                timing.SlowestProject = project;
+            }
+        }
+    }
+
     internal void Flush(ILoggingService loggingService, BuildEventContext? context = null)
     {
         string[] events;
+        string[] examples;
         string summary;
+        string timingSummary;
+        string identity;
+        PhaseTiming[] timings;
         lock (_lock)
         {
             events = [.. _events];
@@ -190,8 +233,16 @@ internal sealed class EvaluationCacheDiagnostics
                 counts.Append(count.Key).Append(':').Append(count.Value);
             }
             summary = FormattableString.Invariant($"EvaluationCacheDiagnosticSummary|Version=1|{Context()}|Requests={_requestCount}|DroppedEvents={_droppedEvents}|ForgottenHistory={_forgottenHistory}|Counts={counts}");
+            identity = Context();
+            timingSummary = FormattableString.Invariant($"EvaluationCacheTimingSummary|Version=1|{identity}|Kind=Counts|Requests={_requestCount}|DroppedEvents={_droppedEvents}|ForgottenHistory={_forgottenHistory}|SuppressedExamples={_suppressedExamples}|StopwatchFrequency={Stopwatch.Frequency}|Counts={counts}");
+            timings = (PhaseTiming[])_timings.Clone();
+            examples = [.. _examples];
             _events.Clear();
             _counts.Clear();
+            Array.Clear(_timings, 0, _timings.Length);
+            _examples.Clear();
+            _exampleCounts.Clear();
+            _suppressedExamples = 0;
             _requestCount = 0;
             _droppedEvents = 0;
             _forgottenHistory = 0;
@@ -202,11 +253,31 @@ internal sealed class EvaluationCacheDiagnostics
             loggingService.LogCommentFromText(context ?? BuildEventContext.Invalid, MessageImportance.Low, message);
         }
         loggingService.LogCommentFromText(context ?? BuildEventContext.Invalid, MessageImportance.Low, summary);
+        loggingService.LogCommentFromText(context ?? BuildEventContext.Invalid, MessageImportance.High, timingSummary);
+        for (int i = 0; i < timings.Length; i++)
+        {
+            PhaseTiming timing = timings[i];
+            if (timing.Count == 0)
+            {
+                continue;
+            }
+
+            Phase phase = (Phase)i;
+            string nestedUnder = phase is Phase.ManifestValidation or Phase.SdkValidation ? nameof(Phase.Validation) : string.Empty;
+            string message = FormattableString.Invariant(
+                $"EvaluationCacheTimingSummary|Version=1|{identity}|Kind=Phase|Phase={phase}|NestedUnder={nestedUnder}|Count={timing.Count}|TotalTicks={timing.TotalTicks}|MaxTicks={timing.MaxTicks}|TotalMilliseconds={timing.TotalTicks * 1000.0 / Stopwatch.Frequency:F3}|MaxMilliseconds={timing.MaxTicks * 1000.0 / Stopwatch.Frequency:F3}|SlowestProject={EscapeBounded(timing.SlowestProject)}");
+            loggingService.LogCommentFromText(context ?? BuildEventContext.Invalid, MessageImportance.High, message);
+        }
+        foreach (string message in examples)
+        {
+            loggingService.LogCommentFromText(context ?? BuildEventContext.Invalid, MessageImportance.High, message);
+        }
     }
 
     private void RecordCore(Request? request, string action, string reason, string? detail)
     {
         Increment(action + "." + reason);
+        RecordExample(request, action, reason, detail);
         if (_events.Count == MaximumEventsPerBuild)
         {
             _droppedEvents++;
@@ -214,6 +285,67 @@ internal sealed class EvaluationCacheDiagnostics
         }
         _events.Add(FormattableString.Invariant(
             $"EvaluationCacheDiagnostic|Version=1|{Context()}|Request={request?.Id ?? 0}|Configuration={request?.ConfigurationId ?? -1}|Submission={request?.SubmissionId ?? -1}|Node={request?.NodeId ?? -1}|Project={Escape(request?.Project)}|Key={Escape(request?.KeyId)}|Event={action}|Reason={reason}|Detail={Escape(detail)}"));
+    }
+
+    private void RecordExample(Request? request, string action, string reason, string? detail)
+    {
+        bool meaningful = action switch
+        {
+            "Validation" => reason is not ("Accepted" or "UnsafeBypass"),
+            "Admission" => reason is not "Stored",
+            "Lookup" => reason is not ("CandidateFound" or "NoEntryOrHistory"),
+            "Bypass" => reason == "CacheUnavailableOnHost",
+            "Fallback" => true,
+            _ => false,
+        };
+        if (!meaningful)
+        {
+            return;
+        }
+
+        string category = action + "." + reason;
+        _exampleCounts.TryGetValue(category, out int count);
+        if (count == MaximumExamplesPerReason || _examples.Count == MaximumExamplesPerBuild)
+        {
+            _suppressedExamples++;
+            return;
+        }
+
+        _exampleCounts[category] = count + 1;
+        _examples.Add(FormattableString.Invariant(
+            $"EvaluationCacheTimingExample|Version=1|{Context()}|Request={request?.Id ?? 0}|Configuration={request?.ConfigurationId ?? -1}|Submission={request?.SubmissionId ?? -1}|Node={request?.NodeId ?? -1}|Project={EscapeBounded(request?.Project)}|Key={Escape(request?.KeyId)}|Event={action}|Reason={reason}|Detail={EscapeBounded(detail)}"));
+    }
+
+    private static string EscapeBounded(string? value)
+    {
+        if (value is { Length: > MaximumExampleFieldLength })
+        {
+            int length = MaximumExampleFieldLength;
+            if (char.IsHighSurrogate(value[length - 1]) && char.IsLowSurrogate(value[length]))
+            {
+                length--;
+            }
+            value = value.Substring(0, length) + "<truncated>";
+        }
+
+        return Escape(value);
+    }
+
+    private struct PhaseTiming
+    {
+        internal long Count;
+        internal long TotalTicks;
+        internal long MaxTicks;
+        internal string? SlowestProject;
+    }
+
+    // Only constructed through a non-null diagnostic request. Disposal does no formatting,
+    // allocation, logging or cache work, including when unwinding an exception.
+    internal readonly struct TimingScope(EvaluationCacheDiagnostics owner, Phase phase, string project) : IDisposable
+    {
+        private readonly long _start = Stopwatch.GetTimestamp();
+
+        public void Dispose() => owner.RecordTiming(phase, project, Stopwatch.GetTimestamp() - _start);
     }
 
     private string Context() => FormattableString.Invariant(
@@ -243,6 +375,8 @@ internal sealed class EvaluationCacheDiagnostics
         internal int SubmissionId { get; } = submissionId;
         internal int NodeId { get; } = nodeId;
         internal string? KeyId { get; set; }
+
+        internal TimingScope Time(Phase phase) => new(owner, phase, Project);
 
         internal void BindKey(ProjectInstanceSnapshotCacheKey key) => KeyId = owner.GetKeyId(key);
 

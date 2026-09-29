@@ -48,18 +48,56 @@ snapshots. Explicit `Record` mode continues to record these evaluations. Subsequ
 normal builds still validate retained snapshots against current inputs, including
 restore-generated imports; no part of the request key is ignored.
 
-`MSBUILDEVALUATIONCACHEDIAGNOSTICS=1` separately opts into detailed, low-importance
-decision tracing. It MUST NOT activate caching, change candidate identity or validation,
+`MSBUILDEVALUATIONCACHEDIAGNOSTICS=1` separately opts into decision and phase timing
+tracing. It MUST NOT activate caching, change candidate identity or validation,
 or emit warnings/errors. It reports bypass/admission/lookup/validation/reuse/lifecycle
 reasons as ordinary versioned messages, preserving binary-log event compatibility.
 Key comparison discloses field and property/environment names, not their values;
 safe validation details disclose paths/names or exception types, not exception text
 or SDK result payloads. Per-tracing-session opaque IDs are not reusable cache keys.
-Diagnostic history and event buffers are bounded, with explicit forgotten/dropped
-counts. Candidate comparisons and absent history MUST NOT be presented as proven
+The original `EvaluationCacheDiagnostic` and `EvaluationCacheDiagnosticSummary`
+Version=1 formats and Low importance remain unchanged. New ordinary High-importance
+`EvaluationCacheTimingSummary|Version=1|` messages expose owner/process/build/trace
+identities, unsampled reason counts, and counts/elapsed totals/maxima/slowest project
+for request-key creation, lookup, validation, materialization, normal fresh evaluation,
+intentional restore evaluation, snapshot freezing/validation-data admission estimates,
+admission/eviction/removal, and fallback preparation. `FallbackPreparation` covers
+post-rejection implicit XML-cache cleanup and SDK resolver preparation, separately
+from candidate removal and the root reopen inside fresh evaluation.
+The existing aggregate experiment status is promoted
+to High importance only while diagnostics are active, retaining its capacity and
+cumulative-counter schema. Worker-local traces remain process-local and MUST NOT
+add diagnostic transport or imply access to the owning cache.
+
+Filesystem/environment manifest validation and SDK validation are separately measured
+inside validation, with explicit parent identification. Top-level scopes do not overlap
+within one request, but they exclude some setup and fallback plumbing. Nested sums
+and sums across parallel requests/nodes MUST NOT be interpreted as additive wall time
+or CPU time. Counts include attempted phases that reject, fall back or throw; timers
+stop on every exit without catching or replacing the underlying exception. Timestamp
+reads, diagnostic formatting/allocations, and additional I/O/resolver invocations MUST
+NOT be introduced on the diagnostics-off path. Even with diagnostics enabled,
+validators and SDK resolution MUST NOT be repeated for instrumentation.
+
+Diagnostic history and detailed-event buffers remain bounded at 2,048 and 10,000,
+with explicit forgotten/dropped counts. Eleven timing accumulators retain only aggregate
+counts/totals/maxima and one slowest-project path each. New High-importance
+`EvaluationCacheTimingExample|Version=1|` messages select at most three examples per
+stable event/reason and 96 per flush for meaningful non-reuse, never one message for
+every decision. Displayed example project/detail and slowest-project fields are bounded
+at 512 UTF-16 code units before escaping, with explicit truncation. A cutoff between
+a high/low surrogate pair backs off by one code unit to preserve valid UTF-16 for
+binary-log serialization. No raw global or
+environment values, SDK payloads, or exception messages are added to console output.
+All logging callbacks occur outside cache and diagnostic locks. Timing, example and
+reason counters reset together on flush; an active timer is counted after completion.
+Reason totals survive example/detail truncation, and `SuppressedExamples` exposes
+example sampling. Candidate comparisons and absent history MUST NOT be presented as proven
 causes for a particular previous configuration. See the benchmark
 [diagnostic instructions](../../../src/MSBuild.Benchmarks/readme.md#diagnosing-cache-decisions)
-for scope, limits, and collection. Diagnostic overhead is excluded from clean benchmarks.
+for schema, phase boundaries, limits, and collection. Timestamp reads, synchronization,
+hashing and buffered logging add diagnostic overhead; these runs are for attribution,
+not clean performance comparisons.
 
 ## Correctness invariant
 

@@ -105,21 +105,30 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
         ProjectInstanceSnapshotCacheKey key,
         ProjectInstanceSnapshotCacheEntry entry,
         ProjectInstanceSnapshotValidationContext? validationContext)
-        => ValidateCore(key, entry, validationContext, captureDetails: false, out _);
+        => ValidateCore(key, entry, validationContext, captureDetails: false, out _, diagnosticRequest: null);
 
     internal ProjectInstanceSnapshotValidationResult Validate(
         ProjectInstanceSnapshotCacheKey key,
         ProjectInstanceSnapshotCacheEntry entry,
         ProjectInstanceSnapshotValidationContext? validationContext,
         out EvaluationInputValidationFailure failure)
-        => ValidateCore(key, entry, validationContext, captureDetails: true, out failure);
+        => ValidateCore(key, entry, validationContext, captureDetails: true, out failure, diagnosticRequest: null);
+
+    internal ProjectInstanceSnapshotValidationResult Validate(
+        ProjectInstanceSnapshotCacheKey key,
+        ProjectInstanceSnapshotCacheEntry entry,
+        ProjectInstanceSnapshotValidationContext? validationContext,
+        out EvaluationInputValidationFailure failure,
+        EvaluationCacheDiagnostics.Request diagnosticRequest)
+        => ValidateCore(key, entry, validationContext, captureDetails: true, out failure, diagnosticRequest);
 
     private static ProjectInstanceSnapshotValidationResult ValidateCore(
         ProjectInstanceSnapshotCacheKey key,
         ProjectInstanceSnapshotCacheEntry entry,
         ProjectInstanceSnapshotValidationContext? validationContext,
         bool captureDetails,
-        out EvaluationInputValidationFailure failure)
+        out EvaluationInputValidationFailure failure,
+        EvaluationCacheDiagnostics.Request? diagnosticRequest)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(entry);
@@ -144,32 +153,40 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
             return ProjectInstanceSnapshotValidationResult.Invalid;
         }
 
-        bool fileSystemCurrent = captureDetails
-            ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure)
-            : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _);
+        bool fileSystemCurrent;
+        using (diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.ManifestValidation))
+        {
+            fileSystemCurrent = captureDetails
+                ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure)
+                : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _);
+        }
         if (!fileSystemCurrent)
         {
             return ProjectInstanceSnapshotValidationResult.Invalid;
         }
 
-        if (data.Inputs.SdkResolutions.Length > 0 && validationContext is null)
+        if (data.Inputs.SdkResolutions.Length > 0)
         {
-            if (captureDetails)
+            using var sdkTiming = diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.SdkValidation);
+            if (validationContext is null)
             {
-                failure = new("MissingSdkContext", data.Inputs.SdkResolutions[0].Reference.Name);
+                if (captureDetails)
+                {
+                    failure = new("MissingSdkContext", data.Inputs.SdkResolutions[0].Reference.Name);
+                }
+
+                return ProjectInstanceSnapshotValidationResult.Invalid;
             }
 
-            return ProjectInstanceSnapshotValidationResult.Invalid;
-        }
-
-        foreach (SdkDependency sdk in data.Inputs.SdkResolutions)
-        {
-            bool sdkCurrent = captureDetails
-                ? validationContext!.Validate(sdk, out failure)
-                : validationContext!.Validate(sdk);
-            if (!sdkCurrent)
+            foreach (SdkDependency sdk in data.Inputs.SdkResolutions)
             {
-                return ProjectInstanceSnapshotValidationResult.Invalid;
+                bool sdkCurrent = captureDetails
+                    ? validationContext.Validate(sdk, out failure)
+                    : validationContext.Validate(sdk);
+                if (!sdkCurrent)
+                {
+                    return ProjectInstanceSnapshotValidationResult.Invalid;
+                }
             }
         }
 

@@ -1144,7 +1144,7 @@ namespace Microsoft.Build.Execution
 
             loggingService.LogCommentFromText(
                 BuildEventContext.Invalid,
-                MessageImportance.Low,
+                buildParameters.EvaluationCacheDiagnostics is null ? MessageImportance.Low : MessageImportance.High,
                 status);
         }
 
