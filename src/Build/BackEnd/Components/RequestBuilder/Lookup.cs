@@ -804,6 +804,86 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Starts appending newly created items of one type directly into this scope's add table.
+        /// </summary>
+        /// <remarks>
+        /// Unlike <see cref="AddNewItemsOfItemType"/>, callers do not need to collect the items into an
+        /// intermediate collection first. The destination list is looked up and sized once, on the first
+        /// <see cref="NewItemAppender.Add"/>, so a batch where nothing is added leaves the add table untouched.
+        /// </remarks>
+        /// <param name="itemType">The item type of every item that will be added.</param>
+        /// <param name="capacityHint">The expected maximum number of items that will be added.</param>
+        internal NewItemAppender BeginAddNewItems(string itemType, int capacityHint)
+        {
+            // Adding to outer scope could be easily implemented, but our code does not do it at present
+            MustNotBeOuterScope();
+
+            return new NewItemAppender(this, itemType, capacityHint);
+        }
+
+        /// <summary>
+        /// Appends newly created items of a single type to the primary add table of a <see cref="Lookup"/>.
+        /// </summary>
+        /// <remarks>
+        /// This is a ref struct so it cannot outlive the operation that created it: the destination list
+        /// belongs to the current scope and may be handed to the parent scope when that scope is left.
+        /// </remarks>
+        internal ref struct NewItemAppender
+        {
+            private readonly Lookup _lookup;
+            private readonly string _itemType;
+            private readonly int _capacityHint;
+            private List<ProjectItemInstance> _destination;
+#if DEBUG
+            private int _firstAppendedIndex;
+#endif
+
+            internal NewItemAppender(Lookup lookup, string itemType, int capacityHint)
+            {
+                _lookup = lookup;
+                _itemType = itemType;
+                _capacityHint = capacityHint;
+                _destination = null;
+                Count = 0;
+#if DEBUG
+                _firstAppendedIndex = 0;
+#endif
+            }
+
+            /// <summary>
+            /// Gets the number of items added so far.
+            /// </summary>
+            public int Count { get; private set; }
+
+            /// <summary>
+            /// Adds a newly created item. Its item type must match the type the appender was created for.
+            /// </summary>
+            public void Add(ProjectItemInstance item)
+            {
+                if (_destination is null)
+                {
+                    _lookup.PrimaryAddTable ??= new ItemDictionarySlim();
+                    _destination = _lookup.PrimaryAddTable.GetOrCreateListWithRoomFor(_itemType, _capacityHint);
+#if DEBUG
+                    _firstAppendedIndex = _destination.Count;
+#endif
+                }
+
+#if DEBUG
+                Assumed.True(MSBuildNameIgnoreCaseComparer.Default.Equals(item.ItemType, _itemType), "Item type does not match the appender's item type");
+
+                // Items appended earlier in this batch are new by construction, so only check the items
+                // that were already in the destination list. Checking the whole list would make a batch
+                // quadratic in its own size.
+                _lookup.MustNotBeInAnyTables(item, _destination, _firstAppendedIndex);
+#endif
+
+                _destination.Add(item);
+                Count++;
+            }
+        }
+
+        /// <summary>
         /// Remove a bunch of items from this scope
         /// </summary>
         internal void RemoveItems(string itemType, ICollection<ProjectItemInstance> items)
@@ -1039,14 +1119,22 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Verify item is not in the table
         /// </summary>
-        private void MustNotBeInTable(ItemDictionarySlim table, ProjectItemInstance item)
+        /// <param name="table">The table to check.</param>
+        /// <param name="item">The item that must not be present.</param>
+        /// <param name="appendingList">A list currently being appended to, or null.</param>
+        /// <param name="appendingStartIndex">Where the in-progress append began in <paramref name="appendingList"/>.
+        /// Items at or after this index are skipped.</param>
+        private void MustNotBeInTable(ItemDictionarySlim table, ProjectItemInstance item, List<ProjectItemInstance> appendingList = null, int appendingStartIndex = 0)
         {
             if (table?.ContainsKey(item.ItemType) == true)
             {
                 List<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
                 {
-                    Assumed.False(tableOfItemsOfSameType.Contains(item), "Item should not be in table");
+                    bool found = ReferenceEquals(tableOfItemsOfSameType, appendingList)
+                        ? tableOfItemsOfSameType.IndexOf(item, 0, appendingStartIndex) >= 0
+                        : tableOfItemsOfSameType.Contains(item);
+                    Assumed.False(found, "Item should not be in table");
                 }
             }
         }
@@ -1069,7 +1157,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Verify item is not in any table in any scope
         /// </summary>
-        private void MustNotBeInAnyTables(ProjectItemInstance item)
+        private void MustNotBeInAnyTables(ProjectItemInstance item, List<ProjectItemInstance> appendingList = null, int appendingStartIndex = 0)
         {
             // This item should not already be in any table; there is no way a project can
             // create items that already existed
@@ -1077,7 +1165,7 @@ namespace Microsoft.Build.BackEnd
             Scope scope = _lookupScopes;
             while (scope != null)
             {
-                MustNotBeInTable(scope.Adds, item);
+                MustNotBeInTable(scope.Adds, item, appendingList, appendingStartIndex);
                 MustNotBeInTable(scope.Removes, item);
                 MustNotBeInTable(scope.Modifies, item);
                 scope = scope.Parent;

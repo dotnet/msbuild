@@ -17,6 +17,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
 {
     public class Lookup_Tests
     {
+        [Fact]
+        public void NewItemAppenderAppendsInOrderAfterExistingAdds()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            Lookup.Scope scope = lookup.EnterScope("x");
+            lookup.AddNewItem(new ProjectItemInstance(project, "i1", "a0", project.FullPath));
+
+            Lookup.NewItemAppender appender = lookup.BeginAddNewItems("i1", 3);
+            appender.Add(new ProjectItemInstance(project, "i1", "a1", project.FullPath));
+            appender.Add(new ProjectItemInstance(project, "i1", "a2", project.FullPath));
+            appender.Add(new ProjectItemInstance(project, "i1", "a3", project.FullPath));
+
+            appender.Count.ShouldBe(3);
+            lookup.GetItems("i1").Select(i => i.EvaluatedInclude).ShouldBe(["a0", "a1", "a2", "a3"]);
+
+            scope.LeaveScope();
+            lookup.GetItems("i1").Select(i => i.EvaluatedInclude).ShouldBe(["a0", "a1", "a2", "a3"]);
+        }
+
+        [Fact]
+        public void NewItemAppenderWithNoItemsAddsNothing()
+        {
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            Lookup.Scope scope = lookup.EnterScope("x");
+
+            Lookup.NewItemAppender appender = lookup.BeginAddNewItems("i1", 10);
+
+            appender.Count.ShouldBe(0);
+            lookup.GetItems("i1").ShouldBeEmpty();
+            scope.LeaveScope();
+            lookup.GetItems("i1").ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void NewItemAppenderAcceptsMoreItemsThanCapacityHint()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            lookup.EnterScope("x");
+
+            Lookup.NewItemAppender appender = lookup.BeginAddNewItems("i1", 1);
+            for (int i = 0; i < 5; i++)
+            {
+                appender.Add(new ProjectItemInstance(project, "i1", $"a{i}", project.FullPath));
+            }
+
+            appender.Count.ShouldBe(5);
+            lookup.GetItems("i1").Select(i => i.EvaluatedInclude).ShouldBe(["a0", "a1", "a2", "a3", "a4"]);
+        }
         /// <summary>
         /// Primary group contains an item for a type and secondary does;
         /// primary item should be returned instead of the secondary item.
