@@ -1843,6 +1843,36 @@
     exact @ switch that resulted in the duplicate response file.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ReplayFilterCanceled">
+        <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
+        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterFailed">
+        <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
+        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterInvalidOutput">
+        <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
+        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterOutputExists">
+        <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
+        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterUnsupportedSwitch">
+        <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
+        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterZipNotSupported">
+        <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
+        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
+      </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
         <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
@@ -2143,7 +2173,7 @@
       </trans-unit>
       <trans-unit id="HelpMessage_30_BinaryLoggerSwitch">
         <source>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
+                     Serializes build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
                      of the build process that can later be used to reconstruct
@@ -2151,6 +2181,19 @@
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
+
+                     Exclude=kind[,kind...] omits the named event kinds from
+                     this binary logger during builds and replay. Console and
+                     other loggers are unaffected. Names are case-insensitive.
+                     Specify Exclude once per logger. Selection matches exact
+                     record kinds, not all derived message or warning events.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Example: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtered replay requires new output paths and does not
+                     support ProjectImports=ZipFile.
+                     Filtering is not redaction: embedded files are independent.
 
                      The optional LogFile specifies the path where the
                      binary log is saved. To generate a distinct log file
@@ -2193,7 +2236,7 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      将所有生成事件序列化为压缩的二进制文件。
                      默认情况下，该文件位于当前目录中，名为
                      "msbuild.binlog"。二进制日志是生成过程的详细描述，

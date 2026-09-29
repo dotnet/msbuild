@@ -942,6 +942,7 @@ namespace Microsoft.Build.CommandLine
                 string[] getTargetResult = [];
                 string getResultOutputFile = string.Empty;
                 BuildResult result = null;
+                FilteredBinlogReplay filteredReplay = null;
 #if FEATURE_REPORTFILEACCESSES
                 bool reportFileAccesses = false;
 #endif
@@ -1007,6 +1008,7 @@ namespace Microsoft.Build.CommandLine
                                             ref getItem,
                                             ref getTargetResult,
                                             ref getResultOutputFile,
+                                            ref filteredReplay,
                                             recursing: false,
                                             string.Join(" ", commandLine),
                                             switchesAlreadyGathered);
@@ -1041,7 +1043,18 @@ namespace Microsoft.Build.CommandLine
 
                     // If the primary file passed to MSBuild is a .binlog file, play it back into passed loggers
                     // as if a build is happening
-                    if (FileUtilities.IsBinaryLogFilename(projectFile))
+                    if (filteredReplay is not null)
+                    {
+                        ILogger[] replayLoggers = distributedLoggerRecords
+                            .Select(record => record.CentralLogger)
+                            .Where(logger => logger is not null)
+                            .Concat(loggers)
+                            .ToArray();
+                        exitType = filteredReplay.Replay(replayLoggers, cpuCount, s_buildCancellationSource.Token)
+                            ? ExitType.Success
+                            : ExitType.BuildError;
+                    }
+                    else if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
                         ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount, isBuildCheckEnabled);
                     }
@@ -1181,7 +1194,7 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(timerOutputFilename))
+                    if (filteredReplay is null && !string.IsNullOrEmpty(timerOutputFilename))
                     {
                         AppendOutputFile(timerOutputFilename, (long)elapsedTime.TotalMilliseconds);
                     }
@@ -2465,6 +2478,7 @@ namespace Microsoft.Build.CommandLine
             ref string[] getItem,
             ref string[] getTargetResult,
             ref string getResultOutputFile,
+            ref FilteredBinlogReplay filteredReplay,
             bool recursing,
             string commandLine,
             bool switchesAlreadyGathered = false)
@@ -2624,6 +2638,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref getItem,
                                                            ref getTargetResult,
                                                            ref getResultOutputFile,
+                                                           ref filteredReplay,
                                                            recursing: true,
                                                            commandLine);
                     }
@@ -2633,6 +2648,18 @@ namespace Microsoft.Build.CommandLine
                             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
                             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
                             Directory.GetFiles));
+
+                    if (FilteredBinlogReplay.IsRequested(projectFile, commandLineSwitches))
+                    {
+                        filteredReplay = FilteredBinlogReplay.Create(projectFile, commandLineSwitches);
+                        string terminalLoggerArgument = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.TerminalLogger].LastOrDefault();
+                        CommandLineSwitchException.VerifyThrow(
+                            !string.Equals(terminalLoggerArgument, "true", StringComparison.OrdinalIgnoreCase)
+                                && !string.Equals(terminalLoggerArgument, "on", StringComparison.OrdinalIgnoreCase),
+                            "ReplayFilterUnsupportedSwitch",
+                            "-terminalLogger");
+                        useTerminalLogger = false;
+                    }
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
@@ -2732,7 +2759,8 @@ namespace Microsoft.Build.CommandLine
                         cpuCount,
                         out profilerLogger,
                         out enableProfiler,
-                        ref detailedSummary);
+                        ref detailedSummary,
+                        filteredReplay is not null);
 
                     var isLoggerThatRequiresTaskInputsConfigured = loggers.Any(l => l is TerminalLogger || l is BinaryLogger);
                     isTaskInputLoggingRequired = isTaskInputLoggingRequired || isLoggerThatRequiresTaskInputsConfigured || isBuildCheckEnabled;
@@ -3839,7 +3867,8 @@ namespace Microsoft.Build.CommandLine
             int cpuCount,
             out ProfilerLogger profilerLogger,
             out bool enableProfiler,
-            ref bool detailedSummary)
+            ref bool detailedSummary,
+            bool filteredReplay)
         {
             string[] loggerSwitchParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Logger];
             string[] distributedLoggerSwitchParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.DistributedLogger];
@@ -3873,7 +3902,7 @@ namespace Microsoft.Build.CommandLine
             var loggers = new List<ILogger>();
 
             var binlogVerbosity = verbosity;
-            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref binlogVerbosity);
+            ProcessBinaryLogger(binaryLoggerParameters, loggers, ref binlogVerbosity, disableCopies: filteredReplay);
 
             // When returning the result of evaluation from the command line, do not use custom loggers.
             if (!useSimpleErrorLogger)
@@ -3882,7 +3911,12 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Add any loggers which have been specified on the command line
-            distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
+            // Replay does not run a build for dotnet's injected logger to track.
+            distributedLoggerRecords = ProcessDistributedLoggerSwitch(
+                filteredReplay
+                    ? distributedLoggerSwitchParameters.Where(parameter => !FilteredBinlogReplay.IsSdkLogger([parameter])).ToArray()
+                    : distributedLoggerSwitchParameters,
+                verbosity);
 
             // Otherwise choose default console logger: None, TerminalLogger, or the older ConsoleLogger
             if (useSimpleErrorLogger)
@@ -4003,7 +4037,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity)
+        private static void ProcessBinaryLogger(string[] binaryLoggerParameters, List<ILogger> loggers, ref LoggerVerbosity verbosity, bool disableCopies)
         {
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
@@ -4029,7 +4063,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", string.Join(", ", processedParams.DuplicateFilePaths)));
             }
 
-            if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
+            if (!disableCopies && processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
             {
                 // Optimized approach: single logger writing to one file, then copy to additional locations
                 BinaryLogger logger = new() { Parameters = processedParams.DistinctParameterSets[0], AdditionalFilePaths = processedParams.AdditionalFilePaths };

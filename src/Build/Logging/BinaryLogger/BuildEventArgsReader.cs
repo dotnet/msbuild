@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -25,6 +26,8 @@ namespace Microsoft.Build.Logging
     /// </summary>
     public class BuildEventArgsReader : IBuildEventArgsReaderNotifications, IDisposable
     {
+        internal const int CancellationCheckInterval = 100;
+
         private readonly BinaryReader _binaryReader;
         // This is used to verify that events deserialization is not overreading expected size.
         private readonly TransparentReadStream _readStream;
@@ -32,6 +35,10 @@ namespace Microsoft.Build.Logging
         private long _recordNumber = 0;
         private bool _skipUnknownEvents;
         private bool _skipUnknownEventParts;
+        private int _recordsUntilCancellationCheck;
+
+        // Reuse the common fields read for filtering during deserialization.
+        private BuildEventArgsFields? _prefetchedFields;
 
         /// <summary>
         /// A list of string records we've encountered so far. If it's a small string, it will be the string directly.
@@ -209,11 +216,45 @@ namespace Microsoft.Build.Logging
         /// The next <see cref="BuildEventArgs"/>.
         /// If there are no more records, returns <see langword="null"/>.
         /// </returns>
-        public BuildEventArgs? Read()
+        public BuildEventArgs? Read() => Read(eventFilter: null);
+
+        internal BinaryLogRecordKind CurrentRecordKind { get; private set; }
+
+        /// <summary>
+        /// Reads the next event accepted by <paramref name="eventFilter"/>.
+        /// </summary>
+        /// <param name="eventFilter">The event filter, or <see langword="null"/> to accept all events.</param>
+        /// <returns>The next accepted event, or <see langword="null"/> at end of stream.</returns>
+        /// <exception cref="BinaryLogEventFilterException">
+        /// The filter callback threw.
+        /// </exception>
+        public BuildEventArgs? Read(BinaryLogEventFilter? eventFilter) => Read(eventFilter, CancellationToken.None);
+
+        internal void ResetCancellationPolling() => _recordsUntilCancellationCheck = 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal bool ShouldCancel(CancellationToken cancellationToken)
+        {
+            if (!cancellationToken.CanBeCanceled)
+            {
+                return false;
+            }
+
+            if (_recordsUntilCancellationCheck > 0)
+            {
+                _recordsUntilCancellationCheck--;
+                return false;
+            }
+
+            _recordsUntilCancellationCheck = CancellationCheckInterval - 1;
+            return cancellationToken.IsCancellationRequested;
+        }
+
+        internal BuildEventArgs? Read(BinaryLogEventFilter? eventFilter, CancellationToken cancellationToken)
         {
             CheckErrorsSubscribed();
             BuildEventArgs? result = null;
-            while (result == null)
+            while (result == null && !ShouldCancel(cancellationToken))
             {
                 BinaryLogRecordKind recordKind = PreprocessRecordsTillNextEvent(IsAuxiliaryRecord);
 
@@ -230,9 +271,67 @@ namespace Microsoft.Build.Logging
                 }
 
                 bool hasError = false;
+                bool filteredOut = false;
                 try
                 {
-                    result = ReadBuildEventArgs(recordKind);
+                    var deserializer = GetDeserializer(recordKind);
+                    // Legacy records cannot be skipped; TargetSkipped stores its original context in the payload.
+                    BinaryLogEventFilter? filterBeforeDeserialization = null;
+                    BinaryLogEventFilter? filterAfterDeserialization = null;
+                    if (eventFilter is not null && deserializer is not null)
+                    {
+                        if (_fileFormatVersion < BinaryLogger.ForwardCompatibilityMinimalVersion ||
+                            recordKind == BinaryLogRecordKind.TargetSkipped)
+                        {
+                            filterAfterDeserialization = eventFilter;
+                        }
+                        else
+                        {
+                            filterBeforeDeserialization = eventFilter;
+                        }
+                    }
+
+                    if (filterBeforeDeserialization is not null)
+                    {
+                        BuildEventArgsFields commonFields = ReadBuildEventArgsFields();
+                        var metadata = new BinaryLogEventMetadata(recordKind, commonFields.BuildEventContext);
+
+                        if (ApplyEventFilter(filterBeforeDeserialization, metadata))
+                        {
+                            _prefetchedFields = commonFields;
+                        }
+                        else
+                        {
+                            SkipBytes(_readStream.BytesCountAllowedToReadRemaining);
+                            filteredOut = true;
+                        }
+                    }
+
+                    if (!filteredOut)
+                    {
+                        try
+                        {
+                            result = deserializer?.Invoke(this);
+                        }
+                        finally
+                        {
+                            _prefetchedFields = null;
+                        }
+
+                        if (result is not null && filterAfterDeserialization is not null)
+                        {
+                            var metadata = new BinaryLogEventMetadata(
+                                recordKind,
+                                result.BuildEventContext,
+                                (result as TargetSkippedEventArgs)?.OriginalBuildEventContext);
+
+                            if (!ApplyEventFilter(filterAfterDeserialization, metadata))
+                            {
+                                result = null;
+                                filteredOut = true;
+                            }
+                        }
+                    }
                 }
                 catch (Exception e) when (
                     // We throw this on mismatches in metadata (name-value list, strings index).
@@ -254,7 +353,7 @@ namespace Microsoft.Build.Logging
                     HandleError(ErrorFactory, _skipUnknownEvents, ReaderErrorType.UnknownFormatOfEventData, recordKind, e);
                 }
 
-                if (result == null && !hasError)
+                if (result == null && !hasError && !filteredOut)
                 {
                     int localSerializedEventLength = serializedEventLength;
                     BinaryLogRecordKind localRecordKind = recordKind;
@@ -278,6 +377,7 @@ namespace Microsoft.Build.Logging
                 }
 
                 _recordNumber += 1;
+                CurrentRecordKind = recordKind;
             }
 
             return result;
@@ -296,45 +396,58 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private BuildEventArgs? ReadBuildEventArgs(BinaryLogRecordKind recordKind)
+        private bool ApplyEventFilter(BinaryLogEventFilter eventFilter, BinaryLogEventMetadata metadata)
+        {
+            try
+            {
+                return eventFilter(metadata);
+            }
+            catch (Exception ex)
+            {
+                // Keep callback failures out of corrupt-record recovery.
+                throw new BinaryLogEventFilterException(metadata, _recordNumber, _fileFormatVersion, ex);
+            }
+        }
+
+        private static Func<BuildEventArgsReader, BuildEventArgs?>? GetDeserializer(BinaryLogRecordKind recordKind)
             => recordKind switch
             {
-                BinaryLogRecordKind.BuildStarted => ReadBuildStartedEventArgs(),
-                BinaryLogRecordKind.BuildFinished => ReadBuildFinishedEventArgs(),
-                BinaryLogRecordKind.BuildSubmissionStarted => ReadBuildSubmissionStartedEventArgs(),
-                BinaryLogRecordKind.ProjectStarted => ReadProjectStartedEventArgs(),
-                BinaryLogRecordKind.ProjectFinished => ReadProjectFinishedEventArgs(),
-                BinaryLogRecordKind.TargetStarted => ReadTargetStartedEventArgs(),
-                BinaryLogRecordKind.TargetFinished => ReadTargetFinishedEventArgs(),
-                BinaryLogRecordKind.TaskStarted => ReadTaskStartedEventArgs(),
-                BinaryLogRecordKind.TaskFinished => ReadTaskFinishedEventArgs(),
-                BinaryLogRecordKind.Error => ReadBuildErrorEventArgs(),
-                BinaryLogRecordKind.Warning => ReadBuildWarningEventArgs(),
-                BinaryLogRecordKind.Message => ReadBuildMessageEventArgs(),
-                BinaryLogRecordKind.CriticalBuildMessage => ReadCriticalBuildMessageEventArgs(),
-                BinaryLogRecordKind.TaskCommandLine => ReadTaskCommandLineEventArgs(),
-                BinaryLogRecordKind.TaskParameter => ReadTaskParameterEventArgs(),
-                BinaryLogRecordKind.ProjectEvaluationStarted => ReadProjectEvaluationStartedEventArgs(),
-                BinaryLogRecordKind.ProjectEvaluationFinished => ReadProjectEvaluationFinishedEventArgs(),
-                BinaryLogRecordKind.ProjectImported => ReadProjectImportedEventArgs(),
-                BinaryLogRecordKind.TargetSkipped => ReadTargetSkippedEventArgs(),
-                BinaryLogRecordKind.EnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
-                BinaryLogRecordKind.ResponseFileUsed => ReadResponseFileUsedEventArgs(),
-                BinaryLogRecordKind.PropertyReassignment => ReadPropertyReassignmentEventArgs(),
-                BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
-                BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
-                BinaryLogRecordKind.AssemblyLoad => ReadAssemblyLoadEventArgs(),
-                BinaryLogRecordKind.BuildCheckMessage => ReadBuildMessageEventArgs(),
-                BinaryLogRecordKind.BuildCheckWarning => ReadBuildWarningEventArgs(),
-                BinaryLogRecordKind.BuildCheckError => ReadBuildErrorEventArgs(),
-                BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
-                BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
-                BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
-                BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
-                BinaryLogRecordKind.MSBuildServerLifecycle => ReadMSBuildServerLifecycleEventArgs(),
-                BinaryLogRecordKind.AssemblyResolutionSearchTrace => ReadAssemblyResolutionSearchTraceEventArgs(),
-                BinaryLogRecordKind.AssemblyConflictDependencyDetails => ReadAssemblyConflictDependencyDetailsMessageEventArgs(),
-                BinaryLogRecordKind.AssemblyConflictWarning => ReadAssemblyConflictWarningEventArgs(),
+                BinaryLogRecordKind.BuildStarted => static reader => reader.ReadBuildStartedEventArgs(),
+                BinaryLogRecordKind.BuildFinished => static reader => reader.ReadBuildFinishedEventArgs(),
+                BinaryLogRecordKind.BuildSubmissionStarted => static reader => reader.ReadBuildSubmissionStartedEventArgs(),
+                BinaryLogRecordKind.ProjectStarted => static reader => reader.ReadProjectStartedEventArgs(),
+                BinaryLogRecordKind.ProjectFinished => static reader => reader.ReadProjectFinishedEventArgs(),
+                BinaryLogRecordKind.TargetStarted => static reader => reader.ReadTargetStartedEventArgs(),
+                BinaryLogRecordKind.TargetFinished => static reader => reader.ReadTargetFinishedEventArgs(),
+                BinaryLogRecordKind.TaskStarted => static reader => reader.ReadTaskStartedEventArgs(),
+                BinaryLogRecordKind.TaskFinished => static reader => reader.ReadTaskFinishedEventArgs(),
+                BinaryLogRecordKind.Error => static reader => reader.ReadBuildErrorEventArgs(),
+                BinaryLogRecordKind.Warning => static reader => reader.ReadBuildWarningEventArgs(),
+                BinaryLogRecordKind.Message => static reader => reader.ReadBuildMessageEventArgs(),
+                BinaryLogRecordKind.CriticalBuildMessage => static reader => reader.ReadCriticalBuildMessageEventArgs(),
+                BinaryLogRecordKind.TaskCommandLine => static reader => reader.ReadTaskCommandLineEventArgs(),
+                BinaryLogRecordKind.TaskParameter => static reader => reader.ReadTaskParameterEventArgs(),
+                BinaryLogRecordKind.ProjectEvaluationStarted => static reader => reader.ReadProjectEvaluationStartedEventArgs(),
+                BinaryLogRecordKind.ProjectEvaluationFinished => static reader => reader.ReadProjectEvaluationFinishedEventArgs(),
+                BinaryLogRecordKind.ProjectImported => static reader => reader.ReadProjectImportedEventArgs(),
+                BinaryLogRecordKind.TargetSkipped => static reader => reader.ReadTargetSkippedEventArgs(),
+                BinaryLogRecordKind.EnvironmentVariableRead => static reader => reader.ReadEnvironmentVariableReadEventArgs(),
+                BinaryLogRecordKind.ResponseFileUsed => static reader => reader.ReadResponseFileUsedEventArgs(),
+                BinaryLogRecordKind.PropertyReassignment => static reader => reader.ReadPropertyReassignmentEventArgs(),
+                BinaryLogRecordKind.UninitializedPropertyRead => static reader => reader.ReadUninitializedPropertyReadEventArgs(),
+                BinaryLogRecordKind.PropertyInitialValueSet => static reader => reader.ReadPropertyInitialValueSetEventArgs(),
+                BinaryLogRecordKind.AssemblyLoad => static reader => reader.ReadAssemblyLoadEventArgs(),
+                BinaryLogRecordKind.BuildCheckMessage => static reader => reader.ReadBuildMessageEventArgs(),
+                BinaryLogRecordKind.BuildCheckWarning => static reader => reader.ReadBuildWarningEventArgs(),
+                BinaryLogRecordKind.BuildCheckError => static reader => reader.ReadBuildErrorEventArgs(),
+                BinaryLogRecordKind.BuildCheckTracing => static reader => reader.ReadBuildCheckTracingEventArgs(),
+                BinaryLogRecordKind.BuildCheckAcquisition => static reader => reader.ReadBuildCheckAcquisitionEventArgs(),
+                BinaryLogRecordKind.BuildCanceled => static reader => reader.ReadBuildCanceledEventArgs(),
+                BinaryLogRecordKind.LoggersRegistered => static reader => reader.ReadLoggersRegisteredEventArgs(),
+                BinaryLogRecordKind.MSBuildServerLifecycle => static reader => reader.ReadMSBuildServerLifecycleEventArgs(),
+                BinaryLogRecordKind.AssemblyResolutionSearchTrace => static reader => reader.ReadAssemblyResolutionSearchTraceEventArgs(),
+                BinaryLogRecordKind.AssemblyConflictDependencyDetails => static reader => reader.ReadAssemblyConflictDependencyDetailsMessageEventArgs(),
+                BinaryLogRecordKind.AssemblyConflictWarning => static reader => reader.ReadAssemblyConflictWarningEventArgs(),
                 _ => null
             };
 
@@ -446,21 +559,54 @@ namespace Microsoft.Build.Logging
                 // Once embedded files are replayed one by one - we can send the resulting stream to subscriber
                 if (EmbeddedContentRead != null)
                 {
-                    projectImportsCollector!.ProcessResult(
-                        streamToEmbed => EmbeddedContentRead(new EmbeddedContentEventArgs(recordKind, streamToEmbed)),
-                        error => throw new InvalidDataException(error));
-                    projectImportsCollector.DeleteArchive();
+                    try
+                    {
+                        projectImportsCollector!.ProcessResult(
+                            streamToEmbed => RaiseEmbeddedContentRead(recordKind, streamToEmbed),
+                            error => throw new InvalidDataException(error));
+                    }
+                    finally
+                    {
+                        projectImportsCollector!.DeleteArchive();
+                    }
                 }
             }
             else if (EmbeddedContentRead != null)
             {
-                EmbeddedContentRead(new EmbeddedContentEventArgs(
-                    recordKind,
-                    _binaryReader.BaseStream.Slice(length)));
+                using Stream contentStream = _binaryReader.BaseStream.Slice(length);
+                RaiseEmbeddedContentRead(recordKind, contentStream);
             }
             else
             {
                 SkipBytes(length);
+            }
+        }
+
+        private void RaiseEmbeddedContentRead(BinaryLogRecordKind recordKind, Stream contentStream)
+        {
+            Delegate[] subscribers = EmbeddedContentRead!.GetInvocationList();
+            if (subscribers.Length == 1)
+            {
+                ((Action<EmbeddedContentEventArgs>)subscribers[0])(new EmbeddedContentEventArgs(recordKind, contentStream));
+                return;
+            }
+
+            // Buffer only multicast archives, on disk so large archives do not exhaust memory.
+            using var bufferedContent = new FileStream(
+                Path.Combine(FileUtilities.TempFileDirectory, Path.GetRandomFileName()),
+                FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, bufferSize: 4096,
+                FileOptions.SequentialScan | FileOptions.DeleteOnClose);
+            contentStream.CopyTo(bufferedContent);
+            if (bufferedContent.Length != contentStream.Length)
+            {
+                throw new EndOfStreamException();
+            }
+
+            foreach (Action<EmbeddedContentEventArgs> subscriber in subscribers)
+            {
+                bufferedContent.Position = 0;
+                using Stream content = bufferedContent.Slice(bufferedContent.Length);
+                subscriber(new EmbeddedContentEventArgs(recordKind, content));
             }
         }
 
@@ -1512,6 +1658,12 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgsFields ReadBuildEventArgsFields(bool readImportance = false)
         {
+            if (_prefetchedFields is { } prefetched)
+            {
+                _prefetchedFields = null;
+                return prefetched;
+            }
+
             BuildEventArgsFieldFlags flags = (BuildEventArgsFieldFlags)ReadInt32();
             var result = new BuildEventArgsFields();
             result.Flags = flags;
@@ -1607,6 +1759,7 @@ namespace Microsoft.Build.Logging
                 result.Arguments = arguments;
             }
 
+            // Prefetching uses v18+ flags for importance; readImportance only affects pre-v13 logs.
             if ((_fileFormatVersion < 13 && readImportance) || (_fileFormatVersion >= 13 && (flags & BuildEventArgsFieldFlags.Importance) != 0))
             {
                 result.Importance = (MessageImportance)ReadInt32();
