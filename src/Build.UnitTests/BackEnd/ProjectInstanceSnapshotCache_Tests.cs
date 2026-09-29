@@ -31,6 +31,38 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
 {
     private readonly ITestOutputHelper _output = output;
 
+    [Theory]
+    [InlineData(null, null, null)]
+    [InlineData("Disabled", null, null)]
+    [InlineData("Record", "1", null)]
+    [InlineData("SnapshotUnsafe", null, "1")]
+    [InlineData("SnapshotFileSystem", null, null)]
+    [InlineData("invalid", "0", "0")]
+    [InlineData(null, "1", "1")]
+    public void PerformanceBranchAlwaysUsesCheckedSnapshotCache(
+        string? requestedMode,
+        string? legacyRecord,
+        string? legacySnapshot)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(EvaluationCacheConfiguration.ModeEnvironmentVariable, requestedMode);
+        env.SetEnvironmentVariable("MSBUILDRECORDEVALUATIONINPUTS", legacyRecord);
+        env.SetEnvironmentVariable("MSBUILDENABLEPROJECTINSTANCESNAPSHOTCACHE", legacySnapshot);
+        Traits.UpdateFromEnvironment();
+
+        EvaluationCacheConfiguration configuration = Traits.Instance.EvaluationCache;
+
+        configuration.Mode.ShouldBe(EvaluationCacheMode.SnapshotFileSystem);
+        configuration.ValidationPolicy.ShouldBe(EvaluationCacheValidationPolicy.FileSystem);
+        configuration.ConfigurationValid.ShouldBeTrue();
+        configuration.IsConfigured.ShouldBeTrue();
+        configuration.RecordInputs.ShouldBeTrue();
+        configuration.EnableSnapshotCache.ShouldBeTrue();
+        configuration.InvalidValue.ShouldBeNull();
+        Environment.GetEnvironmentVariable(EvaluationCacheConfiguration.ModeEnvironmentVariable)
+            .ShouldBe(requestedMode);
+    }
+
     [Fact]
     public void EquivalentEvaluationIdentityProducesEqualKeys()
     {

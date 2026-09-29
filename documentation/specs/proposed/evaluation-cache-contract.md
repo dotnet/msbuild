@@ -2,6 +2,12 @@
 
 ## Status
 
+> **Temporary performance-only override:** this branch always selects
+> `SnapshotFileSystem`, including when activation variables are unset or request
+> another mode. This deliberately overrides the activation contract below for
+> measurement only; it must not be merged as a production default. Input validation,
+> restore-scoped bypass, and the default cache budget are unchanged.
+
 This document is the **required acceptance contract** for an opt-in evaluation cache under the
 timestamp-and-length metadata model described below. The current prototype remains opt-in and makes
 no claim of production readiness. Requirements below are normative within that model; the final

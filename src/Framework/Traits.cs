@@ -36,7 +36,8 @@ namespace Microsoft.Build.Framework
 
         internal static EvaluationCacheConfiguration FromEnvironment()
         {
-            string? configuredMode = Environment.GetEnvironmentVariable(ModeEnvironmentVariable);
+            // Temporary perf-branch override: always measure checked snapshot reuse.
+            string configuredMode = nameof(EvaluationCacheMode.SnapshotFileSystem);
             bool legacyRecord =
                 Environment.GetEnvironmentVariable("MSBUILDRECORDEVALUATIONINPUTS") == "1";
             bool legacySnapshot = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDENABLEPROJECTINSTANCESNAPSHOTCACHE");
