@@ -228,8 +228,24 @@ public sealed class PackageContractTests
             RedirectStandardError = true,
             UseShellExecute = false,
         };
+
+        // The two-stage CI build launches tests with paths from the stage 1 bootstrap.
+        // Let this dotnet invocation recompute its MSBuild paths from the repository-local SDK.
+        startInfo.Environment.Remove("MSBUILD_EXE_PATH");
+        startInfo.Environment.Remove("MSBuildSDKsPath");
+        startInfo.Environment.Remove("MSBuildExtensionsPath");
+        startInfo.Environment.Remove("MSBuildExtensionsPath32");
+        startInfo.Environment.Remove("MSBuildExtensionsPath64");
+        startInfo.Environment.Remove("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR");
+        startInfo.Environment.Remove("DOTNET_ROOT_X64");
+        startInfo.Environment.Remove("DOTNET_ROOT_X86");
+        startInfo.Environment.Remove("DOTNET_ROOT_ARM64");
+        startInfo.Environment.Remove("DOTNET_ROOT_ARM");
+
+        startInfo.Environment["DOTNET_HOST_PATH"] = dotnetPath;
         startInfo.Environment["DOTNET_ROOT"] = dotnetRoot;
         startInfo.Environment[$"DOTNET_ROOT_{RuntimeInformation.ProcessArchitecture.ToString().ToUpperInvariant()}"] = dotnetRoot;
+        startInfo.Environment["DOTNET_INSTALL_DIR"] = dotnetRoot;
         startInfo.Environment["DOTNET_MULTILEVEL_LOOKUP"] = "0";
 
         foreach (string argument in arguments)
