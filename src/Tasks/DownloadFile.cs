@@ -234,7 +234,16 @@ namespace Microsoft.Build.Tasks
 
                         using (var target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
-                            Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
+                            // Terminal Logger renders a progress row for this download, which
+                            // reports the same operation this message announces. Under the change
+                            // wave the message drops to Normal so it is not shown twice; it is
+                            // still written to binary logs and to console output at normal verbosity.
+                            Log.LogMessageFromResources(
+                                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13) ? MessageImportance.Normal : MessageImportance.High,
+                                "DownloadFile.Downloading",
+                                SourceUrl,
+                                destinationFile.FullName,
+                                response.Content.Headers.ContentLength);
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync(
 #if NET

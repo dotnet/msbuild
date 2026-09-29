@@ -121,6 +121,48 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
 
+        /// <summary>
+        /// Terminal Logger renders a progress row for the download and only renders messages of
+        /// high importance, so the message that announces the same download must not be high
+        /// importance as well. It stays in binary logs and in console output at normal verbosity.
+        /// </summary>
+        [Theory]
+        [InlineData(true, MessageImportance.Normal)]
+        [InlineData(false, MessageImportance.High)]
+        public void DownloadingMessageImportanceFollowsChangeWave(bool waveEnabled, MessageImportance expectedImportance)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                testEnvironment.SetEnvironmentVariable(
+                    "MSBUILDDISABLEFEATURESFROMVERSION",
+                    waveEnabled ? null : ChangeWaves.Wave18_13.ToString());
+                ChangeWaves.ResetStateForTests();
+
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: false);
+                DownloadFile downloadFile = new DownloadFile
+                {
+                    BuildEngine = _mockEngine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    DestinationFolder = new TaskItem(folder.Path),
+                    HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("Success!"),
+                        RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://success/foo.txt")
+                    }),
+                    SourceUrl = "http://success/foo.txt"
+                };
+
+                downloadFile.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                BuildMessageEventArgs downloading = _mockEngine.MessageEvents
+                    .Where(m => m.Message?.Contains("http://success/foo.txt") == true)
+                    .ShouldHaveSingleItem(_mockEngine.Log);
+                downloading.Importance.ShouldBe(expectedImportance);
+
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
         [Fact]
         public void CanGetFileNameFromResponseHeader()
         {
