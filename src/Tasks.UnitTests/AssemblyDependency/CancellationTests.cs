@@ -696,6 +696,12 @@ public sealed class CancellationTests(ITestOutputHelper output)
     private static AssemblyNameExtension GetAssemblyName(string path) =>
         new($"{Path.GetFileNameWithoutExtension(path)}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
 
+    /// <summary>
+    /// Hooks FileExists so the test can request cancellation at cache serialization's pre-write
+    /// existence check, then verify that the completed write is still reported in FilesWritten.
+    /// All filesystem operations are forwarded unchanged; TestEnvironment restores the original
+    /// filesystem when the registered scope is reverted.
+    /// </summary>
     private sealed class FileSystemScope : TransientTestState, IFileSystem
     {
         private readonly IFileSystem _original = FileSystems.Default;
