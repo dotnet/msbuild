@@ -66,6 +66,11 @@
         <target state="new">The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</target>
         <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
       </trans-unit>
+      <trans-unit id="Binlog_FilteredLog">
+        <source>This binary log is filtered. Excluded event kinds: {0}.</source>
+        <target state="new">This binary log is filtered. Excluded event kinds: {0}.</target>
+        <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">Odczyt zgodny z przekazywaniem nie jest obsługiwany w przypadku wersji formatu pliku {0} (wymaga &gt;= 18).</target>

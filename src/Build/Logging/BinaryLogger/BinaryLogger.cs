@@ -567,6 +567,23 @@ namespace Microsoft.Build.Logging
                     LogInitialInfo();
                 }
 
+                if (_excludedEventKinds is not null)
+                {
+                    BinaryLogRecordKind[] excludedKinds = [.. _excludedEventKinds];
+                    Array.Sort(excludedKinds);
+
+                    // Keep the notice even with Exclude=Message or OmitInitialInfo.
+                    // The "BinaryLogger" sender would make Structured Log Viewer display a property instead of a message.
+                    eventArgsWriter.Write(new BuildMessageEventArgs(
+                        ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_FilteredLog", string.Join(", ", excludedKinds)),
+                        helpKeyword: null,
+                        senderName: null,
+                        MessageImportance.Normal)
+                    {
+                        BuildEventContext = BuildEventContext.Invalid,
+                    });
+                }
+
                 eventSource.AnyEventRaised += EventSource_AnyEventRaised;
             }
         }

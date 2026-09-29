@@ -163,6 +163,12 @@ and when rewriting an existing binlog. The option affects only that binary logge
 console output, file loggers, and other binary loggers still receive their own events.
 Excluding errors or warnings does not change the build result.
 
+Filtered binlogs contain a build-level message listing the excluded event kinds.
+Structured Log Viewer displays it as a top-level message node, like other build
+information such as the LongPaths status. The notice is retained even with
+`Exclude=Message` or `OmitInitialInfo`, and is written only to the filtered binary
+logger, not to other loggers attached to the same build or replay.
+
 #### Produce filtered binlogs from the command line
 
 Use an MSBuild build containing the `Exclude` binary logger parameter. Until this change
@@ -245,8 +251,9 @@ through top-level `EmbedInBinlog` items are retained when evaluation events are 
 and those added in targets or produced by task outputs are retained with `Exclude=TaskParameter`.
 Each replay output receives its own complete archive unless `ProjectImports=None` is set.
 `Exclude=Message` also excludes
-the binary logger's own metadata messages; `OmitInitialInfo` can suppress initial metadata
-without excluding other messages. **Filtering is not redaction**, and does not guarantee
+the binary logger's own metadata messages, except for the filtering notice;
+`OmitInitialInfo` can suppress initial metadata without excluding other messages
+or the filtering notice. **Filtering is not redaction**, and does not guarantee
 a smaller output.
 
 For CLI filtered replay, the input must use a format supported by this reader, no newer
