@@ -16,27 +16,6 @@ using Microsoft.Build.Shared.FileSystem;
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
-    /// What should happen if multiple versions of a given productfamily or sdk name are found
-    /// </summary>
-    public enum MultipleVersionSupport
-    {
-        /// <summary>
-        /// No action should be taken if multiple versions are detected
-        /// </summary>
-        Allow = 0,
-
-        /// <summary>
-        /// Log  warning
-        /// </summary>
-        Warning = 1,
-
-        /// <summary>
-        /// Log an error
-        /// </summary>
-        Error = 2
-    }
-
-    /// <summary>
     /// Structure to represent the information contained in SDKManifest.xml
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Not worth breaking partners")]
