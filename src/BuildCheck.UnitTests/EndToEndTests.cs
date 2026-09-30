@@ -66,6 +66,31 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
     }
 
+    [Fact]
+    public void PropertiesUsageCheck_RulesAreIndependentlyConfigurable()
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: false,
+            out TransientTestFile projectFile,
+            out TransientTestFile editorconfigFile,
+            "PropsCheckTest.csproj");
+
+        // Turning BC0201 off must not turn BC0202 off - they are separately configurable rules
+        //  that happen to be implemented by a single check.
+        File.WriteAllText(
+            editorconfigFile.Path,
+            File.ReadAllText(editorconfigFile.Path)
+                .Replace("build_check.BC0201.Severity=warning", "build_check.BC0201.Severity=none"));
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        output.ShouldNotContain("BC0201");
+        output.ShouldMatch(@"BC0202: .* Property: 'MyPropT2'");
+    }
+
     [Theory]
     // The culture is not set explicitly, but the extension is a known culture
     //  - a buildcheck warning will occur, but otherwise works

@@ -56,6 +56,16 @@
         <target state="translated">Byla získána hodnota ArchiveFile, nebyla ale nastavena konečná upravená verze.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrew">
+        <source>The binary log event filter threw an exception.</source>
+        <target state="new">The binary log event filter threw an exception.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrewWithContext">
+        <source>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</source>
+        <target state="new">The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</target>
+        <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">Čtení s dopřednou kompatibilitou není podporováno pro formát souboru verze {0} (musí být &gt;= 18).</target>
@@ -602,6 +612,11 @@
         <target state="translated">MSB4255: Následující vstupní soubory mezipaměti pro výsledky neexistují: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerEventFilter">
+        <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="new">MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</target>
+        <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">Řetězec verze nemá správný formát.</target>
@@ -653,6 +668,36 @@
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Metaprojekt {0} byl vygenerován.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
+        <target state="translated">MSB4289: V tomto procesu je již aktivní jiné striktní sestavení s více vlákny. Dokončete ho před spuštěním jiného sestavení, použijte samostatný proces nebo před zahájením procesu nastavte MSBUILDDISABLEFEATURESFROMVERSION=18.12, abyste zakázali přísné kontroly.</target>
+        <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
+        <target state="translated">MSB4286: Striktní režim s více vlákny zjistil aktuální adresář procesu v „{1}“ namísto v „{2}“ po úloze „{0}“. Místo změny adresáře procesu použijte TaskEnvironment. Tato změna může pocházet z jiné úlohy, protokolovacího nástroje nebo hostitelského kódu, který se spustil souběžně s kontextem této události.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
+        <target state="translated">Striktní režim s více vlákny je povolený. Zpracovat aktuální adresář: {0}.</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelMissing">
+        <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
+        <target state="translated">MSB4288: Striktní režim s více vlákny obnovil po znepřístupnění adresáře adresář sentinelu „{0}“ a aktuální adresář procesu. Neodebírá adresáře používané aktivním sestavením.</target>
+        <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
+        <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
+        <target state="translated">MSB4290: Striktní režim s více vlákny nemohl obnovit adresář sentinel {0} a aktuální adresář procesu: {1}. Před spuštěním procesu ověřte, zda lze vytvořit a získat přístup k adresáři vlastněnému modulem, nebo před spuštěním procesu nastavte msbuilddisablefeaturesfromversion=18.12, abyste dočasně zakázali striktní kontroly.</target>
+        <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
+        <target state="translated">MSB4287: Striktní režim s více vlákny při dokončení projektu nebo sestavení našel „{0}“ v adresáři sentinelu „{1}“. Vyřešte cesty pomocí TaskEnvironment. Zápis může pocházet z jiného projektu, protokolovacího nástroje nebo hostitelského kódu.</target>
+        <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
@@ -731,7 +776,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">Při vytváření objektu Project není podporované částečné vyhodnocení (fáze vyhodnocení „{0}“). K částečnému vyhodnocení použijte ProjectInstance. Případně vytvořte Project ve fázi vyhodnocení Full.</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -942,6 +987,11 @@
         <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
         <target state="translated">MSB4283: Úlohu "{0}" se nepovedlo spustit, protože spouštění úloh vyžaduje načítání sestavení a typů úloh pomocí reflexe, což v tomto oříznutém hostiteli ani hostiteli Native AOT není podporované. Sestavujte pomocí MSBuildu založeného na JIT, abyste mohli spouštět úlohy.</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="translated">Vytváření sestav přístupu k souborům nelze použít v režimu s více vlákny. Vytváření sestav přístupu k souborům vyžaduje pracovní uzly izolované procesem, aby každý přístup mohl být přiřazen jednomu projektu. Zakažte buď ReportFileAccesses, nebo MultiThreaded.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
@@ -3181,8 +3231,8 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: Neplatné binární parametry protokolovacího nástroje: {0}. Očekávalo se: ProjectImports={{None,Embed,ZipFile}} nebo [LogFile=]filePath.binlog (název souboru nebo cesta protokolu musí mít příponu .binlog).</target>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="needs-review-translation">MSB4234: Neplatné binární parametry protokolovacího nástroje: {0}. Očekávalo se: ProjectImports={{None,Embed,ZipFile}} nebo [LogFile=]filePath.binlog (název souboru nebo cesta protokolu musí mít příponu .binlog).</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -3326,7 +3376,7 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">Vlastní typ události '{0}' se nepodporuje, protože všechny vlastní typy událostí jsou zastaralé. Použijte prosím místo toho Extended*EventArgs. Další informace: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">Vlastní typ události {0} se nepodporuje, protože všechny vlastní typy událostí byly vyřazeny jako zastaralé. Místo toho prosím použijte Extended*EventArgs. Další informace: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProjectFile">

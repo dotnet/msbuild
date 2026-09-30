@@ -342,8 +342,12 @@ namespace Microsoft.Build.BackEnd
 
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                // Restore the original current directory.
-                NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
+                // The strict scope restores process CWD after all thread nodes have stopped.
+                if (!_componentHost.BuildParameters.MultiThreaded || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12))
+                {
+                    // Restore the original current directory.
+                    NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
+                }
 
                 // Restore the original environment.
                 CommunicationsUtilities.SetEnvironment(_savedEnvironment);

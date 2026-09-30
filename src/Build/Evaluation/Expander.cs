@@ -222,11 +222,7 @@ internal partial class Expander<P, I>
     /// Used to flag use of item expressions where they are illegal.
     /// </summary>
     internal static bool ExpressionContainsItemVector(string expression)
-    {
-        ExpressionShredder.ReferencedItemExpressionsEnumerator transformsEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
-
-        return transformsEnumerator.MoveNext();
-    }
+        => ExpressionShredder.TryGetNextItemVectorExpression(expression, out _);
 
     /// <summary>
     /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options.
@@ -403,11 +399,12 @@ internal partial class Expander<P, I>
         return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
     }
 
-    internal static ExpressionShredder.ItemExpressionCapture? ExpandSingleItemVectorExpressionIntoExpressionCapture(
-            string expression, ExpanderOptions options, IElementLocation elementLocation)
-    {
-        return ItemExpander.ExpandSingleItemVectorExpressionIntoExpressionCapture(expression, options, elementLocation);
-    }
+    internal static bool TryExpandSingleItemVectorExpression(
+        string expression,
+        ExpanderOptions options,
+        IElementLocation elementLocation,
+        out ExpressionShredder.ItemExpressionCapture itemVector)
+        => ItemExpander.TryExpandSingleItemVectorExpression(expression, options, elementLocation, out itemVector);
 
     internal IList<T> ExpandExpressionCaptureIntoItems<T>(
         ExpressionShredder.ItemExpressionCapture expressionCapture, IItemProvider<I> items, IItemFactory<I, T> itemFactory,
@@ -426,7 +423,7 @@ internal partial class Expander<P, I>
         out bool isTransformExpression,
         out List<TransformEntry> entries)
     {
-        return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out entries);
+        return ItemExpander.ExpandItemVector(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out entries);
     }
 
     private static string TruncateString(string metadataValue)
@@ -484,16 +481,11 @@ internal partial class Expander<P, I>
     /// essentially, pushes and pops on a stack of parentheses to do this.
     /// Takes the expression and the index to start at.
     /// Returns the index of the matching parenthesis, or -1 if it was not found.
-    /// Also returns flags to indicate if a propertyfunction or registry property is likely
-    /// to be found in the expression.
     /// </summary>
-    private static int ScanForClosingParenthesis(ReadOnlySpan<char> expression, int index, out bool potentialPropertyFunction, out bool potentialRegistryFunction)
+    private static int ScanForClosingParenthesis(ReadOnlySpan<char> expression, int index)
     {
         int nestLevel = 1;
         int length = expression.Length;
-
-        potentialPropertyFunction = false;
-        potentialRegistryFunction = false;
 
         // Scan for our closing ')'
         while (index < length && nestLevel > 0)
@@ -501,41 +493,24 @@ internal partial class Expander<P, I>
             char character = expression[index];
             switch (character)
             {
-                case '\'':
-                case '`':
-                case '"':
-                    {
-                        index++;
-                        index = ScanForClosingQuote(character, expression, index);
+                case '\'' or '`' or '"':
+                    index++;
+                    index = ScanForClosingQuote(character, expression, index);
 
-                        if (index < 0)
-                        {
-                            return -1;
-                        }
-                        break;
+                    if (index < 0)
+                    {
+                        return -1;
                     }
+
+                    break;
+
                 case '(':
-                    {
-                        nestLevel++;
-                        break;
-                    }
+                    nestLevel++;
+                    break;
+
                 case ')':
-                    {
-                        nestLevel--;
-                        break;
-                    }
-                case '.':
-                case '[':
-                case '$':
-                    {
-                        potentialPropertyFunction = true;
-                        break;
-                    }
-                case ':':
-                    {
-                        potentialRegistryFunction = true;
-                        break;
-                    }
+                    nestLevel--;
+                    break;
             }
 
             index++;
@@ -635,7 +610,7 @@ internal partial class Expander<P, I>
                 n += 2; // skip over the opening '$('
 
                 // Scan for the matching closing bracket, skipping any nested ones
-                n = ScanForClosingParenthesis(argumentsSpan, n, out _, out _);
+                n = ScanForClosingParenthesis(argumentsSpan, n);
 
                 if (n == -1)
                 {

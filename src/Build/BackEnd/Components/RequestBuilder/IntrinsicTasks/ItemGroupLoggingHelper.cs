@@ -243,6 +243,14 @@ namespace Microsoft.Build.BackEnd
                     keyValuePairList.Clear();
                 }
             }
+            else if (parameterValue is AbsolutePath absolutePath)
+            {
+                sb.Append(absolutePath.OriginalValue);
+            }
+            else if (TaskItemTypeDetector.IsSupportedPathType(parameterValue.GetType()))
+            {
+                sb.Append(ValueTypeParser.ToString(parameterValue));
+            }
             else if (parameterValue.GetType().IsValueType)
             {
                 sb.Append((string)Convert.ChangeType(parameterValue, typeof(string), CultureInfo.CurrentCulture));

@@ -4,7 +4,9 @@
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
@@ -45,5 +47,19 @@ namespace Microsoft.Build.UnitTests
             result.ExceptionMessage.ShouldBe("TaskInstantiationFailureError");
             result.TaskException.ShouldNotBeNull();
         }
+
+#if NET
+        [Fact]
+        public void TypedTaskItemParseFailureUsesParameterConversionDiagnostic()
+        {
+            ITaskItem item = new TaskItem("not-an-int");
+
+            System.Exception exception = Should.Throw<System.Exception>(
+                () => OutOfProcTaskAppDomainWrapperBase.ConvertTaskParameterValue(item, typeof(ITaskItem<int>)));
+
+            exception.GetType().Name.ShouldBe("TaskParameterConversionException");
+            exception.InnerException.ShouldBeOfType<System.ArgumentException>();
+        }
+#endif
     }
 }

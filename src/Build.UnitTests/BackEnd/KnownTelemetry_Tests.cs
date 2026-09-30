@@ -53,9 +53,29 @@ public class KnownTelemetry_Tests
         buildTelemetry.BuildEngineVersion.ShouldBeNull();
         buildTelemetry.BuildCheckEnabled.ShouldBeNull();
         buildTelemetry.MultiThreadedModeEnabled.ShouldBeNull();
+        buildTelemetry.TaskHostConsoleOutputForwarded.ShouldBeNull();
         buildTelemetry.SACEnabled.ShouldBeNull();
 
         buildTelemetry.GetProperties().ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BuildTelemetryIncludesTaskHostConsoleOutputForwarded(bool forwarded)
+    {
+        BuildTelemetry buildTelemetry = new()
+        {
+            TaskHostConsoleOutputForwarded = forwarded,
+        };
+
+        var property = buildTelemetry.GetProperties().ShouldHaveSingleItem();
+        property.Key.ShouldBe(nameof(BuildTelemetry.TaskHostConsoleOutputForwarded));
+        property.Value.ShouldBe(forwarded.ToString());
+
+        var activityProperty = buildTelemetry.GetActivityProperties().ShouldHaveSingleItem();
+        activityProperty.Key.ShouldBe(nameof(BuildTelemetry.TaskHostConsoleOutputForwarded));
+        activityProperty.Value.ShouldBe(forwarded);
     }
 
     [Fact]

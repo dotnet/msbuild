@@ -89,6 +89,32 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _registrationContext.Results.Count.ShouldBe(0);
         }
 
+        [Theory]
+        [InlineData("Exec")]
+        [InlineData("exec")]
+        [InlineData("EXEC")]
+        public void ExecTask_WithDifferingTaskNameCasing_ShouldShowWarning(string taskName)
+        {
+            _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData(taskName, new Dictionary<string, TaskInvocationCheckData.TaskParameter>
+            {
+                { "Command", new TaskInvocationCheckData.TaskParameter("dotnet build", IsOutput: false) },
+            }));
+
+            _registrationContext.Results.Count.ShouldBe(1);
+            _registrationContext.Results[0].CheckRule.Id.ShouldBe("BC0302");
+        }
+
+        [Fact]
+        public void DifferentTask_WithBuildCommand_ShouldNotShowWarning()
+        {
+            _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Message", new Dictionary<string, TaskInvocationCheckData.TaskParameter>
+            {
+                { "Command", new TaskInvocationCheckData.TaskParameter("dotnet build", IsOutput: false) },
+            }));
+
+            _registrationContext.Results.Count.ShouldBe(0);
+        }
+
         private TaskInvocationCheckData MakeTaskInvocationData(string taskName, Dictionary<string, TaskInvocationCheckData.TaskParameter> parameters)
         {
             string projectFile = Framework.NativeMethods.IsWindows ? @"C:\fake\project.proj" : "/fake/project.proj";
