@@ -18,7 +18,9 @@ public class TypeForwarders_Tests
         Type[] expectedTypes =
         [
             typeof(DotNetFrameworkArchitecture),
+            typeof(MultipleVersionSupport),
             typeof(ProcessorArchitecture),
+            typeof(SDKType),
             typeof(TargetDotNetFrameworkVersion),
             typeof(VisualStudioVersion),
         ];
