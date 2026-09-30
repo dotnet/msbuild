@@ -18,7 +18,7 @@ namespace Microsoft.Build.Framework
     /// The identity (ItemSpec) is parsed using <see cref="ValueTypeParser"/> which handles value types,
     /// AbsolutePath, FileInfo, and DirectoryInfo.
     /// </remarks>
-    public readonly struct TaskItem<T> : ITaskItem<T>, IEquatable<TaskItem<T>>
+    public readonly struct TaskItem<T> : ITaskItem<T>, ITaskItem3, IEquatable<TaskItem<T>>
     {
         private readonly ITaskItem? _backingItem;
 
@@ -26,6 +26,9 @@ namespace Microsoft.Build.Framework
         /// Gets the strongly-typed value parsed from the item's identity.
         /// </summary>
         public T Value { get; }
+
+        /// <inheritdoc/>
+        public TaskItemLocation? Location => (_backingItem as ITaskItem3)?.Location;
 
         /// <summary>
         /// Initializes a new instance of <see cref="TaskItem{T}"/> from a strongly-typed value.
