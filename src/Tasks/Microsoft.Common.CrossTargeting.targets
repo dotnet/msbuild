@@ -121,7 +121,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      @(InnerOutput) - The combined output items of the inner targets across
                       all target frameworks..
   ============================================================
-  -->    
+  -->
   <Target Name="DispatchToInnerBuilds"
           DependsOnTargets="_ComputeTargetFrameworkItems"
           Returns="@(InnerOutput)">
