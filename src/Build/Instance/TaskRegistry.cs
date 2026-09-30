@@ -18,9 +18,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.NET.StringTools;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 
@@ -53,69 +51,12 @@ namespace Microsoft.Build.Execution
     ///            AssemblyName="utiltasks.dll"
     ///            AssemblyFile="$(MyDownloadedTasks)\"/&gt;
     /// </example>
-    internal sealed class TaskRegistry : ITranslatable
+    internal sealed partial class TaskRegistry : ITranslatable
     {
         /// <summary>
         /// The fallback task registry
         /// </summary>
         private Toolset _toolset;
-
-        /// <summary>
-        /// Simple name for the MSBuild tasks (v4), used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private const string s_tasksV4SimpleName = "Microsoft.Build.Tasks.v4.0";
-
-        /// <summary>
-        /// Filename for the MSBuild tasks (v4), used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private const string s_tasksV4Filename = $"{s_tasksV4SimpleName}.dll";
-
-        /// <summary>
-        /// Expected location that MSBuild tasks (v4) is picked up from if the user
-        /// references it with just a simple name, used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private static readonly string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
-
-        /// <summary>
-        /// Simple name for the MSBuild tasks (v12), used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private const string s_tasksV12SimpleName = "Microsoft.Build.Tasks.v12.0";
-
-        /// <summary>
-        /// Filename for the MSBuild tasks (v12), used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private const string s_tasksV12Filename = $"{s_tasksV12SimpleName}.dll";
-
-        /// <summary>
-        /// Expected location that MSBuild tasks (v12) is picked up from if the user
-        /// references it with just a simple name, used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private static readonly string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
-
-        /// <summary>
-        /// Simple name for the MSBuild tasks (v14+), used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private const string s_tasksCoreSimpleName = "Microsoft.Build.Tasks.Core";
-
-        /// <summary>
-        /// Filename for the MSBuild tasks (v14+), used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private const string s_tasksCoreFilename = $"{s_tasksCoreSimpleName}.dll";
-
-        /// <summary>
-        /// Expected location that MSBuild tasks (v14+) is picked up from if the user
-        /// references it with just a simple name, used for shimming in loading
-        /// task factory UsingTasks
-        /// </summary>
-        private static readonly string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
 
         /// <summary>
         /// Monotonically increasing counter for registered tasks.
@@ -272,8 +213,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <typeparam name="P">A type derived from IProperty</typeparam>
         /// <typeparam name="I">A type derived from IItem</typeparam>
-        private static void RegisterTasksFromUsingTaskElement
-            <P, I>(
+        private static void RegisterTasksFromUsingTaskElement<P, I>(
             LoggingContext loggingContext,
             string directoryOfImportingFile,
             ProjectUsingTaskElement projectUsingTaskXml,
@@ -302,144 +242,9 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            string assemblyFile = null;
-            string assemblyName = null;
+            UsingTaskInfo info = UsingTaskInfo.Create(projectUsingTaskXml, expander, expanderOptions, fileSystem, directoryOfImportingFile);
 
-            string taskName = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.TaskName, expanderOptions, projectUsingTaskXml.TaskNameLocation);
-
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                taskName.Length > 0,
-                projectUsingTaskXml.TaskNameLocation,
-                "InvalidEvaluatedAttributeValue",
-                taskName,
-                projectUsingTaskXml.TaskName,
-                XMakeAttributes.name,
-                XMakeElements.usingTask);
-
-            string taskFactory = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.TaskFactory, expanderOptions, projectUsingTaskXml.TaskFactoryLocation);
-
-            if (String.IsNullOrEmpty(taskFactory) || taskFactory.Equals(RegisteredTaskRecord.AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase) || taskFactory.Equals(RegisteredTaskRecord.TaskHostFactory, StringComparison.OrdinalIgnoreCase))
-            {
-                ProjectXmlUtilities.VerifyThrowProjectNoChildElements(projectUsingTaskXml.XmlElement, projectUsingTaskXml.ContainingProject.ProjectRootElementCache.ParserIgnoreConfiguration);
-            }
-
-            if (projectUsingTaskXml.AssemblyFile.Length > 0)
-            {
-                assemblyFile = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.AssemblyFile, expanderOptions, projectUsingTaskXml.AssemblyFileLocation);
-            }
-            else
-            {
-                assemblyName = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.AssemblyName, expanderOptions, projectUsingTaskXml.AssemblyNameLocation);
-            }
-
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                assemblyFile == null || assemblyFile.Length > 0,
-                projectUsingTaskXml.AssemblyFileLocation,
-                "InvalidEvaluatedAttributeValue",
-                assemblyFile,
-                projectUsingTaskXml.AssemblyFile,
-                XMakeAttributes.assemblyFile,
-                XMakeElements.usingTask);
-
-            ProjectErrorUtilities.VerifyThrowInvalidProject(
-                assemblyName == null || assemblyName.Length > 0,
-                projectUsingTaskXml.AssemblyNameLocation,
-                "InvalidEvaluatedAttributeValue",
-                assemblyName,
-                projectUsingTaskXml.AssemblyName,
-                XMakeAttributes.assemblyName,
-                XMakeElements.usingTask);
-
-            // Ensure the assembly file/path is relative to the project in which this <UsingTask> node was defined -- we
-            // don't want paths from imported projects being interpreted relative to the main project file.
-            try
-            {
-                assemblyFile = FileUtilities.FixFilePath(assemblyFile);
-
-                if (assemblyFile != null && !Path.IsPathRooted(assemblyFile))
-                {
-                    assemblyFile = Strings.WeakIntern(Path.Combine(directoryOfImportingFile, assemblyFile));
-                }
-
-                if (String.Equals(taskFactory, RegisteredTaskRecord.CodeTaskFactory, StringComparison.OrdinalIgnoreCase) || String.Equals(taskFactory, RegisteredTaskRecord.XamlTaskFactory, StringComparison.OrdinalIgnoreCase))
-                {
-                    // SHIM: One common pattern for people using CodeTaskFactory or XamlTaskFactory from M.B.T.v4.0.dll is to
-                    // specify it using $(MSBuildToolsPath) -- which now no longer contains M.B.T.v4.0.dll.  This same pattern
-                    // may also occur if someone is using CodeTaskFactory or XamlTaskFactory from M.B.T.v12.0.dll.  So if we have a
-                    // situation where the path being used doesn't contain the v4 or v12 tasks but DOES contain the v14+ tasks, just
-                    // secretly substitute it here.
-                    if (
-                            assemblyFile != null &&
-                            (assemblyFile.EndsWith(s_tasksV4Filename, StringComparison.OrdinalIgnoreCase) || assemblyFile.EndsWith(s_tasksV12Filename, StringComparison.OrdinalIgnoreCase)) &&
-                            !FileUtilities.FileExistsNoThrow(assemblyFile, fileSystem))
-                    {
-                        string replacedAssemblyFile = Path.Combine(Path.GetDirectoryName(assemblyFile), s_tasksCoreFilename);
-
-                        if (FileUtilities.FileExistsNoThrow(replacedAssemblyFile, fileSystem))
-                        {
-                            assemblyFile = replacedAssemblyFile;
-                        }
-                    }
-                    else if (assemblyName != null)
-                    {
-                        // SHIM: Another common pattern for people using CodeTaskFactory or XamlTaskFactory from
-                        // M.B.T.v4.0.dll is to specify it using AssemblyName with a simple name -- which works only if that
-                        // that assembly is in the current directory.  Much like with the above case, if we detect that
-                        // situation, secretly substitute it here so that the majority of task factory users aren't broken.
-                        if
-                            (
-                                assemblyName.Equals(s_tasksV4SimpleName, StringComparison.OrdinalIgnoreCase) &&
-                                !FileUtilities.FileExistsNoThrow(s_potentialTasksV4Location, fileSystem) &&
-                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation, fileSystem))
-                        {
-                            assemblyName = s_tasksCoreSimpleName;
-                        }
-                        else if
-                            (
-                                assemblyName.Equals(s_tasksV12SimpleName, StringComparison.OrdinalIgnoreCase) &&
-                                !FileUtilities.FileExistsNoThrow(s_potentialTasksV12Location, fileSystem) &&
-                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation, fileSystem))
-                        {
-                            assemblyName = s_tasksCoreSimpleName;
-                        }
-                    }
-                }
-            }
-            catch (ArgumentException ex)
-            {
-                // Invalid chars in AssemblyFile path
-                ProjectErrorUtilities.ThrowInvalidProject(projectUsingTaskXml.Location, "InvalidAttributeValueWithException", assemblyFile, XMakeAttributes.assemblyFile, XMakeElements.usingTask, ex.Message);
-            }
-
-            RegisteredTaskRecord.ParameterGroupAndTaskElementRecord parameterGroupAndTaskElementRecord = null;
-
-            if (projectUsingTaskXml.Count > 0)
-            {
-                parameterGroupAndTaskElementRecord = new RegisteredTaskRecord.ParameterGroupAndTaskElementRecord();
-                parameterGroupAndTaskElementRecord.ExpandUsingTask<P, I>(projectUsingTaskXml, expander, expanderOptions);
-            }
-
-            TaskHostParameters taskFactoryParameters = TaskHostParameters.Empty;
-            string runtime = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Runtime, expanderOptions, projectUsingTaskXml.RuntimeLocation);
-            string architecture = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Architecture, expanderOptions, projectUsingTaskXml.ArchitectureLocation);
-            string overrideUsingTask = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Override, expanderOptions, projectUsingTaskXml.OverrideLocation);
-
-            if ((runtime != string.Empty) || (architecture != string.Empty))
-            {
-                taskFactoryParameters = new TaskHostParameters(
-                    runtime == string.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime,
-                    architecture == string.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
-            }
-
-            taskRegistry.RegisterTask(
-                taskName,
-                AssemblyLoadInfo.Create(assemblyName, assemblyFile),
-                taskFactory,
-                taskFactoryParameters,
-                parameterGroupAndTaskElementRecord,
-                loggingContext,
-                projectUsingTaskXml,
-                ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
+            taskRegistry.RegisterTask(in info, loggingContext, projectUsingTaskXml);
         }
 
         /// <summary>
@@ -661,52 +466,42 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Registers an evaluated using task tag for future
-        /// consultation
+        /// Registers an evaluated using task tag for future consultation.
         /// </summary>
         private void RegisterTask(
-            string taskName,
-            AssemblyLoadInfo assemblyLoadInfo,
-            string taskFactory,
-            in TaskHostParameters taskFactoryParameters,
-            RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
+            ref readonly UsingTaskInfo info,
             LoggingContext loggingContext,
-            ProjectUsingTaskElement projectUsingTaskInXml,
-            bool overrideTask)
+            ProjectUsingTaskElement projectUsingTaskInXml)
         {
-            Assumed.NotNullOrEmpty(taskName);
-            Assumed.NotNull(assemblyLoadInfo);
+            Assumed.NotNullOrEmpty(info.TaskName);
+            Assumed.NotNull(info.LoadInfo);
 
             // Lazily allocate the hashtable
-            if (_taskRegistrations == null)
-            {
-                _taskRegistrations = CreateRegisteredTaskDictionary();
-            }
+            _taskRegistrations ??= CreateRegisteredTaskDictionary();
 
             // since more than one task can have the same name, we want to keep track of all assemblies that are declared to
             // contain tasks with a given name...
-            List<RegisteredTaskRecord> registeredTaskEntries;
-            RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskFactoryParameters);
-            if (!_taskRegistrations.TryGetValue(taskIdentity, out registeredTaskEntries))
+            RegisteredTaskIdentity taskIdentity = new(info.TaskName, info.TaskFactoryParameters);
+            if (!_taskRegistrations.TryGetValue(taskIdentity, out List<RegisteredTaskRecord> registeredTaskEntries))
             {
-                registeredTaskEntries = new List<RegisteredTaskRecord>();
-                _taskRegistrations[taskIdentity] = registeredTaskEntries;
+                registeredTaskEntries = [];
+                _taskRegistrations.Add(taskIdentity, registeredTaskEntries);
             }
 
-            RegisteredTaskRecord newRecord = new RegisteredTaskRecord(
-                taskName,
-                assemblyLoadInfo,
-                taskFactory,
-                taskFactoryParameters,
-                inlineTaskRecord,
+            RegisteredTaskRecord newRecord = new(
+                info.TaskName,
+                info.LoadInfo,
+                info.TaskFactory,
+                info.TaskFactoryParameters,
+                info.InlineTaskRecord,
                 Interlocked.Increment(ref _nextRegistrationOrderId),
                 projectUsingTaskInXml.ContainingProject.FullPath);
 
-            if (overrideTask)
+            if (info.OverrideTask)
             {
                 // Key the dictionary based on Unqualified task names
                 // This is to support partial matches on tasks like Foo.Bar and Baz.Bar
-                string[] nameComponents = taskName.Split('.');
+                string[] nameComponents = info.TaskName.Split('.');
                 string unqualifiedTaskName = nameComponents[nameComponents.Length - 1];
 
                 // Is the task already registered?
@@ -716,19 +511,19 @@ namespace Microsoft.Build.Execution
                     {
                         if (rec.RegisteredName.Equals(taskIdentity.Name, StringComparison.OrdinalIgnoreCase))
                         {
-                            loggingContext.LogError(new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
+                            loggingContext.LogError(new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", info.TaskName);
                             break;
                         }
                     }
+
                     recs.Add(newRecord);
                 }
                 else
                 {
                     // New record's name may be fully qualified. Use it anyway to account for partial matches.
-                    List<RegisteredTaskRecord> unqualifiedTaskNameMatches = new();
-                    unqualifiedTaskNameMatches.Add(newRecord);
+                    List<RegisteredTaskRecord> unqualifiedTaskNameMatches = [newRecord];
                     _overriddenTasks.Add(unqualifiedTaskName, unqualifiedTaskNameMatches);
-                    loggingContext.LogComment(MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
+                    loggingContext.LogComment(MessageImportance.Low, "OverrideUsingTaskElementCreated", info.TaskName, projectUsingTaskInXml.OverrideLocation);
                 }
             }
 
