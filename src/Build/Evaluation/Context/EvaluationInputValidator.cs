@@ -20,7 +20,7 @@ internal static class EvaluationInputValidator
 {
     /// <summary>
     /// Returns true when recording completed without a non-cacheable reason, direct environment reads are unchanged,
-    /// and every recorded path still has the required kind and, for reads/enumeration, metadata.
+    /// and every recorded path still has the required kind and metadata or matching glob results.
     /// </summary>
     /// <param name="inputs">The recorded inputs.</param>
     /// <param name="reason">The first input that differs, or the non-cacheable reason.</param>
@@ -56,6 +56,7 @@ internal static class EvaluationInputValidator
 
         try
         {
+            string? changedGlobDirectory = null;
             foreach (KeyValuePair<string, string?> environmentRead in inputs.EnvironmentReads)
             {
                 if (!string.Equals(
@@ -86,10 +87,10 @@ internal static class EvaluationInputValidator
                     return false;
                 }
 
+                bool metadataChanged = current.LastWriteTimeUtc != file.Value.LastWriteTimeUtc
+                    || current.Length != file.Value.Length;
                 if (current.Kind != file.Value.Kind
-                    || (file.Value.RequiresMetadata
-                        && (current.LastWriteTimeUtc != file.Value.LastWriteTimeUtc
-                            || current.Length != file.Value.Length)))
+                    || (file.Value.RequiresMetadata && metadataChanged))
                 {
                     reason = file.Key;
                     if (captureDetails)
@@ -98,6 +99,40 @@ internal static class EvaluationInputValidator
                     }
 
                     return false;
+                }
+
+                if (file.Value.RequiresGlobValidation && metadataChanged)
+                {
+                    changedGlobDirectory ??= file.Key;
+                }
+            }
+
+            if (changedGlobDirectory is not null && inputs.Globs.IsDefaultOrEmpty)
+            {
+                reason = changedGlobDirectory;
+                if (captureDetails)
+                {
+                    failure = new("FileSystemInputChanged", reason);
+                }
+
+                return false;
+            }
+
+            if (!inputs.Globs.IsDefaultOrEmpty)
+            {
+                foreach (GlobDependency glob in inputs.Globs)
+                {
+                    // Cached expansions may precede the directory stats captured by this evaluation.
+                    if ((changedGlobDirectory is not null || glob.FromCache) && !glob.IsCurrent())
+                    {
+                        reason = changedGlobDirectory ?? glob.ProjectDirectory;
+                        if (captureDetails)
+                        {
+                            failure = new("FileSystemInputChanged", reason);
+                        }
+
+                        return false;
+                    }
                 }
             }
         }

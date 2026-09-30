@@ -68,6 +68,15 @@ internal sealed class EvaluationInputsSnapshotValidationData : IProjectInstanceS
                 size = RetainedSizeEstimator.AddString(size, environmentRead.Value);
             }
 
+            if (!Inputs.Globs.IsDefaultOrEmpty)
+            {
+                size = RetainedSizeEstimator.Add(size, 24);
+                foreach (GlobDependency glob in Inputs.Globs)
+                {
+                    size = RetainedSizeEstimator.Add(size, RetainedSizeEstimator.Add(8, glob.RetainedSizeBytes));
+                }
+            }
+
             foreach (SdkDependency sdk in Inputs.SdkResolutions)
             {
                 size = RetainedSizeEstimator.Add(size, 128);

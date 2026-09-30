@@ -12,6 +12,7 @@ namespace Microsoft.Build.Evaluation.Context;
 /// Forwards to the evaluation file system and records every path evaluation reads, probes, or enumerates.
 /// Probes require only an unchanged path kind. Reads and enumeration require metadata and are recorded before
 /// the operation so the recorded timestamp cannot postdate the content evaluation consumed.
+/// FileMatcher uses the inner filesystem with its own glob-result observations instead of these broad enumeration dependencies.
 /// </summary>
 internal sealed class RecordingFileSystem : IFileSystem
 {
@@ -23,6 +24,8 @@ internal sealed class RecordingFileSystem : IFileSystem
         _inner = inner;
         _recorder = recorder;
     }
+
+    internal IFileSystem Inner => _inner;
 
     public TextReader ReadFile(string path)
     {

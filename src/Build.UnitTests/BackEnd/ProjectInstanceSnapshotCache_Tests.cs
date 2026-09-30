@@ -1488,6 +1488,70 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
         cache.GetStatistics().FreshEvaluations.ShouldBe(3);
     }
 
+    [Fact]
+    public void UnrelatedOutputCopiesReuseSnapshotsWithRecursiveModuleGlobs()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(
+            EvaluationCacheConfiguration.ModeEnvironmentVariable, nameof(EvaluationCacheMode.SnapshotFileSystem));
+        Traits.UpdateFromEnvironment();
+        TransientTestFolder folder = env.CreateFolder(createFolder: true);
+        string output = Path.Combine(folder.Path, "bin", "Debug", "net8.0");
+        Directory.CreateDirectory(output);
+        Directory.CreateDirectory(Path.Combine(folder.Path, "obj", "Debug", "net8.0"));
+        TransientTestFile source = env.CreateFile(folder, "input.txt", "unchanged output contents");
+        env.CreateFile(folder, "build.props", "<Project />");
+        string destination = Path.Combine(output, "output.dll");
+        File.Copy(source.Path, destination);
+        TransientTestFile project = env.CreateFile(folder, "project.proj", """
+            <Project>
+              <ItemGroup>
+                <None Include="Assets.*;GulpAssets.*;Assets/**;**/*.props;**/*.targets"
+                      Exclude="obj/**/*.props;obj/**/*.targets" />
+                <Asset Include="**/*" Exclude="bin/**;obj/**;**/*.props;**/*.targets" />
+              </ItemGroup>
+            </Project>
+            """);
+        var cache = new ProjectInstanceSnapshotCache();
+        cache.ConfigureValidator(EvaluationCacheValidationPolicy.FileSystem);
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
+        BuildRequestConfiguration first = CreateFileConfiguration(project.Path, parameters);
+        first.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+        EvaluationInputs inputs = first.Project.EvaluationInputs.ShouldNotBeNull();
+        inputs.Files[output].RequiresMetadata.ShouldBeFalse();
+        inputs.Files[output].RequiresGlobValidation.ShouldBeTrue();
+        long sizeWithoutGlobs = new EvaluationInputsSnapshotValidationData(inputs with { Globs = [] }).RetainedSizeBytes;
+        new EvaluationInputsSnapshotValidationData(inputs).RetainedSizeBytes
+            .ShouldBeGreaterThan(sizeWithoutGlobs + inputs.Globs.Sum(glob => glob.RetainedSizeBytes));
+
+        for (int i = 0; i < 2; i++)
+        {
+            File.Delete(destination);
+            File.Copy(source.Path, destination);
+            Directory.SetLastWriteTimeUtc(output, Directory.GetLastWriteTimeUtc(output).AddSeconds(2));
+            BuildRequestConfiguration warm = CreateFileConfiguration(project.Path, parameters);
+            warm.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: i + 2, nodeId: 1);
+            warm.Project.GetItems("None").Select(item => item.EvaluatedInclude).ShouldBe(["build.props"]);
+        }
+
+        cache.MaterializedEntries.ShouldBe(2);
+        cache.ValidationRejections.ShouldBe(0);
+        cache.GetStatistics().FreshEvaluations.ShouldBe(1);
+
+        File.WriteAllText(Path.Combine(output, "new.props"), "<Project />");
+        Directory.SetLastWriteTimeUtc(output, Directory.GetLastWriteTimeUtc(output).AddSeconds(2));
+        BuildRequestConfiguration changed = CreateFileConfiguration(project.Path, parameters);
+        changed.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 4, nodeId: 1);
+        changed.Project.GetItems("None").Count.ShouldBe(2);
+        cache.ValidationRejections.ShouldBe(1);
+        cache.GetStatistics().FreshEvaluations.ShouldBe(2);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
