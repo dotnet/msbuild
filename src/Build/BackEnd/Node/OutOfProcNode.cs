@@ -521,6 +521,7 @@ namespace Microsoft.Build.Execution
                     CommunicationsUtilities.Trace($"Failed to restore the original environment: {ex}.");
                 }
                 Traits.UpdateFromEnvironment();
+                PropertyFunctionDescriptorCache.Clear();
             }
             try
             {
@@ -762,6 +763,7 @@ namespace Microsoft.Build.Execution
             }
 
             Traits.UpdateFromEnvironment();
+            PropertyFunctionDescriptorCache.Clear();
             DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(_buildParameters.BuildProcessEnvironment);
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
