@@ -1662,6 +1662,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Validate that a null entry in a task item array output is ignored while preserving item order and metadata.
+        /// </summary>
+        [Fact]
+        public void TestOutputItemArrayWithNullToItems()
+        {
+            SetTaskParameter("ItemArrayParam", "@(ItemListContainingTwoItems)");
+
+            _host.GatherTaskOutputs("ItemArrayWithNullOutput", ElementLocation.Create(".", 1, 1), true, "output").ShouldBeTrue();
+            _outputsReadFromTask.ShouldContainKey("ItemArrayWithNullOutput");
+
+            ICollection<ProjectItemInstance> outputItems = _bucket.Lookup.GetItems("output");
+            outputItems.Count.ShouldBe(_twoItems.Length);
+
+            int index = 0;
+            foreach (ProjectItemInstance outputItem in outputItems)
+            {
+                TaskItemComparer.Instance.Compare(_twoItems[index], new TaskItem(outputItem)).ShouldBe(0);
+                index++;
+            }
+        }
+
+        /// <summary>
         /// Validate that an item array output to a property produces the correct semi-colon-delimited evaluated value.
         /// </summary>
         [Fact]
