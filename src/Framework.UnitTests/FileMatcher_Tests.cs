@@ -3371,6 +3371,521 @@ namespace Microsoft.Build.UnitTests
             matcher.GetFiles(root.Path, "**/*.cs").FileList.ShouldBe(["a.cs", Path.Combine("sub", "b.cs")], ignoreOrder: true);
         }
 
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void GlobResultObservationIsBorrowedAndSynchronous(bool optimized, bool useEntryCache)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "b.cs", string.Empty);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            List<string> excludes = [Path.Combine("excluded", "**")];
+            List<FileMatcher.GlobResultObservation> observations = [];
+            FileMatcher.GlobResultObservation snapshot = default;
+            bool returned = false;
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                useEntryCache ? new ConcurrentDictionary<string, IReadOnlyList<string>>() : null,
+                optimized ? FileMatcherImplementation.Optimized : FileMatcherImplementation.Legacy,
+                FileMatcherCaseFolding.InvariantCulture,
+                globResultObserved: observation =>
+                {
+                    returned.ShouldBeFalse();
+                    observations.Add(observation);
+                    snapshot = observation with
+                    {
+                        Files = [.. observation.Files],
+                        Excludes = observation.Excludes is null ? null : [.. observation.Excludes],
+                    };
+                });
+
+            var result = matcher.GetFiles(root.Path, "**/*.cs", excludes);
+            returned = true;
+
+            observations.Count.ShouldBe(1);
+            FileMatcher.GlobResultObservation observed = observations[0];
+            observed.ProjectDirectory.ShouldBe(root.Path);
+            observed.Filespec.ShouldBe("**/*.cs");
+            observed.Files.ShouldBeSameAs(result.FileList);
+            observed.Excludes.ShouldBeSameAs(excludes);
+            observed.Driver.ShouldBe(matcher.SelectDriver(root.Path, "**/*.cs", excludes).Driver);
+            observed.CaseFolding.ShouldBe(FileMatcherCaseFolding.InvariantCulture);
+            observed.UsesFileSystemEntryCache.ShouldBe(useEntryCache);
+            observed.FromCache.ShouldBeFalse();
+            observed.Succeeded.ShouldBeTrue();
+            result.FileList[0] = "caller mutation";
+            excludes.Add("another exclude");
+            snapshot.Files.ShouldBe(["a.cs", "b.cs"], ignoreOrder: true);
+            snapshot.Excludes.ShouldBe([Path.Combine("excluded", "**")]);
+        }
+
+        [Theory]
+        [InlineData("literal.cs", false)]
+        [InlineData("*.missing", true)]
+        [InlineData("missing/**/*.cs", true)]
+        public void GlobResultObservationSkipsLiteralsAndAcceptsEmptyMatches(string filespec, bool observed)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(FileSystems.Default, globResultObserved: observations.Add);
+
+            var result = matcher.GetFiles(root.Path, filespec);
+
+            observations.Count.ShouldBe(observed ? 1 : 0);
+            if (observed)
+            {
+                result.FileList.ShouldBeEmpty();
+                observations[0].Files.ShouldBeSameAs(result.FileList);
+                observations[0].Succeeded.ShouldBeTrue();
+                observations[0].FromCache.ShouldBeFalse();
+            }
+            else
+            {
+                result.FileList.ShouldBe(["literal.cs"]);
+            }
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(".")]
+        public void GlobResultObservationResolvesEffectiveProjectDirectory(string projectDirectory)
+        {
+            _env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", null);
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            _env.SetCurrentDirectory(root.Path);
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                implementation: FileMatcherImplementation.Optimized,
+                globResultObserved: observations.Add);
+
+            var result = matcher.GetFiles(projectDirectory, "*.cs");
+
+            observations.Count.ShouldBe(1);
+            FileMatcher.GlobResultObservation observation = observations[0];
+            FileMatcher.Normalize(observation.ProjectDirectory).ShouldBe(root.Path);
+            observation.Succeeded.ShouldBeTrue();
+            var replay = FileMatcher.GetFilesForValidation(
+                observation.ProjectDirectory,
+                observation.Filespec,
+                observation.Excludes,
+                observation.Driver,
+                observation.CaseFolding,
+                observation.UsesFileSystemEntryCache);
+            replay.FileList.ShouldBe(result.FileList, ignoreOrder: true);
+        }
+
+        [Fact]
+        public void GlobResultObservationFailsClosedForUnsafeProjectDirectory()
+        {
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(new ThrowingFileSystem(), globResultObserved: observations.Add);
+
+            var result = matcher.GetFiles("\0", "***");
+
+            result.FileList.ShouldBe(["***"]);
+            result.Action.ShouldBe(FileMatcher.SearchAction.ReturnFileSpec);
+            observations.Count.ShouldBe(1);
+            observations[0].ProjectDirectory.ShouldBeEmpty();
+            observations[0].Succeeded.ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void GlobResultObservationHonorsPredicate(bool initiallyActive, bool stopAfterProbe)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            bool active = initiallyActive;
+            List<FileMatcher.GlobResultObservation> observations = [];
+            FileMatcher matcher = FileMatcher.CreateForEvaluation(
+                FileSystems.Default,
+                new ConcurrentDictionary<string, IReadOnlyList<string>>(),
+                directoryTraversed: null,
+                cacheTraversedDirectories: false,
+                shouldObserveDirectoryTraversal: () => active,
+                directoryProbed: (_, _) =>
+                {
+                    if (stopAfterProbe)
+                    {
+                        active = false;
+                    }
+                },
+                globResultObserved: observations.Add);
+
+            matcher.GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+            active = false;
+            matcher.GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+
+            observations.Count.ShouldBe(initiallyActive && !stopAfterProbe ? 1 : 0);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void GlobResultObservationKeepsCachedResultsAndProvenance(bool prewarmWithoutObservation, bool captureDirectories)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            List<FileMatcher.GlobResultObservation> observations = [];
+            List<string> traversed = [];
+            FileMatcher matcher = FileMatcher.CreateForEvaluation(
+                FileSystems.Default,
+                cache,
+                traversed.Add,
+                captureDirectories,
+                shouldObserveDirectoryTraversal: static () => true,
+                globResultObserved: observations.Add);
+
+            if (prewarmWithoutObservation)
+            {
+                new FileMatcher(FileSystems.Default, cache).GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+            }
+            else
+            {
+                matcher.GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+                observations.Count.ShouldBe(1);
+                observations[0].FromCache.ShouldBeFalse();
+            }
+            _env.CreateFile(root, "b.cs", string.Empty);
+            traversed.Clear();
+
+            var result = matcher.GetFiles(root.Path, "*.cs");
+
+            result.FileList.ShouldBe(["a.cs"]);
+            traversed.ShouldNotBeEmpty();
+            observations.Count.ShouldBe(prewarmWithoutObservation ? 1 : 2);
+            observations[^1].Files.ShouldBeSameAs(result.FileList);
+            observations[^1].Files.ShouldBe(["a.cs"]);
+            observations[^1].FromCache.ShouldBeTrue();
+            observations[^1].Succeeded.ShouldBeTrue();
+            new FileMatcher(new ThrowingFileSystem(), cache, globResultObserved: observations.Add)
+                .GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+            observations[^1].FromCache.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void GlobResultObservationTracksEntryCacheHitsInSubdirectories()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            TransientTestFolder sub = _env.CreateFolder(Path.Combine(root.Path, "sub"), createFolder: true);
+            _env.CreateFile(sub, "a.cs", string.Empty);
+            _env.CreateFolder(Path.Combine(root.Path, "other"), createFolder: true);
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            new FileMatcher(FileSystems.Default, cache).GetFiles(root.Path, "sub/*.missing").FileList.ShouldBeEmpty();
+            _env.CreateFile(sub, "b.cs", string.Empty);
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(FileSystems.Default, cache, globResultObserved: observations.Add);
+
+            matcher.GetFiles(root.Path, "**/*.cs").FileList.ShouldBe([Path.Combine("sub", "a.cs")]);
+
+            observations.Count.ShouldBe(1);
+            FileMatcher.GlobResultObservation observation = observations[0];
+            observation.FromCache.ShouldBeTrue();
+            observation.Succeeded.ShouldBeTrue();
+            var replay = FileMatcher.GetFilesForValidation(
+                observation.ProjectDirectory,
+                observation.Filespec,
+                observation.Excludes,
+                observation.Driver,
+                observation.CaseFolding,
+                observation.UsesFileSystemEntryCache);
+            replay.FileList.ShouldBe([Path.Combine("sub", "a.cs"), Path.Combine("sub", "b.cs")], ignoreOrder: true);
+            observations.Count.ShouldBe(1);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GlobResultObservationReportsCompetingEmptyCacheInsertion(bool duringValueFactory)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            var seed = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            new FileMatcher(FileSystems.Default, seed, FileMatcherImplementation.Legacy).GetFiles(root.Path, "*.cs").FileList.ShouldBeEmpty();
+            KeyValuePair<string, IReadOnlyList<string>> expansion = seed.Single(entry => !entry.Key.StartsWith("F;", StringComparison.Ordinal));
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                (_, _, _, _, _) =>
+                {
+                    cache.TryAdd(expansion.Key, expansion.Value).ShouldBeTrue();
+                    return [];
+                },
+                cache,
+                FileMatcherImplementation.Legacy,
+                globResultObserved: observations.Add);
+            if (!duringValueFactory)
+            {
+                matcher.TestOnlyBeforeGetOrAdd = () => cache.TryAdd(expansion.Key, expansion.Value).ShouldBeTrue();
+            }
+
+            matcher.GetFiles(root.Path, "*.cs").FileList.ShouldBeEmpty();
+
+            observations.Count.ShouldBe(1);
+            observations[0].FromCache.ShouldBeTrue();
+            observations[0].Succeeded.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void GlobResultFailuresStayFailedOnCacheHits(bool ioFailure, bool observeProducer)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            List<FileMatcher.GlobResultObservation> observations = [];
+            string filespec = ioFailure ? "*.cs" : "***";
+            List<string> excludes = ioFailure ? null : ["***"];
+            var producer = new FileMatcher(
+                FileSystems.Default,
+                static (_, _, _, _, _) => throw new IOException("Injected enumeration failure."),
+                cache,
+                FileMatcherImplementation.Legacy,
+                globResultObserved: observeProducer ? observations.Add : null);
+
+            var original = producer.GetFiles(root.Path, filespec, excludes);
+
+            original.FileList.ShouldBe(ioFailure ? ["*.cs"] : []);
+            observations.Count.ShouldBe(observeProducer ? 1 : 0);
+            if (observeProducer)
+            {
+                observations[0].Succeeded.ShouldBeFalse();
+                observations[0].FromCache.ShouldBeFalse();
+            }
+            var cached = new FileMatcher(
+                new ThrowingFileSystem(),
+                cache,
+                FileMatcherImplementation.Legacy,
+                globResultObserved: observations.Add).GetFiles(root.Path, filespec, excludes);
+            cached.FileList.ShouldBe(original.FileList);
+            observations[^1].Succeeded.ShouldBeFalse();
+            observations[^1].FromCache.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void GlobResultObservationReportsUncachedIoFallback()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                static (_, _, _, _, _) => throw new IOException("Injected enumeration failure."),
+                implementation: FileMatcherImplementation.Legacy,
+                globResultObserved: observations.Add);
+
+            var result = matcher.GetFiles(root.Path, "*.cs");
+
+            result.FileList.ShouldBe(["*.cs"]);
+            result.GlobFailure.ShouldNotBeNull();
+            observations.Count.ShouldBe(1);
+            observations[0].Files.ShouldBeSameAs(result.FileList);
+            observations[0].Succeeded.ShouldBeFalse();
+            observations[0].FromCache.ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GlobResultDriveWildcardFailuresStayFailedOnCacheHits(bool fail)
+        {
+            Helpers.ResetStateForDriveEnumeratingWildcardTests(_env, fail ? "1" : "0");
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            string filespec = Path.Combine(Path.GetPathRoot(root.Path), "**", "*.cs");
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(
+                new ProbeFileSystem(static _ => true, new ThrowingFileSystem()),
+                static (_, _, _, _, _) => [],
+                cache,
+                FileMatcherImplementation.Legacy,
+                globResultObserved: observations.Add);
+
+            var original = matcher.GetFiles(root.Path, filespec);
+            matcher.GetFiles(root.Path, filespec).FileList.ShouldBeEmpty();
+
+            original.Action.ShouldBe(fail ? FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard : FileMatcher.SearchAction.LogDriveEnumeratingWildcard);
+            observations.Count.ShouldBe(2);
+            observations.ShouldAllBe(observation => !observation.Succeeded);
+            observations[0].FromCache.ShouldBeFalse();
+            observations[1].FromCache.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData(0, false)]
+        [InlineData(0, true)]
+        [InlineData(1, false)]
+        [InlineData(1, true)]
+        [InlineData(2, false)]
+        [InlineData(2, true)]
+        [InlineData(3, false)]
+        [InlineData(3, true)]
+        [InlineData(4, false)]
+        [InlineData(4, true)]
+        public void GlobValidationPreservesDriverEntryCacheAndCaseProfiles(int profile, bool invariant)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "README", string.Empty);
+            _env.CreateFile(root, "source.props", string.Empty);
+            _env.CreateFile(root, "UPPER.PROPS", string.Empty);
+            TransientTestFolder obj = _env.CreateFolder(Path.Combine(root.Path, "obj"), createFolder: true);
+            _env.CreateFile(obj, "excluded.props", string.Empty);
+            bool useEntryCache = profile is 1 or 3;
+            FileMatcherImplementation implementation = profile < 2 ? FileMatcherImplementation.Legacy : FileMatcherImplementation.Optimized;
+            FileMatcherCaseFolding caseFolding = invariant ? FileMatcherCaseFolding.InvariantCulture : FileMatcherCaseFolding.LegacyCurrentCulture;
+            FileMatcherDriver expectedDriver = profile switch
+            {
+                0 or 1 => FileMatcherDriver.Legacy,
+                2 or 3 => FileMatcherDriver.OptimizedCallback,
+                _ => FileMatcherDriver.OptimizedDirect,
+            };
+            List<string> excludes = profile == 2 ? ["never.match", Path.Combine("obj", "**")] : [Path.Combine("obj", "**")];
+            string[] originalExcludes = [.. excludes];
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                useEntryCache ? new ConcurrentDictionary<string, IReadOnlyList<string>>() : null,
+                implementation,
+                caseFolding,
+                globResultObserved: observations.Add);
+            string[] patterns = ["**/*.", "**/*.props"];
+            foreach (string filespec in patterns)
+            {
+                var original = matcher.GetFiles(root.Path, filespec, excludes);
+                FileMatcher.GlobResultObservation observation = observations[^1];
+                observation.Driver.ShouldBe(expectedDriver);
+                observation.CaseFolding.ShouldBe(caseFolding);
+                observation.UsesFileSystemEntryCache.ShouldBe(useEntryCache);
+                observation.Succeeded.ShouldBeTrue();
+
+                var replay = FileMatcher.GetFilesForValidation(
+                    observation.ProjectDirectory,
+                    observation.Filespec,
+                    observation.Excludes,
+                    observation.Driver,
+                    observation.CaseFolding,
+                    observation.UsesFileSystemEntryCache);
+
+                replay.FileList.ShouldBe(original.FileList, ignoreOrder: true);
+                replay.Action.ShouldBe(original.Action);
+                replay.ExcludeFileSpec.ShouldBe(original.ExcludeFileSpec);
+                replay.GlobFailure.ShouldBe(original.GlobFailure);
+                excludes.ShouldBe(originalExcludes);
+            }
+            observations.Count.ShouldBe(patterns.Length);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GlobValidationUsesFreshPhysicalMembershipDespiteBothCaches(bool useEntryCache)
+        {
+            FileMatcher.ClearCaches();
+            _env.WithTransientTestState(new TransientFileMatcherCaches());
+            _env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", "1");
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "module.props", string.Empty);
+            TransientTestFolder bin = _env.CreateFolder(Path.Combine(root.Path, "bin"), createFolder: true);
+            _env.CreateFile(bin, "runtime.dll", string.Empty);
+            TransientTestFolder obj = _env.CreateFolder(Path.Combine(root.Path, "obj"), createFolder: true);
+            _env.CreateFile(obj, "ignored.props", string.Empty);
+            List<string> excludes = [Path.Combine("obj", "**", "*.props"), Path.Combine("obj", "**", "*.targets")];
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                useEntryCache ? new ConcurrentDictionary<string, IReadOnlyList<string>>() : null,
+                FileMatcherImplementation.Optimized,
+                globResultObserved: observations.Add);
+            matcher.GetFiles(root.Path, "**/*.props", excludes).FileList.ShouldBe(["module.props"]);
+            FileMatcher.GlobResultObservation observation = observations[0];
+            _env.CreateFile(bin, "unrelated.dll", string.Empty);
+            _env.CreateFile(obj, "another.props", string.Empty);
+
+            Replay().FileList.ShouldBe(observation.Files, ignoreOrder: true);
+            _env.CreateFile(bin, "new.props", string.Empty);
+            Replay().FileList.ShouldBe(["module.props", Path.Combine("bin", "new.props")], ignoreOrder: true);
+            observations.Count.ShouldBe(1);
+            matcher.GetFiles(root.Path, "**/*.props", excludes).FileList.ShouldBe(["module.props"]);
+            observations[^1].FromCache.ShouldBeTrue();
+
+            (string[] FileList, FileMatcher.SearchAction Action, string ExcludeFileSpec, string GlobFailure) Replay() =>
+                FileMatcher.GetFilesForValidation(
+                    observation.ProjectDirectory,
+                    observation.Filespec,
+                    observation.Excludes,
+                    observation.Driver,
+                    observation.CaseFolding,
+                    observation.UsesFileSystemEntryCache);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GlobResultObservationRestoresNestedEntryCacheTracking(bool nestedThrows)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            var nestedCache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            List<FileMatcher.GlobResultObservation> nestedObservations = [];
+            new FileMatcher(FileSystems.Default, nestedCache, FileMatcherImplementation.Legacy)
+                .GetFiles(root.Path, "*.missing").FileList.ShouldBeEmpty();
+            FileMatcher nested = nestedThrows
+                ? new FileMatcher(new ThrowingFileSystem(), nestedCache, FileMatcherImplementation.Legacy, globResultObserved: nestedObservations.Add)
+                : new FileMatcher(FileSystems.Default, nestedCache, FileMatcherImplementation.Legacy, globResultObserved: nestedObservations.Add);
+            List<FileMatcher.GlobResultObservation> observations = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                (_, _, _, _, _) =>
+                {
+                    if (nestedThrows)
+                    {
+                        Should.Throw<InvalidOperationException>(() => nested.GetFiles(root.Path, "*.cs"));
+                    }
+                    else
+                    {
+                        nested.GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+                    }
+                    return [Path.Combine(root.Path, "a.cs")];
+                },
+                new ConcurrentDictionary<string, IReadOnlyList<string>>(),
+                FileMatcherImplementation.Legacy,
+                globResultObserved: observations.Add);
+
+            matcher.GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+
+            observations.Count.ShouldBe(1);
+            observations[0].FromCache.ShouldBeFalse();
+            nestedObservations.Count.ShouldBe(nestedThrows ? 0 : 1);
+            if (!nestedThrows)
+            {
+                nestedObservations[0].FromCache.ShouldBeTrue();
+            }
+        }
+
+        [Fact]
+        public void GlobValidationRequiresARecordedDriverAndResolvedCaseFolding()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            Should.Throw<ArgumentOutOfRangeException>(() => FileMatcher.GetFilesForValidation(
+                root.Path, "*.cs", null, FileMatcherDriver.Legacy, FileMatcherCaseFolding.Auto))
+                .ParamName.ShouldBe("caseFolding");
+            Should.Throw<ArgumentOutOfRangeException>(() => FileMatcher.GetFilesForValidation(
+                root.Path, "*.cs", null, (FileMatcherDriver)byte.MaxValue, FileMatcherCaseFolding.InvariantCulture))
+                .ParamName.ShouldBe("driver");
+        }
+
         private sealed class TransientFileMatcherCaches : TransientTestState
         {
             public override void Revert() => FileMatcher.ClearCaches();

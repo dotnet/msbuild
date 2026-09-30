@@ -271,13 +271,18 @@ reuse when the selected project or a recorded import is retained in the XML
 cache with unsaved changes or without authoritative file provenance, and when a
 recorded-missing path has any retained XML-cache entry.
 
-Existence-only probes validate path kind rather than timestamp or length. Reading
-a file, requesting metadata, or enumerating a directory promotes that path to full
-metadata validation. Glob expansion caches replay both enumerations and the original
-positive/negative directory probes. Consequently, changing files inside a fully
-excluded subtree does not invalidate evaluation merely because its existence was
-checked. This is not a blanket `bin`/`obj` exemption: generated imports and actually
-enumerated directories still invalidate when their relevant metadata changes.
+Existence-only probes validate path kind rather than timestamp or length. File reads,
+metadata requests, and direct filesystem enumeration remain metadata dependencies.
+Glob expansion instead records its matching paths and directory change signals.
+Unchanged directory stamps use the fast path; changed stamps trigger fresh expansion
+with the recorded include/exclude patterns and matcher configuration. Reuse requires
+the same engine-sorted results. A result replayed from a cache that may predate the
+current evaluation is always revalidated. Isolated caches that started empty under
+the current recorder keep the stamp fast path, including hits within that evaluation.
+Thus an unrelated DLL copy need not invalidate a search for `.props` or `.targets`.
+This is not a blanket `bin`/`obj` exemption: changed matching paths, direct metadata
+reads, and generated imports still invalidate. Glob replay retains the original
+positive/negative directory probes and never weakens a direct read dependency.
 
 The backend constructs the request identity before evaluation for Record and
 both snapshot modes. It uses the effective project-file/explicit toolset,
@@ -287,13 +292,13 @@ retains the same recorded-input manifest for diagnostics; only
 SnapshotFileSystem requires that manifest to be cacheable before admission.
 
 Admission estimates include owned key and manifest strings, environment values,
-registry arrays/strings, and immutable SDK payloads. They remain conservative
+registry arrays/strings, captured glob patterns/results, and immutable SDK payloads. They remain conservative
 retained-payload accounting rather than a process-RSS limit.
 
 `EvaluationInputRecordingBenchmark` measures what recording evaluation inputs
 (`MSBUILDRECORDEVALUATIONINPUTS=1`) adds to an evaluation, in an isolated and in a shared evaluation
 context. `EvaluationInputValidationBenchmark` separately measures checks of recorded files and
-directories: unchanged, and after a project file, an import, or a glob directory changed.
+directories: unchanged, and after a project file, an import, or a matching glob member changed.
 Its evaluation and input capture happen outside the timed operations.
 The recording benchmark also compares the unconfigured and explicit-`Disabled`
 control paths. That comparison is a same-build execution/allocation sanity
@@ -318,10 +323,14 @@ The two classes produce separate reports. To express validation cost relative to
 compare `EvaluationInputValidationBenchmark.ValidateUnchanged` with
 `EvaluationInputRecordingBenchmark.Evaluate` for the same project and run settings.
 The stale-validation cases mutate files or directory membership; use synthetic or disposable workloads.
+The glob case creates a name matching a recorded wildcard beside an existing match
+under the project. Its setup verifies that validation actually rejects the mutation;
+projects without a supported wildcard are not eligible for that case.
 
-Validation compares path existence and file/directory kind for probes. Reads and
-enumerations additionally compare last-write timestamp and length.
-Glob membership is checked through the timestamps of the directories traversed.
+Validation compares path existence and file/directory kind for probes. Direct reads
+and filesystem enumerations additionally compare last-write timestamp and length.
+Glob-directory timestamps signal when matching results need fresh validation;
+timestamp changes alone do not reject an otherwise unchanged glob result.
 Direct environment reads are compared using platform environment-name casing,
 and SDK results are re-resolved in their recorded context and compared with
 immutable owned observations. Registry reads remain recorded but make the

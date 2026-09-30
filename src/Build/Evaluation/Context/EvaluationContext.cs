@@ -69,7 +69,8 @@ namespace Microsoft.Build.Evaluation.Context
         private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ISdkResolverService sdkResolverService = null,
             ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null,
             Action<string> directoryTraversed = null,
-            Action<string, bool> directoryProbed = null)
+            Action<string, bool> directoryProbed = null,
+            Action<FileMatcher.GlobResultObservation> globResultObserved = null)
         {
             Policy = policy;
 
@@ -79,12 +80,15 @@ namespace Microsoft.Build.Evaluation.Context
             // Only a shared cache outlives the evaluation, so only there is it worth storing the directories an expansion
             // depends on for the recorders of later evaluations.
             FileMatcher = FileMatcher.CreateForEvaluation(
-                FileSystem,
+                globResultObserved is not null && FileSystem is RecordingFileSystem recording
+                    ? recording.Inner
+                    : FileSystem,
                 FileEntryExpansionCache,
                 directoryTraversed: directoryTraversed,
                 cacheTraversedDirectories: policy == SharingPolicy.Shared && Traits.Instance.RecordEvaluationInputs,
                 shouldObserveDirectoryTraversal: () => InputRecorder?.IsRecording == true,
-                directoryProbed: directoryProbed);
+                directoryProbed: directoryProbed,
+                globResultObserved: globResultObserved);
         }
 
         /// <summary>
@@ -168,13 +172,20 @@ namespace Microsoft.Build.Evaluation.Context
             EvaluationInputRecorder inputRecorder = null,
             bool recordDirectoryTraversal = true)
         {
+            bool evaluationScopedGlobCache = inputRecorder is not null
+                && recordDirectoryTraversal
+                && Policy != SharingPolicy.Shared
+                && FileEntryExpansionCache.IsEmpty;
             return new EvaluationContext(
                 Policy,
                 fileSystem,
                 SdkResolverService,
                 FileEntryExpansionCache,
-                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordPath,
-                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordDirectoryProbe)
+                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordGlobDirectory,
+                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordDirectoryProbe,
+                inputRecorder is null || !recordDirectoryTraversal
+                    ? null
+                    : evaluationScopedGlobCache ? inputRecorder.RecordEvaluationScopedGlob : inputRecorder.RecordGlob)
             {
                 _used = 1,
                 InputRecorder = inputRecorder,

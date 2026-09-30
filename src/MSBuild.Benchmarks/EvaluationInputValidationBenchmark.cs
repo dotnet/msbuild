@@ -26,7 +26,6 @@ public class EvaluationInputValidationBenchmark
     private readonly string? _originalSnapshot = Environment.GetEnvironmentVariable(SnapshotVariable);
     private EvaluationInputBenchmarkFixture _fixture = null!;
     private string? _importPath;
-    private string? _globDirectory;
     private string? _globMemberPath;
     private DateTime _projectWriteTime;
     private DateTime _importWriteTime;
@@ -49,12 +48,8 @@ public class EvaluationInputValidationBenchmark
             _fixture = new EvaluationInputBenchmarkFixture(ProjectPath);
             _fixture.RecordInputs();
             _importPath = FindNearestImport();
-            _globDirectory = FindShallowestDirectoryUnderProject();
-            if (_globDirectory is not null)
-            {
-                _globMemberPath = Path.Combine(_globDirectory, $"evaluation-inputs-benchmark-{Guid.NewGuid():N}.tmp");
-            }
-            Console.WriteLine($"// stale import {_importPath}, glob directory {_globDirectory}");
+            _globMemberPath = FindGlobMemberPath();
+            Console.WriteLine($"// stale import {_importPath}, glob member {_globMemberPath}");
         }
         catch
         {
@@ -140,7 +135,7 @@ public class EvaluationInputValidationBenchmark
     [Benchmark]
     public bool ValidateStaleImportedFile() => Validate();
 
-    /// <summary>Validation after a file appeared in a directory a glob traversed, which moves the directory's timestamp; the result is false.</summary>
+    /// <summary>Validation after a new matching glob member appeared; the result is false.</summary>
     [Benchmark]
     public bool ValidateStaleGlobMembership() => Validate();
 
@@ -158,7 +153,7 @@ public class EvaluationInputValidationBenchmark
         _importPath ?? throw new NotSupportedException($"{_fixture.ProjectPath} records no imported .props or .targets file.");
 
     private string GlobMemberPath =>
-        _globMemberPath ?? throw new NotSupportedException($"{_fixture.ProjectPath} records no directory under the project.");
+        _globMemberPath ?? throw new NotSupportedException($"{_fixture.ProjectPath} records no supported wildcard match under the project.");
 
     /// <summary>
     /// Moves a file's timestamp forward by two seconds and returns the original, so file systems with coarse timestamps see a change.
@@ -208,24 +203,38 @@ public class EvaluationInputValidationBenchmark
     }
 
     /// <summary>
-    /// The shallowest metadata-dependent directory at or below the project directory, which a glob traversed.
+    /// Finds a unique file name matching a recorded wildcard beside an existing match under the project.
     /// </summary>
-    private string? FindShallowestDirectoryUnderProject()
+    private string? FindGlobMemberPath()
     {
         string projectDirectory = Path.GetDirectoryName(_fixture.ProjectPath)!;
-        string? shallowest = null;
-        foreach (KeyValuePair<string, FileDependency> file in _fixture.Inputs.Files)
+        foreach (GlobDependency glob in _fixture.Inputs.Globs)
         {
-            bool underProject = string.Equals(file.Key, projectDirectory, s_pathComparison)
-                || IsPathUnderDirectory(file.Key, projectDirectory, s_pathComparison);
-            if (file.Value is { Kind: PathKind.Directory, RequiresMetadata: true }
-                && underProject && (shallowest is null || file.Key.Length < shallowest.Length))
+            string pattern = Path.GetFileName(glob.Filespec.Replace('\\', Path.DirectorySeparatorChar));
+            if (!pattern.Contains('*'))
             {
-                shallowest = file.Key;
+                continue;
+            }
+
+            string name = pattern.Replace("*", $"evaluation-inputs-benchmark-{Guid.NewGuid():N}")
+                .Replace('?', 'x');
+            foreach (string match in glob.Files)
+            {
+                string matchedPath = Path.GetFullPath(Path.Combine(glob.ProjectDirectory, match));
+                if (!IsPathUnderDirectory(matchedPath, projectDirectory, s_pathComparison))
+                {
+                    continue;
+                }
+
+                string candidate = Path.Combine(Path.GetDirectoryName(matchedPath)!, name);
+                if (!File.Exists(candidate) && !Directory.Exists(candidate))
+                {
+                    return candidate;
+                }
             }
         }
 
-        return shallowest;
+        return null;
     }
 
     internal static bool IsPathUnderDirectory(string path, string directory, StringComparison comparison)
