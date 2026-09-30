@@ -14,6 +14,7 @@ Deletion does not stop a PerfStar run that has already started.
 
 The `issue_comment` workflow runs from the repository's default branch.
 The comment commands cannot run until the workflow and local action exist on that branch.
-The workflow checks out trusted base code and never runs the pull request head code.
+The workflow checks out the trusted default branch to load the action, including for PRs targeting older branches.
+The action merges the PR's actual base branch into the evaluation branch and never runs the pull request head code.
 
 Run `npm ci` and `npm run validate` from this directory to test the action and check its committed bundle.

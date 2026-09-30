@@ -36,4 +36,5 @@ The lock file implements the trigger declared in the source.
 | [Expert Code Review (command)](review.agent.md) ([lock](review.agent.lock.yml)) | New PR comment from a user with write-level access. | Comment `/review` on a PR to request an expert review. |
 
 PR comment commands run only when their workflow exists on the default branch.
-The PerfStar workflow checks out trusted base code, not the PR head.
+The PerfStar workflow checks out the trusted default branch for its action, even for PRs targeting older branches.
+The action merges the PR's actual base branch into the evaluation branch and never checks out PR head code.
