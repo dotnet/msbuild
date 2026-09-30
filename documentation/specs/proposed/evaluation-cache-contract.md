@@ -163,13 +163,21 @@ Before accepting an entry, checked mode MUST establish that all evaluation input
 
 An SDK result retained for validation MUST be immutable, copied into immutable owned data, or make the
 entry non-reusable. Existence-only probes require an unchanged path kind, not unchanged timestamps
-or lengths. File reads, metadata reads, and directory enumeration additionally require the recorded
-last-write timestamp and length. A later stronger observation promotes a probe without discarding
-the first observed state; a later probe never weakens a read dependency.
+or lengths. File reads, metadata reads, and direct filesystem enumeration additionally require the
+recorded last-write timestamp and length. Glob traversal records directory timestamps as change
+signals and captures the matching paths, include/exclude patterns, and matcher configuration.
+If a traversed directory changes, validation repeats the recorded globs against fresh filesystem
+state and requires the same engine-sorted matching paths. Unrelated file changes therefore do not
+invalidate a glob-only dependency. Results replayed from a cache that can predate this evaluation
+are always checked. An isolated evaluation whose caches started empty under its recorder can retain
+the timestamp fast path: cache hits within that evaluation still have the original pre-enumeration
+directory observations.
+A later stronger observation promotes a dependency without discarding its first observed state;
+neither a probe nor a glob can weaken a direct metadata-read requirement.
 Glob-cache replay MUST preserve this distinction and the original positive/negative probe results.
 This avoids treating excluded-subtree existence checks as reads of their contents without ignoring
-`bin`, `obj`, or any other directory by name. Actually enumerated directories and imported generated
-files remain metadata dependencies.
+`bin`, `obj`, or any other directory by name. Matching file additions, removals, and renames still
+invalidate glob results. Direct metadata reads and imported generated files remain metadata dependencies.
 
 The supported operating model assumes relevant edits change timestamp or length and that
 inputs are not concurrently written during validation and materialization. Same-size edits that
@@ -258,7 +266,7 @@ This table records present behavior; it does not weaken the requirements above.
 | Activation | [`Traits.cs`](../../../src/Framework/Traits.cs) implements the four modes, explicit precedence, legacy mapping, and fail-closed invalid parsing. [`BuildManager.cs`](../../../src/Build/BackEnd/BuildManager/BuildManager.cs) intentionally reports explicit `Disabled` status; the unconfigured path is quiet. Activation is not evidence of complete enabled-path correctness. |
 | Identity | [`ProjectInstanceSnapshotCacheKey.cs`](../../../src/Build/BackEnd/Components/Caching/ProjectInstanceSnapshotCacheKey.cs) covers many request, toolset, parser, directory, culture, and environment fields. Key equality is intentionally not reuse permission, and complete effect coverage is not established. |
 | Recorded inputs | [`EvaluationInputs.cs`](../../../src/Build/Evaluation/Context/EvaluationInputs.cs) and [`EvaluationInputRecorder.cs`](../../../src/Build/Evaluation/Context/EvaluationInputRecorder.cs) represent paths, environment/registry observations, SDK results, and non-cacheable reasons. Full changed-input coverage has not been demonstrated. |
-| Validation | [`EvaluationInputValidator.cs`](../../../src/Build/Evaluation/Context/EvaluationInputValidator.cs) checks cacheability, direct environment reads using platform environment-name casing, and recorded path kind after key agreement. Timestamp and length are checked for reads/enumeration, not existence-only probes. Registry-dependent evaluations are recorded completely but conservatively ineligible. Successful SDK dependencies are re-resolved in their recorded context after cheaper checks and compared before acceptance; failed SDK observations are ineligible because ignored failures emit import diagnostics. |
+| Validation | [`EvaluationInputValidator.cs`](../../../src/Build/Evaluation/Context/EvaluationInputValidator.cs) checks cacheability, direct environment reads using platform environment-name casing, and recorded path kind after key agreement. Timestamp and length are checked for direct reads/enumeration, not existence-only probes. Changed glob-directory stamps trigger fresh matching-result validation; glob results from caches that may predate the evaluation always require it. Captured glob patterns and results are owned by the manifest and included in the retained-size budget. Registry-dependent evaluations are recorded completely but conservatively ineligible. Successful SDK dependencies are re-resolved in their recorded context after cheaper checks and compared before acceptance; failed SDK observations are ineligible because ignored failures emit import diagnostics. |
 | SDK ownership | The recorder copies path, version, additional paths, properties, items and metadata, environment additions, warnings, and errors into immutable owned observations. A rejected SDK validation result is fed to the immediate fresh evaluation so resolver diagnostics are deferred and replayed once rather than emitted during validation or resolved twice. |
 | Diagnostics | Evaluations that emit warnings, errors, or custom SDK logger messages are non-reusable. This avoids silently dropping evaluation diagnostics on a hit without introducing a general diagnostic replay framework. |
 | Integration and provenance | [`BuildRequestConfiguration.cs`](../../../src/Build/BackEnd/Shared/BuildRequestConfiguration.cs) rejects unsaved/unknown-length cached roots for recorded files and rejects any cached root for a recorded-missing path, preserves caller/transferred/in-memory fallback behavior, and propagates cancellation and build aborts. Complete coverage for every host and restore workflow remains an acceptance-matrix gap; the agreed same-metadata and concurrent-writer cases are operating-model exclusions rather than release blockers. |

@@ -10,6 +10,7 @@ using System.Reflection;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
@@ -29,6 +30,7 @@ internal sealed class EvaluationInputRecorder
     private readonly Dictionary<string, string?> _environmentReads = new(
         NativeMethodsShared.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
     private readonly List<RecordedSdkResolution> _sdkResolutions = [];
+    private List<GlobDependency>? _globs;
     private List<RegistryRead>? _registryReads;
     private NonCacheableReason _nonCacheable;
     private string? _nonCacheableDetail;
@@ -127,6 +129,57 @@ internal sealed class EvaluationInputRecorder
 
     internal void RecordDirectoryProbe(string path, bool exists) =>
         RecordProbe(path, ProbeKind.Directory, exists);
+
+    internal void RecordGlobDirectory(string path)
+    {
+        if (!IsRecording)
+        {
+            return;
+        }
+
+        try
+        {
+            TryGetOrObserve(Canonicalize(path), requiresMetadata: false, out _, requiresGlobValidation: true);
+        }
+        catch (Exception ex) when (IsRecoverable(ex))
+        {
+            MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
+        }
+    }
+
+    internal void RecordGlob(FileMatcher.GlobResultObservation observation)
+    {
+        if (!IsRecording)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!observation.Succeeded || !Path.IsPathRooted(observation.ProjectDirectory))
+            {
+                MarkNonCacheable(NonCacheableReason.RecorderFailure, observation.Filespec);
+                return;
+            }
+
+            var dependency = new GlobDependency(observation);
+            lock (_files)
+            {
+                (_globs ??= []).Add(dependency);
+            }
+        }
+        catch (Exception ex) when (IsRecoverable(ex))
+        {
+            MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
+        }
+    }
+
+    internal void RecordEvaluationScopedGlob(FileMatcher.GlobResultObservation observation)
+    {
+        // These caches started empty under this recorder. Hits retain the first pre-enumeration directory
+        // observations, so changed stamps suffice to trigger replay even when later globs share cached entries.
+        RecordGlob(observation with { FromCache = false });
+    }
 
     internal void RecordEnvironmentRead(string name, string? value)
     {
@@ -471,7 +524,8 @@ internal sealed class EvaluationInputRecorder
             [.. sdkResolutions],
             _registryReads is null ? [] : [.. _registryReads],
             _nonCacheable,
-            _nonCacheableDetail);
+            _nonCacheableDetail,
+            _globs is null ? [] : [.. _globs]);
     }
 
     /// <summary>
@@ -511,15 +565,24 @@ internal sealed class EvaluationInputRecorder
     /// Returns the first recorded state, promoting probes to metadata dependencies when needed.
     /// The stat runs outside the lock so parallel glob enumeration does not serialize on it.
     /// </summary>
-    private bool TryGetOrObserve(string fullPath, bool requiresMetadata, out FileDependency recorded)
+    private bool TryGetOrObserve(
+        string fullPath,
+        bool requiresMetadata,
+        out FileDependency recorded,
+        bool requiresGlobValidation = false)
     {
         lock (_files)
         {
             if (_files.TryGetValue(fullPath, out recorded))
             {
-                if (requiresMetadata && !recorded.RequiresMetadata)
+                if ((requiresMetadata && !recorded.RequiresMetadata)
+                    || (requiresGlobValidation && !recorded.RequiresGlobValidation))
                 {
-                    recorded = recorded with { RequiresMetadata = true };
+                    recorded = recorded with
+                    {
+                        RequiresMetadata = recorded.RequiresMetadata || requiresMetadata,
+                        RequiresGlobValidation = recorded.RequiresGlobValidation || requiresGlobValidation,
+                    };
                     _files[fullPath] = recorded;
                 }
 
@@ -536,12 +599,21 @@ internal sealed class EvaluationInputRecorder
         {
             if (!_files.TryGetValue(fullPath, out recorded))
             {
-                recorded = current with { RequiresMetadata = requiresMetadata };
+                recorded = current with
+                {
+                    RequiresMetadata = requiresMetadata,
+                    RequiresGlobValidation = requiresGlobValidation,
+                };
                 _files.Add(fullPath, recorded);
             }
-            else if (requiresMetadata && !recorded.RequiresMetadata)
+            else if ((requiresMetadata && !recorded.RequiresMetadata)
+                || (requiresGlobValidation && !recorded.RequiresGlobValidation))
             {
-                recorded = recorded with { RequiresMetadata = true };
+                recorded = recorded with
+                {
+                    RequiresMetadata = recorded.RequiresMetadata || requiresMetadata,
+                    RequiresGlobValidation = recorded.RequiresGlobValidation || requiresGlobValidation,
+                };
                 _files[fullPath] = recorded;
             }
         }
