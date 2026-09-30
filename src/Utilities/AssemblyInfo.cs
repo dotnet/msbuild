@@ -18,7 +18,9 @@ using System.Runtime.InteropServices;
 #endif
 
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.DotNetFrameworkArchitecture))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.MultipleVersionSupport))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.ProcessorArchitecture))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.SDKType))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.VisualStudioVersion))]
 
