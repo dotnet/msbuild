@@ -75,11 +75,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Executes the task.
         /// </summary>
-        public Task<WorkUnitResult> ExecuteTask(TargetLoggingContext targetLoggingContext, BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, ProjectTargetInstanceChild task, TaskExecutionMode mode, Lookup lookupForInference, Lookup lookupForExecution, CancellationToken cancellationToken)
+        public async Task<WorkUnitResult> ExecuteTask(TargetLoggingContext targetLoggingContext, BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, ProjectTargetInstanceChild task, TaskExecutionMode mode, Lookup lookupForInference, Lookup lookupForExecution, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Canceled, WorkUnitActionCode.Stop, null));
+                return new WorkUnitResult(WorkUnitResultCode.Canceled, WorkUnitActionCode.Stop, null);
             }
 
             ProjectOnErrorInstance errorTask = task as ProjectOnErrorInstance;
@@ -103,23 +103,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (String.Equals(taskInstance.Name, "CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    taskInstance.GetParameter("Targets");
-                    targetBuilderCallback.LegacyCallTarget(taskInstance.GetParameter("Targets").Split(MSBuildConstants.SemicolonChar), false, taskInstance.Location);
+                    await targetBuilderCallback.LegacyCallTarget(
+                        taskInstance.GetParameter("Targets").Split(MSBuildConstants.SemicolonChar),
+                        String.Equals(taskInstance.ContinueOnError, "true", StringComparison.OrdinalIgnoreCase),
+                        taskInstance.Location);
                 }
 
                 _taskNumber++;
                 if (FailTaskNumber == _taskNumber)
                 {
-                    if (taskInstance.ContinueOnError == "True")
+                    if (String.Equals(taskInstance.ContinueOnError, "true", StringComparison.OrdinalIgnoreCase))
                     {
-                        return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Continue, null));
+                        return new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Continue, null);
                     }
 
-                    return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
+                    return new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
                 }
             }
 
-            return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null));
+            return new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
         }
 
         #endregion
