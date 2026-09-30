@@ -15,7 +15,7 @@ Edit the source and regenerate its lock file when changing an agentic workflow.
 | [Labeler: Promotion](labeler-promote.yml) | Manual dispatch. | Promotes staged issue or PR label models to `ACTIVE`. |
 | [Labeler: Training](labeler-train.yml) | Manual dispatch. | Downloads data, trains, and tests issue or PR label models. |
 | [Validate PerfStar action](perfstar-action-validation.yml) | PR or `main` push changing the action or its workflows. | Tests the action and checks its generated bundle. |
-| [Queue PerfStar evaluation](perfstar-branch.yml) | New PR comment; PR head update, closure, or merge. | Comment `/perfstar run` to queue the current head or `/perfstar cancel` to delete its branches. Closure and merge also delete them. See [action details](../actions/perfstar/README.md). |
+| [Queue PerfStar evaluation](perfstar-branch.yml) | New PR comment; PR head update, closure, or merge. | Comment `/perfstar run` to get a SHA confirmation command, `/perfstar run <sha>` to approve and queue that head, or `/perfstar cancel` to delete its branches. Closure and merge also delete them. See [action details](../actions/perfstar/README.md). |
 | [Skill Validation](skill-validation.yml) | PR or `main` push changing skills, agents, or validation workflows; manual dispatch. | Validates skill and agent definitions and publishes results as an artifact. |
 | [Skill Validation — PR Comment](skill-validation-comment.yml) | Completion of Skill Validation for a PR. | Posts the validation result on the PR. |
 | [Sync Microsoft.Build version](SyncAnalyzerTemplateMSBuildVersion.yml) | `main` push changing `eng/Versions.props`. | Opens a PR when the analyzer template needs the new MSBuild version. |

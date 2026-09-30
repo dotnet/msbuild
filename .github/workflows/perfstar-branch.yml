@@ -2,7 +2,7 @@ name: Queue PerfStar evaluation
 
 # This workflow has write access in the base repository so it can handle fork PRs.
 # Keep all PR interaction in the GitHub API; never check out or execute PR code.
-# A PR comment authorizes one commit; a push does not authorize new code.
+# An explicit-SHA PR comment authorizes one commit; a push does not authorize new code.
 on:
   pull_request_target: # zizmor: ignore[dangerous-triggers] - Fork PRs need base-repository write access; no PR code is checked out or executed.
     types: [synchronize, closed]
@@ -21,7 +21,8 @@ jobs:
     if: github.event_name != 'issue_comment' || github.event.issue.pull_request
     permissions:
       contents: write
-      pull-requests: read
+      issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Check out trusted default branch

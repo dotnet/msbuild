@@ -23,7 +23,7 @@ function apiError(status, message) {
 function createHarness({
   eventName = 'issue_comment',
   action = eventName === 'issue_comment' ? 'created' : 'synchronize',
-  body = '/perfstar run',
+  body = `/perfstar run ${HEAD}`,
   isPullRequest = true,
   permission = 'write',
   permissionError,
@@ -31,6 +31,8 @@ function createHarness({
   refs = {},
   merge = { sha: 'merged-sha' },
   mergeError,
+  commentError,
+  reactionError,
   deleteRefError,
 } = {}) {
   const calls = [];
@@ -43,6 +45,22 @@ function createHarness({
           calls.push(['pulls.get', pull_number]);
           const current = pullRequests[Math.min(pullReads++, pullRequests.length - 1)];
           return { data: current };
+        },
+      },
+      issues: {
+        createComment: async ({ issue_number, body: commentBody }) => {
+          calls.push(['issues.createComment', issue_number, commentBody]);
+          if (commentError) {
+            throw commentError;
+          }
+        },
+      },
+      reactions: {
+        createForIssueComment: async ({ comment_id, content }) => {
+          calls.push(['reactions.createForIssueComment', comment_id, content]);
+          if (reactionError) {
+            throw reactionError;
+          }
         },
       },
       repos: {
@@ -131,7 +149,7 @@ function createHarness({
       ? {
           action,
           issue: { number: 42, ...(isPullRequest && { pull_request: {} }) },
-          comment: { body },
+          comment: { id: 123, body },
         }
       : {
           action,
@@ -153,7 +171,7 @@ function callsTo(harness, operation) {
   return harness.calls.filter(([name]) => name === operation);
 }
 
-test('runs a command for the live PR head and records the approved SHA', async () => {
+test('runs a command for the approved PR head and records the approved SHA', async () => {
   const harness = createHarness();
 
   await harness.run();
@@ -166,6 +184,82 @@ test('runs a command for the live PR head and records the approved SHA', async (
   assert.equal(harness.references.has(STAGING), false);
   assert.match(callsTo(harness, 'git.createCommit')[0][1], new RegExp(`PerfStar-Approved-Head: ${HEAD}`));
   assert.equal(harness.summaryCalls.at(-1)[0], 'write');
+  assert.deepEqual(callsTo(harness, 'reactions.createForIssueComment'), [
+    ['reactions.createForIssueComment', 123, 'eyes'],
+    ['reactions.createForIssueComment', 123, 'rocket'],
+  ]);
+  assert.ok(harness.calls.findIndex(([name]) => name === 'reactions.createForIssueComment')
+    < harness.calls.findIndex(([name]) => name === 'pulls.get'));
+});
+
+test('a bare run requests explicit approval without creating an evaluation branch', async () => {
+  const harness = createHarness({ body: '/perfstar run' });
+
+  await harness.run();
+
+  assert.deepEqual(callsTo(harness, 'pulls.get'), [['pulls.get', 42]]);
+  assert.equal(callsTo(harness, 'issues.createComment').length, 1);
+  assert.match(callsTo(harness, 'issues.createComment')[0][2], new RegExp(`/perfstar run ${HEAD}`));
+  assert.equal(callsTo(harness, 'repos.merge').length, 0);
+  assert.equal(harness.references.size, 0);
+  assert.deepEqual(callsTo(harness, 'reactions.createForIssueComment'), [
+    ['reactions.createForIssueComment', 123, 'eyes'],
+  ]);
+});
+
+test('bare run requests confirmation of the head found when the queued job executes', async () => {
+  const harness = createHarness({
+    body: '/perfstar run',
+    pullRequests: [{ ...pullRequest, head: { sha: NEXT_HEAD } }],
+    refs: { [BRANCH]: 'existing-kickoff' },
+  });
+
+  await harness.run();
+
+  assert.match(callsTo(harness, 'issues.createComment')[0][2], new RegExp(`/perfstar run ${NEXT_HEAD}`));
+  assert.equal(callsTo(harness, 'git.createRef').length, 0);
+  assert.equal(harness.references.get(BRANCH), 'existing-kickoff');
+});
+
+test('surfaces a failure to post the approval request', async () => {
+  const harness = createHarness({
+    body: '/perfstar run',
+    commentError: apiError(403, 'Forbidden'),
+  });
+
+  await assert.rejects(harness.run(), /Forbidden/);
+  assert.equal(callsTo(harness, 'repos.merge').length, 0);
+});
+
+test('surfaces a failure to acknowledge the command before handling it', async () => {
+  const harness = createHarness({ reactionError: apiError(403, 'Forbidden') });
+
+  await assert.rejects(harness.run(), /Forbidden/);
+  assert.equal(callsTo(harness, 'pulls.get').length, 0);
+  assert.equal(callsTo(harness, 'repos.merge').length, 0);
+});
+
+test('an explicit SHA cannot approve a head pushed before the first PR read', async () => {
+  const harness = createHarness({
+    pullRequests: [{ ...pullRequest, head: { sha: NEXT_HEAD } }],
+  });
+
+  await harness.run();
+
+  assert.equal(harness.references.size, 0);
+  assert.equal(callsTo(harness, 'repos.merge').length, 0);
+  assert.ok(harness.notices.some(message => message.includes('does not match approved SHA')));
+  assert.match(callsTo(harness, 'issues.createComment')[0][2], /current PR head/);
+  assert.deepEqual(callsTo(harness, 'reactions.createForIssueComment').map(([, , content]) => content), ['eyes']);
+});
+
+test('an explicit SHA can approve the current head without a prior bare command', async () => {
+  const harness = createHarness({ body: `/perfstar run ${HEAD.toUpperCase()}` });
+
+  await harness.run();
+
+  assert.equal(harness.references.get(BRANCH), 'new-kickoff');
+  assert.equal(callsTo(harness, 'issues.createComment').length, 0);
 });
 
 test('re-running updates the evaluation branch', async () => {
@@ -187,6 +281,8 @@ test('does not publish a run if the PR changes before branch publication', async
   assert.equal(harness.references.has(BRANCH), false);
   assert.equal(harness.references.has(STAGING), false);
   assert.ok(harness.notices.some(message => message.includes('changed after approval')));
+  assert.match(callsTo(harness, 'issues.createComment')[0][2], /changed during preparation/);
+  assert.deepEqual(callsTo(harness, 'reactions.createForIssueComment').map(([, , content]) => content), ['eyes']);
 });
 
 test('does not publish a run if the PR closes during preparation', async () => {
@@ -197,6 +293,7 @@ test('does not publish a run if the PR closes during preparation', async () => {
   await harness.run();
 
   assert.equal(harness.references.has(BRANCH), false);
+  assert.match(callsTo(harness, 'issues.createComment')[0][2], /changed during preparation/);
 });
 
 test('denies a run command on a closed PR', async () => {
@@ -206,13 +303,17 @@ test('denies a run command on a closed PR', async () => {
 
   assert.equal(callsTo(harness, 'repos.merge').length, 0);
   assert.ok(harness.notices.some(message => message.includes('is not open')));
+  assert.match(callsTo(harness, 'issues.createComment')[0][2], /pull request is closed/);
 });
 
 test('accepts only exact, newly created PR commands', async t => {
   for (const options of [
     { body: 'Please /perfstar run' },
     { body: '/perfstar run extra' },
+    { body: '/perfstar run aaaa' },
+    { body: `/perfstar run ${HEAD} extra` },
     { body: '/perfstar RUN' },
+    { body: 'hello' },
     { action: 'edited' },
     { isPullRequest: false },
   ]) {
@@ -227,7 +328,7 @@ test('accepts only exact, newly created PR commands', async t => {
 });
 
 test('checks the comment actor for both commands', async t => {
-  for (const body of ['/perfstar run', '/perfstar cancel']) {
+  for (const body of ['/perfstar run', `/perfstar run ${HEAD}`, '/perfstar cancel']) {
     for (const permission of ['write', 'push', 'maintain', 'admin']) {
       await t.test(`${body} as ${permission}`, async () => {
         const harness = createHarness({ body, permission });
@@ -235,7 +336,12 @@ test('checks the comment actor for both commands', async t => {
         await harness.run();
 
         assert.equal(callsTo(harness, 'repos.getCollaboratorPermissionLevel').length, 1);
-        assert.equal(callsTo(harness, body.endsWith('run') ? 'repos.merge' : 'git.deleteRef').length > 0, true);
+        const operation = body === '/perfstar run'
+          ? 'issues.createComment'
+          : body === '/perfstar cancel'
+            ? 'git.deleteRef'
+            : 'repos.merge';
+        assert.equal(callsTo(harness, operation).length > 0, true);
       });
     }
     for (const permission of ['triage', 'read', 'pull']) {
@@ -246,6 +352,8 @@ test('checks the comment actor for both commands', async t => {
 
         assert.equal(callsTo(harness, 'repos.merge').length, 0);
         assert.equal(callsTo(harness, 'git.deleteRef').length, 0);
+        assert.match(callsTo(harness, 'issues.createComment')[0][2], /command denied/);
+        assert.deepEqual(callsTo(harness, 'reactions.createForIssueComment').map(([, , content]) => content), ['eyes']);
       });
     }
   }
@@ -259,6 +367,7 @@ test('denies non-collaborators and surfaces permission lookup failures', async t
 
     assert.equal(callsTo(harness, 'repos.merge').length, 0);
     assert.ok(harness.notices.some(message => message.includes('not a repository collaborator')));
+    assert.match(callsTo(harness, 'issues.createComment')[0][2], /command denied/);
   });
 
   await t.test('API failure', async () => {
@@ -275,6 +384,10 @@ test('cancel removes both branches even when they are missing', async () => {
   assert.equal(harness.references.size, 0);
   assert.deepEqual(callsTo(harness, 'git.deleteRef').map(([, ref]) => ref), [BRANCH, STAGING]);
   assert.equal(callsTo(harness, 'repos.merge').length, 0);
+  assert.deepEqual(callsTo(harness, 'reactions.createForIssueComment'), [
+    ['reactions.createForIssueComment', 123, 'eyes'],
+    ['reactions.createForIssueComment', 123, '+1'],
+  ]);
 });
 
 test('closing or merging a PR deletes both branches without a permission check', async t => {
@@ -292,6 +405,7 @@ test('closing or merging a PR deletes both branches without a permission check',
       assert.equal(harness.references.size, 0);
       assert.deepEqual(callsTo(harness, 'git.deleteRef').map(([, ref]) => ref), [BRANCH, STAGING]);
       assert.equal(callsTo(harness, 'repos.getCollaboratorPermissionLevel').length, 0);
+      assert.equal(callsTo(harness, 'reactions.createForIssueComment').length, 0);
     });
   }
 });
@@ -349,6 +463,7 @@ test('does not swallow other delete errors', async () => {
   });
 
   await assert.rejects(harness.run(), /Validation failed/);
+  assert.deepEqual(callsTo(harness, 'reactions.createForIssueComment').map(([, , content]) => content), ['eyes']);
 });
 
 test('cleans staging if merge fails', async () => {
@@ -357,4 +472,5 @@ test('cleans staging if merge fails', async () => {
   await assert.rejects(harness.run(), /Merge failed/);
 
   assert.equal(harness.references.has(STAGING), false);
+  assert.deepEqual(callsTo(harness, 'reactions.createForIssueComment').map(([, , content]) => content), ['eyes']);
 });

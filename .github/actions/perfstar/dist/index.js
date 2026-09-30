@@ -29927,6 +29927,25 @@ function wrappy (fn, cb) {
 
 const EVALUATION_PERMISSIONS = new Set(['admin', 'maintain', 'write', 'push']);
 const APPROVED_HEAD_PATTERN = /^PerfStar-Approved-Head: ([a-f0-9]{40})$/m;
+const RUN_COMMAND_PATTERN = /^\/perfstar run ([a-f0-9]{40})$/i;
+
+async function reactToCommand(github, context, content) {
+  await github.rest.reactions.createForIssueComment({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    comment_id: context.payload.comment.id,
+    content,
+  });
+}
+
+async function replyToCommand(github, context, pullNumber, body) {
+  await github.rest.issues.createComment({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    issue_number: pullNumber,
+    body,
+  });
+}
 
 /**
  * Authorize a PR comment command only when its actor currently has write-level repository access.
@@ -30054,11 +30073,13 @@ async function upsertBranch(github, context, name, sha) {
 
 /**
  * Handle exact new PR comment commands and PR synchronize/close events.
- * Commands require write-level actor access; run publishes only if the live PR still has the approved head.
+ * Commands require write-level actor access; a bare run requests confirmation, not evaluation.
+ * An explicit SHA approves only that live head; a later push invalidates the approval.
  * Close and stale-head cleanup do not require actor access. All events must share a serialized PR queue.
  */
 async function reconcilePerfStarBranch({ github, context, core }) {
   let command;
+  let requestedHead;
   let pullNumber;
 
   if (context.eventName === 'issue_comment') {
@@ -30067,11 +30088,13 @@ async function reconcilePerfStarBranch({ github, context, core }) {
     }
 
     command = context.payload.comment.body.trim();
-    if (command !== '/perfstar run' && command !== '/perfstar cancel') {
+    requestedHead = RUN_COMMAND_PATTERN.exec(command)?.[1]?.toLowerCase();
+    if (command !== '/perfstar run' && command !== '/perfstar cancel' && !requestedHead) {
       return;
     }
 
     pullNumber = context.payload.issue.number;
+    await reactToCommand(github, context, 'eyes');
   } else if (context.eventName === 'pull_request_target') {
     if (context.payload.action !== 'synchronize' && context.payload.action !== 'closed') {
       return;
@@ -30102,21 +30125,41 @@ async function reconcilePerfStarBranch({ github, context, core }) {
   }
 
   if (!await isAuthorizedEvaluator(github, context, core)) {
+    await replyToCommand(github, context, pullNumber,
+      'PerfStar command denied: only repository users with write, maintain, or admin permission can use this command.');
     return;
   }
 
   if (command === '/perfstar cancel') {
     await deleteBranch(github, context, core, branch);
     await deleteBranch(github, context, core, stagingBranch);
+    await reactToCommand(github, context, '+1');
     return;
   }
 
   if (pullRequest.state !== 'open') {
     core.notice(`PerfStar run denied: pull request #${pullNumber} is not open`);
+    await replyToCommand(github, context, pullNumber,
+      'PerfStar run denied: this pull request is closed. Reopen it before requesting evaluation.');
     return;
   }
 
-  const approvedHead = pullRequest.head.sha;
+  if (command === '/perfstar run') {
+    const headSha = pullRequest.head.sha;
+    await replyToCommand(github, context, pullNumber,
+      `PerfStar found PR head \`${headSha}\`. To approve this commit for evaluation, comment \`/perfstar run ${headSha}\`. If the PR head changes, request approval for the new SHA.`);
+    core.notice(`PerfStar approval requested for pull request #${pullNumber} at ${headSha}`);
+    return;
+  }
+
+  const approvedHead = requestedHead;
+  if (pullRequest.head.sha !== approvedHead) {
+    core.notice(`PerfStar run not queued: pull request #${pullNumber} head does not match approved SHA ${approvedHead}`);
+    await replyToCommand(github, context, pullNumber,
+      `PerfStar run not queued: the current PR head is \`${pullRequest.head.sha}\`, not \`${approvedHead}\`. Review the new head and comment \`/perfstar run ${pullRequest.head.sha}\` to approve it.`);
+    return;
+  }
+
   let kickoffSha;
 
   try {
@@ -30152,6 +30195,8 @@ async function reconcilePerfStarBranch({ github, context, core }) {
     });
     if (currentPullRequest.state !== 'open' || currentPullRequest.head.sha !== approvedHead) {
       core.notice(`PerfStar run not queued: pull request #${pullNumber} changed after approval`);
+      await replyToCommand(github, context, pullNumber,
+        'PerfStar run not queued: the pull request changed during preparation. Review the current head and request approval again.');
       return;
     }
 
@@ -30167,6 +30212,7 @@ async function reconcilePerfStarBranch({ github, context, core }) {
     .addLink(branch, branchUrl)
     .addRaw(` now contains pull request #${pullRequest.number} at ${approvedHead} with ${pullRequest.base.ref} merged in.`)
     .write();
+  await reactToCommand(github, context, 'rocket');
 }
 
 module.exports = { reconcilePerfStarBranch };
