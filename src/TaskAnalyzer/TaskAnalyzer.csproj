@@ -3,13 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <PackageId>Microsoft.Build.TaskAuthoring.Analyzer</PackageId>
+    <PackageDescription>Provides analyzer guidance for MSBuild task authoring and multithreaded task safety.</PackageDescription>
     <AssemblyName>Microsoft.Build.TaskAuthoring.Analyzer</AssemblyName>
     <RootNamespace>Microsoft.Build.TaskAuthoring.Analyzer</RootNamespace>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsPackable>true</IsPackable>
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- Don't ship yet, just make it available to partner repositories. -->
-    <IsShipping>false</IsShipping>
+    <IsShipping>true</IsShipping>
     <IsTestProject>false</IsTestProject>
     <!-- Suppress RS2001: our analyzer rules use custom severities -->
     <NoWarn>$(NoWarn);NU5128;RS1038;RS2001</NoWarn>
