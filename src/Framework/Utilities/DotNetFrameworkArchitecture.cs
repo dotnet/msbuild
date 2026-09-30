@@ -3,8 +3,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-#nullable disable
-
 namespace Microsoft.Build.Utilities;
 
 /// <summary>
@@ -27,5 +25,5 @@ public enum DotNetFrameworkArchitecture
     /// Indicates the 64-bit .NET Framework
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Bitness", Justification = "Bitness is a reasonable term")]
-    Bitness64 = 2
+    Bitness64 = 2,
 }
