@@ -55,9 +55,14 @@ internal enum NonCacheableReason
 }
 
 /// <summary>
-/// State of a path as evaluation observed it. A cache validates it by comparing against a fresh stat.
+/// State of a path as evaluation observed it. Probes require only the path kind to remain unchanged;
+/// reads and enumeration additionally require the recorded metadata.
 /// </summary>
-internal readonly record struct FileDependency(PathKind Kind, DateTime LastWriteTimeUtc, long Length);
+internal readonly record struct FileDependency(
+    PathKind Kind,
+    DateTime LastWriteTimeUtc,
+    long Length,
+    bool RequiresMetadata = true);
 
 /// <summary>
 /// An SDK resolution evaluation consumed, including the context required to repeat it.

@@ -2585,6 +2585,7 @@ namespace Microsoft.Build.Evaluation
                         // clearing the weak cache (and therefore setting explicitload=false) for projects the project system never
                         // was directly interested in (i.e. the ones that were reached for purposes of building a P2P.)
                         bool explicitlyLoaded = importElement.ContainingProject.IsExplicitlyLoaded;
+                        _inputRecorder?.RecordPath(importFileUnescaped);
                         importedProjectElement = ProjectRootElement.OpenProjectOrSolution(
                                     importFileUnescaped,
                                     new ReadOnlyConvertingDictionary<string, ProjectPropertyInstance, string>(

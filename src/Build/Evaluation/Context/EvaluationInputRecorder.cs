@@ -56,7 +56,7 @@ internal sealed class EvaluationInputRecorder
 
         try
         {
-            TryGetOrObserve(Canonicalize(path), out _);
+            TryGetOrObserve(Canonicalize(path), requiresMetadata: true, out _);
         }
         catch (Exception ex) when (IsRecoverable(ex))
         {
@@ -85,7 +85,7 @@ internal sealed class EvaluationInputRecorder
             }
 
             // A probe may have recorded the file moments earlier; its stat serves as well as a new one.
-            if (TryGetOrObserve(path, out FileDependency current)
+            if (TryGetOrObserve(path, requiresMetadata: true, out FileDependency current)
                 && (current.Kind != PathKind.File
                     || current.LastWriteTimeUtc != lastWriteTimeUtcWhenRead
                     || current.Length != lengthWhenRead.Value))
@@ -113,7 +113,8 @@ internal sealed class EvaluationInputRecorder
         try
         {
             string fullPath = Canonicalize(path);
-            if (TryGetOrObserve(fullPath, out FileDependency recorded) && exists != Satisfies(recorded.Kind, kind))
+            if (TryGetOrObserve(fullPath, requiresMetadata: false, out FileDependency recorded)
+                && exists != Satisfies(recorded.Kind, kind))
             {
                 MarkNonCacheable(NonCacheableReason.ConflictingObservation, fullPath);
             }
@@ -123,6 +124,9 @@ internal sealed class EvaluationInputRecorder
             MarkNonCacheable(NonCacheableReason.RecorderFailure, ex.Message);
         }
     }
+
+    internal void RecordDirectoryProbe(string path, bool exists) =>
+        RecordProbe(path, ProbeKind.Directory, exists);
 
     internal void RecordEnvironmentRead(string name, string? value)
     {
@@ -504,15 +508,21 @@ internal sealed class EvaluationInputRecorder
     }
 
     /// <summary>
-    /// Returns the recorded state of a path, observing it first when it is new. The stat runs outside the lock so
-    /// parallel glob enumeration does not serialize on it.
+    /// Returns the first recorded state, promoting probes to metadata dependencies when needed.
+    /// The stat runs outside the lock so parallel glob enumeration does not serialize on it.
     /// </summary>
-    private bool TryGetOrObserve(string fullPath, out FileDependency recorded)
+    private bool TryGetOrObserve(string fullPath, bool requiresMetadata, out FileDependency recorded)
     {
         lock (_files)
         {
             if (_files.TryGetValue(fullPath, out recorded))
             {
+                if (requiresMetadata && !recorded.RequiresMetadata)
+                {
+                    recorded = recorded with { RequiresMetadata = true };
+                    _files[fullPath] = recorded;
+                }
+
                 return true;
             }
         }
@@ -526,8 +536,13 @@ internal sealed class EvaluationInputRecorder
         {
             if (!_files.TryGetValue(fullPath, out recorded))
             {
-                _files.Add(fullPath, current);
-                recorded = current;
+                recorded = current with { RequiresMetadata = requiresMetadata };
+                _files.Add(fullPath, recorded);
+            }
+            else if (requiresMetadata && !recorded.RequiresMetadata)
+            {
+                recorded = recorded with { RequiresMetadata = true };
+                _files[fullPath] = recorded;
             }
         }
 

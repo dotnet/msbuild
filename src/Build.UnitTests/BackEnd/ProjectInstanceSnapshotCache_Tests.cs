@@ -1477,6 +1477,67 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
         statistics.Count.ShouldBe(0);
     }
 
+    [Fact]
+    public void ExcludedOutputChangesReuseSnapshotsButGeneratedImportsStillInvalidate()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable(
+            EvaluationCacheConfiguration.ModeEnvironmentVariable, nameof(EvaluationCacheMode.SnapshotFileSystem));
+        Traits.UpdateFromEnvironment();
+        TransientTestFolder folder = env.CreateFolder(createFolder: true);
+        string bin = Path.Combine(folder.Path, "bin", "Debug");
+        string obj = Path.Combine(folder.Path, "obj", "Debug");
+        Directory.CreateDirectory(bin);
+        Directory.CreateDirectory(obj);
+        env.CreateFile(folder, "input.txt", "included");
+        TransientTestFile project = env.CreateFile(folder, "project.proj", """
+            <Project>
+              <Import Project="obj/Debug/generated.props" Condition="Exists('obj/Debug/generated.props')" />
+              <ItemGroup>
+                <Asset Include="**/*" Exclude="bin/Debug/**/*;obj/Debug/**/*" />
+              </ItemGroup>
+            </Project>
+            """);
+        var cache = new ProjectInstanceSnapshotCache();
+        cache.ConfigureValidator(EvaluationCacheValidationPolicy.FileSystem);
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
+        CreateFileConfiguration(project.Path, parameters).LoadProjectIntoConfiguration(
+            host, BuildRequestDataFlags.None, submissionId: 1, nodeId: 1);
+        cache.StoredEntries.ShouldBe(1);
+
+        File.WriteAllText(Path.Combine(bin, "output.dll"), "new output");
+        Directory.SetLastWriteTimeUtc(bin, Directory.GetLastWriteTimeUtc(bin).AddSeconds(2));
+        BuildRequestConfiguration unchanged = CreateFileConfiguration(project.Path, parameters);
+        unchanged.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 2, nodeId: 1);
+        unchanged.Project.GetItems("Asset").Select(item => item.EvaluatedInclude)
+            .ShouldBe(["input.txt", "project.proj"], ignoreOrder: true);
+        cache.MaterializedEntries.ShouldBe(1);
+        cache.GetStatistics().FreshEvaluations.ShouldBe(1);
+        cache.ValidationRejections.ShouldBe(0);
+
+        string generatedImport = Path.Combine(obj, "generated.props");
+        File.WriteAllText(generatedImport, "<Project><PropertyGroup><Generated>first</Generated></PropertyGroup></Project>");
+        BuildRequestConfiguration appeared = CreateFileConfiguration(project.Path, parameters);
+        appeared.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 3, nodeId: 1);
+        appeared.Project.GetPropertyValue("Generated").ShouldBe("first");
+        appeared.Project.EvaluationInputs!.Files[generatedImport].RequiresMetadata.ShouldBeTrue();
+        cache.ValidationRejections.ShouldBe(1);
+
+        File.WriteAllText(generatedImport, "<Project><PropertyGroup><Generated>changed-value</Generated></PropertyGroup></Project>");
+        File.SetLastWriteTimeUtc(generatedImport, File.GetLastWriteTimeUtc(generatedImport).AddSeconds(2));
+        BuildRequestConfiguration changed = CreateFileConfiguration(project.Path, parameters);
+        changed.LoadProjectIntoConfiguration(host, BuildRequestDataFlags.None, submissionId: 4, nodeId: 1);
+        changed.Project.GetPropertyValue("Generated").ShouldBe("changed-value");
+        cache.ValidationRejections.ShouldBe(2);
+        cache.MaterializedEntries.ShouldBe(1);
+        cache.GetStatistics().FreshEvaluations.ShouldBe(3);
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
