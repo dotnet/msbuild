@@ -12,19 +12,4 @@
             DestinationFolder="$(ArtifactsSymStoreDirectory)\MSBuildTaskHost\net35\amd64"
             Condition="'$(MSBuildRuntimeType)' != 'Core'"/>
     </Target>
-
-    <Target Name="_BuildTrainingInputs"
-            BeforeTargets="AfterBuild"
-            Condition="'$(UsingToolVSSDK)' == 'true' AND '$(UsingToolVisualStudioIbcTraining)' == 'true' AND '$(MSBuildRuntimeType)' != 'Core'">
-        <Error Condition="('$(VisualStudioDropName)' == '' OR '$(RepositoryName)' == '') AND '$(OfficialBuild)' == 'true'"
-               Text="Properties VisualStudioDropName and RepositoryName must be specified in official build that produces Visual Studio insertion components." />
-
-        <GenerateTrainingInputFiles ConfigurationFile="$(RepositoryEngineeringDir)config\OptProf.json"
-                                    InsertionDirectory="$(VisualStudioSetupInsertionPath)"
-                                    OutputDirectory="\\?\$(ArtifactsDir)OptProf\$(Configuration)\Data" />
-
-        <GenerateTrainingPropsFile ProductDropName="$(VisualStudioDropName)"
-                                   RepositoryName="$(RepositoryName)"
-                                   OutputDirectory="$(VisualStudioSetupInsertionPath)OptProf" />
-    </Target>
 </Project>
