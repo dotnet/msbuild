@@ -106,9 +106,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26468.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26472.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>ad80d0623f6532c4864d1e5e2e6dcab26b81a658</Sha>
+      <Sha>614293a9b3aa17dda9dc7e69c4dfcd576f59741a</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="7.0.0-preview.2.254">
       <Uri>https://github.com/nuget/nuget.client</Uri>
