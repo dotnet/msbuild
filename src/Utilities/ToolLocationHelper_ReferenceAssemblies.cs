@@ -10,7 +10,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 
 #nullable disable
 
@@ -124,18 +123,18 @@ public static partial class ToolLocationHelper
         if (targetFrameworkIdentifier.Equals(FrameworkLocationHelper.dotNetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase) && frameworkVersion.Major < 4 && string.IsNullOrEmpty(targetFrameworkProfile))
         {
             // The default
-            SharedDotNetFrameworkArchitecture targetedArchitecture = SharedDotNetFrameworkArchitecture.Current;
+            DotNetFrameworkArchitecture targetedArchitecture = DotNetFrameworkArchitecture.Current;
 
             if (NativeMethodsShared.IsWindows && platformTarget != null)
             {
                 // If we are a 32 bit operating system the we should always return the 32 bit directory, or we are targeting x86, arm is also 32 bit
                 if (!Environment.Is64BitOperatingSystem || platformTarget.Equals("x86", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm", StringComparison.OrdinalIgnoreCase))
                 {
-                    targetedArchitecture = SharedDotNetFrameworkArchitecture.Bitness32;
+                    targetedArchitecture = DotNetFrameworkArchitecture.Bitness32;
                 }
                 else if (platformTarget.Equals("x64", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("Itanium", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm64", StringComparison.OrdinalIgnoreCase))
                 {
-                    targetedArchitecture = SharedDotNetFrameworkArchitecture.Bitness64;
+                    targetedArchitecture = DotNetFrameworkArchitecture.Bitness64;
                 }
             }
 

@@ -14,8 +14,6 @@ using Microsoft.Win32;
 #endif
 using Shouldly;
 using Xunit;
-using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
-using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 
 #nullable disable
 
@@ -137,7 +135,7 @@ public sealed partial class ToolLocationHelper_Tests
             ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Version40),
             DirectoryExists,
             GetDirectories,
-            SharedDotNetFrameworkArchitecture.Current);
+            DotNetFrameworkArchitecture.Current);
 
 #if FEATURE_INSTALLED_MSBUILD
         path.ShouldBe(Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName));
@@ -159,7 +157,7 @@ public sealed partial class ToolLocationHelper_Tests
                 "v1.2",
                 DirectoryExists,
                 GetDirectories,
-                SharedDotNetFrameworkArchitecture.Current);
+                DotNetFrameworkArchitecture.Current);
         path.ShouldBe(Path.Combine("{runtime-base}", "v1.2.x86dbg"));
     }
 
@@ -176,7 +174,7 @@ public sealed partial class ToolLocationHelper_Tests
                 "v1.2",                                              // But we're looking for "Whidbey"
                 DirectoryExists,
                 GetDirectories,
-                SharedDotNetFrameworkArchitecture.Current);
+                DotNetFrameworkArchitecture.Current);
         path.ShouldBe(Path.Combine("{runtime-base}", "v1.2.x86fre"));
     }
 
@@ -193,7 +191,7 @@ public sealed partial class ToolLocationHelper_Tests
                 "v1.2",                                              // But we're looking for "Whidbey"
                 DirectoryExists,
                 GetDirectories,
-                SharedDotNetFrameworkArchitecture.Current);
+                DotNetFrameworkArchitecture.Current);
 
         path.ShouldBe(Path.Combine("{runtime-base}", "v1.2.x86fre"));
     }
@@ -211,7 +209,7 @@ public sealed partial class ToolLocationHelper_Tests
                 "v1.3",                                  // And we're trying to find "orcas" runtime which isn't installed.
                 DirectoryExists,
                 GetDirectories,
-                SharedDotNetFrameworkArchitecture.Current);
+                DotNetFrameworkArchitecture.Current);
 
         path.ShouldBeNull();
     }
@@ -234,7 +232,7 @@ public sealed partial class ToolLocationHelper_Tests
             "v1.1",           // We're looking for "everett"
             DirectoryExists,
             GetDirectories,
-            SharedDotNetFrameworkArchitecture.Current);
+            DotNetFrameworkArchitecture.Current);
 
         FileUtilities.DeleteWithoutTrailingBackslash(fakeEverettPath);
         path.ShouldBeNull();
@@ -263,41 +261,52 @@ public sealed partial class ToolLocationHelper_Tests
         ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest).ShouldBe(FrameworkLocationHelper.PathToDotNetFrameworkV40);
         ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest).ShouldBe(FrameworkLocationHelper.PathToDotNetFrameworkV40);
 
-        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-            FrameworkLocationHelper.GetPathToDotNetFrameworkV11(SharedDotNetFrameworkArchitecture.Bitness32));
-        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-            FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness32));
-        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-            FrameworkLocationHelper.GetPathToDotNetFrameworkV30(SharedDotNetFrameworkArchitecture.Bitness32));
-        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-            FrameworkLocationHelper.GetPathToDotNetFrameworkV35(SharedDotNetFrameworkArchitecture.Bitness32));
+        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11, DotNetFrameworkArchitecture.Bitness32).ShouldBe(
+            FrameworkLocationHelper.GetPathToDotNetFrameworkV11(DotNetFrameworkArchitecture.Bitness32));
+        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20, DotNetFrameworkArchitecture.Bitness32).ShouldBe(
+            FrameworkLocationHelper.GetPathToDotNetFrameworkV20(DotNetFrameworkArchitecture.Bitness32));
+        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30, DotNetFrameworkArchitecture.Bitness32).ShouldBe(
+            FrameworkLocationHelper.GetPathToDotNetFrameworkV30(DotNetFrameworkArchitecture.Bitness32));
+        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35, DotNetFrameworkArchitecture.Bitness32).ShouldBe(
+            FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Bitness32));
 
-        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-            FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness32));
-        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-            FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness32));
-        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-            FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness32));
+        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, DotNetFrameworkArchitecture.Bitness32).ShouldBe(
+            FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Bitness32));
+        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest, DotNetFrameworkArchitecture.Bitness32).ShouldBe(
+            FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Bitness32));
+        ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest, DotNetFrameworkArchitecture.Bitness32).ShouldBe(
+            FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Bitness32));
 
         if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ProgramFiles(x86)")))
         {
             // 64-bit machine, so we should test the 64-bit overloads as well
-            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11, UtilitiesDotNetFrameworkArchitecture.Bitness64).ShouldBe(
-            FrameworkLocationHelper.GetPathToDotNetFrameworkV11(SharedDotNetFrameworkArchitecture.Bitness64));
-            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Bitness64).ShouldBe(
-                FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness64));
-            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30, UtilitiesDotNetFrameworkArchitecture.Bitness64).ShouldBe(
-                FrameworkLocationHelper.GetPathToDotNetFrameworkV30(SharedDotNetFrameworkArchitecture.Bitness64));
-            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35, UtilitiesDotNetFrameworkArchitecture.Bitness64).ShouldBe(
-                FrameworkLocationHelper.GetPathToDotNetFrameworkV35(SharedDotNetFrameworkArchitecture.Bitness64));
+            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11, DotNetFrameworkArchitecture.Bitness64).ShouldBe(
+            FrameworkLocationHelper.GetPathToDotNetFrameworkV11(DotNetFrameworkArchitecture.Bitness64));
+            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20, DotNetFrameworkArchitecture.Bitness64).ShouldBe(
+                FrameworkLocationHelper.GetPathToDotNetFrameworkV20(DotNetFrameworkArchitecture.Bitness64));
+            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version30, DotNetFrameworkArchitecture.Bitness64).ShouldBe(
+                FrameworkLocationHelper.GetPathToDotNetFrameworkV30(DotNetFrameworkArchitecture.Bitness64));
+            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35, DotNetFrameworkArchitecture.Bitness64).ShouldBe(
+                FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Bitness64));
 
-            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, UtilitiesDotNetFrameworkArchitecture.Bitness64).ShouldBe(
-                FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness64));
-            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest, UtilitiesDotNetFrameworkArchitecture.Bitness64).ShouldBe(
-                FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness64));
-            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest, UtilitiesDotNetFrameworkArchitecture.Bitness64).ShouldBe(
-                FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness64));
+            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, DotNetFrameworkArchitecture.Bitness64).ShouldBe(
+                FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Bitness64));
+            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.VersionLatest, DotNetFrameworkArchitecture.Bitness64).ShouldBe(
+                FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Bitness64));
+            ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Latest, DotNetFrameworkArchitecture.Bitness64).ShouldBe(
+                FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Bitness64));
         }
+    }
+
+    [Fact]
+    public void InvalidDotNetFrameworkArchitectureThrows()
+    {
+        var architecture = (DotNetFrameworkArchitecture)int.MaxValue;
+
+        Should.Throw<InternalErrorException>(
+            () => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, architecture));
+        Should.Throw<InternalErrorException>(
+            () => ToolLocationHelper.GetPathToBuildTools(ToolLocationHelper.CurrentToolsVersion, architecture));
     }
 
     [Fact]
@@ -326,20 +335,20 @@ public sealed partial class ToolLocationHelper_Tests
 #endif
     public void TestGetPathToBuildToolsFile_32Bit()
     {
-        string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Bitness32);
-        net20Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "2.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
+        string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version20, DotNetFrameworkArchitecture.Bitness32);
+        net20Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "2.0", DotNetFrameworkArchitecture.Bitness32));
 
-        string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version35, UtilitiesDotNetFrameworkArchitecture.Bitness32);
-        net35Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "3.5", UtilitiesDotNetFrameworkArchitecture.Bitness32));
+        string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version35, DotNetFrameworkArchitecture.Bitness32);
+        net35Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "3.5", DotNetFrameworkArchitecture.Bitness32));
 
-        ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version40, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-            ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "4.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
+        ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version40, DotNetFrameworkArchitecture.Bitness32).ShouldBe(
+            ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "4.0", DotNetFrameworkArchitecture.Bitness32));
 
         var toolsPath32 = ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).Properties["MSBuildToolsPath32"];
         string tv12path = Path.Combine(Path.GetFullPath(toolsPath32.EvaluatedValue), Constants.MSBuildExecutableName);
 
-        tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ObjectModelHelpers.MSBuildDefaultToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
-        tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ToolLocationHelper.CurrentToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
+        tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ObjectModelHelpers.MSBuildDefaultToolsVersion, DotNetFrameworkArchitecture.Bitness32));
+        tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ToolLocationHelper.CurrentToolsVersion, DotNetFrameworkArchitecture.Bitness32));
     }
 
     [Fact]

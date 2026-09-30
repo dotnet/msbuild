@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.Build.Shared;
-using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
-using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 
 #nullable disable
 
@@ -86,7 +84,7 @@ public static partial class ToolLocationHelper
     /// <param name="version">Version of the targeted .NET Framework</param>
     /// <returns>Will return 'null' if there is no target frameworks on this machine.</returns>
     public static string GetPathToDotNetFramework(TargetDotNetFrameworkVersion version)
-        => GetPathToDotNetFramework(version, UtilitiesDotNetFrameworkArchitecture.Current);
+        => GetPathToDotNetFramework(version, DotNetFrameworkArchitecture.Current);
 
     /// <summary>
     /// Get a fully qualified path to the framework's root directory.
@@ -94,11 +92,10 @@ public static partial class ToolLocationHelper
     /// <param name="version">Version of the targeted .NET Framework</param>
     /// <param name="architecture">Desired architecture, or DotNetFrameworkArchitecture.Current for the architecture this process is currently running under.</param>
     /// <returns></returns>
-    public static string GetPathToDotNetFramework(TargetDotNetFrameworkVersion version, UtilitiesDotNetFrameworkArchitecture architecture)
+    public static string GetPathToDotNetFramework(TargetDotNetFrameworkVersion version, DotNetFrameworkArchitecture architecture)
     {
         Version frameworkVersion = TargetDotNetFrameworkVersionToSystemVersion(version);
-        SharedDotNetFrameworkArchitecture sharedArchitecture = ConvertToSharedDotNetFrameworkArchitecture(architecture);
-        return FrameworkLocationHelper.GetPathToDotNetFramework(frameworkVersion, sharedArchitecture);
+        return FrameworkLocationHelper.GetPathToDotNetFramework(frameworkVersion, ValidateDotNetFrameworkArchitecture(architecture));
     }
 
     /// <summary>
@@ -272,7 +269,7 @@ public static partial class ToolLocationHelper
             fileName,
             version,
             visualStudioVersion,
-            UtilitiesDotNetFrameworkArchitecture.Current,
+            DotNetFrameworkArchitecture.Current,
             canFallBackIfNecessary: true); /* If the file is not found for the current architecture, it's OK to follow fallback mechanisms. */
 
     /// <summary>
@@ -282,7 +279,7 @@ public static partial class ToolLocationHelper
     /// <param name="version">Version of the targeted .NET Framework</param>
     /// <param name="architecture">The required architecture of the requested file.</param>
     /// <returns>Path string.</returns>
-    public static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version, UtilitiesDotNetFrameworkArchitecture architecture)
+    public static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version, DotNetFrameworkArchitecture architecture)
         => GetPathToDotNetFrameworkSdkFile(fileName, version, VisualStudioVersion.VersionLatest, architecture);
 
     /// <summary>
@@ -293,7 +290,7 @@ public static partial class ToolLocationHelper
     /// <param name="visualStudioVersion">Version of Visual Studio</param>
     /// <param name="architecture">The required architecture of the requested file.</param>
     /// <returns>Path string.</returns>
-    public static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, UtilitiesDotNetFrameworkArchitecture architecture)
+    public static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, DotNetFrameworkArchitecture architecture)
         => GetPathToDotNetFrameworkSdkFile(
             fileName,
             version,
@@ -312,7 +309,7 @@ public static partial class ToolLocationHelper
     /// current architecture, to x86.  Otherwise, if the requested architecture path doesn't exist, that's it -- no path
     /// will be returned.</param>
     /// <returns></returns>
-    private static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, UtilitiesDotNetFrameworkArchitecture architecture, bool canFallBackIfNecessary)
+    private static string GetPathToDotNetFrameworkSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, DotNetFrameworkArchitecture architecture, bool canFallBackIfNecessary)
     {
         string pathToSdk = GetPathToDotNetFrameworkSdkToolsFolderRoot(version, visualStudioVersion);
         string filePath = null;
@@ -440,7 +437,7 @@ public static partial class ToolLocationHelper
             fileName,
             version,
             visualStudioVersion,
-            UtilitiesDotNetFrameworkArchitecture.Current,
+            DotNetFrameworkArchitecture.Current,
             true); /* If the file is not found for the current architecture, it's OK to follow fallback mechanisms. */
 
     /// <summary>
@@ -552,7 +549,7 @@ public static partial class ToolLocationHelper
     /// <param name="toolsVersion">The ToolsVersion for which to get the tools path</param>
     /// <returns>The tools path folder of the appropriate ToolsVersion if it exists, otherwise null.</returns>
     public static string GetPathToBuildTools(string toolsVersion)
-        => GetPathToBuildTools(toolsVersion, UtilitiesDotNetFrameworkArchitecture.Current);
+        => GetPathToBuildTools(toolsVersion, DotNetFrameworkArchitecture.Current);
 
     /// <summary>
     /// Given a ToolsVersion, return the path to the MSBuild tools for that ToolsVersion
@@ -560,7 +557,7 @@ public static partial class ToolLocationHelper
     /// <param name="toolsVersion">The ToolsVersion for which to get the tools path</param>
     /// <param name="architecture">The architecture of the build tools location to get</param>
     /// <returns>The tools path folder of the appropriate ToolsVersion if it exists, otherwise null.</returns>
-    public static string GetPathToBuildTools(string toolsVersion, UtilitiesDotNetFrameworkArchitecture architecture)
+    public static string GetPathToBuildTools(string toolsVersion, DotNetFrameworkArchitecture architecture)
         => toolsVersion switch
         {
             "2.0" => GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20, architecture),
@@ -568,7 +565,9 @@ public static partial class ToolLocationHelper
             "4.0" => GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version40, architecture),
 
             // Doesn't map to an existing .NET Framework, so let's grab it out of the toolset.
-            _ => FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion(toolsVersion, ConvertToSharedDotNetFrameworkArchitecture(architecture)),
+            _ => FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion(
+                toolsVersion,
+                ValidateDotNetFrameworkArchitecture(architecture)),
         };
 
     /// <summary>
@@ -580,7 +579,7 @@ public static partial class ToolLocationHelper
     /// <returns>The path to the file in the tools path folder of the appropriate ToolsVersion if it
     /// exists, otherwise null.</returns>
     public static string GetPathToBuildToolsFile(string fileName, string toolsVersion)
-        => GetPathToBuildToolsFile(fileName, toolsVersion, UtilitiesDotNetFrameworkArchitecture.Current);
+        => GetPathToBuildToolsFile(fileName, toolsVersion, DotNetFrameworkArchitecture.Current);
 
     /// <summary>
     /// Given the name of a file and a ToolsVersion, return the path to that file in the MSBuild
@@ -591,7 +590,7 @@ public static partial class ToolLocationHelper
     /// <param name="architecture">The architecture of the build tools file to get</param>
     /// <returns>The path to the file in the tools path folder of the appropriate ToolsVersion if it
     /// exists, otherwise null.</returns>
-    public static string GetPathToBuildToolsFile(string fileName, string toolsVersion, UtilitiesDotNetFrameworkArchitecture architecture)
+    public static string GetPathToBuildToolsFile(string fileName, string toolsVersion, DotNetFrameworkArchitecture architecture)
     {
         string toolPath = GetPathToBuildTools(toolsVersion, architecture);
 
@@ -616,7 +615,7 @@ public static partial class ToolLocationHelper
     /// <param name="version">Version of the targeted .NET Framework</param>
     /// <returns>Will return 'null' if there is no target frameworks on this machine.</returns>
     public static string GetPathToDotNetFrameworkFile(string fileName, TargetDotNetFrameworkVersion version)
-        => GetPathToDotNetFrameworkFile(fileName, version, UtilitiesDotNetFrameworkArchitecture.Current);
+        => GetPathToDotNetFrameworkFile(fileName, version, DotNetFrameworkArchitecture.Current);
 
     /// <summary>
     /// Get a fully qualified path to a file in the frameworks root directory for the specified architecture.
@@ -625,7 +624,7 @@ public static partial class ToolLocationHelper
     /// <param name="version">Version of the targeted .NET Framework</param>
     /// <param name="architecture">Desired architecture, or DotNetFrameworkArchitecture.Current for the architecture this process is currently running under.</param>
     /// <returns>Will return 'null' if there is no target frameworks on this machine.</returns>
-    public static string GetPathToDotNetFrameworkFile(string fileName, TargetDotNetFrameworkVersion version, UtilitiesDotNetFrameworkArchitecture architecture)
+    public static string GetPathToDotNetFrameworkFile(string fileName, TargetDotNetFrameworkVersion version, DotNetFrameworkArchitecture architecture)
     {
         string pathToFx = GetPathToDotNetFramework(version, architecture);
         return pathToFx == null ? null : Path.Combine(pathToFx, fileName);
@@ -638,16 +637,12 @@ public static partial class ToolLocationHelper
     /// <returns>Path string.</returns>
     public static string GetPathToSystemFile(string fileName) => Path.Combine(PathToSystem, fileName);
 
-    /// <summary>
-    /// Converts a member of the Microsoft.Build.Utilities.DotNetFrameworkArchitecture enum to the equivalent member of the
-    /// Microsoft.Build.Shared.DotNetFrameworkArchitecture enum.
-    /// </summary>
-    private static SharedDotNetFrameworkArchitecture ConvertToSharedDotNetFrameworkArchitecture(UtilitiesDotNetFrameworkArchitecture architecture)
+    private static DotNetFrameworkArchitecture ValidateDotNetFrameworkArchitecture(DotNetFrameworkArchitecture architecture)
         => architecture switch
         {
-            UtilitiesDotNetFrameworkArchitecture.Current => SharedDotNetFrameworkArchitecture.Current,
-            UtilitiesDotNetFrameworkArchitecture.Bitness32 => SharedDotNetFrameworkArchitecture.Bitness32,
-            UtilitiesDotNetFrameworkArchitecture.Bitness64 => SharedDotNetFrameworkArchitecture.Bitness64,
-            _ => Assumed.Unreachable<SharedDotNetFrameworkArchitecture>(),
+            DotNetFrameworkArchitecture.Current or
+            DotNetFrameworkArchitecture.Bitness32 or
+            DotNetFrameworkArchitecture.Bitness64 => architecture,
+            _ => Assumed.Unreachable<DotNetFrameworkArchitecture>(),
         };
 }

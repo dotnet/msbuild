@@ -10,7 +10,6 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 
 #nullable disable
 
@@ -870,9 +869,9 @@ public sealed partial class ToolLocationHelper_Tests
     [Fact]
     public void GetPathToStandardLibraries64Bit35()
     {
-        string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness32);
-        string frameworkDirectory2064bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness64);
-        string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Current);
+        string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(DotNetFrameworkArchitecture.Bitness32);
+        string frameworkDirectory2064bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(DotNetFrameworkArchitecture.Bitness64);
+        string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(DotNetFrameworkArchitecture.Current);
 
         if (!Environment.Is64BitOperatingSystem)
         {
@@ -962,8 +961,8 @@ public sealed partial class ToolLocationHelper_Tests
     [Fact]
     public void GetPathToStandardLibraries32Bit35()
     {
-        string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness32);
-        string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Current);
+        string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(DotNetFrameworkArchitecture.Bitness32);
+        string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(DotNetFrameworkArchitecture.Current);
 
         if (Environment.Is64BitOperatingSystem)
         {
