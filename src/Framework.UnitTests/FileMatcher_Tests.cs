@@ -2700,34 +2700,45 @@ namespace Microsoft.Build.UnitTests
             traversed.Select(path => path.TrimEnd(Path.DirectorySeparatorChar)).ShouldBe([root.Path, sub.Path, empty.Path], ignoreOrder: true);
         }
 
-        [Fact]
-        public void CompetingSharedCacheInsertionReplaysTraversedDirectories()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CompetingSharedCacheInsertionReplaysTraversedDirectories(bool optimized)
         {
+            FileMatcherImplementation implementation = optimized ? FileMatcherImplementation.Optimized : FileMatcherImplementation.Legacy;
             TransientTestFolder root = _env.CreateFolder(createFolder: true);
             _env.CreateFile(root, "a.cs", string.Empty);
             TransientTestFolder sub = _env.CreateFolder(Path.Combine(root.Path, "sub"), createFolder: true);
             _env.CreateFile(sub, "b.cs", string.Empty);
+            TransientTestFolder excluded = _env.CreateFolder(Path.Combine(root.Path, "excluded"), createFolder: true);
+            string missing = Path.Combine(root.Path, "missing");
+            List<string> excludes = [Path.Combine("excluded", "**"), Path.Combine("missing", "**")];
             var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
             var producer = new FileMatcher(
                 FileSystems.Default,
                 cache,
+                implementation,
                 cacheTraversedDirectories: true);
             List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
             var consumer = new FileMatcher(
                 new ThrowingFileSystem(),
                 cache,
+                implementation,
                 directoryTraversed: traversed.Add,
-                cacheTraversedDirectories: true);
+                cacheTraversedDirectories: true,
+                directoryProbed: (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)));
             consumer.TestOnlyBeforeGetOrAdd = () =>
             {
                 consumer.TestOnlyBeforeGetOrAdd = null;
-                producer.GetFiles(root.Path, "**/*.cs").FileList.Length.ShouldBe(2);
+                producer.GetFiles(root.Path, "**/*.cs", excludes).FileList.Length.ShouldBe(2);
             };
 
-            consumer.GetFiles(root.Path, "**/*.cs").FileList.Length.ShouldBe(2);
+            consumer.GetFiles(root.Path, "**/*.cs", excludes).FileList.Length.ShouldBe(2);
 
             traversed.Select(path => path.TrimEnd(Path.DirectorySeparatorChar))
                 .ShouldBe([root.Path, sub.Path], ignoreOrder: true);
+            probes.ShouldBe([(root.Path, true), (excluded.Path, true), (missing, false)], ignoreOrder: true);
         }
 
         [Fact]
@@ -2792,9 +2803,628 @@ namespace Microsoft.Build.UnitTests
             traversed.Select(path => path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)).ShouldBe([missing]);
         }
 
-        /// <summary>Fails every operation, proving a cached expansion is reused without touching the file system.</summary>
-        private sealed class ThrowingFileSystem : IFileSystem
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ExcludedSubtreesAreOnlyReportedAsDirectoryProbes(bool optimized)
         {
+            FileMatcherImplementation implementation = optimized ? FileMatcherImplementation.Optimized : FileMatcherImplementation.Legacy;
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            TransientTestFolder sub = _env.CreateFolder(Path.Combine(root.Path, "src"), createFolder: true);
+            _env.CreateFile(sub, "b.cs", string.Empty);
+            List<string> excludes = [];
+            List<(string Path, bool Exists)> expectedProbes = [(root.Path, true)];
+            string[] excludedNames = ["bin", "obj", "generated"];
+            foreach (string name in excludedNames)
+            {
+                TransientTestFolder excluded = _env.CreateFolder(Path.Combine(root.Path, name), createFolder: true);
+                _env.CreateFile(excluded, "excluded.cs", string.Empty);
+                excludes.Add(Path.Combine(name, "**"));
+                expectedProbes.Add((excluded.Path, true));
+            }
+            excludes.Add(Path.Combine("missing", "**"));
+            expectedProbes.Add((Path.Combine(root.Path, "missing"), false));
+
+            var actualProbes = new ConcurrentBag<(string Path, bool Exists)>();
+            var probes = new ConcurrentBag<(string Path, bool Exists)>();
+            var traversed = new ConcurrentBag<string>();
+            var fileSystem = new ProbeFileSystem(path =>
+            {
+                bool exists = FileSystems.Default.DirectoryExists(path);
+                actualProbes.Add((FileMatcher.Normalize(path), exists));
+                return exists;
+            });
+            var matcher = new FileMatcher(
+                fileSystem,
+                new ConcurrentDictionary<string, IReadOnlyList<string>>(),
+                implementation,
+                directoryTraversed: path => traversed.Add(FileMatcher.Normalize(path)),
+                directoryProbed: (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)));
+            var baseline = new FileMatcher(FileSystems.Default, new ConcurrentDictionary<string, IReadOnlyList<string>>(), implementation);
+
+            matcher.SelectDriver(root.Path, "**/*.cs", excludes).Driver.ShouldBe(
+                implementation == FileMatcherImplementation.Legacy ? FileMatcherDriver.Legacy : FileMatcherDriver.OptimizedCallback);
+            var expected = baseline.GetFiles(root.Path, "**/*.cs", excludes);
+            var result = matcher.GetFiles(root.Path, "**/*.cs", excludes);
+
+            result.FileList.ShouldBe(["a.cs", Path.Combine("src", "b.cs")], ignoreOrder: true);
+            result.FileList.ShouldBe(expected.FileList, ignoreOrder: true);
+            result.Action.ShouldBe(expected.Action);
+            result.ExcludeFileSpec.ShouldBe(expected.ExcludeFileSpec);
+            result.GlobFailure.ShouldBe(expected.GlobFailure);
+            traversed.Distinct(FileUtilities.PathComparer).ShouldBe([root.Path, sub.Path], ignoreOrder: true);
+            probes.ShouldBe(expectedProbes, ignoreOrder: true);
+            actualProbes.ShouldBe(expectedProbes, ignoreOrder: true);
+        }
+
+        [Theory]
+        [InlineData(false, false, false, false)]
+        [InlineData(false, false, false, true)]
+        [InlineData(false, false, true, false)]
+        [InlineData(false, false, true, true)]
+        [InlineData(false, true, false, false)]
+        [InlineData(false, true, false, true)]
+        [InlineData(false, true, true, false)]
+        [InlineData(false, true, true, true)]
+        [InlineData(true, false, false, false)]
+        [InlineData(true, false, false, true)]
+        [InlineData(true, false, true, false)]
+        [InlineData(true, false, true, true)]
+        [InlineData(true, true, false, false)]
+        [InlineData(true, true, false, true)]
+        [InlineData(true, true, true, false)]
+        [InlineData(true, true, true, true)]
+        public void SharedCacheReplaysDirectoryProbesForMixedObservers(
+            bool optimized,
+            bool producerHasProbeObserver,
+            bool consumerHasProbeObserver,
+            bool consumerCapturesMetadata)
+        {
+            FileMatcherImplementation implementation = optimized ? FileMatcherImplementation.Optimized : FileMatcherImplementation.Legacy;
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            TransientTestFolder excluded = _env.CreateFolder(Path.Combine(root.Path, "excluded"), createFolder: true);
+            string missing = Path.Combine(root.Path, "missing");
+            List<string> excludes = [Path.Combine("excluded", "**"), Path.Combine("missing", "**")];
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            var producerTraversed = new ConcurrentBag<string>();
+            var producerProbes = new ConcurrentBag<(string Path, bool Exists)>();
+            var producer = new FileMatcher(
+                FileSystems.Default,
+                cache,
+                implementation,
+                directoryTraversed: producerTraversed.Add,
+                cacheTraversedDirectories: true,
+                directoryProbed: producerHasProbeObserver ? (path, exists) => producerProbes.Add((path, exists)) : null);
+
+            producer.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs"]);
+            Directory.Delete(excluded.Path);
+            _env.CreateFolder(missing, createFolder: true);
+            _env.CreateFile(root, "new.cs", string.Empty);
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            var consumer = new FileMatcher(
+                new ThrowingFileSystem(),
+                cache,
+                implementation,
+                directoryTraversed: path => traversed.Add(FileMatcher.Normalize(path)),
+                cacheTraversedDirectories: consumerCapturesMetadata,
+                directoryProbed: consumerHasProbeObserver ? (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)) : null);
+
+            consumer.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs"]);
+
+            if (consumerHasProbeObserver)
+            {
+                traversed.ShouldBe([root.Path]);
+                probes.ShouldBe([(root.Path, true), (excluded.Path, true), (missing, false)], ignoreOrder: true);
+            }
+            else
+            {
+                traversed.ShouldBe([root.Path, excluded.Path, missing], ignoreOrder: true);
+                probes.ShouldBeEmpty();
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SharedCacheWithoutTraversalObserverReplaysProbes(bool observeProbes)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            string missing = Path.Combine(root.Path, "missing");
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            new FileMatcher(FileSystems.Default, cache, cacheTraversedDirectories: true)
+                .GetFiles(root.Path, "missing/**/*.cs").FileList.ShouldBeEmpty();
+            _env.CreateFolder(missing, createFolder: true);
+            List<(string Path, bool Exists)> probes = [];
+            var consumer = new FileMatcher(
+                new ThrowingFileSystem(),
+                cache,
+                cacheTraversedDirectories: true,
+                directoryProbed: observeProbes ? (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)) : null);
+
+            consumer.GetFiles(root.Path, "missing/**/*.cs").FileList.ShouldBeEmpty();
+
+            probes.ShouldBe(observeProbes ? [(missing, false)] : []);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void PrewarmedCacheWithoutObservationCollectsProbesWithoutChangingFiles(bool optimized)
+        {
+            FileMatcherImplementation implementation = optimized ? FileMatcherImplementation.Optimized : FileMatcherImplementation.Legacy;
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            TransientTestFolder excluded = _env.CreateFolder(Path.Combine(root.Path, "excluded"), createFolder: true);
+            string missing = Path.Combine(root.Path, "missing");
+            List<string> excludes = [Path.Combine("excluded", "**"), Path.Combine("missing", "**")];
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            new FileMatcher(FileSystems.Default, cache, implementation).GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs"]);
+            cache.Keys.ShouldAllBe(key => !key.EndsWith("\0traversed", StringComparison.Ordinal));
+            _env.CreateFile(root, "new.cs", string.Empty);
+            var actualProbes = new ConcurrentBag<(string Path, bool Exists)>();
+            var fileSystem = new ProbeFileSystem(path =>
+            {
+                bool exists = FileSystems.Default.DirectoryExists(path);
+                actualProbes.Add((FileMatcher.Normalize(path), exists));
+                return exists;
+            }, new ThrowingFileSystem());
+            var probes = new ConcurrentBag<(string Path, bool Exists)>();
+            var traversed = new ConcurrentBag<string>();
+            var consumer = new FileMatcher(
+                fileSystem,
+                cache,
+                implementation,
+                directoryTraversed: path => traversed.Add(FileMatcher.Normalize(path)),
+                cacheTraversedDirectories: true,
+                directoryProbed: (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)));
+
+            consumer.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs"]);
+
+            traversed.Distinct(FileUtilities.PathComparer).ShouldBe([root.Path]);
+            probes.ShouldBe([(root.Path, true), (excluded.Path, true), (missing, false)], ignoreOrder: true);
+            actualProbes.ShouldBe(probes, ignoreOrder: true);
+            List<(string Path, bool Exists)> replayed = [];
+            new FileMatcher(
+                new ThrowingFileSystem(),
+                cache,
+                implementation,
+                directoryProbed: (path, exists) => replayed.Add((FileMatcher.Normalize(path), exists)))
+                .GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs"]);
+            replayed.ShouldBe(probes, ignoreOrder: true);
+        }
+
+        [Fact]
+        public void LegacyTraversalMetadataIsReplayedConservatively()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            string missing = Path.Combine(root.Path, "missing");
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            new FileMatcher(FileSystems.Default, cache, cacheTraversedDirectories: true)
+                .GetFiles(root.Path, "missing/**/*.cs").FileList.ShouldBeEmpty();
+            string metadataKey = cache.Keys.Single(key => key.EndsWith("\0traversed", StringComparison.Ordinal));
+            cache[metadataKey] = [missing];
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            var consumer = new FileMatcher(
+                new ThrowingFileSystem(),
+                cache,
+                directoryTraversed: traversed.Add,
+                directoryProbed: (path, exists) => probes.Add((path, exists)));
+
+            consumer.GetFiles(root.Path, "missing/**/*.cs").FileList.ShouldBeEmpty();
+
+            traversed.ShouldBe([missing]);
+            probes.ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DirectoryObservationStopsWhenPredicateBecomesFalse(bool cached)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            List<string> excludes = [Path.Combine("missing", "**")];
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            if (cached)
+            {
+                new FileMatcher(FileSystems.Default, cache, cacheTraversedDirectories: true)
+                    .GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs"]);
+            }
+            bool active = true;
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            FileMatcher matcher = FileMatcher.CreateForEvaluation(
+                cached ? new ThrowingFileSystem() : FileSystems.Default,
+                cache,
+                path =>
+                {
+                    traversed.Add(path);
+                    active = false;
+                },
+                cacheTraversedDirectories: true,
+                shouldObserveDirectoryTraversal: () => active,
+                directoryProbed: (path, exists) =>
+                {
+                    probes.Add((path, exists));
+                    active = false;
+                });
+
+            matcher.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs"]);
+            matcher.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs"]);
+
+            (traversed.Count + probes.Count).ShouldBe(1);
+            if (!cached)
+            {
+                cache.Keys.ShouldAllBe(key => !key.EndsWith("\0traversed", StringComparison.Ordinal));
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SharedCachePreservesConflictingProbeOutcomesAndPathCasing(bool optimized)
+        {
+            FileMatcherImplementation implementation = optimized ? FileMatcherImplementation.Optimized : FileMatcherImplementation.Legacy;
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            string lower = Path.Combine(root.Path, "child");
+            string upper = Path.Combine(root.Path, "CHILD");
+            List<string> excludes =
+            [
+                Path.Combine("child", "**", "*.tmp"),
+                Path.Combine("CHILD", "**", "*.tmp"),
+                Path.Combine("child", "**", "*.bak"),
+            ];
+            int lowerProbeCount = 0;
+            var actualProbes = new ConcurrentBag<(string Path, bool Exists)>();
+            var fileSystem = new ProbeFileSystem(path =>
+            {
+                path = FileMatcher.Normalize(path);
+                bool exists = path == root.Path || (path == lower && ++lowerProbeCount == 1);
+                actualProbes.Add((path, exists));
+                return exists;
+            }, new ThrowingFileSystem());
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            var producer = new FileMatcher(
+                fileSystem,
+                (type, path, _, _, _) => type == FileMatcher.FileSystemEntity.Directories && FileMatcher.Normalize(path) == root.Path
+                    ? [lower, upper]
+                    : [],
+                cache,
+                implementation,
+                allowDirectEnumeration: true,
+                cacheTraversedDirectories: true);
+
+            producer.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBeEmpty();
+
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            var consumer = new FileMatcher(
+                new ThrowingFileSystem(),
+                cache,
+                implementation,
+                directoryTraversed: path => traversed.Add(FileMatcher.Normalize(path)),
+                directoryProbed: (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)));
+            consumer.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBeEmpty();
+
+            traversed.Count.ShouldBe(FileUtilities.PathComparer.Equals(lower, upper) ? 2 : 3);
+            traversed.ShouldContain(root.Path);
+            traversed.ShouldContain(path => FileUtilities.PathComparer.Equals(path, lower));
+            traversed.ShouldContain(path => FileUtilities.PathComparer.Equals(path, upper));
+            probes.ShouldBe([(root.Path, true), (lower, true), (upper, false), (lower, false)], ignoreOrder: true);
+            actualProbes.ShouldBe(probes, ignoreOrder: true);
+        }
+
+        [Fact]
+        public void NestedFailedExpansionRestoresDirectoryObservationCollector()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            var cache = new ConcurrentDictionary<string, IReadOnlyList<string>>();
+            var nested = new FileMatcher(
+                new ThrowingFileSystem(),
+                new ConcurrentDictionary<string, IReadOnlyList<string>>(),
+                FileMatcherImplementation.Legacy,
+                cacheTraversedDirectories: true);
+            var producer = new FileMatcher(
+                FileSystems.Default,
+                cache,
+                FileMatcherImplementation.Legacy,
+                cacheTraversedDirectories: true,
+                directoryProbed: (_, _) => Should.Throw<InvalidOperationException>(() => nested.GetFiles(root.Path, "*.txt")));
+
+            producer.GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            new FileMatcher(
+                new ThrowingFileSystem(),
+                cache,
+                FileMatcherImplementation.Legacy,
+                directoryTraversed: traversed.Add,
+                directoryProbed: (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)))
+                .GetFiles(root.Path, "*.cs").FileList.ShouldBe(["a.cs"]);
+            traversed.Select(FileMatcher.Normalize).ShouldBe([root.Path]);
+            probes.ShouldBe([(root.Path, true)]);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void DirectoryProbeObservationPreservesIllegalSpecsAndProbeExceptions(bool optimized, bool observeProbes)
+        {
+            FileMatcherImplementation implementation = optimized ? FileMatcherImplementation.Optimized : FileMatcherImplementation.Legacy;
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            var matcher = new FileMatcher(
+                new ThrowingFileSystem(),
+                new ConcurrentDictionary<string, IReadOnlyList<string>>(),
+                implementation,
+                directoryTraversed: traversed.Add,
+                directoryProbed: observeProbes ? (path, exists) => probes.Add((path, exists)) : null);
+
+            var illegal = matcher.GetFiles(root.Path, "***");
+            illegal.FileList.ShouldBe(["***"]);
+            illegal.Action.ShouldBe(FileMatcher.SearchAction.ReturnFileSpec);
+            illegal.GlobFailure.ShouldBeNull();
+            traversed.ShouldBeEmpty();
+            probes.ShouldBeEmpty();
+            Should.Throw<InvalidOperationException>(() => matcher.GetFiles(root.Path, "**/*.cs", [Path.Combine("missing", "**")]));
+
+            traversed.ShouldBe(observeProbes ? [] : [root.Path]);
+            probes.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void UnobservedExpansionDoesNotInvokeObservationPredicate()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            FileMatcher matcher = FileMatcher.CreateForEvaluation(
+                FileSystems.Default,
+                new ConcurrentDictionary<string, IReadOnlyList<string>>(),
+                directoryTraversed: null,
+                cacheTraversedDirectories: false,
+                shouldObserveDirectoryTraversal: () => throw new InvalidOperationException("Observation is disabled."));
+
+            matcher.GetFiles(root.Path, "*.cs").FileList.ShouldBeEmpty();
+            matcher.GetFiles(root.Path, "*.cs").FileList.ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DirectEnumerationObservesDirectoriesBeforeReadingMembership(bool recursive)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            TransientTestFolder sub = _env.CreateFolder(Path.Combine(root.Path, "sub"), createFolder: true);
+            string include = recursive ? "**/*.cs" : "*.cs";
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                implementation: FileMatcherImplementation.Optimized,
+                directoryTraversed: path =>
+                {
+                    path = FileMatcher.Normalize(path);
+                    traversed.Add(path);
+                    if (FileUtilities.PathComparer.Equals(path, root.Path))
+                    {
+                        _env.CreateFile(root, "root.cs", string.Empty);
+                    }
+                    else if (FileUtilities.PathComparer.Equals(path, sub.Path))
+                    {
+                        _env.CreateFile(sub, "nested.cs", string.Empty);
+                    }
+                },
+                directoryProbed: (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)));
+
+            matcher.SelectDriver(root.Path, include, excludeSpecs: null).Driver.ShouldBe(FileMatcherDriver.OptimizedDirect);
+            var result = matcher.GetFiles(root.Path, include);
+
+            result.FileList.ShouldBe(
+                recursive ? ["root.cs", Path.Combine("sub", "nested.cs")] : ["root.cs"],
+                ignoreOrder: true);
+            traversed.ShouldBe(recursive ? [root.Path, sub.Path] : [root.Path]);
+            probes.ShouldBe([(root.Path, true)]);
+            var baseline = new FileMatcher(FileSystems.Default, implementation: FileMatcherImplementation.Optimized)
+                .GetFiles(root.Path, include);
+            result.FileList.ShouldBe(baseline.FileList, ignoreOrder: true);
+            result.Action.ShouldBe(baseline.Action);
+            result.ExcludeFileSpec.ShouldBe(baseline.ExcludeFileSpec);
+            result.GlobFailure.ShouldBe(baseline.GlobFailure);
+        }
+
+        [Fact]
+        public void DirectEnumerationDoesNotObservePrunedSubtrees()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            TransientTestFolder src = _env.CreateFolder(Path.Combine(root.Path, "src"), createFolder: true);
+            _env.CreateFile(src, "source.cs", string.Empty);
+            TransientTestFolder empty = _env.CreateFolder(Path.Combine(src.Path, "empty"), createFolder: true);
+            TransientTestFolder excluded = _env.CreateFolder(Path.Combine(src.Path, "generated"), createFolder: true);
+            _env.CreateFile(excluded, "excluded.cs", string.Empty);
+            TransientTestFolder unrelated = _env.CreateFolder(Path.Combine(root.Path, "other"), createFolder: true);
+            _env.CreateFile(unrelated, "unrelated.cs", string.Empty);
+            string missing = Path.Combine(root.Path, "missing");
+            List<string> excludes = [Path.Combine("src", "generated", "**"), Path.Combine("missing", "**")];
+            const string include = "s*/**/*.cs";
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                implementation: FileMatcherImplementation.Optimized,
+                directoryTraversed: path => traversed.Add(FileMatcher.Normalize(path)),
+                directoryProbed: (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)));
+
+            matcher.SelectDriver(root.Path, include, excludes).Driver.ShouldBe(FileMatcherDriver.OptimizedDirect);
+            matcher.GetFiles(root.Path, include, excludes).FileList.ShouldBe([Path.Combine("src", "source.cs")]);
+
+            traversed.ShouldBe([root.Path, src.Path, empty.Path], ignoreOrder: true);
+            probes.ShouldBe([(root.Path, true), (excluded.Path, true), (missing, false)], ignoreOrder: true);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void DirectEnumerationCacheReplaysTraversalAndOriginalProbes(bool producerHasObservers, bool consumerHasProbeObserver)
+        {
+            FileMatcher.ClearCaches();
+            _env.WithTransientTestState(new TransientFileMatcherCaches());
+            _env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", "1");
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            TransientTestFolder sub = _env.CreateFolder(Path.Combine(root.Path, "sub"), createFolder: true);
+            _env.CreateFile(sub, "b.cs", string.Empty);
+            TransientTestFolder empty = _env.CreateFolder(Path.Combine(root.Path, "empty"), createFolder: true);
+            TransientTestFolder excluded = _env.CreateFolder(Path.Combine(root.Path, "excluded"), createFolder: true);
+            string missing = Path.Combine(root.Path, "missing");
+            List<string> excludes = [Path.Combine("excluded", "**"), Path.Combine("missing", "**")];
+            List<string> producerTraversed = [];
+            List<(string Path, bool Exists)> producerProbes = [];
+            var producer = new FileMatcher(
+                FileSystems.Default,
+                implementation: FileMatcherImplementation.Optimized,
+                directoryTraversed: producerHasObservers ? path => producerTraversed.Add(FileMatcher.Normalize(path)) : null,
+                cacheTraversedDirectories: true,
+                directoryProbed: producerHasObservers ? (path, exists) => producerProbes.Add((FileMatcher.Normalize(path), exists)) : null);
+
+            producer.SelectDriver(root.Path, "**/*.cs", excludes).Driver.ShouldBe(FileMatcherDriver.OptimizedDirect);
+            producer.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs", Path.Combine("sub", "b.cs")], ignoreOrder: true);
+            producerTraversed.ShouldBe(producerHasObservers ? [root.Path, sub.Path, empty.Path] : [], ignoreOrder: true);
+            producerProbes.ShouldBe(producerHasObservers ? [(root.Path, true), (excluded.Path, true), (missing, false)] : [], ignoreOrder: true);
+            Directory.Delete(excluded.Path);
+            _env.CreateFolder(missing, createFolder: true);
+            _env.CreateFile(root, "new.cs", string.Empty);
+            _env.CreateFile(empty, "new.cs", string.Empty);
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            var consumer = new FileMatcher(
+                new ThrowingFileSystem(supportsDirectEnumeration: true),
+                implementation: FileMatcherImplementation.Optimized,
+                directoryTraversed: path => traversed.Add(FileMatcher.Normalize(path)),
+                directoryProbed: consumerHasProbeObserver ? (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)) : null);
+
+            consumer.SelectDriver(root.Path, "**/*.cs", excludes).Driver.ShouldBe(FileMatcherDriver.OptimizedDirect);
+            consumer.GetFiles(root.Path, "**/*.cs", excludes).FileList.ShouldBe(["a.cs", Path.Combine("sub", "b.cs")], ignoreOrder: true);
+
+            traversed.ShouldBe(
+                consumerHasProbeObserver ? [root.Path, sub.Path, empty.Path] : [root.Path, sub.Path, empty.Path, excluded.Path, missing],
+                ignoreOrder: true);
+            probes.ShouldBe(consumerHasProbeObserver ? [(root.Path, true), (excluded.Path, true), (missing, false)] : [], ignoreOrder: true);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DirectEnumerationHonorsObservationPredicate(bool initiallyActive)
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            TransientTestFolder sub = _env.CreateFolder(Path.Combine(root.Path, "sub"), createFolder: true);
+            _env.CreateFile(sub, "b.cs", string.Empty);
+            bool active = initiallyActive;
+            List<string> traversed = [];
+            List<(string Path, bool Exists)> probes = [];
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                static (_, _, _, _, _) => throw new InvalidOperationException("The direct driver must not use callback enumeration."),
+                implementation: FileMatcherImplementation.Optimized,
+                allowDirectEnumeration: true,
+                directoryTraversed: path =>
+                {
+                    traversed.Add(FileMatcher.Normalize(path));
+                    active = false;
+                },
+                shouldObserveDirectoryTraversal: () => active,
+                directoryProbed: (path, exists) => probes.Add((FileMatcher.Normalize(path), exists)));
+
+            matcher.SelectDriver(root.Path, "**/*.cs", excludeSpecs: null).Driver.ShouldBe(FileMatcherDriver.OptimizedDirect);
+            matcher.GetFiles(root.Path, "**/*.cs").FileList.ShouldBe(["a.cs", Path.Combine("sub", "b.cs")], ignoreOrder: true);
+
+            traversed.ShouldBe(initiallyActive ? [root.Path] : []);
+            probes.ShouldBe(initiallyActive ? [(root.Path, true)] : []);
+        }
+
+        [Fact]
+        public void UnobservedDirectEnumerationDoesNotInvokeObservationPredicate()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            _env.CreateFile(root, "a.cs", string.Empty);
+            TransientTestFolder sub = _env.CreateFolder(Path.Combine(root.Path, "sub"), createFolder: true);
+            _env.CreateFile(sub, "b.cs", string.Empty);
+            var matcher = new FileMatcher(
+                FileSystems.Default,
+                static (_, _, _, _, _) => throw new InvalidOperationException("The direct driver must not use callback enumeration."),
+                implementation: FileMatcherImplementation.Optimized,
+                allowDirectEnumeration: true,
+                shouldObserveDirectoryTraversal: () => throw new InvalidOperationException("Observation is disabled."));
+
+            matcher.SelectDriver(root.Path, "**/*.cs", excludeSpecs: null).Driver.ShouldBe(FileMatcherDriver.OptimizedDirect);
+            matcher.GetFiles(root.Path, "**/*.cs").FileList.ShouldBe(["a.cs", Path.Combine("sub", "b.cs")], ignoreOrder: true);
+        }
+
+        private sealed class TransientFileMatcherCaches : TransientTestState
+        {
+            public override void Revert() => FileMatcher.ClearCaches();
+        }
+
+        private sealed class ProbeFileSystem : IFileSystem
+        {
+            private readonly Func<string, bool> _directoryExists;
+            private readonly IFileSystem _inner;
+
+            internal ProbeFileSystem(Func<string, bool> directoryExists, IFileSystem inner = null)
+            {
+                _directoryExists = directoryExists;
+                _inner = inner ?? FileSystems.Default;
+            }
+
+            public TextReader ReadFile(string path) => _inner.ReadFile(path);
+
+            public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => _inner.GetFileStream(path, mode, access, share);
+
+            public string ReadFileAllText(string path) => _inner.ReadFileAllText(path);
+
+            public byte[] ReadFileAllBytes(string path) => _inner.ReadFileAllBytes(path);
+
+            public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+                => _inner.EnumerateFiles(path, searchPattern, searchOption);
+
+            public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+                => _inner.EnumerateDirectories(path, searchPattern, searchOption);
+
+            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+                => _inner.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+
+            public FileAttributes GetAttributes(string path) => _inner.GetAttributes(path);
+
+            public DateTime GetLastWriteTimeUtc(string path) => _inner.GetLastWriteTimeUtc(path);
+
+            public bool DirectoryExists(string path) => _directoryExists(path);
+
+            public bool FileExists(string path) => _inner.FileExists(path);
+
+            public bool FileOrDirectoryExists(string path) => _inner.FileOrDirectoryExists(path);
+        }
+
+        /// <summary>Fails every operation, proving a cached expansion is reused without touching the file system.</summary>
+        private sealed class ThrowingFileSystem : IFileSystem, IDirectFileSystemEnumeration
+        {
+            internal ThrowingFileSystem(bool supportsDirectEnumeration = false)
+            {
+                SupportsDirectEnumeration = supportsDirectEnumeration;
+            }
+
+            public bool SupportsDirectEnumeration { get; }
+
             public TextReader ReadFile(string path) => throw new InvalidOperationException(path);
 
             public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => throw new InvalidOperationException(path);

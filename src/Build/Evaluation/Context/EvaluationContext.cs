@@ -67,7 +67,9 @@ namespace Microsoft.Build.Evaluation.Context
         private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
         private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ISdkResolverService sdkResolverService = null,
-            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null, Action<string> directoryTraversed = null)
+            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null,
+            Action<string> directoryTraversed = null,
+            Action<string, bool> directoryProbed = null)
         {
             Policy = policy;
 
@@ -81,7 +83,8 @@ namespace Microsoft.Build.Evaluation.Context
                 FileEntryExpansionCache,
                 directoryTraversed: directoryTraversed,
                 cacheTraversedDirectories: policy == SharingPolicy.Shared && Traits.Instance.RecordEvaluationInputs,
-                shouldObserveDirectoryTraversal: () => InputRecorder?.IsRecording == true);
+                shouldObserveDirectoryTraversal: () => InputRecorder?.IsRecording == true,
+                directoryProbed: directoryProbed);
         }
 
         /// <summary>
@@ -153,7 +156,8 @@ namespace Microsoft.Build.Evaluation.Context
         /// <param name="fileSystem">The file system to use by the new evaluation context.</param>
         /// <param name="inputRecorder">
         /// Recorder for the evaluation the copy serves, or null. A recording copy shares the glob expansion cache; its
-        /// matcher reports every directory a glob traverses, replaying the cached record when the expansion is reused.
+        /// matcher reports directory traversal and existence probes separately, replaying the cached observations
+        /// when the expansion is reused.
         /// </param>
         /// <param name="recordDirectoryTraversal">
         /// Whether glob cache misses and replays should report traversed directories to the recorder.
@@ -169,7 +173,8 @@ namespace Microsoft.Build.Evaluation.Context
                 fileSystem,
                 SdkResolverService,
                 FileEntryExpansionCache,
-                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordPath)
+                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordPath,
+                inputRecorder is null || !recordDirectoryTraversal ? null : inputRecorder.RecordDirectoryProbe)
             {
                 _used = 1,
                 InputRecorder = inputRecorder,
