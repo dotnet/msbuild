@@ -20,7 +20,7 @@ internal static class EvaluationInputValidator
 {
     /// <summary>
     /// Returns true when recording completed without a non-cacheable reason, direct environment reads are unchanged,
-    /// and every recorded path still has the same kind, timestamp, and length.
+    /// and every recorded path still has the required kind and, for reads/enumeration, metadata.
     /// </summary>
     /// <param name="inputs">The recorded inputs.</param>
     /// <param name="reason">The first input that differs, or the non-cacheable reason.</param>
@@ -86,7 +86,10 @@ internal static class EvaluationInputValidator
                     return false;
                 }
 
-                if (current != file.Value)
+                if (current.Kind != file.Value.Kind
+                    || (file.Value.RequiresMetadata
+                        && (current.LastWriteTimeUtc != file.Value.LastWriteTimeUtc
+                            || current.Length != file.Value.Length)))
                 {
                     reason = file.Key;
                     if (captureDetails)

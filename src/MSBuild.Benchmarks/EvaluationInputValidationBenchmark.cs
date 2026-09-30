@@ -91,7 +91,15 @@ public class EvaluationInputValidationBenchmark
     public void RestoreProjectFile() => File.SetLastWriteTimeUtc(_fixture.ProjectPath, _projectWriteTime);
 
     [IterationSetup(Target = nameof(ValidateStaleImportedFile))]
-    public void TouchImportedFile() => _importWriteTime = Touch(ImportPath);
+    public void TouchImportedFile()
+    {
+        _importWriteTime = Touch(ImportPath);
+        if (Validate())
+        {
+            RestoreImportedFile();
+            throw new InvalidOperationException("Changing the selected import did not invalidate the recorded inputs.");
+        }
+    }
 
     [IterationCleanup(Target = nameof(ValidateStaleImportedFile))]
     public void RestoreImportedFile() => File.SetLastWriteTimeUtc(ImportPath, _importWriteTime);
@@ -99,8 +107,15 @@ public class EvaluationInputValidationBenchmark
     [IterationSetup(Target = nameof(ValidateStaleGlobMembership))]
     public void AddGlobMember()
     {
-        using FileStream stream = new(GlobMemberPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        _globMemberCreated = true;
+        using (FileStream stream = new(GlobMemberPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+        {
+            _globMemberCreated = true;
+        }
+        if (Validate())
+        {
+            RemoveGlobMember();
+            throw new InvalidOperationException("Adding a member to the selected directory did not invalidate the recorded inputs.");
+        }
     }
 
     [IterationCleanup(Target = nameof(ValidateStaleGlobMembership))]
@@ -156,7 +171,7 @@ public class EvaluationInputValidationBenchmark
     }
 
     /// <summary>
-    /// The recorded .props or .targets file under the project directory sharing the longest path prefix with the project.
+    /// The metadata-read .props or .targets file under the project directory sharing the longest path prefix with the project.
     /// Imports outside the workload are not mutated.
     /// </summary>
     private string? FindNearestImport()
@@ -168,6 +183,7 @@ public class EvaluationInputValidationBenchmark
         {
             string extension = Path.GetExtension(file.Key);
             if (file.Value.Kind != PathKind.File
+                || !file.Value.RequiresMetadata
                 || !IsPathUnderDirectory(file.Key, projectDirectory, s_pathComparison)
                 || string.Equals(file.Key, _fixture.ProjectPath, s_pathComparison)
                 || !(extension.Equals(".props", StringComparison.OrdinalIgnoreCase) || extension.Equals(".targets", StringComparison.OrdinalIgnoreCase)))
@@ -192,7 +208,7 @@ public class EvaluationInputValidationBenchmark
     }
 
     /// <summary>
-    /// The shallowest recorded directory at or below the project directory, which a glob traversed.
+    /// The shallowest metadata-dependent directory at or below the project directory, which a glob traversed.
     /// </summary>
     private string? FindShallowestDirectoryUnderProject()
     {
@@ -202,7 +218,8 @@ public class EvaluationInputValidationBenchmark
         {
             bool underProject = string.Equals(file.Key, projectDirectory, s_pathComparison)
                 || IsPathUnderDirectory(file.Key, projectDirectory, s_pathComparison);
-            if (file.Value.Kind == PathKind.Directory && underProject && (shallowest is null || file.Key.Length < shallowest.Length))
+            if (file.Value is { Kind: PathKind.Directory, RequiresMetadata: true }
+                && underProject && (shallowest is null || file.Key.Length < shallowest.Length))
             {
                 shallowest = file.Key;
             }

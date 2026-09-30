@@ -56,7 +56,7 @@ internal sealed class EvaluationInputsSnapshotValidationData : IProjectInstanceS
             foreach (KeyValuePair<string, FileDependency> file in Inputs.Files)
             {
                 size = RetainedSizeEstimator.AddString(
-                    RetainedSizeEstimator.Add(size, 80),
+                    RetainedSizeEstimator.Add(size, 88),
                     file.Key);
             }
 

@@ -5,6 +5,7 @@ using System;
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 #if !NETFRAMEWORK
@@ -163,10 +164,11 @@ namespace Microsoft.Build.Shared
         private readonly GetFileSystemEntries _getFileSystemEntries;
 
         /// <summary>
-        /// Called with every directory a glob enumerates or probes for existence, and with the same directories when a
-        /// cached expansion is reused, so an evaluation input recorder sees the same dependencies either way.
+        /// Called with every directory a glob enumerates, and with the same directories when a cached expansion is reused.
+        /// Also reports existence probes conservatively when no separate probe observer is supplied.
         /// </summary>
         private readonly Action<string> _directoryTraversed;
+        private readonly Action<string, bool> _directoryProbed;
 
         /// <summary>
         /// Whether to store the directories an expansion depends on next to its cached file list, for a cache that
@@ -179,9 +181,20 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Collects the directories the expansion running on the current call chain depends on, so they can be cached
-        /// next to its file list. Flows into the tasks the expansion starts.
+        /// next to its file list. A null outcome denotes enumeration. Flows into the tasks the expansion starts.
         /// </summary>
-        private static readonly AsyncLocal<ConcurrentBag<string>> s_traversedDirectories = new();
+        private static readonly AsyncLocal<ConcurrentBag<(string Path, bool? Exists)>> s_directoryObservations = new();
+
+        private sealed class TraversalMetadata : ReadOnlyCollection<string>
+        {
+            internal TraversalMetadata(string[] directories, (string Path, bool Exists)[] probes)
+                : base(directories)
+            {
+                Probes = probes;
+            }
+
+            internal (string Path, bool Exists)[] Probes { get; }
+        }
 
         private static class FileSpecRegexParts
         {
@@ -218,7 +231,8 @@ namespace Microsoft.Build.Shared
             FileMatcherImplementation implementation = FileMatcherImplementation.Auto,
             FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto,
             Action<string> directoryTraversed = null,
-            bool cacheTraversedDirectories = false) : this(
+            bool cacheTraversedDirectories = false,
+            Action<string, bool> directoryProbed = null) : this(
             fileSystem,
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
@@ -232,7 +246,8 @@ namespace Microsoft.Build.Shared
             allowDirectEnumeration: true,
             caseFolding,
             directoryTraversed,
-            cacheTraversedDirectories)
+            cacheTraversedDirectories,
+            directoryProbed: directoryProbed)
         {
         }
 
@@ -245,9 +260,11 @@ namespace Microsoft.Build.Shared
             FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto,
             Action<string> directoryTraversed = null,
             bool cacheTraversedDirectories = false,
-            Func<bool> shouldObserveDirectoryTraversal = null)
+            Func<bool> shouldObserveDirectoryTraversal = null,
+            Action<string, bool> directoryProbed = null)
         {
             _directoryTraversed = directoryTraversed;
+            _directoryProbed = directoryProbed;
             _cacheTraversedDirectories = cacheTraversedDirectories;
             _shouldObserveDirectoryTraversal = shouldObserveDirectoryTraversal;
             if (Traits.Instance.MSBuildCacheFileEnumerations)
@@ -316,7 +333,8 @@ namespace Microsoft.Build.Shared
             ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache,
             Action<string> directoryTraversed,
             bool cacheTraversedDirectories,
-            Func<bool> shouldObserveDirectoryTraversal)
+            Func<bool> shouldObserveDirectoryTraversal,
+            Action<string, bool> directoryProbed = null)
         {
             return new FileMatcher(
                 fileSystem,
@@ -331,13 +349,13 @@ namespace Microsoft.Build.Shared
                 allowDirectEnumeration: true,
                 directoryTraversed: directoryTraversed,
                 cacheTraversedDirectories: cacheTraversedDirectories,
-                shouldObserveDirectoryTraversal: shouldObserveDirectoryTraversal);
+                shouldObserveDirectoryTraversal: shouldObserveDirectoryTraversal,
+                directoryProbed: directoryProbed);
         }
 
         /// <summary>
-        /// Reports a directory an expansion depends on: one it enumerates, whether the entries come from the file system
-        /// or the entry cache, or the root whose existence it probes. Nothing to do, and no async-local read, unless
-        /// this matcher reports or stores them.
+        /// Reports an enumerated directory, whether the entries come from the file system or the entry cache.
+        /// Nothing to do, and no async-local read, unless this matcher reports or stores observations.
         /// </summary>
         private void NoteTraversal(string path)
         {
@@ -348,7 +366,27 @@ namespace Microsoft.Build.Shared
             }
 
             _directoryTraversed?.Invoke(path);
-            s_traversedDirectories.Value?.Add(path);
+            s_directoryObservations.Value?.Add((path, null));
+        }
+
+        private void NoteDirectoryProbe(string path, bool exists, bool reportTraversal = true)
+        {
+            if ((_directoryProbed is null && _directoryTraversed is null && !_cacheTraversedDirectories)
+                || _shouldObserveDirectoryTraversal?.Invoke() == false)
+            {
+                return;
+            }
+
+            if (_directoryProbed is not null)
+            {
+                _directoryProbed(path, exists);
+            }
+            else if (reportTraversal)
+            {
+                _directoryTraversed?.Invoke(path);
+            }
+
+            s_directoryObservations.Value?.Add((path, exists));
         }
 
         /// <summary>
@@ -2194,9 +2232,9 @@ namespace Microsoft.Build.Shared
 
             // An evaluation input recorder needs the directories an expansion depends on even when the expansion comes from
             // the cache, so a cache that outlives the evaluation stores them next to the file list.
-            bool observeTraversal = (_directoryTraversed != null || _cacheTraversedDirectories)
+            bool observeTraversal = (_directoryTraversed is not null || _directoryProbed is not null || _cacheTraversedDirectories)
                 && (_shouldObserveDirectoryTraversal?.Invoke() ?? true);
-            string? traversalKey = observeTraversal && _cacheTraversedDirectories ? enumerationKey + "\0traversed" : null;
+            string? traversalKey = observeTraversal ? enumerationKey + "\0traversed" : null;
 
             IReadOnlyList<string>? files;
             string[] fileList;
@@ -2242,23 +2280,26 @@ namespace Microsoft.Build.Shared
             (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? GlobFailure) Expand()
             {
                 traversalObserved = true;
-                if (traversalKey is null)
+                if (traversalKey is null || !_cacheTraversedDirectories)
                 {
                     return GetFilesForImplementation(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped, selection);
                 }
 
-                ConcurrentBag<string>? outer = s_traversedDirectories.Value;
-                var traversed = new ConcurrentBag<string>();
-                s_traversedDirectories.Value = traversed;
+                ConcurrentBag<(string Path, bool? Exists)>? outer = s_directoryObservations.Value;
+                var observations = new ConcurrentBag<(string Path, bool? Exists)>();
+                s_directoryObservations.Value = observations;
                 try
                 {
                     var result = GetFilesForImplementation(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped, selection);
-                    _cachedGlobExpansions[traversalKey] = Distinct(traversed);
+                    if (_shouldObserveDirectoryTraversal?.Invoke() != false)
+                    {
+                        _cachedGlobExpansions[traversalKey] = CreateTraversalMetadata(observations);
+                    }
                     return result;
                 }
                 finally
                 {
-                    s_traversedDirectories.Value = outer;
+                    s_directoryObservations.Value = outer;
                 }
             }
         }
@@ -2276,23 +2317,43 @@ namespace Microsoft.Build.Shared
 
             foreach (string directory in traversed)
             {
-                _directoryTraversed(directory);
+                NoteTraversal(directory);
+            }
+
+            if (traversed is TraversalMetadata metadata)
+            {
+                HashSet<string>? reportedDirectories = _directoryProbed is null && _directoryTraversed is not null
+                    ? new HashSet<string>(traversed, FileUtilities.PathComparer)
+                    : null;
+                foreach ((string path, bool exists) in metadata.Probes)
+                {
+                    NoteDirectoryProbe(path, exists, reportTraversal: reportedDirectories?.Add(path) ?? true);
+                }
             }
 
             return true;
         }
 
-        private static string[] Distinct(ConcurrentBag<string> paths)
+        private static TraversalMetadata CreateTraversalMetadata(ConcurrentBag<(string Path, bool? Exists)> observations)
         {
-            var distinct = new HashSet<string>(FileUtilities.PathComparer);
-            foreach (string path in paths)
+            var directories = new HashSet<string>(FileUtilities.PathComparer);
+            List<(string Path, bool Exists)> probes = [];
+            foreach ((string path, bool? exists) in observations)
             {
-                distinct.Add(path);
+                if (exists is bool directoryExists)
+                {
+                    // Keep every outcome, including conflicting probes of the same path.
+                    probes.Add((path, directoryExists));
+                }
+                else
+                {
+                    directories.Add(path);
+                }
             }
 
-            string[] result = new string[distinct.Count];
-            distinct.CopyTo(result);
-            return result;
+            string[] traversed = new string[directories.Count];
+            directories.CopyTo(traversed);
+            return new TraversalMetadata(traversed, probes.ToArray());
         }
 #nullable disable
 
@@ -2423,8 +2484,17 @@ namespace Microsoft.Build.Shared
              */
             if (fixedDirectoryPart.Length > 0)
             {
-                NoteTraversal(fixedDirectoryPart);
-                if (!_fileSystem.DirectoryExists(fixedDirectoryPart))
+                // Preserve the legacy observer's notification before the probe, including when the probe throws.
+                if (_directoryProbed is null
+                    && _directoryTraversed is not null
+                    && _shouldObserveDirectoryTraversal?.Invoke() != false)
+                {
+                    _directoryTraversed(fixedDirectoryPart);
+                }
+
+                bool exists = _fileSystem.DirectoryExists(fixedDirectoryPart);
+                NoteDirectoryProbe(fixedDirectoryPart, exists, reportTraversal: false);
+                if (!exists)
                 {
                     return SearchAction.ReturnEmptyList;
                 }
@@ -3277,12 +3347,15 @@ namespace Microsoft.Build.Shared
 #if NET || FEATURE_MSIOREDIST
                 if (useDirectEnumeration)
                 {
+                    FileMatcher? directoryObserver = _directoryTraversed is not null || _cacheTraversedDirectories ? this : null;
+                    directoryObserver?.NoteTraversal(state.BaseDirectory);
                     using OptimizedFileSystemEnumerator enumerator = new(
                         state.BaseDirectory,
                         projectDirectoryUnescaped,
                         stripProjectDirectory,
                         includeMatcher,
-                        excludesToMatch);
+                        excludesToMatch,
+                        directoryObserver);
 
                     while (enumerator.MoveNext())
                     {
@@ -3634,6 +3707,7 @@ namespace Microsoft.Build.Shared
             private readonly MSBuildPathMatcher _includeMatcher;
             private readonly OptimizedFileSearch[] _excludes;
             private readonly byte[] _activeFileExcludes;
+            private readonly FileMatcher? _directoryObserver;
             private bool _fileStateValid;
             private bool _includeFilesInCurrentDirectory;
 
@@ -3642,12 +3716,14 @@ namespace Microsoft.Build.Shared
                 string? projectDirectory,
                 bool stripProjectDirectory,
                 MSBuildPathMatcher includeMatcher,
-                List<OptimizedFileSearch>? excludes)
+                List<OptimizedFileSearch>? excludes,
+                FileMatcher? directoryObserver)
                 : base(GetFullPath(directory), CreateEnumerationOptions())
             {
                 _enumerationRoot = GetFullPath(directory);
                 _outputRoot = GetOutputRoot(directory, projectDirectory, stripProjectDirectory);
                 _includeMatcher = includeMatcher;
+                _directoryObserver = directoryObserver;
 
                 if (excludes is null)
                 {
@@ -3724,6 +3800,7 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
+                _directoryObserver?.NoteTraversal(directory);
                 return true;
             }
 
