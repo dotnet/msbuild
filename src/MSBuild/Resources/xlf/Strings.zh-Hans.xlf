@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
@@ -249,17 +249,13 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded[:true|false]
+        <target state="translated">  -multithreaded[:true|false]
                      在 MSBuild 中启用实验性多线程模式。
                      这意味着 MSBuild 将使用多个线程
                      并行构建项目，
                      而不是使用多个进程。
-                     不支持此选项。
                      使用的最大线程数
                      由 -maxCpuCount 开关决定。
-                     如果开启多线程模式
-                     且 MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount 不能大于 256。
                      (缩写: -mt)
     </target>
         <note />
@@ -1875,7 +1871,7 @@
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: 多线程模式不能与 -reportFileAccesses 一起使用。文件访问报告会为每个工作进程报告一个项目的文件访问情况，但多线程模式可以在同一进程中执行多个项目。请删除 -reportFileAccesses，或使用 -mt:false 禁用多线程模式。如果设置了 MSBUILDFORCEMULTITHREADED，请先取消设置；MSBUILDENABLEMULTITHREADED 可由 -mt:false 覆盖。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
