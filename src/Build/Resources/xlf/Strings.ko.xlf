@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
@@ -3232,7 +3232,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="needs-review-translation">MSB4234: 잘못된 이진 로거 매개 변수: "{0}". 예상 값: ProjectImports={{None,Embed,ZipFile}} 및/또는 [LogFile=]filePath.binlog(로그 파일 이름 또는 경로, 확장명이 ".binlog"여야 함).</target>
+        <target state="new">MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
