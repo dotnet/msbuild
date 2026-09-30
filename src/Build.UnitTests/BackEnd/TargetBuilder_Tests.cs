@@ -1524,6 +1524,61 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             resultsCache.GetResultForRequest(entry.Request)["Victim"].ResultCode.ShouldBe(TargetResultCode.Success);
         }
 
+        [Fact]
+        public void ReentrantSuccessDoesNotMaskFailingBeforeTargetForLocallySkippedTarget()
+        {
+            string projectContents = """
+                <Target Name="Build" DependsOnTargets="Victim;MustNotRun">
+                  <BuildTask />
+                </Target>
+                <Target Name="Victim" Condition="false" />
+                <Target Name="BeforeVictim" BeforeTargets="Victim">
+                  <BeforeVictimTask />
+                </Target>
+                <Target Name="MustNotRun">
+                  <MustNotRunTask />
+                </Target>
+                """;
+
+            ProjectInstance project = CreateTestProject(projectContents, string.Empty, "Build");
+            TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
+            IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
+
+            taskBuilder.FailTaskNumber = 1;
+            (string name, TargetBuiltReason reason)[] target = [("Build", TargetBuiltReason.None)];
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), configCache[1], CreateStubTaskEnvironment());
+
+            const int OtherRequestId = 12345;
+            entry.RequestConfiguration.ActivelyBuildingTargets["BeforeVictim"] = OtherRequestId;
+            TargetResult savedVictimResult = BuildResultUtilities.GetEmptySucceedingTargetResult();
+            bool blocked = false;
+
+            _blockOnTargetInProgress = (blockingRequestId, blockingTarget, partialBuildResult) =>
+            {
+                blockingRequestId.ShouldBe(OtherRequestId);
+                blockingTarget.ShouldBe("BeforeVictim");
+                blocked = true;
+                entry.RequestConfiguration.ActivelyBuildingTargets.Remove(blockingTarget);
+                resultsCache.GetResultsForConfiguration(entry.Request.ConfigurationId)
+                    .AddResultsForTarget("Victim", savedVictimResult);
+                return Task.CompletedTask;
+            };
+
+            BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
+
+            blocked.ShouldBeTrue();
+            taskBuilder.ExecutedTasks.Select(task => task.Name).ToArray().ShouldBe(["BeforeVictimTask"]);
+            result["Build"].ResultCode.ShouldBe(TargetResultCode.Failure);
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            TargetResult victimResult = resultsCache.GetResultsForConfiguration(entry.Request.ConfigurationId).ResultsByTarget["Victim"];
+            victimResult.ShouldBeSameAs(savedVictimResult);
+            victimResult.ResultCode.ShouldBe(TargetResultCode.Success);
+            victimResult.WorkUnitResult.ActionCode.ShouldBe(WorkUnitActionCode.Continue);
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]

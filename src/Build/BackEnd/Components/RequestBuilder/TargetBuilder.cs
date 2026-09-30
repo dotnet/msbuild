@@ -552,7 +552,11 @@ namespace Microsoft.Build.BackEnd
                             stopProcessingStack = true;
                         }
 
-                        PopDependencyTargetsOnTargetFailure(topEntry, resultForDependencyProcessing, ref stopProcessingStack);
+                        // A preserved success must not erase a local before-target failure's Stop.
+                        PopDependencyTargetsOnTargetFailure(
+                            topEntry,
+                            targetResult.WorkUnitResult.ActionCode == WorkUnitActionCode.Stop ? targetResult : resultForDependencyProcessing,
+                            ref stopProcessingStack);
 
                         break;
 
