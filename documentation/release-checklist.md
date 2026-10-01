@@ -199,6 +199,15 @@ See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamen
 
 Steps are **sequential**.
 
+**Telemetry evidence procedure (steps 4.0 and 4.4a):**
+- For each Visual Studio or SDK path actually shipping in this release, use [the queries documented in the internal MSBuild telemetry wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/45184/Telemetry) and ordinary authorized access to check normal MSBuild `build` events. The code-level routes are `VS/MSBuild/Build` for Visual Studio and `dotnet/cli/msbuild/build` for SDK forwarding; the wiki documents backend query examples and access prerequisites.
+- Identify each candidate by an immutable build-specific identity supported by that query (for example, official build ID plus source commit or artifact identity) and record its exact MSBuild version; a broad release-version family is not sufficient.
+- Use a bounded UTC window that accounts for normal ingestion delay—valid positive evidence can be reviewed as soon as it appears—and record the query link, path, candidate identity/version, aggregate count, first/last timestamps, limitations, and the named release owner's decision.
+- If a documented query, access, identity field, or data is unavailable, record verification as **pending**. Missing data or query failure is not proof of a product regression; the owner must explicitly document whether to hold, defer, or proceed with rationale.
+
+This is a human release check, not an official-build, artifact-publishing, or automated-promotion dependency.
+
+- [ ] **4.0** Before final branding and Insiders promotion, use the telemetry evidence procedure to confirm recent ordinary telemetry from relevant canary builds for each path shipping in this release: {{CANARY_TELEMETRY_EVIDENCE_AND_DECISION}}
 - [ ] **4.1** Promote public API on `vs{{THIS_RELEASE_VERSION}}` branch: \
 Move contents of `PublicAPI.Unshipped.txt` → `PublicAPI.Shipped.txt` for all projects with API changes. See [release.md](./release.md) for details.
 - [ ] **4.2** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. **If the Phase 3.3 hardcoded `OptProfBaselineDrop` was kept current, the auto-triggered build should already pick it up (`.vsts-dotnet.yml` seeds `OptProfDrop` from it on `vs*` branches) and this step is a no-op.** Only if the official build still fails for lack of OptProf data (e.g. the baseline was stale/empty at branch-cut):
@@ -208,6 +217,8 @@ Move contents of `PublicAPI.Unshipped.txt` → `PublicAPI.Shipped.txt` for all p
 _**Only required if we are behind the VS schedule** — i.e. the insertion didn't land in VS `main` before `{{INSIDERS_SNAP_DATE}}` (4.4 was missed) and a milestone-gate approval is now needed. If the insertion made the schedule, **skip this step**._
 - [ ] **4.4** Babysit the VS insertion PR from `vs{{THIS_RELEASE_VERSION}}` into VS `main` (auto-generated at https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests). The inserted bits must be in VS `main` **before** `{{INSIDERS_SNAP_DATE}}` so they are included when VS snaps to `rel/insiders`: {{URL_OF_VS_INSERTION}} \
 The insertion PR contains the inserted package versions — useful for the nuget.org publishing step.
+
+- [ ] **4.4a** After Insiders snap and before stable promotion/GA, use the telemetry evidence procedure to confirm ordinary telemetry attributable to the actual final/Insiders candidate for each path shipping in this release. Check Visual Studio and SDK separately because they can carry different MSBuild versions: {{FINAL_TELEMETRY_EVIDENCE_AND_DECISION}}
 
 **After insiders snap** (only if a backport to insiders is needed):
 

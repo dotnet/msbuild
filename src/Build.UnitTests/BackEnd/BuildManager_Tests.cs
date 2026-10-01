@@ -957,6 +957,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void DeferredMessagesAreClearedWhenBeginBuildThrows()
+        {
+            const string deferredMessage = "Message from a failed BeginBuild";
+
+            _buildManager.BeginBuild(_parameters);
+            Should.Throw<InvalidOperationException>(() => _buildManager.BeginBuild(
+                _parameters,
+                [new BuildManager.DeferredBuildMessage(deferredMessage, MessageImportance.High)]));
+            _buildManager.EndBuild();
+
+            BuildResult result = _buildManager.Build(
+                _parameters,
+                GetBuildRequestData("<Project><Target Name='test' /></Project>"));
+
+            result.ShouldHaveSucceeded();
+            _logger.AssertLogDoesntContain(deferredMessage);
+        }
+
+        [Fact]
         public void DeferredMessageShouldBeLogged()
         {
             string contents = CleanupFileContents(@"
@@ -4714,6 +4733,27 @@ $@"<Project InitialTargets=`Sleep`>
 
             _logger.AssertLogContains("MSB4040");
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Ensures programmatic callers receive an actionable failure for the unsupported combination from
+        /// https://github.com/dotnet/msbuild/issues/14825.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedAndReportFileAccessesAreRejectedBeforeBuildStarts()
+        {
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                ReportFileAccesses = true,
+            };
+
+            InvalidOperationException exception = Should.Throw<InvalidOperationException>(
+                () => _buildManager.BeginBuild(parameters));
+
+            exception.Message.ShouldContain("File-access reporting cannot be used with multi-threaded mode.");
+        }
+#endif
 
         /// <summary>
         /// Verifies that MT mode builds with multiple projects referencing the same dependency

@@ -811,16 +811,20 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [Fact]
-    public void DirectDriverPreservesLexicalExcludeRoot()
+    [Theory]
+    [InlineData("src/Framework")]
+    [InlineData("./src/Framework")]
+    [InlineData("src/Framework/../Framework")]
+    public void DirectDriverPreservesLexicalExcludeRoot(string includeRoot)
     {
         TransientTestFolder root = _environment.CreateFolder();
         string frameworkDirectory = Path.Combine(root.Path, "src", "Framework");
         Directory.CreateDirectory(frameworkDirectory);
         File.WriteAllText(Path.Combine(frameworkDirectory, "source.cs"), string.Empty);
 
-        string include = ToPlatformPath("src/Framework/**/*.cs");
-        List<string> excludes = [ToPlatformPath("src/Framework/../Framework/**/*.cs")];
+        includeRoot = ToPlatformPath(includeRoot);
+        string include = Path.Combine(includeRoot, "**", "*.cs");
+        List<string> excludes = [Path.Combine(includeRoot, "..", "Framework", "**", "*.cs")];
         FileMatcher legacy = new(FileSystems.Default, implementation: FileMatcherImplementation.Legacy);
         FileMatcher optimized = new(FileSystems.Default, implementation: FileMatcherImplementation.Optimized);
 
@@ -828,7 +832,60 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             legacy.GetFiles(root.Path, include, excludes),
             optimized.GetFiles(root.Path, include, excludes));
         optimized.GetFiles(root.Path, include, excludes).FileList.ShouldContain(
-            ToPlatformPath("src/Framework/source.cs"));
+            Path.Combine(includeRoot, "source.cs"));
+    }
+
+    [Theory]
+    [InlineData("./src/Project", false, "Build/*.environment.props")]
+    [InlineData("./src/Project", true, "Build/*.environment.props")]
+    [InlineData("build/../src/Project", false, "Build/*.environment.props")]
+    [InlineData("build/../src/Project", true, "Build/*.environment.props")]
+    [InlineData("./src/Project", false, "**/*.environment.props")]
+    [InlineData("./src/Project", true, "**/*.environment.props")]
+    [InlineData("build/../src/Project", false, "**/*.environment.props")]
+    [InlineData("build/../src/Project", true, "**/*.environment.props")]
+    [InlineData("./src/Project", false, "Build/**")]
+    [InlineData("./src/Project", true, "Build/**")]
+    [InlineData("build/../src/Project", false, "Build/**")]
+    [InlineData("build/../src/Project", true, "Build/**")]
+    public void DirectDriverMatchesExcludesWithLexicalIncludeRoot(
+        string includeRoot,
+        bool useAbsolutePaths,
+        string excludeSuffix)
+    {
+        TransientTestFolder root = _environment.CreateFolder();
+        Directory.CreateDirectory(Path.Combine(root.Path, "build"));
+        string projectDirectory = Path.Combine(root.Path, "src", "Project");
+        string buildDirectory = Path.Combine(projectDirectory, "Build");
+        Directory.CreateDirectory(buildDirectory);
+        File.WriteAllText(Path.Combine(projectDirectory, "file1.txt"), string.Empty);
+        File.WriteAllText(Path.Combine(projectDirectory, "file2.txt"), string.Empty);
+        File.WriteAllText(Path.Combine(buildDirectory, "Cpp.props"), string.Empty);
+        File.WriteAllText(Path.Combine(buildDirectory, "CSharp.props"), string.Empty);
+        File.WriteAllText(Path.Combine(buildDirectory, "Cpp.environment.props"), string.Empty);
+        File.WriteAllText(Path.Combine(buildDirectory, "CSharp.environment.props"), string.Empty);
+
+        includeRoot = ToPlatformPath(includeRoot);
+        if (useAbsolutePaths)
+        {
+            includeRoot = Path.Combine(root.Path, includeRoot);
+        }
+
+        string include = Path.Combine(includeRoot, "**", "*.*");
+        List<string> excludes = [Path.Combine(includeRoot, ToPlatformPath(excludeSuffix))];
+        FileMatcher legacy = new(FileSystems.Default, implementation: FileMatcherImplementation.Legacy);
+        FileMatcher optimized = new(FileSystems.Default, implementation: FileMatcherImplementation.Optimized);
+        optimized.SelectDriver(root.Path, include, excludes).Driver.ShouldBe(FileMatcherDriver.OptimizedDirect);
+
+        var legacyResult = legacy.GetFiles(root.Path, include, excludes);
+        var optimizedResult = optimized.GetFiles(root.Path, include, excludes);
+
+        AssertEquivalent(legacyResult, optimizedResult);
+        optimizedResult.FileList.Select(Path.GetFileName).ShouldBe(
+            excludeSuffix == "Build/**"
+                ? ["file1.txt", "file2.txt"]
+                : ["file1.txt", "file2.txt", "Cpp.props", "CSharp.props"],
+            ignoreOrder: true);
     }
 
     [Fact]
@@ -995,6 +1052,37 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             [ToPlatformPath("**/obj/**")]);
 
         result.FileList.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void RecordingFileSystemPreservesConcurrentEnumerationCalls()
+    {
+        TransientTestFolder root = _environment.CreateFolder();
+        DirectRecordingFileSystem fileSystem = new(FileSystems.Default);
+        const int iterations = 4096;
+        List<(string Operation, string Path, string Pattern)> expected = [];
+
+        for (int i = 0; i < iterations; i++)
+        {
+            string pattern = i.ToString(CultureInfo.InvariantCulture);
+            expected.Add((nameof(IFileSystem.EnumerateFiles), root.Path, pattern));
+            expected.Add((nameof(IFileSystem.EnumerateDirectories), root.Path, pattern));
+            expected.Add((nameof(IFileSystem.EnumerateFileSystemEntries), root.Path, pattern));
+        }
+
+        Parallel.For(0, iterations, i =>
+        {
+            string pattern = i.ToString(CultureInfo.InvariantCulture);
+            fileSystem.EnumerateFiles(root.Path, pattern);
+            fileSystem.EnumerateDirectories(root.Path, pattern);
+            fileSystem.EnumerateFileSystemEntries(root.Path, pattern);
+        });
+
+        fileSystem.EnumerationCalls.Count.ShouldBe(expected.Count);
+        fileSystem.EnumerationCalls.OrderBy(call => call.Pattern, StringComparer.Ordinal)
+            .ThenBy(call => call.Operation, StringComparer.Ordinal)
+            .ShouldBe(expected.OrderBy(call => call.Pattern, StringComparer.Ordinal)
+                .ThenBy(call => call.Operation, StringComparer.Ordinal));
     }
 
     [Fact]
@@ -2266,7 +2354,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             _inner = inner;
         }
 
-        internal List<(string Operation, string Path, string Pattern)> EnumerationCalls { get; } = [];
+        internal ConcurrentQueue<(string Operation, string Path, string Pattern)> EnumerationCalls { get; } = new();
 
         public TextReader ReadFile(string path) => _inner.ReadFile(path);
         public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) =>
@@ -2279,7 +2367,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             string searchPattern = "*",
             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
-            EnumerationCalls.Add((nameof(EnumerateFiles), path, searchPattern));
+            EnumerationCalls.Enqueue((nameof(EnumerateFiles), path, searchPattern));
             return _inner.EnumerateFiles(path, searchPattern, searchOption);
         }
 
@@ -2288,7 +2376,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             string searchPattern = "*",
             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
-            EnumerationCalls.Add((nameof(EnumerateDirectories), path, searchPattern));
+            EnumerationCalls.Enqueue((nameof(EnumerateDirectories), path, searchPattern));
             return _inner.EnumerateDirectories(path, searchPattern, searchOption);
         }
 
@@ -2297,7 +2385,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
             string searchPattern = "*",
             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
-            EnumerationCalls.Add((nameof(EnumerateFileSystemEntries), path, searchPattern));
+            EnumerationCalls.Enqueue((nameof(EnumerateFileSystemEntries), path, searchPattern));
             return _inner.EnumerateFileSystemEntries(path, searchPattern, searchOption);
         }
 

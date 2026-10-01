@@ -530,7 +530,9 @@ namespace Microsoft.Build.BackEnd
 
             InitializeProject(componentHost.BuildParameters, () =>
             {
-                if (componentHost.BuildParameters.SaveOperatingEnvironment)
+                // Strict mode keeps the sentinel as process CWD throughout project execution.
+                if (componentHost.BuildParameters.SaveOperatingEnvironment
+                    && (!componentHost.BuildParameters.MultiThreaded || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)))
                 {
                     try
                     {

@@ -42,6 +42,9 @@ body:
     attributes:
       label: Versions & Configurations
       description: |
-        In a Visual Studio developer command prompt, run `msbuild -version` and paste the output here.
-        If applicable, include the version of the tool that invokes MSBuild (Visual Studio, dotnet CLI, etc).
-        Post any other relevant configuration settings here: OS, architecture, etc.
+        Include what you know; "unknown" or "not tested" is fine.
+        * The tool that invokes the build and its version (Visual Studio, dotnet CLI, etc.). Run `dotnet --info` for dotnet builds or `msbuild -version` for MSBuild.exe builds in the same environment as the failing build.
+        * OS and architecture.
+        * Relevant settings such as `-m`, `-mt`, `-graphBuild`, node reuse and MSBuild Server use, including response-file or environment overrides if known.
+        * Whether this happens on the first build or only on repeated builds.
+        * The last known working SDK/MSBuild/Visual Studio version, if applicable.

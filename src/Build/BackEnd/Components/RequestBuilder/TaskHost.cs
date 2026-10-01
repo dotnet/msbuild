@@ -131,6 +131,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Whether the scheduler has activated this request.
+        /// </summary>
+        internal bool IsRequestActive => _requestEntry.State == BuildRequestEntryState.Active;
+
+        /// <summary>
         /// Returns true in the multiproc case
         /// </summary>
         /// <comment>
