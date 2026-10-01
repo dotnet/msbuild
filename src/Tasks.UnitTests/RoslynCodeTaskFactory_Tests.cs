@@ -1269,19 +1269,23 @@ namespace InlineTask
             factory.CleanupTask(factory.CreateTask(engine));
 
             var cachedFactory = new RoslynCodeTaskFactory();
-            cachedFactory.Initialize("ReadDependency", new Dictionary<string, TaskPropertyInfo>(), taskBody, engine).ShouldBeTrue(engine.Log);
-            cachedFactory.TaskType.ShouldBeSameAs(factory.TaskType);
-            ITask first = cachedFactory.CreateTask(engine);
-            ITask second = cachedFactory.CreateTask(engine);
-            cachedFactory.CleanupTask(first);
-            // TaskHost cleanup passes a wrapper after cleaning up the original task.
-            cachedFactory.CleanupTask(new GetProcessId());
+            ITask first = null;
+            ITask second = null;
             try
             {
+                cachedFactory.Initialize("ReadDependency", new Dictionary<string, TaskPropertyInfo>(), taskBody, engine).ShouldBeTrue(engine.Log);
+                first = cachedFactory.CreateTask(engine);
+                second = cachedFactory.CreateTask(engine);
+                cachedFactory.TaskType.ShouldBeSameAs(factory.TaskType);
+                cachedFactory.CleanupTask(first);
+                first = null;
+                // TaskHost cleanup passes a wrapper after cleaning up the original task.
+                cachedFactory.CleanupTask(new GetProcessId());
                 second.Execute().ShouldBeTrue();
             }
             finally
             {
+                cachedFactory.CleanupTask(first);
                 cachedFactory.CleanupTask(second);
             }
         }
