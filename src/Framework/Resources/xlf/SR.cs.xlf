@@ -122,6 +122,11 @@
         <target state="translated">Cesta: {0} překračuje maximální limit pro cestu k OS. Plně kvalifikovaný název souboru musí být kratší než {1} znaků.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: Nepovedlo se najít soubor manifestu platformy v umístění {0}.</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">Verze {0} rozhraní .NET Framework není podporovaná. Zadejte hodnotu z výčtu Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>

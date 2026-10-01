@@ -122,6 +122,11 @@
         <target state="translated">Yol: {0}, işletim sisteminin en yüksek yol sınırını aşıyor. Tam dosya adı en fazla {1} karakter olmalıdır.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: Platform bildirim dosyası, "{0}" konumunda bulunamadı.</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">.NET Framework "{0}" sürümü desteklenmiyor. Lütfen Microsoft.Build.Utilities.TargetDotNetFrameworkVersion sabit listesinden bir değer belirtin.</target>

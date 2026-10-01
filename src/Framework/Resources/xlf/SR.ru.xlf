@@ -122,6 +122,11 @@
         <target state="translated">Длина пути {0} превышает максимально допустимую в ОС. Символов в полном имени файла должно быть не больше {1}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: не удалось найти файл манифеста платформы по адресу "{0}".</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">.NET Framework версии "{0}" не поддерживается. Укажите значение из перечисления Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
