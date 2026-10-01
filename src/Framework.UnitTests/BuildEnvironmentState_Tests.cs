@@ -9,10 +9,16 @@ namespace Microsoft.Build.Framework.UnitTests;
 
 public class BuildEnvironmentState_Tests
 {
-    private static TestEnvironment CreateEnvironmentWithoutHost()
+    internal static TestEnvironment CreateEnvironmentWithoutHost()
     {
         TestEnvironment env = TestEnvironment.Create();
-        CIEnvironmentDetector_Tests.ClearCIEnvironment(env);
+        foreach (string variable in BuildEnvironmentState.AutomatedEnvironmentVariables)
+        {
+            env.SetEnvironmentVariable(variable, null);
+        }
+
+        env.SetEnvironmentVariable("CI", null);
+        env.SetEnvironmentVariable("GITHUB_ACTIONS", null);
         env.SetEnvironmentVariable("MSBUILD_HOST_NAME", null);
         env.SetEnvironmentVariable("VSCODE_CWD", null);
         env.SetEnvironmentVariable("TERM_PROGRAM", null);

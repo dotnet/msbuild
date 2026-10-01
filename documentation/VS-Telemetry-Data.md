@@ -134,6 +134,7 @@ Inside Visual Studio, MSBuild adds its events to the Visual Studio telemetry ses
 
 - The `MSBuild.exe` process that you start owns a telemetry session for its whole lifetime. So does the MSBuild server node. Each build in that process adds events to the same session, so a server node sends its events only when it exits.
 - Worker nodes, task hosts, and RAR nodes do not create sessions. Build telemetry is aggregated in the entry process, so a build reports one `VS/MSBuild/build` event, however many nodes it uses.
+- Tasks that post events to the Visual Studio default telemetry session, for example tasks from Visual Studio SDKs, use this session when they run in the entry process.
 
 ### Consent
 
@@ -144,7 +145,7 @@ Inside Visual Studio, MSBuild adds its events to the Visual Studio telemetry ses
 ### Delivery
 
 - Outside CI, events are saved on exit to the local Visual Studio telemetry store. A later Visual Studio or `MSBuild.exe` process uploads them.
-- In CI, as detected by the same environment variables as the .NET SDK (for example `TF_BUILD`, `GITHUB_ACTIONS`, or `CI`), `MSBuild.exe` uploads pending events just before it exits. Ephemeral agents are often discarded before a later process could do it.
+- In CI, as detected by the same environment variables that disable the terminal logger (for example `CI`, `TF_BUILD`, `GITHUB_ACTIONS`, `TEAMCITY_VERSION`, `JENKINS_URL`, or `GITLAB_CI`), `MSBuild.exe` uploads pending events just before it exits. Ephemeral agents are often discarded before a later process could do it.
 - The upload is best effort and bounded. The whole shutdown waits at most 10 seconds by default; `MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS` changes this budget, and `0` means don't wait. When the budget runs out, the upload is cancelled, and events that were not sent stay in the local store. Telemetry never changes the build result or exit code.
 - Events are not delivered in these cases:
   - Telemetry is opted out or consent is not given.

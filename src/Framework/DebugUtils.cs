@@ -140,8 +140,7 @@ namespace Microsoft.Build.Framework
         public static bool IsInTaskHostNode() => ProcessNodeMode.Value == NodeMode.OutOfProcTaskHostNode;
 
         /// <summary>
-        /// Returns the <see cref="NodeMode"/> this process was launched with (via <c>/nodemode:</c>),
-        /// or null for the entry-point (central) process.
+        /// Returns the <see cref="NodeMode"/> this process was launched with, or null for the entry process.
         /// </summary>
         public static NodeMode? GetProcessNodeMode() => ProcessNodeMode.Value;
     }

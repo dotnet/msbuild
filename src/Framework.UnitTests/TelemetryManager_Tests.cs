@@ -47,8 +47,7 @@ public sealed class TelemetryManager_Tests : IDisposable
     /// </summary>
     private static TestEnvironment CreateEnvironment()
     {
-        TestEnvironment env = TestEnvironment.Create();
-        CIEnvironmentDetector_Tests.ClearCIEnvironment(env);
+        TestEnvironment env = BuildEnvironmentState_Tests.CreateEnvironmentWithoutHost();
         env.SetEnvironmentVariable(TelemetryManager.ShutdownTimeoutEnvironmentVariable, null);
         env.SetEnvironmentVariable(TelemetryManager.DiagnosticsEnvironmentVariable, null);
         return env;

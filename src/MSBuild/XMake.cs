@@ -119,12 +119,6 @@ namespace Microsoft.Build.CommandLine
         private static bool s_initialized;
 
         /// <summary>
-        /// Set by <see cref="Main"/> in worker, task host and RAR node processes. These processes do not keep a telemetry
-        /// session for normal operation; they create one only to report a crash, see <see cref="Execute(string[])"/>.
-        /// </summary>
-        private static bool s_initializeTelemetryOnCrash;
-
-        /// <summary>
         /// The object used to synchronize access to shared build state
         /// </summary>
         private static readonly LockType s_buildLock = new LockType();
@@ -311,10 +305,6 @@ namespace Microsoft.Build.CommandLine
             {
                 TelemetryManager.Instance.Initialize(isStandalone: true);
             }
-            else
-            {
-                s_initializeTelemetryOnCrash = true;
-            }
 
             try
             {
@@ -322,20 +312,13 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-                // Shut down telemetry once per process, after every build request and the final telemetry events. The shutdown is
-                // bounded, does not throw for non-critical failures, and does not change the exit code.
                 TelemetryManager.Instance.Dispose();
             }
         }
 
         /// <summary>
-        /// Returns whether a process with the given node mode creates and owns a telemetry session for its lifetime.
+        /// Only the entry process and the server node report builds, so worker, task host and RAR nodes don't own a telemetry session.
         /// </summary>
-        /// <remarks>
-        /// Only processes that report builds own a session: the entry-point process (no node mode) and the MSBuild server node.
-        /// Worker, task host and RAR nodes report no build events, so creating a session in each of them would only add startup cost
-        /// and compete with the entry process for uploading telemetry.
-        /// </remarks>
         internal static bool OwnsProcessTelemetrySession(NodeMode? nodeMode) => nodeMode is null or NodeMode.OutOfProcServerNode;
 
         private static int RunMain(string[] args)
@@ -1388,10 +1371,9 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-                if (s_initializeTelemetryOnCrash && KnownTelemetry.CrashTelemetry is not null)
+                if (KnownTelemetry.CrashTelemetry is not null && !OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
                 {
-                    // This node did not create a telemetry session at startup; create one now to report the crash.
-                    // Main shuts it down when the process exits.
+                    // Main shuts this session down when the process exits.
                     TelemetryManager.Instance.Initialize(isStandalone: true);
                 }
 
@@ -2907,7 +2889,7 @@ namespace Microsoft.Build.CommandLine
             static bool CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes()
             {
                 // TerminalLogger is not used in automated environments (CI, GitHub Actions, GitHub Copilot, etc.)
-                if (IsAutomatedEnvironment())
+                if (BuildEnvironmentState.IsAutomatedEnvironment())
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
                         new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated"), MessageImportance.Low));
@@ -3086,39 +3068,6 @@ namespace Microsoft.Build.CommandLine
 
                 useTerminalLogger = CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes();
             }
-        }
-
-        /// <summary>
-        /// Determines if the current environment is an automated environment where terminal logger should be disabled.
-        /// This includes CI systems, GitHub Actions, GitHub Copilot, and other automated build environments.
-        /// </summary>
-        /// <returns>True if running in an automated environment, false otherwise.</returns>
-        private static bool IsAutomatedEnvironment()
-        {
-            // Check for common CI environment indicators that use boolean values
-            if (EnvironmentUtilities.IsValueOneOrTrue("CI") ||
-                EnvironmentUtilities.IsValueOneOrTrue("GITHUB_ACTIONS"))
-            {
-                return true;
-            }
-
-            // Check for environment variables that indicate automated environments
-            string[] automatedEnvironmentVariables =
-            {
-                "COPILOT_API_URL",    // GitHub Copilot
-                "BUILD_ID",           // Jenkins, Google Cloud Build
-                "BUILDKITE",          // Buildkite
-                "CIRCLECI",           // CircleCI
-                "TEAMCITY_VERSION",   // TeamCity
-                "TF_BUILD",           // Azure DevOps
-                "APPVEYOR",           // AppVeyor
-                "TRAVIS",             // Travis CI
-                "GITLAB_CI",          // GitLab CI
-                "JENKINS_URL",        // Jenkins
-                "BAMBOO_BUILD_NUMBER" // Atlassian Bamboo
-            };
-
-            return automatedEnvironmentVariables.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
         }
 
         internal static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)

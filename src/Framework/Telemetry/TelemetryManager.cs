@@ -9,6 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -17,30 +18,16 @@ using System.Threading.Tasks;
 namespace Microsoft.Build.Framework.Telemetry
 {
     /// <summary>
-    /// Completes a telemetry session that is owned by this process.
+    /// Shuts down a telemetry session owned by this process: uploads its events when <paramref name="transmit"/> is true,
+    /// otherwise persists them locally for a later process to upload.
     /// </summary>
-    /// <param name="transmit">
-    /// When <c>true</c>, pending events should be uploaded over the network before the returned task completes.
-    /// When <c>false</c>, pending events are only persisted locally, to be uploaded later by another process.
-    /// </param>
-    /// <param name="cancellationToken">Signaled when the shutdown budget is exhausted.</param>
     internal delegate Task OwnedTelemetrySessionShutdown(bool transmit, CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Result of <see cref="TelemetryManager.Dispose"/>.
-    /// </summary>
     internal enum TelemetryShutdownOutcome
     {
-        /// <summary>The process did not own a telemetry session, so nothing was shut down.</summary>
         NotOwned,
-
-        /// <summary>The owned session completed its shutdown within the budget.</summary>
         Completed,
-
-        /// <summary>The shutdown budget was exhausted; the shutdown was cancelled and abandoned.</summary>
         TimedOut,
-
-        /// <summary>The owned session failed to shut down. The failure was swallowed.</summary>
         Failed,
     }
 
@@ -52,23 +39,11 @@ namespace Microsoft.Build.Framework.Telemetry
     /// The TelemetryManager is a singleton that handles both standalone and integrated telemetry scenarios.
     /// On .NET Framework, it integrates with Visual Studio telemetry services.
     /// On .NET Core it provides a lightweight telemetry implementation through exposing an activity source.
-    /// The lifetime of a telemetry session created by <see cref="Initialize"/> in standalone mode is the lifetime of the process:
-    /// it is shut down once, by <see cref="Dispose"/>, never per build request. Sessions borrowed from a host are never shut down.
     /// </remarks>
     internal class TelemetryManager
     {
-        /// <summary>
-        /// Environment variable that overrides the total time, in milliseconds, that <see cref="Dispose"/> waits
-        /// for an owned telemetry session to persist or transmit its events. <c>0</c> means do not wait.
-        /// </summary>
         internal const string ShutdownTimeoutEnvironmentVariable = "MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS";
-
-        /// <summary>
-        /// Environment variable that, when <c>1</c> or <c>true</c>, writes telemetry status messages to the standard error stream.
-        /// </summary>
         internal const string DiagnosticsEnvironmentVariable = "MSBUILD_TELEMETRY_DIAGNOSTICS";
-
-        private const string DiagnosticsPrefix = "MSBuild telemetry: ";
 
         internal const string OptOutEnvironmentVariable =
 #if NETFRAMEWORK
@@ -77,11 +52,6 @@ namespace Microsoft.Build.Framework.Telemetry
             "DOTNET_CLI_TELEMETRY_OPTOUT";
 #endif
 
-        /// <summary>
-        /// Default total shutdown budget. There is a single owned session, so this is the budget for the whole shutdown.
-        /// It matches the Visual Studio telemetry stack's own maximum wait for its manifest on dispose, and is half of the
-        /// .NET SDK's per-provider CI shutdown timeout.
-        /// </summary>
         internal static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
 
         /// <summary>
@@ -99,22 +69,9 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         internal static bool IsDisposed => s_disposed;
 
-        /// <summary>
-        /// The outcome of the last <see cref="Dispose"/> that shut down telemetry.
-        /// Exposed for TESTING purposes.
-        /// </summary>
+        // Exposed for TESTING purposes.
         internal static TelemetryShutdownOutcome LastShutdownOutcome { get; private set; }
-
-        /// <summary>
-        /// Replaces the standard error stream as the destination of diagnostics messages.
-        /// Exposed for TESTING purposes.
-        /// </summary>
         internal static TextWriter? DiagnosticsWriterForTest { get; set; }
-
-        /// <summary>
-        /// Replaces the platform telemetry initialization, for example to simulate a missing telemetry assembly.
-        /// Exposed for TESTING purposes.
-        /// </summary>
         internal static Func<bool, MSBuildActivitySource?>? InitializerForTest { get; set; }
 
         private TelemetryManager()
@@ -141,7 +98,7 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             lock (s_lock)
             {
-                // Telemetry is shut down for the rest of the process once disposed; a session created now would never be shut down.
+                // A session created after Dispose would never be shut down.
                 if (s_initialized || s_disposed)
                 {
                     return;
@@ -176,8 +133,7 @@ namespace Microsoft.Build.Framework.Telemetry
         }
 
         /// <summary>
-        /// Registers a session that <see cref="Dispose"/> treats as owned by this process.
-        /// Exposed for TESTING purposes, so tests never need a real telemetry transport.
+        /// Registers a session that <see cref="Dispose"/> shuts down as owned, so tests never need a real telemetry transport.
         /// </summary>
         internal static void SetOwnedSessionShutdownForTest(OwnedTelemetrySessionShutdown? shutdown)
         {
@@ -224,14 +180,9 @@ namespace Microsoft.Build.Framework.Telemetry
         }
 
         /// <summary>
-        /// Shuts down telemetry for the rest of the process lifetime. Call once, when the process is about to exit.
+        /// Shuts down telemetry for the rest of the process. Only a session owned by this process is shut down: in CI its events
+        /// are uploaded, because an ephemeral agent may never run another process that would upload them; elsewhere they are persisted.
         /// </summary>
-        /// <remarks>
-        /// Only a session owned by this process is shut down. On a CI agent (see <see cref="CIEnvironmentDetector"/>) the session
-        /// tries to upload its events before the process exits, because an ephemeral agent may never run another process that would
-        /// upload persisted events. Elsewhere the session persists events locally, as before. Either way the wait is bounded by
-        /// <see cref="GetShutdownTimeout"/>, happens outside of any lock, and never throws for non-critical failures.
-        /// </remarks>
         public void Dispose()
         {
             OwnedTelemetrySessionShutdown? shutdown;
@@ -252,108 +203,63 @@ namespace Microsoft.Build.Framework.Telemetry
 
             LastShutdownOutcome = shutdown is null
                 ? TelemetryShutdownOutcome.NotOwned
-                : ShutdownOwnedSession(shutdown, CIEnvironmentDetector.IsCIEnvironment(), GetShutdownTimeout());
+                : ShutdownOwnedSession(shutdown, BuildEnvironmentState.IsAutomatedEnvironment(), GetShutdownTimeout());
         }
 
-        /// <summary>
-        /// Runs <paramref name="shutdown"/> and waits at most <paramref name="timeout"/> for it to complete.
-        /// </summary>
-        /// <remarks>
-        /// The shutdown runs on a dedicated background thread, so it starts immediately even when the thread pool is saturated and
-        /// an abandoned shutdown cannot keep the process alive. When the budget is exhausted, the shutdown's cancellation token is
-        /// signaled so the transport stops sending, and the caller returns without waiting further.
-        /// </remarks>
         internal static TelemetryShutdownOutcome ShutdownOwnedSession(OwnedTelemetrySessionShutdown shutdown, bool transmit, TimeSpan timeout)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-#pragma warning disable CA2000 // Dispose objects before losing scope - disposed below, or by the continuation once an abandoned shutdown completes.
+#pragma warning disable CA2000 // Dispose objects before losing scope - disposed by the continuation below.
             CancellationTokenSource cancellation = new();
 #pragma warning restore CA2000
             CancellationToken cancellationToken = cancellation.Token;
+
+            // A dedicated background thread starts even when the thread pool is saturated and cannot keep the process alive.
+            Task task = Task.Factory.StartNew(
+                () => shutdown(transmit, cancellationToken),
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default).Unwrap();
+
+            cancellation.CancelAfter(timeout);
+
             TelemetryShutdownOutcome outcome;
             Exception? failure = null;
-            Task? task = null;
-
             try
             {
-                task = Task.Factory.StartNew(
-                    () => shutdown(transmit, cancellationToken) ?? Task.CompletedTask,
-                    CancellationToken.None,
-                    TaskCreationOptions.LongRunning,
-                    TaskScheduler.Default).Unwrap();
-
-                cancellation.CancelAfter(timeout);
                 outcome = task.Wait(timeout) ? TelemetryShutdownOutcome.Completed : TelemetryShutdownOutcome.TimedOut;
             }
             catch (AggregateException ex)
             {
-                failure = FindNonCancellationException(ex);
+                failure = ex.Flatten().InnerExceptions.FirstOrDefault(e => e is not OperationCanceledException);
                 outcome = failure is null ? TelemetryShutdownOutcome.TimedOut : TelemetryShutdownOutcome.Failed;
             }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                failure = ex;
-                outcome = TelemetryShutdownOutcome.Failed;
-            }
 
-            stopwatch.Stop();
-
-            if (task is null)
-            {
-                cancellation.Dispose();
-            }
-            else
-            {
-                // Observe any later failure of an abandoned shutdown and release the token source only once nothing uses it.
-                task.ContinueWith(
-                    static (completedTask, state) =>
-                    {
-                        _ = completedTask.Exception;
-                        ((CancellationTokenSource)state!).Dispose();
-                    },
-                    cancellation,
-                    CancellationToken.None,
-                    TaskContinuationOptions.ExecuteSynchronously,
-                    TaskScheduler.Default);
-            }
-
-            if (IsDiagnosticsEnabled())
-            {
-                string mode = transmit ? "transmit to network (CI)" : "persist locally";
-                string result = outcome switch
+            task.ContinueWith(
+                static (completedTask, state) =>
                 {
-                    TelemetryShutdownOutcome.Completed => "completed",
-                    TelemetryShutdownOutcome.TimedOut => "timed out, pending events may be lost",
-                    _ => $"failed: {DescribeException(failure!)}",
-                };
-                WriteDiagnostic(string.Format(
-                    CultureInfo.InvariantCulture,
-                    "shutdown ({0}) {1} after {2} ms, budget {3} ms.",
-                    mode,
-                    result,
-                    stopwatch.ElapsedMilliseconds,
-                    (long)timeout.TotalMilliseconds));
-            }
+                    _ = completedTask.Exception;
+                    ((CancellationTokenSource)state!).Dispose();
+                },
+                cancellation,
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
+            string result = outcome switch
+            {
+                TelemetryShutdownOutcome.Completed => "completed",
+                TelemetryShutdownOutcome.TimedOut => "timed out, pending events may be lost",
+                _ => $"failed: {DescribeException(failure!)}",
+            };
+            WriteDiagnostic($"shutdown ({(transmit ? "transmit to network (CI)" : "persist locally")}) {result} after {stopwatch.ElapsedMilliseconds} ms, budget {(long)timeout.TotalMilliseconds} ms.");
 
             return outcome;
         }
 
-        /// <summary>
-        /// Gets the total time <see cref="Dispose"/> may wait for the owned session, from <see cref="ShutdownTimeoutEnvironmentVariable"/>
-        /// or <see cref="DefaultShutdownTimeout"/>.
-        /// </summary>
         internal static TimeSpan GetShutdownTimeout()
         {
-            string? value;
-            try
-            {
-                value = Environment.GetEnvironmentVariable(ShutdownTimeoutEnvironmentVariable);
-            }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                return DefaultShutdownTimeout;
-            }
-
+            string? value = Environment.GetEnvironmentVariable(ShutdownTimeoutEnvironmentVariable);
             if (string.IsNullOrWhiteSpace(value))
             {
                 return DefaultShutdownTimeout;
@@ -364,12 +270,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 return TimeSpan.FromMilliseconds(milliseconds);
             }
 
-            WriteDiagnostic(string.Format(
-                CultureInfo.InvariantCulture,
-                "ignoring {0} because it is not a non-negative whole number of milliseconds; using {1} ms.",
-                ShutdownTimeoutEnvironmentVariable,
-                (long)DefaultShutdownTimeout.TotalMilliseconds));
-
+            WriteDiagnostic($"ignoring {ShutdownTimeoutEnvironmentVariable} because it is not a non-negative whole number of milliseconds; using {(long)DefaultShutdownTimeout.TotalMilliseconds} ms.");
             return DefaultShutdownTimeout;
         }
 
@@ -383,21 +284,10 @@ namespace Microsoft.Build.Framework.Telemetry
             Traits.Instance.SdkTelemetryOptOut;
 #endif
 
-        internal static bool IsDiagnosticsEnabled()
-        {
-            try
-            {
-                return EnvironmentUtilities.IsValueOneOrTrue(DiagnosticsEnvironmentVariable);
-            }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                return false;
-            }
-        }
+        internal static bool IsDiagnosticsEnabled() => EnvironmentUtilities.IsValueOneOrTrue(DiagnosticsEnvironmentVariable);
 
         /// <summary>
-        /// Writes a telemetry status message to the standard error stream when <see cref="DiagnosticsEnvironmentVariable"/> is set.
-        /// Messages must not contain paths, user data, or event contents.
+        /// Writes a message to the standard error stream when diagnostics are enabled. Messages must not contain paths, user data, or event contents.
         /// </summary>
         internal static void WriteDiagnostic(string message)
         {
@@ -408,124 +298,61 @@ namespace Microsoft.Build.Framework.Telemetry
 
             try
             {
-                (DiagnosticsWriterForTest ?? Console.Error).WriteLine(DiagnosticsPrefix + message);
+                (DiagnosticsWriterForTest ?? Console.Error).WriteLine("MSBuild telemetry: " + message);
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
-                // Diagnostics are best effort, for example the standard error stream may be closed.
+                // The standard error stream may be closed.
             }
         }
 
         /// <summary>
-        /// Describes an exception without its message, which may contain paths: its type, HRESULT and, for assembly load failures,
-        /// the simple name of the assembly.
+        /// Describes an exception without its message, which may contain paths.
         /// </summary>
         internal static string DescribeException(Exception exception)
         {
-            string description = DescribeSingleException(exception);
             Exception baseException = exception.GetBaseException();
             return ReferenceEquals(baseException, exception)
-                ? description
-                : $"{description} caused by {DescribeSingleException(baseException)}";
-        }
+                ? Describe(exception)
+                : $"{Describe(exception)} caused by {Describe(baseException)}";
 
-        private static string DescribeSingleException(Exception exception)
-        {
-            string description = string.Format(CultureInfo.InvariantCulture, "{0} (0x{1:X8})", exception.GetType().FullName, exception.HResult);
-            string? fileName = exception switch
+            static string Describe(Exception exception)
             {
-                FileNotFoundException fileNotFound => fileNotFound.FileName,
-                FileLoadException fileLoad => fileLoad.FileName,
-                BadImageFormatException badImage => badImage.FileName,
-                _ => null,
-            };
-
-            return string.IsNullOrEmpty(fileName) ? description : $"{description} for assembly '{GetSimpleAssemblyName(fileName!)}'";
-        }
-
-        private static string GetSimpleAssemblyName(string fileName)
-        {
-            try
-            {
-                // Load failures report either an assembly display name or a path/URI (for example from a codeBase). Never report directories.
-                if (fileName.IndexOfAny(['\\', '/']) >= 0)
+                string description = $"{exception.GetType().FullName} (0x{exception.HResult:X8})";
+                string? fileName = exception switch
                 {
-                    return Path.GetFileNameWithoutExtension(fileName);
-                }
+                    FileNotFoundException fileNotFound => fileNotFound.FileName,
+                    FileLoadException fileLoad => fileLoad.FileName,
+                    BadImageFormatException badImage => badImage.FileName,
+                    _ => null,
+                };
 
-                return new AssemblyName(fileName).Name ?? "unknown";
-            }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                return "unknown";
-            }
-        }
-
-        private static Exception? FindNonCancellationException(AggregateException exception)
-        {
-            foreach (Exception innerException in exception.Flatten().InnerExceptions)
-            {
-                if (innerException is not OperationCanceledException)
-                {
-                    return innerException;
-                }
+                return string.IsNullOrEmpty(fileName) ? description : $"{description} for assembly '{GetAssemblyName(fileName!)}'";
             }
 
-            return null;
-        }
-
-#if NETFRAMEWORK
-        /// <summary>
-        /// Describes where an assembly was loaded from without revealing its path.
-        /// </summary>
-        internal static string DescribeAssembly(Assembly assembly)
-        {
-            string name = assembly.GetName().Name ?? "unknown";
-            string version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "unknown";
-            return $"{name} {version} from {DescribeAssemblyLocation(assembly)}";
-        }
-
-        private static string DescribeAssemblyLocation(Assembly assembly)
-        {
-            try
+            // Load failures report an assembly display name, or a path or URI when binding through a codeBase.
+            static string GetAssemblyName(string fileName)
             {
-                if (assembly.GlobalAssemblyCache)
+                try
                 {
-                    return "the global assembly cache";
+                    return fileName.IndexOfAny(['\\', '/']) >= 0
+                        ? Path.GetFileNameWithoutExtension(fileName)
+                        : new AssemblyName(fileName).Name ?? "unknown";
                 }
-
-                string? assemblyDirectory = Path.GetDirectoryName(assembly.Location);
-                string applicationDirectory = AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                if (string.Equals(assemblyDirectory, applicationDirectory, StringComparison.OrdinalIgnoreCase))
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    return "the application directory";
+                    return "unknown";
                 }
-
-                if (string.Equals(assemblyDirectory, Path.GetDirectoryName(applicationDirectory), StringComparison.OrdinalIgnoreCase))
-                {
-                    return "the parent of the application directory";
-                }
-
-                return "another directory";
-            }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                return "an unknown location";
             }
         }
-#endif
 
         private static OwnedTelemetrySessionShutdown? DetachOwnedSessionShutdown()
         {
-            OwnedTelemetrySessionShutdown? shutdown = s_ownedSessionShutdownForTest;
-            s_ownedSessionShutdownForTest = null;
-
+            OwnedTelemetrySessionShutdown? shutdown = null;
 #if NETFRAMEWORK
             try
             {
-                // Always detach, so that the session state is cleared even if a test registered its own session.
-                OwnedTelemetrySessionShutdown? vsShutdown = DetachVsTelemetrySession();
-                shutdown ??= vsShutdown;
+                shutdown = DetachVsTelemetrySession();
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
@@ -534,7 +361,8 @@ namespace Microsoft.Build.Framework.Telemetry
                 WriteDiagnostic($"could not shut down the telemetry session: {DescribeException(ex)}.");
             }
 #endif
-
+            shutdown = s_ownedSessionShutdownForTest ?? shutdown;
+            s_ownedSessionShutdownForTest = null;
             return shutdown;
         }
 
@@ -582,20 +410,20 @@ namespace Microsoft.Build.Framework.Telemetry
 
             if (TelemetryManager.IsDiagnosticsEnabled())
             {
-                WriteInitializationDiagnostic(session, isStandalone);
+                string state = session is null
+                    ? "no session is available"
+                    : $"{(isStandalone ? "owned" : "host")} session, {(session.IsOptedIn ? "opted in" : "not opted in, events will not be sent")}";
+                TelemetryManager.WriteDiagnostic(
+                    $"initialized ({state}, CI: {BuildEnvironmentState.IsAutomatedEnvironment()}) using {DescribeAssembly(typeof(TelemetrySession).Assembly)}.");
             }
 
             return new MSBuildActivitySource(session);
         }
 
         /// <summary>
-        /// Clears the session state and, if this process owns the session, returns the operation that shuts it down.
-        /// Sessions borrowed from a host, for example Visual Studio, belong to that host and are never shut down here.
+        /// Clears the session state and returns the shutdown of the session if this process owns it. Host sessions are never shut down.
+        /// Must not reference telemetry types, so that processes without a session do not load the telemetry assembly on shutdown.
         /// </summary>
-        /// <remarks>
-        /// This method does not reference Visual Studio telemetry types, so processes that never created a session
-        /// do not load the telemetry assembly on shutdown.
-        /// </remarks>
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static OwnedTelemetrySessionShutdown? DetachOwnedSession()
         {
@@ -618,46 +446,44 @@ namespace Microsoft.Build.Framework.Telemetry
                 return null;
             }
 
+            // DisposeToNetworkAsync uploads pending and previously persisted events; cancellation leaves unsent events in the local store.
             return (transmit, cancellationToken) =>
             {
                 if (transmit)
                 {
-                    // Flushes pending events to the local store, then uploads all stored events. Cancellation stops the upload;
-                    // events that were not sent stay in the local store. Uploading requires this process to hold the store's
-                    // cross-process mutex; otherwise the process that holds it uploads them.
                     return session.DisposeToNetworkAsync(cancellationToken);
                 }
 
-                // Persists pending events to the local store; a later telemetry process uploads them.
                 session.Dispose();
                 return Task.CompletedTask;
             };
         }
 
-        private static void WriteInitializationDiagnostic(TelemetrySession? session, bool isStandalone)
+        // Reports the location relative to MSBuild.exe, because the full path may contain a user name.
+        private static string DescribeAssembly(Assembly assembly)
         {
-            string sessionDescription;
-            if (session is null)
+            string version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "unknown";
+            string location;
+            string? assemblyDirectory = string.IsNullOrEmpty(assembly.Location) ? null : Path.GetDirectoryName(assembly.Location);
+            string applicationDirectory = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
+            if (assembly.GlobalAssemblyCache)
             {
-                sessionDescription = "no session is available";
+                location = "the global assembly cache";
+            }
+            else if (string.Equals(assemblyDirectory, applicationDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                location = "the application directory";
+            }
+            else if (string.Equals(assemblyDirectory, Path.GetDirectoryName(applicationDirectory), StringComparison.OrdinalIgnoreCase))
+            {
+                location = "the parent of the application directory";
             }
             else
             {
-                string optedIn;
-                try
-                {
-                    optedIn = session.IsOptedIn ? "opted in" : "not opted in, events will not be sent";
-                }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    optedIn = "consent unknown";
-                }
-
-                sessionDescription = $"{(isStandalone ? "owned" : "host")} session, {optedIn}";
+                location = "another directory";
             }
 
-            TelemetryManager.WriteDiagnostic(
-                $"initialized ({sessionDescription}, CI: {CIEnvironmentDetector.IsCIEnvironment()}) using {TelemetryManager.DescribeAssembly(typeof(TelemetrySession).Assembly)}.");
+            return $"{assembly.GetName().Name} {version} from {location}";
         }
     }
 #endif

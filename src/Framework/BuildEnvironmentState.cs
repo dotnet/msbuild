@@ -16,31 +16,53 @@ namespace Microsoft.Build.Framework
         internal static bool s_runningInVisualStudio = false;
         internal static bool s_runningTests = false;
 
-        /// <summary>
-        /// Host name reported when running in an Azure Pipelines job (<c>TF_BUILD</c> is true).
-        /// </summary>
         internal const string AzureDevOpsHostName = "Azure DevOps";
+        internal const string GitHubActionsHostName = "GitHub Action";
 
         /// <summary>
-        /// Host name reported when running in a GitHub Actions job (<c>GITHUB_ACTIONS</c> is true).
+        /// Environment variables whose presence indicates an automated environment, in addition to <c>CI</c> and <c>GITHUB_ACTIONS</c> being true.
         /// </summary>
-        internal const string GitHubActionsHostName = "GitHub Action";
+        internal static readonly string[] AutomatedEnvironmentVariables =
+        [
+            "COPILOT_API_URL",    // GitHub Copilot
+            "BUILD_ID",           // Jenkins, Google Cloud Build
+            "BUILDKITE",          // Buildkite
+            "CIRCLECI",           // CircleCI
+            "TEAMCITY_VERSION",   // TeamCity
+            "TF_BUILD",           // Azure DevOps
+            "APPVEYOR",           // AppVeyor
+            "TRAVIS",             // Travis CI
+            "GITLAB_CI",          // GitLab CI
+            "JENKINS_URL",        // Jenkins
+            "BAMBOO_BUILD_NUMBER" // Atlassian Bamboo
+        ];
+
+        /// <summary>
+        /// Determines if the current environment is an automated environment, such as a CI system, GitHub Actions or GitHub Copilot.
+        /// </summary>
+        internal static bool IsAutomatedEnvironment()
+        {
+            if (EnvironmentUtilities.IsValueOneOrTrue("CI") ||
+                EnvironmentUtilities.IsValueOneOrTrue("GITHUB_ACTIONS"))
+            {
+                return true;
+            }
+
+            foreach (string variable in AutomatedEnvironmentVariables)
+            {
+                if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(variable)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Detects the host environment MSBuild is running in (VS, VSCode, CI, CLI, or custom).
         /// Returns null if no specific host could be determined.
         /// </summary>
-        /// <remarks>
-        /// The first matching rule wins:
-        /// <list type="number">
-        ///   <item>Running inside Visual Studio: <c>"VS"</c>.</item>
-        ///   <item>An explicit, non-empty <c>MSBUILD_HOST_NAME</c> (for example set by the .NET CLI or another host): its value.</item>
-        ///   <item><c>TF_BUILD</c> is true: <c>"Azure DevOps"</c>.</item>
-        ///   <item><c>GITHUB_ACTIONS</c> is true: <c>"GitHub Action"</c>.</item>
-        ///   <item><c>VSCODE_CWD</c> is set or <c>TERM_PROGRAM</c> is <c>vscode</c>: <c>"VSCode"</c>.</item>
-        /// </list>
-        /// CI agents are checked before VS Code because a CI job is the more specific host when both are detected.
-        /// </remarks>
         internal static string? GetHostName()
         {
             if (s_runningInVisualStudio)

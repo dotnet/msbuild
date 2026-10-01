@@ -235,8 +235,7 @@ namespace Microsoft.Build.UnitTests
             // https://github.com/dotnet/msbuild/pull/6274
             _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", null);
 
-            // Never let tests (or MSBuild.exe processes they launch) send VS telemetry. Tests that exercise telemetry
-            // clear this explicitly and use controlled listeners/channels.
+            // Tests and the MSBuild.exe processes they launch must never send VS telemetry.
             _testEnvironment.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", "1");
 
             // The `dotnet` muxer always injects MSBuildSDKsPath / MSBuildExtensionsPath (pointing at the SDK it

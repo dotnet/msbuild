@@ -152,9 +152,7 @@
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
     <PackageReference Include="System.ValueTuple" ExcludeAssets="Build" /><!-- We ship the new version but binding redirect to the old version manually, so must avoid the drop-binding-redirect logic in the 4.6.1 package. -->
-    <!-- Microsoft.Build.Framework references this privately; MSBuild.exe owns a telemetry session, so it needs the runtime closure
-         (Telemetry, RemoteControl, Utilities.Internal) next to it. Keep files.swr and app.amd64.config in sync with this closure. -->
-    <PackageReference Include="Microsoft.VisualStudio.Telemetry" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.Telemetry" PrivateAssets="all" /><!-- MSBuild.exe owns a telemetry session, so it ships the runtime closure; keep files.swr and app.amd64.config in sync. -->
   </ItemGroup>
 
   <ItemGroup>
