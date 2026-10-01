@@ -133,8 +133,8 @@ Inside Visual Studio, MSBuild adds its events to the Visual Studio telemetry ses
 ### Which processes report
 
 - The `MSBuild.exe` process that you start owns a telemetry session for its whole lifetime. So does the MSBuild server node. Each build in that process adds events to the same session, so a server node sends its events only when it exits.
-- Worker nodes, task hosts, and RAR nodes do not create sessions. Build telemetry is aggregated in the entry process, so a build reports one `VS/MSBuild/build` event, however many nodes it uses.
-- Tasks that post events to the Visual Studio default telemetry session, for example tasks from Visual Studio SDKs, use this session when they run in the entry process.
+- MSBuild does not create sessions in worker nodes, task hosts, or RAR nodes. Build telemetry is aggregated in the entry process, so a build reports one `VS/MSBuild/build` event, however many nodes it uses.
+- Tasks that post events to the Visual Studio default telemetry session, for example tasks from Visual Studio SDKs, use this session when they run in the entry process. In other processes they create their own session, as before.
 
 ### Consent
 

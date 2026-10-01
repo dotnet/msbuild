@@ -1,8 +1,8 @@
 # MSBuild Telemetry
 
-MSBuild emits and collects telemetry to guide decisions on modernization and optimization investments. Currently the MSBuild collects telemetry only when run from SDK host (mostly the `dotnet build` and `dotnet msbuild` commands). For more details please refer to [the official SDK telemetry documentation](https://learn.microsoft.com/dotnet/core/tools/telemetry).
+MSBuild emits and collects telemetry to guide decisions on modernization and optimization investments. When run from the SDK host (mostly the `dotnet build` and `dotnet msbuild` commands), telemetry follows [the official SDK telemetry documentation](https://learn.microsoft.com/dotnet/core/tools/telemetry). Inside Visual Studio and in `MSBuild.exe` on .NET Framework, MSBuild sends its events through Visual Studio telemetry, see [VS Telemetry Data](../VS-Telemetry-Data.md).
 
-Visual Studio collects some build related telemetry - but that is not leveraging any MSBuild instrumentation, but rather information about count and duration of MSBuild API invocations from the caller point of view. For general information about telemetry being collected by Visual Studio Family of products and regulations compliance please refer to [the official documentation](https://learn.microsoft.com/compliance/regulatory/gdpr-dsr-visual-studio-family).
+For general information about telemetry being collected by Visual Studio Family of products and regulations compliance please refer to [the official documentation](https://learn.microsoft.com/compliance/regulatory/gdpr-dsr-visual-studio-family).
 
 ## Type of data collected
 

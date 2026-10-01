@@ -201,9 +201,17 @@ namespace Microsoft.Build.Framework.Telemetry
                 shutdown = DetachOwnedSessionShutdown();
             }
 
-            LastShutdownOutcome = shutdown is null
-                ? TelemetryShutdownOutcome.NotOwned
-                : ShutdownOwnedSession(shutdown, BuildEnvironmentState.IsAutomatedEnvironment(), GetShutdownTimeout());
+            try
+            {
+                LastShutdownOutcome = shutdown is null
+                    ? TelemetryShutdownOutcome.NotOwned
+                    : ShutdownOwnedSession(shutdown, BuildEnvironmentState.IsAutomatedEnvironment(), GetShutdownTimeout());
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                LastShutdownOutcome = TelemetryShutdownOutcome.Failed;
+                WriteDiagnostic($"shutdown failed: {DescribeException(ex)}.");
+            }
         }
 
         internal static TelemetryShutdownOutcome ShutdownOwnedSession(OwnedTelemetrySessionShutdown shutdown, bool transmit, TimeSpan timeout)
@@ -291,18 +299,16 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         internal static void WriteDiagnostic(string message)
         {
-            if (!IsDiagnosticsEnabled())
-            {
-                return;
-            }
-
             try
             {
-                (DiagnosticsWriterForTest ?? Console.Error).WriteLine("MSBuild telemetry: " + message);
+                if (IsDiagnosticsEnabled())
+                {
+                    (DiagnosticsWriterForTest ?? Console.Error).WriteLine("MSBuild telemetry: " + message);
+                }
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
-                // The standard error stream may be closed.
+                // Diagnostics are best effort, for example the standard error stream may be closed.
             }
         }
 
