@@ -54,15 +54,6 @@
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
-      <Link>AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfig.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
-      <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
-      <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderItem.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>CanonicalError.cs</Link>
     </Compile>

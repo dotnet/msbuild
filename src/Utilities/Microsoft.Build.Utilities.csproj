@@ -38,15 +38,6 @@
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>Shared\AssemblyFolders\AssemblyFoldersEx.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
-      <Link>Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
-      <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
-      <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>Shared\CanonicalError.cs</Link>
