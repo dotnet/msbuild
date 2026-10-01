@@ -17,6 +17,8 @@ using System.Runtime.InteropServices;
 #pragma warning restore 618
 #endif
 
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.AssemblyFoldersExInfo))]
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.AssemblyFoldersFromConfigInfo))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.DotNetFrameworkArchitecture))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.MultipleVersionSupport))]
 [assembly: TypeForwardedTo(typeof(Microsoft.Build.Utilities.ProcessorArchitecture))]

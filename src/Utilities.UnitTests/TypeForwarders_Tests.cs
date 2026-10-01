@@ -17,6 +17,8 @@ public class TypeForwarders_Tests
     {
         Type[] expectedTypes =
         [
+            typeof(AssemblyFoldersExInfo),
+            typeof(AssemblyFoldersFromConfigInfo),
             typeof(DotNetFrameworkArchitecture),
             typeof(MultipleVersionSupport),
             typeof(ProcessorArchitecture),
