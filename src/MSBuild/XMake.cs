@@ -119,6 +119,12 @@ namespace Microsoft.Build.CommandLine
         private static bool s_initialized;
 
         /// <summary>
+        /// Set by <see cref="Main"/> in worker, task host and RAR node processes. These processes do not keep a telemetry
+        /// session for normal operation; they create one only to report a crash, see <see cref="Execute(string[])"/>.
+        /// </summary>
+        private static bool s_initializeTelemetryOnCrash;
+
+        /// <summary>
         /// The object used to synchronize access to shared build state
         /// </summary>
         private static readonly LockType s_buildLock = new LockType();
@@ -301,8 +307,39 @@ namespace Microsoft.Build.CommandLine
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
 
-            TelemetryManager.Instance.Initialize(isStandalone: true);
+            if (OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
+            {
+                TelemetryManager.Instance.Initialize(isStandalone: true);
+            }
+            else
+            {
+                s_initializeTelemetryOnCrash = true;
+            }
 
+            try
+            {
+                return RunMain(args);
+            }
+            finally
+            {
+                // Shut down telemetry once per process, after every build request and the final telemetry events. The shutdown is
+                // bounded, does not throw for non-critical failures, and does not change the exit code.
+                TelemetryManager.Instance.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Returns whether a process with the given node mode creates and owns a telemetry session for its lifetime.
+        /// </summary>
+        /// <remarks>
+        /// Only processes that report builds own a session: the entry-point process (no node mode) and the MSBuild server node.
+        /// Worker, task host and RAR nodes report no build events, so creating a session in each of them would only add startup cost
+        /// and compete with the entry process for uploading telemetry.
+        /// </remarks>
+        internal static bool OwnsProcessTelemetrySession(NodeMode? nodeMode) => nodeMode is null or NodeMode.OutOfProcServerNode;
+
+        private static int RunMain(string[] args)
+        {
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -370,8 +407,6 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
-
-            TelemetryManager.Instance.Dispose();
 
             return exitCode;
         }
@@ -1353,6 +1388,13 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                if (s_initializeTelemetryOnCrash && KnownTelemetry.CrashTelemetry is not null)
+                {
+                    // This node did not create a telemetry session at startup; create one now to report the crash.
+                    // Main shuts it down when the process exits.
+                    TelemetryManager.Instance.Initialize(isStandalone: true);
+                }
+
                 CrashTelemetryRecorder.FlushCrashTelemetry();
 
                 s_buildComplete.Set();

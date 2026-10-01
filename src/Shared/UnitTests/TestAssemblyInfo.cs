@@ -235,6 +235,10 @@ namespace Microsoft.Build.UnitTests
             // https://github.com/dotnet/msbuild/pull/6274
             _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", null);
 
+            // Never let tests (or MSBuild.exe processes they launch) send VS telemetry. Tests that exercise telemetry
+            // clear this explicitly and use controlled listeners/channels.
+            _testEnvironment.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", "1");
+
             // The `dotnet` muxer always injects MSBuildSDKsPath / MSBuildExtensionsPath (pointing at the SDK it
             // resolved) into the environment of the MSBuild process it launches. In the bootstrapped CI build the
             // test hosts are spawned by the stage 1 bootstrap `dotnet`, so these leak in pointing at the stage 1

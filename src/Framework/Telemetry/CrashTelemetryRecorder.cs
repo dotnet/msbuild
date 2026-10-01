@@ -97,6 +97,17 @@ internal static class CrashTelemetryRecorder
         {
             // Best effort: telemetry must never cause a secondary failure.
         }
+
+        // The process is about to terminate without running its normal shutdown, so give a session owned by this
+        // process a bounded chance to persist or transmit the crash. Sessions borrowed from a host are not affected.
+        try
+        {
+            TelemetryManager.Instance.Dispose();
+        }
+        catch
+        {
+            // Best effort: telemetry must never cause a secondary failure.
+        }
     }
 
     /// <summary>
