@@ -58,12 +58,12 @@
       </trans-unit>
       <trans-unit id="Binlog_EventFilterThrew">
         <source>The binary log event filter threw an exception.</source>
-        <target state="new">The binary log event filter threw an exception.</target>
+        <target state="translated">Filtr zdarzeń dziennika binarnego zgłosił wyjątek.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_EventFilterThrewWithContext">
         <source>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</source>
-        <target state="new">The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</target>
+        <target state="translated">Filtr zdarzeń dziennika binarnego zgłosił wyjątek dla rekordu {0} ({1}) w wersji formatu pliku {2}. Kontekst kompilacji: [{3}]. Oryginalny kontekst kompilacji: [{4}]. Zobacz wyjątek wewnętrzny, aby uzyskać szczegółowe informacje.</target>
         <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
@@ -614,7 +614,7 @@
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerEventFilter">
         <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
-        <target state="new">MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</target>
+        <target state="translated">MSB4234: nieprawidłowy filtr zdarzeń rejestratora binarnego: „{0}”. Określ wartość Exclude = raz na rejestrator, a następnie nazwy rodzajów zdarzeń rozdzielonych przecinkami. Puste, liczbowe, nieznane, pomocnicze i chronione rodzaje cyklu życia są niedozwolone. Wyklucz elementy ProjectEvaluationStarted i ProjectEvaluationFinished razem lub nie.</target>
         <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
       </trans-unit>
       <trans-unit id="InvalidVersionFormat">
@@ -3232,7 +3232,7 @@ Wykorzystanie:          Średnie wykorzystanie {0}: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="new">MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</target>
+        <target state="translated">MSB4234: nieprawidłowe parametry rejestratora binarnego: "{0}". Oczekiwano: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...] i/lub [LogFile=]filePath.binlog (nazwa lub ścieżka pliku dziennika musi mieć rozszerzenie ".binlog").</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">

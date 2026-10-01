@@ -1851,32 +1851,32 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: La riproduzione del log binario filtrato è stata annullata. Non è stato pubblicato alcun output.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: la riesecuzione del log binario filtrato non è riuscita. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: il percorso di output del log binario filtrato non è valido. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: La destinazione del log binario esiste già, oppure è specificata più di una volta. Scegliere un nuovo percorso di output.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: Questa opzione non è supportata durante la riproduzione di un log binario con Exclude=.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: La riproduzione filtrata supporta ProjectImports=Embed o ProjectImports=None, ma non ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
@@ -2244,63 +2244,63 @@ Nota: livello di dettaglio dei logger di file
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes build events to a compressed binary file.
-                     By default the file is in the current directory and named
-                     "msbuild.binlog". The binary log is a detailed description
-                     of the build process that can later be used to reconstruct
-                     text logs and used by other analysis tools. A binary log
-                     is usually 10-20x smaller than the most detailed text
-                     diagnostic-level log, but it contains more information.
-                     (Short form: -bl)
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializza gli eventi di compilazione in un file binario compresso.
+                     Per impostazione predefinita, il file si trova nella directory corrente e si chiama
+                     "msbuild.binlog". Il log binario è una descrizione
+                     dettagliata del processo di compilazione utilizzabile in
+                     seguito per ricostruire i log di testo e viene usato da altri strumenti di analisi. Un log binario è in genere
+                     10-20 volte più piccolo del più dettagliato log di testo
+                     di livello diagnostico, ma contiene maggiori informazioni.
+                     (Forma breve: -bl)
 
-                     Exclude=kind[,kind...] omits the named event kinds from
-                     this binary logger during builds and replay. Console and
-                     other loggers are unaffected. Names are case-insensitive.
-                     Specify Exclude once per logger. Selection matches exact
-                     record kinds, not all derived message or warning events.
-                     Build, project, target and task lifecycle events are
-                     protected. Exclude both ProjectEvaluationStarted and
-                     ProjectEvaluationFinished together, or neither.
-                     Example: -bl:"out.binlog;Exclude=Message,Warning"
-                     Filtered replay requires new output paths and does not
-                     support ProjectImports=ZipFile.
-                     Filtering is not redaction: embedded files are independent.
+                     Exclude=kind[,kind...] esclude i tipi di evento specificati da
+                     questo logger binario durante le compilazioni e la riproduzione. La console e
+                     gli altri logger non sono interessati. I nomi non fanno distinzione tra maiuscole e minuscole.
+                     Specificare Exclude una sola volta per logger. La selezione corrisponde esattamente a
+                     tipi di record esatti, non a tutti gli eventi messaggio o avviso derivati.
+                     Gli eventi del ciclo di vita di compilazioni, progetti, destinazioni e attività sono
+                     protetti. Escludere sia ProjectEvaluationStarted che
+                     ProjectEvaluationFinished o nessuno dei due.
+                     Esempio: -bl:"out.binlog;Exclude=Message,Warning"
+                     La riproduzione filtrata richiede nuovi percorsi di output e non
+                     supporta ProjectImports=ZipFile.
+                     Il filtro non è un offuscamento dei dati sensibili: i file incorporati sono indipendenti.
 
-                     The optional LogFile specifies the path where the
-                     binary log is saved. To generate a distinct log file
-                     for each build, the token "{}" can be added into the
-                     path, for example: LogFile=output-{}-log.binlog. Each 
-                     "{}" in the log path is replaced with a unique string
-                     using the timestamp, running process Id and random
-                     string stamp.
+                     Il LogFile facoltativo specifica il percorso in cui il
+                     il log binario viene salvato. Per generare un file di log distinto
+                     per ogni compilazione, il token "{}" può essere aggiunto al
+                     percorso, ad esempio: LogFile=output-{}-log.binlog. Ogni 
+                     "{}" nel percorso del log viene sostituito con una stringa univoca
+                     usando il timestamp, l'ID del processo in esecuzione e timbro
+                     stringa casuale.
 
-                     The binary logger by default collects the source text of
-                     project files, including all imported projects and target
-                     files encountered during the build. The optional
-                     ProjectImports switch controls this behavior:
+                     Per impostazione predefinita, il logger binario raccoglie il testo di origine di
+                     file di progetto, inclusi tutti i
+                     progetti importati e i file di destinazione rilevati durante la compilazione. L'opzione facoltativa
+                     ProjectImports controlla questo comportamento:
 
-                      ProjectImports=None     - Don't collect the project
-                                                imports.
-                      ProjectImports=Embed    - Embed project imports in the
-                                                log file.
-                      ProjectImports=ZipFile  - Save project files to
+                      ProjectImports=None     - Non viene eseguita la raccolta
+                                                delle importazioni del progetto.
+                      ProjectImports=Embed    - Le importazioni del progetto vengono incorporate nel
+                                                file di log.
+                      ProjectImports=ZipFile  - I file del progetto vengono salvati in
                                                 output.projectimports.zip
-                                                where output is the same name
-                                                as the binary log file name.
+                                                dove output corrisponde allo stesso
+                                                nome del file di log binario.
 
-                     The default setting for ProjectImports is Embed.
-                     Note: the logger does not collect non-MSBuild source files
-                     such as .cs, .cpp etc.
+                     L'impostazione predefinita di ProjectImports è Embed.
+                     Nota: il logger non raccoglie i file di origine non-MSBuild,
+                     ad esempio quelli con estensione .cs, .cpp e così via.
 
-                     A .binlog file can be "played back" by passing it to
-                     msbuild.exe as an argument instead of a project/solution.
-                     Other loggers will receive the information contained
-                     in the log file as if the original build was happening.
-                     You can read more about the binary log and its usages at:
+                     È possibile riprodurre un file con estensione binlog
+                     passandolo a msbuild.exe come argomento invece di un progetto o di una soluzione.
+                     Altri logger riceveranno le
+                     informazioni contenute nel file di log come se fosse in corso la compilazione originale.
+                     Per maggiori informazioni sul file di log e su come usarlo, vedere:
                      https://aka.ms/msbuild/binlog
 
-                     Examples:
+                     Esempi:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
