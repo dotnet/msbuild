@@ -7,6 +7,9 @@ using System.Configuration.Assemblies;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Build.BackEnd;
@@ -965,7 +968,13 @@ namespace Microsoft.Build.Shared
 
                 info.AddValue("hashAlg", asAssemblyName.HashAlgorithm);
                 info.AddValue("verCompat", asAssemblyName.VersionCompatibility);
+#if NET
+                // CodeBase always returns an empty string under Native AOT. Avoid the incompatible read so ILC can
+                // remove it without changing the result.
+                info.AddValue("codebase", RuntimeFeature.IsDynamicCodeSupported ? asAssemblyName.CodeBase : string.Empty);
+#else
                 info.AddValue("codebase", asAssemblyName.CodeBase);
+#endif
             }
 
             info.AddValue("asStr", asString);
