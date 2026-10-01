@@ -122,6 +122,11 @@
         <target state="translated">Ścieżka: {0} przekracza limit maksymalnej długości ścieżki w systemie operacyjnym. W pełni kwalifikowana nazwa pliku musi się składać z mniej niż {1} znaków.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: nie można odnaleźć pliku manifestu platformy w lokalizacji „{0}”.</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>

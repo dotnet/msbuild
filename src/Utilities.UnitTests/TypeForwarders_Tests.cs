@@ -13,15 +13,18 @@ namespace Microsoft.Build.UnitTests;
 public class TypeForwarders_Tests
 {
     [Fact]
-    public void ToolLocationHelperLeafTypesAreForwardedFromUtilities()
+    public void ToolLocationHelperTypesAreForwardedFromUtilities()
     {
         Type[] expectedTypes =
         [
             typeof(DotNetFrameworkArchitecture),
             typeof(MultipleVersionSupport),
             typeof(ProcessorArchitecture),
+            typeof(SDKManifest),
+            typeof(SDKManifest.Attributes),
             typeof(SDKType),
             typeof(TargetDotNetFrameworkVersion),
+            typeof(TargetPlatformSDK),
             typeof(VisualStudioVersion),
         ];
 
