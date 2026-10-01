@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             log = (TaskLoggingHelper)logPrivate.GetValue(t, null);
             log.LogErrorWithCodeFromResources("ToolTask.CommandTooLong", "Painkiller");
             log.LogWarningWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", "Fallout Tactics", "Fallout 2");
-            log.LogMessageFromResources("ToolsLocationHelper.InvalidRedistFile", "Deus Ex", "Fallout");
+            log.LogMessageFromResources("General.ToolCommandFailedNoErrorCode", "Deus Ex");
         }
 
         /// <summary>

@@ -201,8 +201,17 @@
   <data name="UnsupportedFrameworkVersion" xml:space="preserve">
     <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
   </data>
+  <data name="ToolLocationHelper_UnsupportedFrameworkVersion" xml:space="preserve">
+    <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
+  </data>
   <data name="CouldNotGenerateReferenceAssemblyDirectory" xml:space="preserve">
     <value>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</value>
+  </data>
+  <data name="InvalidRedistFile" xml:space="preserve">
+    <value>There was an error reading the redist list file "{0}". {1}</value>
+  </data>
+  <data name="CouldNotCreateChain" xml:space="preserve">
+    <value>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</value>
   </data>
   <data name="_0_does_not_contain_matching_element" xml:space="preserve">
     <value>'{0}' does not contain matching element.</value>

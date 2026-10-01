@@ -59,7 +59,7 @@ public static partial class ToolLocationHelper
         List<string> sdkDiskRoots = GetTargetPlatformMonikerDiskRoots(diskRoots);
         List<string> extensionSdkDiskRoots = GetExtensionSdkDiskRoots(extensionDiskRoots);
 
-        string registryRoot = NativeMethodsShared.IsWindows ? GetTargetPlatformMonikerRegistryRoots(registrySearchLocation) : string.Empty;
+        string registryRoot = NativeMethods.IsWindows ? GetTargetPlatformMonikerRegistryRoots(registrySearchLocation) : string.Empty;
 
         string cachedTargetPlatformsKey = string.Join("|",
             string.Join(";", sdkDiskRoots),
@@ -78,7 +78,7 @@ public static partial class ToolLocationHelper
                 var monikers = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                 GatherSDKListFromDirectory(sdkDiskRoots, monikers);
 
-                if (NativeMethodsShared.IsWindows)
+                if (NativeMethods.IsWindows)
                 {
                     GatherSDKListFromRegistry(registryRoot, monikers);
                 }
@@ -506,7 +506,7 @@ public static partial class ToolLocationHelper
     /// </summary>
     private static void GetDefaultSDKDiskRoots(List<string> diskRoots)
     {
-        if (NativeMethodsShared.IsWindows)
+        if (NativeMethods.IsWindows)
         {
             // The order is important here because we want to look in the users location first before the non privileged location.
 
@@ -528,7 +528,7 @@ public static partial class ToolLocationHelper
         }
         else
         {
-            diskRoots.Add(NativeMethodsShared.FrameworkBasePath);
+            diskRoots.Add(NativeMethods.FrameworkBasePath);
         }
     }
 
