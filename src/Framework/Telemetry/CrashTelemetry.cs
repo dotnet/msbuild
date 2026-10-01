@@ -173,13 +173,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         RegexOptions.Compiled);
 
     /// <summary>
-    /// A prefix of the exception message, truncated and sanitized to avoid PII.
-    /// Particularly useful for <c>InternalErrorException</c> where the message text
-    /// identifies the specific assertion that failed.
-    /// </summary>
-    public string? ExceptionMessage { get; set; }
-
-    /// <summary>
     /// The HResult from the exception, if available.
     /// </summary>
     public int? HResult { get; set; }
@@ -227,13 +220,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// Truncated to <see cref="MaxStackTraceLength"/> characters.
     /// </summary>
     public string? InnerExceptionStackTrace { get; set; }
-
-    /// <summary>
-    /// A prefix of the inner exception's message, truncated and sanitized to avoid PII.
-    /// For <c>ObjectDisposedException</c>, this includes the disposed object name
-    /// which identifies the specific component that was prematurely disposed.
-    /// </summary>
-    public string? InnerExceptionMessage { get; set; }
 
     /// <summary>
     /// The type name of the build event that was being logged when a logger exception occurred.
@@ -401,7 +387,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         InnerExceptionType = exception.InnerException?.GetType().FullName;
         InnermostExceptionType = GetInnermostException(exception)?.GetType().FullName;
         HResult = exception.HResult;
-        ExceptionMessage = TruncateMessage(exception.Message);
         StackHash = ComputeStackHash(exception);
         StackTop = ExtractStackTop(exception);
         StackCaller = ExtractStackCaller(exception);
@@ -425,7 +410,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         if (inner is not null)
         {
             InnerExceptionStackTrace = ExtractFullStackTrace(inner);
-            InnerExceptionMessage = TruncateMessage(inner.Message);
         }
 
         // InternalLoggerException (in Microsoft.Build) carries the type name of the BuildEventArgs
@@ -507,7 +491,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(StackTop);
         AddIfNotNull(StackCaller);
         AddIfNotNull(FullStackTrace);
-        AddIfNotNull(ExceptionMessage);
         AddIfNotNull(HResult);
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
@@ -520,7 +503,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(CrashThreadName);
         AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(InnerExceptionStackTrace);
-        AddIfNotNull(InnerExceptionMessage);
         AddIfNotNull(LoggerEventType);
         AddIfNotNull(ProcessWorkingSetMB);
         AddIfNotNull(MemoryLoadPercent);
@@ -577,7 +559,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(StackTop);
         AddIfNotNull(StackCaller);
         AddIfNotNull(FullStackTrace);
-        AddIfNotNull(ExceptionMessage);
         AddIfNotNull(HResult?.ToString(), nameof(HResult));
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
@@ -590,7 +571,6 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(CrashThreadName);
         AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(InnerExceptionStackTrace);
-        AddIfNotNull(InnerExceptionMessage);
         AddIfNotNull(LoggerEventType);
         AddIfNotNull(ProcessWorkingSetMB?.ToString(), nameof(ProcessWorkingSetMB));
         AddIfNotNull(MemoryLoadPercent?.ToString(), nameof(MemoryLoadPercent));

@@ -126,6 +126,10 @@ The following Microsoft-owned task factory names are sent in plain text:
 - `XamlTaskFactory`
 - `IntrinsicTaskFactory`
 
+### Crash Events
+
+Crash events don't include exception messages, which can contain customer data. They include exception types, HRESULTs, a stack hash, and stack traces with file paths removed.
+
 ## Collection and Delivery
 
 Inside Visual Studio, MSBuild adds its events to the Visual Studio telemetry session, which Visual Studio owns. MSBuild never shuts that session down. The rest of this section applies to `MSBuild.exe` on .NET Framework, as installed with Visual Studio or Build Tools.
