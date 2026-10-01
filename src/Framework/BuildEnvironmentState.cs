@@ -18,49 +18,60 @@ namespace Microsoft.Build.Framework
 
         internal const string AzureDevOpsHostName = "Azure DevOps";
         internal const string GitHubActionsHostName = "GitHub Action";
+        internal const string GenericCIHostName = "CI";
 
         /// <summary>
-        /// Environment variables whose presence indicates an automated environment, in addition to <c>CI</c> and <c>GITHUB_ACTIONS</c> being true.
+        /// Environment variables whose presence identifies a specific automated environment, in precedence order.
         /// </summary>
-        internal static readonly string[] AutomatedEnvironmentVariables =
+        internal static readonly (string Variable, string HostName)[] CIHostVariables =
         [
-            "COPILOT_API_URL",    // GitHub Copilot
-            "BUILD_ID",           // Jenkins, Google Cloud Build
-            "BUILDKITE",          // Buildkite
-            "CIRCLECI",           // CircleCI
-            "TEAMCITY_VERSION",   // TeamCity
-            "TF_BUILD",           // Azure DevOps
-            "APPVEYOR",           // AppVeyor
-            "TRAVIS",             // Travis CI
-            "GITLAB_CI",          // GitLab CI
-            "JENKINS_URL",        // Jenkins
-            "BAMBOO_BUILD_NUMBER" // Atlassian Bamboo
+            ("TF_BUILD", AzureDevOpsHostName),
+            ("COPILOT_API_URL", "GitHub Copilot"),
+            ("BUILDKITE", "Buildkite"),
+            ("CIRCLECI", "CircleCI"),
+            ("TEAMCITY_VERSION", "TeamCity"),
+            ("APPVEYOR", "AppVeyor"),
+            ("TRAVIS", "Travis CI"),
+            ("GITLAB_CI", "GitLab CI"),
+            ("JENKINS_URL", "Jenkins"),
+            ("BAMBOO_BUILD_NUMBER", "Bamboo"),
         ];
 
         /// <summary>
         /// Determines if the current environment is an automated environment, such as a CI system, GitHub Actions or GitHub Copilot.
         /// </summary>
-        internal static bool IsAutomatedEnvironment()
-        {
-            if (EnvironmentUtilities.IsValueOneOrTrue("CI") ||
-                EnvironmentUtilities.IsValueOneOrTrue("GITHUB_ACTIONS"))
-            {
-                return true;
-            }
+        internal static bool IsAutomatedEnvironment() => GetCIHostName() is not null;
 
-            foreach (string variable in AutomatedEnvironmentVariables)
+        /// <summary>
+        /// Returns the name of the automated environment, <see cref="GenericCIHostName"/> if only a generic CI marker
+        /// (<c>CI</c> or <c>BUILD_ID</c>) is set, or null outside of an automated environment.
+        /// </summary>
+        internal static string? GetCIHostName()
+        {
+            foreach ((string variable, string hostName) in CIHostVariables)
             {
                 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(variable)))
                 {
-                    return true;
+                    return hostName;
                 }
             }
 
-            return false;
+            if (EnvironmentUtilities.IsValueOneOrTrue("GITHUB_ACTIONS"))
+            {
+                return GitHubActionsHostName;
+            }
+
+            if (EnvironmentUtilities.IsValueOneOrTrue("CI") ||
+                !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_ID")))
+            {
+                return GenericCIHostName;
+            }
+
+            return null;
         }
 
         /// <summary>
-        /// Detects the host environment MSBuild is running in (VS, VSCode, CI, CLI, or custom).
+        /// Detects the host environment MSBuild is running in: VS, then MSBUILD_HOST_NAME, then <see cref="GetCIHostName"/>, then VS Code.
         /// Returns null if no specific host could be determined.
         /// </summary>
         internal static string? GetHostName()
@@ -78,14 +89,10 @@ namespace Microsoft.Build.Framework
                     return msbuildHostName;
                 }
 
-                if (EnvironmentUtilities.IsValueOneOrTrue("TF_BUILD"))
+                string? ciHostName = GetCIHostName();
+                if (ciHostName is not null)
                 {
-                    return AzureDevOpsHostName;
-                }
-
-                if (EnvironmentUtilities.IsValueOneOrTrue("GITHUB_ACTIONS"))
-                {
-                    return GitHubActionsHostName;
+                    return ciHostName;
                 }
 
                 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD"))

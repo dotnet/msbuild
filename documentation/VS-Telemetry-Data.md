@@ -24,9 +24,10 @@ The primary telemetry event capturing overall build information.
 |----------|------|-------------|
 | `BuildDurationInMilliseconds` | double | Total build duration from start to finish |
 | `InnerBuildDurationInMilliseconds` | double | Duration from when BuildManager starts (excludes server connection time) |
-| `BuildEngineHost` | string | Host environment: "VS", "VSCode", "Azure DevOps", "GitHub Action", "CLI", etc. |
-| `BuildSuccess` | bool | Whether the build succeeded |
-| `BuildTarget` | string | The target(s) being built |
+| `BuildEngineHost` | string | Host environment: "VS", "VSCode", "Azure DevOps", "GitHub Action", "Jenkins", "CI", etc. See [Host identification](#host-identification) |
+| `IsCI` | bool | Whether the build ran in an automated environment, even when `BuildEngineHost` is overridden by `MSBUILD_HOST_NAME` |
+| `BuildSuccess` | bool | Whether the build succeeded. A failed build also ends the event with the `UserFault` result instead of `Success` |
+| `BuildTarget` | string | The target(s) of the first build request. With `-restore`, the targets built after restore. Empty when the project's default targets are built. Custom target names are hashed |
 | `BuildEngineVersion` | Version | MSBuild engine version |
 | `BuildEngineDisplayVersion` | string | Display-friendly engine version |
 | `BuildEngineFrameworkName` | string | Runtime framework name |
@@ -85,24 +86,31 @@ Tracks which task factories are being used.
 | `XamlTaskFactoryTasksExecutedCount` | int | Tasks created via XamlTaskFactory |
 | `CustomTaskFactoryTasksExecutedCount` | int | Tasks from custom task factories |
 
+### Task Details and Summary (Activity Properties)
+
+- `Tasks` lists only tasks that ran at least once in the build, with their execution count, cumulative time, and memory.
+- `TotalMemoryBytes` is the memory allocated while the task ran. It is measured only on .NET and is null on .NET Framework.
+- The time of the intrinsic `MSBuild` and `CallTarget` tasks includes waiting for the projects and targets they build.
+
 ## 4. Build Incrementality Telemetry
 
-Classifies builds as full or incremental based on target execution patterns.
+Classifies builds as full or incremental based on how many targets with `Inputs` and `Outputs` were up to date.
 
 ### Incrementality Info (Activity Property)
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `Classification` | enum | `Full`, `Incremental`, or `Unknown` |
-| `TotalTargetsCount` | int | Total number of targets |
-| `ExecutedTargetsCount` | int | Targets that ran |
-| `SkippedTargetsCount` | int | Targets that were skipped |
-| `SkippedDueToUpToDateCount` | int | Skipped because outputs were current |
-| `SkippedDueToConditionCount` | int | Skipped due to false condition |
-| `SkippedDueToPreviouslyBuiltCount` | int | Skipped because already built |
-| `IncrementalityRatio` | double | Ratio of skipped to total (0.0-1.0) |
+| `TotalTargetsCount` | int | Distinct target names loaded in the build |
+| `ExecutedTargetsCount` | int | Distinct target names that ran in at least one project |
+| `SkippedTargetsCount` | int | Distinct target names that never ran |
+| `SkippedDueToUpToDateCount` | int | Distinct target names that never ran because their outputs were up to date |
+| `SkippedDueToConditionCount` | int | Distinct target names that never ran because their condition was false |
+| `UpToDateInputOutputTargetsCount` | int | Target instances with `Inputs` and `Outputs` that were skipped because their outputs were up to date |
+| `ExecutedInputOutputTargetsCount` | int | Target instances with `Inputs` and `Outputs` that ran |
+| `IncrementalityRatio` | double | `UpToDateInputOutputTargetsCount` / (`UpToDateInputOutputTargetsCount` + `ExecutedInputOutputTargetsCount`), from 0.0 to 1.0 |
 
-A build is classified as **Incremental** when more than 70% of targets are skipped.
+Each target instance is counted once, in the project that built it, and results reused from the cache are not counted again. A build is classified as **Incremental** when `IncrementalityRatio` is at least 0.7, and as **Unknown** when no target with `Inputs` and `Outputs` was built.
 
 ---
 
@@ -164,12 +172,13 @@ Inside Visual Studio, MSBuild adds its events to the Visual Studio telemetry ses
 
 1. `VS` when MSBuild runs inside Visual Studio.
 2. The value of `MSBUILD_HOST_NAME`, when set.
-3. `Azure DevOps` when `TF_BUILD` is `true`.
+3. The CI system, identified by the first of these environment variables that is set: `TF_BUILD` (`Azure DevOps`), `COPILOT_API_URL` (`GitHub Copilot`), `BUILDKITE` (`Buildkite`), `CIRCLECI` (`CircleCI`), `TEAMCITY_VERSION` (`TeamCity`), `APPVEYOR` (`AppVeyor`), `TRAVIS` (`Travis CI`), `GITLAB_CI` (`GitLab CI`), `JENKINS_URL` (`Jenkins`), `BAMBOO_BUILD_NUMBER` (`Bamboo`).
 4. `GitHub Action` when `GITHUB_ACTIONS` is `true`.
-5. `VSCode` when `VSCODE_CWD` is set or `TERM_PROGRAM` is `vscode`.
-6. Otherwise no host is reported.
+5. `CI` when only `CI` is `true` or `BUILD_ID` is set.
+6. `VSCode` when `VSCODE_CWD` is set or `TERM_PROGRAM` is `vscode`.
+7. Otherwise no host is reported.
 
-Other CI systems are detected for upload on exit, but they are not reported as a host.
+The same CI detection sets `IsCI` on build and crash events, so CI builds stay identifiable when `MSBUILD_HOST_NAME` is set.
 
 ### Deployment requirements
 

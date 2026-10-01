@@ -437,14 +437,16 @@ namespace Microsoft.Build.BackEnd
         /// (<see cref="TryCreateIntrinsicTaskFactory"/>) so the two constructions cannot drift.
         /// </summary>
         private TaskFactoryWrapper CreateIntrinsicTaskFactoryWrapper(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type intrinsicTaskType)
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type intrinsicTaskType,
+            TaskRegistry.RegisteredTaskRecord.Stats statistics = null)
         {
             Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
             return new TaskFactoryWrapper(
                 new IntrinsicTaskFactory(intrinsicTaskType),
                 new LoadedType(intrinsicTaskType, AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)),
                 _taskName,
-                TaskHostParameters.Empty);
+                TaskHostParameters.Empty,
+                statistics);
         }
 
         /// <summary>
@@ -1242,12 +1244,12 @@ namespace Microsoft.Build.BackEnd
                 // Map to an intrinsic task, if necessary.
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = CreateIntrinsicTaskFactoryWrapper(typeof(MSBuild));
+                    returnClass = CreateIntrinsicTaskFactoryWrapper(typeof(MSBuild), returnClass.Statistics);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    returnClass = CreateIntrinsicTaskFactoryWrapper(typeof(CallTarget));
+                    returnClass = CreateIntrinsicTaskFactoryWrapper(typeof(CallTarget), returnClass.Statistics);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
             }

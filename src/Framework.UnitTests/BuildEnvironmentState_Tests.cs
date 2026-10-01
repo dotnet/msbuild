@@ -11,10 +11,13 @@ public class BuildEnvironmentState_Tests
 {
     [Theory]
     [InlineData("", null, false)]
-    [InlineData("CI=true", null, true)]
+    [InlineData("CI=true", "CI", true)]
+    [InlineData("BUILD_ID=42", "CI", true)]
     [InlineData("TF_BUILD=True", "Azure DevOps", true)]
     [InlineData("TF_BUILD=1", "Azure DevOps", true)]
     [InlineData("GITHUB_ACTIONS=true", "GitHub Action", true)]
+    [InlineData("JENKINS_URL=http://jenkins", "Jenkins", true)]
+    [InlineData("GITLAB_CI=true", "GitLab CI", true)]
     [InlineData("TERM_PROGRAM=vscode", "VSCode", false)]
     [InlineData("TF_BUILD=True;GITHUB_ACTIONS=true", "Azure DevOps", true)]
     [InlineData("GITHUB_ACTIONS=true;VSCODE_CWD=folder", "GitHub Action", true)]
@@ -23,12 +26,12 @@ public class BuildEnvironmentState_Tests
     public void DetectsHost(string variables, string? expectedHost, bool isCI)
     {
         using TestEnvironment env = TestEnvironment.Create();
-        foreach (string variable in BuildEnvironmentState.AutomatedEnvironmentVariables)
+        foreach ((string variable, _) in BuildEnvironmentState.CIHostVariables)
         {
             env.SetEnvironmentVariable(variable, null);
         }
 
-        foreach (string variable in new[] { "CI", "GITHUB_ACTIONS", "MSBUILD_HOST_NAME", "VSCODE_CWD", "TERM_PROGRAM" })
+        foreach (string variable in new[] { "CI", "BUILD_ID", "GITHUB_ACTIONS", "MSBUILD_HOST_NAME", "VSCODE_CWD", "TERM_PROGRAM" })
         {
             env.SetEnvironmentVariable(variable, null);
         }

@@ -193,6 +193,11 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public string? BuildEngineHost { get; set; }
 
     /// <summary>
+    /// True if MSBuild is running in an automated environment such as CI, regardless of <see cref="BuildEngineHost"/>.
+    /// </summary>
+    public bool? IsCI { get; set; }
+
+    /// <summary>
     /// The origin classification of the crash.
     /// Helps distinguish crashes in MSBuild's own code from crashes in dependencies
     /// that happen to run in the MSBuild process.
@@ -495,6 +500,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
         AddIfNotNull(BuildEngineHost);
+        AddIfNotNull(IsCI);
         if (CrashOrigin != CrashOriginKind.Unknown)
         {
             telemetryItems.Add(nameof(CrashOrigin), CrashOrigin.ToString());
@@ -563,6 +569,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
         AddIfNotNull(BuildEngineHost);
+        AddIfNotNull(IsCI?.ToString(), nameof(IsCI));
         if (CrashOrigin != CrashOriginKind.Unknown)
         {
             AddIfNotNull(CrashOrigin.ToString(), nameof(CrashOrigin));

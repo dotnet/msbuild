@@ -35,6 +35,9 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             writer.Write(entry.Value.WasExecuted);
             writer.Write((int)entry.Value.SkipReason);
         }
+
+        writer.Write(WorkerNodeTelemetryData.UpToDateInputOutputTargetsCount);
+        writer.Write(WorkerNodeTelemetryData.ExecutedInputOutputTargetsCount);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
@@ -70,7 +73,7 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             targetsExecutionData.Add(key, new TargetExecutionStats(wasExecuted, skipReason));
         }
 
-        WorkerNodeTelemetryData = new WorkerNodeTelemetryData(tasksExecutionData, targetsExecutionData);
+        WorkerNodeTelemetryData = new WorkerNodeTelemetryData(tasksExecutionData, targetsExecutionData, reader.ReadInt32(), reader.ReadInt32());
     }
 
     private static void WriteToStream(BinaryWriter writer, TaskOrTargetTelemetryKey key)
