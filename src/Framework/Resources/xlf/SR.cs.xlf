@@ -77,6 +77,16 @@
         <target state="translated">Při pokusu o vygenerování cesty odkazovaného sestavení z cesty {0} a monikeru rozhraní {1} došlo k chybě. {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">Při čtení souboru seznamu redistribučního balíčku {0} došlo k chybě. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">Architektura v cestě {0} se pokusila zahrnout do svých cest odkazovaných sestavení architekturu v cestě {1}. Při této akci však došlo k chybě. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Cesta {0} používaná pro protokoly ladění je příliš dlouhá. Nastavte ji na kratší hodnotu pomocí proměnné prostředí MSBUILDDEBUGPATH nebo změňte konfigurace vašeho systému, aby povolovala dlouhé cesty.</target>
@@ -128,6 +138,11 @@
         <note>{StrBegin="MSB6010: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">Verze {0} rozhraní .NET Framework není podporovaná. Zadejte hodnotu z výčtu Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">Verze {0} rozhraní .NET Framework není podporovaná. Zadejte hodnotu z výčtu Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />

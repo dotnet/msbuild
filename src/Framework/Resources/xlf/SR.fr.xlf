@@ -77,6 +77,16 @@
         <target state="translated">Une erreur s'est produite lors de la tentative de génération d'un chemin d'assembly de référence à partir du chemin d'accès "{0}" et du moniker du Framework "{1}". {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">Une erreur s'est produite lors de la lecture du fichier de liste de packages redistribuables "{0}". {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">Le Framework à l'emplacement "{0}" a tenté d'inclure le Framework à l'emplacement "{1}" comme faisant partie de ses chemins d'assembly de référence, mais une erreur s'est produite. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Le chemin d’accès « {0} » utilisé pour les journaux de débogage est trop long. Définissez-la sur une valeur plus courte à l’aide de la variable d’environnement MSBUILDDEBUGPATH ou modifiez votre configuration système pour autoriser les chemins longs.</target>
@@ -128,6 +138,11 @@
         <note>{StrBegin="MSB6010: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">La version "{0}" de .NET Framework n'est pas prise en charge. Spécifiez une valeur de l'énumération Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">La version "{0}" de .NET Framework n'est pas prise en charge. Spécifiez une valeur de l'énumération Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />

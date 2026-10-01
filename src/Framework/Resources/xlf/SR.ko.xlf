@@ -77,6 +77,16 @@
         <target state="translated">"{0}" 경로 및 프레임워크 모니커 "{1}"에서 참조 어셈블리 경로를 생성하는 동안 오류가 발생했습니다. {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">재배포 가능 패키지 목록 파일 "{0}"을(를) 읽는 동안 오류가 발생했습니다. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">"{0}" 경로에 있는 프레임워크가 "{1}" 경로에 있는 프레임워크를 해당 참조 어셈블리 경로의 일부로 포함하려고 했지만 오류가 발생했습니다. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">디버그 로그에 사용된 경로 "{0}"이(가) 너무 깁니다. MSBUILDDEBUGPATH 환경 변수를 사용하여 값을 더 짧게 설정하거나 긴 경로를 허용하도록 시스템 구성을 변경합니다.</target>
@@ -128,6 +138,11 @@
         <note>{StrBegin="MSB6010: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">.NET Framework 버전 "{0}"이(가) 지원되지 않습니다. Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 열거형에서 값을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">.NET Framework 버전 "{0}"이(가) 지원되지 않습니다. Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 열거형에서 값을 지정하세요.</target>
         <note />

@@ -125,7 +125,7 @@ public static partial class ToolLocationHelper
             // The default
             DotNetFrameworkArchitecture targetedArchitecture = DotNetFrameworkArchitecture.Current;
 
-            if (NativeMethodsShared.IsWindows && platformTarget != null)
+            if (NativeMethods.IsWindows && platformTarget != null)
             {
                 // If we are a 32 bit operating system the we should always return the 32 bit directory, or we are targeting x86, arm is also 32 bit
                 if (!Environment.Is64BitOperatingSystem || platformTarget.Equals("x86", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm", StringComparison.OrdinalIgnoreCase))
@@ -662,11 +662,11 @@ public static partial class ToolLocationHelper
         }
         catch (XmlException ex)
         {
-            ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.InvalidRedistFile", redistFilePath, ex.Message);
+            throw new InvalidOperationException(SR.FormatInvalidRedistFile(redistFilePath, ex.Message));
         }
         catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
         {
-            ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.InvalidRedistFile", redistFilePath, ex.Message);
+            throw new InvalidOperationException(SR.FormatInvalidRedistFile(redistFilePath, ex.Message));
         }
 
         // Cache the display name if we have one
@@ -714,10 +714,8 @@ public static partial class ToolLocationHelper
         }
         catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
         {
-            ErrorUtilities.ThrowInvalidOperation("ToolsLocationHelper.CouldNotCreateChain", path, pathToReturn, e.Message);
+            throw new InvalidOperationException(SR.FormatCouldNotCreateChain(path, pathToReturn, e.Message));
         }
-
-        return null;
     }
 
     /// <summary>

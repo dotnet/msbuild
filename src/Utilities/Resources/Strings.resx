@@ -120,15 +120,6 @@
     <data name="General.ToolCommandFailedNoErrorCode">
         <value>The command exited with code {0}.</value>
     </data>
-    <data name="ToolLocationHelper.UnsupportedFrameworkVersion" UESanitized="false" Visibility="Private_OM">
-        <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
-    </data>
-    <data name="ToolLocationHelper.UnsupportedFrameworkVersionForWindowsSdk" UESanitized="false" Visibility="Private_OM">
-        <value>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</value>
-    </data>
-    <data name="ToolLocationHelper.UnsupportedVisualStudioVersion" UESanitized="false" Visibility="Private_OM">
-        <value>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</value>
-    </data>
     <data name="ToolTask.CommandTooLong">
         <value>MSB6002: The command-line for the "{0}" task is too long. Command-lines longer than 32000 characters are likely to fail. Try reducing the length of the command-line by breaking down the call to "{0}" into multiple calls with fewer parameters per call.</value>
         <comment>{StrBegin="MSB6002: "}</comment>
@@ -144,18 +135,6 @@
     <data name="ToolTask.ToolExecutableNotFound">
         <value>MSB6004: The specified task executable location "{0}" is invalid.</value>
       <comment>{StrBegin="MSB6004: "}</comment>
-  </data>
-  <data name="ToolsLocationHelper.InvalidRedistFile">
-        <value>There was an error reading the redist list file "{0}". {1}</value>
-        <comment>No Error code because this resource will be used in an exception. The error code is discarded if it is included</comment>
-  </data>
-  <data name="ToolsLocationHelper.CouldNotCreateChain">
-        <value>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</value>
-        <comment>No Error code because this resource will be used in an exception. The error code is discarded if it is included</comment>
-  </data>
-  <data name="ToolsLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
-    <value>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</value>
-    <comment>No Error code because this resource will be used in an exception. The error code is discarded if it is included</comment>
   </data>
   <data name="ToolTask.InvalidEnvironmentParameter">
     <value>MSB6007: The "{0}" value passed to the Environment property is not in the format "name=value", where the value part may be empty.</value>

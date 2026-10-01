@@ -32,21 +32,6 @@
         <target state="translated">Le fichier est verrouillé par : "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersion">
-        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="translated">La version "{0}" de .NET Framework n'est pas prise en charge. Spécifiez une valeur de l'énumération Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
-        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">La version "{0}" de .NET Framework n'est pas prise en charge lors du ciblage explicite du SDK Windows, qui est pris en charge uniquement par .NET 4.5 et ultérieur.  Spécifiez une valeur de l'énumération Microsoft.Build.Utilities.TargetDotNetFrameworkVersion correspondant à la version 4.5 (Version45) ou ultérieure.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolLocationHelper.UnsupportedVisualStudioVersion">
-        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="translated">La version "{0}" de Visual Studio n'est pas prise en charge.  Spécifiez une valeur de l'énumération Microsoft.Build.Utilities.VisualStudioVersion.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolTask.CommandTooLong">
         <source>MSB6002: The command-line for the "{0}" task is too long. Command-lines longer than 32000 characters are likely to fail. Try reducing the length of the command-line by breaking down the call to "{0}" into multiple calls with fewer parameters per call.</source>
         <target state="translated">MSB6002: La ligne de commande de la tâche "{0}" est trop longue. Les lignes de commande de plus de 32 000 caractères risquent d'échouer. Essayez de réduire la longueur de la ligne de commande en scindant l'appel à "{0}" en plusieurs appels contenant moins de paramètres chacun.</target>
@@ -91,21 +76,6 @@
         <source>MSB6011: Invalid parameters passed to the {0} task.</source>
         <target state="translated">MSB6011: Paramètres non valides passés à la tâche {0}.</target>
         <note>{StrBegin="MSB6011: "}</note>
-      </trans-unit>
-      <trans-unit id="ToolsLocationHelper.InvalidRedistFile">
-        <source>There was an error reading the redist list file "{0}". {1}</source>
-        <target state="translated">Une erreur s'est produite lors de la lecture du fichier de liste de packages redistribuables "{0}". {1}</target>
-        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
-      </trans-unit>
-      <trans-unit id="ToolsLocationHelper.CouldNotCreateChain">
-        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
-        <target state="translated">Le Framework à l'emplacement "{0}" a tenté d'inclure le Framework à l'emplacement "{1}" comme faisant partie de ses chemins d'assembly de référence, mais une erreur s'est produite. {2}</target>
-        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
-      </trans-unit>
-      <trans-unit id="ToolsLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
-        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
-        <target state="translated">Une erreur s'est produite lors de la tentative de génération d'un chemin d'assembly de référence à partir du chemin d'accès "{0}" et du moniker du Framework "{1}". {2}</target>
-        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
       </trans-unit>
       <trans-unit id="ToolTask.InvalidEnvironmentParameter">
         <source>MSB6007: The "{0}" value passed to the Environment property is not in the format "name=value", where the value part may be empty.</source>

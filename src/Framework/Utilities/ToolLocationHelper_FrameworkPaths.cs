@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -154,67 +155,30 @@ public static partial class ToolLocationHelper
     }
 
     private static Version TargetDotNetFrameworkVersionToSystemVersion(TargetDotNetFrameworkVersion version)
-    {
-        switch (version)
+        => version switch
         {
-            case TargetDotNetFrameworkVersion.Version11:
-                return FrameworkLocationHelper.dotNetFrameworkVersion11;
+            TargetDotNetFrameworkVersion.Version11 => FrameworkLocationHelper.dotNetFrameworkVersion11,
+            TargetDotNetFrameworkVersion.Version20 => FrameworkLocationHelper.dotNetFrameworkVersion20,
+            TargetDotNetFrameworkVersion.Version30 => FrameworkLocationHelper.dotNetFrameworkVersion30,
+            TargetDotNetFrameworkVersion.Version35 => FrameworkLocationHelper.dotNetFrameworkVersion35,
+            TargetDotNetFrameworkVersion.Version40 => FrameworkLocationHelper.dotNetFrameworkVersion40,
+            TargetDotNetFrameworkVersion.Version45 => FrameworkLocationHelper.dotNetFrameworkVersion45,
+            TargetDotNetFrameworkVersion.Version451 => FrameworkLocationHelper.dotNetFrameworkVersion451,
+            TargetDotNetFrameworkVersion.Version452 => FrameworkLocationHelper.dotNetFrameworkVersion452,
+            TargetDotNetFrameworkVersion.Version46 => FrameworkLocationHelper.dotNetFrameworkVersion46,
+            TargetDotNetFrameworkVersion.Version461 => FrameworkLocationHelper.dotNetFrameworkVersion461,
+            TargetDotNetFrameworkVersion.Version462 => FrameworkLocationHelper.dotNetFrameworkVersion462,
+            TargetDotNetFrameworkVersion.Version47 => FrameworkLocationHelper.dotNetFrameworkVersion47,
+            TargetDotNetFrameworkVersion.Version471 => FrameworkLocationHelper.dotNetFrameworkVersion471,
+            TargetDotNetFrameworkVersion.Version472 => FrameworkLocationHelper.dotNetFrameworkVersion472,
+            TargetDotNetFrameworkVersion.Version48 => FrameworkLocationHelper.dotNetFrameworkVersion48,
+            TargetDotNetFrameworkVersion.Version481 or TargetDotNetFrameworkVersion.Latest => FrameworkLocationHelper.dotNetFrameworkVersion481,
 
-            case TargetDotNetFrameworkVersion.Version20:
-                return FrameworkLocationHelper.dotNetFrameworkVersion20;
-
-            case TargetDotNetFrameworkVersion.Version30:
-                return FrameworkLocationHelper.dotNetFrameworkVersion30;
-
-            case TargetDotNetFrameworkVersion.Version35:
-                return FrameworkLocationHelper.dotNetFrameworkVersion35;
-
-            case TargetDotNetFrameworkVersion.Version40:
-                return FrameworkLocationHelper.dotNetFrameworkVersion40;
-
-            case TargetDotNetFrameworkVersion.Version45:
-                return FrameworkLocationHelper.dotNetFrameworkVersion45;
-
-            case TargetDotNetFrameworkVersion.Version451:
-                return FrameworkLocationHelper.dotNetFrameworkVersion451;
-
-            case TargetDotNetFrameworkVersion.Version452:
-                return FrameworkLocationHelper.dotNetFrameworkVersion452;
-
-            case TargetDotNetFrameworkVersion.Version46:
-                return FrameworkLocationHelper.dotNetFrameworkVersion46;
-
-            case TargetDotNetFrameworkVersion.Version461:
-                return FrameworkLocationHelper.dotNetFrameworkVersion461;
-
-            case TargetDotNetFrameworkVersion.Version462:
-                return FrameworkLocationHelper.dotNetFrameworkVersion462;
-
-            case TargetDotNetFrameworkVersion.Version47:
-                return FrameworkLocationHelper.dotNetFrameworkVersion47;
-
-            case TargetDotNetFrameworkVersion.Version471:
-                return FrameworkLocationHelper.dotNetFrameworkVersion471;
-
-            case TargetDotNetFrameworkVersion.Version472:
-                return FrameworkLocationHelper.dotNetFrameworkVersion472;
-
-            case TargetDotNetFrameworkVersion.Version48:
-                return FrameworkLocationHelper.dotNetFrameworkVersion48;
-
-            case TargetDotNetFrameworkVersion.Version481:
-            case TargetDotNetFrameworkVersion.Latest: // Latest is a special value to indicate the highest version we know about.
-                return FrameworkLocationHelper.dotNetFrameworkVersion481;
-
-            default:
-                ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedFrameworkVersion", version);
-                return null;
-        }
-    }
+            _ => throw new ArgumentException(SR.FormatToolLocationHelper_UnsupportedFrameworkVersion(version)),
+        };
 
     private static Version VisualStudioVersionToSystemVersion(VisualStudioVersion version)
-    {
-        return version switch
+        => version switch
         {
             VisualStudioVersion.Version100 => FrameworkLocationHelper.visualStudioVersion100,
             VisualStudioVersion.Version110 => FrameworkLocationHelper.visualStudioVersion110,
@@ -224,15 +188,9 @@ public static partial class ToolLocationHelper
             VisualStudioVersion.Version160 => FrameworkLocationHelper.visualStudioVersion160,
             VisualStudioVersion.Version170 => FrameworkLocationHelper.visualStudioVersion170,
             VisualStudioVersion.Version180 => FrameworkLocationHelper.visualStudioVersion180,
-            _ => Unsupported()
-        };
 
-        Version Unsupported()
-        {
-            ErrorUtilities.ThrowArgument("ToolLocationHelper.UnsupportedVisualStudioVersion", version);
-            return null;
-        }
-    }
+            _ => throw new ArgumentException(SR.FormatUnsupportedVisualStudioVersion(version)),
+        };
 
     /// <summary>
     /// Get a fully qualified path to a file in the latest .NET Framework SDK. Error if the .NET Framework SDK can't be found.
@@ -394,16 +352,16 @@ public static partial class ToolLocationHelper
                     ? ProcessorArchitecture.ARM
                     : ProcessorArchitecture.X86,
             DotNetFrameworkArchitecture.Bitness64
-                => NativeMethodsShared.ProcessorArchitectureNative switch
+                => NativeMethods.ProcessorArchitectureNative switch
                 {
-                    NativeMethodsShared.ProcessorArchitectures.X64 => ProcessorArchitecture.AMD64,
-                    NativeMethodsShared.ProcessorArchitectures.IA64 => ProcessorArchitecture.IA64,
-                    NativeMethodsShared.ProcessorArchitectures.ARM64 => ProcessorArchitecture.ARM64,
+                    NativeMethods.ProcessorArchitectures.X64 => ProcessorArchitecture.AMD64,
+                    NativeMethods.ProcessorArchitectures.IA64 => ProcessorArchitecture.IA64,
+                    NativeMethods.ProcessorArchitectures.ARM64 => ProcessorArchitecture.ARM64,
 
                     // Error, OK, we're trying to get the 64-bit path on a 32-bit machine.
                     // That ... doesn't make sense.
-                    NativeMethodsShared.ProcessorArchitectures.X86 => null,
-                    NativeMethodsShared.ProcessorArchitectures.ARM => null,
+                    NativeMethods.ProcessorArchitectures.X86 => null,
+                    NativeMethods.ProcessorArchitectures.ARM => null,
 
                     // unknown architecture? return null
                     _ => null,

@@ -77,6 +77,16 @@
         <target state="translated">Wystąpił błąd podczas próby wygenerowania ścieżki zestawu odwołania ze ścieżki „{0}” i monikera struktury „{1}”. {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">Wystąpił błąd odczytu pliku listy redystrybucyjnej „{0}”. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">Właściwość Framework w ścieżce „{0}” próbowała uwzględnić właściwość framework w ścieżce „{1}” jako część jej ścieżek zestawu odwołania, ale wystąpił błąd. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Ścieżka „{0}” używana w dziennikach debugowania jest za długa. Ustaw ją na krótszą wartość przy użyciu zmiennej środowiskowej MSBUILDEBUGPATH lub zmień konfigurację systemu, aby zezwolić na długie ścieżki.</target>
@@ -128,6 +138,11 @@
         <note>{StrBegin="MSB6010: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
