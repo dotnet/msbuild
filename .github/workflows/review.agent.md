@@ -13,6 +13,7 @@ permissions:
   pull-requests: read
 
 timeout-minutes: 60
+max-ai-credits: 2000
 
 # ###############################################################
 # Disable the per-workflow daily AI Credits guardrail. Cost is

@@ -16,7 +16,7 @@ internal sealed class TerminalNodesFrame
 {
     private const int MaxColumn = 120;
 
-    private readonly (TerminalNodeStatus nodeStatus, int durationLength)[] _nodes;
+    private readonly (TerminalNodeStatus nodeStatus, int durationLength, int renderedWidth, bool canUpdateDuration)[] _nodes;
 
     private readonly StringBuilder _renderBuilder = new();
 
@@ -24,12 +24,22 @@ internal sealed class TerminalNodesFrame
     public int Height { get; }
     public int NodesCount { get; private set; }
 
+    /// <summary>
+    /// The width of the terminal this frame was rendered for, before it is capped to <see cref="MaxColumn"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Width"/> drives layout, but line wrapping happens at the real terminal width, so that
+    /// is what <see cref="GetPhysicalRows"/> needs.
+    /// </remarks>
+    public int TerminalWidth { get; }
+
     public TerminalNodesFrame(TerminalNodeStatus?[] nodes, int width, int height)
     {
         Width = Math.Min(width, MaxColumn);
+        TerminalWidth = width;
         Height = height;
 
-        _nodes = new (TerminalNodeStatus, int)[nodes.Length];
+        _nodes = new (TerminalNodeStatus, int, int, bool)[nodes.Length];
 
         foreach (TerminalNodeStatus? status in nodes)
         {
@@ -57,7 +67,7 @@ internal sealed class TerminalNodesFrame
         string? targetPrefix = status.TargetPrefix;
         TerminalColor targetPrefixColor = status.TargetPrefixColor;
 
-        var targetWithoutAnsiLength = !string.IsNullOrWhiteSpace(targetPrefix)
+        int targetWithoutAnsiLength = !string.IsNullOrWhiteSpace(targetPrefix)
             // +1 because we will join them by space in the final output.
             ? targetPrefix!.Length + 1 + target.Length
             : target.Length;
@@ -78,11 +88,15 @@ internal sealed class TerminalNodesFrame
 
                 if (renderedWidth > Width)
                 {
+                    _nodes[i].renderedWidth = project.Length;
                     return project.AsSpan();
                 }
             }
         }
 
+        // SetCursorHorizontal(MaxColumn) makes the logical line occupy the full layout width.
+        _nodes[i].renderedWidth = Math.Max(Width, 1);
+        _nodes[i].canUpdateDuration = true;
         var renderedTarget = !string.IsNullOrWhiteSpace(targetPrefix) ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
         var builder = StringBuilderCache.Acquire(renderedWidth);
         builder.Append(TerminalLogger.Indentation).Append(project);
@@ -120,18 +134,35 @@ internal sealed class TerminalNodesFrame
         StringBuilder sb = _renderBuilder;
         sb.Clear();
 
-        // Move cursor back to 1st line of nodes.
-        sb.AppendLine($"{AnsiCodes.CSI}{previousFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
+        // Move cursor back to 1st line of nodes. The previous frame's lines are reflowed by the
+        // terminal when it is resized, so measure them against the width we are rendering for now.
+        int previousPhysicalRows = previousFrame.GetPhysicalRows(TerminalWidth);
+        sb.AppendLine($"{AnsiCodes.CSI}{previousPhysicalRows + 1}{AnsiCodes.MoveUpToLineStart}");
+
+        bool redrawAll = previousPhysicalRows > previousFrame.NodesCount;
+        if (redrawAll)
+        {
+            sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+        }
 
         int i = 0;
         for (; i < NodesCount; i++)
         {
             ReadOnlySpan<char> needed = RenderNodeStatus(i);
 
-            // Do we have previous node string to compare with?
-            if (previousFrame.NodesCount > i)
+            if (!redrawAll
+                && previousFrame.NodesCount > 0
+                && _nodes[i].renderedWidth > TerminalWidth)
             {
-                if (previousFrame._nodes[i] == _nodes[i])
+                sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                redrawAll = true;
+            }
+
+            // Do we have previous node string to compare with?
+            if (!redrawAll && previousFrame.NodesCount > i)
+            {
+                if (previousFrame._nodes[i] == _nodes[i]
+                    && _nodes[i].canUpdateDuration)
                 {
                     // Same everything except time, AND same number of digits in time
                     string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("DurationDisplay", _nodes[i].nodeStatus.Stopwatch.ElapsedSeconds);
@@ -155,12 +186,29 @@ internal sealed class TerminalNodesFrame
         }
 
         // clear no longer used lines
-        if (i < previousFrame.NodesCount)
+        if (!redrawAll && i < previousFrame.NodesCount)
         {
             sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
         }
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Returns how many physical terminal rows this frame's lines occupy when wrapped at <paramref name="terminalWidth"/>.
+    /// </summary>
+    internal int GetPhysicalRows(int terminalWidth)
+    {
+        terminalWidth = Math.Max(terminalWidth, 1);
+
+        int physicalRows = 0;
+        for (int i = 0; i < NodesCount; i++)
+        {
+            int renderedWidth = Math.Max(_nodes[i].renderedWidth, 1);
+            physicalRows += ((renderedWidth - 1) / terminalWidth) + 1;
+        }
+
+        return physicalRows;
     }
 
     public void Clear()

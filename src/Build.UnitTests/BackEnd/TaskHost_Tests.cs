@@ -13,6 +13,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -230,6 +231,74 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Make sure our custom logger received the actual custom event and not some fake.
             Assert.True(_customLogger.LastError is BuildErrorEventArgs); // "Expected Error Event"
             Assert.Equal(0, _customLogger.LastWarning.LineNumber); // "Expected line number to be 0"
+        }
+
+        /// <summary>
+        /// An error carrying extended data must keep that data when ContinueOnError downgrades it to a warning,
+        /// otherwise the structured payload a task attached to the error is silently lost.
+        /// </summary>
+        [Fact]
+        public void TestLogExtendedErrorEventWithContinueOnErrorPreservesExtendedData()
+        {
+            _taskHost.ContinueOnError = true;
+            _taskHost.ConvertErrorsToWarnings = true;
+
+            var error = new ExtendedBuildErrorEventArgs(
+                "myExtendedType", "SubCategory", "code", "file", 1, 2, 3, 4, "message", "Help", "Sender",
+                "https://aka.ms/help", new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc), messageArgs: null)
+            {
+                ExtendedData = /*lang=json*/ "{\"key\":\"value\"}",
+                ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" } },
+            };
+
+            _taskHost.LogErrorEvent(error);
+
+            var warning = _customLogger.LastWarning.ShouldBeOfType<ExtendedBuildWarningEventArgs>();
+            warning.ExtendedType.ShouldBe(error.ExtendedType);
+            warning.ExtendedData.ShouldBe(error.ExtendedData);
+            // Assert the contents rather than the dictionary instance: preserving the payload is the requirement,
+            // and the implementation is free to copy the metadata for safety or serialization.
+            warning.ExtendedMetadata.ShouldNotBeNull();
+            warning.ExtendedMetadata.ShouldHaveSingleItem().ShouldBe(new KeyValuePair<string, string>("m1", "v1"));
+            AssertBaseFieldsMatch(error, warning);
+        }
+
+        /// <summary>
+        /// A plain error downgraded by ContinueOnError must keep the fields that are not part of the
+        /// shortest BuildWarningEventArgs constructor.
+        /// </summary>
+        [Fact]
+        public void TestLogErrorEventWithContinueOnErrorPreservesHelpLinkAndTimestamp()
+        {
+            _taskHost.ContinueOnError = true;
+            _taskHost.ConvertErrorsToWarnings = true;
+
+            var error = new BuildErrorEventArgs(
+                "SubCategory", "code", "file", 1, 2, 3, 4, "message", "Help", "Sender",
+                "https://aka.ms/help", new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc), messageArgs: null);
+
+            _taskHost.LogErrorEvent(error);
+
+            AssertBaseFieldsMatch(error, _customLogger.LastWarning);
+        }
+
+        /// <summary>
+        /// Asserts that everything the ContinueOnError downgrade is expected to carry over made it across.
+        /// </summary>
+        private static void AssertBaseFieldsMatch(BuildErrorEventArgs error, BuildWarningEventArgs warning)
+        {
+            warning.Subcategory.ShouldBe(error.Subcategory);
+            warning.Code.ShouldBe(error.Code);
+            warning.File.ShouldBe(error.File);
+            warning.LineNumber.ShouldBe(error.LineNumber);
+            warning.ColumnNumber.ShouldBe(error.ColumnNumber);
+            warning.EndLineNumber.ShouldBe(error.EndLineNumber);
+            warning.EndColumnNumber.ShouldBe(error.EndColumnNumber);
+            warning.Message.ShouldBe(error.Message);
+            warning.HelpKeyword.ShouldBe(error.HelpKeyword);
+            warning.SenderName.ShouldBe(error.SenderName);
+            warning.HelpLink.ShouldBe(error.HelpLink);
+            warning.Timestamp.ShouldBe(error.Timestamp);
         }
 
         /// <summary>
@@ -503,6 +572,149 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ExpectedEventToBeSerializable", e.GetType().Name);
             Assert.Contains(message, _customLogger.LastWarning.Message); // "Expected line to contain NotSerializable message but it did not"
+        }
+
+        [Fact]
+        public void TestLogAssemblyResolutionSearchTraceEventMP()
+        {
+            var searchEvent = new AssemblyResolutionSearchTraceEventArgs(
+                "Requested, Version=1.0.0.0",
+                "MSIL",
+                [
+                    new AssemblyResolutionSearchAttempt(
+                        "candidate.dll",
+                        "search-path",
+                        parentAssembly: null,
+                        assemblyName: null,
+                        AssemblyResolutionSearchResult.FileNotFound,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: false),
+                ],
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+            _taskHost.LogMessageEvent(searchEvent);
+
+            _taskHost.IsRunningMultipleNodes.ShouldBeTrue();
+            _customLogger.LastMessage.ShouldBeOfType<AssemblyResolutionSearchTraceEventArgs>();
+            _customLogger.NumberOfWarning.ShouldBe(0);
+        }
+
+        private static AssemblyConflictReferenceDetails CreateConflictVictorDetails()
+            => new(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+
+        private static AssemblyConflictReferenceDetails CreateConflictVictimDetails()
+            => new(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+
+        [Fact]
+        public void TestLogAssemblyConflictDependencyDetailsMessageEventMP()
+        {
+            var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
+                CreateConflictVictorDetails(),
+                CreateConflictVictimDetails(),
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+            _taskHost.LogMessageEvent(detailsEvent);
+
+            _taskHost.IsRunningMultipleNodes.ShouldBeTrue();
+            _customLogger.LastMessage.ShouldBeOfType<AssemblyConflictDependencyDetailsMessageEventArgs>();
+            _customLogger.NumberOfWarning.ShouldBe(0);
+        }
+
+        [Fact]
+        public void TestLogAssemblyConflictWarningEventMP()
+        {
+            AssemblyConflictReferenceDetails victor = CreateConflictVictorDetails();
+            AssemblyConflictReferenceDetails victim = CreateConflictVictimDetails();
+            var warningEvent = new AssemblyConflictWarningEventArgs(
+                "D",
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                "MSB3277",
+                @"C:\foo\bar.proj",
+                42,
+                7,
+                "MSBuild.ResolveAssemblyReference.FoundConflicts",
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
+
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+            _taskHost.LogWarningEvent(warningEvent);
+
+            _taskHost.IsRunningMultipleNodes.ShouldBeTrue();
+            _customLogger.LastWarning.ShouldBeOfType<AssemblyConflictWarningEventArgs>();
+            _customLogger.NumberOfWarning.ShouldBe(1);
+
+            var deserializedWarning = (AssemblyConflictWarningEventArgs)_customLogger.LastWarning;
+            deserializedWarning.Code.ShouldBe("MSB3277");
+            deserializedWarning.SimpleAssemblyName.ShouldBe("D");
+            deserializedWarning.Message.ShouldBe(warningEvent.Message);
+        }
+
+        [Fact]
+        public void TaskHostTaskForwardsSupportedEvents()
+        {
+            var criticalEvent = new CriticalBuildMessageEventArgs(null, null, null, 0, 0, 0, 0, "Critical message", null, "Task");
+            var searchEvent = new AssemblyResolutionSearchTraceEventArgs();
+            var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs();
+            var warningEvent = new AssemblyConflictWarningEventArgs();
+            var telemetryEvent = new TelemetryEventArgs
+            {
+                EventName = "Task telemetry",
+                Properties = new Dictionary<string, string> { ["Property"] = "Value" },
+            };
+            var engine = new MockEngine();
+
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, criticalEvent)));
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, searchEvent)));
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, detailsEvent)));
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, warningEvent)));
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, telemetryEvent)));
+
+            engine.MessageEvents.Length.ShouldBe(3);
+            engine.MessageEvents[0].ShouldBeSameAs(criticalEvent);
+            engine.MessageEvents[1].ShouldBeSameAs(searchEvent);
+            engine.MessageEvents[2].ShouldBeSameAs(detailsEvent);
+            engine.WarningEvents.ShouldHaveSingleItem().ShouldBeSameAs(warningEvent);
+            engine.Log.ShouldContain("Received telemetry event 'Task telemetry'");
+        }
+
+        [Fact]
+        public void TaskHostTaskIgnoresEventsUnsupportedByBuildEngine()
+        {
+            var engine = new BaseBuildEngine();
+            var telemetryEvent = new TelemetryEventArgs
+            {
+                EventName = "Task telemetry",
+                Properties = new Dictionary<string, string> { ["Property"] = "Value" },
+            };
+
+            Should.NotThrow(() => TaskHostTask.HandleLoggedMessage(
+                engine,
+                new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, telemetryEvent))));
+            Should.NotThrow(() => TaskHostTask.HandleLoggedMessage(
+                engine,
+                new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, new UnknownBuildEventArgs()))));
         }
 
         /// <summary>
@@ -843,6 +1055,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         #region Helper Classes
+
+        private sealed class UnknownBuildEventArgs : BuildEventArgs
+        {
+        }
+
+        private sealed class BaseBuildEngine : IBuildEngine
+        {
+            public bool ContinueOnError => false;
+
+            public int LineNumberOfTaskNode => 0;
+
+            public int ColumnNumberOfTaskNode => 0;
+
+            public string ProjectFileOfTaskNode => string.Empty;
+
+            public void LogErrorEvent(BuildErrorEventArgs e)
+            {
+            }
+
+            public void LogWarningEvent(BuildWarningEventArgs e)
+            {
+            }
+
+            public void LogMessageEvent(BuildMessageEventArgs e)
+            {
+            }
+
+            public void LogCustomEvent(CustomBuildEventArgs e)
+            {
+            }
+
+            public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
+                => false;
+        }
 
         /// <summary>
         /// Create a custom message event to make sure it can get sent correctly

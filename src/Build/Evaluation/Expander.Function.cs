@@ -913,7 +913,7 @@ internal partial class Expander<P, I>
                 argumentStartIndex++;
 
                 // Scan for the matching closing bracket, skipping any nested ones
-                int argumentsEndIndex = ScanForClosingParenthesis(expressionFunctionAsSpan, argumentStartIndex, out _, out _);
+                int argumentsEndIndex = ScanForClosingParenthesis(expressionFunctionAsSpan, argumentStartIndex);
 
                 if (argumentsEndIndex == -1)
                 {

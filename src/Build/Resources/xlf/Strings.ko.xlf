@@ -56,6 +56,16 @@
         <target state="translated">ArchiveFile을 가져왔지만 마지막으로 편집한 버전이 설정되지 않았습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrew">
+        <source>The binary log event filter threw an exception.</source>
+        <target state="new">The binary log event filter threw an exception.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrewWithContext">
+        <source>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</source>
+        <target state="new">The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</target>
+        <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">파일 형식 버전 {0}에 대해 상위 호환 읽기가 지원되지 않습니다(18 이상 필요).</target>
@@ -602,6 +612,11 @@
         <target state="translated">MSB4255: 다음 입력 결과 캐시 파일이 존재하지 않습니다. "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerEventFilter">
+        <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="new">MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</target>
+        <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">버전 문자열의 형식이 잘못되었습니다.</target>
@@ -653,6 +668,36 @@
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">메타프로젝트 "{0}"이(가) 생성되었습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
+        <target state="translated">MSB4289: 다른 다중 스레드 엄격한 빌드가 이 프로세스에서 이미 활성화되어 있습니다. 다른 빌드를 시작하기 전에 완료하거나, 별도의 프로세스를 사용하거나, 프로세스를 시작하기 전에 MSBUILDDISABLEFEATURESFROMVERSION=18.12를 설정하여 엄격한 검사를 사용하지 않도록 설정합니다.</target>
+        <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
+        <target state="translated">MSB4286: 다중 스레드 엄격 모드에서 작업 "{1}"을(를) 확인한 결과, 프로세스의 현재 디렉터리가 "{2}"에 있었습니다. 현재 디렉터리는 "{0}"여야 합니다. 프로세스 디렉터리를 변경하는 대신 TaskEnvironment를 사용하세요. 이 변경은 다른 작업, 로거 또는 이 이벤트의 컨텍스트와 동시에 실행된 호스트 코드에서 발생했을 수 있습니다.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
+        <target state="translated">다중 스레드 strict 모드를 사용할 수 있습니다. 프로세스 현재 디렉터리: "{0}".</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelMissing">
+        <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
+        <target state="translated">MSB4288: 디렉터리를 사용할 수 없게 된 후 다중 스레드 엄격 모드가 센티넬 디렉터리 "{0}"과(와) 프로세스의 현재 디렉터리를 복원했습니다. 활성 빌드에서 사용 중인 디렉터리는 제거하지 마세요.</target>
+        <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
+        <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
+        <target state="translated">MSB4290: 다중 스레드 엄격 모드에서 sentinel 디렉터리 "{0}" 및 프로세스 현재 디렉터리를 복원할 수 없습니다. {1} 엔진 소유 디렉터리를 만들고 액세스할 수 있는지 확인하거나, 엄격한 검사를 일시적으로 사용하지 않도록 프로세스를 시작하기 전에 MSBUILDDISABLEFEATURESFROMVERSION=18.12를 설정합니다.</target>
+        <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
+        <target state="translated">MSB4287: 프로젝트 또는 빌드가 완료될 때 센티넬 디렉터리 "{0}"에서 다중 스레드 엄격 모드가 "{1}"을(를) 발견했습니다. TaskEnvironment를 사용해 경로를 확인하세요. 쓰기 작업은 다른 프로젝트, 로거 또는 호스트 코드에서 수행되었을 수 있습니다.</target>
+        <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
@@ -731,7 +776,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">프로젝트를 만들 때는 부분 평가("{0}" 평가 단계)를 지원하지 않습니다. 부분 평가를 수행하려면 ProjectInstance를 사용하세요. 프로젝트를 만들려면 전체 평가 단계(Full evaluation stage)를 사용하세요.</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -942,6 +987,11 @@
         <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
         <target state="translated">MSB4283: "{0}" 작업을 실행하려면 반영을 통해 작업 어셈블리와 형식을 로드해야 하므로 실행할 수 없습니다. 이는 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서는 지원되지 않습니다. 작업을 실행하려면 JIT 기반 MSBuild로 빌드하세요.</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="translated">다중 스레드 모드에서는 파일 액세스 보고를 사용할 수 없습니다. 파일 액세스 보고에는 각 액세스를 하나의 프로젝트에 귀속할 수 있도록 프로세스 격리된 작업자 노드가 필요합니다. ReportFileAccesses 또는 MultiThreaded를 사용하지 않도록 설정합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
@@ -3181,8 +3231,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: 잘못된 이진 로거 매개 변수: "{0}". 예상 값: ProjectImports={{None,Embed,ZipFile}} 및/또는 [LogFile=]filePath.binlog(로그 파일 이름 또는 경로, 확장명이 ".binlog"여야 함).</target>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="needs-review-translation">MSB4234: 잘못된 이진 로거 매개 변수: "{0}". 예상 값: ProjectImports={{None,Embed,ZipFile}} 및/또는 [LogFile=]filePath.binlog(로그 파일 이름 또는 경로, 확장명이 ".binlog"여야 함).</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -3326,7 +3376,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">모든 사용자 지정 이벤트 유형이 사용되지 않으므로 사용자 지정 이벤트 유형 '{0}' 지원되지 않습니다. 대신 Extended*EventArgs를 사용하세요. 추가 정보: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">사용자 지정 이벤트 유형 '{0}'은(는) 일부 사용자 지정 이벤트 형식이 더 이상 사용되지 않으므로 지원되지 않습니다. 대신 Extended*EventArgs를 사용하세요. 추가 정보: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProjectFile">

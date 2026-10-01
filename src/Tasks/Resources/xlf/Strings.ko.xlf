@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
@@ -1834,31 +1834,6 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
-        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
-        <target state="translated">SearchPath "{0}"의 경우(어셈블리 "{1}"을(를) 참조하여 추가됨).</target>
-        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
-        <source>Considered AssemblyFoldersEx locations.</source>
-        <target state="translated">AssemblyFoldersEx 위치로 간주했습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictFound">
-        <source>There was a conflict between "{0}" and "{1}".</source>
-        <target state="translated">"{0}"과(와) "{1}" 사이에 충돌이 발생했습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictHigherVersionChosen">
-        <source>"{0}" was chosen because it had a higher version.</source>
-        <target state="translated">"{0}"이(가) 버전이 더 높아 선택되었습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictPrimaryChosen">
-        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
-        <target state="translated">"{0}"이(가) 기본 항목이므로 선택되었습니다. "{1}"은(는) 기본 항목이 아닙니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConflictRedirectSuggestion">
         <source>Consider app.config remapping of assembly "{0}" from Version "{1}" [{2}] to Version "{3}" [{4}] to solve conflict and get rid of warning.</source>
         <target state="translated">충돌을 해결하고 경고 메시지가 표시되지 않게 하려면 app.config에서 "{0}" 어셈블리의 버전을 "{1}" [{2}]에서 "{3}" [{4}](으)로 다시 매핑하십시오.</target>
@@ -1868,40 +1843,6 @@
                 {2} and {4} are file names correspending to {1} and {3} respectively
                 {0} is an assembly name with no version number like 'D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa'
     </note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch">
-        <source>Considered "{0}",
-			but its name "{1}"
-			didn't match the expected name "{2}".</source>
-        <target state="translated">"{0}"(으)로 간주했지만
-			이름 "{1}"이(가)
-			필요한 이름 "{2}"과(와) 일치하지 않습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">
-        <source>Considered "{0}", but it didn't exist.</source>
-        <target state="translated">"{0}"(으)로 간주했지만 존재하지 않습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk">
-        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
-        <target state="translated">"{0}"을(를) 파일 이름으로 간주했지만 존재하지 않습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac">
-        <source>Considered "{0}", which was not found in the GAC.</source>
-        <target state="translated">"{0}"(으)로 간주했지만 GAC에서 찾을 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
-        <target state="translated">존재하지만 유효한 .NET 어셈블리로 보이지 않는 "{0}"(으)로 간주됩니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
-        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
-        <target state="translated">이미 있는 "{0}"(으)로 간주했지만 대상 프로세서 아키텍처 "{2}"과(와) 일치하지 않는 프로세서 아키텍처 "{1}"이 있습니다.</target>
-        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Dependency">
         <source>Dependency "{0}".</source>
@@ -1957,11 +1898,6 @@
         <source>MSB3242: Conflict between mutually exclusive parameters. AutoUnify was 'true' and AppConfigFile was set.</source>
         <target state="translated">MSB3242: 함께 사용할 수 없는 매개 변수 사이에 충돌이 발생했습니다. AutoUnify가 'true'이고 AppConfigFile이 설정되었습니다.</target>
         <note>{StrBegin="MSB3242: "}</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ConflictUnsolvable">
-        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
-        <target state="translated">MSB3243: "{0}"과(와) "{1}" 사이의 충돌을 해결할 수 없습니다. 임의로 "{0}"을(를) 선택합니다.</target>
-        <note>{StrBegin="MSB3243: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FailedToFindDependentFiles">
         <source>MSB3244: Could not find dependent files. {0}</source>
@@ -2103,11 +2039,6 @@
         <target state="translated">잘못된 PE 헤더를 찾았습니다. 구현 파일이 사용되지 않습니다.</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
-        <source>References which depend on or have been unified to "{0}" [{1}].</source>
-        <target state="translated">"{0}" [{1}]에 종속되거나 통합된 참조입니다.</target>
-        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: 알 수 없는 프로세서 아키텍처입니다. "{1}"에 대한 구현 파일 "{0}"의 ImageFileMachine 값이 "0x{2}"입니다. 이 구현 파일을 사용하려면 프로젝트의 "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" 속성을 "Warning" 또는 "None"으로 지정하세요.</target>
@@ -2127,13 +2058,6 @@
         <source>MSB3276: Found conflicts between different versions of the same dependent assembly. Please set the "AutoGenerateBindingRedirects" property to true in the project file. For more information, see http://go.microsoft.com/fwlink/?LinkId=294190.</source>
         <target state="translated">MSB3276: 같은 종속 어셈블리의 서로 다른 버전이 충돌합니다. 프로젝트 파일에서 "AutoGenerateBindingRedirects" 속성을 true로 설정하세요. 자세한 내용은 http://go.microsoft.com/fwlink/?LinkId=294190을 참조하세요.</target>
         <note>{StrBegin="MSB3276: "}</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
-{1}</source>
-        <target state="translated">MSB3277: 해결할 수 없는 "{0}"의 다른 버전 간 충돌이 발견되었습니다.
-{1}</target>
-        <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.LogAttributeFormat">
         <source>{0} = '{1}'</source>
@@ -2218,21 +2142,6 @@
         <target state="translated">"{0}"에 필요합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.ReferenceDependsOn">
-        <source>References which depend on "{0}" [{1}].</source>
-        <target state="translated">"{0}"[{1}]에 종속되는 참조입니다.</target>
-        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
-        <source>Unresolved primary reference with an item include of "{0}".</source>
-        <target state="translated">항목 Include "{0}"이(가) 있는 확인되지 않은 기본 참조입니다.</target>
-        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.PrimarySourceItemsForReference">
-        <source>Project file item includes which caused reference "{0}".</source>
-        <target state="translated">"{0}" 참조를 발생시킨 프로젝트 파일 항목 Include입니다.</target>
-        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
-      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.Resolved">
         <source>Resolved file path is "{0}".</source>
         <target state="translated">확인된 파일 경로는 "{0}"입니다.</target>
@@ -2241,11 +2150,6 @@
       <trans-unit id="ResolveAssemblyReference.ResolvedFrom">
         <source>Reference found at search path location "{0}".</source>
         <target state="translated">검색 경로 위치 "{0}"에서 참조를 찾았습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.SearchPath">
-        <source>For SearchPath "{0}".</source>
-        <target state="translated">SearchPath "{0}"에 사용됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnificationByAppConfig">
@@ -2674,42 +2578,42 @@
       </trans-unit>
       <trans-unit id="TarDirectory.Comment">
         <source>Creating tar archive from directory "{0}" to "{1}".</source>
-        <target state="new">Creating tar archive from directory "{0}" to "{1}".</target>
+        <target state="translated">디렉터리 "{0}"에서 "{1}"(으)로 tar 압축 파일을 만드는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
         <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
-        <target state="new">MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB4321: 디렉터리 "{0}"이(가) 없거나 액세스할 수 없기 때문에 디렉터리를 tar로 압축하지 못했습니다.</target>
         <note>{StrBegin="MSB4321: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
         <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
-        <target state="new">MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4325: 압축 파일이 최신 상태가 아니고 증분 빌드가 요청되었으므로 디렉터리 "{0}"을(를) 파일 "{1}"에 tar로 압축하지 못했습니다.</target>
         <note>{StrBegin="MSB4325: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailed">
         <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="new">MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</target>
+        <target state="translated">MSB4323: 디렉터리 "{0}"을(를) 파일 "{1}"에 tar로 압축하지 못했습니다. {2} {3}</target>
         <note>{StrBegin="MSB4323: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFileExists">
         <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
-        <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <target state="translated">MSB4322: 파일이 이미 있기 때문에 tar 파일 "{0}"을(를) 만들지 못했습니다.  파일을 삭제하거나 이름을 바꾸고 다시 시도하세요.</target>
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidCompression">
         <source>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</source>
-        <target state="new">MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</target>
+        <target state="translated">MSB4327: 압축 값 "{0}"이(가) 잘못되었습니다. "None", "GZip" 또는 "ZStandard" 중 하나를 지정하세요.</target>
         <note>{StrBegin="MSB4327: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
         <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
-        <target state="new">MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</target>
+        <target state="translated">MSB4324: DeterministicTimestamp 값 "{0}"이(가) 잘못되었습니다. RFC 3339 날짜-시간(예: "2024-01-01T00:00:00Z") 또는 Unix epoch 이후의 정수 시간(초)을 지정하세요.</target>
         <note>{StrBegin="MSB4324: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidFormat">
         <source>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</source>
-        <target state="new">MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</target>
+        <target state="translated">MSB4326: 형식 값 "{0}"이(가) 잘못되었습니다. "Pax", "Ustar", "V7" 또는 "Gnu" 중 하나를 지정하세요.</target>
         <note>{StrBegin="MSB4326: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
@@ -2819,67 +2723,67 @@
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfEntryType">
         <source>Did not untar entry "{0}" because its entry type "{1}" is not supported.</source>
-        <target state="new">Did not untar entry "{0}" because its entry type "{1}" is not supported.</target>
+        <target state="translated">해당 항목 종류 "{1}"이(가) 지원되지 않으므로 항목 "{0}"의 압축을 해제하지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFileMatch">
         <source>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
-        <target state="new">Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <target state="translated">"{2}" 매개 변수가 프로젝트에 "{3}"(으)로 설정되었고 파일 크기와 타임스탬프가 일치하기 때문에 "{0}" 파일에서 "{1}" 파일로 압축을 풀지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFilter">
         <source>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">파일 "{0}"이(가) 포함 필터와 일치하지 않거나 제외 필터와 일치하므로 압축을 풀지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</source>
-        <target state="new">MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</target>
+        <target state="translated">MSB4331: 디렉터리 "{0}"을(를) 만들 수 없기 때문에 디렉터리의 압축을 풀지 못했습니다. {1}</target>
         <note>{StrBegin="MSB4331: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotExtractFile">
         <source>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</source>
-        <target state="new">MSB4336: Failed to untar file "{0}" to "{1}".  {2}</target>
+        <target state="translated">MSB4336: 파일 "{0}"의 압축을 "{1}"에 풀지 못했습니다. {2}</target>
         <note>{StrBegin="MSB4336: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotMakeFileWriteable">
         <source>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="new">MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</target>
+        <target state="translated">MSB4335: 대상 파일 "{1}"이(가) 읽기 전용이고 쓰기 가능하도록 만들 수 없기 때문에 파일 "{0}"의 압축을 풀지 못했습니다. {2} {3}</target>
         <note>{StrBegin="MSB4335: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotOpenFile">
         <source>MSB4333: Failed to open tar file "{0}".  {1}</source>
-        <target state="new">MSB4333: Failed to open tar file "{0}".  {1}</target>
+        <target state="translated">MSB4333: tar 파일 "{0}"을(를) 열지 못했습니다. {1}</target>
         <note>{StrBegin="MSB4333: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorExtractingResultsInFilesOutsideDestination">
         <source>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</source>
-        <target state="new">MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <target state="translated">MSB4334: 대상 디렉터리 밖에 있기 때문에 파일 "{0}"의 압축을 "{1}"에 풀지 못했습니다.</target>
         <note>{StrBegin="MSB4334: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFileDoesNotExist">
         <source>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</source>
-        <target state="new">MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</target>
+        <target state="translated">MSB4332: 파일 "{0}"이(가) 존재하지 않거나 액세스할 수 없기 때문에 파일의 압축을 풀지 못했습니다.</target>
         <note>{StrBegin="MSB4332: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternInvalidPath">
         <source>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB4337: 잘못된 경로 문자가 포함되어 있기 때문에 패턴 "{0}"을(를) 구문 분석하지 못했습니다.</target>
         <note>{StrBegin="MSB4337: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternPropertyReferences">
         <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB4338: 지원되지 않는 속성 참조가 포함되어 있기 때문에 패턴 "{0}"을(를) 구문 분석하지 못했습니다.</target>
         <note>{StrBegin="MSB4338: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFailIfNotIncremental">
         <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
-        <target state="new">MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4339: 대상이 최신 상태가 아니고 증분 빌드가 요청되었으므로 파일 "{0}"의 압축을 "{1}"에 풀지 못했습니다.</target>
         <note>{StrBegin="MSB4339: "}</note>
       </trans-unit>
       <trans-unit id="Untar.FileComment">
         <source>Untarring file "{0}" to "{1}".</source>
-        <target state="new">Untarring file "{0}" to "{1}".</target>
+        <target state="translated">파일 "{0}"의 압축을 "{1}"에 푸는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
@@ -3114,7 +3018,7 @@
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputDtdProhibited">
         <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <target state="translated">MSB3733: XML 입력에 DTD가 포함되어 있습니다. DTD는 보안상의 이유로 기본적으로 금지되어 있습니다. DTD를 제거하거나 DTD를 무시하려면 "{1}" 작업에서 "{0}"을(를) "false"로 설정하여 중지합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
@@ -3134,7 +3038,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.TransformDtdProhibited">
         <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
-        <target state="new">MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</target>
+        <target state="translated">MSB3703: XML 입력 "{0}"에 DTD가 포함되어 있으므로 변환을 실행할 수 없습니다. DTD는 보안상의 이유로 기본적으로 금지되어 있습니다. DTD를 제거하거나 입력을 신뢰하는 경우 "{2}" 작업에서 "{1}"을(를) "false"로 설정하여 DTD를 무시합니다.</target>
         <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3169,7 +3073,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadDtdProhibited">
         <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <target state="translated">MSB3704: 지정된 Xslt에 DTD가 포함되어 있으므로 로드할 수 없습니다. DTD는 보안상의 이유로 기본적으로 금지되어 있습니다. DTD를 제거하거나 입력을 신뢰하는 경우 "{1}" 작업에서 "{0}"을(를) "false"로 설정하여 DTD를 무시합니다.</target>
         <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">
