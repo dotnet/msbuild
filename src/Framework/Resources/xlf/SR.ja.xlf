@@ -77,6 +77,16 @@
         <target state="translated">参照アセンブリ パスをパス "{0}" とフレームワーク モニカー "{1}" から生成しようとしたときに、エラーが発生しました。{2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">再頒布可能パッケージ リスト ファイル "{0}" の読み取り中にエラーが発生しました。{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">パス "{0}" のフレームワークはパス "{1}" のフレームワークを参照アセンブリ パスの一部として含めようとしましたが、エラーが発生しました。{2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">デバッグ ログに使用されるパス "{0}" が長すぎます。MSBUILDDEBUGPATH 環境変数を使用して短い値に設定するか、長いパスを許可するようにシステム構成を変更してください。</target>
@@ -128,6 +138,11 @@
         <note>{StrBegin="MSB6010: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">.NET Framework のバージョン "{0}" はサポートされていません。列挙 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion から値を指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">.NET Framework のバージョン "{0}" はサポートされていません。列挙 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion から値を指定してください。</target>
         <note />

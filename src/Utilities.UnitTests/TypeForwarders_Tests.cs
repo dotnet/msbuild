@@ -27,6 +27,7 @@ public class TypeForwarders_Tests
             typeof(SDKType),
             typeof(TargetDotNetFrameworkVersion),
             typeof(TargetPlatformSDK),
+            typeof(ToolLocationHelper),
             typeof(VisualStudioVersion),
         ];
 
