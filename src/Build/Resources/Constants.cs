@@ -277,13 +277,8 @@ namespace Microsoft.Build.Internal
         [DynamicDependency(PropertyFunctionMembers, typeof(Uri))]
         [DynamicDependency(PropertyFunctionMembers, typeof(UriBuilder))]
         [DynamicDependency(PropertyFunctionMembers, typeof(Version))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Microsoft.Build.Utilities.ToolLocationHelper))]
 #if NET
-        // ToolLocationHelper lives in Microsoft.Build.Utilities.Core in the SDK, which Microsoft.Build does not
-        // directly reference, so it cannot be named with typeof here like the entries above. Root it with the
-        // (memberTypes, typeName, assemblyName) string overload instead - it is otherwise an ordinary allowlist
-        // entry (see the TryAdd for it below). That overload (and trimming itself) exists only on .NET, so this
-        // entry is guarded for the .NET build; the allowlist still includes the type at run time on .NET Framework.
-        [DynamicDependency(PropertyFunctionMembers, "Microsoft.Build.Utilities.ToolLocationHelper", "Microsoft.Build.Utilities.Core")]
         [DynamicDependency(PropertyFunctionMembers, typeof(OperatingSystem))]
 #endif
         // The DynamicDependency allowlist above preserves each property-function receiver type's public
@@ -393,7 +388,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Uri", new Tuple<string, Type>(null, typeof(Uri)));
                         availableStaticMethods.TryAdd("System.UriBuilder", new Tuple<string, Type>(null, typeof(UriBuilder)));
                         availableStaticMethods.TryAdd("System.Version", new Tuple<string, Type>(null, typeof(Version)));
-                        availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
+                        availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>(null, typeof(Microsoft.Build.Utilities.ToolLocationHelper)));
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
 #if NET
