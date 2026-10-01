@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1126,7 +1126,8 @@ namespace Microsoft.Build.UnitTests
         public void DoNotWriteThroughHardLinkWhenDestinationCannotBeDeleted()
         {
             using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
-
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
             TransientTestFolder folder = env.CreateFolder(createFolder: true);
             string linkedFile = Path.Combine(folder.Path, "linked.dll");   // stands in for the NuGet cache file
             string destination = Path.Combine(folder.Path, "destination.dll");
@@ -1138,10 +1139,11 @@ namespace Microsoft.Build.UnitTests
             File.WriteAllText(linkedFile, LinkedContents);
             File.WriteAllText(source, SourceContents);
 
+            var engine = new MockEngine(_testOutputHelper);
             var task = new Copy
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                BuildEngine = new MockEngine(_testOutputHelper),
+                BuildEngine = engine,
                 RetryDelayMilliseconds = 1, // speed up tests!
                 Retries = 0,
                 SourceFiles = new ITaskItem[] { new TaskItem(source) },
@@ -1149,26 +1151,173 @@ namespace Microsoft.Build.UnitTests
             };
 
             string linkError = string.Empty;
-            if (!Tasks.NativeMethods.MakeHardLink(destination, linkedFile, ref linkError, task.Log))
-            {
-                // Hard links are not available here (e.g. non-NTFS volume); nothing to verify.
-                return;
-            }
+            Tasks.NativeMethods.MakeHardLink(destination, linkedFile, ref linkError, task.Log).ShouldBeTrue(linkError);
 
-            // Someone else is holding the destination open. FileShare.ReadWrite does not include
-            // FileShare.Delete, so DeleteFile on the destination fails with a sharing violation
-            // while CopyFile onto it still succeeds.
+            // FileShare.ReadWrite does not include FileShare.Delete, so deletion fails with
+            // a sharing violation while an in-place copy would still succeed.
             using (File.Open(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
-                task.Execute();
+                Should.Throw<IOException>(() => File.Delete(destination));
+                task.Execute().ShouldBeFalse();
             }
 
-            // Whatever the task decided to do, it must not have modified the file that the
-            // destination was hard linked to.
+            engine.AssertLogContains("MSB3021");
+            engine.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Copy.DestinationNotDeleted", destination));
+            task.CopiedFiles.ShouldBeEmpty();
+            File.ReadAllText(destination).ShouldBe(LinkedContents);
             File.ReadAllText(linkedFile).ShouldBe(
                 LinkedContents,
                 "Copy overwrote the destination in place and corrupted the file it was hard linked to.");
         }
+
+        /// <summary>
+        /// Replacing a symbolic link must preserve the file that it points to, including when
+        /// that file is open without FileShare.Delete. Opening a symbolic link follows its target.
+        /// </summary>
+        [RequiresSymbolicLinksFact]
+        public void DoNotWriteThroughSymbolicLinkWhenTargetIsOpen()
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Assert.Skip("FileShare.Delete controls deletion on Windows only.");
+            }
+
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            string linkedFile = Path.Combine(folder.Path, "linked.dll");
+            string destination = Path.Combine(folder.Path, "destination.dll");
+            string source = Path.Combine(folder.Path, "source.dll");
+
+            const string LinkedContents = "This file is shared with the NuGet cache.";
+            const string SourceContents = "This is a completely different file.";
+            File.WriteAllText(linkedFile, LinkedContents);
+            File.WriteAllText(source, SourceContents);
+
+            var task = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = new MockEngine(_testOutputHelper),
+                Retries = 0,
+                SourceFiles = [new TaskItem(source)],
+                DestinationFiles = [new TaskItem(destination)],
+            };
+
+            string linkError = string.Empty;
+            NativeMethodsShared.MakeSymbolicLink(destination, linkedFile, ref linkError).ShouldBeTrue(linkError);
+            (File.GetAttributes(destination) & FileAttributes.ReparsePoint).ShouldBe(FileAttributes.ReparsePoint);
+
+            using (File.Open(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                task.Execute().ShouldBeTrue();
+            }
+
+            File.ReadAllText(destination).ShouldBe(SourceContents);
+            File.ReadAllText(linkedFile).ShouldBe(LinkedContents);
+            (File.GetAttributes(destination) & FileAttributes.ReparsePoint).ShouldBe((FileAttributes)0);
+            task.CopiedFiles.Length.ShouldBe(1);
+        }
+
+#if !NETFRAMEWORK
+        /// <summary>
+        /// A non-writable parent directory prevents deletion but still allows in-place writes
+        /// to writable files. On Unix, reject a surviving destination even if it is a regular file,
+        /// because determining its hard-link count is not supported.
+        /// </summary>
+        [UnixOnlyTheory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotWriteThroughDestinationWhenParentDirectoryIsNotWritable(bool useHardLink, bool useSymbolicLink)
+        {
+            if (!Tasks.UnitTests.Unzip_Tests.NotRunningAsRoot())
+            {
+                Assert.Skip("root can delete files in non-writable directories.");
+            }
+
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            string destinationFolder = Path.Combine(folder.Path, "destination");
+            Directory.CreateDirectory(destinationFolder);
+            string destination = Path.Combine(destinationFolder, "destination.dll");
+            string probeDestination = Path.Combine(destinationFolder, "probe.dll");
+            string linkedFile = Path.Combine(folder.Path, "linked.dll");
+            string probeLinkedFile = Path.Combine(folder.Path, "probe-linked.dll");
+            string source = Path.Combine(folder.Path, "source.dll");
+
+            const string LinkedContents = "This file is shared with the NuGet cache.";
+            const string SourceContents = "This is a completely different file.";
+            File.WriteAllText(linkedFile, LinkedContents);
+            File.WriteAllText(probeLinkedFile, LinkedContents);
+            File.WriteAllText(source, SourceContents);
+
+            var engine = new MockEngine(_testOutputHelper);
+            var task = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                RetryDelayMilliseconds = 1,
+                Retries = 0,
+                SourceFiles = [new TaskItem(source)],
+                DestinationFiles = [new TaskItem(destination)],
+            };
+
+            CreateDestination(destination, linkedFile);
+            CreateDestination(probeDestination, probeLinkedFile);
+
+#pragma warning disable CA1416 // UnixFileMode APIs are guarded by [UnixOnlyTheory].
+            UnixFileMode originalMode = File.GetUnixFileMode(destinationFolder);
+            try
+            {
+                File.SetUnixFileMode(destinationFolder, originalMode & ~(UnixFileMode.UserWrite | UnixFileMode.GroupWrite | UnixFileMode.OtherWrite));
+
+                // Verify that the permissions prevent deletion while still allowing the
+                // in-place copy that would corrupt a linked file without the guard.
+                Should.Throw<UnauthorizedAccessException>(() => File.Delete(destination));
+                // Linux allows in-place overwrite here. macOS may instead reject its clonefile
+                // optimization before falling back to a copy, so do not require it to succeed there.
+                if (NativeMethodsShared.IsLinux)
+                {
+                    File.Copy(source, probeDestination, overwrite: true);
+                    File.ReadAllText(probeDestination).ShouldBe(SourceContents);
+                    if (useHardLink || useSymbolicLink)
+                    {
+                        File.ReadAllText(probeLinkedFile).ShouldBe(SourceContents);
+                    }
+                }
+
+                task.Execute().ShouldBeFalse();
+                engine.AssertLogContains("MSB3021");
+                engine.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Copy.DestinationNotDeleted", destination));
+                task.CopiedFiles.ShouldBeEmpty();
+                File.ReadAllText(destination).ShouldBe(LinkedContents);
+                File.ReadAllText(linkedFile).ShouldBe(LinkedContents);
+            }
+            finally
+            {
+                File.SetUnixFileMode(destinationFolder, originalMode);
+            }
+#pragma warning restore CA1416
+
+            void CreateDestination(string path, string target)
+            {
+                string linkError = string.Empty;
+                if (useHardLink)
+                {
+                    Tasks.NativeMethods.MakeHardLink(path, target, ref linkError, task.Log).ShouldBeTrue(linkError);
+                }
+                else if (useSymbolicLink)
+                {
+                    NativeMethodsShared.MakeSymbolicLink(path, target, ref linkError).ShouldBeTrue(linkError);
+                }
+                else
+                {
+                    File.WriteAllText(path, LinkedContents);
+                }
+            }
+        }
+#endif
 
 
         /// <summary>
@@ -1182,7 +1331,6 @@ namespace Microsoft.Build.UnitTests
             // TODO: Remove test when Wave18_12 rotates out
             ChangeWaves.ResetStateForTests();
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_12.ToString());
-
             TransientTestFolder folder = env.CreateFolder(createFolder: true);
             string linkedFile = Path.Combine(folder.Path, "linked.dll");
             string destination = Path.Combine(folder.Path, "destination.dll");
@@ -1205,10 +1353,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             string linkError = string.Empty;
-            if (!Tasks.NativeMethods.MakeHardLink(destination, linkedFile, ref linkError, task.Log))
-            {
-                return;
-            }
+            Tasks.NativeMethods.MakeHardLink(destination, linkedFile, ref linkError, task.Log).ShouldBeTrue(linkError);
 
             using (File.Open(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
@@ -1217,8 +1362,6 @@ namespace Microsoft.Build.UnitTests
 
             // Pre-wave behavior: the copy wrote through the hard link.
             File.ReadAllText(linkedFile).ShouldBe(SourceContents);
-
-            ChangeWaves.ResetStateForTests();
         }
 
         /*

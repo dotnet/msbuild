@@ -380,16 +380,17 @@ namespace Microsoft.Build.Tasks
             if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // DeleteNoThrow swallows its failures. If the delete above did not actually remove
-                // the destination and the destination is still a link, File.Copy(..., overwrite: true)
-                // would write through that link and silently corrupt the file it points at.
+                // the destination, File.Copy(..., overwrite: true) could write through a surviving
+                // link and silently corrupt its target. On Unix, conservatively refuse any surviving
+                // destination because we cannot establish its hard-link count.
                 // Refuse instead, and let DoCopyWithRetries surface it like any other locked destination.
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12) &&
                     destinationDeleteAttempted &&
-                    DestinationIsSurvivingLink(destinationFileState.Path))
+                    DestinationCannotBeSafelyOverwritten(destinationFileState.Path))
                 {
                     destinationFileState.Reset();
                     throw new IOException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                        "Copy.LinkedDestinationNotDeleted",
+                        "Copy.DestinationNotDeleted",
                         destinationFileState.Path.OriginalValue));
                 }
 
@@ -415,15 +416,15 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Returns true when <paramref name="path"/> survived the attempt to delete it AND is still
-        /// a link - either a symbolic link / reparse point, or a hard link with more than one
-        /// directory entry. Overwriting such a file in place changes the data every other link sees.
+        /// Returns true when <paramref name="path"/> survived the attempt to delete it and cannot
+        /// be established to be safe to overwrite in place. On Windows, checks for symbolic links,
+        /// reparse points and multiple hard links. On Unix, conservatively refuses any surviving file.
         /// </summary>
         /// <remarks>
-        /// Only reached on the rare path where deleting the destination failed, so the extra
-        /// file system calls do not show up in normal builds.
+        /// Checks existence after every attempted delete. Attribute and hard-link checks are only
+        /// reached when the destination still exists.
         /// </remarks>
-        private static bool DestinationIsSurvivingLink(string path)
+        private static bool DestinationCannotBeSafelyOverwritten(string path)
         {
             if (!FileSystems.Default.FileExists(path))
             {
@@ -451,12 +452,10 @@ namespace Microsoft.Build.Tasks
             }
 #endif
 
-            // On Unix the BCL does not expose the hard link count, but it does not need to. A
-            // destination that survived unlink() cannot be replaced with rename() either: both
-            // need write permission on the containing directory, and that is exactly what is
-            // missing whenever unlink() fails with EACCES/EPERM. Since no safe way to put a new
-            // file at this path exists, refuse rather than write into the existing one - which
-            // would change the contents of every other name sharing it.
+            // On Unix the BCL does not expose the hard-link count. For example, a non-writable
+            // containing directory can prevent unlink() while still permitting an in-place copy
+            // into a writable file. Conservatively refuse any surviving destination rather than
+            // risk changing the contents of other names sharing it.
             return true;
         }
 

@@ -2837,8 +2837,8 @@
     <value>MSB3892: ErrorIfLinkFails requires UseHardlinksIfPossible or UseSymbolicLinksIfPossible to be set.</value>
     <comment>{StrBegin="MSB3892: "} LOCALIZATION: Do not localize "ErrorIfLinkFails", "UseHardLinksIfPossible", or "UseSymbolicLinksIfPossible".</comment>
   </data>
-  <data name="Copy.LinkedDestinationNotDeleted" xml:space="preserve">
-    <value>MSB3897: Could not copy to "{0}" because the existing file is a hard or symbolic link that could not be deleted first. Overwriting it in place would modify the file it is linked to.</value>
+  <data name="Copy.DestinationNotDeleted" xml:space="preserve">
+    <value>MSB3897: Cannot overwrite destination file "{0}" because it could not be deleted first. Overwriting it in place could modify other files linked to it.</value>
     <comment>{StrBegin="MSB3897: "} LOCALIZATION: {0} is a path.</comment>
   </data>
   <data name="Copy.LinkFailed" xml:space="preserve">

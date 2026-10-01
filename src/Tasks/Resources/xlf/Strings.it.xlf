@@ -314,9 +314,9 @@
         <target state="translated">MSB3893: non è stato possibile usare un collegamento per copiare "{0}" in "{1}".</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
-      <trans-unit id="Copy.LinkedDestinationNotDeleted">
-        <source>MSB3897: Could not copy to "{0}" because the existing file is a hard or symbolic link that could not be deleted first. Overwriting it in place would modify the file it is linked to.</source>
-        <target state="new">MSB3897: Could not copy to "{0}" because the existing file is a hard or symbolic link that could not be deleted first. Overwriting it in place would modify the file it is linked to.</target>
+      <trans-unit id="Copy.DestinationNotDeleted">
+        <source>MSB3897: Cannot overwrite destination file "{0}" because it could not be deleted first. Overwriting it in place could modify other files linked to it.</source>
+        <target state="new">MSB3897: Cannot overwrite destination file "{0}" because it could not be deleted first. Overwriting it in place could modify other files linked to it.</target>
         <note>{StrBegin="MSB3897: "} LOCALIZATION: {0} is a path.</note>
       </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
