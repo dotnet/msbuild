@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
@@ -245,25 +245,17 @@
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
-                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded[:true|false]
-                     Povolí experimentální vícevláknový režim v nástroji MSBuild.
+                     Povolí EXPERIMENTÁLNÍ vícevláknový režim v nástroji MSBuild.
                      To znamená, že nástroj MSBuild bude používat více vláken
                      k paralelnímu sestavování projektů
                      namísto více procesů.
-                     Tato možnost není podporována.
-                     Maximální počet použitých vláken je určen
+                     Maximální počet použitých vláken je určován
                      přepínačem -maxCpuCount.
-                     V případě zapnutého režimu s více vlákny
-                     a MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     nemůže být maxCpuCount větší než 256.
                      (Krátký tvar: -mt)
     </target>
         <note />
@@ -1855,6 +1847,44 @@
     exact @ switch that resulted in the duplicate response file.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ReplayFilterCanceled">
+        <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
+        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterFailed">
+        <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
+        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterInvalidOutput">
+        <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
+        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterOutputExists">
+        <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
+        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterUnsupportedSwitch">
+        <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
+        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterZipNotSupported">
+        <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
+        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
+        <target state="translated">MSBUILD : error MSB1073: Multi-threaded mode a -reportFileAccesses nelze použít společně. Atributy generování sestav přístupu k souborům přistupují k jednomu projektu na pracovní proces, ale režim s více vlákny může spustit více projektů ve stejném procesu. Odeberte -reportFileAccesses nebo zakažte režim s více vlákny pomocí -mt:false. Pokud je nastavena hodnota MSBUILDFORCEMULTITHREADED, zrušte nejprve její nastavení. MSBUILDENABLEMULTITHREADED lze přepsat pomocí -mt:false.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
         <source>MSBUILD : error MSB1022: Response file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1022: Soubor odpovědí neexistuje.</target>
@@ -2147,7 +2177,7 @@
       </trans-unit>
       <trans-unit id="HelpMessage_30_BinaryLoggerSwitch">
         <source>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
+                     Serializes build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
                      of the build process that can later be used to reconstruct
@@ -2155,6 +2185,19 @@
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
+
+                     Exclude=kind[,kind...] omits the named event kinds from
+                     this binary logger during builds and replay. Console and
+                     other loggers are unaffected. Names are case-insensitive.
+                     Specify Exclude once per logger. Selection matches exact
+                     record kinds, not all derived message or warning events.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Example: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtered replay requires new output paths and does not
+                     support ProjectImports=ZipFile.
+                     Filtering is not redaction: embedded files are independent.
 
                      The optional LogFile specifies the path where the
                      binary log is saved. To generate a distinct log file
@@ -2197,7 +2240,7 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializuje všechny události sestavení do komprimovaného binárního souboru.
                      Ve výchozím nastavení se soubor nachází v aktuálním adresáři a má název
                      "msbuild.binlog". Binární protokol je podrobný popis

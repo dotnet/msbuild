@@ -61,8 +61,6 @@ namespace Microsoft.Build.UnitTests.Shared
         // fail to find its runtime. See eng/BootStrapMsBuild.targets.
         private static readonly string s_bootstrapDotnetHostPath = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
 
-        public static string BootstrapDotnetHostPath => s_bootstrapDotnetHostPath;
-
         // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the .NET app host.
         // X86/X64/ARM64 cover every CI agent architecture; these are cleared when launching the bootstrapped MSBuild.
         private static readonly string[] s_archSpecificDotnetRootVars =
@@ -77,6 +75,15 @@ namespace Microsoft.Build.UnitTests.Shared
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
             testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, s_dotnetExePath);
         }
+
+        /// <summary>
+        /// The dotnet host inside the bootstrap layout, for tests that must drive the bootstrap
+        /// installation directly rather than through MSBuild (for example <c>dotnet build-server
+        /// shutdown</c>). Pair it with <see cref="GetBootstrapMSBuildEnvironmentVariables"/> so the
+        /// command targets the same installation, and therefore the same server, that
+        /// <see cref="ExecBootstrapedMSBuild(string, out bool, bool, ITestOutputHelper, bool, int)"/> built with.
+        /// </summary>
+        public static string BootstrapDotnetHostPath => s_bootstrapDotnetHostPath;
 #endif
 
         /// <summary>

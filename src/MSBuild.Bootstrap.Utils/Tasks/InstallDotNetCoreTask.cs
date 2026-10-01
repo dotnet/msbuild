@@ -18,6 +18,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
     public sealed class InstallDotNetCoreTask : ToolTask
     {
         private const string ScriptName = "dotnet-install";
+        private const int MaxScriptDownloadAttempts = 3;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InstallDotNetCoreTask"/> class.
@@ -53,6 +54,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         /// Gets or sets the base URL for downloading the .NET Core installation script. The default value is "https://dot.net/v1/".
         /// </summary>
         public string DotNetInstallBaseUrl { get; set; } = "https://dot.net/v1/";
+
+        internal HttpMessageHandler HttpMessageHandler { get; set; } = null!;
 
         private bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
@@ -96,22 +99,62 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         /// <param name="scriptPath">The path where the script will be saved.</param>
         private async AsyncTasks.Task DownloadScriptAsync(string scriptName, string scriptPath)
         {
-            using (HttpClient client = new HttpClient())
+            string scriptContent = await DownloadScriptContentAsync(scriptName).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(scriptContent))
             {
-                HttpResponseMessage response = await client.GetAsync($"{DotNetInstallBaseUrl}{scriptName}").ConfigureAwait(false);
-                if (response.IsSuccessStatusCode)
+                File.WriteAllText(scriptPath, scriptContent);
+            }
+        }
+
+        private async AsyncTasks.Task<string> DownloadScriptContentAsync(string scriptName)
+        {
+            string scriptUrl = $"{DotNetInstallBaseUrl}{scriptName}";
+
+#pragma warning disable CA2000 // Dispose objects before losing scope because HttpClientHandler is disposed by HttpClient.Dispose()
+            using (HttpClient client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
+#pragma warning restore CA2000
+            {
+                using (HttpResponseMessage response = await GetScriptDownloadResponseAsync(client, scriptUrl).ConfigureAwait(false))
                 {
-                    string scriptContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    if (!string.IsNullOrEmpty(scriptContent))
+                    if (response == null)
                     {
-                        File.WriteAllText(scriptPath, scriptContent);
+                        return null!;
                     }
-                }
-                else
-                {
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+
                     Log.LogError($"Install-scripts download from {DotNetInstallBaseUrl} error. Status code: {response.StatusCode}.");
+                    return null!;
                 }
             }
+        }
+
+        private async AsyncTasks.Task<HttpResponseMessage> GetScriptDownloadResponseAsync(HttpClient client, string scriptUrl)
+        {
+            for (int attempt = 1; attempt <= MaxScriptDownloadAttempts; attempt++)
+            {
+                try
+                {
+                    return await client.GetAsync(scriptUrl).ConfigureAwait(false);
+                }
+                catch (HttpRequestException e)
+                {
+                    if (attempt < MaxScriptDownloadAttempts)
+                    {
+                        Log.LogMessage(MessageImportance.Low, $"Install-scripts download from {scriptUrl} failed. Retrying attempt {attempt + 1} of {MaxScriptDownloadAttempts}. {e.Message}");
+                        continue;
+                    }
+
+                    Log.LogError($"Install-scripts download from {scriptUrl} failed after {attempt} {(attempt == 1 ? "attempt" : "attempts")}. {e.Message}");
+                    Log.LogMessage(MessageImportance.Low, e.ToString());
+                    return null!;
+                }
+            }
+
+            return null!;
         }
 
         /// <summary>

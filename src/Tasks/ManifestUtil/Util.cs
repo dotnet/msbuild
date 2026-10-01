@@ -458,7 +458,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static void WriteFile(string path, Stream s)
         {
-            using StreamReader r = new StreamReader(s);
+            using StreamReader r = new StreamReader(
+                s,
+                Encoding.UTF8,
+                detectEncodingFromByteOrderMarks: true,
+                bufferSize: 1024,
+                leaveOpen: true);
             WriteFile(path, r.ReadToEnd());
         }
 

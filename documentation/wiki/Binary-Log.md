@@ -153,6 +153,250 @@ logReader.Replay(path_to_binlog_file);
 
 ```
 
+<a id="filtering-events-during-replay"></a>
+
+### Filtering events during builds and replay
+
+Add `Exclude=kind[,kind...]` to a binary logger's parameters to omit selected event kinds.
+The same implementation filters events before serialization during an ordinary build
+and when rewriting an existing binlog. The option affects only that binary logger:
+console output, file loggers, and other binary loggers still receive their own events.
+Excluding errors or warnings does not change the build result.
+
+#### Produce filtered binlogs from the command line
+
+Use an MSBuild build containing the `Exclude` binary logger parameter. Until this change
+is released, use MSBuild built from this branch; older installed SDKs do not recognize it.
+For example, filter the original build's log while keeping normal console diagnostics:
+
+```powershell
+dotnet build "C:\src\App\App.csproj" "-bl:C:\logs\filtered.binlog;Exclude=Message,Warning;ProjectImports=None"
+```
+
+Use the same parameter when rewriting an existing binlog:
+
+```powershell
+dotnet msbuild "C:\logs\input.binlog" "-bl:C:\logs\filtered.binlog;Exclude=ProjectEvaluationStarted,ProjectEvaluationFinished;ProjectImports=None" -noAutoResponse
+```
+
+The same arguments work with `MSBuild.exe`. Passing a binlog replays it; it does not rebuild
+the original project. Multiple `-bl` arguments can have independent filters, or no filter:
+
+```powershell
+dotnet msbuild "C:\logs\input.binlog" "-bl:C:\logs\quiet.binlog;Exclude=Message" "-bl:C:\logs\full.binlog" -noAutoResponse
+```
+
+If multiple `-bl` arguments resolve to the same output path, the first configuration
+wins and later duplicates are ignored with a notice. Only the retained configurations'
+`Exclude` parameters enable filtered replay and its restrictions.
+
+During filtered replay, all binary log destinations must be new paths, including the
+default `msbuild.binlog` when only `-bl:Exclude=...` is specified. Ordinary builds retain
+the binary logger's normal overwrite behavior. The usual `{}` output-name expansion is
+supported. Relative output paths are resolved from the current directory, including
+directories whose names contain semicolons.
+
+Specify `Exclude=` once per logger, including parameters from response files. `Exclude=`
+and event kind names are case-insensitive. Separate names with commas; duplicate names
+within the list are harmless. Empty lists, numeric values, unknown names, auxiliary
+records, and protected event kinds are rejected.
+
+Selection matches exact serialized record kinds, not event-class inheritance. For
+example, `Exclude=Message` does not exclude `CriticalBuildMessage` or `TaskCommandLine`;
+name those kinds explicitly to exclude them too.
+
+Retained `BuildCheckMessage`, `BuildCheckWarning`, and `BuildCheckError` records keep
+their original kinds when a binlog is rewritten, rather than becoming ordinary
+`Message`, `Warning`, and `Error` records. Subsequent filtering therefore continues
+to distinguish BuildCheck diagnostics from ordinary diagnostics.
+
+| Excludable group | Event kinds |
+| --- | --- |
+| Diagnostics | `Error`, `Warning`, `Message`, `CriticalBuildMessage` |
+| Task diagnostics | `TaskCommandLine`, `TaskParameter` |
+| Evaluation | `ProjectEvaluationStarted`, `ProjectEvaluationFinished` (exclude both or neither) |
+| Imports and properties | `ProjectImported`, `PropertyReassignment`, `UninitializedPropertyRead`, `EnvironmentVariableRead`, `PropertyInitialValueSet` |
+| Other diagnostics | `ResponseFileUsed`, `AssemblyLoad` |
+| Recorded BuildCheck diagnostics | `BuildCheckMessage`, `BuildCheckWarning`, `BuildCheckError`, `BuildCheckTracing`, `BuildCheckAcquisition` |
+
+Build, project, target, and task start/finish events, `TargetSkipped`, and other lifecycle
+and correlation records are protected. These restrictions retain the structure needed
+by the ordinary console logger; they do not guarantee that every consumer can perform
+the same analyses after data is excluded.
+
+Filtered replay uses the ordinary console logger, not the terminal logger. Its console
+output is not filtered. Besides binary, custom, file, and distributed loggers, supported
+switches are verbosity (`-v`), console logger parameters
+(`-clp`), `-nologo`, `-m`, `-nr`, `-lowPriority`, `-noAutoResponse`, `-noConsoleLogger`,
+and automatic or disabled terminal selection (`-tl:auto` or `-tl:false`, both using the
+ordinary console logger here). Build-only switches and `-check` are rejected before their
+outputs are opened. The build logger automatically registered by `dotnet msbuild` from
+the current SDK is ignored. Terminal logger parameters (`-tlp`), including
+those supplied by the SDK, do not configure the ordinary console logger.
+Use `-noAutoResponse`, as above, to avoid
+inheriting build-only switches from automatic response files.
+
+`ProjectImports=Embed` remains the default; `ProjectImports=None` omits the archive.
+`ProjectImports=ZipFile` is supported during builds, but not during filtered replay because
+its sidecar archive is not part of the staged binary log publication.
+Archives are handled independently of event selection: excluding `ProjectImported` or
+evaluation events does not remove embedded source files. Files explicitly requested
+through top-level `EmbedInBinlog` items are retained when evaluation events are excluded,
+and those added in targets or produced by task outputs are retained with `Exclude=TaskParameter`.
+Each replay output receives its own complete archive unless `ProjectImports=None` is set.
+`Exclude=Message` also excludes
+the binary logger's own metadata messages; `OmitInitialInfo` can suppress initial metadata
+without excluding other messages. **Filtering is not redaction**, and does not guarantee
+a smaller output.
+
+For CLI filtered replay, the input must use a format supported by this reader, no newer
+than its current format.
+Unlike ordinary forward-compatible replay, filtered rewriting does not skip unknown
+records or fields. It writes the current binlog format, not a byte-for-byte copy.
+
+The CLI stages each binary output in its destination directory and publishes it without
+overwriting only after replay and logger finalization succeed. Cancellation observed
+before publication begins, read/write failures, and finalization/publication failures
+produce a nonzero exit status.
+Existing destinations, including files created while replay is running, are preserved.
+Publication is atomic per file, not across all outputs: a later publication failure can
+leave earlier successfully published binlogs. Other logger outputs are not staged.
+Temporary-file cleanup failures are reported. Exit status describes the transformation,
+not whether the build recorded in the input succeeded.
+
+For programmatic per-logger filtering, set `BinaryLogger.Parameters` to include `Exclude=...`
+and initialize it with either a live build event source or a `BinaryLogReplayEventSource`.
+The logger forces structured replay so raw passthrough cannot bypass its filter. Events
+are still deserialized and delivered to other subscribers; use the replay-source API below
+when the same predicate should apply to every subscriber and skip rejected payloads early.
+
+Direct `BinaryLogger` use does not provide the CLI's staging and no-overwrite guarantees.
+Choose distinct input and output paths, and manage output publication and failure cleanup
+in the calling application. `BinaryLogger.Initialize` normally creates or overwrites its
+configured file; the overload taking an output stream writes to that stream instead.
+
+#### Run a filtered replay from a console application
+
+Set `BinaryLogReplayEventSource.EventFilter` when constructing the replay source to select
+which events reach subscribers. The callback receives `BinaryLogEventMetadata`, containing
+the record kind, its `BuildEventContext` (if present), and the original build context for a
+`TargetSkipped` event. Return `true` to retain an event or `false` to skip it. A `null` filter
+leaves replay unchanged. All `Replay` overloads apply the filter.
+
+The following API example prints only errors and warnings from an existing binlog without
+rebuilding the original project or changing the input file.
+
+Use a .NET SDK supported by the `Microsoft.Build` package version you are referencing.
+Create a console application and add the package, replacing `VERSION_WITH_EVENT_FILTER`
+with a version containing this API. Older packages without `EventFilter` cannot compile
+this example. To try an unreleased build of this change, configure a local NuGet source
+containing the packages built from this branch.
+
+```powershell
+dotnet new console --name FilterBinlog --no-restore
+dotnet add .\FilterBinlog\FilterBinlog.csproj package Microsoft.Build --version "VERSION_WITH_EVENT_FILTER" --no-restore
+```
+
+Replace `FilterBinlog\Program.cs` with:
+
+```csharp
+using System;
+using Microsoft.Build.Logging;
+
+if (args.Length != 1)
+{
+    Console.Error.WriteLine("Usage: FilterBinlog <path-to-binlog>");
+    return 1;
+}
+
+var logReader = new BinaryLogReplayEventSource
+{
+    EventFilter = metadata =>
+        metadata.RecordKind is BinaryLogRecordKind.Error or BinaryLogRecordKind.Warning
+};
+
+logReader.AnyEventRaised += (_, e) => Console.WriteLine(e.Message);
+logReader.Replay(args[0]);
+return 0;
+```
+
+Build the sample, then invoke it with the path to your binlog:
+
+```powershell
+dotnet build .\FilterBinlog\FilterBinlog.csproj -bl:{{}}
+dotnet run --project .\FilterBinlog\FilterBinlog.csproj --no-build -- "C:\logs\build.binlog"
+```
+
+The `--` separates the application's argument from `dotnet run` options. Replay runs
+synchronously and prints each retained event's message. If the log contains no errors
+or warnings, the application prints nothing and exits successfully. To select different
+events, change the `EventFilter` predicate; event subscribers receive only accepted events.
+
+This example selects diagnostics for display, not for creating a complete build log.
+When writing a filtered binlog or passing events to a consumer that relies on build
+structure, retain a consistent set of events (for example, matching start/finish events
+and any required parent project or target events).
+
+To write accepted events to a caller-provided stream, configure a `BinaryLogger`'s
+`Parameters`, then call `binaryLogger.Initialize(logReader, outputStream)`.
+Call `Shutdown()` to finalize the log and close the stream; dispose the stream yourself
+if initialization fails. The configured file path remains the log's metadata name and
+controls import archive paths, but the binlog itself is written to the supplied stream.
+
+#### Filtering behavior and failures
+
+The replay source's `EventFilter` forces structured reading instead of raw record
+passthrough. With length-framed logs (format version 18 or later), rejected events skip
+their type-specific payload without deserialization. `TargetSkipped` is an exception: its original build context
+requires deserializing the payload first. Older formats also filter after deserialization.
+Auxiliary records, including strings, name/value lists, and embedded content, are still
+read so retained events can be decoded correctly. Cancellation is polled before the first
+read and at most every 100 event-record reads, including rejected events. It cannot
+interrupt a callback or record read already running. CLI filtered replay also checks
+cancellation before publishing outputs.
+
+Unknown record kinds are not offered to the filter or interpreted as known event payloads.
+They follow the existing forward-compatibility policy: when recovery is enabled for a
+newer format, they are skipped with a `RecoverableReadError` notification; strict reading
+still rejects them.
+
+If a filter throws, replay stops with `BinaryLogEventFilterException`. This is a callback
+failure, not a recoverable log-format error: `AllowForwardCompatibility` does not suppress
+it and `RecoverableReadError` is not raised for it. The exception provides:
+
+| Property | Diagnostic information |
+| --- | --- |
+| `InnerException` | The original exception, including its type, message, stack trace, and any nested exceptions. |
+| `RecordKind` | The kind of event passed to the failing callback. |
+| `BuildEventContext` | The event's build context, or `null` if absent. |
+| `OriginalBuildEventContext` | The original context of a `TargetSkipped` event, or `null` if absent. |
+| `RecordNumber` | The zero-based record number in the reader, including auxiliary and rejected records; not a byte offset or count of dispatched events. |
+| `FileFormatVersion` | The format version of the source binary log. |
+
+The localized exception message includes the record kind, number, format version, and
+available contexts. Legacy exception serialization is supported only on .NET Framework,
+where these properties are preserved across AppDomain boundaries; modern .NET does not
+declare legacy serialization support. When manually constructing the exception with only an inner exception,
+the record properties are `null` because no record information was supplied.
+
+To log a callback failure explicitly, replace the `logReader.Replay(args[0])` call in
+the console application above with:
+
+```csharp
+try
+{
+    logReader.Replay(args[0]);
+}
+catch (BinaryLogEventFilterException ex)
+{
+    Console.Error.WriteLine(ex); // Includes record information and the original exception.
+    throw;
+}
+```
+
+Low-level readers can use `BuildEventArgsReader.Read(eventFilter)` directly; it returns
+the next accepted event and reports filter failures with the same exception information.
+
 ### Handling the recoverable reading errors
 
 In compatibility mode (default for `BinaryLogReplayEventSource`. Only supported for binlogs of version 18 and higher) reader is capable of skipping unknown event types and unknown parts of known events (`BuildEventArgsReader` can configure the behavior via 2 separate properties - `SkipUnknownEvents` and `SkipUnknownEventParts`).

@@ -4,6 +4,7 @@
 using System;
 
 using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -34,6 +35,19 @@ namespace Microsoft.Build.UnitTests
             bmea = new BuildMessageEventArgs(null, null, null, 0, 0, 0, 0, null, null, null, MessageImportance.Low);
             bmea = new BuildMessageEventArgs(null, null, null, 0, 0, 0, 0, null, null, null, MessageImportance.Low, DateTime.Now);
             bmea = new BuildMessageEventArgs(null, null, null, 0, 0, 0, 0, null, null, null, MessageImportance.Low, DateTime.Now, null);
+        }
+
+        [Fact]
+        public void FormatMessageWithoutMutationPreservesArguments()
+        {
+            object[] arguments = ["argument"];
+            var eventArgs = new BuildMessageEventArgs("Message {0}", null, null, MessageImportance.High, DateTime.Now, arguments);
+
+            eventArgs.FormatMessageWithoutMutation().ShouldBe("Message argument");
+            eventArgs.RawArguments.ShouldBeSameAs(arguments);
+
+            eventArgs.Message.ShouldBe("Message argument");
+            eventArgs.RawArguments.ShouldBeNull();
         }
 
         /// <summary>

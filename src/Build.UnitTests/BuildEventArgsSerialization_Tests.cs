@@ -4,13 +4,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -19,6 +23,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
+using EngineTaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using UtilitiesTaskItem = Microsoft.Build.Utilities.TaskItem;
 
 #nullable disable
 
@@ -50,6 +56,68 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(BinaryLogRecordKind.ProjectImportArchive, (BinaryLogRecordKind)binaryReader.Read7BitEncodedInt());
             Assert.Equal(bytes.Length, binaryReader.Read7BitEncodedInt());
             Assert.Equal(bytes, binaryReader.ReadBytes(bytes.Length));
+        }
+
+        [Theory]
+        [InlineData(1, false)]
+        [InlineData(2, false)]
+        [InlineData(3, false)]
+        [InlineData(1, true)]
+        [InlineData(2, true)]
+        public void EmbeddedArchiveIsCompleteForEverySubscriber(int subscriberCount, bool rewriteArchive)
+        {
+            using var archiveStream = new MemoryStream();
+            using (var archive = new ZipArchive(archiveStream, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                using var content = new StreamWriter(archive.CreateEntry("source.txt").Open());
+                content.Write("original content");
+            }
+
+            archiveStream.Position = 0;
+            using var logStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(logStream, Encoding.UTF8, leaveOpen: true);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+            writer.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, archiveStream);
+            writer.Write(new BuildFinishedEventArgs("after archive", null, true));
+            binaryWriter.Write((byte)BinaryLogRecordKind.EndOfFile);
+            binaryWriter.Flush();
+            logStream.Position = 0;
+
+            using var binaryReader = new BinaryReader(logStream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            if (rewriteArchive)
+            {
+                reader.ArchiveFileEncountered += args =>
+                {
+                    using ArchiveData original = args.ArchiveData;
+                    args.ArchiveData = new ArchiveFile(original.FullPath, "rewritten content");
+                };
+            }
+
+            int archivesRead = 0;
+            for (int i = 0; i < subscriberCount; i++)
+            {
+                reader.EmbeddedContentRead += args =>
+                {
+                    args.ContentKind.ShouldBe(BinaryLogRecordKind.ProjectImportArchive);
+                    using Stream content = args.ContentStream;
+                    content.Position.ShouldBe(0);
+                    using var copy = new MemoryStream();
+                    content.CopyTo(copy);
+                    copy.Length.ShouldBe(content.Length);
+                    copy.Position = 0;
+                    using var archive = new ZipArchive(copy, ZipArchiveMode.Read);
+                    ZipArchiveEntry entry = archive.Entries.ShouldHaveSingleItem();
+                    entry.FullName.ShouldBe("source.txt");
+                    using var text = new StreamReader(entry.Open());
+                    text.ReadToEnd().ShouldBe(rewriteArchive ? "rewritten content" : "original content");
+                    archivesRead++;
+                };
+            }
+
+            reader.Read().ShouldBeOfType<BuildFinishedEventArgs>().Message.ShouldBe("after archive");
+            reader.Read().ShouldBeNull();
+            archivesRead.ShouldBe(subscriberCount);
         }
 
         [Theory]
@@ -969,6 +1037,562 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void TaskParameterSerializationReusesSharedBackingMetadata()
+        {
+            ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata
+                .Add("Metadata", "value%253b");
+            var first = new UtilitiesTaskItem("ItemSpec1");
+            var second = new UtilitiesTaskItem("ItemSpec2");
+            ((IMetadataContainer)first).ImportMetadata(metadata);
+            ((IMetadataContainer)second).ImportMetadata(metadata);
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(1);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterSerializationCachesEmptyMetadataAndFallsBackForTaskItemData()
+        {
+            var first = new UtilitiesTaskItem("ItemSpec1");
+            var second = new UtilitiesTaskItem("ItemSpec2");
+            var taskItemData = new TaskItemData(
+                "ItemSpec3",
+                new Dictionary<string, string>
+                {
+                    ["Metadata"] = "value%253b",
+                });
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second, taskItemData },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(0);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterSerializationReusesItemDefinitionMetadata()
+        {
+            var project = new Project();
+            var definition = new ProjectItemDefinition(project, "MyItem");
+            definition.SetMetadataValue("Metadata", "value%253b");
+            var itemDefinitions = new List<ProjectItemDefinitionInstance>
+            {
+                new ProjectItemDefinitionInstance(definition),
+            };
+            var first = new EngineTaskItem(
+                "ItemSpec1",
+                "ItemSpec1",
+                directMetadata: null,
+                itemDefinitions,
+                projectDirectory: null,
+                immutable: false,
+                definingFileEscaped: "project.proj");
+            var second = new EngineTaskItem(
+                "ItemSpec2",
+                "ItemSpec2",
+                directMetadata: null,
+                itemDefinitions,
+                projectDirectory: null,
+                immutable: false,
+                definingFileEscaped: "project.proj");
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskOutput,
+                "ParameterName",
+                "PropertyName",
+                "ItemName",
+                new ITaskItem[] { first, second },
+                logItemMetadata: true,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream);
+            var writer = new BuildEventArgsWriter(binaryWriter);
+
+            writer.Write(args);
+
+#if DEBUG
+            writer.MetadataReferenceCacheHits.ShouldBe(1);
+#endif
+            Roundtrip(
+                args,
+                e => string.Join(
+                    ";",
+                    e.Items.Cast<ITaskItem>().Select(item => $"{item.ItemSpec}:{item.GetMetadata("Metadata")}")));
+        }
+
+        [Fact]
+        public void TaskParameterBackingMetadataFastPathPreservesSerializedBytes()
+        {
+            ImmutableDictionary<string, string> backingMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                .Add("Metadata", "value%253b");
+            var optimizedFirst = new UtilitiesTaskItem("ItemSpec1");
+            var optimizedSecond = new UtilitiesTaskItem("ItemSpec2");
+            ((IMetadataContainer)optimizedFirst).ImportMetadata(backingMetadata);
+            ((IMetadataContainer)optimizedSecond).ImportMetadata(backingMetadata);
+
+            byte[] optimizedBytes = SerializeTaskParameter([optimizedFirst, optimizedSecond]);
+            byte[] fallbackBytes = SerializeTaskParameter(
+                [
+                    new FallbackTaskItem("ItemSpec1", "Metadata", "value%3b"),
+                    new FallbackTaskItem("ItemSpec2", "Metadata", "value%3b"),
+                ]);
+
+            optimizedBytes.ShouldBe(fallbackBytes);
+
+            static byte[] SerializeTaskParameter(ITaskItem[] items)
+            {
+                var args = new TaskParameterEventArgs(
+                    TaskParameterMessageKind.TaskOutput,
+                    "ParameterName",
+                    "PropertyName",
+                    "ItemName",
+                    items,
+                    logItemMetadata: true,
+                    DateTime.MinValue);
+                var stream = new MemoryStream();
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(writer).Write(args);
+                }
+                return stream.ToArray();
+            }
+        }
+
+        [Fact]
+        public void TaskParameterTaskItemDataDirectPathPreservesSerializedBytes()
+        {
+            var metadata = new Dictionary<string, string>
+            {
+                ["First"] = "value",
+                ["Second"] = string.Empty,
+                ["Escaped"] = "value%3b",
+            };
+            var differentMetadata = new Dictionary<string, string>(metadata)
+            {
+                ["First"] = "different",
+            };
+            byte[] directBytes = SerializeTaskParameter(
+                [
+                    new TaskItemData("ItemSpec1", new Dictionary<string, string>(metadata)),
+                    new TaskItemData("ItemSpec2", new Dictionary<string, string>(metadata)),
+                    new TaskItemData("ItemSpec3", differentMetadata),
+                    new TaskItemData("ItemSpec4", metadata: null),
+                ]);
+            byte[] fallbackBytes = SerializeTaskParameter(
+                [
+                    new FallbackTaskItem("ItemSpec1", new Dictionary<string, string>(metadata)),
+                    new FallbackTaskItem("ItemSpec2", new Dictionary<string, string>(metadata)),
+                    new FallbackTaskItem("ItemSpec3", new Dictionary<string, string>(differentMetadata)),
+                    new FallbackTaskItem("ItemSpec4", new Dictionary<string, string>()),
+                ]);
+
+            directBytes.ShouldBe(fallbackBytes);
+
+            using var stream = new MemoryStream(directBytes);
+            using var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+            replayedArgs.Items.Count.ShouldBe(4);
+            ((ITaskItem)replayedArgs.Items[0]).GetMetadata("First").ShouldBe("value");
+            ((ITaskItem)replayedArgs.Items[1]).GetMetadata("First").ShouldBe("value");
+            ((ITaskItem)replayedArgs.Items[2]).GetMetadata("First").ShouldBe("different");
+            ((ITaskItem)replayedArgs.Items[0]).GetMetadata("Escaped").ShouldBe("value%3b");
+            ((ITaskItem)replayedArgs.Items[1]).GetMetadata("Second").ShouldBe(string.Empty);
+            ((ITaskItem)replayedArgs.Items[2]).GetMetadata("Escaped").ShouldBe("value%3b");
+            ((ITaskItem)replayedArgs.Items[3]).MetadataCount.ShouldBe(0);
+            stream.Position.ShouldBe(stream.Length);
+
+            static byte[] SerializeTaskParameter(ITaskItem[] items)
+            {
+                var args = new TaskParameterEventArgs(
+                    TaskParameterMessageKind.TaskOutput,
+                    "ParameterName",
+                    "PropertyName",
+                    "ItemName",
+                    items,
+                    logItemMetadata: true,
+                    DateTime.MinValue);
+                var stream = new MemoryStream();
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(writer).Write(args);
+                }
+
+                return stream.ToArray();
+            }
+        }
+
+        [Fact]
+        public void RoundtripAssemblyResolutionSearchTraceEventArgs()
+        {
+            var args = CreateAssemblyResolutionSearchEvent();
+            args.ProjectFile = "project.proj";
+
+            Roundtrip(
+                args,
+                e => e.RequestedAssemblyName,
+                e => e.TargetProcessorArchitecture,
+                e => e.Importance.ToString(),
+                e => e.ProjectFile,
+                e => e.Message,
+                e => string.Join("|", e.SearchAttempts.Select(
+                    attempt => $"{attempt.SearchPath};{attempt.ParentAssembly};{attempt.FileNameAttempted};{attempt.AssemblyName};{attempt.Result};{attempt.ProcessorArchitecture};{attempt.IsAssemblyFoldersExSearch}")));
+        }
+
+        [Theory]
+        [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyResolutionSearchTrace, false)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictDependencyDetails, false)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictWarning, true)]
+        [InlineData(BinaryLogRecordKind.AssemblyConflictWarning, false)]
+        public void Replay_EventFilter_HandlesAssemblyResolutionDiagnostics(BinaryLogRecordKind recordKind, bool acceptEvent)
+        {
+            BuildEventArgs original = recordKind switch
+            {
+                BinaryLogRecordKind.AssemblyResolutionSearchTrace => CreateAssemblyResolutionSearchEvent(),
+                BinaryLogRecordKind.AssemblyConflictDependencyDetails => CreateAssemblyConflictDependencyDetailsEvent(),
+                BinaryLogRecordKind.AssemblyConflictWarning => CreateAssemblyConflictWarningEvent(),
+                _ => throw new ArgumentOutOfRangeException(nameof(recordKind))
+            };
+            original.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream);
+            var eventWriter = new BuildEventArgsWriter(writer);
+            eventWriter.Write(original);
+            eventWriter.Write(new BuildFinishedEventArgs("finished", null, succeeded: true));
+            writer.Write((byte)BinaryLogRecordKind.EndOfFile);
+            writer.Flush();
+            stream.Position = 0;
+
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            List<BinaryLogEventMetadata> metadataSeen = [];
+            BinaryLogEventFilter filter = metadata =>
+            {
+                metadataSeen.Add(metadata);
+                return metadata.RecordKind != recordKind || acceptEvent;
+            };
+
+            BuildEventArgs result = reader.Read(filter);
+            if (acceptEvent)
+            {
+                result.GetType().ShouldBe(original.GetType());
+                result.Message.ShouldBe(original.Message);
+                result.Timestamp.ShouldBe(original.Timestamp);
+                result.BuildEventContext.ProjectContextId.ShouldBe(3);
+                result = reader.Read(filter);
+            }
+
+            result.ShouldBeOfType<BuildFinishedEventArgs>().Succeeded.ShouldBeTrue();
+            reader.Read(filter).ShouldBeNull();
+            metadataSeen.Select(metadata => metadata.RecordKind).ShouldBe([recordKind, BinaryLogRecordKind.BuildFinished]);
+            metadataSeen[0].BuildEventContext.ProjectContextId.ShouldBe(3);
+        }
+
+        private static AssemblyResolutionSearchTraceEventArgs CreateAssemblyResolutionSearchEvent()
+            => new(
+                "Requested, Version=1.0.0.0",
+                "MSIL",
+                [
+                    new AssemblyResolutionSearchAttempt(
+                        "first.dll",
+                        "first-path",
+                        parentAssembly: null,
+                        assemblyName: null,
+                        AssemblyResolutionSearchResult.FileNotFound,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: true),
+                    new AssemblyResolutionSearchAttempt(
+                        "second.dll",
+                        "second-path",
+                        "parent.dll",
+                        "Found, Version=2.0.0.0",
+                        AssemblyResolutionSearchResult.FusionNamesDidNotMatch,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: false),
+                    new AssemblyResolutionSearchAttempt(
+                        "third.dll",
+                        "second-path",
+                        "parent.dll",
+                        "Requested, Version=1.0.0.0",
+                        AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch,
+                        "AMD64",
+                        logAssemblyFoldersEx: false),
+                ],
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\search.proj",
+            };
+
+        [Fact]
+        public void RoundtripAssemblyConflictDependencyDetailsMessageEventArgs()
+        {
+            var args = CreateAssemblyConflictDependencyDetailsEvent();
+
+            Roundtrip(
+                args,
+                e => e.Importance.ToString(),
+                e => e.ProjectFile,
+                e => e.Message,
+                e => DescribeConflictReferenceDetails(e.Victor),
+                e => DescribeConflictReferenceDetails(e.Victim));
+        }
+
+        [Fact]
+        public void RoundtripAssemblyConflictWarningEventArgs()
+        {
+            var args = CreateAssemblyConflictWarningEvent();
+
+            Roundtrip(
+                args,
+                e => e.Code,
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
+                e => e.HelpKeyword,
+                e => e.ProjectFile,
+                e => e.SimpleAssemblyName,
+                e => e.LossReason.ToString(),
+                e => e.Message,
+                e => DescribeConflictReferenceDetails(e.Victor),
+                e => DescribeConflictReferenceDetails(e.Victim));
+        }
+
+        [Fact]
+        public void AssemblyConflictMessagesAreFormattedLazily()
+        {
+            AssemblyConflictDependencyDetailsMessageEventArgs details = CreateAssemblyConflictDependencyDetailsEvent();
+            AssemblyConflictWarningEventArgs warning = CreateAssemblyConflictWarningEvent();
+
+            details.IsMessageMaterialized.ShouldBeFalse();
+            warning.IsMessageMaterialized.ShouldBeFalse();
+
+            details.Message.ShouldNotBeNullOrEmpty();
+            warning.Message.ShouldNotBeNullOrEmpty();
+
+            details.IsMessageMaterialized.ShouldBeTrue();
+            warning.IsMessageMaterialized.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void AssemblyConflictMessagesAreInvariant()
+        {
+            CultureInfo originalCulture = CultureInfo.CurrentCulture;
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+
+                CreateAssemblyConflictDependencyDetailsEvent().Message.ShouldStartWith("    References which depend on");
+                CreateAssemblyConflictWarningEvent().Message.ShouldStartWith("Found conflicts between different versions");
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        [Fact]
+        public void AssemblyConflictMessagesCanBeFormattedAndCachedForAnotherCulture()
+        {
+            CultureInfo culture = CultureInfo.GetCultureInfo("fr-FR");
+            AssemblyConflictDependencyDetailsMessageEventArgs details = CreateAssemblyConflictDependencyDetailsEvent();
+            AssemblyConflictWarningEventArgs warning = CreateAssemblyConflictWarningEvent();
+
+            string localizedDetails = details.FormatMessage(culture);
+            string localizedWarning = warning.FormatMessage(culture);
+
+            localizedDetails.ShouldStartWith("    Références qui dépendent de");
+            localizedWarning.ShouldStartWith("détection de conflits");
+            details.FormatMessage(culture).ShouldBeSameAs(localizedDetails);
+            warning.FormatMessage(culture).ShouldBeSameAs(localizedWarning);
+            details.IsMessageMaterialized.ShouldBeFalse();
+            warning.IsMessageMaterialized.ShouldBeFalse();
+        }
+
+        /// <summary>
+        /// Verifies a binary-log round trip for a large structured conflict event.
+        /// The event contains many dependees and source items without one large preformatted string.
+        /// </summary>
+        [Fact]
+        public void RoundtripAssemblyConflictWarningEventArgsWithManyDependees()
+        {
+            const int dependeeCount = 250;
+            const int sourceItemsPerDependee = 4;
+
+            var dependees = new AssemblyConflictDependee[dependeeCount];
+            for (int i = 0; i < dependeeCount; i++)
+            {
+                var sourceItemSpecs = new string[sourceItemsPerDependee];
+                for (int j = 0; j < sourceItemsPerDependee; j++)
+                {
+                    sourceItemSpecs[j] = $"Item{i}_{j}.proj";
+                }
+
+                dependees[i] = new AssemblyConflictDependee($"/deps/Dependee{i}.dll", sourceItemSpecs);
+            }
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/deps/D.dll",
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: [],
+                dependees);
+
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/deps/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+
+            var args = new AssemblyConflictWarningEventArgs(
+                "D",
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                "MSB3277",
+                file: null,
+                lineNumber: 0,
+                columnNumber: 0,
+                helpKeyword: null,
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
+
+            Roundtrip(
+                args,
+                e => e.Message,
+                e => e.Victor.PrimarySourceItemSpecs.Count.ToString(),
+                e => e.Victor.Dependees.Count.ToString(),
+                e => e.Victim.Dependees.Count.ToString(),
+                e => DescribeConflictReferenceDetails(e.Victim));
+
+            // Verify that the reconstructed message contains each dependee in the original order.
+            args.Message.ShouldNotBeNull();
+            for (int i = 0; i < dependeeCount; i++)
+            {
+                args.Message.ShouldContain($"Dependee{i}.dll");
+            }
+        }
+
+        private static string DescribeConflictReferenceDetails(AssemblyConflictReferenceDetails details)
+            => $"{details.FusionName};{details.FullPath};{details.IsPrimary};{details.IsResolved};{details.UnresolvedPrimaryItemSpec};"
+                + $"[{string.Join(",", details.PrimarySourceItemSpecs)}];"
+                + string.Join("|", details.Dependees.Select(d => $"{d.DependeeFullPath}=[{string.Join(",", d.SourceItemSpecs)}]"));
+
+        private static AssemblyConflictDependencyDetailsMessageEventArgs CreateAssemblyConflictDependencyDetailsEvent()
+        {
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                isPrimary: false,
+                isResolved: false,
+                unresolvedPrimaryItemSpec: "D, Version=2.0.0.0",
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B", "B2"])]);
+
+            return new AssemblyConflictDependencyDetailsMessageEventArgs(
+                victor,
+                victim,
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\details.proj",
+            };
+        }
+
+        private static AssemblyConflictWarningEventArgs CreateAssemblyConflictWarningEvent()
+        {
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+
+            return new AssemblyConflictWarningEventArgs(
+                "D",
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                "MSB3277",
+                @"C:\foo\bar.proj",
+                42,
+                7,
+                "MSBuild.ResolveAssemblyReference.FoundConflicts",
+                "ResolveAssemblyReference",
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\warning.proj",
+            };
+        }
+
+        [Fact]
         public void RoundtripProjectEvaluationStartedEventArgs()
         {
             var projectFile = @"C:\foo\bar.proj";
@@ -1006,6 +1630,47 @@ namespace Microsoft.Build.UnitTests
                 e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
                 e => TranslationHelpers.GetPropertiesString(e.Properties),
                 e => TranslationHelpers.GetMultiItemsString(e.Items));
+        }
+
+        [Fact]
+        public void EvaluationFilesCanBeCollectedWithoutSerializingTheEvent()
+        {
+            string projectFile = Path.GetFullPath(Path.Combine("evaluated", "source.proj"));
+            var args = new ProjectEvaluationFinishedEventArgs("finished")
+            {
+                ProjectFile = projectFile,
+                Items = new List<DictionaryEntry>
+                {
+                    new("Compile", new MyTaskItem { ItemSpec = "unrelated.txt" }),
+                    new("EmbedInBinlog", new MyTaskItem { ItemSpec = "first.txt" }),
+                    new("EmbedInBinlog", "second.txt"),
+                    new("embedinbinlog", new MyTaskItem { ItemSpec = "third.txt" }),
+                    new("EmbedInBinlog", new MyTaskItem { ItemSpec = "" }),
+                    new("EmbedInBinlog", ""),
+                },
+            };
+            using var writtenStream = new MemoryStream();
+            using var writtenBinaryWriter = new BinaryWriter(writtenStream);
+            var writer = new BuildEventArgsWriter(writtenBinaryWriter);
+            List<string> writtenFiles = [];
+            writer.EmbedFile += writtenFiles.Add;
+            writer.Write(args);
+
+            using var excludedStream = new MemoryStream();
+            using var excludedBinaryWriter = new BinaryWriter(excludedStream);
+            var excludedWriter = new BuildEventArgsWriter(excludedBinaryWriter);
+            List<string> excludedFiles = [];
+            excludedWriter.EmbedFile += excludedFiles.Add;
+            excludedWriter.CheckForFilesToEmbed(args);
+
+            writtenFiles.ShouldBe(new[]
+            {
+                Path.Combine(Path.GetDirectoryName(projectFile), "first.txt"),
+                Path.Combine(Path.GetDirectoryName(projectFile), "second.txt"),
+                Path.Combine(Path.GetDirectoryName(projectFile), "third.txt"),
+            });
+            excludedFiles.ShouldBe(writtenFiles);
+            excludedStream.Length.ShouldBe(0);
         }
 
         /// <summary>
@@ -1057,6 +1722,52 @@ namespace Microsoft.Build.UnitTests
 
             /// <inheritdoc />
             public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata() => _metadata;
+        }
+
+        private sealed class FallbackTaskItem : ITaskItem
+        {
+            private readonly Dictionary<string, string> _metadata;
+
+            internal FallbackTaskItem(string itemSpec, string metadataName, string metadataValue)
+            {
+                ItemSpec = itemSpec;
+                _metadata = new Dictionary<string, string>
+                {
+                    [metadataName] = metadataValue,
+                };
+            }
+
+            internal FallbackTaskItem(string itemSpec, Dictionary<string, string> metadata)
+            {
+                ItemSpec = itemSpec;
+                _metadata = metadata;
+            }
+
+            public string ItemSpec { get; set; }
+
+            public ICollection MetadataNames => _metadata.Keys;
+
+            public int MetadataCount => _metadata.Count;
+
+            public string GetMetadata(string metadataName)
+                => _metadata.TryGetValue(metadataName, out string value) ? value : string.Empty;
+
+            public void SetMetadata(string metadataName, string metadataValue)
+                => _metadata[metadataName] = metadataValue;
+
+            public void RemoveMetadata(string metadataName)
+                => _metadata.Remove(metadataName);
+
+            public void CopyMetadataTo(ITaskItem destinationItem)
+            {
+                foreach (KeyValuePair<string, string> metadata in _metadata)
+                {
+                    destinationItem.SetMetadata(metadata.Key, metadata.Value);
+                }
+            }
+
+            public IDictionary CloneCustomMetadata()
+                => new Dictionary<string, string>(_metadata);
         }
 
         [Fact]
@@ -1519,6 +2230,7 @@ namespace Microsoft.Build.UnitTests
             using var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
             var deserializedArgs = (T)buildEventArgsReader.Read();
 
+            buildEventArgsReader.CurrentRecordKind.ShouldBe(BuildEventArgsWriter.GetRecordKind(args));
             Assert.Equal(length, memoryStream.Position);
 
             Assert.NotNull(deserializedArgs);
