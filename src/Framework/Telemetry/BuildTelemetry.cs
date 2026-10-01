@@ -125,6 +125,11 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? BuildEngineHost { get; set; }
 
         /// <summary>
+        /// True if the build ran in an automated environment such as CI, regardless of <see cref="BuildEngineHost"/>.
+        /// </summary>
+        public bool? IsCI { get; set; }
+
+        /// <summary>
         /// True if buildcheck was used.
         /// </summary>
         public bool? BuildCheckEnabled { get; set; }
@@ -190,6 +195,7 @@ namespace Microsoft.Build.Framework.Telemetry
             }
 
             AddIfNotNull(BuildEngineHost);
+            AddIfNotNull(IsCI);
             AddIfNotNull(BuildSuccess);
             AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
             AddIfNotNull(BuildEngineVersion);
@@ -220,6 +226,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildEngineDisplayVersion);
             AddIfNotNull(BuildEngineFrameworkName);
             AddIfNotNull(BuildEngineHost);
+            AddIfNotNull(IsCI?.ToString(), nameof(IsCI));
             AddIfNotNull(InitialMSBuildServerState);
             AddIfNotNull(ProjectPath != null ? Path.GetFileName(ProjectPath) : null, nameof(ProjectPath));
             AddIfNotNull(ServerFallbackReason);
@@ -280,7 +287,7 @@ namespace Microsoft.Build.Framework.Telemetry
             for (int i = 0; i < targets.Length; i++)
             {
                 string target = targets[i].Trim();
-                targets[i] = KnownTargetNames.Contains(target)
+                targets[i] = target.Length == 0 || KnownTargetNames.Contains(target)
                     ? target
                     : TelemetryDataUtils.GetHashed(target);
             }

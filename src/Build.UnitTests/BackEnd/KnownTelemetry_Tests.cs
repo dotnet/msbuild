@@ -260,7 +260,8 @@ public class KnownTelemetry_Tests
     [Fact]
     public void BuildTelemetryBuildTargetPreservesKnownTargets()
     {
-        string[] knownTargets = { "Build", "Clean", "Rebuild", "Restore", "Pack", "Publish", "Test" };
+        // An empty target list means the project's default targets.
+        string[] knownTargets = { "", "Build", "Clean", "Rebuild", "Restore", "Pack", "Publish", "Test" };
 
         foreach (string target in knownTargets)
         {
