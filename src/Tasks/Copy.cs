@@ -14,7 +14,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #if FEATURE_WINDOWSINTEROP
+using Microsoft.Win32.SafeHandles;
 using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
 #endif
 
 #nullable disable
@@ -465,23 +467,28 @@ namespace Microsoft.Build.Tasks
         /// file is one of several hard links. Returns true as well when that cannot be determined,
         /// since this is only called when we already failed to delete the destination.
         /// </summary>
-        private static bool HasMultipleHardLinks(string path)
+        private static unsafe bool HasMultipleHardLinks(string path)
         {
             try
             {
-                using FileStream stream = new FileStream(
-                    path,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.ReadWrite | FileShare.Delete);
-
-                // The FileStream keeps the handle alive for the duration of the call.
+                // Query metadata without requiring read-data access, which may be denied by
+                // the destination's sharing mode or ACL even when an in-place copy is allowed.
 #pragma warning disable CA1416 // Only reached on Windows; see the caller.
-                return Windows.Win32.PInvoke.GetFileInformationByHandle(
-                        (HANDLE)stream.SafeFileHandle.DangerousGetHandle(),
-                        out Windows.Win32.Storage.FileSystem.BY_HANDLE_FILE_INFORMATION info)
-                    ? info.nNumberOfLinks > 1
-                    : true;
+                HANDLE nativeHandle = Windows.Win32.PInvoke.CreateFile(
+                    path,
+                    0,
+                    FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE | FILE_SHARE_MODE.FILE_SHARE_DELETE,
+                    null,
+                    FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                    FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_NORMAL,
+                    HANDLE.Null);
+
+                using SafeFileHandle handle = new((IntPtr)nativeHandle.Value, ownsHandle: true);
+                return handle.IsInvalid ||
+                    !Windows.Win32.PInvoke.GetFileInformationByHandle(
+                        (HANDLE)handle.DangerousGetHandle(),
+                        out BY_HANDLE_FILE_INFORMATION info) ||
+                    info.nNumberOfLinks > 1;
 #pragma warning restore CA1416
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

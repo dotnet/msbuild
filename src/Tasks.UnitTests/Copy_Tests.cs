@@ -7,10 +7,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
-#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
-#endif
+using System.Security.Principal;
+using System.Threading;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -1119,11 +1118,15 @@ namespace Microsoft.Build.UnitTests
         /// If the destination is a hard link into the NuGet global packages folder, this silently
         /// rewrites the package file while the build still reports success.
         ///
-        /// A process holding the destination open with FileShare.ReadWrite (which does NOT imply
-        /// FileShare.Delete) is enough to make the delete fail while leaving the copy possible.
+        /// A process holding the destination open without FileShare.Delete is enough to make
+        /// the delete fail while leaving the copy possible, even when reading is not shared.
         /// </summary>
-        [WindowsOnlyFact]
-        public void DoNotWriteThroughHardLinkWhenDestinationCannotBeDeleted()
+        [WindowsOnlyTheory]
+        [InlineData(FileAccess.ReadWrite, FileShare.ReadWrite)]
+        [InlineData(FileAccess.Read, FileShare.Write)]
+        [InlineData(FileAccess.Write, FileShare.Write)]
+        [InlineData(FileAccess.ReadWrite, FileShare.Write)]
+        public void DoNotWriteThroughHardLinkWhenDestinationCannotBeDeleted(FileAccess access, FileShare share)
         {
             using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
@@ -1146,16 +1149,16 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = engine,
                 RetryDelayMilliseconds = 1, // speed up tests!
                 Retries = 0,
-                SourceFiles = new ITaskItem[] { new TaskItem(source) },
-                DestinationFiles = new ITaskItem[] { new TaskItem(destination) },
+                SourceFiles = [new TaskItem(source)],
+                DestinationFiles = [new TaskItem(destination)],
             };
 
             string linkError = string.Empty;
             Tasks.NativeMethods.MakeHardLink(destination, linkedFile, ref linkError, task.Log).ShouldBeTrue(linkError);
 
-            // FileShare.ReadWrite does not include FileShare.Delete, so deletion fails with
+            // Neither sharing mode includes FileShare.Delete, so deletion fails with
             // a sharing violation while an in-place copy would still succeed.
-            using (File.Open(destination, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+            using (File.Open(destination, FileMode.Open, access, share))
             {
                 Should.Throw<IOException>(() => File.Delete(destination));
                 task.Execute().ShouldBeFalse();
@@ -1169,6 +1172,145 @@ namespace Microsoft.Build.UnitTests
                 LinkedContents,
                 "Copy overwrote the destination in place and corrupted the file it was hard linked to.");
         }
+
+        /// <summary>
+        /// An ordinary destination can remain writable when a sharing mode prevents both deletion
+        /// and reading its contents. Inspecting its link count must not require read-data access.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData(FileAccess.Read)]
+        [InlineData(FileAccess.Write)]
+        [InlineData(FileAccess.ReadWrite)]
+        public void CopyToSingleLinkWhenDestinationDoesNotShareReadAccess(FileAccess access)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            string destination = Path.Combine(folder.Path, "destination.dll");
+            string source = Path.Combine(folder.Path, "source.dll");
+
+            const string SourceContents = "This is a completely different file.";
+            File.WriteAllText(destination, "This is an ordinary destination file.");
+            File.WriteAllText(source, SourceContents);
+
+            var engine = new MockEngine(_testOutputHelper);
+            var task = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                Retries = 0,
+                SourceFiles = [new TaskItem(source)],
+                DestinationFiles = [new TaskItem(destination)],
+            };
+
+            using (File.Open(destination, FileMode.Open, access, FileShare.Write))
+            {
+                Should.Throw<IOException>(() => File.Delete(destination));
+                Should.Throw<IOException>(() =>
+                {
+                    using FileStream stream = File.Open(destination, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                });
+                task.Execute().ShouldBeTrue();
+            }
+
+            engine.Errors.ShouldBe(0);
+            engine.Warnings.ShouldBe(0);
+            task.CopiedFiles.Length.ShouldBe(1);
+            task.WroteAtLeastOneFile.ShouldBeTrue();
+            File.ReadAllText(destination).ShouldBe(SourceContents);
+        }
+
+        /// <summary>
+        /// Denying read-data access through the ACL must still allow copying to an ordinary file,
+        /// while protecting a hard-linked destination whose deletion is blocked by an open handle.
+        /// </summary>
+#pragma warning disable CA1416 // Windows ACL APIs are guarded by [WindowsOnlyTheory].
+        [WindowsOnlyTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CopyWhenDestinationAclDeniesReadData(bool useHardLink)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            string destination = Path.Combine(folder.Path, "destination.dll");
+            string source = Path.Combine(folder.Path, "source.dll");
+            string linkedFile = Path.Combine(folder.Path, "linked.dll");
+
+            const string DestinationContents = "This is the existing destination file.";
+            const string SourceContents = "This is a completely different file.";
+            File.WriteAllText(useHardLink ? linkedFile : destination, DestinationContents);
+            File.WriteAllText(source, SourceContents);
+
+            var engine = new MockEngine(_testOutputHelper);
+            var task = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                Retries = 0,
+                SourceFiles = [new TaskItem(source)],
+                DestinationFiles = [new TaskItem(destination)],
+            };
+
+            if (useHardLink)
+            {
+                string linkError = string.Empty;
+                Tasks.NativeMethods.MakeHardLink(destination, linkedFile, ref linkError, task.Log).ShouldBeTrue(linkError);
+            }
+
+            var destinationInfo = new FileInfo(destination);
+            FileSecurity originalSecurity = destinationInfo.GetAccessControl(AccessControlSections.Access);
+            FileSecurity deniedSecurity = destinationInfo.GetAccessControl(AccessControlSections.Access);
+            using WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            deniedSecurity.AddAccessRule(new FileSystemAccessRule(identity.User, FileSystemRights.ReadData, AccessControlType.Deny));
+            TransientFileAccessControl accessControl = env.WithTransientTestState(new TransientFileAccessControl(destinationInfo, originalSecurity));
+
+            using (File.Open(destination, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
+            {
+                destinationInfo.SetAccessControl(deniedSecurity);
+                Should.Throw<IOException>(() => File.Delete(destination));
+                Should.Throw<UnauthorizedAccessException>(() =>
+                {
+                    using FileStream stream = File.Open(destination, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                });
+                task.Execute().ShouldBe(!useHardLink);
+            }
+
+            accessControl.Revert();
+            engine.Warnings.ShouldBe(0);
+            if (useHardLink)
+            {
+                engine.Errors.ShouldBe(1);
+                engine.AssertLogContains("MSB3021");
+                engine.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Copy.DestinationNotDeleted", destination));
+                task.CopiedFiles.ShouldBeEmpty();
+                task.WroteAtLeastOneFile.ShouldBeFalse();
+                File.ReadAllText(linkedFile).ShouldBe(DestinationContents);
+            }
+            else
+            {
+                engine.Errors.ShouldBe(0);
+                task.CopiedFiles.Length.ShouldBe(1);
+                task.WroteAtLeastOneFile.ShouldBeTrue();
+            }
+
+            File.ReadAllText(destination).ShouldBe(useHardLink ? DestinationContents : SourceContents);
+        }
+
+        private sealed class TransientFileAccessControl(FileInfo file, FileSecurity originalSecurity) : TransientTestState
+        {
+            public override void Revert()
+            {
+                // SetAccessControl only persists modified sections, so mark the original DACL
+                // as modified in a fresh FileSecurity instance before restoring it.
+                FileSecurity security = new();
+                security.SetSecurityDescriptorBinaryForm(originalSecurity.GetSecurityDescriptorBinaryForm(), AccessControlSections.Access);
+                file.SetAccessControl(security);
+            }
+        }
+#pragma warning restore CA1416
 
         /// <summary>
         /// Replacing a symbolic link must preserve the file that it points to, including when
