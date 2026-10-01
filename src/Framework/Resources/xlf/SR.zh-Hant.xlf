@@ -122,6 +122,11 @@
         <target state="translated">路徑: {0} 超過 OS 路徑上限。完整檔案名稱必須少於 {1} 個字元。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: 在 "{0}" 找不到平台資訊清單檔案。</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">不支援 .NET Framework 版本 "{0}"。請從列舉 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中指定值。</target>

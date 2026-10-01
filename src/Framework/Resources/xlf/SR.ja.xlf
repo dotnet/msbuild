@@ -122,6 +122,11 @@
         <target state="translated">パス: {0} は OS のパスの上限を越えています。完全修飾のファイル名は {1} 文字以下にする必要があります。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: "{0}" にプラットフォームのマニフェスト ファイルが見つかりませんでした。</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">.NET Framework のバージョン "{0}" はサポートされていません。列挙 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion から値を指定してください。</target>

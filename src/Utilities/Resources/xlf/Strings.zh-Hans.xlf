@@ -32,11 +32,6 @@
         <target state="translated">文件被“{0}”锁定。</target>
         <note />
       </trans-unit>
-      <trans-unit id="PlatformManifest.MissingPlatformXml">
-        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
-        <target state="translated">MSB6010: 找不到“{0}”中的平台清单文件。</target>
-        <note>{StrBegin="MSB6010: "}</note>
-      </trans-unit>
       <trans-unit id="ToolLocationHelper.UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">不支持 .NET Framework 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中的某个值。</target>

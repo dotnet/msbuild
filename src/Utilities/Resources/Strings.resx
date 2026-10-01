@@ -120,10 +120,6 @@
     <data name="General.ToolCommandFailedNoErrorCode">
         <value>The command exited with code {0}.</value>
     </data>
-    <data name="PlatformManifest.MissingPlatformXml" UESanitized="false" Visibility="Private_OM">
-        <value>MSB6010: Could not find platform manifest file at "{0}".</value>
-        <comment>{StrBegin="MSB6010: "}</comment>
-    </data>
     <data name="ToolLocationHelper.UnsupportedFrameworkVersion" UESanitized="false" Visibility="Private_OM">
         <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
     </data>

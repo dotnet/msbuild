@@ -122,6 +122,11 @@
         <target state="translated">Der Pfad "{0}" überschreitet das maximale Pfadlimit des Betriebssystems. Der vollqualifizierte Dateiname muss weniger als {1} Zeichen umfassen.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: Plattform-Manifestdatei in "{0}" nicht gefunden.</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">Die .NET Framework-Version "{0}" wird nicht unterstützt. Geben Sie einen Wert aus der Enumeration "Microsoft.Build.Utilities.TargetDotNetFrameworkVersion" an.</target>
