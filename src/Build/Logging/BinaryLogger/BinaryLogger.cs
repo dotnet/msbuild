@@ -125,6 +125,12 @@ namespace Microsoft.Build.Logging
         //    (RAR conflict dependency-list details and MSB3277 warning, structured behind ChangeWave 18.12)
         //    Forward-compatible readers older than version 28 skip these unknown record kinds.
         //    Strict readers reject the newer file format.
+        // version 29: reserved for incompatible standalone local experiments; not supported here.
+        // version 30 (combined local experiment):
+        //    - StringSlice shares a slice of a recent ordinary string, with literal prefix/suffix.
+        //    - ItemSequence records define bounded, ordered lists of item/metadata references.
+        //    - Negative item counts reference these records; zero-length records reset the dictionary.
+        //    - Requires reader 30: these dependencies cannot be skipped by older readers.
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.
@@ -135,13 +141,13 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 28;
+        internal const int FileFormatVersion = 30;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
         // read by older readers. (changing of the individual BuildEventArgs or adding new is fine - as reader can
         // skip them if they are not known to it. Example of change requiring the increment would be the introduction of strings deduplication)
-        internal const int MinimumReaderVersion = 18;
+        internal const int MinimumReaderVersion = 30;
 
         // Parameter name constants
         private const string LogFileParameterPrefix = "LogFile=";

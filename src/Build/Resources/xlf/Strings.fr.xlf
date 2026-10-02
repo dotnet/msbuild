@@ -78,6 +78,11 @@
         <target state="translated">L’archive des fichiers importés a dépassé la limite de 2 Go et n’est pas incorporée.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_IncompatibleExperimentalFormat">
+        <source>Binary log format 29 was used by incompatible standalone experiments. Use the matching experiment's reader; the combined experiment requires format 30.</source>
+        <target state="new">Binary log format 29 was used by incompatible standalone experiments. Use the matching experiment's reader; the combined experiment requires format 30.</target>
+        <note>29 and 30 are binary log format version numbers for local experiments.</note>
+      </trans-unit>
       <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
         <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
         <target state="translated">L’abonnement à RecoverableReadError est obligatoire pendant la lecture compatible avec le transfert.</target>
