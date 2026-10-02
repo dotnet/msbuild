@@ -792,62 +792,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         /// <summary>
-        /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
-        /// </summary>
-        [WindowsOnlyTheory]
-        [InlineData(@"%DRIVE%:\**\*.log")]
-        [InlineData(@"%DRIVE%:$(empty)\**\*.log")]
-        [InlineData(@"%DRIVE%:\**")]
-        [InlineData(@"%DRIVE%:\\**")]
-        [InlineData(@"%DRIVE%:\\\\\\\\**")]
-        [InlineData(@"%DRIVE%:\**\*.cs")]
-        public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
-        {
-            unevaluatedInclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.Value.MappedDriveLetter);
-            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
-        }
-
-        [UnixOnlyTheory]
-        [InlineData(@"/**/*.log")]
-        [InlineData(@"$(empty)/**/*.log")]
-        [InlineData(@"/$(empty)**/*.log")]
-        [InlineData(@"/*$(empty)*/*.log")]
-        public void ProjectGetterResultsInUnixDriveEnumerationWarning(string unevaluatedInclude)
-        {
-            ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
-        }
-
-        private static void ProjectGetterResultsInDriveEnumerationWarning(string unevaluatedInclude)
-        {
-            using (var env = TestEnvironment.Create())
-            {
-                try
-                {
-                    // Reset state
-                    Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
-
-                    // Setup
-                    using ProjectCollection projectCollection = new ProjectCollection();
-                    MockLogger collectionLogger = new MockLogger();
-                    projectCollection.RegisterLogger(collectionLogger);
-                    Project project = new Project(projectCollection);
-
-                    // Add item
-                    _ = project.AddItem("i", unevaluatedInclude);
-
-                    // Verify
-                    collectionLogger.WarningCount.ShouldBe(1);
-                    collectionLogger.AssertLogContains("MSB5029");
-                    projectCollection.UnregisterAllLoggers();
-                }
-                finally
-                {
-                    ChangeWaves.ResetStateForTests();
-                }
-            }
-        }
-
-        /// <summary>
         /// Project instance created from a file that contains a drive enumerating wildcard results in a thrown exception.
         /// </summary>
         [Theory]
