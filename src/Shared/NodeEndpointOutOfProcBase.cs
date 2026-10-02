@@ -518,6 +518,8 @@ namespace Microsoft.Build.BackEnd
 
                     if (!gotValidConnection)
                     {
+                        NodeLifecycleJournal.Record(NodeJournalEvent.HandshakeRejected, detail: "parent");
+
                         if (localPipeServer.IsConnected)
                         {
                             localPipeServer.Disconnect();
@@ -525,6 +527,7 @@ namespace Microsoft.Build.BackEnd
                         continue;
                     }
 
+                    NodeLifecycleJournal.Record(NodeJournalEvent.Connected, detail: "parent");
                     ChangeLinkStatus(LinkStatus.Active);
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))

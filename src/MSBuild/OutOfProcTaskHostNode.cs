@@ -1595,7 +1595,9 @@ namespace Microsoft.Build.CommandLine
         {
             try
             {
+                NodeLifecycleJournal.Record(NodeJournalEvent.DisposalBegin, NodeJournalKind.TaskHost);
                 _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
+                NodeLifecycleJournal.Record(NodeJournalEvent.DisposalEnd, NodeJournalKind.TaskHost);
             }
             finally
             {

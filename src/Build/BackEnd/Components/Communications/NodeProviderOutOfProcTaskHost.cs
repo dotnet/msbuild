@@ -259,6 +259,9 @@ namespace Microsoft.Build.BackEnd
             => SupportsSidecarLifetime(handshakeOptions, negotiatedVersion)
                 && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
 
+        /// <inheritdoc/>
+        protected override NodeJournalKind JournalNodeKind => NodeJournalKind.TaskHost;
+
         private static bool SupportsSidecarLifetime(HandshakeOptions handshakeOptions, byte negotiatedVersion)
             => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
                 && negotiatedVersion >= NodePacketTypeExtensions.TaskHostOwnershipMinVersion
@@ -336,6 +339,7 @@ namespace Microsoft.Build.BackEnd
                     if (!enableReuse && SupportsSidecarLifetime(nodeKey.HandshakeOptions, context.NegotiatedPacketVersion))
                     {
                         RetireNode(context.NodeId);
+                        NodeLifecycleJournal.Record(NodeJournalEvent.TaskHostRetired, NodeJournalKind.TaskHost, context.NodeId, context.Process.Id, "build-complete");
                     }
                     else
                     {
@@ -362,6 +366,7 @@ namespace Microsoft.Build.BackEnd
                         ? NodeBuildCompleteAction.ReuseWithConnection
                         : NodeBuildCompleteAction.Legacy;
                 context.SendData(new NodeBuildComplete(enableReuse, action));
+                NodeLifecycleJournal.Record(NodeJournalEvent.ShutdownSent, NodeJournalKind.TaskHost, context.NodeId, context.Process.Id, action);
             }
 
             if (waitForCleanup)
@@ -1347,6 +1352,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void NodeContextTerminated(int nodeId)
         {
+            NodeLifecycleJournal.Record(NodeJournalEvent.Disconnected, NodeJournalKind.TaskHost, nodeId);
+
             lock (_consoleForwardingLock)
             {
                 _consoleForwardingNodeIds.Remove(nodeId);

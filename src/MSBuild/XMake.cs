@@ -3449,11 +3449,14 @@ namespace Microsoft.Build.CommandLine
                 nodeMode = ParseNodeMode(input[0]);
             }
 
+            NodeLifecycleJournal.SetProcessRole(NodeLifecycleJournal.KindOf(nodeMode));
+
             bool restart = true;
             while (restart)
             {
                 Exception nodeException = null;
                 NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
+                NodeLifecycleJournal.Record(NodeJournalEvent.NodeStarted);
 
                 switch (nodeMode)
                 {
@@ -3530,12 +3533,14 @@ namespace Microsoft.Build.CommandLine
 
                 if (shutdownReason == NodeEngineShutdownReason.Error)
                 {
+                    NodeLifecycleJournal.Record(NodeJournalEvent.Exited, NodeJournalKind.None, 0, 0, shutdownReason);
                     Debug.WriteLine("An error has happened, throwing an exception");
                     throw nodeException;
                 }
 
                 if (shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
                 {
+                    NodeLifecycleJournal.Record(NodeJournalEvent.Exited, NodeJournalKind.None, 0, 0, shutdownReason);
                     restart = false;
                 }
             }
