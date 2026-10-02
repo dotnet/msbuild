@@ -22,6 +22,9 @@ using System.Security.Principal;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if FEATURE_NET35_TASKHOST
+using Microsoft.Build.Utilities;
+#endif
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
