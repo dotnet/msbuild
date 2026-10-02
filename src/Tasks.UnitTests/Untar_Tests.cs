@@ -50,6 +50,43 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void ReportsExtractionProgress()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+                testEnvironment.CreateFile(sourceFolder, "F1.txt", "F1");
+                testEnvironment.CreateFile(sourceFolder, "F2.txt", "F2");
+
+                string tarFilePath = CreateTar(testEnvironment, sourceFolder);
+
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                Untar untar = new Untar
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    SkipUnchangedFiles = false,
+                    SourceFiles = [new TaskItem(tarFilePath)],
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                untar.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                progress.Updates.ShouldNotBeEmpty();
+                progress.Completed.ShouldBe(2);
+
+                // A tar archive is read as a stream, so the entry count is not known up front.
+                progress.Total.ShouldBeNull();
+                progress.IsComplete.ShouldBeTrue();
+                _mockEngine.TaskProgressReporterTitle.ShouldBe($"Extracting {Path.GetFileName(tarFilePath)}");
+            }
+        }
+
+        [Fact]
         public void CanUntarWithIncludeFilter()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())

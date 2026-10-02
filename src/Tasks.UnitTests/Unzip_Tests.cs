@@ -106,6 +106,82 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void ReportsExtractionProgress()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+                testEnvironment.CreateFile(source, "A04FF4B88DF14860B7C73A8E75A4FB76.txt", "file2");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                Unzip unzip = new Unzip
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    SkipUnchangedFiles = false,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
+                };
+
+                unzip.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                progress.Updates.ShouldNotBeEmpty();
+                progress.Completed.ShouldBe(2);
+                progress.Total.ShouldBe(2);
+                progress.IsComplete.ShouldBeTrue();
+                _mockEngine.TaskProgressReporterTitle.ShouldBe($"Extracting {Path.GetFileName(zipArchive.Path)}");
+            }
+        }
+
+        [Fact]
+        public void DoesNotReportProgressWhenNothingIsExtracted()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                testEnvironment.CreateFile(source, "BE78A17D30144B549D21F71D5C633F7D.txt", "file1");
+
+                TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+
+                Unzip unzip = new Unzip
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    SkipUnchangedFiles = true,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
+                };
+
+                unzip.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                // Everything is now up to date, so a second run must not start a progress operation.
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                Unzip upToDate = new Unzip
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    SkipUnchangedFiles = true,
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
+                };
+
+                upToDate.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                progress.Updates.ShouldBeEmpty();
+                progress.IsComplete.ShouldBeFalse();
+            }
+        }
+
+        [Fact]
         public void CanUnzip_ExplicitDirectoryEntries()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())

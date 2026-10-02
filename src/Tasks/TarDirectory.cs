@@ -204,7 +204,15 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", _sourceDirectory.FullName, _destinationFile.FullName);
+                // Terminal Logger renders a progress row for the archive, which reports the same
+                // operation this message announces. Under the change wave the message drops to
+                // Normal so it is not shown twice; it is still written to binary logs and to
+                // console output at normal verbosity.
+                Log.LogMessageFromResources(
+                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13) ? MessageImportance.Normal : MessageImportance.High,
+                    "TarDirectory.Comment",
+                    _sourceDirectory.FullName,
+                    _destinationFile.FullName);
 
                 // Scope the write streams to this block so they are flushed and closed before Execute returns,
                 // and — importantly — before the catch below attempts to delete a partially-written archive.
@@ -231,7 +239,16 @@ namespace Microsoft.Build.Tasks
 
                     CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-                    foreach ((FileSystemInfo info, string entryName) in EnumerateEntriesInDeterministicOrder())
+                    List<(FileSystemInfo Info, string EntryName)> entries = EnumerateEntriesInDeterministicOrder();
+                    long writtenEntries = 0;
+
+                    using ITaskProgressReporter? progress = entries.Count == 0
+                        ? null
+                        : (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                            $"Creating {_destinationFile.Name}",
+                            TaskProgressUnit.Items);
+
+                    foreach ((FileSystemInfo info, string entryName) in entries)
                     {
                         // Check for cancellation on every iteration so a cancelled build stops promptly rather than
                         // writing out the entire remaining archive.
@@ -251,7 +268,12 @@ namespace Microsoft.Build.Tasks
                             await writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
                                 .ConfigureAwait(continueOnCapturedContext: false);
                         }
+
+                        writtenEntries++;
+                        progress?.Report(new TaskProgressUpdate(writtenEntries, entries.Count, entryName));
                     }
+
+                    progress?.Finish(succeeded: true, cancellationToken);
                 }
 
                 // A break out of the loop above (rather than an OperationCanceledException from a mid-entry write)

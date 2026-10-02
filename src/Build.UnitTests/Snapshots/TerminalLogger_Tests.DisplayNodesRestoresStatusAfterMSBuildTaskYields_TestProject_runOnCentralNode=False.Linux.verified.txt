@@ -1,9 +1,9 @@
-﻿]9;4;3;\[?25l[1F
+]9;4;3;\[?2026h[?25l[1F
   project [120G[14DTesting (0.2s)
-[?25h[?25l[2F
-[J[?25h[?25l[1F
+[?25h[?2026l[?2026h[?25l[2F
+[J[?25h[?2026l[?2026h[?25l[1F
   project [120G[14DTesting (0.3s)
-[?25h[2F
+[?25h[?2026l[2F
 [J  project test [32;1msucceeded[m (0.3s)
 
 Build [32;1msucceeded[m in 5.0s

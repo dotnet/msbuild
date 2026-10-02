@@ -421,6 +421,8 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.TargetFinished => static reader => reader.ReadTargetFinishedEventArgs(),
                 BinaryLogRecordKind.TaskStarted => static reader => reader.ReadTaskStartedEventArgs(),
                 BinaryLogRecordKind.TaskFinished => static reader => reader.ReadTaskFinishedEventArgs(),
+                BinaryLogRecordKind.TaskProgressStarted => static reader => reader.ReadTaskProgressStartedEventArgs(),
+                BinaryLogRecordKind.TaskProgressFinished => static reader => reader.ReadTaskProgressFinishedEventArgs(),
                 BinaryLogRecordKind.Error => static reader => reader.ReadBuildErrorEventArgs(),
                 BinaryLogRecordKind.Warning => static reader => reader.ReadBuildWarningEventArgs(),
                 BinaryLogRecordKind.Message => static reader => reader.ReadBuildMessageEventArgs(),
@@ -1156,6 +1158,40 @@ namespace Microsoft.Build.Logging
                 taskName,
                 succeeded,
                 fields.Timestamp);
+            SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadTaskProgressStartedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+            var operationId = ReadInt64();
+            var title = ReadOptionalString();
+            var unit = (TaskProgressUnit)ReadInt32();
+            var parentOperationId = ReadInt64();
+            var retention = (TaskProgressNestedRetention)ReadInt32();
+
+            var e = new TaskProgressStartedEventArgs(operationId, title ?? string.Empty, unit, fields.HelpKeyword, fields.SenderName)
+            {
+                Title = title,
+                ParentOperationId = parentOperationId,
+                Retention = retention,
+            };
+            SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadTaskProgressFinishedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+            var operationId = ReadInt64();
+            var sequence = ReadInt64();
+            var outcome = (TaskProgressOutcome)ReadInt32();
+            var completed = ReadInt64();
+            long? total = ReadBoolean() ? ReadInt64() : null;
+            var summary = ReadOptionalString();
+
+            var e = new TaskProgressFinishedEventArgs(operationId, sequence, outcome, completed, total, summary, fields.HelpKeyword, fields.SenderName);
             SetCommonFields(e, fields);
             return e;
         }

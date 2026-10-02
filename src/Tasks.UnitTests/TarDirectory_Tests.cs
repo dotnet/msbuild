@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -59,6 +61,80 @@ namespace Microsoft.Build.Tasks.UnitTests
                             "CDA3DD8C25A54A7CAC638A444CB1EAD0.txt"
                         ],
                         ignoreOrder: true);
+            }
+        }
+
+        /// <summary>
+        /// Terminal Logger renders a progress row for the archive and only renders messages of
+        /// high importance, so the message that announces the same archive must not be high
+        /// importance as well. It stays in binary logs and in console output at normal verbosity.
+        /// </summary>
+        [Theory]
+        [InlineData(true, MessageImportance.Normal)]
+        [InlineData(false, MessageImportance.High)]
+        public void ArchiveMessageImportanceFollowsChangeWave(bool waveEnabled, MessageImportance expectedImportance)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                testEnvironment.SetEnvironmentVariable(
+                    "MSBUILDDISABLEFEATURESFROMVERSION",
+                    waveEnabled ? null : ChangeWaves.Wave18_13.ToString());
+                ChangeWaves.ResetStateForTests();
+
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+                testEnvironment.CreateFile(sourceFolder, "file.txt", "content");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                BuildMessageEventArgs archiving = _mockEngine.MessageEvents
+                    .Where(m => m.Message?.Contains(tarFilePath) == true)
+                    .ShouldHaveSingleItem(_mockEngine.Log);
+                archiving.Importance.ShouldBe(expectedImportance);
+
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        [Fact]
+        public void ReportsArchiveCreationProgress()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "F1.txt", "F1");
+                testEnvironment.CreateFile(sourceFolder, "F2.txt", "F2");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                progress.Updates.ShouldNotBeEmpty();
+                progress.Completed.ShouldBe(2);
+                progress.Total.ShouldBe(2);
+                progress.IsComplete.ShouldBeTrue();
+                _mockEngine.TaskProgressReporterTitle.ShouldBe("Creating test.tar");
             }
         }
 
