@@ -150,7 +150,7 @@ Inside Visual Studio, MSBuild adds its events to the Visual Studio telemetry ses
 
 - Outside CI, events are saved on exit to the local Visual Studio telemetry store. A later Visual Studio or `MSBuild.exe` process uploads them.
 - In CI, as detected by the same environment variables that disable the terminal logger (for example `CI`, `TF_BUILD`, `GITHUB_ACTIONS`, `TEAMCITY_VERSION`, `JENKINS_URL`, or `GITLAB_CI`), `MSBuild.exe` uploads pending events just before it exits. Ephemeral agents are often discarded before a later process could do it.
-- The upload is best effort and bounded. The whole shutdown waits at most 10 seconds by default; `MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS` changes this budget, and `0` means don't wait. When the budget runs out, the upload is cancelled, and events that were not sent stay in the local store. Telemetry never changes the build result or exit code.
+- The upload is best effort and bounded. The whole shutdown waits at most 10 seconds by default; `MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS` changes this budget, and `0` means don't wait. When the budget runs out, `MSBuild.exe` exits without waiting further, and pending events may be lost. Telemetry never changes the build result or exit code.
 - Events are not delivered in these cases:
   - Telemetry is opted out or consent is not given.
   - The process is terminated forcibly.
@@ -189,7 +189,8 @@ Set `MSBUILD_TELEMETRY_DIAGNOSTICS=1` to write telemetry status lines, prefixed 
 - Whether telemetry was opted out.
 - Initialization: session ownership, consent, CI detection, and the loaded telemetry assembly version.
 - Initialization and dependency failures, by exception type and assembly name.
-- How long shutdown took and whether it completed, timed out, or failed.
+- How long shutdown took, whether events were saved or uploaded, and whether it completed or timed out.
+- Shutdown failures, by exception type.
 
 The messages contain no paths, session identifiers, or event data. CI steps that fail on any standard error output (for example `failOnStderr`) will fail when this is on.
 

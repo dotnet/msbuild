@@ -319,7 +319,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Only the entry process and the server node report builds, so worker, task host and RAR nodes don't own a telemetry session.
         /// </summary>
-        internal static bool OwnsProcessTelemetrySession(NodeMode? nodeMode) => nodeMode is null or NodeMode.OutOfProcServerNode;
+        private static bool OwnsProcessTelemetrySession(NodeMode? nodeMode) => nodeMode is null or NodeMode.OutOfProcServerNode;
 
         private static int RunMain(string[] args)
         {
