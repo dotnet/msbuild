@@ -234,8 +234,9 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 try
                 {
-                    return fileName.IndexOfAny(['\\', '/']) >= 0
-                        ? Path.GetFileNameWithoutExtension(fileName)
+                    int separator = fileName.LastIndexOfAny(['\\', '/']);
+                    return separator >= 0
+                        ? Path.GetFileNameWithoutExtension(fileName.Substring(separator + 1))
                         : new AssemblyName(fileName).Name ?? "unknown";
                 }
                 catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
