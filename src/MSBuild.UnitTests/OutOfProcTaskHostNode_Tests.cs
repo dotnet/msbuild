@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -40,6 +42,69 @@ namespace Microsoft.Build.UnitTests
         {
             _output = output;
         }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CompletionDrainPreservesResultsAndFlushesConcurrentConsoleOutput(bool enqueueDuringDrain)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RecordingEndpoint endpoint = env.WithTransientTestState(new RecordingEndpoint());
+            Action? afterErrorFlush = null;
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(
+                text => endpoint.Node.SendData(new ConsoleWritePacket(text, ConsoleOutput.Standard)),
+                text =>
+                {
+                    endpoint.Node.SendData(new ConsoleWritePacket(text, ConsoleOutput.Error));
+                    afterErrorFlush?.Invoke();
+                }));
+            state.SetField("_nodeEndpoint", endpoint.Node);
+            TaskHostTaskComplete first = CreateCompletion(TaskCompleteType.Success);
+            TaskHostTaskComplete second = CreateCompletion(TaskCompleteType.Failure);
+            state.PendingCompletions.Enqueue(first);
+            state.OutWriter.Write("A output");
+            state.ErrorWriter.Write("A error");
+
+            if (enqueueDuringDrain)
+            {
+                afterErrorFlush = () =>
+                {
+                    afterErrorFlush = null;
+                    // Interleave another producer after stdout was flushed for the first completion.
+                    state.OutWriter.Write("B output");
+                    state.PendingCompletions.Enqueue(second);
+                };
+            }
+            else
+            {
+                state.PendingCompletions.Enqueue(second);
+            }
+
+            state.CompleteTask();
+
+            INodePacket[] packets = endpoint.Packets.ToArray();
+            packets.Length.ShouldBe(enqueueDuringDrain ? 5 : 4);
+            packets[0].ShouldBeOfType<ConsoleWritePacket>().Text.ShouldBe("A output");
+            packets[1].ShouldBeOfType<ConsoleWritePacket>().Text.ShouldBe("A error");
+            packets[2].ShouldBeSameAs(first);
+            if (enqueueDuringDrain)
+            {
+                packets[3].ShouldBeOfType<ConsoleWritePacket>().Text.ShouldBe("B output");
+            }
+            packets[^1].ShouldBeSameAs(second);
+            packets.OfType<TaskHostTaskComplete>().Select(packet => packet.TaskResult).ToArray()
+                .ShouldBe([TaskCompleteType.Success, TaskCompleteType.Failure]);
+            state.PendingCompletions.ShouldBeEmpty();
+            state.CompleteTask();
+            endpoint.Packets.Count.ShouldBe(packets.Length, "a second drain must not duplicate either completion");
+        }
+
+        private static TaskHostTaskComplete CreateCompletion(TaskCompleteType result) =>
+            new(new OutOfProcTaskHostTaskResult(result),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                null);
 
         [Theory]
         [InlineData(false)]
@@ -101,6 +166,65 @@ namespace Microsoft.Build.UnitTests
             Console.Error.ShouldBeSameAs(state.OriginalError);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ShutdownAcknowledgmentPreservesReuseUnlessConnectionAlreadyFailed(bool connectionAlreadyFailed)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.ShutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+            ImmediateDisconnectEndpoint endpoint = new();
+            state.SubscribeToLinkStatus(endpoint);
+            if (connectionAlreadyFailed)
+            {
+                endpoint.FailConnection();
+            }
+
+            state.Node.SendShutdownNotification(endpoint);
+
+            state.ShutdownReason.ShouldBe(connectionAlreadyFailed
+                ? NodeEngineShutdownReason.ConnectionFailed
+                : NodeEngineShutdownReason.BuildCompleteReuse);
+            endpoint.ClientWillDisconnectCalled.ShouldBe(!connectionAlreadyFailed);
+            if (connectionAlreadyFailed)
+            {
+                endpoint.ShutdownPacket.ShouldBeNull();
+            }
+            else
+            {
+                endpoint.ShutdownPacket.ShouldNotBeNull();
+                endpoint.ShutdownPacket.Reason.ShouldBe(NodeShutdownReason.Requested);
+                endpoint.LinkStatus.ShouldBe(LinkStatus.Failed);
+            }
+        }
+
+        private sealed class ImmediateDisconnectEndpoint : INodeEndpoint
+        {
+            public event LinkStatusChangedDelegate? OnLinkStatusChanged;
+
+            public LinkStatus LinkStatus { get; private set; } = LinkStatus.Active;
+            internal bool ClientWillDisconnectCalled { get; private set; }
+            internal NodeShutdown? ShutdownPacket { get; private set; }
+
+            public void ClientWillDisconnect() => ClientWillDisconnectCalled = true;
+            public void Connect(INodePacketFactory factory) => throw new NotSupportedException();
+            public void Listen(INodePacketFactory factory) => throw new NotSupportedException();
+            public void Disconnect() => throw new NotSupportedException();
+
+            public void SendData(INodePacket packet)
+            {
+                ShutdownPacket = packet.ShouldBeOfType<NodeShutdown>();
+                FailConnection();
+            }
+
+            internal void FailConnection()
+            {
+                LinkStatus = LinkStatus.Failed;
+                OnLinkStatusChanged?.Invoke(this, LinkStatus);
+            }
+        }
+
         private sealed class ThrowingBuildObject : IDisposable
         {
             public void Dispose()
@@ -119,6 +243,14 @@ namespace Microsoft.Build.UnitTests
             internal TextWriter OriginalError { get; } = Console.Error;
             internal RedirectConsoleWriter OutWriter { get; }
             internal RedirectConsoleWriter ErrorWriter { get; }
+            internal NodeEngineShutdownReason ShutdownReason
+            {
+                get => (NodeEngineShutdownReason)typeof(OutOfProcTaskHostNode).GetField("_shutdownReason", InstanceMembers)!.GetValue(Node)!;
+                set => SetField("_shutdownReason", value);
+            }
+
+            internal ConcurrentQueue<TaskHostTaskComplete> PendingCompletions =>
+                (ConcurrentQueue<TaskHostTaskComplete>)typeof(OutOfProcTaskHostNode).GetField("_taskCompletePackets", InstanceMembers)!.GetValue(Node)!;
 
             internal RedirectedNodeState(Action<string> output, Action<string> error)
             {
@@ -140,6 +272,9 @@ namespace Microsoft.Build.UnitTests
             internal void ShutdownConsole() => ((Action)typeof(OutOfProcTaskHostNode)
                 .GetMethod("ShutdownConsoleRedirection", InstanceMembers)!.CreateDelegate(typeof(Action), Node))();
 
+            internal void CompleteTask() => ((Action)typeof(OutOfProcTaskHostNode)
+                .GetMethod("CompleteTask", InstanceMembers)!.CreateDelegate(typeof(Action), Node))();
+
             public override void Revert()
             {
                 Console.SetOut(OriginalOut);
@@ -158,12 +293,40 @@ namespace Microsoft.Build.UnitTests
             internal void SetField(string name, object value) =>
                 typeof(OutOfProcTaskHostNode).GetField(name, InstanceMembers)!.SetValue(Node, value);
 
+            internal void SubscribeToLinkStatus(INodeEndpoint endpoint) =>
+                endpoint.OnLinkStatusChanged += (LinkStatusChangedDelegate)typeof(OutOfProcTaskHostNode)
+                    .GetMethod("OnLinkStatusChanged", InstanceMembers)!.CreateDelegate(typeof(LinkStatusChangedDelegate), Node);
+
             private static void StopTimer(RedirectConsoleWriter writer)
             {
                 using ManualResetEvent disposed = new(false);
                 Timer timer = (Timer)typeof(RedirectConsoleWriter).GetField("_timer", InstanceMembers)!.GetValue(writer)!;
                 timer.Dispose(disposed).ShouldBeTrue();
                 disposed.WaitOne(10_000).ShouldBeTrue();
+            }
+        }
+
+        private sealed class RecordingEndpoint : TransientTestState
+        {
+            private const BindingFlags InstanceMembers = BindingFlags.Instance | BindingFlags.NonPublic;
+            private readonly AutoResetEvent _packetAvailable = new(false);
+
+            internal NodeEndpointOutOfProcTaskHost Node { get; } = new(false, NodePacketTypeExtensions.PacketVersion);
+            internal ConcurrentQueue<INodePacket> Packets { get; } = new();
+
+            internal RecordingEndpoint()
+            {
+                typeof(NodeEndpointOutOfProcBase).GetField("_status", InstanceMembers)!.SetValue(Node, LinkStatus.Active);
+                typeof(NodeEndpointOutOfProcBase).GetField("_packetQueue", InstanceMembers)!.SetValue(Node, Packets);
+                typeof(NodeEndpointOutOfProcBase).GetField("_packetAvailable", InstanceMembers)!.SetValue(Node, _packetAvailable);
+            }
+
+            public override void Revert()
+            {
+                typeof(NodeEndpointOutOfProcBase).GetField("_status", InstanceMembers)!.SetValue(Node, LinkStatus.Inactive);
+                _packetAvailable.Dispose();
+                ((IDisposable)typeof(NodeEndpointOutOfProcBase).GetField("_pipeServer", InstanceMembers)!.GetValue(Node)!).Dispose();
+                ((IDisposable)typeof(NodeEndpointOutOfProcBase).GetField("_binaryWriter", InstanceMembers)!.GetValue(Node)!).Dispose();
             }
         }
 

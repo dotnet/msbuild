@@ -161,6 +161,7 @@
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.TestAccessor.cs" />
     <Compile Include="BackEnd\BuildManager\EnvironmentVariableValidator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
+    <Compile Include="BackEnd\BuildManager\MultiThreadedStrictModeScope.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
@@ -597,6 +598,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
     <Compile Include="Logging\BaseConsoleLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
+    <Compile Include="Logging\BinaryLogger\BinaryLogEventFilter.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogReplayEventSource.cs" />
     <Compile Include="Logging\BinaryLogger\EventArgsDispatcher.cs" />

@@ -571,7 +571,11 @@
         attributes. At the end of the message we show the exception text we got trying to use the value.</comment>
   </data>
   <data name="InvalidBinaryLoggerParameters" xml:space="preserve">
-    <value>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</value>
+    <value>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</value>
+  </data>
+  <data name="InvalidBinaryLoggerEventFilter" xml:space="preserve">
+    <value>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</value>
+    <comment>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</comment>
   </data>
   <data name="InvalidContinueOnErrorAttribute" xml:space="preserve">
     <value>MSB4021: The "ContinueOnError" attribute of the "{0}" task is not valid. {1}</value>
@@ -1353,6 +1357,30 @@
     <value>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</value>
     <comment>{StrBegin="MSB4285: "}</comment>
   </data>
+  <data name="MultiThreadedStrictModeEnabled" xml:space="preserve">
+    <value>Multi-threaded strict mode is enabled. Process current directory: "{0}".</value>
+    <comment>{0} is the full path of the sentinel directory.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeAlreadyActive" xml:space="preserve">
+    <value>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</value>
+    <comment>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</comment>
+  </data>
+  <data name="MultiThreadedStrictModeCurrentDirectoryChanged" xml:space="preserve">
+    <value>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</value>
+    <comment>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeUnresolvedPathWrite" xml:space="preserve">
+    <value>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</value>
+    <comment>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeSentinelMissing" xml:space="preserve">
+    <value>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</value>
+    <comment>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</comment>
+  </data>
+  <data name="MultiThreadedStrictModeSentinelRecoveryFailed" xml:space="preserve">
+    <value>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</value>
+    <comment>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</comment>
+  </data>
   <data name="CouldNotLoadSdkResolver" xml:space="preserve">
     <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>
     <comment>{StrBegin="MSB4237: "}</comment>
@@ -2123,6 +2151,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="Binlog_MissingRecoverableErrorSubscribeError" xml:space="preserve">
     <value>Subscription to RecoverableReadError is mandatory during forward compatible reading.</value>
+  </data>
+  <data name="Binlog_EventFilterThrew" xml:space="preserve">
+    <value>The binary log event filter threw an exception.</value>
+  </data>
+  <data name="Binlog_EventFilterThrewWithContext" xml:space="preserve">
+    <value>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</value>
+    <comment>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</comment>
   </data>
   <data name="Binlog_ImportFileSizeError" xml:space="preserve">
     <value>Imported files archive exceeded 2GB limit and it's not embedded.</value>

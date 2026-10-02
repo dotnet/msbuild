@@ -220,7 +220,7 @@
       </trans-unit>
       <trans-unit id="AssemblyResolutionSearchTrace_SearchPath">
         <source>For SearchPath "{0}".</source>
-        <target state="translated">Für SearchPath "{0}".</target>
+        <target state="translated">Für SearchPath „{0}“.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">

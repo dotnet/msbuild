@@ -119,6 +119,37 @@ Using the API is safe when the task accounts for this sharing. Before adding `[M
 * if multiple tasks race to register equal keys, only one object is retained and the task disposes any unretained object that needs cleanup; and
 * correctness does not require two task invocations to use the same cache so the task is functional both in multithreaded and multiprocess modes.
 
+## Validate a task migration
+
+Run a representative build with an MSBuild version that supports
+[strict mode](multithreaded-msbuild.md#strict-mode), and capture a binary log:
+
+```powershell
+dotnet build .\MyProject.csproj -m -mt -nr:false -bl:migration-strict.binlog "-warnAsError:MSB4286;MSB4287;MSB4288"
+```
+
+Ensure [change wave 18.12](../../wiki/ChangeWaves.md#1812) is enabled so the default strict checks are active.
+`MSB4287` and successful sentinel recovery (`MSB4288`) are warnings by default; the command
+promotes them to errors for migration sign-off. Do not suppress `MSB4286`, `MSB4287`, or `MSB4288`
+through `-nowarn` or `MSBuildWarningsAsMessages`.
+Clean the relevant outputs or invoke the required targets so the migrated task actually
+runs. In the binlog, confirm that the expected task assembly was used and the task ran
+in-process, rather than being skipped or using a legacy copy in a TaskHost.
+
+Search the binlog for **`MT-sentinel-CWD`**. The strict-mode enable message
+contains this path by design; use it to confirm the mode was active. Treat every other
+occurrence as a migration violation to investigate before sign-off. In
+particular, a sentinel path in task inputs or outputs, evaluated file paths, tool command
+lines, or file-access errors shows that process-relative state has leaked into the build.
+
+Trace each leak back to the task, its helpers, or the project expression that produced it.
+Fix the path resolution and repeat the build and search. **A successful build alone is
+not enough:** a swallowed exception or an output containing a wrong absolute path can
+leave the build green without MSB4286/MSB4287. CWD is checked after each task, but sentinel
+contents are scanned at project/build completion: a relative file written and deleted by
+different tasks before that scan can escape detection. A clean search only covers the code paths
+and logged values exercised by that build; retain the migration's unit tests and call-chain audit.
+
 ## TaskEnvironment API
 
 The `TaskEnvironment` provides thread-safe alternatives to APIs that use global process state, enabling tasks to execute safely in a multithreaded environment.

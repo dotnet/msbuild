@@ -577,7 +577,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enables running build in multiple in-proc nodes.
         /// </summary>
-        /// <remarks>Cannot be enabled together with <c>ReportFileAccesses</c>.</remarks>
+        /// <remarks>
+        /// Multi-threaded builds use an empty sentinel current directory and check for process-directory
+        /// changes and unresolved relative-path writes when change wave 18.12 is enabled.
+        /// Cannot be enabled together with <c>ReportFileAccesses</c>.
+        /// </remarks>
         public bool MultiThreaded
         {
             get => _multiThreaded;

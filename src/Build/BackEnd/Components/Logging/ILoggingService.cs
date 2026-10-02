@@ -295,6 +295,13 @@ namespace Microsoft.Build.BackEnd.Logging
         bool HasBuildSubmissionLoggedErrors(int submissionId);
 
         /// <summary>
+        /// Determines whether a warning will be promoted to an error after applying suppression and global and project settings.
+        /// </summary>
+        /// <param name="buildEventContext">The context in which the warning will be logged.</param>
+        /// <param name="warningCode">The warning code.</param>
+        bool ShouldTreatWarningAsError(BuildEventContext buildEventContext, string warningCode);
+
+        /// <summary>
         /// Populates build telemetry with error categorization data.
         /// </summary>
         /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
