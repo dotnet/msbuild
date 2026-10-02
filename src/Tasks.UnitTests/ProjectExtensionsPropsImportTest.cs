@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
+using Xunit;
 
 #nullable disable
 
@@ -12,9 +13,14 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public sealed class ProjectExtensionsPropsImportTest : ProjectExtensionsImportTestBase
     {
-        protected override string CustomImportProjectPath => Path.Combine(ObjectModelHelpers.TempProjectDir, "obj", $"{Path.GetFileName(_projectRelativePath)}.custom.props");
+        public ProjectExtensionsPropsImportTest(ITestOutputHelper output)
+            : base(output)
+        {
+        }
 
-        protected override string ImportProjectPath => Path.Combine(Path.GetDirectoryName(_projectRelativePath), "obj", $"{Path.GetFileName(_projectRelativePath)}.custom.props");
+        protected override string CustomImportProjectRelativePath => Path.Combine("obj", $"{Path.GetFileName(_projectRelativePath)}.custom.props");
+
+        protected override string ImportProjectRelativePath => Path.Combine(Path.GetDirectoryName(_projectRelativePath), "obj", $"{Path.GetFileName(_projectRelativePath)}.custom.props");
 
         protected override string PropertyNameToEnableImport => "ImportProjectExtensionProps";
 
