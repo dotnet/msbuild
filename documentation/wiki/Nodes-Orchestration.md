@@ -33,6 +33,8 @@ Endpoints (nodes) communicate via named pipes (Windows or named pipes API implem
 
 The validation of transport is done via [proprietary handshake](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/Components/Communications/NodeProviderOutOfProcBase.cs#L501-L508).
 
+`NodeEndpointOutOfProcBase` combines queued logging packet frames into pipe writes of at most 64 KiB. Each packet is serialized independently with its existing type, length, payload, and negotiated version; batching does not change the wire format or binary log contents. Pending frames are written when the queue drains, before control packets, and before shutdown, without waiting for more packets. Packets at least 64 KiB bypass the batch buffer.
+
 
 ## Orchestration
 
@@ -68,5 +70,4 @@ Once a `project instance` is assigned to a worker node - it is locked to that no
 Scheduler can (opt-in) dump a graph of dependencies from last build into a text file and then use it in the next build (with option of [various scheduling algorithms](https://github.com/dotnet/msbuild/blob/7cfb36cb90d1c9cc34bc4e0910d0c9ef42ee47b6/src/Build/BackEnd/Components/Scheduler/Scheduler.cs#L833))
 
 Another mode of building is `graph build` - where project is build only once all its dependencies are resolved (so the build graph needs to be known and unchanged upfront).
-
 
