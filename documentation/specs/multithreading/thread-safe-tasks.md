@@ -18,12 +18,12 @@ Thread-safe capability is declared by a single mechanism: the `[MSBuildMultiThre
 | Declaration | Effect | Read by |
 | --- | --- | --- |
 | `[MSBuildMultiThreadableTask]` | Runs in-process instead of an out-of-proc TaskHost | `TaskRouter.NeedsTaskHostInMultiThreadedMode` |
-| `IMultiThreadableTask` | Receives a `TaskEnvironment` | `TaskExecutionHost` |
+| `IMultiThreadableTask` | Receives a `TaskEnvironment` | `TaskExecutionHost`, `OutOfProcTaskAppDomainWrapperBase` |
 
 Declaring one without the other is legal, and each half fails quietly:
 
 - **Attribute only** — a complete, properly migrated state for a task that does not resolve relative paths or read environment variables. The task runs in-process without `TaskEnvironment`. If the task *does* declare a `TaskEnvironment` property, MSBuild never assigns it: the property silently retains whatever the task itself initialized it to — commonly `TaskEnvironment.Fallback`, or `null` when there is no initializer — so paths resolve against the shared process working directory. The task-authoring analyzer reports `MSBuildTask0012` for this shape.
-- **Interface only** — a useful intermediate state. The task resolves paths correctly but still pays for a TaskHost. Note that the engine does not assign the property in that TaskHost: the out-of-proc host supplies `TaskEnvironment.Fallback` to a `TaskEnvironment` constructor if the task declares one, and otherwise leaves the property at the task's own default. That is correct there, because `Fallback` is backed by `MultiProcessTaskEnvironmentDriver` and the host process is dedicated to a single task. `MSBuildTask0013` reports this shape, disabled by default.
+- **Interface only** — a useful intermediate state. The task resolves paths correctly but still pays for a TaskHost. The out-of-proc host assigns `TaskEnvironment.Fallback` to the property before setting task parameters and executing the task. It also supplies the same environment to a `TaskEnvironment` constructor if the task declares one. `Fallback` is backed by `MultiProcessTaskEnvironmentDriver`, so it uses the host's process environment and working directory. `MSBuildTask0013` reports this shape, disabled by default.
 
 Tasks that use `TaskEnvironment` cannot load in older MSBuild versions that do not support multithreading features, requiring authors to drop support for older MSBuild versions. To address this challenge, MSBuild provides a compatibility bridge that allows certain tasks targeting older MSBuild versions to participate in multithreaded builds: the attribute is detected by name, so a task can apply it without referencing a new MSBuild assembly, and correct absolute path resolution can be and should be achieved without accessing `TaskEnvironment`. Tasks using that bridge must still avoid relying on environment variables or modifying global process state.
 
@@ -44,7 +44,7 @@ public interface IMultiThreadableTask : ITask
 }
 ```
 
-Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`) or run in the out-of-proc task host. The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
+Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`). Both the engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) and the out-of-proc task host assign the appropriate environment before setting task parameters and calling `Execute()`, so hosted tasks do not need to provide their own default.
 
 #### Constructor Injection of `TaskEnvironment`
 
