@@ -97,6 +97,16 @@ internal static class CrashTelemetryRecorder
         {
             // Best effort: telemetry must never cause a secondary failure.
         }
+
+        // The process is about to terminate without reaching Main's telemetry shutdown.
+        try
+        {
+            TelemetryManager.Instance.Dispose();
+        }
+        catch
+        {
+            // Best effort: telemetry must never cause a secondary failure.
+        }
     }
 
     /// <summary>
@@ -179,15 +189,15 @@ internal static class CrashTelemetryRecorder
     }
 
     /// <summary>
-    /// Exception wrapper that sanitizes message and stack trace to remove PII
-    /// before being passed to VS Telemetry's <c>FaultEvent</c>.
+    /// Exception wrapper passed to VS Telemetry's <c>FaultEvent</c> that carries only the exception type
+    /// instead of the message, which can contain customer data, and a stack trace with file paths removed.
     /// </summary>
     internal sealed class SanitizedException : Exception
     {
         private readonly string? _sanitizedStackTrace;
 
         public SanitizedException(Exception original)
-            : base(CrashTelemetry.TruncateMessage(original.Message) ?? original.GetType().FullName,
+            : base(original.GetType().FullName,
                    original.InnerException is not null ? new SanitizedException(original.InnerException) : null)
         {
             _sanitizedStackTrace = original.StackTrace is not null

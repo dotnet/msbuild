@@ -126,6 +126,74 @@ The following Microsoft-owned task factory names are sent in plain text:
 - `XamlTaskFactory`
 - `IntrinsicTaskFactory`
 
+### Crash Events
+
+Crash events don't include exception messages, which can contain customer data. They include exception types, HRESULTs, a stack hash, and stack traces with file paths removed.
+
+## Collection and Delivery
+
+Inside Visual Studio, MSBuild adds its events to the Visual Studio telemetry session, which Visual Studio owns. MSBuild never shuts that session down. The rest of this section applies to `MSBuild.exe` on .NET Framework, as installed with Visual Studio or Build Tools.
+
+### Which processes report
+
+- The `MSBuild.exe` process that you start owns a telemetry session for its whole lifetime. So does the MSBuild server node. Each build in that process adds events to the same session, so a server node sends its events only when it exits.
+- MSBuild does not create sessions in worker nodes, task hosts, or RAR nodes. Build telemetry is aggregated in the entry process, so a build reports one `VS/MSBuild/build` event, however many nodes it uses.
+- Tasks that post events to the Visual Studio default telemetry session, for example tasks from Visual Studio SDKs, use this session when they run in the entry process. In other processes they create their own session, as before.
+
+### Consent
+
+- `MSBUILD_TELEMETRY_OPTOUT=1` (or `true`) turns telemetry off for `MSBuild.exe`. No telemetry assemblies are loaded, no session is created, and nothing is sent.
+- `DOTNET_CLI_TELEMETRY_OPTOUT` applies to MSBuild running on .NET, for example `dotnet build`. It does not apply to `MSBuild.exe` on .NET Framework. Set both variables to opt out of both.
+- Otherwise the session uses the Visual Studio consent: the [Visual Studio Customer Experience Improvement Program](https://learn.microsoft.com/visualstudio/ide/visual-studio-experience-improvement-program) setting, including machine-wide policy. When consent is not given, the session is created but no events are sent. MSBuild does not change consent, and running in CI does not opt a machine in.
+
+### Delivery
+
+- Outside CI, events are saved on exit to the local Visual Studio telemetry store. A later Visual Studio or `MSBuild.exe` process uploads them.
+- In CI, as detected by the same environment variables that disable the terminal logger (for example `CI`, `TF_BUILD`, `GITHUB_ACTIONS`, `TEAMCITY_VERSION`, `JENKINS_URL`, or `GITLAB_CI`), `MSBuild.exe` uploads pending events just before it exits. Ephemeral agents are often discarded before a later process could do it.
+- The upload is best effort and bounded. The whole shutdown waits at most 10 seconds by default; `MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS` changes this budget, and `0` means don't wait. When the budget runs out, `MSBuild.exe` exits without waiting further, and pending events may be lost. Telemetry never changes the build result or exit code.
+- Events are not delivered in these cases:
+  - Telemetry is opted out or consent is not given.
+  - The process is terminated forcibly.
+  - The collector is unreachable within the budget.
+  - Another Visual Studio telemetry process on the same machine holds the upload lock. That process uploads the stored events instead.
+  - A worker node crashes with an unhandled exception.
+
+### Host identification
+
+`BuildEngineHost` is determined in this order:
+
+1. `VS` when MSBuild runs inside Visual Studio.
+2. The value of `MSBUILD_HOST_NAME`, when set.
+3. `Azure DevOps` when `TF_BUILD` is `true`.
+4. `GitHub Action` when `GITHUB_ACTIONS` is `true`.
+5. `VSCode` when `VSCODE_CWD` is set or `TERM_PROGRAM` is `vscode`.
+6. Otherwise no host is reported.
+
+Other CI systems are detected for upload on exit, but they are not reported as a host.
+
+### Deployment requirements
+
+`MSBuild.exe` loads these files from `MSBuild\Current\Bin`:
+
+- `Microsoft.VisualStudio.Telemetry.dll`
+- `Microsoft.VisualStudio.RemoteControl.dll`
+- `Microsoft.VisualStudio.Utilities.Internal.dll`
+- `Newtonsoft.Json.dll`
+
+The 64-bit and ARM64 `MSBuild.exe` find them through `codeBase` entries in their `MSBuild.exe.config`. If the files can't be loaded, telemetry is disabled for that process, and the build is not affected.
+
+### Diagnostics
+
+Set `MSBUILD_TELEMETRY_DIAGNOSTICS=1` to write telemetry status lines, prefixed with `MSBuild telemetry:`, to standard error. They report:
+
+- Whether telemetry was opted out.
+- Initialization: session ownership, consent, CI detection, and the path of the loaded telemetry assembly.
+- Initialization and dependency failures, with the exception.
+- How long shutdown took, whether events were saved or uploaded, and whether it completed or timed out.
+- Shutdown failures, with the exception.
+
+The messages contain no session identifiers or event data. CI steps that fail on any standard error output (for example `failOnStderr`) will fail when this is on.
+
 ## Related Files
 
 | File | Description |
