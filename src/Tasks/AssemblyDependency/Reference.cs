@@ -942,7 +942,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (var frameworkPath in frameworkPaths)
                 {
-                    if (IsUnderDirectory(fullPath, frameworkPath.Value))
+                    if (IsUnderDirectory(fullPath, frameworkPath))
                     {
                         return true;
                     }

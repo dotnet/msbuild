@@ -28,7 +28,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             _taskInputs = RarTaskParameters.Get(ParameterType.Input, rar);
 
             // Capture the project directory from TaskEnvironment
-            _projectDirectory = rar.TaskEnvironment.ProjectDirectory.Value;
+            _projectDirectory = rar.TaskEnvironment.ProjectDirectory;
 
             // Ensure log messages are identical to those that would be produced on the client.
             _lineNumberOfTaskNode = rar.BuildEngine.LineNumberOfTaskNode;

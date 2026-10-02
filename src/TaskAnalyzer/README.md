@@ -190,6 +190,11 @@ File.Exists(item.GetMetadataValue("FullPath"))
 void Helper(AbsolutePath p) => File.Exists(p);
 ```
 
+Pass `AbsolutePath` directly to string parameters instead of reading `.Value`.
+The implicit conversion preserves the path's type for analyzer checks, including
+when initializing a string local. Bare `AbsolutePath.Value` is not a recognized
+safe pattern; the canonicalization exception above is unchanged.
+
 ### MSBuildTask0004 — Potential Issue (Review Required)
 
 These APIs may cause version conflicts or other issues in a shared task host.
