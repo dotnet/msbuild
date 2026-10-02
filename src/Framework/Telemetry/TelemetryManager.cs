@@ -171,7 +171,14 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             if (Traits.Instance.TelemetryDiagnostics)
             {
-                Console.Error.WriteLine("MSBuild telemetry: " + message);
+                try
+                {
+                    Console.Error.WriteLine("MSBuild telemetry: " + message);
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Console may not be available (e.g. redirected to a broken pipe).
+                }
             }
         }
 
