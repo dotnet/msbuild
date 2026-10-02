@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Runtime.Serialization;
 #endif
 
-using System.IO;
 using Microsoft.Build.Framework.Telemetry;
 using Shouldly;
 using Xunit;
@@ -106,23 +105,5 @@ public class TelemetryManager_Tests
 
         TelemetryManager.IsDisposed.ShouldBeFalse();
         TelemetryManager.Instance.DefaultActivitySource.ShouldBeNull();
-    }
-
-    [Theory]
-    [InlineData("Microsoft.VisualStudio.Telemetry, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-    [InlineData(@"C:\Users\someone\secret\Microsoft.VisualStudio.Telemetry.dll")]
-    [InlineData("file:///C:/Users/someone/secret/Microsoft.VisualStudio.Telemetry.dll")]
-    public void DescribeExceptionOmitsMessagesAndPaths(string fileName)
-    {
-        FileLoadException exception = new(@"Could not load C:\Users\someone\secret", fileName);
-
-        string description = TelemetryManager.DescribeException(new System.TypeInitializationException("SomeType", exception));
-
-        description.ShouldContain("System.TypeInitializationException");
-        description.ShouldContain("caused by System.IO.FileLoadException");
-        description.ShouldContain("for assembly 'Microsoft.VisualStudio.Telemetry'");
-        description.ShouldNotContain("someone");
-        description.ShouldNotContain("secret");
-        description.ShouldNotContain("Version=");
     }
 }

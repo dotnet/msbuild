@@ -9,8 +9,6 @@ using Microsoft.VisualStudio.Telemetry;
 #endif
 
 using System;
-using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -26,18 +24,6 @@ namespace Microsoft.Build.Framework.Telemetry
     /// </remarks>
     internal class TelemetryManager
     {
-        internal const string ShutdownTimeoutEnvironmentVariable = "MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS";
-        internal const string DiagnosticsEnvironmentVariable = "MSBUILD_TELEMETRY_DIAGNOSTICS";
-
-        internal const string OptOutEnvironmentVariable =
-#if NETFRAMEWORK
-            "MSBUILD_TELEMETRY_OPTOUT";
-#else
-            "DOTNET_CLI_TELEMETRY_OPTOUT";
-#endif
-
-        internal static readonly TimeSpan DefaultShutdownTimeout = TimeSpan.FromSeconds(10);
-
         /// <summary>
         /// Lock object for thread-safe initialization and disposal.
         /// </summary>
@@ -86,7 +72,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 if (IsOptOut())
                 {
-                    WriteDiagnostic($"disabled by {OptOutEnvironmentVariable}.");
+                    WriteDiagnostic("opted out.");
                     return;
                 }
 
@@ -122,7 +108,6 @@ namespace Microsoft.Build.Framework.Telemetry
                 DefaultActivitySource = VsTelemetryInitializer.Initialize(isStandalone);
 #else
                 DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
-                WriteDiagnostic("initialized activity source.");
 #endif
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
@@ -133,7 +118,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 // (when MSBuild.exe is invoked directly). The telemetry stack itself can also throw, for example when the machine is
                 // configured to opt out of Visual Studio telemetry, so any non-critical failure simply disables telemetry for this process.
                 DefaultActivitySource = null;
-                WriteDiagnostic($"initialization failed, telemetry is disabled for this process: {DescribeException(ex)}.");
+                WriteDiagnostic("initialization failed, telemetry is disabled for this process: " + ex);
             }
         }
 
@@ -164,15 +149,9 @@ namespace Microsoft.Build.Framework.Telemetry
                 // FileLoadException, TypeLoadException), and disposing the session can itself throw when the
                 // telemetry stack was not fully started - for example when telemetry is opted out machine wide.
                 // Critical exceptions still propagate because the process is not safe to continue.
-                WriteDiagnostic($"shutdown failed: {DescribeException(ex)}.");
+                WriteDiagnostic("shutdown failed: " + ex);
             }
 #endif
-        }
-
-        internal static TimeSpan GetShutdownTimeout()
-        {
-            int milliseconds = EnvironmentUtilities.GetValueAsInt32OrDefault(ShutdownTimeoutEnvironmentVariable, -1);
-            return milliseconds >= 0 ? TimeSpan.FromMilliseconds(milliseconds) : DefaultShutdownTimeout;
         }
 
         /// <summary>
@@ -185,64 +164,14 @@ namespace Microsoft.Build.Framework.Telemetry
             Traits.Instance.SdkTelemetryOptOut;
 #endif
 
-        internal static bool IsDiagnosticsEnabled() => EnvironmentUtilities.IsValueOneOrTrue(DiagnosticsEnvironmentVariable);
-
         /// <summary>
-        /// Writes a message to the standard error stream when diagnostics are enabled. Messages must not contain paths, user data, or event contents.
+        /// Writes a message to the standard error stream when MSBUILD_TELEMETRY_DIAGNOSTICS is set.
         /// </summary>
         internal static void WriteDiagnostic(string message)
         {
-            try
+            if (Traits.Instance.TelemetryDiagnostics)
             {
-                if (IsDiagnosticsEnabled())
-                {
-                    Console.Error.WriteLine("MSBuild telemetry: " + message);
-                }
-            }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                // Diagnostics are best effort, for example the standard error stream may be closed.
-            }
-        }
-
-        /// <summary>
-        /// Describes an exception without its message, which may contain paths.
-        /// </summary>
-        internal static string DescribeException(Exception exception)
-        {
-            Exception baseException = exception.GetBaseException();
-            return ReferenceEquals(baseException, exception)
-                ? Describe(exception)
-                : $"{Describe(exception)} caused by {Describe(baseException)}";
-
-            static string Describe(Exception exception)
-            {
-                string description = $"{exception.GetType().FullName} (0x{exception.HResult:X8})";
-                string? fileName = exception switch
-                {
-                    FileNotFoundException fileNotFound => fileNotFound.FileName,
-                    FileLoadException fileLoad => fileLoad.FileName,
-                    BadImageFormatException badImage => badImage.FileName,
-                    _ => null,
-                };
-
-                return string.IsNullOrEmpty(fileName) ? description : $"{description} for assembly '{GetAssemblyName(fileName!)}'";
-            }
-
-            // Load failures report an assembly display name, or a path or URI when binding through a codeBase.
-            static string GetAssemblyName(string fileName)
-            {
-                try
-                {
-                    int separator = fileName.LastIndexOfAny(['\\', '/']);
-                    return separator >= 0
-                        ? Path.GetFileNameWithoutExtension(fileName.Substring(separator + 1))
-                        : new AssemblyName(fileName).Name ?? "unknown";
-                }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    return "unknown";
-                }
+                Console.Error.WriteLine("MSBuild telemetry: " + message);
             }
         }
 
@@ -288,13 +217,13 @@ namespace Microsoft.Build.Framework.Telemetry
                 session.Start();
             }
 
-            if (TelemetryManager.IsDiagnosticsEnabled())
+            if (Traits.Instance.TelemetryDiagnostics)
             {
                 string state = session is null
                     ? "no session is available"
                     : $"{(isStandalone ? "owned" : "host")} session, {(session.IsOptedIn ? "opted in" : "not opted in, events will not be sent")}";
                 TelemetryManager.WriteDiagnostic(
-                    $"initialized ({state}, CI: {BuildEnvironmentState.IsAutomatedEnvironment()}) using {DescribeAssembly(typeof(TelemetrySession).Assembly)}.");
+                    $"initialized ({state}, CI: {BuildEnvironmentState.IsAutomatedEnvironment()}) using {typeof(TelemetrySession).Assembly.Location}.");
             }
 
             return new MSBuildActivitySource(session);
@@ -325,7 +254,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             // An ephemeral CI agent may be discarded before another process uploads the persisted events.
             bool upload = BuildEnvironmentState.IsAutomatedEnvironment();
-            TimeSpan timeout = TelemetryManager.GetShutdownTimeout();
+            int timeoutMs = Traits.Instance.TelemetryShutdownTimeoutMs;
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             // Disposing can block on the network, so the exiting process abandons the thread after the budget.
@@ -338,37 +267,10 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 session.Dispose();
                 return Task.CompletedTask;
-            }).Wait(timeout);
+            }).Wait(timeoutMs);
 
             TelemetryManager.WriteDiagnostic(
-                $"{(upload ? "upload" : "save")} {(completed ? "completed" : "timed out, pending events may be lost")} after {stopwatch.ElapsedMilliseconds} ms, budget {(long)timeout.TotalMilliseconds} ms.");
-        }
-
-        // Reports the location relative to MSBuild.exe, because the full path may contain a user name.
-        private static string DescribeAssembly(Assembly assembly)
-        {
-            string version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "unknown";
-            string location;
-            string? assemblyDirectory = string.IsNullOrEmpty(assembly.Location) ? null : Path.GetDirectoryName(assembly.Location);
-            string applicationDirectory = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/');
-            if (assembly.GlobalAssemblyCache)
-            {
-                location = "the global assembly cache";
-            }
-            else if (string.Equals(assemblyDirectory, applicationDirectory, StringComparison.OrdinalIgnoreCase))
-            {
-                location = "the application directory";
-            }
-            else if (string.Equals(assemblyDirectory, Path.GetDirectoryName(applicationDirectory), StringComparison.OrdinalIgnoreCase))
-            {
-                location = "the parent of the application directory";
-            }
-            else
-            {
-                location = "another directory";
-            }
-
-            return $"{assembly.GetName().Name} {version} from {location}";
+                $"{(upload ? "upload" : "save")} {(completed ? "completed" : "timed out, pending events may be lost")} after {stopwatch.ElapsedMilliseconds} ms, budget {timeoutMs} ms.");
         }
     }
 #endif

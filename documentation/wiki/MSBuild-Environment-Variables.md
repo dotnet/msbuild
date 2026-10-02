@@ -49,4 +49,4 @@ Some of the env variables listed here are unsupported, meaning there is no guara
 - `MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS`
   - Total time in milliseconds that `MSBuild.exe` on .NET Framework waits on exit to save or upload telemetry. The default is `10000`, and `0` means don't wait.
 - `MSBUILD_TELEMETRY_DIAGNOSTICS=1`
-  - Writes telemetry status messages, without paths or event data, to standard error.
+  - Writes telemetry status messages, without event data, to standard error.

@@ -187,12 +187,12 @@ The 64-bit and ARM64 `MSBuild.exe` find them through `codeBase` entries in their
 Set `MSBUILD_TELEMETRY_DIAGNOSTICS=1` to write telemetry status lines, prefixed with `MSBuild telemetry:`, to standard error. They report:
 
 - Whether telemetry was opted out.
-- Initialization: session ownership, consent, CI detection, and the loaded telemetry assembly version.
-- Initialization and dependency failures, by exception type and assembly name.
+- Initialization: session ownership, consent, CI detection, and the path of the loaded telemetry assembly.
+- Initialization and dependency failures, with the exception.
 - How long shutdown took, whether events were saved or uploaded, and whether it completed or timed out.
-- Shutdown failures, by exception type.
+- Shutdown failures, with the exception.
 
-The messages contain no paths, session identifiers, or event data. CI steps that fail on any standard error output (for example `failOnStderr`) will fail when this is on.
+The messages contain no session identifiers or event data. CI steps that fail on any standard error output (for example `failOnStderr`) will fail when this is on.
 
 ## Related Files
 
