@@ -1288,16 +1288,13 @@ namespace Microsoft.Build.BackEnd
                     bool isTaskHost = false;
                     try
                     {
-                        // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
-                        // This happens when: 1) Environment variable is set, OR 2) MultiThreaded build is enabled
-                        // IntrinsicTaskFactory tasks run in proc always
                         bool shouldRunOutOfProc = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryEngineContext)
                                                   && _taskFactoryWrapper.TaskFactory is not IntrinsicTaskFactory;
 
                         if (shouldRunOutOfProc)
                         {
-                            // Custom Task factories are not supported, internal TaskFactories implement this marker interface
-                            if (_taskFactoryWrapper.TaskFactory is not IOutOfProcTaskFactory outOfProcTaskFactory)
+                            // A task's attribute does not establish that its factory is safe to use in MT mode.
+                            if (_taskFactoryWrapper.TaskFactory is not IOutOfProcTaskFactory)
                             {
                                 _taskLoggingContext.LogError(
                                     new BuildEventFileInfo(_taskLocation),
@@ -1307,7 +1304,13 @@ namespace Microsoft.Build.BackEnd
                                 return null;
                             }
 
-                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory, scheduledNodeId);
+                            shouldRunOutOfProc = taskFactoryEngineContext.ForceOutOfProcessExecution
+                                                 || TaskRouter.NeedsTaskHostInMultiThreadedMode(_taskFactoryWrapper.TaskFactory.TaskType);
+                        }
+
+                        if (shouldRunOutOfProc)
+                        {
+                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, (IOutOfProcTaskFactory)_taskFactoryWrapper.TaskFactory, scheduledNodeId);
                             isTaskHost = true;
                         }
 
