@@ -6,10 +6,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -17,6 +19,7 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -60,6 +63,10 @@ namespace Microsoft.Build.Graph
         private readonly Lazy<IReadOnlyCollection<ProjectGraphNode>> _projectNodesTopologicallySorted;
 
         private readonly EvaluationContext _evaluationContext = null;
+
+        private readonly IReadOnlyCollection<ProjectGraphNode> _originalEntryPointNodes;
+
+        private readonly ImmutableHashSet<string> _generatedSolutionTargets;
 
         private GraphBuilder.GraphEdges Edges { get; }
 
@@ -441,6 +448,77 @@ namespace Microsoft.Build.Graph
         public ProjectGraph(
             ProjectGraphOptions options,
             CancellationToken cancellationToken = default)
+            : this(
+                options,
+                solutionProjectFactory: null,
+                generatedSolutionTargets: null,
+                cancellationToken)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a target-bound project graph using the generated solution traversal project.
+        /// </summary>
+        /// <param name="options">The options used to construct the target-bound graph.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe.</param>
+        /// <returns>The constructed project graph.</returns>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
+        public static ProjectGraph CreateForBuild(
+            ProjectGraphBuildOptions options,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(options.EntryPoints);
+            ArgumentNullException.ThrowIfNull(options.ProjectCollection);
+            ArgumentNullException.ThrowIfNull(options.Targets);
+
+            ImmutableArray<string> targets = options.Targets.ToImmutableArray();
+            if (targets.Any(targetName => string.IsNullOrWhiteSpace(targetName)))
+            {
+                throw new ArgumentException(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "OM_TargetNameNullOrEmpty",
+                        nameof(CreateForBuild)),
+                    nameof(options.Targets));
+            }
+
+            var graphOptions = new ProjectGraphOptions
+            {
+                EntryPoints = options.EntryPoints,
+                ProjectCollection = options.ProjectCollection,
+                ProjectInstanceFactoryFunc = options.ProjectInstanceFactoryFunc,
+                DegreeOfParallelism = options.DegreeOfParallelism,
+                Mode = options.Mode
+            };
+
+            var generationContext = new SolutionProjectGenerationContext(
+                options.ProjectCollection.LoggingService,
+                BuildEventContext.Invalid,
+                SdkResolverService.Instance,
+                targets,
+                options.ToolsVersionOverride,
+                BuildEventContext.InvalidSubmissionId);
+
+            SolutionProjectFactory solutionProjectFactory =
+                (solution, globalProperties) =>
+                    SolutionProjectGenerator.GenerateForGraph(
+                        solution,
+                        globalProperties,
+                        options.ProjectCollection,
+                        generationContext);
+
+            return new ProjectGraph(
+                graphOptions,
+                solutionProjectFactory,
+                targets,
+                cancellationToken);
+        }
+
+        private ProjectGraph(
+            ProjectGraphOptions options,
+            SolutionProjectFactory solutionProjectFactory,
+            IReadOnlyCollection<string> generatedSolutionTargets,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(options.ProjectCollection, nameof(options.ProjectCollection));
             ArgumentNullException.ThrowIfNull(options.EntryPoints, nameof(options.EntryPoints));
@@ -448,6 +526,8 @@ namespace Microsoft.Build.Graph
             {
                 throw new ArgumentOutOfRangeException(nameof(options.DegreeOfParallelism), "DegreeOfParallelism must be greater than zero.");
             }
+
+            _generatedSolutionTargets = generatedSolutionTargets?.ToImmutableHashSet(StringComparer.OrdinalIgnoreCase);
 
             var measurementInfo = BeginMeasurement();
 
@@ -466,10 +546,12 @@ namespace Microsoft.Build.Graph
                 ProjectInterpretation.Instance,
                 options.DegreeOfParallelism,
                 options.Mode,
+                solutionProjectFactory,
                 cancellationToken);
             graphBuilder.BuildGraph();
 
             EntryPointNodes = graphBuilder.EntryPointNodes;
+            _originalEntryPointNodes = graphBuilder.OriginalEntryPointNodes;
             GraphRoots = graphBuilder.RootNodes;
             ProjectNodes = graphBuilder.ProjectNodes;
             Edges = graphBuilder.Edges;
@@ -639,36 +721,108 @@ namespace Microsoft.Build.Graph
         {
             ThrowOnEmptyTargetNames(entryProjectTargets);
 
-            // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
-            var targetLists = ProjectNodes.ToDictionary(node => node, node => ImmutableList<string>.Empty);
+            if (_generatedSolutionTargets is not null
+                && Solution is not null
+                && entryProjectTargets is not null)
+            {
+                foreach (string targetName in entryProjectTargets)
+                {
+                    if (!_generatedSolutionTargets.Contains(targetName)
+                        && !SolutionProjectGenerator._defaultTargetNames.Contains(targetName))
+                    {
+                        throw new ArgumentException(
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "OM_ProjectGraphTargetNotGenerated",
+                                targetName),
+                            nameof(entryProjectTargets));
+                    }
+                }
+            }
+
+            // Seed the dictionary with empty lists for every buildable node. In this particular case though an empty list means "build nothing" rather than "default targets".
+            var targetLists = new Dictionary<ProjectGraphNode, ImmutableList<string>>(ProjectNodes.Count);
+            foreach (ProjectGraphNode projectNode in ProjectNodes)
+            {
+                targetLists[projectNode] = ImmutableList<string>.Empty;
+            }
+
+            foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
+            {
+                if (!targetLists.ContainsKey(entryPointNode))
+                {
+                    targetLists[entryPointNode] = ImmutableList<string>.Empty;
+                }
+            }
 
             var encounteredEdges = new HashSet<ProjectGraphBuildRequest>();
             var edgesToVisit = new Queue<ProjectGraphBuildRequest>();
 
             if (entryProjectTargets == null || entryProjectTargets.Count == 0)
             {
-                // If no targets were specified, use every project's default targets.
+                // If no targets were specified, use every entry point's default targets.
                 foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                 {
-                    string[] entryTargets = entryPointNode.ProjectInstance.DefaultTargets.ToArray();
-                    var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
+                    var entryEdge = new ProjectGraphBuildRequest(entryPointNode, GetEntryTargets(entryPointNode));
                     encounteredEdges.Add(entryEdge);
                     edgesToVisit.Enqueue(entryEdge);
+
+                    // For solution graphs, also enqueue the project nodes directly with their default targets.
+                    // The synthetic solution node can't propagate targets (no ProjectReferenceTargets),
+                    // so we need to ensure project nodes get their targets directly.
+                    if (IsSyntheticSolutionNode(entryPointNode))
+                    {
+                        foreach (var projectNode in entryPointNode.ProjectReferences)
+                        {
+                            var projectEdge = new ProjectGraphBuildRequest(projectNode, projectNode.ProjectInstance.DefaultTargets.ToArray());
+                            if (encounteredEdges.Add(projectEdge))
+                            {
+                                edgesToVisit.Enqueue(projectEdge);
+                            }
+                        }
+                    }
                 }
             }
             else
             {
                 foreach (string targetName in entryProjectTargets)
                 {
-                    // Special-case the "Build" target. The solution's metaproj invokes each project's default targets
+                    foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
+                    {
+                        if (IsSyntheticSolutionNode(entryPointNode))
+                        {
+                            var solutionEdge = new ProjectGraphBuildRequest(entryPointNode, [targetName]);
+                            if (encounteredEdges.Add(solutionEdge))
+                            {
+                                edgesToVisit.Enqueue(solutionEdge);
+                            }
+                        }
+                    }
+
+                    // Special-case the "Build" target. The solution's metaproj invokes each project's default targets.
                     if (targetName.Equals("Build", StringComparison.OrdinalIgnoreCase))
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
-                            string[] entryTargets = entryPointNode.ProjectInstance.DefaultTargets.ToArray();
-                            var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
-                            encounteredEdges.Add(entryEdge);
-                            edgesToVisit.Enqueue(entryEdge);
+                            var entryEdge = new ProjectGraphBuildRequest(entryPointNode, GetEntryTargets(entryPointNode));
+                            if (encounteredEdges.Add(entryEdge))
+                            {
+                                edgesToVisit.Enqueue(entryEdge);
+                            }
+
+                            // For solution graphs, also enqueue the project nodes directly with their default targets.
+                            // The synthetic solution node can't propagate targets (no ProjectReferenceTargets),
+                            // so we need to ensure project nodes get their targets directly.
+                            if (IsSyntheticSolutionNode(entryPointNode))
+                            {
+                                foreach (var projectNode in entryPointNode.ProjectReferences)
+                                {
+                                    var projectEdge = new ProjectGraphBuildRequest(projectNode, projectNode.ProjectInstance.DefaultTargets.ToArray());
+                                    if (encounteredEdges.Add(projectEdge))
+                                    {
+                                        edgesToVisit.Enqueue(projectEdge);
+                                    }
+                                }
+                            }
                         }
 
                         continue;
@@ -716,8 +870,10 @@ namespace Microsoft.Build.Graph
                                 isSolutionTraversalTarget = true;
                             }
 
-                            // For solutions, there should only be exactly one entry node per project file
-                            ProjectGraphNode GetNodeForProject(ProjectInSolution project) => EntryPointNodes.First(node => string.Equals(node.ProjectInstance.FullPath, project.AbsolutePath));
+                            // Resolve against the original solution entry points because multitargeting projects
+                            // have multiple graph nodes with the same project path.
+                            ProjectGraphNode GetNodeForProject(ProjectInSolution project) =>
+                                _originalEntryPointNodes.First(node => string.Equals(node.ProjectInstance.FullPath, project.AbsolutePath, StringComparison.OrdinalIgnoreCase));
                         }
                     }
 
@@ -725,12 +881,56 @@ namespace Microsoft.Build.Graph
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
+                            if (IsSyntheticSolutionNode(entryPointNode))
+                            {
+                                // Targets defined by solution imports execute only on the generated solution
+                                // project. Generated traversal targets also dispatch to the projects.
+                                if (ShouldPropagateSolutionTarget(entryPointNode, targetName))
+                                {
+                                    foreach (ProjectGraphNode projectNode in entryPointNode.ProjectReferences)
+                                    {
+                                        ProjectGraphBuildRequest projectEdge = new(projectNode, [targetName]);
+                                        if (encounteredEdges.Add(projectEdge))
+                                        {
+                                            edgesToVisit.Enqueue(projectEdge);
+                                        }
+                                    }
+                                }
+
+                                continue;
+                            }
+
                             ProjectGraphBuildRequest entryEdge = new(entryPointNode, [targetName]);
                             encounteredEdges.Add(entryEdge);
                             edgesToVisit.Enqueue(entryEdge);
                         }
                     }
                 }
+            }
+
+            string[] GetEntryTargets(ProjectGraphNode entryPointNode)
+            {
+                if (IsSyntheticSolutionNode(entryPointNode))
+                {
+                    return ["Build"];
+                }
+
+                return entryPointNode.ProjectInstance.DefaultTargets.ToArray();
+            }
+
+            bool IsSyntheticSolutionNode(ProjectGraphNode node) =>
+                Solution is not null
+                && node.ProjectInstance.GlobalProperties.ContainsKey(SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty);
+
+            bool ShouldPropagateSolutionTarget(ProjectGraphNode solutionNode, string targetName)
+            {
+                if (_generatedSolutionTargets is null)
+                {
+                    return true;
+                }
+
+                return solutionNode.ProjectInstance.Targets.TryGetValue(targetName, out ProjectTargetInstance target)
+                    && FileUtilities.PathComparer.Equals(target.Location.File, solutionNode.ProjectInstance.FullPath);
             }
 
             // Traverse the entire graph, visiting each edge once.

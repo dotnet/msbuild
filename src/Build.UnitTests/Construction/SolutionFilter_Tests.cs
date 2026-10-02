@@ -132,8 +132,11 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                     // We only need to construct the graph, since that tells us what would build if we were to build it.
                     ProjectGraph graphFromSolution = new(entryPoint, projectCollection);
                     logger.AssertNoErrors();
-                    graphFromSolution.ProjectNodes.ShouldHaveSingleItem();
-                    graphFromSolution.ProjectNodes.Single().ProjectInstance.ProjectFileLocation.LocationString.ShouldBe(simpleProject.Path);
+                    graphFromSolution.ProjectNodes.Count.ShouldBe(2);
+                    graphFromSolution.ProjectNodes.ShouldContain(graphFromSolution.EntryPointNodes.ShouldHaveSingleItem());
+                    graphFromSolution.ProjectNodes
+                        .Single(node => node.ProjectInstance.ProjectFileLocation.LocationString == simpleProject.Path)
+                        .ProjectInstance.ProjectFileLocation.LocationString.ShouldBe(simpleProject.Path);
                 }
                 else
                 {
