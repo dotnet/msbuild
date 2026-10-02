@@ -2728,7 +2728,7 @@ namespace Microsoft.Build.Tasks
                         _ignoreDefaultInstalledAssemblyTables,
                         _installedAssemblyTables,
                         new GetListPath(RedistList.GetRedistListPathsFromDisk),
-                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
                             ? targetFrameworkDirectories
                             : TargetFrameworkDirectories);
                     AssemblyTableInfo[] inclusionListSubsetTableInfo = null;
@@ -2764,7 +2764,7 @@ namespace Microsoft.Build.Tasks
                                 IgnoreDefaultInstalledAssemblySubsetTables,
                                 InstalledAssemblySubsetTables,
                                 new GetListPath(inclusionList.GetSubsetListPathsFromDisk),
-                                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12)
+                                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
                                     ? targetFrameworkDirectories
                                     : TargetFrameworkDirectories);
                             if (inclusionListSubsetTableInfo.Length > 0 && (redistList?.Count > 0))
