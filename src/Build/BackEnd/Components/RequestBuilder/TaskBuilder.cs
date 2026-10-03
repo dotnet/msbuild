@@ -10,6 +10,7 @@ using System.Runtime.ExceptionServices;
 #endif
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -221,7 +222,6 @@ namespace Microsoft.Build.BackEnd
             {
                 Assumed.NotNull(_taskExecutionHost, "taskExecutionHost not initialized.");
                 _componentHost = null;
-
                 IDisposable disposable = _taskExecutionHost as IDisposable;
                 disposable?.Dispose();
 
@@ -803,11 +803,25 @@ namespace Microsoft.Build.BackEnd
             {
                 bool taskReturned = false;
                 Exception taskException = null;
+                TaskResultCacheInvocation cacheInvocation =
+                    await TaskResultCacheInvocation.TryOpenAsync(
+                        taskExecutionHost,
+                        _taskNode,
+                        _buildRequestEntry,
+                        _componentHost,
+                        taskLoggingContext,
+                        _cancellationToken);
+                using IDisposable cacheEventCapture =
+                    cacheInvocation?.BeginEventCapture(taskHost);
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
                 try
                 {
-                    if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
+                    if (cacheInvocation?.TryReplay(taskHost) == true)
+                    {
+                        taskResult = true;
+                    }
+                    else if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
                     {
                         // https://github.com/dotnet/msbuild/issues/11025
                         // The metaproject's inner <MSBuild> tasks are generator-authored plumbing,
@@ -885,6 +899,8 @@ namespace Microsoft.Build.BackEnd
 
                     taskException = ex;
                 }
+
+                cacheEventCapture?.Dispose();
 
                 if (taskException == null)
                 {
@@ -1044,6 +1060,13 @@ namespace Microsoft.Build.BackEnd
                 {
                     taskResult = GatherTaskOutputs(taskExecutionHost, howToExecuteTask, bucket) && taskResult;
                 }
+
+                await TaskResultCacheInvocation.TryStoreAsync(
+                    cacheInvocation,
+                    taskReturned,
+                    taskResult,
+                    taskLoggingContext.HasLoggedErrors,
+                    _cancellationToken);
 
                 // If the taskResults are false look at ContinueOnError.  If ContinueOnError=false (default)
                 // mark the taskExecutedSuccessfully=false.  Otherwise let the task succeed but log a normal

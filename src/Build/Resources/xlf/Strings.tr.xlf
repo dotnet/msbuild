@@ -1175,6 +1175,27 @@ Hatalar: {3}</target>
         <target state="translated">"{0}" görevi yalnızca {2} tutarken {1} çekirdeği serbest bırakmak istedi. Şu anda toplam {3} çekirdek tutuyor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskResultCacheFailure">
+        <source>The content cache could not be used for task "{0}": {1}. Normal task execution is used.</source>
+        <target state="new">The content cache could not be used for task "{0}": {1}. Normal task execution is used.</target>
+        <note>
+      LOCALIZATION: {0} is an MSBuild task name. {1} explains the cache failure.
+    </note>
+      </trans-unit>
+      <trans-unit id="TaskResultCacheHit">
+        <source>Content cache hit for task "{0}" with key "{1}".</source>
+        <target state="new">Content cache hit for task "{0}" with key "{1}".</target>
+        <note>
+      LOCALIZATION: {0} is an MSBuild task name. {1} is a hexadecimal content hash and should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="TaskResultCacheMiss">
+        <source>Content cache miss for task "{0}" with key "{1}".</source>
+        <target state="new">Content cache miss for task "{0}" with key "{1}".</target>
+        <note>
+      LOCALIZATION: {0} is an MSBuild task name. {1} is a hexadecimal content hash and should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="TaskReturnedFalseButDidNotLogError">
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
         <target state="translated">MSB4181: "{0}" görevi false değerini döndürdü ancak günlüğe hata kaydetmedi.</target>
