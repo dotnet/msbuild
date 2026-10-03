@@ -621,6 +621,52 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     }
 
     [Theory]
+    [InlineData("second")]
+    [InlineData(null)]
+    public void EnvironmentReadIsRevalidated(string? currentValue)
+    {
+        _env.SetEnvironmentVariable("MSBUILD_TEST_INPUT", "first");
+        string project = CreateProject("""
+            <Project>
+              <PropertyGroup>
+                <Value>$([System.Environment]::GetEnvironmentVariable('MSBUILD_TEST_INPUT'))</Value>
+              </PropertyGroup>
+            </Project>
+            """);
+        EvaluationInputs inputs = Evaluate(project);
+        inputs.EnvironmentReads["MSBUILD_TEST_INPUT"].ShouldBe("first");
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        _env.SetEnvironmentVariable("MSBUILD_TEST_INPUT", currentValue);
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe("MSBUILD_TEST_INPUT");
+        inputs.EnvironmentReads["MSBUILD_TEST_INPUT"].ShouldBe("first");
+    }
+
+    [UnixOnlyFact]
+    public void EnvironmentReadsWithDifferentCasingAreRevalidatedOnUnix()
+    {
+        _env.SetEnvironmentVariable("MSBUILD_TEST_CASE", "upper");
+        _env.SetEnvironmentVariable("msbuild_test_case", "lower");
+        string project = CreateProject("""
+            <Project>
+              <PropertyGroup>
+                <Upper>$([System.Environment]::GetEnvironmentVariable('MSBUILD_TEST_CASE'))</Upper>
+                <Lower>$([System.Environment]::GetEnvironmentVariable('msbuild_test_case'))</Lower>
+              </PropertyGroup>
+            </Project>
+            """);
+        EvaluationInputs inputs = Evaluate(project);
+
+        inputs.EnvironmentReads.Count.ShouldBe(2);
+        _env.SetEnvironmentVariable("MSBUILD_TEST_CASE", "changed");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe("MSBUILD_TEST_CASE");
+    }
+
+    [Theory]
     [InlineData("$([System.DateTime]::Now)")]
     [InlineData("$([System.Guid]::NewGuid())")]
     [InlineData("$([System.DateTime]::Parse('12:34'))")]
@@ -1387,6 +1433,12 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         inputs.EnvironmentReads.Keys.ShouldBe(
             ["MSBUILD_TEST_EXPAND_ROOT", "MSBUILD_TEST_EXPAND_MISSING"],
             ignoreOrder: true);
+        IsCurrent(inputs, out _).ShouldBeTrue();
+
+        _env.SetEnvironmentVariable("MSBUILD_TEST_EXPAND_ROOT", "changed");
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe("MSBUILD_TEST_EXPAND_ROOT");
     }
 
     [Fact]
