@@ -301,8 +301,28 @@ namespace Microsoft.Build.CommandLine
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
 
-            TelemetryManager.Instance.Initialize(isStandalone: true);
+            if (OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
+            {
+                TelemetryManager.Instance.Initialize(isStandalone: true);
+            }
 
+            try
+            {
+                return RunMain(args);
+            }
+            finally
+            {
+                TelemetryManager.Instance.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Only the entry process and the server node report builds, so worker, task host and RAR nodes don't own a telemetry session.
+        /// </summary>
+        private static bool OwnsProcessTelemetrySession(NodeMode? nodeMode) => nodeMode is null or NodeMode.OutOfProcServerNode;
+
+        private static int RunMain(string[] args)
+        {
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -370,8 +390,6 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
-
-            TelemetryManager.Instance.Dispose();
 
             return exitCode;
         }
@@ -1353,6 +1371,12 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                if (KnownTelemetry.CrashTelemetry is not null && !OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
+                {
+                    // Main shuts this session down when the process exits.
+                    TelemetryManager.Instance.Initialize(isStandalone: true);
+                }
+
                 CrashTelemetryRecorder.FlushCrashTelemetry();
 
                 s_buildComplete.Set();
@@ -2865,7 +2889,7 @@ namespace Microsoft.Build.CommandLine
             static bool CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes()
             {
                 // TerminalLogger is not used in automated environments (CI, GitHub Actions, GitHub Copilot, etc.)
-                if (IsAutomatedEnvironment())
+                if (BuildEnvironmentState.IsAutomatedEnvironment())
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
                         new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated"), MessageImportance.Low));
@@ -3044,39 +3068,6 @@ namespace Microsoft.Build.CommandLine
 
                 useTerminalLogger = CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes();
             }
-        }
-
-        /// <summary>
-        /// Determines if the current environment is an automated environment where terminal logger should be disabled.
-        /// This includes CI systems, GitHub Actions, GitHub Copilot, and other automated build environments.
-        /// </summary>
-        /// <returns>True if running in an automated environment, false otherwise.</returns>
-        private static bool IsAutomatedEnvironment()
-        {
-            // Check for common CI environment indicators that use boolean values
-            if (EnvironmentUtilities.IsValueOneOrTrue("CI") ||
-                EnvironmentUtilities.IsValueOneOrTrue("GITHUB_ACTIONS"))
-            {
-                return true;
-            }
-
-            // Check for environment variables that indicate automated environments
-            string[] automatedEnvironmentVariables =
-            {
-                "COPILOT_API_URL",    // GitHub Copilot
-                "BUILD_ID",           // Jenkins, Google Cloud Build
-                "BUILDKITE",          // Buildkite
-                "CIRCLECI",           // CircleCI
-                "TEAMCITY_VERSION",   // TeamCity
-                "TF_BUILD",           // Azure DevOps
-                "APPVEYOR",           // AppVeyor
-                "TRAVIS",             // Travis CI
-                "GITLAB_CI",          // GitLab CI
-                "JENKINS_URL",        // Jenkins
-                "BAMBOO_BUILD_NUMBER" // Atlassian Bamboo
-            };
-
-            return automatedEnvironmentVariables.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
         }
 
         internal static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)

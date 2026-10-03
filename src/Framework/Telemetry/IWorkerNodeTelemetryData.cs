@@ -10,6 +10,16 @@ internal interface IWorkerNodeTelemetryData
     Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
 
     Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> TargetsExecutionData { get; }
+
+    /// <summary>
+    /// Number of target instances declaring both Inputs and Outputs that were skipped because their outputs were up to date.
+    /// </summary>
+    int UpToDateInputOutputTargetsCount { get; }
+
+    /// <summary>
+    /// Number of target instances declaring both Inputs and Outputs that ran because their outputs were missing or out of date.
+    /// </summary>
+    int ExecutedInputOutputTargetsCount { get; }
 }
 
 /// <summary>

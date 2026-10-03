@@ -27,7 +27,9 @@ namespace Microsoft.Build.Framework.UnitTests
                     { (TaskOrTargetTelemetryKey)"target1", TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
                     { (TaskOrTargetTelemetryKey)"target2", TargetExecutionStats.Executed() },
                     { (TaskOrTargetTelemetryKey)"target3", TargetExecutionStats.Skipped(TargetSkipReason.ConditionWasFalse) },
-                });
+                },
+                upToDateInputOutputTargetsCount: 7,
+                executedInputOutputTargetsCount: 2);
 
             WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(td);
 
@@ -43,6 +45,8 @@ namespace Microsoft.Build.Framework.UnitTests
             argDeserialized.CreateFromStream(br, packetVersion);
             argDeserialized.WorkerNodeTelemetryData.TargetsExecutionData.ShouldBeEquivalentTo(td.TargetsExecutionData);
             argDeserialized.WorkerNodeTelemetryData.TasksExecutionData.ShouldBeEquivalentTo(td.TasksExecutionData);
+            argDeserialized.WorkerNodeTelemetryData.UpToDateInputOutputTargetsCount.ShouldBe(7);
+            argDeserialized.WorkerNodeTelemetryData.ExecutedInputOutputTargetsCount.ShouldBe(2);
         }
     }
 }
