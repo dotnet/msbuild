@@ -3,65 +3,83 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Build.Logging;
 
 /// <summary>
-/// A struct containing relevant evaluation-time data that may not be knowable just from ProjectStart events.
+/// Holds Terminal Logger presentation state for a project correlated by
+/// <see cref="BuildEventTracker"/>.
 /// </summary>
-/// <param name="context"></param>
-/// <param name="ProjectFile"></param>
-/// <param name="TargetFramework"></param>
-/// <param name="RuntimeIdentifier"></param>
-internal record struct EvalProjectInfo(TerminalLogger.EvalContext context, string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier)
-{
-    public readonly int Id => context.Id;
-}
-
-/// <summary>
-/// Represents a project being built.
-/// </summary>
+/// <remarks>
+/// Build facts remain in <see cref="BuildEventTracker"/>.
+/// This type stores terminal timing, formatted output, and summary exclusions.
+/// </remarks>
 internal sealed class TerminalProjectInfo
 {
     private List<TerminalBuildMessage>? _buildMessages;
+    private BuildEventTracker.ProjectSnapshot _projectSnapshot;
+    private int _warningsExcludedFromSummaryCount;
 
     /// <summary>
-    /// Initialized a new <see cref="TerminalProjectInfo"/> with the given <paramref name="evalInfo"/> .
+    /// Initializes a new <see cref="TerminalProjectInfo"/> for the tracked project.
     /// </summary>
-    /// <param name="context">The ProjectContext of this project execution.</param>
-    /// <param name="evalInfo">A subset of the interesting eval-time data for this running project</param>
-    /// <param name="stopwatch">A stopwatch to time the build of the project.</param>
-    public TerminalProjectInfo(TerminalLogger.ProjectContext context, EvalProjectInfo evalInfo, StopwatchAbstraction? stopwatch)
+    /// <param name="project">The tracked project.</param>
+    /// <param name="stopwatch">The stopwatch used for terminal rendering.</param>
+    public TerminalProjectInfo(BuildEventTracker.ProjectSnapshot project, StopwatchAbstraction stopwatch)
     {
-        _evalInfo = evalInfo;
-        _context = context;
-
-        if (stopwatch is not null)
-        {
-            stopwatch.Start();
-            Stopwatch = stopwatch;
-        }
-        else
-        {
-            Stopwatch = SystemStopwatch.StartNew();
-        }
+        _projectSnapshot = project;
+        Stopwatch = stopwatch;
+        Stopwatch.Start();
     }
-
-    /// <summary>
-    /// The int value of the ProjectContext id of this project execution.
-    /// </summary>
-    public int Id => _context.Id;
 
     /// <summary>
     /// The full path to the project file.
     /// </summary>
-    public string? ProjectFile => _evalInfo.ProjectFile;
+    public string? ProjectFile => _projectSnapshot.EvaluationProjectFile;
 
     /// <summary>
     /// A stopwatch to time the build of the project.
     /// </summary>
     public StopwatchAbstraction Stopwatch { get; }
+
+    /// <summary>
+    /// The target framework of the project or null if not multi-targeting.
+    /// </summary>
+    public string? TargetFramework => _projectSnapshot.TargetFramework;
+
+    /// <summary>
+    /// The runtime identifier of the project or null if platform-agnostic.
+    /// </summary>
+    public string? RuntimeIdentifier => _projectSnapshot.RuntimeIdentifier;
+
+    /// <summary>
+    /// True if the project built successfully; otherwise false.
+    /// </summary>
+    public bool Succeeded => _projectSnapshot.Succeeded == true;
+
+    /// <summary>
+    /// The number of errors included in the terminal summary.
+    /// </summary>
+    public int SummaryErrorCount => _projectSnapshot.ErrorCount;
+
+    /// <summary>
+    /// The number of warnings included in the terminal summary.
+    /// </summary>
+    public int SummaryWarningCount
+    {
+        get
+        {
+            Debug.Assert(_projectSnapshot.WarningCount >= _warningsExcludedFromSummaryCount);
+            return _projectSnapshot.WarningCount - _warningsExcludedFromSummaryCount;
+        }
+    }
+
+    /// <summary>
+    /// True when the project has error or warning build messages; otherwise false.
+    /// </summary>
+    public bool HasSummaryDiagnostics => SummaryErrorCount > 0 || SummaryWarningCount > 0;
 
     /// <summary>
     /// Full path to the primary output of the project, if known.
@@ -74,23 +92,6 @@ internal sealed class TerminalProjectInfo
     public ReadOnlyMemory<char>? SourceRoot { get; set; }
 
     /// <summary>
-    /// The target framework of the project or null if not multi-targeting.
-    /// </summary>
-    public string? TargetFramework => _evalInfo.TargetFramework;
-
-    /// <summary>
-    /// The runtime identifier of the project or null if platform-agnostic.
-    /// </summary>
-    public string? RuntimeIdentifier => _evalInfo.RuntimeIdentifier;
-    private readonly TerminalLogger.ProjectContext _context;
-    private readonly EvalProjectInfo _evalInfo;
-
-    /// <summary>
-    /// The name of the target currently being executed.
-    /// </summary>
-    public string? CurrentTarget { get; set; }
-
-    /// <summary>
     /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
     /// </summary>
     public bool IsTestProject { get; set; }
@@ -99,26 +100,6 @@ internal sealed class TerminalProjectInfo
     /// True when the project has run target with name "_CachePluginRunStart".
     /// </summary>
     public bool IsCachePluginProject { get; set; }
-
-    /// <summary>
-    /// True if project built successfully; otherwise false.
-    /// </summary>
-    public bool Succeeded { get; set; }
-
-    /// <summary>
-    /// The number of errors raised during the build of the project.
-    /// </summary>
-    public int ErrorCount { get; private set; }
-
-    /// <summary>
-    /// The number of warnings raised during the build of the project.
-    /// </summary>
-    public int WarningCount { get; private set; }
-
-    /// <summary>
-    /// True when the project has error or warning build messages; otherwise false.
-    /// </summary>
-    public bool HasErrorsOrWarnings => ErrorCount > 0 || WarningCount > 0;
 
     /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
@@ -130,18 +111,27 @@ internal sealed class TerminalProjectInfo
     /// </summary>
     public void AddBuildMessage(TerminalMessageSeverity severity, string message)
     {
-        _buildMessages ??= new List<TerminalBuildMessage>();
+        _buildMessages ??= [];
         _buildMessages.Add(new TerminalBuildMessage(severity, message));
-
-        if (severity == TerminalMessageSeverity.Error)
-        {
-            ErrorCount++;
-        }
-        else if (severity == TerminalMessageSeverity.Warning)
-        {
-            WarningCount++;
-        }
     }
+
+    internal void Complete(BuildEventTracker.ProjectSnapshot projectSnapshot)
+    {
+        UpdateSnapshot(projectSnapshot);
+        Stopwatch.Stop();
+    }
+
+    internal void UpdateSnapshot(BuildEventTracker.ProjectSnapshot projectSnapshot)
+    {
+        Debug.Assert(projectSnapshot.ContextKey == _projectSnapshot.ContextKey);
+        _projectSnapshot = projectSnapshot;
+    }
+
+    internal void ExcludeWarningFromSummary() => _warningsExcludedFromSummaryCount++;
+
+    internal void ResumeTiming() => Stopwatch.Start();
+
+    internal void YieldTiming() => Stopwatch.Stop();
 
     /// <summary>
     /// Filters the build messages to only include errors and warnings.
@@ -149,10 +139,9 @@ internal sealed class TerminalProjectInfo
     /// <returns>A sequence of error and warning build messages.</returns>
     public IEnumerable<TerminalBuildMessage> GetBuildErrorAndWarningMessages()
     {
-        return BuildMessages is null ?
-            Enumerable.Empty<TerminalBuildMessage>() :
-            BuildMessages.Where(message =>
-                message.Severity == TerminalMessageSeverity.Error ||
-                message.Severity == TerminalMessageSeverity.Warning);
+        return BuildMessages is null
+            ? []
+            : BuildMessages.Where(message =>
+                message.Severity is TerminalMessageSeverity.Error or TerminalMessageSeverity.Warning);
     }
 }
