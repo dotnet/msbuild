@@ -28,6 +28,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Encoding Utf8WithoutBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
         private static Encoding s_currentOemEncoding;
+        private static Encoding s_currentAnsiEncoding;
 
         internal const string UseUtf8Always = "ALWAYS";
         internal const string UseUtf8Never = "NEVER";
@@ -36,54 +37,76 @@ namespace Microsoft.Build.Shared
         internal const string UseUtf8True = "TRUE";
 
         /// <summary>
+        /// Special value for tool stdout/stderr encoding parameters that selects the current system ANSI code page (GetACP).
+        /// </summary>
+        internal const string UseAnsiEncoding = "ansi";
+
+        /// <summary>
         /// Get the current system locale code page, OEM version. OEM code pages are used for console-based input/output
         /// for historical reasons.
         /// </summary>
-        internal static Encoding CurrentSystemOemEncoding
+        internal static Encoding CurrentSystemOemEncoding => s_currentOemEncoding ??= GetCurrentSystemEncoding(useOemCodePage: true);
+
+        /// <summary>
+        /// Get the current system locale code page, ANSI version (GetACP). Many native Windows tools
+        /// (e.g., MSVC link.exe, cl.exe) write output using the ANSI code page rather than the OEM code page.
+        /// </summary>
+        internal static Encoding CurrentSystemAnsiEncoding => s_currentAnsiEncoding ??= GetCurrentSystemEncoding(useOemCodePage: false);
+
+        /// <summary>
+        /// Resolves an encoding from a user-supplied encoding name. The special value "ansi" (case-insensitive) selects the
+        /// current system ANSI code page (GetACP); any other value is resolved via <see cref="Encoding.GetEncoding(string)"/>.
+        /// </summary>
+        internal static Encoding GetEncodingFromName(string encodingName) =>
+            string.Equals(encodingName, UseAnsiEncoding, StringComparison.OrdinalIgnoreCase)
+                ? CurrentSystemAnsiEncoding
+                : Encoding.GetEncoding(encodingName);
+
+        /// <summary>
+        /// Resolves the current system locale code page encoding, either the OEM code page (GetOEMCP)
+        /// or the ANSI code page (GetACP). Falls back to the default encoding if the platform code page
+        /// cannot be resolved.
+        /// </summary>
+        /// <param name="useOemCodePage"><see langword="true"/> to use the OEM code page (GetOEMCP);
+        /// <see langword="false"/> to use the ANSI code page (GetACP).</param>
+        private static Encoding GetCurrentSystemEncoding(bool useOemCodePage)
         {
-            get
-            {
-                // if we already have it, no need to do it again
-                if (s_currentOemEncoding != null)
-                {
-                    return s_currentOemEncoding;
-                }
-
-                // fall back to default ANSI encoding if we have problems
+            // fall back to the default encoding if we have problems.
+            // On .NET Framework, Encoding.Default returns the system ANSI code page.
 #if FEATURE_ENCODING_DEFAULT
-                s_currentOemEncoding = Encoding.Default;
+            Encoding encoding = Encoding.Default;
 #else
-                s_currentOemEncoding = Encoding.UTF8;
+            Encoding encoding = Encoding.UTF8;
 #endif
 
-                try
-                {
+            try
+            {
 #if FEATURE_WINDOWSINTEROP
-                    if (NativeMethods.IsWindows)
-                    {
+                if (NativeMethods.IsWindows)
+                {
 #if RUNTIME_TYPE_NETCORE
-                        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
-                        // get the current OEM code page
-                        s_currentOemEncoding = Encoding.GetEncoding((int)PInvoke.GetOEMCP());
-                    }
+                    // Get the current OEM (GetOEMCP) or ANSI (GetACP) code page.
+                    uint codePage = useOemCodePage ? PInvoke.GetOEMCP() : PInvoke.GetACP();
+                    encoding = Encoding.GetEncoding((int)codePage);
+                }
 #endif
-                }
-                // theoretically, GetEncoding may throw an ArgumentException or a NotSupportedException. This should never
-                // really happen, since the code page we pass in has just been returned from the "underlying platform",
-                // so it really should support it. If it ever happens, we'll just fall back to the default encoding.
-                // No point in showing any errors to the users, since they most likely wouldn't be actionable.
-                catch (ArgumentException ex)
-                {
-                    Debug.Assert(false, "GetEncoding(default OEM encoding) threw an ArgumentException in EncodingUtilities.CurrentSystemOemEncoding! Please log a bug against MSBuild.", ex.Message);
-                }
-                catch (NotSupportedException ex)
-                {
-                    Debug.Assert(false, "GetEncoding(default OEM encoding) threw a NotSupportedException in EncodingUtilities.CurrentSystemOemEncoding! Please log a bug against MSBuild.", ex.Message);
-                }
-
-                return s_currentOemEncoding;
             }
+            // theoretically, GetEncoding may throw an ArgumentException or a NotSupportedException. This should never
+            // really happen, since the code page we pass in has just been returned from the "underlying platform",
+            // so it really should support it. If it ever happens, we'll just fall back to the default encoding.
+            // No point in showing any errors to the users, since they most likely wouldn't be actionable.
+            catch (ArgumentException ex)
+            {
+                Debug.Assert(false, "GetEncoding(system code page) threw an ArgumentException in EncodingUtilities.GetCurrentSystemEncoding! Please log a bug against MSBuild.", ex.Message);
+            }
+            catch (NotSupportedException ex)
+            {
+                Debug.Assert(false, "GetEncoding(system code page) threw a NotSupportedException in EncodingUtilities.GetCurrentSystemEncoding! Please log a bug against MSBuild.", ex.Message);
+            }
+
+            return encoding;
         }
 
         /// <summary>
