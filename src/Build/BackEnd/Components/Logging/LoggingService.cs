@@ -276,6 +276,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private AutoResetEvent _enqueueEvent;
 
+        private int _enqueueNotificationPending;
+
         /// <summary>
         /// CTS for stopping logging event processing.
         /// </summary>
@@ -1381,7 +1383,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     eventQueue.Enqueue(buildEvent);
-                    enqueueEvent.Set();
+                    if (Interlocked.Exchange(ref _enqueueNotificationPending, 1) == 0)
+                    {
+                        enqueueEvent.Set();
+                    }
                 }
                 catch (ObjectDisposedException)
                 {
@@ -1480,6 +1485,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _dequeueEvent = new AutoResetEvent(false);
             _emptyQueueEvent = new ManualResetEvent(false);
             _enqueueEvent = new AutoResetEvent(false);
+            _enqueueNotificationPending = 0;
             _loggingEventProcessingCancellation = new CancellationTokenSource();
 
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
@@ -1509,6 +1515,14 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                         else
                         {
+                            // Producers publish before claiming notification; the consumer clears the claim before its final queue check.
+                            // An enqueue racing with the clear either sends a wake-up or is observed by that check.
+                            Interlocked.Exchange(ref _enqueueNotificationPending, 0);
+                            if (!eventQueue.IsEmpty)
+                            {
+                                continue;
+                            }
+
                             emptyQueueEvent?.Set();
 
                             // Wait for next event, or finish.
