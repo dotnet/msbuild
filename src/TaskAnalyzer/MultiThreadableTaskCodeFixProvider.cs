@@ -122,6 +122,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var taskEnvironmentType = compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
                 var absolutePathType = compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
                 var iTaskItemType = compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
+                var systemIOPathType = ResolveSystemIOPath(compilation);
 
                 foreach (var argument in arguments)
                 {
@@ -137,7 +138,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     // optional parameters, whose syntax is the call itself).
                     if (argument.Syntax is ArgumentSyntax argumentSyntax &&
                         argumentList.Arguments.Contains(argumentSyntax) &&
-                        !IsWrappedSafely(argument.Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                        !IsWrappedSafely(argument.Value, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType))
                     {
                         return argumentSyntax;
                     }

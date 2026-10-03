@@ -52,6 +52,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
+            var systemIOPathType = ResolveSystemIOPath(compilationContext.Compilation);
             var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
             var multiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             var contributingMultiThreadableTaskBaseTypes = FindContributingMultiThreadableTaskBaseTypes(
@@ -84,7 +85,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Register operation-level analysis within this type
                 symbolStartContext.RegisterOperationAction(
                     ctx => AnalyzeOperation(ctx, bannedApiLookup, filePathTypes, analyzeAsMultiThreadable, analyzeAllTasksByTree,
-                        taskEnvironmentType, absolutePathType, iTaskItemType, consoleType),
+                        taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, systemIOPathType),
                     OperationKind.Invocation,
                     OperationKind.ObjectCreation,
                     OperationKind.PropertyReference,
@@ -103,7 +104,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
-            INamedTypeSymbol? consoleType)
+            INamedTypeSymbol? consoleType,
+            INamedTypeSymbol? systemIOPathType)
         {
             ISymbol? referencedSymbol = null;
             ImmutableArray<IArgumentOperation> arguments = default;
@@ -147,7 +149,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Check banned API lookup (handles MSBuildTask0001, 0002, 0004)
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
-                if (IsAbsolutePathCanonicalization(context.Operation, absolutePathType))
+                if (IsAbsolutePathCanonicalization(context.Operation, absolutePathType, systemIOPathType))
                 {
                     return;
                 }
@@ -192,7 +194,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 if (containingType is not null &&
                     filePathTypes.Contains(containingType) &&
                     ShouldReportEnvironmentRules(context, analyzeAsMultiThreadable, analyzeAllTasksByTree) &&
-                    HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
+                    HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType))
                 {
                     string displayName = isConstructor
                         ? $"new {containingType.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat)}(...)"

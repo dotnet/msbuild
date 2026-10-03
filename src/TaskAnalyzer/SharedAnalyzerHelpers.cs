@@ -242,7 +242,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             ImmutableArray<IArgumentOperation> arguments,
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
-            INamedTypeSymbol? iTaskItemType)
+            INamedTypeSymbol? iTaskItemType,
+            INamedTypeSymbol? systemIOPathType)
         {
             for (int i = 0; i < arguments.Length; i++)
             {
@@ -258,7 +259,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     continue;
                 }
 
-                if (!IsWrappedSafely(arg.Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                if (!IsWrappedSafely(arg.Value, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType))
                 {
                     return true;
                 }
@@ -271,7 +272,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// Recognizes the normalization operation used by AbsolutePath.GetCanonicalForm and its polyfills.
         /// Unlike arbitrary strings, AbsolutePath.Value is already fully qualified.
         /// </summary>
-        internal static bool IsAbsolutePathCanonicalization(IOperation operation, INamedTypeSymbol? absolutePathType)
+        internal static bool IsAbsolutePathCanonicalization(
+            IOperation operation,
+            INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? systemIOPathType)
         {
             if (absolutePathType is null ||
                 operation is not IInvocationOperation invocation ||
@@ -288,23 +292,27 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 argument = conversion.Operand;
             }
 
-            if (argument is not IPropertyReferenceOperation
-                {
-                    Property: { Name: "Value", IsStatic: false, Type.SpecialType: SpecialType.System_String } property
-                })
-            {
-                return false;
-            }
-
-            if (!SymbolEqualityComparer.Default.Equals(property.ContainingType, absolutePathType))
-            {
-                return false;
-            }
-
-            // Resolve Path from the intrinsic string's assembly, not a source or referenced lookalike.
-            var pathType = invocation.TargetMethod.ReturnType.ContainingAssembly?.GetTypeByMetadataName("System.IO.Path");
-            return SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, pathType);
+            return IsAbsolutePathValue(argument, absolutePathType) && IsSystemIOPath(invocation, systemIOPathType);
         }
+
+        internal static INamedTypeSymbol? ResolveSystemIOPath(Compilation compilation)
+        {
+            // Resolve Path from the core library, not a source or referenced lookalike.
+            var coreLibrary = compilation.GetSpecialType(SpecialType.System_Object).ContainingAssembly;
+            return coreLibrary?.GetTypeByMetadataName("System.IO.Path");
+        }
+
+        private static bool IsSystemIOPath(IInvocationOperation invocation, INamedTypeSymbol? systemIOPathType) =>
+            systemIOPathType is not null &&
+            SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, systemIOPathType);
+
+        private static bool IsAbsolutePathValue(IOperation operation, INamedTypeSymbol? absolutePathType) =>
+            absolutePathType is not null &&
+            operation is IPropertyReferenceOperation
+            {
+                Property: { Name: "Value", IsStatic: false, Type.SpecialType: SpecialType.System_String } property
+            } &&
+            SymbolEqualityComparer.Default.Equals(property.ContainingType, absolutePathType);
 
         /// <summary>
         /// Recursively checks if an operation represents a safely-wrapped path.
@@ -313,7 +321,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             IOperation operation,
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
-            INamedTypeSymbol? iTaskItemType)
+            INamedTypeSymbol? iTaskItemType,
+            INamedTypeSymbol? systemIOPathType)
         {
             // Unwrap conversions (implicit AbsolutePath -> string, etc.)
             while (operation is IConversionOperation conversion)
@@ -369,18 +378,18 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Check: Path.GetDirectoryName(safe) — directory of an absolute path is absolute
                 if (invocation.TargetMethod.Name == "GetDirectoryName" &&
-                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    IsSystemIOPath(invocation, systemIOPathType) &&
                     invocation.Arguments.Length >= 1 &&
-                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType))
                 {
                     return true;
                 }
 
                 // Check: Path.Combine(safe, ...) — result is absolute when first arg is absolute
                 if (invocation.TargetMethod.Name == "Combine" &&
-                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    IsSystemIOPath(invocation, systemIOPathType) &&
                     invocation.Arguments.Length >= 2 &&
-                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType))
                 {
                     return true;
                 }
@@ -388,15 +397,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Check: Path.GetFullPath(safe) — safe only when input is already absolute.
                 // If input is relative, GetFullPath resolves against CWD (wrong in MT).
                 // Only the specific AbsolutePath.Value normalization also exempts the GetFullPath call.
-                if (IsAbsolutePathCanonicalization(invocation, absolutePathType))
+                if (IsAbsolutePathCanonicalization(invocation, absolutePathType, systemIOPathType))
                 {
                     return true;
                 }
 
                 if (invocation.TargetMethod.Name == "GetFullPath" &&
-                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    IsSystemIOPath(invocation, systemIOPathType) &&
                     invocation.Arguments.Length >= 1 &&
-                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType))
                 {
                     return true;
                 }
@@ -410,6 +419,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 {
                     return true;
                 }
+            }
+
+            // AbsolutePath.Value is already fully qualified; no canonicalization is required.
+            if (IsAbsolutePathValue(operation, absolutePathType))
+            {
+                return true;
             }
 
             // Check: argument type is AbsolutePath or Nullable<AbsolutePath>
@@ -435,7 +450,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         if (declOp is IVariableDeclaratorOperation declarator &&
                             declarator.Initializer?.Value is IOperation initValue)
                         {
-                            return IsWrappedSafely(initValue, taskEnvironmentType, absolutePathType, iTaskItemType);
+                            return IsWrappedSafely(initValue, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType);
                         }
                     }
                 }

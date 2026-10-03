@@ -55,6 +55,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
+            var systemIOPathType = ResolveSystemIOPath(compilationContext.Compilation);
             var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
             var multiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
 
@@ -76,7 +77,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 ScanOperation(opCtx, callGraph, directViolations, bannedApiLookup, filePathTypes,
                     taskEnvironmentType, absolutePathType, iTaskItemType, consoleType, iTaskType,
-                    multiThreadableTaskType, contributingMultiThreadableTaskBaseTypes, directAnalysisStateCache);
+                    multiThreadableTaskType, contributingMultiThreadableTaskBaseTypes, directAnalysisStateCache, systemIOPathType);
             },
             OperationKind.Invocation,
             OperationKind.ObjectCreation,
@@ -108,7 +109,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol iTaskType,
             INamedTypeSymbol? multiThreadableTaskType,
             ImmutableHashSet<INamedTypeSymbol> contributingMultiThreadableTaskBaseTypes,
-            ConcurrentDictionary<INamedTypeSymbol, DirectAnalysisState> directAnalysisStateCache)
+            ConcurrentDictionary<INamedTypeSymbol, DirectAnalysisState> directAnalysisStateCache,
+            INamedTypeSymbol? systemIOPathType)
         {
             var containingSymbol = context.ContainingSymbol;
             if (containingSymbol is not IMethodSymbol containingMethod)
@@ -191,7 +193,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Check if this is a banned API call → record as a direct violation
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
-                if (IsAbsolutePathCanonicalization(context.Operation, absolutePathType))
+                if (IsAbsolutePathCanonicalization(context.Operation, absolutePathType, systemIOPathType))
                 {
                     return;
                 }
@@ -237,7 +239,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var methodContainingType = method.ContainingType;
                 if (methodContainingType is not null && filePathTypes.Contains(methodContainingType))
                 {
-                    if (HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType))
+                    if (HasUnwrappedPathArgument(arguments, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType))
                     {
                         if (IsReportedByDirectAnalyzer(
                             context,

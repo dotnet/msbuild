@@ -96,6 +96,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var outputAttributeType = types.OutputAttribute;
             var fileInfoType = types.FileInfo;
             var directoryInfoType = types.DirectoryInfo;
+            var systemIOPathType = ResolveSystemIOPath(compilationContext.Compilation);
 
             compilationContext.RegisterSymbolStartAction(symbolStartContext =>
             {
@@ -124,7 +125,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 {
                     AnalyzeOperation(ctx, pendingDiagnostics, stringInputProps, taskItemInputProps,
                         absolutePathType, taskEnvironmentType, iTaskItemType,
-                        fileInfoType, directoryInfoType);
+                        fileInfoType, directoryInfoType, systemIOPathType);
                 },
                 OperationKind.ObjectCreation,
                 OperationKind.Invocation);
@@ -371,19 +372,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? fileInfoType,
-            INamedTypeSymbol? directoryInfoType)
+            INamedTypeSymbol? directoryInfoType,
+            INamedTypeSymbol? systemIOPathType)
         {
             switch (context.Operation)
             {
                 case IObjectCreationOperation creation:
                     AnalyzeObjectCreation(pendingDiagnostics, creation, stringInputProps, taskItemInputProps,
-                        absolutePathType, taskEnvironmentType, iTaskItemType, fileInfoType, directoryInfoType);
+                        absolutePathType, taskEnvironmentType, iTaskItemType, fileInfoType, directoryInfoType, systemIOPathType);
                     break;
 
                 case IInvocationOperation invocation:
                     AnalyzeInvocation(pendingDiagnostics, invocation, stringInputProps, taskItemInputProps,
                         absolutePathType, taskEnvironmentType, iTaskItemType,
-                        fileInfoType, directoryInfoType);
+                        fileInfoType, directoryInfoType, systemIOPathType);
                     break;
             }
         }
@@ -558,7 +560,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             HashSet<IPropertySymbol> stringInputProps,
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
-            INamedTypeSymbol? iTaskItemType)
+            INamedTypeSymbol? iTaskItemType,
+            INamedTypeSymbol? systemIOPathType)
         {
             var flagged = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
             foreach (var arg in arguments)
@@ -572,7 +575,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Only raw (unwrapped) string arguments represent the daisy-chain scenario. A safely-wrapped
                 // argument is either already correct or covered by the existing 0006 conversion branches.
-                if (IsWrappedSafely(arg.Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                if (IsWrappedSafely(arg.Value, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType))
                 {
                     continue;
                 }
@@ -594,7 +597,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? fileInfoType,
-            INamedTypeSymbol? directoryInfoType)
+            INamedTypeSymbol? directoryInfoType,
+            INamedTypeSymbol? systemIOPathType)
         {
             var createdType = creation.Type;
             if (createdType is null || creation.Arguments.Length == 0)
@@ -692,7 +696,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 if (createdTypeName is "System.IO.FileStream" or "System.IO.StreamReader" or "System.IO.StreamWriter")
                 {
                     ReportStringPathConsumers(pendingDiagnostics, creation.Arguments, creation.Syntax.GetLocation(),
-                        "FileInfo", stringInputProps, taskEnvironmentType, absolutePathType, iTaskItemType);
+                        "FileInfo", stringInputProps, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType);
                 }
             }
         }
@@ -706,7 +710,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? fileInfoType,
-            INamedTypeSymbol? directoryInfoType)
+            INamedTypeSymbol? directoryInfoType,
+            INamedTypeSymbol? systemIOPathType)
         {
             var method = invocation.TargetMethod;
 
@@ -801,7 +806,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 if (consumerType is not null)
                 {
                     ReportStringPathConsumers(pendingDiagnostics, invocation.Arguments, invocation.Syntax.GetLocation(),
-                        consumerType, stringInputProps, taskEnvironmentType, absolutePathType, iTaskItemType);
+                        consumerType, stringInputProps, taskEnvironmentType, absolutePathType, iTaskItemType, systemIOPathType);
                 }
             }
 
