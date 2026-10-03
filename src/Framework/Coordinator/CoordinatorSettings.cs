@@ -23,6 +23,12 @@ internal sealed record class CoordinatorSettings()
     public const int DefaultInitialConnectionTimeoutMs = 200;
     public const int DefaultConnectionTimeoutMs = 5_000;
     public const int DefaultShutdownTimeoutMs = 60_000;
+    public const int DefaultNodeSettingsMinimumBudget = 8;
+    public const int DefaultHighPriorityReservedNodes = 4;
+    public const int DefaultMaxNodesPerBuild = 4;
+    public const int DefaultMaxNodesPerBuildWhenIdle = DefaultMaxNodesPerBuild * 2;
+    public const int UseDefaultNodeSetting = -1;
+    public const int DefaultPriorityAgingThreshold = 3;
     public const int MaxHeartbeatIntervalMs = 300_000;
 
     private static string DefaultPipeName => $"{PipeNameBase}-{EnvironmentUtilities.CurrentUserName}";
@@ -33,6 +39,9 @@ internal sealed record class CoordinatorSettings()
     private int? _connectionTimeoutMs;
     private int? _shutdownTimeoutMs;
     private int? _totalNodeBudget;
+    private int? _highPriorityReservedNodes;
+    private int? _maxNodesPerBuild;
+    private int? _priorityAgingThreshold;
     private int? _processId;
 
     /// <summary>
@@ -64,6 +73,52 @@ internal sealed record class CoordinatorSettings()
     {
         get => _totalNodeBudget ??= Environment.ProcessorCount;
         init => _totalNodeBudget = value <= 0 ? Environment.ProcessorCount : value;
+    }
+
+    public int HighPriorityReservedNodes
+    {
+        get => ResolveHighPriorityReservedNodes(_highPriorityReservedNodes, TotalNodeBudget);
+        init => _highPriorityReservedNodes = value < 0 ? null : value;
+    }
+
+    public int MaxNodesPerBuild
+    {
+        get => ResolveMaxNodesPerBuild(_maxNodesPerBuild, TotalNodeBudget);
+        init => _maxNodesPerBuild = value < 0 ? null : value;
+    }
+
+    public bool UsesDefaultHighPriorityReservedNodes
+        => !_highPriorityReservedNodes.HasValue;
+
+    public bool UsesDefaultMaxNodesPerBuild
+        => !_maxNodesPerBuild.HasValue;
+
+    public int MaxNodesPerBuildWhenIdle
+        => UsesDefaultMaxNodesPerBuild && MaxNodesPerBuild > 0
+            ? Math.Min(DefaultMaxNodesPerBuildWhenIdle, TotalNodeBudget)
+            : 0;
+
+    public int PriorityAgingThreshold
+    {
+        get => _priorityAgingThreshold ??= DefaultPriorityAgingThreshold;
+        init => _priorityAgingThreshold = value > 0 ? value : DefaultPriorityAgingThreshold;
+    }
+
+    public string? DefaultNodeSettingsOptOutMessage
+    {
+        get
+        {
+            bool usesDefaultReservation = UsesDefaultHighPriorityReservedNodes && HighPriorityReservedNodes > 0;
+            bool usesDefaultMaxNodesPerBuild = UsesDefaultMaxNodesPerBuild && MaxNodesPerBuild > 0;
+
+            return (usesDefaultReservation, usesDefaultMaxNodesPerBuild) switch
+            {
+                (true, true) => $"Set {Constants.HighPriorityReservedNodesEnvVarName}=0 and {Constants.MaxNodesPerBuildEnvVarName}=0 to disable reservation and per-build caps.",
+                (true, false) => $"Set {Constants.HighPriorityReservedNodesEnvVarName}=0 to disable reservation.",
+                (false, true) => $"Set {Constants.MaxNodesPerBuildEnvVarName}=0 to disable per-build caps.",
+                _ => null,
+            };
+        }
     }
 
     public int ShutdownTimeoutMs
@@ -115,6 +170,19 @@ internal sealed record class CoordinatorSettings()
             ? pipeNameOverride
             : DefaultPipeName;
 
+        int totalNodeBudget = EnvironmentUtilities.GetValueAsInt32OrDefault(
+            Constants.NodeBudgetEnvVarName,
+            Environment.ProcessorCount);
+        int highPriorityReservedNodes = EnvironmentUtilities.GetValueAsInt32OrDefault(
+            Constants.HighPriorityReservedNodesEnvVarName,
+            UseDefaultNodeSetting);
+        int maxNodesPerBuild = EnvironmentUtilities.GetValueAsInt32OrDefault(
+            Constants.MaxNodesPerBuildEnvVarName,
+            UseDefaultNodeSetting);
+        int priorityAgingThreshold = EnvironmentUtilities.GetValueAsInt32OrDefault(
+            Constants.PriorityAgingThresholdEnvVarName,
+            DefaultPriorityAgingThreshold);
+
         return Default with
         {
             PipeName = pipeName,
@@ -122,9 +190,10 @@ internal sealed record class CoordinatorSettings()
                 Constants.HeartbeatIntervalEnvVarName,
                 DefaultHeartbeatIntervalMs),
             MissedHeartbeatsThreshold = DefaultMissedHeartbeatsThreshold,
-            TotalNodeBudget = EnvironmentUtilities.GetValueAsInt32OrDefault(
-                Constants.NodeBudgetEnvVarName,
-                Environment.ProcessorCount),
+            TotalNodeBudget = totalNodeBudget,
+            HighPriorityReservedNodes = highPriorityReservedNodes,
+            MaxNodesPerBuild = maxNodesPerBuild,
+            PriorityAgingThreshold = priorityAgingThreshold,
             ShutdownTimeoutMs = EnvironmentUtilities.GetValueAsInt32OrDefault(
                 Constants.ShutdownTimeoutEnvVarName,
                 DefaultShutdownTimeoutMs),
@@ -132,6 +201,22 @@ internal sealed record class CoordinatorSettings()
             ProcessId = EnvironmentUtilities.CurrentProcessId,
         };
     }
+
+    private static int ResolveHighPriorityReservedNodes(int? configuredValue, int totalNodeBudget)
+        => ClampHighPriorityReservedNodes(
+            configuredValue ?? (totalNodeBudget >= DefaultNodeSettingsMinimumBudget ? DefaultHighPriorityReservedNodes : 0),
+            totalNodeBudget);
+
+    private static int ResolveMaxNodesPerBuild(int? configuredValue, int totalNodeBudget)
+        => ClampMaxNodesPerBuild(
+            configuredValue ?? (totalNodeBudget >= DefaultNodeSettingsMinimumBudget ? DefaultMaxNodesPerBuild : 0),
+            totalNodeBudget);
+
+    private static int ClampHighPriorityReservedNodes(int highPriorityReservedNodes, int totalNodeBudget)
+        => Math.Min(highPriorityReservedNodes, Math.Max(0, totalNodeBudget - 1));
+
+    private static int ClampMaxNodesPerBuild(int maxNodesPerBuild, int totalNodeBudget)
+        => maxNodesPerBuild == 0 ? 0 : Math.Min(maxNodesPerBuild, totalNodeBudget);
 
     /// <summary>
     ///  Generates a platform-appropriate mutex name by combining the pipe name with a purpose suffix.

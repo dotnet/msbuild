@@ -68,7 +68,7 @@ internal sealed partial class CoordinatorClient
             try
             {
                 output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {Id})");
-                WriteClientMessage(new ClientHandshakeMessage(Id, processId, capabilities: [Capabilities.NestedGrants]));
+                WriteClientMessage(new ClientHandshakeMessage(Id, processId, capabilities: [Capabilities.NestedGrants, Capabilities.Priority]));
 
                 ServerMessage response = ReadServerMessage();
 

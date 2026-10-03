@@ -40,7 +40,7 @@ internal sealed partial class CoordinatorClient
 
                 output.WriteLine("CoordinatorClient: Connected to test server");
 
-                CoordinatorClient? client = TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService: null);
+                CoordinatorClient? client = TryNegotiate(pipeStream, requestedNodes, GetBuildPriorityFromEnvironment(), settings, output, loggingService: null);
                 pipeStream = null; // Ownership transferred unconditionally; TryNegotiate disposes on failure.
                 return client;
             }
