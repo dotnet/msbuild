@@ -49,6 +49,15 @@ namespace Microsoft.Build.Collections
             _selector = selector;
         }
 
+        /// <summary>
+        /// Filters the backing collection before copying and projecting its items.
+        /// The predicate and selector run under the same lock when the result is enumerated.
+        /// </summary>
+        internal CopyOnReadEnumerable<TSource, TResult> Filter(Func<TSource, bool> predicate)
+        {
+            return new CopyOnReadEnumerable<TSource, TResult>(_backingEnumerable.Where(predicate), _syncRoot, _selector);
+        }
+
         #region IEnumerable<T> Members
 
         /// <summary>
