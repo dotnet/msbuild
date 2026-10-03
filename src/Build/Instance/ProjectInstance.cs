@@ -392,6 +392,7 @@ namespace Microsoft.Build.Execution
             _hostServices = project.ProjectCollection.HostServices;
 
             EvaluationId = project.EvaluationCounter;
+            EvaluationInputs = project.EvaluationInputs;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
             this.CreatePropertiesSnapshot(project.Properties, immutable);
@@ -715,6 +716,7 @@ namespace Microsoft.Build.Execution
             this.TaskRegistry = data.TaskRegistry;
 
             this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
+            EvaluationInputs = data.Project.EvaluationInputs;
 
             this.EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
 
@@ -756,6 +758,7 @@ namespace Microsoft.Build.Execution
             _hostServices = that._hostServices;
             _isImmutable = isImmutable;
             _evaluationId = that.EvaluationId;
+            EvaluationInputs = that.EvaluationInputs;
             _translateEntireState = that._translateEntireState;
             _requestedProjectStateFilter = filter?.DeepClone();
 
@@ -1293,6 +1296,11 @@ namespace Microsoft.Build.Execution
         /// The outer ProjectRootElement that maps to this project instance itself is not included.
         /// </summary>
         public IReadOnlyList<string> ImportPaths { get; private set; }
+
+        /// <summary>
+        /// Inputs recorded during evaluation when <see cref="Traits.RecordEvaluationInputs"/> is set; otherwise null.
+        /// </summary>
+        internal EvaluationInputs EvaluationInputs { get; private set; }
 
         /// <summary>
         /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.
@@ -3342,7 +3350,7 @@ namespace Microsoft.Build.Execution
 
             evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
-            Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
+            EvaluationInputs = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
                 data: this,
                 project: null,
                 xml,
