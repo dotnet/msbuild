@@ -33,7 +33,7 @@ Endpoints (nodes) communicate via named pipes (Windows or named pipes API implem
 
 The validation of transport is done via [proprietary handshake](https://github.com/dotnet/msbuild/blob/main/src/Build/BackEnd/Components/Communications/NodeProviderOutOfProcBase.cs#L501-L508).
 
-`NodeEndpointOutOfProcBase` combines queued logging packet frames into pipe writes of at most 64 KiB. Each packet is serialized independently with its existing type, length, payload, and negotiated version; batching does not change the wire format or binary log contents. Pending frames are written when the queue drains, before control packets, and before shutdown, without waiting for more packets. Packets at least 64 KiB bypass the batch buffer.
+`NodeEndpointOutOfProcBase` combines queued logging packet frames into pipe writes up to a configurable byte budget. `MSBUILDLOGPACKETBATCHSIZE` sets that budget in bytes: the default is 64 KiB, zero disables batching, and values from zero through 1 MiB are accepted inclusively. Invalid values use the default. Each packet is serialized independently with its existing type, length, payload, and negotiated version; batching does not change the wire format or binary log contents. Pending frames are written when the queue drains, before control packets, and before shutdown, without waiting for more packets. Frames at least as large as a configured positive limit bypass the batch buffer. This setting controls user-space logging writes independently of `MSBUILDNODECONNECTIONBUFFERSIZE`, which controls the kernel pipe buffer size.
 
 
 ## Orchestration

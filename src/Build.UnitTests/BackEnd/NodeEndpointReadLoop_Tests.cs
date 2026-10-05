@@ -75,10 +75,16 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(1)]
-    [InlineData(NodePacketTypeExtensions.PacketVersion)]
-    public async Task LogBatch_PreservesSerializedFramesAndControlOrder(byte version)
+    [InlineData(0, null, 3)]
+    [InlineData(0, "0", 5)]
+    [InlineData(0, "1048576", 3)]
+    [InlineData(1, null, 3)]
+    [InlineData(1, "0", 5)]
+    [InlineData(1, "1048576", 3)]
+    [InlineData(NodePacketTypeExtensions.PacketVersion, null, 3)]
+    [InlineData(NodePacketTypeExtensions.PacketVersion, "0", 5)]
+    [InlineData(NodePacketTypeExtensions.PacketVersion, "1048576", 3)]
+    public async Task LogBatch_PreservesSerializedFramesAndControlOrder(byte version, string? logPacketBatchSize, int expectedWrites)
     {
         INodePacket[] packets =
         [
@@ -89,64 +95,77 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
         byte[] expected = SerializeFrames(packets, version);
         using CountingWriteStream stream = new();
 
-        await RunWritePump(stream, packets, version);
+        await RunWritePump(stream, packets, version, logPacketBatchSize: logPacketBatchSize);
 
         stream.ToArray().ShouldBe(expected);
-        stream.Writes.Count.ShouldBe(3);
+        stream.Writes.Count.ShouldBe(expectedWrites);
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task LogBatch_FlushesOnQueueEmptyOrTermination(bool terminating)
+    [InlineData(false, null)]
+    [InlineData(true, null)]
+    [InlineData(false, "0")]
+    [InlineData(true, "0")]
+    [InlineData(false, "64")]
+    [InlineData(true, "64")]
+    public async Task LogBatch_FlushesOnQueueEmptyOrTermination(bool terminating, string? logPacketBatchSize)
     {
         INodePacket[] packets = [new RawPacket(17), new RawPacket(23)];
         using CountingWriteStream stream = new();
 
-        await RunWritePump(stream, packets, terminating: terminating);
+        await RunWritePump(stream, packets, terminating: terminating, logPacketBatchSize: logPacketBatchSize);
 
         stream.ToArray().ShouldBe(SerializeFrames(packets));
-        stream.Writes.ShouldBe([40]);
+        int[] expectedWrites = logPacketBatchSize == "0" ? [17, 23] : [40];
+        stream.Writes.ShouldBe(expectedWrites);
     }
 
     [Theory]
-    [InlineData(-1, 1)]
-    [InlineData(0, 1)]
-    [InlineData(1, 2)]
-    public async Task LogBatch_RespectsByteBudget(int adjustment, int expectedWrites)
+    [InlineData(null, Traits.DefaultLogPacketBatchSize, -1, 1)]
+    [InlineData(null, Traits.DefaultLogPacketBatchSize, 0, 1)]
+    [InlineData(null, Traits.DefaultLogPacketBatchSize, 1, 2)]
+    [InlineData("64", 64, -1, 1)]
+    [InlineData("64", 64, 0, 1)]
+    [InlineData("64", 64, 1, 2)]
+    public async Task LogBatch_RespectsByteBudget(string? logPacketBatchSize, int byteBudget, int adjustment, int expectedWrites)
     {
-        int half = NodeEndpointOutOfProcBase.LogPacketBatchSize / 2;
-        INodePacket[] packets = [new RawPacket(half), new RawPacket(half + adjustment)];
+        int firstSize = byteBudget / 2;
+        INodePacket[] packets = [new RawPacket(firstSize), new RawPacket(byteBudget - firstSize + adjustment)];
         using CountingWriteStream stream = new();
 
-        await RunWritePump(stream, packets);
+        await RunWritePump(stream, packets, logPacketBatchSize: logPacketBatchSize);
 
         stream.ToArray().ShouldBe(SerializeFrames(packets));
         stream.Writes.Count.ShouldBe(expectedWrites);
-        stream.Writes.ShouldAllBe(size => size <= NodeEndpointOutOfProcBase.LogPacketBatchSize);
+        stream.Writes.ShouldAllBe(size => size <= byteBudget);
     }
 
     [Theory]
-    [InlineData(-1)]
-    [InlineData(0)]
-    [InlineData(1)]
-    public async Task LogBatch_WritesLargePacketsInOrder(int adjustment)
+    [InlineData(null, Traits.DefaultLogPacketBatchSize, -1)]
+    [InlineData(null, Traits.DefaultLogPacketBatchSize, 0)]
+    [InlineData(null, Traits.DefaultLogPacketBatchSize, 1)]
+    [InlineData("64", 64, -1)]
+    [InlineData("64", 64, 0)]
+    [InlineData("64", 64, 1)]
+    public async Task LogBatch_WritesLargePacketsInOrder(string? logPacketBatchSize, int byteBudget, int adjustment)
     {
-        int size = NodeEndpointOutOfProcBase.LogPacketBatchSize + adjustment;
+        int size = byteBudget + adjustment;
         INodePacket[] packets = [new RawPacket(6), new RawPacket(size), new RawPacket(7)];
         using CountingWriteStream stream = new();
 
-        await RunWritePump(stream, packets);
+        await RunWritePump(stream, packets, logPacketBatchSize: logPacketBatchSize);
 
         stream.ToArray().ShouldBe(SerializeFrames(packets));
         stream.Writes.ShouldBe([6, size, 7]);
     }
 
     [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    public async Task LogBatch_SerializationFailurePreservesPrefixAndBothErrors(bool controlPacket, bool failWrite)
+    [InlineData(false, false, null)]
+    [InlineData(true, false, null)]
+    [InlineData(false, true, null)]
+    [InlineData(false, false, "0")]
+    [InlineData(false, false, "32")]
+    public async Task LogBatch_SerializationFailurePreservesPrefixAndBothErrors(bool controlPacket, bool failWrite, string? logPacketBatchSize)
     {
         using CountingWriteStream stream = new() { FailWrite = failWrite };
         RawPacket prefix = new(17);
@@ -160,7 +179,7 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
             throw new InvalidOperationException("Injected packet serialization failure.");
         });
 
-        string diagnostic = await RunWritePump(stream, [prefix, failure, new RawPacket(9)]);
+        string diagnostic = await RunWritePump(stream, [prefix, failure, new RawPacket(9)], logPacketBatchSize: logPacketBatchSize);
 
         diagnostic.ShouldContain("Injected packet serialization failure.");
         stream.Writes.ShouldBe([17]);
@@ -171,16 +190,69 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
         }
     }
 
-    [Fact]
-    public async Task LogBatch_WriteFailureFailsLinkWithoutRetry()
+    [Theory]
+    [InlineData(null, 40, true)]
+    [InlineData("0", 17, false)]
+    [InlineData("32", 17, true)]
+    public async Task LogBatch_WriteFailureFailsLinkWithoutRetry(string? logPacketBatchSize, int failedWriteSize, bool secondPacketSerialized)
     {
         using CountingWriteStream stream = new() { FailWrite = true };
+        bool secondPacketWasSerialized = false;
 
-        string diagnostic = await RunWritePump(stream, [new RawPacket(17), new RawPacket(23)]);
+        string diagnostic = await RunWritePump(
+            stream,
+            [new RawPacket(17), new RawPacket(23, beforeTranslate: () => secondPacketWasSerialized = true)],
+            logPacketBatchSize: logPacketBatchSize);
 
         diagnostic.ShouldContain("Injected pipe write failure.");
-        stream.Writes.ShouldBe([40]);
+        stream.Writes.ShouldBe([failedWriteSize]);
         stream.Length.ShouldBe(0);
+        secondPacketWasSerialized.ShouldBe(secondPacketSerialized);
+    }
+
+    [Theory]
+    [InlineData(null, Traits.DefaultLogPacketBatchSize)]
+    [InlineData("", Traits.DefaultLogPacketBatchSize)]
+    [InlineData("malformed", Traits.DefaultLogPacketBatchSize)]
+    [InlineData("-1", Traits.DefaultLogPacketBatchSize)]
+    [InlineData("2147483648", Traits.DefaultLogPacketBatchSize)]
+    [InlineData("1048577", Traits.DefaultLogPacketBatchSize)]
+    [InlineData("2147483647", Traits.DefaultLogPacketBatchSize)]
+    [InlineData("0", 0)]
+    [InlineData("1", 1)]
+    [InlineData("32768", 32768)]
+    [InlineData("1048576", 1048576)]
+    public void LogPacketBatchSize_ValidatesConfiguration(string? configured, int expected)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDLOGPACKETBATCHSIZE", configured);
+
+        Traits.Instance.LogPacketBatchSize.ShouldBe(expected);
+    }
+
+    [Fact]
+    public async Task LogBatch_CapturesConfiguredBudgetOncePerPump()
+    {
+        INodePacket[] packets =
+        [
+            new RawPacket(6, NodePacketType.NodeBuildComplete),
+            new RawPacket(17),
+            new RawPacket(15)
+        ];
+        using CountingWriteStream stream = new();
+
+        await RunWritePump(
+            stream,
+            packets,
+            logPacketBatchSize: "32",
+            afterFirstWrite: env =>
+            {
+                env.SetEnvironmentVariable("MSBUILDLOGPACKETBATCHSIZE", "0");
+                Traits.Instance.LogPacketBatchSize.ShouldBe(0);
+            });
+
+        stream.ToArray().ShouldBe(SerializeFrames(packets));
+        stream.Writes.ShouldBe([6, 32]);
     }
 
     private static LogMessagePacket Log(string message) =>
@@ -207,9 +279,16 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
         return outputStream.ToArray();
     }
 
-    private async Task<string> RunWritePump(CountingWriteStream stream, INodePacket[] packets, byte version = 0, bool terminating = false)
+    private async Task<string> RunWritePump(
+        CountingWriteStream stream,
+        INodePacket[] packets,
+        byte version = 0,
+        bool terminating = false,
+        string? logPacketBatchSize = null,
+        Action<TestEnvironment>? afterFirstWrite = null)
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDLOGPACKETBATCHSIZE", logPacketBatchSize);
         using MemoryStream packetStream = new();
         using BinaryWriter writer = new(packetStream);
         using AutoResetEvent available = new(!terminating);
@@ -219,7 +298,12 @@ public sealed class NodeEndpointReadLoop_Tests(ITestOutputHelper output)
         SetField("_packetStream", packetStream);
         SetField("_binaryWriter", writer);
         SetField("_negotiatedWriteVersion", version);
-        stream.AfterWrite = () => terminate.Set();
+        stream.AfterWrite = () =>
+        {
+            Action<TestEnvironment>? callback = Interlocked.Exchange(ref afterFirstWrite, null);
+            callback?.Invoke(env);
+            terminate.Set();
+        };
         DebugUtils.ResetDebugDumpPathInRunningTests = true;
         _ = DebugUtils.DebugDumpPath;
 

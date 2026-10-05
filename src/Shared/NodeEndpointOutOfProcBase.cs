@@ -131,11 +131,6 @@ namespace Microsoft.Build.BackEnd
         private const int MaxRetainedReadBufferSize = 2 * 1024 * 1024; // 2 MB
 
         /// <summary>
-        /// Maximum combined size of already-framed logging packets in a pipe write.
-        /// </summary>
-        internal const int LogPacketBatchSize = 64 * 1024;
-
-        /// <summary>
         /// Represents the version of the parent packet associated with the node instantiation.
         /// </summary>
         private byte _parentPacketVersion;
@@ -687,6 +682,7 @@ namespace Microsoft.Build.BackEnd
             ITranslator writeTranslator = null;
             byte[] logPacketBatch = null;
             int logPacketBatchLength = 0;
+            int logPacketBatchSize = Traits.Instance.LogPacketBatchSize;
 
             void FlushLogPacketBatch()
             {
@@ -944,24 +940,24 @@ namespace Microsoft.Build.BackEnd
                                     packetStream.Position = 1;
                                     _binaryWriter.Write(packetStreamLength - 5);
 
-                                    if (!isLogPacket || packetStreamLength >= LogPacketBatchSize)
+                                    if (!isLogPacket || packetStreamLength >= logPacketBatchSize)
                                     {
                                         FlushLogPacketBatch();
                                         localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
                                     }
                                     else
                                     {
-                                        if (packetStreamLength > LogPacketBatchSize - logPacketBatchLength)
+                                        if (packetStreamLength > logPacketBatchSize - logPacketBatchLength)
                                         {
                                             FlushLogPacketBatch();
                                         }
 
                                         // Keep serialization at offset zero; translators may depend on packet-relative positions.
-                                        logPacketBatch ??= new byte[LogPacketBatchSize];
+                                        logPacketBatch ??= new byte[logPacketBatchSize];
                                         Buffer.BlockCopy(packetStream.GetBuffer(), 0, logPacketBatch, logPacketBatchLength, packetStreamLength);
                                         logPacketBatchLength += packetStreamLength;
 
-                                        if (logPacketBatchLength == LogPacketBatchSize)
+                                        if (logPacketBatchLength == logPacketBatchSize)
                                         {
                                             FlushLogPacketBatch();
                                         }
