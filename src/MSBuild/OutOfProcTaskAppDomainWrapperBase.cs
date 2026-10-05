@@ -360,6 +360,21 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
+
+                if (wrappedTask is IMultiThreadableTask multiThreadableTask)
+                {
+#if FEATURE_APPDOMAIN
+                    if (_taskAppDomain is not null)
+                    {
+                        // TaskEnvironment is not serializable; assign the fallback inside the task's AppDomain.
+                        _taskAppDomain.DoCallBack(new TaskEnvironmentInitializer(multiThreadableTask).Initialize);
+                    }
+                    else
+#endif
+                    {
+                        multiThreadableTask.TaskEnvironment = TaskEnvironment.Fallback;
+                    }
+                }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -472,6 +487,14 @@ namespace Microsoft.Build.CommandLine
 
             return new OutOfProcTaskHostTaskResult(success ? TaskCompleteType.Success : TaskCompleteType.Failure, finalParameterValues);
         }
+
+#if FEATURE_APPDOMAIN
+        [Serializable]
+        private sealed class TaskEnvironmentInitializer(IMultiThreadableTask task)
+        {
+            public void Initialize() => task.TaskEnvironment = TaskEnvironment.Fallback;
+        }
+#endif
 
 #if NET
         internal static object ConvertTaskParameterValue(object value, Type targetType)

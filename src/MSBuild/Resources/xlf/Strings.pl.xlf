@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../Strings.resx">
     <body>
@@ -1850,32 +1850,32 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: anulowano odtwarzanie przefiltrowanego dziennika binarnego. Nie opublikowano żadnych danych wyjściowych.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: nie można odtworzyć przefiltrowanego dziennika binarnego. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: nieprawidłowa przefiltrowana ścieżka wyjściowa dziennika binarnego. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: miejsce docelowe dziennika binarnego już istnieje lub jest określone więcej niż raz. Wybierz nową ścieżkę wyjściową.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: ten przełącznik nie jest obsługiwany podczas odtwarzania dziennika binarnego z exclude=.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: odfiltrowane ponowne odtwarzanie obsługuje projectImports=Embed lub ProjectImports=None, nie ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
@@ -2241,7 +2241,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]wyjście.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]wyjście.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializuje wszystkie zdarzenia kompilacji do skompresowanego pliku binarnego.
                      Domyślnie plik znajduje się w bieżącym katalogu i ma nazwę
                      „msbuild.binlog”. Dziennik binarny to szczegółowy opis procesu
@@ -2250,6 +2250,19 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      jest zwykle 10–20 razy mniejszy od najbardziej szczegółowych
                      tekstowych dzienników na poziomie diagnostycznym, ale zawiera więcej informacji.
                      (Krótka forma: -bl)
+
+                     Exclude=kind[,kind...] pomija nazwane rodzaje zdarzeń z
+                     tego rejestratora binarnego podczas kompilacji i odtwarzania. Konsola i
+                     inne rejestratory nie są tym objęte. W nazwach nie jest rozróżniana wielkość liter.
+                     Określ opcję Wyklucz raz dla rejestratora. Wybór jest dokładnie zgodny z
+                     typami rekordów, nie wszystkimi pochodnymi komunikatami lub zdarzeniami ostrzegawczymi.
+                     Zdarzenia cyklu życia kompilacji, projektu, miejsca docelowego i zadania są
+                     chronione. Wyklucz obie wartości ProjectEvaluationStarted i
+                     ProjectEvaluation jednocześnie lub żadną z nich.
+                     Przykład: -bl:"out.binlog; Exclude=Message,Ostrzeżenie"
+                     Przefiltrowane ponowne odtwarzanie wymaga nowych ścieżek wyjściowych i nie
+                     obsługuje elementu ProjectImports=ZipFile.
+                     Filtrowanie nie jest redagowaniem: pliki osadzone są niezależne.
 
                      Opcjonalny LogFile określa ścieżkę, w której
                      zapisany jest dziennik binarny. Aby wygenerować osobny plik dziennika

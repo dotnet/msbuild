@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
@@ -58,12 +58,12 @@
       </trans-unit>
       <trans-unit id="Binlog_EventFilterThrew">
         <source>The binary log event filter threw an exception.</source>
-        <target state="new">The binary log event filter threw an exception.</target>
+        <target state="translated">이진 로그 이벤트 필터에서 예외가 발생했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_EventFilterThrewWithContext">
         <source>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</source>
-        <target state="new">The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</target>
+        <target state="translated">이진 로그 이벤트 필터가 레코드 {0}({1})에 대해 파일 형식 버전 {2}에서 예외를 발생시켰습니다. 빌드 컨텍스트: [{3}]. 원래 빌드 컨텍스트: [{4}]. 자세한 내용은 내부 예외를 참조하세요.</target>
         <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
@@ -614,7 +614,7 @@
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerEventFilter">
         <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
-        <target state="new">MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</target>
+        <target state="translated">MSB4234: 잘못된 이진 로거 이벤트 필터: "{0}". 로거당 한 번씩 Exclude=를 지정하고 뒤에 쉼표로 구분된 이벤트 종류 이름을 지정하십시오. 비어 있음, 숫자, 알 수 없음, 보조 및 보호된 수명 주기 종류는 허용되지 않습니다. ProjectEvaluationStarted와 ProjectEvaluationFinished를 함께 제외하거나 둘 다 제외하지 마세요.</target>
         <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
       </trans-unit>
       <trans-unit id="InvalidVersionFormat">
@@ -3232,7 +3232,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="needs-review-translation">MSB4234: 잘못된 이진 로거 매개 변수: "{0}". 예상 값: ProjectImports={{None,Embed,ZipFile}} 및/또는 [LogFile=]filePath.binlog(로그 파일 이름 또는 경로, 확장명이 ".binlog"여야 함).</target>
+        <target state="translated">MSB4234: 잘못된 이진 로거 매개 변수: "{0}". 예상 값: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...] 및/또는 [LogFile=]filePath.binlog(로그 파일 이름 또는 경로, 확장명이 ".binlog"여야 함).</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">

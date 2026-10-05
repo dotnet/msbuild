@@ -25,8 +25,8 @@ When the main thread receives a `TaskHostConfiguration` packet, it spawns the ta
 
 1. Sets up the environment (working directory, env vars, culture)
 2. Loads the task assembly and instantiates the task
-3. Sets task parameters via reflection
-4. Calls `task.Execute()` -- for tasks implementing `IMultiThreadableTask`, the default `TaskEnvironment` (backed by `MultiProcessTaskEnvironmentDriver`) is available, providing safe access to the task host process's working directory and environment variables
+3. Assigns `TaskEnvironment.Fallback` to tasks implementing `IMultiThreadableTask`, then sets task parameters via reflection
+4. Calls `task.Execute()` -- the supplied `TaskEnvironment` (backed by `MultiProcessTaskEnvironmentDriver`) provides access to the task host process's working directory and environment variables
 5. Collects output parameters
 6. Packages the result into `TaskHostTaskComplete` and signals `_taskCompleteEvent`
 

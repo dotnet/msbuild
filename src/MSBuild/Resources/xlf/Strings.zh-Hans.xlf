@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
@@ -1841,32 +1841,32 @@
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: 已取消筛选的二进制日志重播。未发布任何输出。</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: 筛选的二进制日志重播失败。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: 筛选的二进制日志输出路径无效。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: 二进制日志目标已存在或指定了多次。选择新的输出路径。</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: 使用 Exclude= 重播二进制日志时不支持此开关。</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: 筛选重播支持 ProjectImports=Embed 或 ProjectImports=None，而不支持 ProjectImports=ZipFile。</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
@@ -2232,8 +2232,8 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     将所有生成事件序列化为压缩的二进制文件。
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     将生成事件序列化为压缩的二进制文件。
                      默认情况下，该文件位于当前目录中，名为
                      "msbuild.binlog"。二进制日志是生成过程的详细描述，
                      稍后可用于重新构造
@@ -2241,6 +2241,19 @@
                      大小通常为最详细的文本诊断级别日志的 1/10 至 1/20，
                      但它包含更多信息。
                      (缩写: -bl)
+
+                     Exclude=kind[，kind...] 在生成和重播期间从此二进制记录器中
+                     排除指定的事件类型。控制台和
+                     其他记录器不受影响。名称不区分大小写。
+                     指定每个记录器排除一次。所选内容匹配确切的
+                     记录类型，而非所有派生的消息或警告事件。
+                     生成、项目、目标和任务生命周期事件
+                     受保护。要么同时排除 ProjectEvaluationStarted 和 ProjectEvaluationFinished，
+                     要么都不排除。
+                     示例: -bl:"out.binlog;Exclude=Message,Warning"
+                     筛选的重播需要新的输出路径，并且不
+                     支持 ProjectImports=ZipFile。
+                     筛选不是编修: 嵌入文件是独立的。
 
                      可选的 LogFile 指定保存二进制日志的
                      路径。要为每个生成产生不同的日志文件，
