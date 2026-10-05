@@ -108,6 +108,17 @@ For tasks to be eligible for multithreaded execution using this approach, they m
 public class MyTask : Task {...}
 ```
 
+### Inline task classes
+
+`RoslynCodeTaskFactory` tasks declared with `<Code Type="Class">` can opt into
+in-process multithreaded execution by applying `[MSBuildMultiThreadableTask]` to
+the concrete task class. Unannotated classes and generated `Fragment`/`Method`
+tasks remain isolated.
+
+For `TaskEnvironment` access, also implement `IMultiThreadableTask` and initialize
+the property to `TaskEnvironment.Fallback`. A public parameterless constructor is
+still required; the engine injects the environment after construction.
+
 ### Registered task objects
 
 In multithreaded builds, in-process tasks share the `IBuildEngine4` registered-task-object cache across thread nodes. Tasks in worker or TaskHost processes use separate caches.
