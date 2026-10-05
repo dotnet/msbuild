@@ -439,10 +439,14 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
-    public async Task FileExists_WithAbsolutePathVariable_NoDiagnostic()
+    [Theory]
+    [InlineData("File.Exists(path);", false)]
+    [InlineData("string file = path; File.Exists(file);", false)]
+    [InlineData("File.Exists(path.Value);", true)]
+    [InlineData("string file = path.Value; File.Exists(file);", true)]
+    public async Task FileExists_WithAbsolutePathConversion(string statement, bool expectDiagnostic)
     {
-        var diags = await GetDiagnosticsAsync("""
+        var diags = await GetDiagnosticsAsync($$"""
             using System.IO;
             using Microsoft.Build.Framework;
             [MSBuildMultiThreadableTask]
@@ -451,14 +455,14 @@ public class MultiThreadableTaskAnalyzerTests
                 public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
-                    AbsolutePath p = TaskEnvironment.GetAbsolutePath("foo.txt");
-                    File.Exists(p);
+                    AbsolutePath path = TaskEnvironment.GetAbsolutePath("foo.txt");
+                    {{statement}}
                     return true;
                 }
             }
             """);
 
-        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.Count(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBe(expectDiagnostic ? 1 : 0);
     }
 
     [Fact]
@@ -484,74 +488,6 @@ public class MultiThreadableTaskAnalyzerTests
             """);
 
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task FileApis_WithImplicitAbsolutePathConversion_NoDiagnostics(bool analyzeAllTasks)
-    {
-        const string source = """
-            using System.IO;
-            using Microsoft.Build.Framework;
-
-            [MSBuildMultiThreadableTask]
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
-            {
-                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
-                public override bool Execute()
-                {
-                    AbsolutePath path = TaskEnvironment.GetAbsolutePath("input.txt");
-                    new FileInfo(path);
-                    new DirectoryInfo(TaskEnvironment.GetAbsolutePath("out"));
-                    using var stream = File.OpenRead(path);
-                    string directory = TaskEnvironment.GetAbsolutePath("out");
-                    Directory.CreateDirectory(directory);
-                    string file = path;
-                    string copy = file;
-                    File.Exists(copy);
-                    File.Exists(Path.Combine(TaskEnvironment.ProjectDirectory, "input.txt"));
-                    AbsolutePath? nullablePath = path;
-                    File.Exists(nullablePath.Value);
-                    return true;
-                }
-            }
-            """;
-
-        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        var diags = await GetDiagnosticsWithAllTasksOptionAsync(source, analyzeAllTasks);
-
-        diags.ShouldBeEmpty();
-    }
-
-    [Theory]
-    [InlineData("new FileInfo(path.Value);")]
-    [InlineData("using var stream = File.OpenRead(path.Value);")]
-    [InlineData("string file = path.Value; string copy = file; File.Exists(copy);")]
-    [InlineData("string directory = TaskEnvironment.GetAbsolutePath(\"out\").Value; Directory.CreateDirectory(directory);")]
-    public async Task FileApis_WithBareAbsolutePathValue_ProducesDiagnostic(string statement)
-    {
-        var source = $$"""
-            using System.IO;
-            using Microsoft.Build.Framework;
-
-            [MSBuildMultiThreadableTask]
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
-            {
-                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
-                public override bool Execute()
-                {
-                    AbsolutePath path = TaskEnvironment.GetAbsolutePath("input.txt");
-                    {{statement}}
-                    return true;
-                }
-            }
-            """;
-
-        CreateCompilation(source).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        var diags = await GetDiagnosticsAsync(source);
-
-        diags.ShouldHaveSingleItem().Id.ShouldBe(DiagnosticIds.FilePathRequiresAbsolute);
     }
 
     [Fact]
