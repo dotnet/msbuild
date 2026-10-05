@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
@@ -1849,32 +1849,32 @@
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: Přehrání filtrovaného binárního protokolu bylo zrušeno. Nebyl publikován žádný výstup.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: Přehrání filtrovaného binárního protokolu se nezdařilo. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: Neplatná výstupní cesta filtrovaného binárního protokolu. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: Cíl binárního protokolu již existuje nebo je zadán více než jednou. Zvolte novou výstupní cestu.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: Tento přepínač není podporován při přehrávání binárního protokolu s parametrem Exclude=.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: Filtrované přehrání podporuje ProjectImports=Embed nebo ProjectImports=None, ne ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
@@ -2240,21 +2240,34 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializuje všechny události sestavení do komprimovaného binárního souboru.
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializuje události sestavení do komprimovaného binárního souboru.
                      Ve výchozím nastavení se soubor nachází v aktuálním adresáři a má název
-                     "msbuild.binlog". Binární protokol je podrobný popis
+                     „msbuild.binlog“. Binární protokol je podrobný popis
                      procesu sestavení, který se dá později použít k rekonstrukci
                      textových protokolů a který využívají jiné analytické nástroje. Binární protokol
                      je obvykle 10–20krát menší než nejpodrobnější textový
                      protokol na úrovni diagnostiky, ale obsahuje více informací.
                      (Krátký tvar: -bl)
 
-                     Nepovinný soubor logFile určuje cestu, kde
+                     Exclude=kind[,kind...] vynechá pojmenované typy událostí z
+                     tohoto binárního protokolovacího nástroje během sestavení a přehrávání. Konzole a
+                     ostatní protokolovací nástroje nejsou ovlivněny. Názvy nerozlišují velká a malá písmena.
+                     Zadejte Exclude jednou pro každý protokolovací nástroj. Výběr odpovídá přesným
+                     typům záznamů, nikoli všem odvozeným událostem zpráv nebo upozornění.
+                     Události životního cyklu sestavení, projektu, cíle a úkolů jsou
+                     chráněny. Vynechejte společně ProjectEvaluationStarted i
+                     ProjectEvaluationFinished, nebo nevynechávejte ani jedno z toho.
+                     Příklad: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtrované přehrávání vyžaduje nové výstupní cesty a nepodporuje
+                     ProjectImports=ZipFile.
+                     Filtrování není redigování: vložené soubory jsou nezávislé.
+
+                     Nepovinný soubor LogFile určuje cestu, kde
                      je binární protokol uložený. Pro generování samostatného souboru protokolu
-                     pro každé sestavení se dá token {} přidat do
-                     cesty, například: LogFile=output-{}-log.binlog. Každý 
-                     {} v cestě k protokolu se nahradí jedinečným řetězcem
+                     pro každé sestavení se dá token „{}“ přidat do
+                     cesty, například: LogFile=output-{}-log.binlog. Každé 
+                     „{}“ v cestě k protokolu se nahradí jedinečným řetězcem
                      pomocí časového razítka, ID spuštěného procesu a náhodného
                      razítka řetězce.
 
