@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.resx">
     <body>
@@ -55,6 +55,16 @@
         <source>ArchiveFile was obtained, but the final edited version was not set.</source>
         <target state="translated">ArchiveFile foi obtido, mas a versão editada final não foi definida.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrew">
+        <source>The binary log event filter threw an exception.</source>
+        <target state="translated">O filtro de evento de log binário gerou uma exceção.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrewWithContext">
+        <source>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</source>
+        <target state="translated">O filtro de evento de log binário gerou uma exceção para o registro {0} ({1}) na versão de formato de arquivo {2}. Contexto de build: [{3}]. Contexto de build original: [{4}]. Confira a exceção interna para obter mais detalhes.</target>
+        <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
@@ -602,6 +612,11 @@
         <target state="translated">MSB4255: os arquivos de cache do resultado de entrada a seguir não existem: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerEventFilter">
+        <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="translated">MSB4234: filtro de evento de agente binário inválido: "{0}". Especifique Exclude= uma vez por agente, seguido por nomes de tipo de evento separados por vírgula. Não são permitidos tipos de ciclo de vida vazios, numéricos, desconhecidos, auxiliares e protegidos. Exclua ProjectEvaluationStarted e ProjectEvaluationFinished juntos, ou nenhum dos dois.</target>
+        <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">A cadeia de caracteres de versão não estava em um formato correto.</target>
@@ -653,6 +668,36 @@
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Metaprojeto "{0}" gerado.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
+        <target state="translated">MSB4289: Já existe outra compilação estrita multi-threaded ativa neste processo. Conclua-a antes de iniciar outra compilação, use um processo separado ou defina MSBUILDDISABLEFEATURESFROMVERSION=18.12 antes de iniciar o processo para desabilitar as verificações estritas.</target>
+        <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
+        <target state="translated">MSB4286: o modo estrito multithread localizou o diretório atual do processo em "{1}" em vez de "{2}" após a tarefa "{0}". Use TaskEnvironment em vez de alterar o diretório do processo. A alteração pode vir de outra tarefa, um agente ou código de host que foi executado simultaneamente ao contexto desse evento.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
+        <target state="translated">O modo estrito multithread está habilitado. Diretório atual do processo: "{0}".</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelMissing">
+        <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
+        <target state="translated">MSB4288: O modo estrito multi-threaded restaurou o diretório sentinela "{0}" e o diretório atual do processo depois que um diretório ficou indisponível. Não remova os diretórios usados por uma compilação ativa.</target>
+        <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
+        <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
+        <target state="translated">MSB4290: o modo estrito multithread não pôde restaurar o diretório sentinela "{0}" e o diretório atual do processo: {1} Verifique se o diretório de propriedade do mecanismo pode ser criado e acessado ou defina MSBUILDDISABLEFEATURESFROMVERSION=18.12 antes de iniciar o processo para desabilitar temporariamente as verificações estritas.</target>
+        <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
+        <target state="translated">MSB4287: modo estrito multithread encontrado "{0}" no diretório do Sentinel "{1}" na conclusão do projeto ou do build. Resolva caminhos com TaskEnvironment. A gravação pode vir de outro projeto, um agente ou código de host.</target>
+        <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
@@ -731,7 +776,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">A avaliação parcial (o estágio de avaliação "{0}") não tem suporte ao criar um projeto. Use ProjectInstance para realizar uma avaliação parcial ou use o estágio de avaliação Completa para criar um projeto.</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -942,6 +987,11 @@
         <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
         <target state="translated">MSB4283: não foi possível executar a tarefa "{0}" porque a execução de tarefas requer o carregamento de assemblies de tarefas e tipos por reflexão, o que não tem suporte neste host AOT nativo ou cortado. Crie com um MSBuild baseado em JIT para executar tarefas.</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="translated">O relatório de acesso a arquivos não pode ser usado com o modo multithread. O relatório de acesso a arquivos requer nós de trabalho isolados do processo para que cada acesso possa ser atribuído a um projeto. Desabilite ReportFileAccesses ou MultiThreaded.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
@@ -3181,8 +3231,8 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: parâmetro de agente binário inválido: "{0}". Esperado: ProjectImports={{None,Embed,ZipFile}} e/ou [LogFile=]filePath.binlog (o nome do arquivo de log ou caminho deve ter a extensão ".binlog").</target>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="translated">MSB4234: parâmetro de agente binário inválido: "{0}". Esperado: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...] e/ou [LogFile=]filePath.binlog (o nome ou caminho do arquivo de log deve ter a extensão ".binlog").</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -3326,7 +3376,7 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">Não há suporte '{0}' tipo de evento personalizado porque todos os tipos de eventos personalizados foram preteridos. Use Extended*EventArgs em vez disso. Mais informações: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">O tipo de evento personalizado '{0}' não tem suporte, pois todos os tipos de eventos personalizados foram preteridos. Use Extended*EventArgs em vez disso. Mais informações: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProjectFile">

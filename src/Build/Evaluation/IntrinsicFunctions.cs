@@ -357,7 +357,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>The full path of the directory containing the file if it is found, otherwise an empty string. </returns>
         public static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName, IFileSystem fileSystem)
         {
-            return FileUtilities.GetDirectoryNameOfFileAbove(startingDirectory, fileName, fileSystem);
+            return FileUtilities.GetDirectoryNameOfFileAbove(ResolveAgainstThreadWorkingDirectory(startingDirectory), fileName, fileSystem);
         }
 
         /// <summary>
@@ -370,7 +370,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
         public static string GetPathOfFileAbove(string file, string startingDirectory, IFileSystem fileSystem)
         {
-            return FileUtilities.GetPathOfFileAbove(file, startingDirectory, fileSystem);
+            return FileUtilities.GetPathOfFileAbove(file, ResolveAgainstThreadWorkingDirectory(startingDirectory), fileSystem);
         }
 
         /// <summary>
@@ -534,7 +534,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         public static bool FileExists(string path)
         {
-            return FileUtilities.FileExistsNoThrow(path);
+            return FileUtilities.FileExistsNoThrow(FixSeparatorsAndResolveAgainstThreadWorkingDirectory(path));
         }
 
         /// <summary>
@@ -544,8 +544,25 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         public static bool DirectoryExists(string path)
         {
-            return FileUtilities.DirectoryExistsNoThrow(path);
+            return FileUtilities.DirectoryExistsNoThrow(FixSeparatorsAndResolveAgainstThreadWorkingDirectory(path));
         }
+
+        /// <summary>
+        /// As <see cref="ResolveAgainstThreadWorkingDirectory"/>, but normalizes directory separators first.
+        /// </summary>
+        /// <remarks>
+        /// Resolving turns on a rootedness test, and that test has to be asked in the same separator form the
+        /// callee's own resolution uses, or the two disagree about whether the path is relative. On Unix
+        /// <c>\tmp\x</c> is relative before separators are fixed and rooted after. <c>FileExistsNoThrow</c> and
+        /// <c>DirectoryExistsNoThrow</c> fix first and let the OS resolve the rest, so they see it as rooted
+        /// and we have to fix to match. <see cref="FileUtilities.NormalizePath(string)"/> and the other callees
+        /// resolve the raw string before fixing it, so they see it as relative and
+        /// <see cref="ResolveAgainstThreadWorkingDirectory"/> has to leave it alone. What is at stake is which
+        /// question gets asked, not the separators handed back, which the callee normalizes either way.
+        /// <see cref="FileUtilities.FixFilePath(string)"/> is a no-op on Windows, so this only ever bites on Unix.
+        /// </remarks>
+        private static string FixSeparatorsAndResolveAgainstThreadWorkingDirectory(string path)
+            => ResolveAgainstThreadWorkingDirectory(FileUtilities.FixFilePath(path));
 
         /// <summary>
         /// Gets the canonicalized full path of the provided path and ensures it contains the correct directory separator characters for the current operating system.
@@ -554,7 +571,27 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A canonicalized full path with the correct directory separators.</returns>
         public static string NormalizePath(params string[] path)
         {
-            return FileUtilities.NormalizePath(path);
+            return FileUtilities.NormalizePath(ResolveAgainstThreadWorkingDirectory(Path.Combine(path)));
+        }
+
+        /// <summary>
+        /// In multithreaded (<c>-mt</c>) mode every project gets its own thread-local working directory while the
+        /// process-wide current directory is shared, so a relative path must be resolved against
+        /// <see cref="FileUtilities.CurrentThreadWorkingDirectory"/> rather than against the process current
+        /// directory, which may belong to an unrelated project and would silently produce a valid-looking but
+        /// wrong absolute path.
+        /// </summary>
+        /// <param name="path">The path to resolve. May be null, empty, or already fully qualified.</param>
+        /// <returns>The resolved path, or <paramref name="path"/> unchanged when no resolution is needed.</returns>
+        private static string ResolveAgainstThreadWorkingDirectory(string path)
+        {
+            if (string.IsNullOrEmpty(FileUtilities.CurrentThreadWorkingDirectory))
+            {
+                return path;
+            }
+
+            AbsolutePath? resolvedPath = FileUtilities.MakeFullPathFromThreadWorkingDirectory(path);
+            return resolvedPath?.Value ?? path;
         }
 
         /// <summary>
@@ -722,7 +759,7 @@ namespace Microsoft.Build.Evaluation
 
         public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
-            pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
+            pathToAssembly = FileUtilities.GetFullPathNoThrow(ResolveAgainstThreadWorkingDirectory(pathToAssembly));
             if (FileSystems.Default.FileExists(pathToAssembly))
             {
                 loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));

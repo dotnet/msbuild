@@ -4,9 +4,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+#if FEATURE_APPDOMAIN
+using System.Runtime.Remoting;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -26,6 +31,9 @@ namespace Microsoft.Build.Logging
     /// </summary>
     internal class BuildEventArgsWriter
     {
+        private const int StringReferenceCacheSize = 256; // Must remain a power of two.
+        private const int MaxCachedStringLength = 4096;
+
         private readonly Stream originalStream;
 
         /// <summary>
@@ -55,6 +63,11 @@ namespace Microsoft.Build.Logging
         private readonly BinaryWriter currentRecordWriter;
 
         /// <summary>
+        /// The binary writer around the nameValueListStream.
+        /// </summary>
+        private readonly BinaryWriter nameValueListWriter;
+
+        /// <summary>
         /// The binary writer we're currently using. Is pointing at the currentRecordWriter usually,
         /// but sometimes we repoint it to the originalBinaryWriter temporarily, when writing string
         /// and name-value records.
@@ -75,9 +88,24 @@ namespace Microsoft.Build.Logging
         private readonly Dictionary<HashKey, int> stringHashes = new Dictionary<HashKey, int>();
 
         /// <summary>
+        /// Avoid repeatedly hashing shared string instances without retaining the full string population.
+        /// </summary>
+        private readonly StringReferenceCacheEntry[] stringReferenceCache = new StringReferenceCacheEntry[StringReferenceCacheSize];
+
+        /// <summary>
         /// Hashtable used for deduplicating name-value lists. Same as strings.
         /// </summary>
         private readonly Dictionary<HashKey, int> nameValueListHashes = new Dictionary<HashKey, int>();
+
+        /// <summary>
+        /// Avoid repeatedly enumerating and hashing metadata dictionaries shared across items (because they're copy-on-write and frequently unmodified).
+        /// </summary>
+        private readonly ConditionalWeakTable<ImmutableDictionary<string, string>, StrongBox<int>> metadataRecordIds =
+            new ConditionalWeakTable<ImmutableDictionary<string, string>, StrongBox<int>>();
+
+#if DEBUG
+        internal int MetadataReferenceCacheHits { get; private set; }
+#endif
 
         /// <summary>
         /// Index 0 is null, Index 1 is the empty string.
@@ -131,6 +159,7 @@ namespace Microsoft.Build.Logging
             this.currentRecordStream = new MemoryStream(65536);
 
             this.nameValueListStream = new MemoryStream(256);
+            this.nameValueListWriter = new BinaryWriter(nameValueListStream);
 
             this.originalBinaryWriter = binaryWriter;
             this.currentRecordWriter = new BinaryWriter(currentRecordStream);
@@ -141,11 +170,20 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Write a provided instance of BuildEventArgs to the BinaryWriter
         /// </summary>
-        public void Write(BuildEventArgs e)
+        public void Write(BuildEventArgs e, BinaryLogRecordKind? originalRecordKind = null)
         {
             // reset the temp stream (in case last usage forgot to do so).
             this.currentRecordStream.SetLength(0);
             BinaryLogRecordKind eventKind = WriteCore(e);
+
+            // Legacy BuildCheck diagnostics share ordinary payloads, but retain distinct record kinds.
+            eventKind = (originalRecordKind, eventKind) switch
+            {
+                (BinaryLogRecordKind.BuildCheckMessage, BinaryLogRecordKind.Message) => BinaryLogRecordKind.BuildCheckMessage,
+                (BinaryLogRecordKind.BuildCheckWarning, BinaryLogRecordKind.Warning) => BinaryLogRecordKind.BuildCheckWarning,
+                (BinaryLogRecordKind.BuildCheckError, BinaryLogRecordKind.Error) => BinaryLogRecordKind.BuildCheckError,
+                _ => eventKind,
+            };
 
             FlushRecordToFinalStream(eventKind, currentRecordStream);
         }
@@ -210,6 +248,7 @@ namespace Microsoft.Build.Logging
                 case TargetStartedEventArgs targetStarted: return Write(targetStarted);
                 case TargetFinishedEventArgs targetFinished: return Write(targetFinished);
                 case BuildErrorEventArgs buildError: return Write(buildError);
+                case AssemblyConflictWarningEventArgs assemblyConflictWarning: return Write(assemblyConflictWarning);
                 case BuildWarningEventArgs buildWarning: return Write(buildWarning);
                 case ProjectStartedEventArgs projectStarted: return Write(projectStarted);
                 case ProjectFinishedEventArgs projectFinished: return Write(projectFinished);
@@ -270,6 +309,44 @@ namespace Microsoft.Build.Logging
             Write((int)stream.Length);
             WriteToOriginalStream(stream);
         }
+
+        internal static BinaryLogRecordKind GetRecordKind(BuildEventArgs e) => e switch
+        {
+            ResponseFileUsedEventArgs => BinaryLogRecordKind.ResponseFileUsed,
+            TaskParameterEventArgs => BinaryLogRecordKind.TaskParameter,
+            ProjectImportedEventArgs => BinaryLogRecordKind.ProjectImported,
+            TargetSkippedEventArgs => BinaryLogRecordKind.TargetSkipped,
+            PropertyReassignmentEventArgs => BinaryLogRecordKind.PropertyReassignment,
+            TaskCommandLineEventArgs => BinaryLogRecordKind.TaskCommandLine,
+            UninitializedPropertyReadEventArgs => BinaryLogRecordKind.UninitializedPropertyRead,
+            EnvironmentVariableReadEventArgs => BinaryLogRecordKind.EnvironmentVariableRead,
+            PropertyInitialValueSetEventArgs => BinaryLogRecordKind.PropertyInitialValueSet,
+            CriticalBuildMessageEventArgs => BinaryLogRecordKind.CriticalBuildMessage,
+            AssemblyLoadBuildEventArgs => BinaryLogRecordKind.AssemblyLoad,
+            MSBuildServerLifecycleEventArgs => BinaryLogRecordKind.MSBuildServerLifecycle,
+            AssemblyResolutionSearchTraceEventArgs => BinaryLogRecordKind.AssemblyResolutionSearchTrace,
+            AssemblyConflictDependencyDetailsMessageEventArgs => BinaryLogRecordKind.AssemblyConflictDependencyDetails,
+            BuildMessageEventArgs => BinaryLogRecordKind.Message,
+            TaskStartedEventArgs => BinaryLogRecordKind.TaskStarted,
+            TaskFinishedEventArgs => BinaryLogRecordKind.TaskFinished,
+            TargetStartedEventArgs => BinaryLogRecordKind.TargetStarted,
+            TargetFinishedEventArgs => BinaryLogRecordKind.TargetFinished,
+            BuildErrorEventArgs => BinaryLogRecordKind.Error,
+            AssemblyConflictWarningEventArgs => BinaryLogRecordKind.AssemblyConflictWarning,
+            BuildWarningEventArgs => BinaryLogRecordKind.Warning,
+            ProjectStartedEventArgs => BinaryLogRecordKind.ProjectStarted,
+            ProjectFinishedEventArgs => BinaryLogRecordKind.ProjectFinished,
+            BuildSubmissionStartedEventArgs => BinaryLogRecordKind.BuildSubmissionStarted,
+            BuildStartedEventArgs => BinaryLogRecordKind.BuildStarted,
+            BuildFinishedEventArgs => BinaryLogRecordKind.BuildFinished,
+            BuildCanceledEventArgs => BinaryLogRecordKind.BuildCanceled,
+            ProjectEvaluationStartedEventArgs => BinaryLogRecordKind.ProjectEvaluationStarted,
+            ProjectEvaluationFinishedEventArgs => BinaryLogRecordKind.ProjectEvaluationFinished,
+            BuildCheckTracingEventArgs => BinaryLogRecordKind.BuildCheckTracing,
+            BuildCheckAcquisitionEventArgs => BinaryLogRecordKind.BuildCheckAcquisition,
+            LoggersRegisteredEventArgs => BinaryLogRecordKind.LoggersRegistered,
+            _ => BinaryLogRecordKind.Message,
+        };
 
         /// <summary>
         /// Switches the binaryWriter used by the Write* methods to the direct underlying stream writer
@@ -542,6 +619,8 @@ namespace Microsoft.Build.Logging
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
                 case MSBuildServerLifecycleEventArgs serverLifecycle: return Write(serverLifecycle);
+                case AssemblyResolutionSearchTraceEventArgs assemblyResolutionSearchTrace: return Write(assemblyResolutionSearchTrace);
+                case AssemblyConflictDependencyDetailsMessageEventArgs assemblyConflictDependencyDetails: return Write(assemblyConflictDependencyDetails);
 
                 default: // actual BuildMessageEventArgs
                     WriteMessageFields(e, writeImportance: true);
@@ -597,6 +676,101 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.ReasonCode);
             Write(e.ShortLived);
             return BinaryLogRecordKind.MSBuildServerLifecycle;
+        }
+
+        private BinaryLogRecordKind Write(AssemblyResolutionSearchTraceEventArgs e)
+        {
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
+            WriteDeduplicatedString(e.RequestedAssemblyName);
+            WriteDeduplicatedString(e.TargetProcessorArchitecture);
+
+            Write(e.SearchAttempts.Count);
+            AssemblyResolutionSearchAttempt previous = null;
+            for (int i = 0; i < e.SearchAttempts.Count; i++)
+            {
+                AssemblyResolutionSearchAttempt attempt = e.SearchAttempts[i];
+                AssemblyResolutionSearchAttemptContext unchangedContext = attempt.GetUnchangedContext(previous);
+                Write((byte)unchangedContext);
+                WriteDeduplicatedString(attempt.FileNameAttempted);
+                if ((unchangedContext & AssemblyResolutionSearchAttemptContext.SearchPathUnchanged) == 0)
+                {
+                    WriteDeduplicatedString(attempt.SearchPath);
+                }
+
+                if ((unchangedContext & AssemblyResolutionSearchAttemptContext.ParentAssemblyUnchanged) == 0)
+                {
+                    WriteDeduplicatedString(attempt.ParentAssembly);
+                }
+
+                WriteDeduplicatedString(attempt.AssemblyName);
+                Write((int)attempt.Result);
+                WriteDeduplicatedString(attempt.ProcessorArchitecture);
+                if ((unchangedContext & AssemblyResolutionSearchAttemptContext.AssemblyFoldersExUnchanged) == 0)
+                {
+                    Write(attempt.IsAssemblyFoldersExSearch);
+                }
+
+                previous = attempt;
+            }
+
+            return BinaryLogRecordKind.AssemblyResolutionSearchTrace;
+        }
+        private BinaryLogRecordKind Write(AssemblyConflictDependencyDetailsMessageEventArgs e)
+        {
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
+            WriteAssemblyConflictReferenceDetails(e.Victor);
+            WriteAssemblyConflictReferenceDetails(e.Victim);
+
+            return BinaryLogRecordKind.AssemblyConflictDependencyDetails;
+        }
+
+        private BinaryLogRecordKind Write(AssemblyConflictWarningEventArgs e)
+        {
+            // Write the eight diagnostic fields that the generic BuildWarningEventArgs writer uses.
+            // Do not write Message or Arguments because the reader reconstructs the message from the structured fields.
+            WriteBuildEventArgsFields(e, writeMessage: false);
+            WriteDeduplicatedString(e.Subcategory);
+            WriteDeduplicatedString(e.Code);
+            WriteDeduplicatedString(e.File);
+            WriteDeduplicatedString(e.ProjectFile);
+            Write(e.LineNumber);
+            Write(e.ColumnNumber);
+            Write(e.EndLineNumber);
+            Write(e.EndColumnNumber);
+
+            WriteDeduplicatedString(e.SimpleAssemblyName);
+            Write((int)e.LossReason);
+            WriteAssemblyConflictReferenceDetails(e.Victor);
+            WriteAssemblyConflictReferenceDetails(e.Victim);
+
+            return BinaryLogRecordKind.AssemblyConflictWarning;
+        }
+
+        private void WriteAssemblyConflictReferenceDetails(AssemblyConflictReferenceDetails details)
+        {
+            WriteDeduplicatedString(details.FusionName);
+            WriteDeduplicatedString(details.FullPath);
+            Write(details.IsPrimary);
+            Write(details.IsResolved);
+            WriteDeduplicatedString(details.UnresolvedPrimaryItemSpec);
+
+            Write(details.PrimarySourceItemSpecs.Count);
+            for (int i = 0; i < details.PrimarySourceItemSpecs.Count; i++)
+            {
+                WriteDeduplicatedString(details.PrimarySourceItemSpecs[i]);
+            }
+
+            Write(details.Dependees.Count);
+            for (int i = 0; i < details.Dependees.Count; i++)
+            {
+                AssemblyConflictDependee dependee = details.Dependees[i];
+                WriteDeduplicatedString(dependee.DependeeFullPath);
+                Write(dependee.SourceItemSpecs.Count);
+                for (int j = 0; j < dependee.SourceItemSpecs.Count; j++)
+                {
+                    WriteDeduplicatedString(dependee.SourceItemSpecs[j]);
+                }
+            }
         }
 
         private BinaryLogRecordKind Write(CriticalBuildMessageEventArgs e)
@@ -667,12 +841,32 @@ namespace Microsoft.Build.Logging
             WriteTaskItemList(e.Items, e.LogItemMetadata);
             WriteDeduplicatedString(e.ParameterName);
             WriteDeduplicatedString(e.PropertyName);
-            if (e.Kind == TaskParameterMessageKind.AddItem
-               || e.Kind == TaskParameterMessageKind.TaskOutput)
+            CheckForFilesToEmbed(e);
+            return BinaryLogRecordKind.TaskParameter;
+        }
+
+        internal void CheckForFilesToEmbed(TaskParameterEventArgs e)
+        {
+            if (e.Kind is TaskParameterMessageKind.AddItem or TaskParameterMessageKind.TaskOutput)
             {
                 CheckForFilesToEmbed(e.ItemType, e.Items, e.ProjectFile);
             }
-            return BinaryLogRecordKind.TaskParameter;
+        }
+
+        internal void CheckForFilesToEmbed(ProjectEvaluationFinishedEventArgs e)
+        {
+            if (EmbedFile == null)
+            {
+                return;
+            }
+
+            foreach (var item in Internal.Utilities.EnumerateItems(e.Items))
+            {
+                if (string.Equals(item.Type, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase))
+                {
+                    CheckForFileToEmbed(item.Value, e.ProjectFile);
+                }
+            }
         }
 
         private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true, bool writeLineAndColumn = false)
@@ -987,6 +1181,11 @@ namespace Microsoft.Build.Logging
                         Write((byte)0);
                     }
                 }
+                else if (item is AbsolutePath absolutePath)
+                {
+                    WriteDeduplicatedString(absolutePath.OriginalValue ?? string.Empty);
+                    Write(0);
+                }
                 else
                 {
                     WriteDeduplicatedString(item?.ToString() ?? ""); // itemspec
@@ -1088,14 +1287,19 @@ namespace Microsoft.Build.Logging
 
             foreach (var item in list)
             {
-                if (item is ITaskItem taskItem && !string.IsNullOrEmpty(taskItem.ItemSpec))
-                {
-                    EmbedFile.Invoke(ResolveEmbedPath(taskItem.ItemSpec, projectFile));
-                }
-                else if (item is string itemSpec && !string.IsNullOrEmpty(itemSpec))
-                {
-                    EmbedFile.Invoke(ResolveEmbedPath(itemSpec, projectFile));
-                }
+                CheckForFileToEmbed(item, projectFile);
+            }
+        }
+
+        private void CheckForFileToEmbed(object item, string projectFile)
+        {
+            if (item is ITaskItem taskItem && !string.IsNullOrEmpty(taskItem.ItemSpec))
+            {
+                EmbedFile.Invoke(ResolveEmbedPath(taskItem.ItemSpec, projectFile));
+            }
+            else if (item is string itemSpec && !string.IsNullOrEmpty(itemSpec))
+            {
+                EmbedFile.Invoke(ResolveEmbedPath(itemSpec, projectFile));
             }
         }
 
@@ -1137,25 +1341,67 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
-            // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
-            // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
-            // CopyOnWriteDictionary doesn't implement it properly.
-            foreach (var kvp in item.EnumerateMetadata())
+            ImmutableDictionary<string, string> backingMetadata = null;
+            IMetadataContainer metadataContainer = item as IMetadataContainer;
+            if (metadataContainer != null
+#if FEATURE_APPDOMAIN
+                && !RemotingServices.IsTransparentProxy(item)
+#endif
+                )
             {
-                nameValueListBuffer.Add(kvp);
+                SerializableMetadata serializableMetadata = metadataContainer.BackingMetadata;
+                if (serializableMetadata.HasValue)
+                {
+                    backingMetadata = serializableMetadata.Dictionary;
+                    if (backingMetadata.Count == 0)
+                    {
+                        Write((byte)0);
+                        return;
+                    }
+
+                    if (metadataRecordIds.TryGetValue(backingMetadata, out StrongBox<int> cachedRecord))
+                    {
+#if DEBUG
+                        MetadataReferenceCacheHits++;
+#endif
+                        Write(cachedRecord.Value);
+                        return;
+                    }
+
+                    foreach (KeyValuePair<string, string> kvp in backingMetadata)
+                    {
+                        nameValueListBuffer.Add(new KeyValuePair<string, string>(
+                            kvp.Key,
+                            EscapingUtilities.UnescapeAll(kvp.Value)));
+                    }
+                }
             }
 
-            // Don't sort metadata because we want the binary log to be fully roundtrippable
-            // and we need to preserve the original order.
-            // if (nameValueListBuffer.Count > 1)
-            // {
-            //    nameValueListBuffer.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
-            // }
+            if (backingMetadata == null)
+            {
+                if (item is TaskItemData taskItemData)
+                {
+                    WriteNameValueList(taskItemData.Metadata);
+                    return;
+                }
 
-            WriteNameValueList();
+                // WARNING: Can't use AddRange here because CopyOnWriteDictionary in Microsoft.Build.Utilities.v4.0.dll
+                // is broken. Microsoft.Build.Utilities.v4.0.dll loads from the GAC by XAML markup tooling and it's
+                // implementation doesn't work with AddRange because AddRange special-cases ICollection<T> and
+                // CopyOnWriteDictionary doesn't implement it properly.
+                foreach (var kvp in item.EnumerateMetadata())
+                {
+                    nameValueListBuffer.Add(kvp);
+                }
+            }
 
+            int metadataRecordId = WriteNameValueList();
             nameValueListBuffer.Clear();
+
+            if (backingMetadata != null)
+            {
+                metadataRecordIds.Add(backingMetadata, new StrongBox<int>(metadataRecordId));
+            }
         }
 
         private void WriteProperties(IEnumerable properties)
@@ -1209,15 +1455,32 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void WriteNameValueList()
+        private int WriteNameValueList()
         {
             if (nameValueListBuffer.Count == 0)
             {
                 Write((byte)0);
-                return;
+                return 0;
             }
 
             HashKey hash = HashAllStrings(nameValueListBuffer);
+            return WriteNameValueList(hash);
+        }
+
+        private int WriteNameValueList(IEnumerable<KeyValuePair<string, string>> nameValueList)
+        {
+            HashKey hash = HashAllStrings(nameValueList);
+            if (nameValueIndexListBuffer.Count == 0)
+            {
+                Write((byte)0);
+                return 0;
+            }
+
+            return WriteNameValueList(hash);
+        }
+
+        private int WriteNameValueList(HashKey hash)
+        {
             if (!nameValueListHashes.TryGetValue(hash, out var recordId))
             {
                 recordId = nameValueRecordId;
@@ -1229,6 +1492,7 @@ namespace Microsoft.Build.Logging
             }
 
             Write(recordId);
+            return recordId;
         }
 
         /// <summary>
@@ -1248,12 +1512,11 @@ namespace Microsoft.Build.Logging
             // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
             nameValueListStream.SetLength(0);
-            var nameValueListBw = new BinaryWriter(nameValueListStream);
 
-            using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
+            using (var _ = RedirectWritesToDifferentWriter(nameValueListWriter, binaryWriter))
             {
                 Write(nameValueIndexListBuffer.Count);
-                for (int i = 0; i < nameValueListBuffer.Count; i++)
+                for (int i = 0; i < nameValueIndexListBuffer.Count; i++)
                 {
                     var kvp = nameValueIndexListBuffer[i];
                     Write(kvp.Key);
@@ -1280,6 +1543,24 @@ namespace Microsoft.Build.Logging
             for (int i = 0; i < nameValueList.Count; i++)
             {
                 var kvp = nameValueList[i];
+                var (keyIndex, keyHash) = HashString(kvp.Key);
+                var (valueIndex, valueHash) = HashString(kvp.Value);
+                hash = hash.Add(keyHash);
+                hash = hash.Add(valueHash);
+                nameValueIndexListBuffer.Add(new KeyValuePair<int, int>(keyIndex, valueIndex));
+            }
+
+            return hash;
+        }
+
+        private HashKey HashAllStrings(IEnumerable<KeyValuePair<string, string>> nameValueList)
+        {
+            HashKey hash = new HashKey();
+
+            nameValueIndexListBuffer.Clear();
+
+            foreach (KeyValuePair<string, string> kvp in nameValueList)
+            {
                 var (keyIndex, keyHash) = HashString(kvp.Key);
                 var (valueIndex, valueHash) = HashString(kvp.Value);
                 hash = hash.Add(keyHash);
@@ -1358,6 +1639,20 @@ namespace Microsoft.Build.Logging
                 return (1, default);
             }
 
+            int referenceCacheIndex = -1;
+            if (text.Length <= MaxCachedStringLength)
+            {
+                // The CLR caches the identity hash, so reference-cache hits avoid
+                // recomputing the content hash by scanning the string.
+                int identityHash = RuntimeHelpers.GetHashCode(text);
+                referenceCacheIndex = identityHash & (StringReferenceCacheSize - 1);
+                ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
+                if (ReferenceEquals(cachedEntry.Text, text))
+                {
+                    return (cachedEntry.RecordId, cachedEntry.Hash);
+                }
+            }
+
             var hash = new HashKey(text);
             if (!stringHashes.TryGetValue(hash, out var recordId))
             {
@@ -1367,6 +1662,14 @@ namespace Microsoft.Build.Logging
                 WriteStringRecord(text);
 
                 stringRecordId += 1;
+            }
+
+            if (referenceCacheIndex >= 0)
+            {
+                ref StringReferenceCacheEntry cachedEntry = ref stringReferenceCache[referenceCacheIndex];
+                cachedEntry.RecordId = recordId;
+                cachedEntry.Hash = hash;
+                cachedEntry.Text = text;
             }
 
             return (recordId, hash);
@@ -1429,6 +1732,13 @@ namespace Microsoft.Build.Logging
                 Write(extendedData.ExtendedMetadata);
                 WriteDeduplicatedString(extendedData.ExtendedData);
             }
+        }
+
+        private struct StringReferenceCacheEntry
+        {
+            internal string Text;
+            internal int RecordId;
+            internal HashKey Hash;
         }
 
         internal readonly struct HashKey : IEquatable<HashKey>

@@ -95,6 +95,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                     ITypeSymbol typeArg = namedPropertyType.TypeArguments[0];
 
+                    // A generic task can be constructed with a supported type. Its open type
+                    // parameter does not provide enough information for a binding diagnostic.
+                    if (typeArg.TypeKind == TypeKind.TypeParameter)
+                    {
+                        continue;
+                    }
+
                     if (SupportedTaskItemTypes.IsConvertChangeTypeTaskItemType(typeArg.SpecialType))
                     {
                         symbolContext.ReportDiagnostic(Diagnostic.Create(

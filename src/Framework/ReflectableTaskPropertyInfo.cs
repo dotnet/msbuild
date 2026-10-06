@@ -40,6 +40,14 @@ namespace Microsoft.Build.Execution
         {
             ArgumentNullException.ThrowIfNull(taskType);
             _taskType = taskType;
+            IsAssignableToITask = taskPropertyInfo.IsAssignableToITask;
+            IsValueTypeOutputParameter = taskPropertyInfo.IsValueTypeOutputParameter;
+            if (taskPropertyInfo is ReflectableTaskPropertyInfo reflectableProperty)
+            {
+                IsTypeUnresolved = reflectableProperty.IsTypeUnresolved;
+                ParameterTypeForExpansion = reflectableProperty.ParameterTypeForExpansion;
+                DeclaredTypeName = reflectableProperty.DeclaredTypeName;
+            }
         }
 
         /// <summary>
@@ -57,20 +65,68 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Initializes a new <see cref="ReflectableTaskPropertyInfo"/> with three precomputed parameters. This is specifically
+        /// Initializes a new <see cref="ReflectableTaskPropertyInfo"/> with precomputed parameters. This is specifically
         /// used with MetadataLoadContext, as these parameters cannot be computed for the property type passed in directly but
         /// rather the relevant base type.
         /// </summary>
-        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, bool isAssignableToITaskItemType)
+        internal ReflectableTaskPropertyInfo(
+            PropertyInfo propertyInfo,
+            Type propertyType,
+            bool output,
+            bool required,
+            bool isAssignableToITaskItemType,
+            Type parameterTypeForExpansion,
+            bool isTypeUnresolved)
             : base(
             propertyInfo.Name,
-            propertyInfo.PropertyType,
+            propertyType,
             output,
             required)
         {
             _propertyInfo = propertyInfo;
             IsAssignableToITask = isAssignableToITaskItemType;
+            IsValueTypeOutputParameter |= IsPathType(parameterTypeForExpansion);
+            ParameterTypeForExpansion = parameterTypeForExpansion;
+            IsTypeUnresolved = isTypeUnresolved;
+            if (isTypeUnresolved)
+            {
+                try
+                {
+                    DeclaredTypeName = propertyType.FullName;
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                }
+            }
         }
+
+        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, Type parameterTypeForExpansion)
+            : this(propertyInfo, output, required, parameterTypeForExpansion, declaredTypeName: null)
+        {
+        }
+
+        internal ReflectableTaskPropertyInfo(PropertyInfo propertyInfo, bool output, bool required, Type parameterTypeForExpansion, string declaredTypeName)
+            : base(propertyInfo.Name, parameterTypeForExpansion ?? typeof(object), output, required)
+        {
+            _propertyInfo = propertyInfo;
+            IsTypeUnresolved = true;
+            IsValueTypeOutputParameter |= IsPathType(parameterTypeForExpansion);
+            ParameterTypeForExpansion = parameterTypeForExpansion;
+            DeclaredTypeName = declaredTypeName;
+        }
+
+        private static bool IsPathType(Type type)
+        {
+            Type elementType = type?.IsArray == true ? type.GetElementType() : type;
+            return elementType == typeof(System.IO.FileInfo)
+                || elementType == typeof(System.IO.DirectoryInfo);
+        }
+
+        internal bool IsTypeUnresolved { get; }
+
+        internal Type ParameterTypeForExpansion { get; }
+
+        internal string DeclaredTypeName { get; }
 
         /// <summary>
         /// Gets or sets the reflection-produced PropertyInfo.

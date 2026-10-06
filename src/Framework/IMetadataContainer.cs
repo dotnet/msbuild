@@ -19,6 +19,8 @@ namespace Microsoft.Build.Framework
         /// If the implementation's backing dictionary does not support copy-on-write, it should return the default struct,
         /// allowing the caller to decide whether to take the reference.
         /// This can safely be used across AppDomain boundaries.
+        /// Values use MSBuild's internal escaped representation; keys are stored verbatim.
+        /// Unescaping each value must produce the same metadata sequence and ordering as <see cref="EnumerateMetadata"/>.
         /// </remarks>
         SerializableMetadata BackingMetadata { get; }
 

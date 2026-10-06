@@ -218,17 +218,16 @@
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
                      터미널 로거에 대한 매개 변수입니다. (약식: -tlp)
                      사용 가능한 매개 변수입니다.
-                        default--터미널의 기본 동작을 지정합니다.
-                        로거입니다. 다음 값 중 하나가 필요합니다.
-                           - 'on', 'true'는 terminalLogger를 사용하도록 강제하며,
-                            이는 사용하지 않도록 설정된 경우에도 마찬가지입니다.
-                           - 'off', 'false'는 terminalLogger를 사용하지 않도록 강제하며,
-                            이는 사용하도록 설정된 경우에도 마찬가지입니다.
-                           - 'auto'는 터미널이
-                            지원하고 세션이 리디렉션되지 않을 때 TerminalLogger를 사용하도록 설정합니다.
+                        default--터미널 로거의 기본 동작을
+                        지정합니다. 다음 값 중 하나가 필요합니다.
+                           - `on`, `true`는 비활성화된 경우에도 terminalLogger를
+                            사용하도록 강제합니다.
+                           - `off`, `false`는 활성화된 경우에도 terminalLogger를
+                            사용하지 않도록 강제합니다.
+                           - `auto`는 터미널이 지원하고 세션이
+                            리디렉션되지 않을 때 TerminalLogger를 활성화합니다.
                             stdout/stderr
-                        verbosity--이
-로거에 대한 -verbosity 설정을
+                        verbosity--이 로거에 대한 -verbosity 설정을
                         재정의합니다.
                         showCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
 
@@ -246,26 +245,17 @@
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
-                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded
+        <target state="translated">  -multithreaded[:true|false]
                      MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
                      즉, MSBuild는 여러 스레드를 사용하여
                      프로젝트를 병렬로 빌드합니다.
                      여러 프로세스 대신에 말이죠.
-                     이 옵션은 지원되지 않습니다.
-                     사용되는 최대 스레드 수는 
-에 의해 결정됩니다.
+                     사용되는 최대 스레드 수는 에 의해 결정됩니다
                      -maxCpuCount 스위치에 의해 결정됩니다.
-                     다중 스레드 모드가 켜져 있고
-                     MSBUILDFORCEALLTASKSOUTOFPROC=1인 경우
-                     maxCpuCount는 256보다 클 수 없습니다.
                      (약식: -mt)
     </target>
         <note />
@@ -318,7 +308,7 @@
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
         <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1072: 다중 스레드 모드 값이 유효하지 않습니다. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -393,62 +383,62 @@
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
-        <target state="needs-review-translation">제한 시간 내에 서버에 연결할 수 없었습니다. 서버가 시작되지 못했을 수 있습니다</target>
+        <target state="translated">제한 시간 내에 서버에 연결할 수 없었습니다. 서버가 시작되지 못했을 수 있습니다</target>
         <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerCrashedOnLaunch">
         <source>the server process exited with code {0} immediately after launch</source>
-        <target state="needs-review-translation">서버 프로세스가 시작 직후 코드 {0}(으)로 종료되었습니다</target>
+        <target state="translated">서버 프로세스가 시작 직후 코드 {0}(으)로 종료되었습니다</target>
         <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
-        <target state="needs-review-translation">서버 프로세스를 시작할 수 없습니다</target>
+        <target state="translated">서버 프로세스를 시작할 수 없습니다</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">이 빌드에 대해 실행 중인 MSBuild Server 노드를 다시 사용합니다(프로세스 ID {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">이 빌드에서 MSBuild Server 노드가 시작되었습니다(프로세스 ID {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">이 빌드에서만 MSBuild Server 노드가 시작되었습니다. 이후에는 종료됩니다(프로세스 ID {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">MSBuild Server가 요청되었지만 이 빌드에는 사용되지 않았습니다: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">서버가 다른 빌드를 처리하느라 바빴습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">이 호출은 MSBuild Server와 호환되지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">노드 재사용이 사용하지 않도록 설정되어 있습니다(-nodeReuse:false 또는 MSBUILDDISABLENODEREUSE=1).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">MSBUILDENSURESTDOUTFORTASKPROCESSES 이스케이프 해치가 사용하도록 설정되어 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
-        <target state="needs-review-translation">현재 서버 상태를 확인할 수 없습니다</target>
+        <target state="translated">현재 서버 상태를 확인할 수 없습니다</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerUnavailable">
@@ -1849,6 +1839,44 @@
     exact @ switch that resulted in the duplicate response file.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ReplayFilterCanceled">
+        <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
+        <target state="translated">MSBUILD : error MSB1082: 필터링된 이진 로그 재생이 취소되었습니다. 출력이 게시되지 않았습니다.</target>
+        <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterFailed">
+        <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
+        <target state="translated">MSBUILD : error MSB1081: 필터링된 이진 로그를 재생하지 못했습니다. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterInvalidOutput">
+        <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
+        <target state="translated">MSBUILD : error MSB1085: 필터링된 이진 로그 출력 경로가 잘못되었습니다. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterOutputExists">
+        <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
+        <target state="translated">MSBUILD : error MSB1080: 이진 로그 대상이 이미 있거나 두 번 이상 지정되었습니다. 새 출력 경로를 선택하세요.</target>
+        <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterUnsupportedSwitch">
+        <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
+        <target state="translated">MSBUILD : error MSB1077: Exclude=를 사용하여 이진 로그를 재생할 때는 이 스위치가 지원되지 않습니다.</target>
+        <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterZipNotSupported">
+        <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
+        <target state="translated">MSBUILD : error MSB1084: 필터링된 재생에서는 ProjectImports=Embed 또는 ProjectImports=None만 지원하며, ProjectImports=ZipFile은 지원하지 않습니다.</target>
+        <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
+        <target state="translated">MSBUILD : error MSB1073: 다중 스레드 모드와 -reportFileAccesses는 함께 사용할 수 없습니다. 파일 액세스 보고는 작업자 프로세스당 하나의 프로젝트에 대한 액세스만 기록하지만, 다중 스레드 모드에서는 동일한 프로세스에서 여러 프로젝트를 실행할 수 있습니다. -reportFileAccesses를 제거하거나 -mt:false를 사용해 다중 스레드 모드를 사용하지 않도록 설정하세요. MSBUILDFORCEMULTITHREADED가 설정된 경우 먼저 이를 설정 해제하세요. MSBUILDENABLEMULTITHREADED는 -mt:false로 재정의할 수 있습니다.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
         <source>MSBUILD : error MSB1022: Response file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1022: 지시 파일이 없습니다.</target>
@@ -2141,7 +2169,7 @@
       </trans-unit>
       <trans-unit id="HelpMessage_30_BinaryLoggerSwitch">
         <source>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
+                     Serializes build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
                      of the build process that can later be used to reconstruct
@@ -2149,6 +2177,19 @@
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
+
+                     Exclude=kind[,kind...] omits the named event kinds from
+                     this binary logger during builds and replay. Console and
+                     other loggers are unaffected. Names are case-insensitive.
+                     Specify Exclude once per logger. Selection matches exact
+                     record kinds, not all derived message or warning events.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Example: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtered replay requires new output paths and does not
+                     support ProjectImports=ZipFile.
+                     Filtering is not redaction: embedded files are independent.
 
                      The optional LogFile specifies the path where the
                      binary log is saved. To generate a distinct log file
@@ -2192,7 +2233,7 @@
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     모든 빌드 이벤트를 압축된 이진 파일로 직렬화합니다.
+                     빌드 이벤트를 압축된 이진 파일로 직렬화합니다.
                      기본적으로 파일은 현재 디렉터리에 있으며 이름은
                      "msbuild.binlog"입니다. 이진 로그는 나중에 텍스트 로그를 재구성하는 데
                      사용할 수 있고 다른 분석 도구에서 사용할 수 있는 빌드 프로세스의
@@ -2201,11 +2242,24 @@
                      작지만 더 많은 정보를 담고 있습니다.
                      (약식: -bl)
 
+                     Exclude=kind[,kind...]는 명명된 이벤트 종류를
+                     빌드 및 재생 중 이 이진 로거에서 생략합니다. 콘솔 및
+                     다른 로거에는 영향을 주지 않습니다. 이름은 대/소문자를 구분하지 않습니다.
+                     로거마다 Exclude를 한 번씩 지정합니다. 선택 영역은 정확한
+                     레코드 종류와 일치하며, 모든 파생된 메시지나 경고 이벤트와 일치하지는 않습니다.
+                     빌드, 프로젝트, 대상 및 작업 수명 주기 이벤트는
+                     보호됩니다. ProjectEvaluationStarted와
+                     ProjectEvaluationFinished는 둘 다 제외하거나 둘 다 제외하지 마세요.
+                     예: -bl:"out.binlog;Exclude=Message,Warning"
+                     필터링된 재생은 새 출력 경로가 필요하며
+                     ProjectImports=ZipFile은 지원되지 않습니다.
+                     필터링은 삭제가 아니며, 포함된 파일은 독립적입니다.
+
                      선택적 LogFile은 이진 로그가 저장되는
                      경로를 지정합니다. 각 빌드에 고유한 로그 파일을 생성하려면
                      토큰 "{}"를 경로에 추가할 수 있습니다.
                      예: LogFile=output-{}-log.binlog. 로그 경로의 
-                     각 "{}"는 타임스탬프, 실행 프로세스 ID 및 임이의 문자열
+                     각 "{}"는 타임스탬프, 실행 프로세스 ID 및 임의의 문자열
                      스탬프를 사용하여 고유한 문자열로
                      대체됩니다.
 

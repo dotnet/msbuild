@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
     <body>
@@ -55,6 +55,16 @@
         <source>ArchiveFile was obtained, but the final edited version was not set.</source>
         <target state="translated">ArchiveFile получен, но окончательная измененная версия не установлена.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrew">
+        <source>The binary log event filter threw an exception.</source>
+        <target state="translated">Фильтр событий двоичного журнала создал исключение.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrewWithContext">
+        <source>The binary log event filter threw an exception for record {0} ({1}) in file format version {2}. Build context: [{3}]. Original build context: [{4}]. See the inner exception for details.</source>
+        <target state="translated">Фильтр событий двоичного журнала вызвал исключение для записи {0} ({1}) в формате файла версии {2}. Контекст сборки: [{3}]. Исходный контекст сборки: [{4}]. Дополнительные сведения см. во внутреннем исключении.</target>
+        <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
@@ -602,6 +612,11 @@
         <target state="translated">MSB4255: следующие входные файлы кэша результатов не существуют: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidBinaryLoggerEventFilter">
+        <source>MSB4234: Invalid binary logger event filter: "{0}". Specify Exclude= once per logger, followed by comma-separated event kind names. Empty, numeric, unknown, auxiliary, and protected lifecycle kinds are not allowed. Exclude ProjectEvaluationStarted and ProjectEvaluationFinished together, or neither.</source>
+        <target state="translated">MSB4234: недопустимый фильтр событий средства ведения двоичного журнала: "{0}". Укажите Exclude= один раз для каждого средства ведения журнала, а затем через запятую перечислите имена видов событий. Пустые, числовые, неизвестные, вспомогательные и защищенные виды жизненного цикла не допускаются. Исключите ProjectEvaluationStarted и ProjectEvaluationFinished одновременно либо не исключайте ни один из них.</target>
+        <note>{StrBegin="MSB4234: "}Do not localize Exclude= or the event kind names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">Строка версии имела неверный формат.</target>
@@ -653,6 +668,36 @@
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Создан метапроект "{0}".</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeAlreadyActive">
+        <source>MSB4289: Another multi-threaded strict build is already active in this process. Finish it before starting another build, use a separate process, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to disable strict checks.</source>
+        <target state="translated">MSB4289: в этом процессе уже используется другая многопоточная строгая сборка. Завершите его перед началом другой сборки, используйте отдельный процесс или задайте MSBUILDDISABLEFEATURESFROMVERSION=18.12 перед запуском процесса, чтобы отключить строгие проверки.</target>
+        <note>{StrBegin="MSB4289: "}Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeCurrentDirectoryChanged">
+        <source>MSB4286: Multi-threaded strict mode found the process current directory at "{1}" instead of "{2}" after task "{0}". Use TaskEnvironment instead of changing the process directory. The change may come from another task, a logger, or host code that ran concurrently to the context of this event.</source>
+        <target state="translated">MSB4286: в многопоточном строгом режиме текущий каталог процесса обнаружен в "{1}", а не в "{2}" после "{0}" задачи. Используйте TaskEnvironment вместо изменения каталога процесса. Изменение может произойти из-за другой задачи, средства ведения журнала или кода узла, которые выполнялись одновременно с контекстом этого события.</target>
+        <note>{StrBegin="MSB4286: "}{0} is the task checked. {1} is the unexpected current directory. {2} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeEnabled">
+        <source>Multi-threaded strict mode is enabled. Process current directory: "{0}".</source>
+        <target state="translated">Многопоточный строгий режим включен. Текущий каталог процесса: "{0}".</target>
+        <note>{0} is the full path of the sentinel directory.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelMissing">
+        <source>MSB4288: Multi-threaded strict mode restored the sentinel directory "{0}" and the process current directory after a directory became unavailable. Do not remove directories used by an active build.</source>
+        <target state="translated">MSB4288: многопоточный строгий режим восстановил каталог Sentinel "{0}" и текущий каталог процесса после того, как каталог стал недоступен. Не удаляйте каталоги, используемые активной сборкой.</target>
+        <note>{StrBegin="MSB4288: "}{0} is the sentinel directory. This warning is reported only after successful recovery.</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeSentinelRecoveryFailed">
+        <source>MSB4290: Multi-threaded strict mode could not restore the sentinel directory "{0}" and the process current directory: {1} Ensure the engine-owned directory can be created and accessed, or set MSBUILDDISABLEFEATURESFROMVERSION=18.12 before starting the process to temporarily disable strict checks.</source>
+        <target state="translated">MSB4290: многопоточному строгому режиму не удалось восстановить "{0}" каталога Sentinel и текущий каталог процесса: {1} Убедитесь, что каталог, принадлежащий подсистеме, можно создать и получить к нему доступ, или задайте MSBUILDDISABLEFEATURESFROMVERSION=18.12 перед запуском процесса, чтобы временно отключить строгие проверки.</target>
+        <note>{StrBegin="MSB4290: "}{0} is the sentinel directory. {1} is the recovery failure message. Do not localize "MSBUILDDISABLEFEATURESFROMVERSION=18.12".</note>
+      </trans-unit>
+      <trans-unit id="MultiThreadedStrictModeUnresolvedPathWrite">
+        <source>MSB4287: Multi-threaded strict mode found "{0}" in the sentinel directory "{1}" at project or build completion. Resolve paths with TaskEnvironment. The write may come from another project, a logger, or host code.</source>
+        <target state="translated">MSB4287: многопоточный строгий режим обнаружил "{0}" в каталоге Sentinel "{1}" при выполнении проекта или сборки. Разрешайте пути с помощью TaskEnvironment. Запись может исходить от другого проекта, регистратора или кода узла.</target>
+        <note>{StrBegin="MSB4287: "}{0} is a comma-separated list of file and directory names. {1} is the sentinel directory. "TaskEnvironment" is a type name and should not be localized.</note>
       </trans-unit>
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
@@ -731,7 +776,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">Частичное вычисление (этап вычисления "{0}") не поддерживается при создании проекта. Используйте ProjectInstance для выполнения частичной оценки или этап полной оценки для создания проекта.</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -942,6 +987,11 @@
         <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
         <target state="translated">MSB4283: не удалось выполнить задачу "{0}", так как для выполнения задач требуется загрузка типов и сборок задач с помощью отражения, что не поддерживается в этом обрезанном узле или узле с собственным AOT. Выполните сборку с помощью MSBuild на основе JIT, чтобы выполнять задания.</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>File-access reporting cannot be used with multi-threaded mode. File-access reporting requires process-isolated worker nodes so each access can be attributed to one project. Disable either ReportFileAccesses or MultiThreaded.</source>
+        <target state="translated">Отчеты о доступе к файлам нельзя использовать с многопоточным режимом. Для отчетов о доступе к файлам требуются изолированные по процессам рабочие узлы, чтобы каждый доступ можно было отнести к одному проекту. Отключите ReportFileAccesses или MultiThreaded.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
@@ -3181,8 +3231,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
-        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: недопустимые параметры средства ведения двоичного журнала: "{0}". Ожидаются: ProjectImports={{None,Embed,ZipFile}} и (или) [LogFile=]filePath.binlog (имя файла журнала или путь к нему должны иметь расширение ".binlog").</target>
+        <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...], and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
+        <target state="translated">MSB4234: недопустимые параметры средства ведения двоичного журнала: "{0}". Ожидается: ProjectImports={{None,Embed,ZipFile}}, OmitInitialInfo, Exclude=kind[,kind...] и/или [LogFile=]filePath.binlog (имя файла журнала или путь должны иметь расширение ".binlog").</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -3326,7 +3376,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">Настраиваемый тип '{0}' не поддерживается, так как все пользовательские типы событий устарели. Используйте extended*EventArgs. Дополнительные сведения: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">Настраиваемый тип событий "{0}" не поддерживается, так как все настраиваемые типы событий являются нерекомендуемыми. Вместо этого используйте Extended*EventArgs. Дополнительные сведения: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProjectFile">

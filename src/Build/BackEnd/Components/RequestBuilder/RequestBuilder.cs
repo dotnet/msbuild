@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -1207,7 +1208,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-
+            string tracedTargets = null;
             try
             {
                 // Determine the set of targets we need to build
@@ -1215,7 +1216,8 @@ namespace Microsoft.Build.BackEnd
                     .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
-                    MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
+                    tracedTargets = string.Join(", ", allTargets);
+                    MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, tracedTargets);
                 }
                 HandleProjectStarted(buildCheckManager);
 
@@ -1256,6 +1258,24 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+                if (!_cancellationTokenSource.IsCancellationRequested
+                    && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
+                    && scope.BuildId == _componentHost.BuildParameters.BuildId)
+                {
+                    ElementLocation location = _requestEntry.RequestConfiguration.Project.ProjectFileLocation;
+                    string entries = scope.VerifyUnresolvedPathWrites(location, out bool recovered);
+                    if (recovered)
+                    {
+                        _projectLoggingContext.LogWarning(null, new BuildEventFileInfo(location),
+                            "MultiThreadedStrictModeSentinelMissing", scope.SentinelDirectory);
+                    }
+                    else if (entries is not null)
+                    {
+                        _projectLoggingContext.LogWarning(null, new BuildEventFileInfo(location),
+                            "MultiThreadedStrictModeUnresolvedPathWrite", entries, scope.SentinelDirectory);
+                    }
+                }
+
                 // Populate the evaluation ID from the configuration for sending to the central node.
                 result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
 
@@ -1265,16 +1285,15 @@ namespace Microsoft.Build.BackEnd
                     ? result
                     : CopyTargetResultsFromProxyTargetsToRealTargets(result);
 
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath,
-                        string.Join(", ", allTargets));
-                }
-
                 return result;
             }
             finally
             {
+                if (tracedTargets is not null)
+                {
+                    MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, tracedTargets);
+                }
+
                 if (buildCheckManager is not null && _projectLoggingContext is not null)
                 {
                     buildCheckManager.EndProjectRequest(

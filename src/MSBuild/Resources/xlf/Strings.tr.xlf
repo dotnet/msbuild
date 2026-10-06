@@ -245,25 +245,17 @@
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
-                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -çok iş parçacıklı
+        <target state="translated">  -multithreaded[:true|false]
                      MSBuild’de DENEYSEL çok iş parçacıklı modu etkinleştirir.
                      Bu, MSBuild’in
                      projeleri işlemek için birden çok iş parçacığı kullanacağı,
                      birden çok işlem kullanmayacağı anlamına gelir.
-                     Bu seçenek desteklenmiyor.
                      Kullanılan maksimum iş parçacığı sayısı
                      -maxCpuCount anahtarı ile belirlenir.
-                     Çok iş parçacıklı modun açık
-                     ve MSBUILDFORCEALLTASKSOUTOFPROC=1 olması durumunda,
-                     maxCpuCount değeri 256’dan büyük olamaz.
                      (Kısa form: -mt)
     </target>
         <note />
@@ -316,7 +308,7 @@
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
         <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1072: Çok iş parçacıklı mod değeri geçerli değil. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -391,62 +383,62 @@
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
-        <target state="needs-review-translation">zaman aşımı süresi içinde sunucuya bağlanılamadı; sunucu başlatılamamış olabilir</target>
+        <target state="translated">zaman aşımı süresi içinde sunucuya bağlanılamadı; sunucu başlatılamamış olabilir</target>
         <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerCrashedOnLaunch">
         <source>the server process exited with code {0} immediately after launch</source>
-        <target state="needs-review-translation">sunucu işlemi başlatıldıktan hemen sonra {0} koduyla çıktı</target>
+        <target state="translated">sunucu işlemi başlatıldıktan hemen sonra {0} koduyla çıktı</target>
         <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
-        <target state="needs-review-translation">sunucu işlemi başlatılamadı</target>
+        <target state="translated">sunucu işlemi başlatılamadı</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">Bu derleme için çalışan MSBuild Sunucu düğümü yeniden kullanılıyor (işlem kimliği {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">Bu derleme için MSBuild Sunucu düğümü başlatıldı (işlem kimliği {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">MSBuild Sunucu düğümü yalnızca bu derleme için başlatıldı, ardından kapatılacak (işlem kimliği {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">MSBuild Sunucusu istendi ancak bu derleme için kullanılmadı: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">sunucu başka bir derlemeyle meşguldü</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">bu çağrı MSBuild Sunucu ile uyumlu değil</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">düğüm yeniden kullanımı devre dışı (-nodeReuse:false veya MSBUILDDISABLENODEREUSE=1)</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">MSBUILDENSURESTDOUTFORTASKPROCESSES kaçış mekanizması etkin</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
-        <target state="needs-review-translation">geçerli sunucu durumu belirlenemedi</target>
+        <target state="translated">geçerli sunucu durumu belirlenemedi</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerUnavailable">
@@ -1851,6 +1843,44 @@
     exact @ switch that resulted in the duplicate response file.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ReplayFilterCanceled">
+        <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
+        <target state="translated">MSBUILD : error MSB1082: Filtrelenmiş ikili günlük yeniden yürütme iptal edildi. Hiçbir çıktı yayımlanmadı.</target>
+        <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterFailed">
+        <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
+        <target state="translated">MSBUILD : error MSB1081: Filtrelenmiş ikili günlük yeniden yürütme başarısız oldu. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterInvalidOutput">
+        <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
+        <target state="translated">MSBUILD : error MSB1085: Geçersiz filtrelenmiş ikili günlük çıkış yolu. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterOutputExists">
+        <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
+        <target state="translated">MSBUILD : error MSB1080: İkili günlük hedefi zaten var veya birden çok kez belirtilmiş. Yeni bir çıkış yolu seçin.</target>
+        <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterUnsupportedSwitch">
+        <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
+        <target state="translated">MSBUILD : error MSB1077: Exclude= kullanılarak ikili günlük yeniden yürütülürken bu anahtar desteklenmez.</target>
+        <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterZipNotSupported">
+        <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
+        <target state="translated">MSBUILD : error MSB1084: Filtrelenmiş yeniden yürütme, ProjectImports=Embed veya ProjectImports=None değerlerini destekler, ProjectImports=ZipFile değerini desteklemez.</target>
+        <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
+        <target state="translated">MSBUILD : error MSB1073: Çok iş parçacıklı mod ile -reportFileAccesses birlikte kullanılamaz. Dosya erişimi raporlama, erişimleri çalışan işlemi başına tek bir projeyle ilişkilendirir. Ancak çok iş parçacıklı mod, aynı işlem içinde birden çok projeyi yürütebilir. -reportFileAccesses parametresini kaldırın veya -mt:false ile çok iş parçacıklı modu devre dışı bırakın. MSBUILDFORCEMULTITHREADED ayarlandıysa, önce bunun ayarını kaldırın; MSBUILDENABLEMULTITHREADED, -mt:false ile geçersiz kılınabilir.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
         <source>MSBUILD : error MSB1022: Response file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1022: Yanıt dosyası yok.</target>
@@ -2143,7 +2173,7 @@
       </trans-unit>
       <trans-unit id="HelpMessage_30_BinaryLoggerSwitch">
         <source>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
+                     Serializes build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
                      of the build process that can later be used to reconstruct
@@ -2151,6 +2181,19 @@
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
+
+                     Exclude=kind[,kind...] omits the named event kinds from
+                     this binary logger during builds and replay. Console and
+                     other loggers are unaffected. Names are case-insensitive.
+                     Specify Exclude once per logger. Selection matches exact
+                     record kinds, not all derived message or warning events.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Example: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtered replay requires new output paths and does not
+                     support ProjectImports=ZipFile.
+                     Filtering is not redaction: embedded files are independent.
 
                      The optional LogFile specifies the path where the
                      binary log is saved. To generate a distinct log file
@@ -2194,14 +2237,27 @@
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Tüm derleme olaylarını sıkıştırılmış bir ikili dosyada seri hale getirir.
+                     Derleme olaylarını sıkıştırılmış bir ikili dosyada seri hale getirir.
                      Varsayılan olarak, dosya geçerli dizinde bulunur ve "msbuild.binlog"
                      olarak adlandırılır. Daha sonra metin günlüklerini yeniden
                      yapılandırmak için kullanılabilen ve diğer analiz araçları tarafından
                      kullanılan ikili günlüğü, derleme işleminin ayrıntılı bir açıklamasıdır. İkili günlüğü genellikle, en ayrıntılı metin tanılama düzeyi günlüklerden
                      10-20 kat küçüktür ancak daha fazla bilgi içerir.
                      (Kısa biçim: -bl)
-                     
+                     (Kısa biçim: -bl)
+
+                     Exclude=kind[,kind...], adlandırılmış olay türlerini
+                     derlemeler ve yeniden yürütme sırasında bu ikili kaydediciden atlar. Konsol ve
+                     diğer kaydediciler etkilenmez. Adlar büyük/küçük harfe duyar değildir.
+                     Exclude değerini her günlükçü için bir kez belirtin. Seçim tam olarak
+                     türetilen tüm ileti veya uyarı olaylarını değil, kayıt türleriyle eşleşir.
+                     Derleme, proje, hedef ve görev yaşam döngüsü olayları
+                     korunuyor. ProjectEvaluationStarted ve
+                     ProjectEvaluationFinished birlikte veya hiçbirini hariç tut.
+                     Örnek: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtrelenmiş yeniden oynatma yeni çıkış yolları gerektirir ve
+                     ProjectImports=ZipFile desteklemez.
+                     Filtreleme, sansürleme değildir: eklenen dosyalar bağımsızdır.
 
                      İsteğe bağlı LogFile ikili günlüğün kaydedileceği yolu
                      belirtir. Ayrı bir günlük dosyası oluşturmak için
