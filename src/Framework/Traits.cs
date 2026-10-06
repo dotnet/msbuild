@@ -243,7 +243,7 @@ namespace Microsoft.Build.Framework
 
         private static int GetTelemetryShutdownTimeoutMs()
         {
-            int configured = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS", -1);
+            int configured = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS", 10_000);
             return configured >= 0 ? configured : 10_000;
         }
 

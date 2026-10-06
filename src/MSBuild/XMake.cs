@@ -1371,12 +1371,6 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-                if (KnownTelemetry.CrashTelemetry is not null && !OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
-                {
-                    // Main shuts this session down when the process exits.
-                    TelemetryManager.Instance.Initialize(isStandalone: true);
-                }
-
                 CrashTelemetryRecorder.FlushCrashTelemetry();
 
                 s_buildComplete.Set();

@@ -12,7 +12,7 @@ To tailor modernization and performance optimization investments we need to cont
 
 MSBuild telemetry collection (that is turned on by default), can be opted out - same as .NET SDK telemetry in general - via setting `DOTNET_CLI_TELEMETRY_OPTOUT` environment variable to `1` or `true`.
 
-`DOTNET_CLI_TELEMETRY_OPTOUT` applies to MSBuild running on .NET. `MSBuild.exe` on .NET Framework, as installed with Visual Studio or Build Tools, uses `MSBUILD_TELEMETRY_OPTOUT` instead, together with the Visual Studio telemetry consent. To opt out of both, set both variables. For delivery, consent, and CI behavior of `MSBuild.exe`, see [Collection and Delivery](../VS-Telemetry-Data.md#collection-and-delivery).
+`DOTNET_CLI_TELEMETRY_OPTOUT` applies to MSBuild running on both .NET and .NET Framework. `MSBuild.exe` on .NET Framework, as installed with Visual Studio or Build Tools, also supports `MSBUILD_TELEMETRY_OPTOUT` and honors the Visual Studio telemetry consent. For delivery, consent, and CI behavior of `MSBuild.exe`, see [Collection and Delivery](../VS-Telemetry-Data.md#collection-and-delivery).
 
 ## Datapoints overview
 

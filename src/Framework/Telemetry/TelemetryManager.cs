@@ -159,7 +159,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         internal static bool IsOptOut() =>
 #if NETFRAMEWORK
-            Traits.Instance.FrameworkTelemetryOptOut;
+            Traits.Instance.FrameworkTelemetryOptOut || Traits.Instance.SdkTelemetryOptOut;
 #else
             Traits.Instance.SdkTelemetryOptOut;
 #endif
@@ -264,20 +264,32 @@ namespace Microsoft.Build.Framework.Telemetry
             int timeoutMs = Traits.Instance.TelemetryShutdownTimeoutMs;
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            // Disposing can block on the network, so the exiting process abandons the thread after the budget.
-            bool completed = Task.Run(() =>
-            {
-                if (upload)
-                {
-                    return session.DisposeToNetworkAsync(CancellationToken.None);
-                }
-
-                session.Dispose();
-                return Task.CompletedTask;
-            }).Wait(timeoutMs);
+            bool completed = DisposeOwnedSession(
+                upload,
+                timeoutMs,
+                () => session.DisposeToNetworkAsync(CancellationToken.None),
+                session.Dispose);
 
             TelemetryManager.WriteDiagnostic(
                 $"{(upload ? "upload" : "save")} {(completed ? "completed" : "timed out, pending events may be lost")} after {stopwatch.ElapsedMilliseconds} ms, budget {timeoutMs} ms.");
+        }
+
+        /// <summary>
+        /// Disposes an owned telemetry session using the CI-specific upload path or the local-save path.
+        /// Exposed for deterministic testing without creating a real Visual Studio telemetry session.
+        /// </summary>
+        internal static bool DisposeOwnedSession(
+            bool upload,
+            int timeoutMs,
+            Func<Task> disposeToNetworkAsync,
+            Action dispose)
+        {
+            // Disposing can block on the network, so the exiting process abandons the thread after the budget.
+            Task disposalTask = upload
+                ? Task.Run(disposeToNetworkAsync)
+                : Task.Run(dispose);
+
+            return disposalTask.Wait(timeoutMs);
         }
     }
 #endif

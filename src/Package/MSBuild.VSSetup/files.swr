@@ -104,6 +104,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.WinFx.targets
   file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
   file source=$(X86BinPath)Microsoft.VisualStudio.Telemetry.dll
+  # This assembly is in the devenv SAC. MSBuild in Visual Studio uses that copy; remove this packaged copy in a future version after compatibility is confirmed.
   file source=$(X86BinPath)Microsoft.VisualStudio.RemoteControl.dll
   # This assembly is in the devenv SAC. MSBuild in Visual Studio uses that copy; remove this packaged copy in a future version after compatibility is confirmed.
   file source=$(X86BinPath)Microsoft.VisualStudio.Utilities.Internal.dll

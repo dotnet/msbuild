@@ -43,7 +43,7 @@ Some of the env variables listed here are unsupported, meaning there is no guara
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
   - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system.
 - `MSBUILD_TELEMETRY_OPTOUT=1`
-  - Turns off telemetry for `MSBuild.exe` on .NET Framework. MSBuild on .NET uses `DOTNET_CLI_TELEMETRY_OPTOUT` instead. See [Collection and Delivery](../VS-Telemetry-Data.md#collection-and-delivery).
+  - Turns off telemetry for `MSBuild.exe` on .NET Framework. `DOTNET_CLI_TELEMETRY_OPTOUT` also turns it off and applies to MSBuild running on .NET. See [Collection and Delivery](../VS-Telemetry-Data.md#collection-and-delivery).
 - `MSBUILD_HOST_NAME`
   - Overrides the host name reported in build telemetry, for example `Azure DevOps` or `GitHub Action`, which are otherwise detected from `TF_BUILD` and `GITHUB_ACTIONS`.
 - `MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS`

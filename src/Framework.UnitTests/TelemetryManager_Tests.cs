@@ -3,11 +3,14 @@
 
 #if NETFRAMEWORK
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 #endif
 
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
@@ -45,7 +48,98 @@ public class TelemetryManager_Tests
         TelemetryManager.ResetForTest();
     }
 
+    [Theory]
+    [InlineData("1")]
+    [InlineData("true")]
+    public void DotnetCliTelemetryOptOutDisablesTelemetry(string value)
+    {
+        TestEnvironment environment = TestEnvironment.Create();
+
+        try
+        {
+            environment.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", null);
+            environment.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", value);
+            Traits.UpdateFromEnvironment();
+
+            TelemetryManager.IsOptOut().ShouldBeTrue();
+        }
+        finally
+        {
+            environment.Dispose();
+            Traits.UpdateFromEnvironment();
+        }
+    }
+
 #if NETFRAMEWORK
+    [Fact]
+    public void OwnedSessionInCiUsesNetworkDisposal()
+    {
+        bool uploadCalled = false;
+        bool disposeCalled = false;
+
+        bool completed = VsTelemetryInitializer.DisposeOwnedSession(
+            upload: true,
+            timeoutMs: 1_000,
+            disposeToNetworkAsync: () =>
+            {
+                uploadCalled = true;
+                return Task.CompletedTask;
+            },
+            dispose: () => disposeCalled = true);
+
+        completed.ShouldBeTrue();
+        uploadCalled.ShouldBeTrue();
+        disposeCalled.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void OwnedSessionOutsideCiUsesLocalDisposal()
+    {
+        bool uploadCalled = false;
+        bool disposeCalled = false;
+
+        bool completed = VsTelemetryInitializer.DisposeOwnedSession(
+            upload: false,
+            timeoutMs: 1_000,
+            disposeToNetworkAsync: () =>
+            {
+                uploadCalled = true;
+                return Task.CompletedTask;
+            },
+            dispose: () => disposeCalled = true);
+
+        completed.ShouldBeTrue();
+        uploadCalled.ShouldBeFalse();
+        disposeCalled.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void OwnedSessionShutdownHonorsConfiguredTimeout()
+    {
+        const int timeoutMs = 50;
+        TaskCompletionSource<object?> uploadCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+
+        bool completed;
+        try
+        {
+            completed = VsTelemetryInitializer.DisposeOwnedSession(
+                upload: true,
+                timeoutMs,
+                () => uploadCompletion.Task,
+                () => throw new InvalidOperationException("The local disposal path must not run in CI."));
+        }
+        finally
+        {
+            uploadCompletion.TrySetResult(null);
+        }
+
+        stopwatch.Stop();
+        completed.ShouldBeFalse();
+        stopwatch.ElapsedMilliseconds.ShouldBeGreaterThanOrEqualTo(timeoutMs / 2);
+        stopwatch.ElapsedMilliseconds.ShouldBeLessThan(2_000);
+    }
+
     [Fact]
     public void DisposeSwallowsTelemetrySessionNullReferenceAndClearsState()
     {

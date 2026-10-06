@@ -142,8 +142,7 @@ Inside Visual Studio, MSBuild adds its events to the Visual Studio telemetry ses
 
 ### Consent
 
-- `MSBUILD_TELEMETRY_OPTOUT=1` (or `true`) turns telemetry off for `MSBuild.exe`. No telemetry assemblies are loaded, no session is created, and nothing is sent.
-- `DOTNET_CLI_TELEMETRY_OPTOUT` applies to MSBuild running on .NET, for example `dotnet build`. It does not apply to `MSBuild.exe` on .NET Framework. Set both variables to opt out of both.
+- `MSBUILD_TELEMETRY_OPTOUT=1` or `DOTNET_CLI_TELEMETRY_OPTOUT=1` (or `true`) turns telemetry off for `MSBuild.exe`. No telemetry assemblies are loaded, no session is created, and nothing is sent. `DOTNET_CLI_TELEMETRY_OPTOUT` also applies to MSBuild running on .NET, for example `dotnet build`.
 - Otherwise the session uses the Visual Studio consent: the [Visual Studio Customer Experience Improvement Program](https://learn.microsoft.com/visualstudio/ide/visual-studio-experience-improvement-program) setting, including machine-wide policy. When consent is not given, the session is created but no events are sent. MSBuild does not change consent, and running in CI does not opt a machine in.
 
 ### Delivery
