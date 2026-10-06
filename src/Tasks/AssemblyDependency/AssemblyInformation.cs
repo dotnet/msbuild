@@ -790,6 +790,9 @@ namespace Microsoft.Build.Tasks
                         uint pubKeyBytes;
                         uint asmNameLength;
                         CorAssemblyFlags flags;
+                        void* hashValue;
+                        uint hashSize;
+                        // Preserve the legacy read failure for malformed hash-blob metadata.
                         asmImport.Pointer->GetAssemblyRefProps(
                             asmRefTokens[i],
                             &pubKeyPtr,
@@ -798,8 +801,8 @@ namespace Microsoft.Build.Tasks
                             0,
                             &asmNameLength,
                             null,
-                            null,
-                            null,
+                            &hashValue,
+                            &hashSize,
                             &flags).ThrowOnFailure();
 
                         // Allocate assembly name buffer.
@@ -825,8 +828,8 @@ namespace Microsoft.Build.Tasks
                                 (uint)asmNameBuf.Length,
                                 &asmNameLength,
                                 &asmMeta,
-                                null,
-                                null,
+                                &hashValue,
+                                &hashSize,
                                 &flags).ThrowOnFailure();
                         }
 
