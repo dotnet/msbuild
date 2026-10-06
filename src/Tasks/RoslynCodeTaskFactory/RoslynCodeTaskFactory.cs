@@ -213,6 +213,8 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            taskInfo.CompileForOutOfProcess = _compileForOutOfProcess;
+
             bool initialized = false;
             try
             {

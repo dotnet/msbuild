@@ -26,6 +26,11 @@ namespace Microsoft.Build.Tasks
         public string Name { get; set; }
 
         /// <summary>
+        /// Gets or sets whether the task must be compiled for out-of-process execution.
+        /// </summary>
+        public bool CompileForOutOfProcess { get; set; }
+
+        /// <summary>
         /// Gets a <see cref="ISet{String}"/> of namespaces to use.
         /// </summary>
         public ISet<string> Namespaces { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -55,7 +60,8 @@ namespace Microsoft.Build.Tasks
 
             return String.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase)
                 && String.Equals(SourceCode, other.SourceCode, StringComparison.OrdinalIgnoreCase) 
-                && References.SetEquals(other.References);
+                && References.SetEquals(other.References)
+                && CompileForOutOfProcess == other.CompileForOutOfProcess;
         }
 
         public override bool Equals(object obj)
@@ -71,7 +77,7 @@ namespace Microsoft.Build.Tasks
         public override int GetHashCode()
         {
             // Include both Name and SourceCode to avoid cache collisions between different task names
-            return HashCode.Combine(Name?.GetHashCode() ?? 0, SourceCode?.GetHashCode() ?? 0);
+            return HashCode.Combine(Name?.GetHashCode() ?? 0, SourceCode?.GetHashCode() ?? 0, CompileForOutOfProcess);
         }
     }
 }
