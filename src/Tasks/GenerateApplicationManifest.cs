@@ -431,9 +431,13 @@ namespace Microsoft.Build.Tasks
             return new AssemblyIdentity(values[0], values[1], values[2], values[3], values[4]);
         }
 
-        private static void EnsureAssemblyReferenceExists(ApplicationManifest manifest, AssemblyIdentity identity)
+        private void EnsureAssemblyReferenceExists(ApplicationManifest manifest, AssemblyIdentity identity)
         {
-            if (manifest.AssemblyReferences.Find(identity) == null)
+            AssemblyReference assemblyReference = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                ? manifest.AssemblyReferences.Find(identity, TaskEnvironment)
+                : manifest.AssemblyReferences.Find(identity);
+
+            if (assemblyReference == null)
             {
                 var assembly = new AssemblyReference
                 {
