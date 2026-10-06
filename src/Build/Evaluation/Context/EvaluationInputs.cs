@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -115,7 +116,11 @@ internal sealed class GlobDependency
         }
     }
 
-    internal bool IsCurrent()
+    /// <param name="sharedEntryCache">
+    /// An optional directory-listing cache shared across every glob replayed while validating one build, so
+    /// overlapping directory trees (within or across projects) are only enumerated once per build.
+    /// </param>
+    internal bool IsCurrent(ConcurrentDictionary<string, IReadOnlyList<string>>? sharedEntryCache = null)
     {
         if (_caseFolding == FileMatcherCaseFolding.LegacyCurrentCulture
             && !string.Equals(_culture, CultureInfo.CurrentCulture.Name, StringComparison.Ordinal))
@@ -124,7 +129,7 @@ internal sealed class GlobDependency
         }
 
         var current = FileMatcher.GetFilesForValidation(
-            ProjectDirectory, Filespec, _excludes, _driver, _caseFolding, _usesFileSystemEntryCache);
+            ProjectDirectory, Filespec, _excludes, _driver, _caseFolding, _usesFileSystemEntryCache, sharedEntryCache);
         if (current.GlobFailure is not null
             || current.Action is FileMatcher.SearchAction.ReturnFileSpec
                 or FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard

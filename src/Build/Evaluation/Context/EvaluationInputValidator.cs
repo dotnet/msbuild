@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
@@ -24,8 +25,15 @@ internal static class EvaluationInputValidator
     /// </summary>
     /// <param name="inputs">The recorded inputs.</param>
     /// <param name="reason">The first input that differs, or the non-cacheable reason.</param>
-    internal static bool IsFileSystemCurrent(EvaluationInputs inputs, out string? reason)
-        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _);
+    /// <param name="sharedGlobEntryCache">
+    /// An optional directory-listing cache shared across every entry validated in the same build, so glob replay
+    /// does not redundantly re-enumerate directories already listed earlier in the same build.
+    /// </param>
+    internal static bool IsFileSystemCurrent(
+        EvaluationInputs inputs,
+        out string? reason,
+        ConcurrentDictionary<string, IReadOnlyList<string>>? sharedGlobEntryCache = null)
+        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _, sharedGlobEntryCache);
 
     /// <summary>
     /// Checks recorded inputs, retaining the legacy reason separately from privacy-safe failure details.
@@ -33,14 +41,16 @@ internal static class EvaluationInputValidator
     internal static bool IsFileSystemCurrent(
         EvaluationInputs inputs,
         out string? reason,
-        out EvaluationInputValidationFailure failure)
-        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure);
+        out EvaluationInputValidationFailure failure,
+        ConcurrentDictionary<string, IReadOnlyList<string>>? sharedGlobEntryCache = null)
+        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure, sharedGlobEntryCache);
 
     private static bool IsFileSystemCurrentCore(
         EvaluationInputs inputs,
         bool captureDetails,
         out string? reason,
-        out EvaluationInputValidationFailure failure)
+        out EvaluationInputValidationFailure failure,
+        ConcurrentDictionary<string, IReadOnlyList<string>>? sharedGlobEntryCache)
     {
         failure = default;
         if (!inputs.IsCacheable)
@@ -123,7 +133,7 @@ internal static class EvaluationInputValidator
                 foreach (GlobDependency glob in inputs.Globs)
                 {
                     // Cached expansions may precede the directory stats captured by this evaluation.
-                    if ((changedGlobDirectory is not null || glob.FromCache) && !glob.IsCurrent())
+                    if ((changedGlobDirectory is not null || glob.FromCache) && !glob.IsCurrent(sharedGlobEntryCache))
                     {
                         reason = changedGlobDirectory ?? glob.ProjectDirectory;
                         if (captureDetails)
