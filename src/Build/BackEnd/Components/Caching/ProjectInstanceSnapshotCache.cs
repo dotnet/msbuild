@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Execution;
@@ -23,6 +24,8 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
     private readonly LockType _lock = new();
     private readonly Dictionary<ProjectInstanceSnapshotCacheKey, LinkedListNode<CacheEntry>> _entries = [];
     private readonly LinkedList<CacheEntry> _leastRecentlyUsed = [];
+    private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _globValidationEntryCache =
+        new(StringComparer.Ordinal);
     private readonly long _maximumSizeBytes;
     private long _currentSizeBytes;
     private long _buildsServed;
@@ -218,12 +221,22 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
         }
     }
 
+    /// <summary>
+    /// Directory listings captured while replaying recorded globs during validation, shared across every
+    /// entry validated in the current build to avoid redundant physical directory enumeration when several
+    /// recorded globs overlap the same directory tree. Cleared at the start of each build so no listing can
+    /// leak across builds and mask a real filesystem change.
+    /// </summary>
+    internal ConcurrentDictionary<string, IReadOnlyList<string>> GlobValidationEntryCache => _globValidationEntryCache;
+
     internal void NotifyBuildStarted()
     {
         lock (_lock)
         {
             _buildsServed++;
         }
+
+        _globValidationEntryCache.Clear();
     }
 
     internal void NotifyCacheLookup(bool hit)

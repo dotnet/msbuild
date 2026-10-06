@@ -2252,6 +2252,9 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Replays the recorded matching semantics against fresh physical entries, bypassing the result cache and observers.
+        /// An optional directory-listing cache (<paramref name="sharedEntryCache"/>) may be passed so multiple validation
+        /// replays within the same build share directory listings instead of each re-enumerating the physical filesystem;
+        /// doing so never changes which changes are detected, only how much enumeration work is repeated.
         /// </summary>
         internal static (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? GlobFailure) GetFilesForValidation(
             string projectDirectory,
@@ -2259,7 +2262,8 @@ namespace Microsoft.Build.Shared
             List<string>? excludes,
             FileMatcherDriver driver,
             FileMatcherCaseFolding caseFolding,
-            bool usesFileSystemEntryCache = true)
+            bool usesFileSystemEntryCache = true,
+            ConcurrentDictionary<string, IReadOnlyList<string>>? sharedEntryCache = null)
         {
             if (caseFolding is not (FileMatcherCaseFolding.LegacyCurrentCulture or FileMatcherCaseFolding.InvariantCulture))
             {
@@ -2281,7 +2285,7 @@ namespace Microsoft.Build.Shared
             var matcher = new FileMatcher(
                 fileSystem,
                 usesFileSystemEntryCache && driver != FileMatcherDriver.OptimizedDirect
-                    ? new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
+                    ? sharedEntryCache ?? new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
                     : null,
                 implementation: driver == FileMatcherDriver.Legacy ? FileMatcherImplementation.Legacy : FileMatcherImplementation.Optimized,
                 caseFolding: caseFolding);

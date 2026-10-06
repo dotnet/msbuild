@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using Microsoft.Build.BackEnd.Logging;
@@ -157,8 +158,8 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
         using (diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.ManifestValidation))
         {
             fileSystemCurrent = captureDetails
-                ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure)
-                : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _);
+                ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure, validationContext?.GlobValidationEntryCache)
+                : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, validationContext?.GlobValidationEntryCache);
         }
         if (!fileSystemCurrent)
         {
@@ -211,7 +212,8 @@ internal sealed class ProjectInstanceSnapshotValidationContext
         ISdkResolverService sdkResolverService,
         ILoggingService loggingService,
         BuildEventContext buildEventContext,
-        int submissionId)
+        int submissionId,
+        ConcurrentDictionary<string, IReadOnlyList<string>>? globValidationEntryCache = null)
     {
         ArgumentNullException.ThrowIfNull(sdkResolverService);
         ArgumentNullException.ThrowIfNull(loggingService);
@@ -220,7 +222,16 @@ internal sealed class ProjectInstanceSnapshotValidationContext
         _loggingService = loggingService;
         _buildEventContext = buildEventContext;
         _submissionId = submissionId;
+        GlobValidationEntryCache = globValidationEntryCache;
     }
+
+    /// <summary>
+    /// A directory-listing cache shared across every entry validated in the current build, so glob replay in
+    /// <see cref="EvaluationInputValidator"/> does not redundantly re-enumerate directories already listed
+    /// earlier in the same build. Null when the owning cache does not provide one (e.g. tests constructing
+    /// this context directly).
+    /// </summary>
+    internal ConcurrentDictionary<string, IReadOnlyList<string>>? GlobValidationEntryCache { get; }
 
     internal bool Validate(SdkDependency dependency) => ValidateCore(dependency, captureDetails: false, out _);
 

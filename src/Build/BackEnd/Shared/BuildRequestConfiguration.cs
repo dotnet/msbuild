@@ -715,7 +715,8 @@ namespace Microsoft.Build.BackEnd
                                             sdkResolverService,
                                             componentHost.LoggingService,
                                             buildEventContext,
-                                            submissionId);
+                                            submissionId,
+                                            snapshotCache.GlobValidationEntryCache);
                                         hasUnverifiableCachedProjectRootElement =
                                             HasUnverifiableCachedProjectRootElement(
                                                 componentHost.BuildParameters.ProjectRootElementCache,
