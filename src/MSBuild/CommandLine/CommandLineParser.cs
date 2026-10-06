@@ -46,6 +46,22 @@ namespace Microsoft.Build.CommandLine.Experimental
 
         internal IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
 
+        private sealed class ParsingContext
+        {
+            internal readonly bool ThrowOnUnknownSwitches;
+            internal readonly bool ReadResponseFiles;
+            internal readonly bool ReadLoggingArgumentsFromEnvironment;
+            internal List<string> UnrecognizedArguments;
+            internal List<string> UnexpandedResponseFileArguments;
+
+            internal ParsingContext(CommandLineParsingOptions options)
+            {
+                ThrowOnUnknownSwitches = options?.ThrowOnUnknownSwitches ?? true;
+                ReadResponseFiles = options?.ReadResponseFiles ?? true;
+                ReadLoggingArgumentsFromEnvironment = options?.ReadLoggingArgumentsFromEnvironment ?? true;
+            }
+        }
+
         /// <summary>
         /// Parses the provided command-line arguments into a <see cref="CommandLineSwitchesAccessor"/>.
         /// </summary>
@@ -62,16 +78,38 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// </exception>
         public CommandLineSwitchesAccessor Parse(IEnumerable<string> commandLineArgs)
         {
-            List<string> args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. commandLineArgs];
+            ArgumentNullException.ThrowIfNull(commandLineArgs);
+            return Parse(commandLineArgs as IReadOnlyList<string> ?? commandLineArgs.ToArray());
+        }
+
+        /// <summary>
+        /// Parses tokens without an executable path, using the specified options.
+        /// </summary>
+        /// <param name="commandLineArgs">The command-line tokens, excluding the executable path.</param>
+        /// <param name="options">The parsing options. Null uses the existing strict parsing behavior.</param>
+        /// <returns>
+        /// The parsed switches, unknown switch tokens, and response-file tokens that were not expanded.
+        /// Command-line switches take precedence over automatic response-file switches.
+        /// </returns>
+        /// <exception cref="CommandLineSwitchException">
+        /// Thrown for invalid syntax, or unknown switches when <see cref="CommandLineParsingOptions.ThrowOnUnknownSwitches"/> is true.
+        /// </exception>
+        /// <exception cref="InitializationException">
+        /// Thrown when a response file cannot be read or is included more than once.
+        /// </exception>
+        public CommandLineSwitchesAccessor Parse(IReadOnlyList<string> commandLineArgs, CommandLineParsingOptions options = null)
+        {
+            ArgumentNullException.ThrowIfNull(commandLineArgs);
+            ParsingContext context = new(options);
             List<DeferredBuildMessage> deferredBuildMessages = [];
 
-            GatherAllSwitches(
-                args,
+            GatherSwitches(
+                commandLineArgs,
                 deferredBuildMessages,
                 out CommandLineSwitches responseFileSwitches,
                 out CommandLineSwitches commandLineSwitches,
                 out string fullCommandLine,
-                out _);
+                context);
 
             CommandLineSwitches result = new();
             result.Append(responseFileSwitches, fullCommandLine); // lowest precedence
@@ -79,7 +117,10 @@ namespace Microsoft.Build.CommandLine.Experimental
 
             result.ThrowErrors();
 
-            return new CommandLineSwitchesAccessor(result);
+            return new CommandLineSwitchesAccessor(
+                result,
+                context.UnrecognizedArguments?.AsReadOnly(),
+                context.UnexpandedResponseFileArguments?.AsReadOnly());
         }
 
         /// <summary>
@@ -100,30 +141,47 @@ namespace Microsoft.Build.CommandLine.Experimental
             out string fullCommandLine,
             out string exeName)
         {
-            ResetGatheringSwitchesState();
-
             // discard the first piece, because that's the path to the executable -- the rest are args
-            commandLineArgs = commandLineArgs.Skip(1);
             exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+            GatherSwitches(
+                commandLineArgs.Skip(1),
+                deferredBuildMessages,
+                out switchesFromAutoResponseFile,
+                out switchesNotFromAutoResponseFile,
+                out fullCommandLine,
+                null);
+        }
 
+        private void GatherSwitches(
+            IEnumerable<string> commandLineArgs,
+            List<DeferredBuildMessage> deferredBuildMessages,
+            out CommandLineSwitches switchesFromAutoResponseFile,
+            out CommandLineSwitches switchesNotFromAutoResponseFile,
+            out string fullCommandLine,
+            ParsingContext context)
+        {
+            ResetGatheringSwitchesState();
             fullCommandLine = $"'{string.Join(" ", commandLineArgs)}'";
 
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
-            GatherCommandLineSwitches(commandLineArgs, switchesNotFromAutoResponseFile, fullCommandLine);
+            GatherCommandLineSwitches(commandLineArgs, switchesNotFromAutoResponseFile, fullCommandLine, context);
 
             // parse the auto-response file (if "/noautoresponse" is not specified), and combine those switches with the
             // switches on the command line
             switchesFromAutoResponseFile = new CommandLineSwitches();
-            if (!switchesNotFromAutoResponseFile[ParameterlessSwitch.NoAutoResponse])
+            if ((context?.ReadResponseFiles ?? true) && !switchesNotFromAutoResponseFile[ParameterlessSwitch.NoAutoResponse])
             {
                 string exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath()); // Copied from XMake
-                GatherAutoResponseFileSwitches(exePath, switchesFromAutoResponseFile, fullCommandLine);
+                GatherAutoResponseFileSwitches(exePath, switchesFromAutoResponseFile, fullCommandLine, context);
             }
 
-            CommandLineSwitches switchesFromEnvironmentVariable = new();
-            GatherLoggingArgsEnvironmentVariableSwitches(ref switchesFromEnvironmentVariable, deferredBuildMessages, fullCommandLine);
-            switchesNotFromAutoResponseFile.Append(switchesFromEnvironmentVariable, fullCommandLine);
+            if (context?.ReadLoggingArgumentsFromEnvironment ?? true)
+            {
+                CommandLineSwitches switchesFromEnvironmentVariable = new();
+                GatherLoggingArgsEnvironmentVariableSwitches(ref switchesFromEnvironmentVariable, deferredBuildMessages, fullCommandLine, context);
+                switchesNotFromAutoResponseFile.Append(switchesFromEnvironmentVariable, fullCommandLine);
+            }
         }
 
         /// <summary>
@@ -134,6 +192,13 @@ namespace Microsoft.Build.CommandLine.Experimental
             ref CommandLineSwitches switches,
             List<DeferredBuildMessage> deferredBuildMessages,
             string commandLine)
+            => GatherLoggingArgsEnvironmentVariableSwitches(ref switches, deferredBuildMessages, commandLine, null);
+
+        private void GatherLoggingArgsEnvironmentVariableSwitches(
+            ref CommandLineSwitches switches,
+            List<DeferredBuildMessage> deferredBuildMessages,
+            string commandLine,
+            ParsingContext context)
         {
             if (string.IsNullOrWhiteSpace(Traits.MSBuildLoggingArgs))
             {
@@ -180,7 +245,7 @@ namespace Microsoft.Build.CommandLine.Experimental
                 if (validArgs.Count > 0)
                 {
                     deferredBuildMessages.Add(new DeferredBuildMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoggingArgsEnvVarUsing", string.Join(" ", validArgs)), MessageImportance.Low));
-                    GatherCommandLineSwitches(validArgs, switches, commandLine);
+                    GatherCommandLineSwitches(validArgs, switches, commandLine, context);
                 }
             }
             catch (Exception ex)
@@ -227,6 +292,13 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// Internal for unit testing only.
         /// </remarks>
         internal void GatherCommandLineSwitches(IEnumerable<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine = "")
+            => GatherCommandLineSwitches(commandLineArgs, commandLineSwitches, commandLine, null);
+
+        private void GatherCommandLineSwitches(
+            IEnumerable<string> commandLineArgs,
+            CommandLineSwitches commandLineSwitches,
+            string commandLine,
+            ParsingContext context)
         {
             foreach (string commandLineArg in commandLineArgs)
             {
@@ -237,7 +309,14 @@ namespace Microsoft.Build.CommandLine.Experimental
                     // response file switch starts with @
                     if (unquotedCommandLineArg.StartsWith("@", StringComparison.Ordinal))
                     {
-                        GatherResponseFileSwitch(unquotedCommandLineArg, commandLineSwitches, commandLine);
+                        if (context?.ReadResponseFiles ?? true)
+                        {
+                            GatherResponseFileSwitch(unquotedCommandLineArg, commandLineSwitches, commandLine, context);
+                        }
+                        else
+                        {
+                            (context.UnexpandedResponseFileArguments ??= []).Add(commandLineArg);
+                        }
                     }
                     else
                     {
@@ -316,7 +395,14 @@ namespace Microsoft.Build.CommandLine.Experimental
                         }
                         else
                         {
-                            commandLineSwitches.SetUnknownSwitchError(unquotedCommandLineArg, commandLine);
+                            if (context?.ThrowOnUnknownSwitches ?? true)
+                            {
+                                commandLineSwitches.SetUnknownSwitchError(unquotedCommandLineArg, commandLine);
+                            }
+                            else
+                            {
+                                (context.UnrecognizedArguments ??= []).Add(commandLineArg);
+                            }
                         }
                     }
                 }
@@ -329,7 +415,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// </summary>
         /// <param name="unquotedCommandLineArg"></param>
         /// <param name="commandLineSwitches"></param>
-        private void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches, string commandLine)
+        private void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches, string commandLine, ParsingContext context = null)
         {
             try
             {
@@ -396,7 +482,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 
                         CommandLineSwitches.SwitchesFromResponseFiles.Add((responseFile, string.Join(" ", argsFromResponseFile)));
 
-                        GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, commandLine);
+                        GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, commandLine, context);
                     }
                 }
             }
@@ -657,13 +743,13 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// switches from the auto-response file with the switches passed in.
         /// Returns true if the response file was found.
         /// </summary>
-        private bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
+        private bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile, string commandLine, ParsingContext context = null)
         {
             string autoResponseFile = Path.Combine(path, autoResponseFileName);
-            return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile, commandLine);
+            return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile, commandLine, context);
         }
 
-        private bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
+        private bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile, string commandLine, ParsingContext context = null)
         {
             bool found = false;
 
@@ -671,7 +757,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             if (FileSystems.Default.FileExists(autoResponseFile))
             {
                 found = true;
-                GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile, commandLine);
+                GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile, commandLine, context);
 
                 // if the "/noautoresponse" switch was set in the auto-response file, flag an error
                 if (switchesFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
