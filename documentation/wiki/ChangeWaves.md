@@ -35,6 +35,9 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.13
+- [When MSBuild selects UTF-8 console input encoding, use UTF-8 without a BOM so that `Exec` and `ToolTask` do not send an unintended preamble to child stdin on .NET Framework.](https://github.com/dotnet/msbuild/pull/15170) Set `MSBUILDDISABLEFEATURESFROMVERSION=18.13` to restore the previous BOM-emitting input encoding. Output encoding and explicit input redirection are unchanged.
+
 ### 18.12
 - [Multi-threaded builds use an empty sentinel current directory, check CWD after tasks, and detect unresolved relative-path writes at project/build completion.](https://github.com/dotnet/msbuild/pull/14917)
 - [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)
