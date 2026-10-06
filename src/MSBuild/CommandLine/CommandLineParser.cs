@@ -79,7 +79,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         public CommandLineSwitchesAccessor Parse(IEnumerable<string> commandLineArgs)
         {
             ArgumentNullException.ThrowIfNull(commandLineArgs);
-            return Parse(commandLineArgs as IReadOnlyList<string> ?? commandLineArgs.ToArray());
+            return Parse(commandLineArgs.ToArray());
         }
 
         /// <summary>
@@ -91,6 +91,9 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// The parsed switches, unknown switch tokens, and response-file tokens that were not expanded.
         /// Command-line switches take precedence over automatic response-file switches.
         /// </returns>
+        /// <remarks>
+        /// The input list must remain unchanged and support repeated enumeration until parsing completes.
+        /// </remarks>
         /// <exception cref="CommandLineSwitchException">
         /// Thrown for invalid syntax, or unknown switches when <see cref="CommandLineParsingOptions.ThrowOnUnknownSwitches"/> is true.
         /// </exception>

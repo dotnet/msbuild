@@ -3,6 +3,8 @@
 `Microsoft.Build.CommandLine.Experimental.CommandLineParser` is an internal API shared with the .NET SDK.
 `Parse(IReadOnlyList<string>, CommandLineParsingOptions)` accepts tokens without an executable path.
 The existing `Parse(IEnumerable<string>)` overload remains available.
+The enumerable overload copies its input before parsing and enumerates the caller's input only once.
+The list overload does not copy its input. Its input must remain unchanged and support repeated enumeration until parsing completes.
 
 All options default to `true`, which preserves existing parsing behavior:
 

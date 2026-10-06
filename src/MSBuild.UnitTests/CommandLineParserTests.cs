@@ -246,6 +246,42 @@ namespace Microsoft.Build.CommandLine.UnitTests
         }
 
         [Fact]
+        public void EnumerableOverloadEnumeratesReadOnlyListOnlyOnce()
+        {
+            SingleEnumerationReadOnlyList arguments = new();
+            CommandLineParser parser = new();
+
+            parser.Parse((IEnumerable<string>)arguments).Targets.ShouldBe(["targets.txt"]);
+
+            arguments.Enumerations.ShouldBe(1);
+        }
+
+        private sealed class SingleEnumerationReadOnlyList : IReadOnlyList<string>
+        {
+            public int Enumerations { get; private set; }
+
+            public int Count => 2;
+
+            public string this[int index] => index switch
+            {
+                0 => "-noautoresponse",
+                1 => "-targets:targets.txt",
+                _ => throw new ArgumentOutOfRangeException(nameof(index))
+            };
+
+            public IEnumerator<string> GetEnumerator()
+            {
+                (++Enumerations).ShouldBe(1);
+                for (int index = 0; index < Count; index++)
+                {
+                    yield return this[index];
+                }
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+        }
+
+        [Fact]
         public void NullArgumentsAreRejected()
         {
             CommandLineParser parser = new();
