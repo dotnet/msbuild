@@ -168,6 +168,7 @@ namespace Microsoft.Build.Utilities
 
             if (sourceItem is ITaskItem3 taskItemWithLocation && taskItemWithLocation.Location is TaskItemLocation location)
             {
+                _definingProject = EscapingUtilities.Escape(location.File, cache: true);
                 _sourceLineNumber = location.Line;
                 _sourceColumnNumber = location.Column;
             }
