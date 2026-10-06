@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
@@ -1841,32 +1841,32 @@
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: 필터링된 이진 로그 재생이 취소되었습니다. 출력이 게시되지 않았습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: 필터링된 이진 로그를 재생하지 못했습니다. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: 필터링된 이진 로그 출력 경로가 잘못되었습니다. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: 이진 로그 대상이 이미 있거나 두 번 이상 지정되었습니다. 새 출력 경로를 선택하세요.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: Exclude=를 사용하여 이진 로그를 재생할 때는 이 스위치가 지원되지 않습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: 필터링된 재생에서는 ProjectImports=Embed 또는 ProjectImports=None만 지원하며, ProjectImports=ZipFile은 지원하지 않습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
@@ -2232,8 +2232,8 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     모든 빌드 이벤트를 압축된 이진 파일로 직렬화합니다.
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     빌드 이벤트를 압축된 이진 파일로 직렬화합니다.
                      기본적으로 파일은 현재 디렉터리에 있으며 이름은
                      "msbuild.binlog"입니다. 이진 로그는 나중에 텍스트 로그를 재구성하는 데
                      사용할 수 있고 다른 분석 도구에서 사용할 수 있는 빌드 프로세스의
@@ -2242,11 +2242,24 @@
                      작지만 더 많은 정보를 담고 있습니다.
                      (약식: -bl)
 
+                     Exclude=kind[,kind...]는 명명된 이벤트 종류를
+                     빌드 및 재생 중 이 이진 로거에서 생략합니다. 콘솔 및
+                     다른 로거에는 영향을 주지 않습니다. 이름은 대/소문자를 구분하지 않습니다.
+                     로거마다 Exclude를 한 번씩 지정합니다. 선택 영역은 정확한
+                     레코드 종류와 일치하며, 모든 파생된 메시지나 경고 이벤트와 일치하지는 않습니다.
+                     빌드, 프로젝트, 대상 및 작업 수명 주기 이벤트는
+                     보호됩니다. ProjectEvaluationStarted와
+                     ProjectEvaluationFinished는 둘 다 제외하거나 둘 다 제외하지 마세요.
+                     예: -bl:"out.binlog;Exclude=Message,Warning"
+                     필터링된 재생은 새 출력 경로가 필요하며
+                     ProjectImports=ZipFile은 지원되지 않습니다.
+                     필터링은 삭제가 아니며, 포함된 파일은 독립적입니다.
+
                      선택적 LogFile은 이진 로그가 저장되는
                      경로를 지정합니다. 각 빌드에 고유한 로그 파일을 생성하려면
                      토큰 "{}"를 경로에 추가할 수 있습니다.
                      예: LogFile=output-{}-log.binlog. 로그 경로의 
-                     각 "{}"는 타임스탬프, 실행 프로세스 ID 및 임이의 문자열
+                     각 "{}"는 타임스탬프, 실행 프로세스 ID 및 임의의 문자열
                      스탬프를 사용하여 고유한 문자열로
                      대체됩니다.
 

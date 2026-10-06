@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx">
     <body>
@@ -1848,32 +1848,32 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: se canceló la reproducción de registros binarios filtrados. No se publicó ninguna salida.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: error de reproducción de registro binario filtrado. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: ruta de acceso de salida de registro binario filtrado no válida. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: el destino del registro binario ya existe o se especifica más de una vez. Elija una nueva ruta de acceso de salida.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: este modificador no se admite al reproducir un registro binario con Exclude=.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: la reproducción filtrada admite ProjectImports=Embed o ProjectImports=None, no ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
@@ -2239,8 +2239,8 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializa todos los eventos de compilación en un archivo binario comprimido.
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializa los eventos de compilación en un archivo binario comprimido.
                      De forma predeterminada, el archivo está en el directorio actual y se denomina
                      "msbuild.binlog". El registro binario es una descripción detallada
                      del proceso de compilación que se puede usar más adelante para reconstruir
@@ -2248,6 +2248,19 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      suele ser 10-20 veces menor que el registro de nivel de diagnóstico
                      de texto más detallado, pero contiene más información.
                      (Forma corta: -bl)
+
+                     Exclude=kind[,kind...] omite los tipos de eventos con nombre de
+                     este registrador binario durante las compilaciones y la reproducción. Consola y
+                     otros registradores no se ven afectados. Los nombres no distinguen mayúsculas de minúsculas.
+                     Especifique Excluir una vez por registrador. La selección coincide exactamente
+                     tipos de registros, no todos los eventos derivados de mensajes o advertencias.
+                     Los eventos de ciclo de vida de compilación, proyecto, destino y tarea son
+                     protegido. Excluir ProjectEvaluationStarted y
+                     ProjectEvaluationFinished juntos o ninguno.
+                     Ejemplo: -bl:"out.binlog; Exclude=Message,Advertencia"
+                     La reproducción filtrada requiere nuevas rutas de acceso de salida y no
+                     admite ProjectImports=ZipFile.
+                     El filtrado no es una acción: los archivos incrustados son independientes.
 
                      El archivo de registro opcional especifica la ruta de acceso donde el
                      se guarda el registro binario. Para generar un archivo de registro distinto
@@ -2262,8 +2275,8 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      de destino encontrados durante la compilación. El conmutador opcional
                      ProjectImports controla este comportamiento:
 
-                      ProjectImports=None     - No recopilar las importaciones
-                                                del proyecto.
+                      ProjectImports=None: no recopilar el proyecto
+                                                importaciones.
                       ProjectImports=Embed    - Inserción de importaciones de proyecto en el
                                                 archivo de registro.
                       ProjectImports=ZipFile  - Guardar archivos de proyecto en

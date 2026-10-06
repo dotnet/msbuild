@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.resx">
     <body>
@@ -1842,32 +1842,32 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: a reprodução do log binário filtrado foi cancelada. Nenhuma saída foi publicada.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: a reprodução filtrada do log binário falhou. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: caminho de saída do log binário filtrado inválido. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: o destino do log binário já existe ou foi especificado mais de uma vez. Escolha um novo caminho de saída.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: esse parâmetro não tem suporte ao reproduzir um log binário com Exclude=.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: a reprodução filtrada dá suporte a ProjectImports=Embed ou ProjectImports=None, mas não a ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
@@ -2233,46 +2233,59 @@ arquivo de resposta.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializa todos os eventos da compilação em um arquivo binário compactado.
-                     Por padrão, o arquivo está no diretório atual e é chamado de
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializa eventos de compilação em um arquivo binário compactado.
+                     Por padrão, o arquivo fica no diretório atual e é denominado
                      "msbuild.binlog". O log binário é uma descrição detalhada
-                     do processo de compilação que pode mais tarde ser usado para reconstruir
-                     logs de texto e usados por outras ferramentas de análise. Um log binário
-                     normalmente é 10 a 20x menor do que os log de nível
-                     de diagnóstico do texto mais detalhado, mas contém mais informações.
+                     do processo de compilação que pode ser usada posteriormente para reconstruir
+                     logs de texto e usada por outras ferramentas de análise. Um log binário
+                     geralmente é 10-20x menor que o texto mais detalhado
+                     de log de nível de diagnóstico, mas contém mais informações.
                      (Forma abreviada: -bl)
 
-                     O LogFile opcional especifica o caminho em que o
+                     Exclude=kind[,kind...] omite os tipos de evento nomeados deste
+                     agente de log binário durante as compilações e a reprodução. O console e
+                     outros agentes de log não são afetados. Os nomes não diferenciam maiúsculas de minúsculas.
+                     Especifique Exclude uma vez por agente de log. A seleção corresponde exatamente aos
+                     tipos de registro, não a todos os eventos de mensagem ou aviso derivados.
+                     Os eventos de ciclo de vida de compilação, projeto, destino e tarefa são
+                     protegidos. Exclua ProjectEvaluationStarted e
+                     ProjectEvaluationFinished juntos ou nenhum dos dois.
+                     Exemplo: -bl:"out.binlog;Exclude=Message,Warning"
+                     A reprodução filtrada requer novos caminhos de saída e não
+                     dá suporte a ProjectImports=ZipFile.
+                     A filtragem não é redação: os arquivos incorporados são independentes.
+
+                     O LogFile opcional especifica o caminho onde o
                      log binário é salvo. Para gerar um arquivo de log distinto
                      para cada compilação, o token "{}" pode ser adicionado ao
                      caminho, por exemplo: LogFile=output-{}-log.binlog. Cada 
-                     "{}" no caminho de log é substituído por uma cadeia de caracteres exclusiva
-                     usando o carimbo de data/hora, executando a ID do processo e aleatoriamente
-                     o aplicar selo de cadeia de caracteres.
+                     "{}" no caminho do log é substituído por uma cadeia exclusiva
+                     usando o carimbo de data/hora, a ID do processo em execução e um
+                     sufixo de cadeia aleatório.
 
-                     O agente binário, por padrão, coleta o texto fonte dos
-                     arquivos de projeto, incluindo todos os projetos importados e arquivos
-                     de destino encontrados durante a compilação. A opção
-                     ProjectImports controla este comportamento:
+                     Por padrão, o agente de log binário coleta o texto-fonte dos
+                     arquivos de projeto, incluindo todos os projetos importados e arquivos de destino
+                     encontrados durante a compilação. O parâmetro opcional
+                     ProjectImports controla esse comportamento:
 
-                      ProjectImports=None     – Não coletar as importações
-                                                do projeto.
-                      ProjectImports=Embed    – Inserir as importações do projeto no
+                      ProjectImports=None     - Não coleta as importações de projeto
+                                                .
+                      ProjectImports=Embed    - Incorpora as importações de projeto no
                                                 arquivo de log.
-                      ProjectImports=ZipFile  – Salvar os arquivos de projeto em
+                      ProjectImports=ZipFile  - Salva os arquivos de projeto em
                                                 output.projectimports.zip
-                                                em que a saída tem o mesmo nome que o
-                                                nome do arquivo de log binário.
+                                                em que a saída é o mesmo nome
+                                                do nome do arquivo de log binário.
 
-                     A configuração padrão para ProjectImports é Embed.
-                     Observação: o agente não coleta arquivos de origem não MSBuild
-                     tais como .cs, .cpp etc.
+                     A configuração padrão de ProjectImports é Embed.
+                     Observação: o agente de log não coleta arquivos-fonte que não são do MSBuild
+                     como .cs, .cpp etc.
 
-                     Um arquivo .binlog pode ser "reproduzido novamente", passando-o para
+                     Um arquivo .binlog pode ser "reproduzido" passando-o para
                      msbuild.exe como um argumento em vez de um projeto/solução.
-                     Outros agentes receberão as informações contidas
-                     no arquivo de log como se a compilação original estivesse acontecendo.
+                     Outros agentes de log receberão as informações contidas
+                     no arquivo de log como se a compilação original estivesse ocorrendo.
                      Você pode ler mais sobre o log binário e seus usos em:
                      https://aka.ms/msbuild/binlog
 
