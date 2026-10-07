@@ -294,6 +294,66 @@ Log.LogError(Class1.ToPrint());
         }
 
         [Fact]
+        public void RoslynCodeTaskFactoryCache_DistinguishesMultiThreadedCompilation()
+        {
+            string taskName = $"CachedRoslynInlineTask_{Guid.NewGuid():N}";
+            const string taskBody = """
+                <Code Type="Fragment" Language="cs">
+                    Log.LogMessage("inline execution");
+                </Code>
+                """;
+
+            var inProcFactory = new RoslynCodeTaskFactory();
+            var inProcEngine = new MockEngine();
+            bool inProcInitialized = inProcFactory.Initialize(
+                taskName,
+                new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+                taskBody,
+                inProcEngine);
+            inProcInitialized.ShouldBeTrue(inProcEngine.Log);
+            inProcFactory.GetAssemblyPath().ShouldBeNullOrEmpty();
+            inProcFactory.CleanupTask(inProcFactory.CreateTask(inProcEngine));
+
+            var outOfProcFactory = new RoslynCodeTaskFactory();
+            var outOfProcEngine = new MockEngine { IsMultiThreadedBuild = true };
+            bool outOfProcInitialized = outOfProcFactory.Initialize(
+                taskName,
+                new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+                taskBody,
+                outOfProcEngine);
+            outOfProcInitialized.ShouldBeTrue(outOfProcEngine.Log);
+
+            string assemblyPath = outOfProcFactory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty();
+            File.Exists(assemblyPath).ShouldBeTrue();
+            outOfProcFactory.CleanupTask(outOfProcFactory.CreateTask(outOfProcEngine));
+        }
+
+        [Fact]
+        public void RoslynCodeTaskFactoryTaskInfoHashCode_MatchesCaseInsensitiveEquality()
+        {
+            var first = new RoslynCodeTaskFactoryTaskInfo
+            {
+                Name = "CaseTask",
+                SourceCode = "class CaseTask {}"
+            };
+            var second = new RoslynCodeTaskFactoryTaskInfo
+            {
+                Name = "casetask",
+                SourceCode = "class casetask {}"
+            };
+            var cache = new Dictionary<RoslynCodeTaskFactoryTaskInfo, int>
+            {
+                [first] = 1
+            };
+
+            first.Equals(second).ShouldBeTrue();
+            first.GetHashCode().ShouldBe(second.GetHashCode());
+            cache.TryGetValue(second, out int cachedValue).ShouldBeTrue();
+            cachedValue.ShouldBe(1);
+        }
+
+        [Fact]
         public void VisualBasicFragment()
         {
             const string fragment = "Dim x = 0";
