@@ -26,6 +26,39 @@ public class NodeStatus_Transition_Tests
         UseProjectRelativeDirectory("Snapshots");
     }
 
+    [Fact]
+    public void ClearingFrameResetsProgressRows()
+    {
+        TerminalProgressStatus progress = new(new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items), 0);
+        TerminalNodesFrame frame = new([], [progress], width: 80, height: 40);
+        frame.Render(new TerminalNodesFrame([], width: 80, height: 40));
+        frame.ProgressCount.ShouldBe(1);
+
+        frame.Clear();
+
+        frame.NodesCount.ShouldBe(0);
+        frame.ProgressCount.ShouldBe(0);
+        frame.GetPhysicalRows(20).ShouldBe(0);
+        new TerminalNodesFrame([], [progress], width: 80, height: 40).Render(frame)
+            .ShouldStartWith($"{AnsiCodes.CSI}1{AnsiCodes.MoveUpToLineStart}");
+    }
+
+    [Fact]
+    public void ProgressRowsReflowUsingTheirPreviouslyRenderedWidth()
+    {
+        TerminalProgressStatus progress = new(new TaskProgressStartedEventArgs(1, new string('x', 100), TaskProgressUnit.Items), 0);
+        TerminalNodesFrame frame = new([], [progress], width: 80, height: 40);
+        frame.Render(new TerminalNodesFrame([], width: 80, height: 40));
+        frame.GetPhysicalRows(20).ShouldBe(4);
+
+        // The frame records what was drawn, not the mutable operation's current text.
+        progress.Update(new TaskProgressUpdatedEventArgs(1, 1, long.MaxValue, long.MaxValue, "Changed"));
+        frame.GetPhysicalRows(20).ShouldBe(4);
+        string resized = new TerminalNodesFrame([], [progress], width: 20, height: 40).Render(frame);
+        resized.ShouldStartWith($"{AnsiCodes.CSI}5{AnsiCodes.MoveUpToLineStart}");
+        resized.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+    }
+
     /// <summary>
     /// Several projects often download similarly named files at once, so an operation has to appear
     /// with the project that reported it rather than in a block at the end.

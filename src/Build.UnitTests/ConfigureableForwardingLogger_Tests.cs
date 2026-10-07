@@ -297,6 +297,25 @@ namespace Microsoft.Build.UnitTests
             logger.ForwardedEvents.Contains(updated).ShouldBe(expectUpdates);
         }
 
+        [Fact]
+        public void LowMessageSubscriptionForwardsEntireProgressLifecycle()
+        {
+            var source = new EventSourceSink();
+            var logger = new TestForwardingLogger { Parameters = "LOWMESSAGEEVENT", Verbosity = LoggerVerbosity.Minimal };
+            logger.Initialize(source, 4);
+            BuildEventArgs[] events =
+            [
+                new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items),
+                new TaskProgressUpdatedEventArgs(1, 1, 1, 2, null),
+                new TaskProgressFinishedEventArgs(1, 2, TaskProgressOutcome.Completed, 2, 2, null),
+            ];
+            foreach (BuildEventArgs progress in events)
+            {
+                source.Consume(progress);
+                logger.ForwardedEvents.ShouldContain(progress);
+            }
+        }
+
         private void RaiseEvents(EventSourceSink source)
         {
             source.Consume(_buildStarted);

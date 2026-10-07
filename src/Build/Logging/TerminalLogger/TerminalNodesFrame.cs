@@ -25,7 +25,9 @@ internal sealed class TerminalNodesFrame
     /// </summary>
     private readonly int[] _nodeIndexes;
 
-    private readonly TerminalProgressStatus[] _progress;
+    private TerminalProgressStatus[] _progress;
+
+    private readonly int[] _progressRenderedWidths;
 
     private readonly StringBuilder _renderBuilder = new();
 
@@ -62,6 +64,7 @@ internal sealed class TerminalNodesFrame
         }
 
         _progress = [.. progress];
+        _progressRenderedWidths = _progress.Length == 0 ? Array.Empty<int>() : new int[_progress.Length];
     }
 
     public TerminalNodesFrame(TerminalNodeStatus?[] nodes, int width, int height)
@@ -280,7 +283,7 @@ internal sealed class TerminalNodesFrame
         {
             if (_progress[progressIndex].NodeIndex == nodeIndex)
             {
-                AppendProgressLine(sb, _progress[progressIndex], redrawAll);
+                AppendProgressLine(sb, progressIndex, redrawAll);
             }
         }
     }
@@ -295,12 +298,12 @@ internal sealed class TerminalNodesFrame
         {
             if (!IsNodeDisplayed(_progress[progressIndex].NodeIndex))
             {
-                AppendProgressLine(sb, _progress[progressIndex], redrawAll);
+                AppendProgressLine(sb, progressIndex, redrawAll);
             }
         }
     }
 
-    private void AppendProgressLine(StringBuilder sb, TerminalProgressStatus progress, bool redrawAll)
+    private void AppendProgressLine(StringBuilder sb, int progressIndex, bool redrawAll)
     {
         // An operation's text shrinks as often as it grows, so clear the rest of the line first.
         // After a full erase there is nothing left to clear.
@@ -309,7 +312,9 @@ internal sealed class TerminalNodesFrame
             sb.Append($"{AnsiCodes.CSI}{AnsiCodes.EraseInLine}");
         }
 
-        sb.Append(progress.Render(Math.Max(Width, 1))).AppendLine();
+        string rendered = _progress[progressIndex].Render(Math.Max(Width, 1));
+        _progressRenderedWidths[progressIndex] = rendered.Length;
+        sb.Append(rendered).AppendLine();
     }
 
     private bool IsNodeDisplayed(int nodeIndex)
@@ -339,11 +344,18 @@ internal sealed class TerminalNodesFrame
             physicalRows += ((renderedWidth - 1) / terminalWidth) + 1;
         }
 
-        return physicalRows + ProgressCount;
+        for (int i = 0; i < ProgressCount; i++)
+        {
+            int renderedWidth = Math.Max(_progressRenderedWidths[i], 1);
+            physicalRows += ((renderedWidth - 1) / terminalWidth) + 1;
+        }
+
+        return physicalRows;
     }
 
     public void Clear()
     {
         NodesCount = 0;
+        _progress = [];
     }
 }

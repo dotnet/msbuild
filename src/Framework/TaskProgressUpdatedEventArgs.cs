@@ -50,6 +50,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Gets or sets the engine-generated identifier of the operation this update belongs to.
+        /// Combine this value with <see cref="BuildEventArgs.BuildEventContext"/> to identify an operation across processes.
         /// </summary>
         public long OperationId { get; set; }
 

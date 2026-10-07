@@ -12,6 +12,18 @@ namespace Microsoft.Build.UnitTests;
 
 public sealed class TerminalProgressStatus_Tests
 {
+    [Theory]
+    [InlineData(1L << 60, 1L << 60, "##########")]
+    [InlineData(long.MaxValue, long.MaxValue, "##########")]
+    [InlineData(long.MaxValue / 2, long.MaxValue, "####------")]
+    [InlineData(-1, long.MaxValue, "----------")]
+    public void RenderBarDoesNotOverflow(long completed, long total, string bar)
+    {
+        var status = new TerminalProgressStatus(new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items), 0);
+        status.Update(new TaskProgressUpdatedEventArgs(1, 1, completed, total, null));
+        status.Render(120).ShouldContain($"[{bar} ");
+    }
+
     [Fact]
     public void RenderSanitizesControlCharactersAndTruncates()
     {

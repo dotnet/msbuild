@@ -28,16 +28,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private const int MaxTrackedOperations = 1024;
 
-        private readonly Dictionary<long, (string? Title, TaskProgressUnit Unit)> _operations = [];
+        private readonly Dictionary<(BuildEventContext? Context, long OperationId), (string? Title, TaskProgressUnit Unit)> _operations = [];
 
         /// <summary>
         /// Records the data needed to describe <paramref name="started"/> when it ends.
         /// </summary>
         internal void Start(TaskProgressStartedEventArgs started)
         {
-            if (_operations.ContainsKey(started.OperationId) || _operations.Count < MaxTrackedOperations)
+            var key = (started.BuildEventContext, started.OperationId);
+            if (_operations.ContainsKey(key) || _operations.Count < MaxTrackedOperations)
             {
-                _operations[started.OperationId] = (started.Title, started.Unit);
+                _operations[key] = (started.Title, started.Unit);
             }
         }
 
@@ -46,7 +47,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal string Finish(TaskProgressFinishedEventArgs finished)
         {
-            if (!_operations.TryGetValue(finished.OperationId, out (string? Title, TaskProgressUnit Unit) operation))
+            var key = (finished.BuildEventContext, finished.OperationId);
+            if (!_operations.TryGetValue(key, out (string? Title, TaskProgressUnit Unit) operation))
             {
                 // The started event never arrived, so the title and unit are unknown. This happens when
                 // the operation limit was reached, and it must not lose the outcome.
@@ -54,7 +56,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             else
             {
-                _operations.Remove(finished.OperationId);
+                _operations.Remove(key);
             }
 
             string title = string.IsNullOrWhiteSpace(operation.Title) ? finished.SenderName ?? string.Empty : operation.Title!;

@@ -24,7 +24,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initializes an instance of the <see cref="TaskProgressStartedEventArgs"/> class.
         /// </summary>
-        /// <param name="operationId">The engine-generated identifier for this operation, unique within the build.</param>
+        /// <param name="operationId">The engine-generated identifier for this operation, qualified by its task's <see cref="BuildEventArgs.BuildEventContext"/>.</param>
         /// <param name="title">A short, stable description of the operation.</param>
         /// <param name="unit">The unit that progress values are expressed in.</param>
         /// <param name="helpKeyword">Help keyword.</param>
@@ -43,7 +43,8 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Gets or sets the engine-generated identifier for this operation, unique within the build.
+        /// Gets or sets the engine-generated identifier for this operation.
+        /// Combine this value with <see cref="BuildEventArgs.BuildEventContext"/> to identify an operation across processes.
         /// </summary>
         public long OperationId { get; set; }
 
@@ -59,6 +60,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Gets or sets the identifier of the operation that this operation is nested in, or zero for a top-level operation.
+        /// The parent has the same <see cref="BuildEventArgs.BuildEventContext"/> as this operation.
         /// </summary>
         public long ParentOperationId { get; set; }
 

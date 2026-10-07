@@ -106,7 +106,7 @@ public sealed partial class TerminalLogger : INodeLogger
     private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = [];
 
     private readonly Dictionary<EvalContext, EvalProjectInfo> _projectEvaluations = [];
-    private readonly Dictionary<long, TerminalProgressStatus> _progress = [];
+    private readonly Dictionary<(BuildEventContext? Context, long OperationId), TerminalProgressStatus> _progress = [];
 
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
@@ -487,10 +487,10 @@ public sealed partial class TerminalLogger : INodeLogger
                 case TaskProgressStartedEventArgs started:
                     StartProgress(started);
                     break;
-                case TaskProgressUpdatedEventArgs updated when _progress.TryGetValue(updated.OperationId, out TerminalProgressStatus? active):
+                case TaskProgressUpdatedEventArgs updated when _progress.TryGetValue((updated.BuildEventContext, updated.OperationId), out TerminalProgressStatus? active):
                     active.Update(updated);
                     break;
-                case TaskProgressFinishedEventArgs finished when _progress.TryGetValue(finished.OperationId, out TerminalProgressStatus? ended):
+                case TaskProgressFinishedEventArgs finished when _progress.TryGetValue((finished.BuildEventContext, finished.OperationId), out TerminalProgressStatus? ended):
                     if (ended.Parent is not null && ended.Retention == TaskProgressNestedRetention.Persist)
                     {
                         ended.Finish(finished);
@@ -509,21 +509,22 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private void StartProgress(TaskProgressStartedEventArgs started)
     {
-        if (_progress.ContainsKey(started.OperationId) || _progress.Count >= MaxProgressOperations)
+        var key = (started.BuildEventContext, started.OperationId);
+        if (_progress.ContainsKey(key) || _progress.Count >= MaxProgressOperations)
         {
             return;
         }
 
         // A nested operation is shown only below its parent. If the parent is not shown, neither is the nested operation.
         TerminalProgressStatus? parent = null;
-        if (started.ParentOperationId != 0 && !_progress.TryGetValue(started.ParentOperationId, out parent))
+        if (started.ParentOperationId != 0 && !_progress.TryGetValue((started.BuildEventContext, started.ParentOperationId), out parent))
         {
             return;
         }
 
         int nodeIndex = parent?.NodeIndex ?? (started.BuildEventContext is { } context ? NodeIndexForContext(context) : -1);
         var status = new TerminalProgressStatus(started, nodeIndex, parent);
-        _progress[started.OperationId] = status;
+        _progress[key] = status;
         parent?.Children.Add(status);
     }
 
@@ -544,7 +545,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         status.Children.Clear();
-        _progress.Remove(status.OperationId);
+        _progress.Remove((status.BuildEventContext, status.OperationId));
     }
 
     /// <summary>
@@ -598,8 +599,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
         if (progress!.Total is long total && total > 0)
         {
-            long calculatedPercent = progress.Completed * 100L / total;
-            int percent = (int)Math.Min(100L, Math.Max(0L, calculatedPercent));
+            int percent = (int)(Math.Min(total, Math.Max(0L, progress.Completed)) * 100m / total);
             Terminal.Write(AnsiCodes.SetProgress(percent));
         }
         else

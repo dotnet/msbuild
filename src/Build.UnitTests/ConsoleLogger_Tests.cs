@@ -691,6 +691,27 @@ namespace Microsoft.Build.UnitTests
             output.Trim().Split('\n').Length.ShouldBe(1, output);
         }
 
+        [Fact]
+        public void ProgressOperationIdsAreQualifiedByTaskContext()
+        {
+            var tracker = new ConsoleProgressTracker();
+            var first = new BuildEventContext(1, 2, 3, 4);
+            var second = new BuildEventContext(2, 2, 3, 4);
+            tracker.Start(new TaskProgressStartedEventArgs(1, "First operation", TaskProgressUnit.Items) { BuildEventContext = first });
+            tracker.Start(new TaskProgressStartedEventArgs(1, "Second operation", TaskProgressUnit.Bytes) { BuildEventContext = second });
+
+            tracker.Finish(new TaskProgressFinishedEventArgs(1, 1, TaskProgressOutcome.Completed, 1, 1, null)
+            {
+                BuildEventContext = new BuildEventContext(1, 2, 3, 4),
+            }).ShouldContain("First operation");
+            string remaining = tracker.Finish(new TaskProgressFinishedEventArgs(1, 1, TaskProgressOutcome.Completed, 2, 2, null)
+            {
+                BuildEventContext = second,
+            });
+            remaining.ShouldContain("Second operation");
+            remaining.ShouldNotContain("First operation");
+        }
+
         [Theory]
         [InlineData(TaskProgressOutcome.Completed, "TaskProgressCompleted")]
         [InlineData(TaskProgressOutcome.Canceled, "TaskProgressCanceled")]

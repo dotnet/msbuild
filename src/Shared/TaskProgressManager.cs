@@ -28,8 +28,8 @@ namespace Microsoft.Build.BackEnd
         /// Generates operation identifiers that are unique within the current process.
         /// </summary>
         /// <remarks>
-        /// Distributed builds will need a node-qualified identifier once out-of-process transport
-        /// is implemented; this counter is sufficient for the initial single-process slice.
+        /// Loggers qualify these identifiers with the owning task's BuildEventContext, including
+        /// its node identity. Nested operations share their parent's context.
         /// </remarks>
         private static long s_nextOperationId;
 

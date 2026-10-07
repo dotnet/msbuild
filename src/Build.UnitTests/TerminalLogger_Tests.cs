@@ -1185,6 +1185,104 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Theory]
+        [InlineData(1L << 60, 1L << 60, 100)]
+        [InlineData(long.MaxValue, long.MaxValue, 100)]
+        [InlineData(long.MaxValue / 2, long.MaxValue, 49)]
+        public void ProgressTaskbarPercentageDoesNotOverflow(long completed, long total, int expectedPercent)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink source = new(0);
+            var logger = new TerminalLogger(terminal);
+            try
+            {
+                logger.Initialize(source, _nodeCount);
+                source.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items) { BuildEventContext = MakeBuildEventContext() });
+                output.GetStringBuilder().Clear();
+                source.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(1, 1, completed, total, null) { BuildEventContext = MakeBuildEventContext() });
+                output.ToString().ShouldContain(AnsiCodes.SetProgress(expectedPercent));
+            }
+            finally
+            {
+                logger.Shutdown();
+            }
+        }
+
+        [Theory]
+        [InlineData(80, 2)]
+        [InlineData(20, 5)]
+        public void ImmediateMessagesEraseProgressRowsOnlyOnce(int resizedWidth, int cursorMove)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink source = new(0);
+            var logger = new TerminalLogger(terminal);
+            try
+            {
+                logger.Initialize(source, _nodeCount);
+                source.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(1, new string('x', 100), TaskProgressUnit.Items) { BuildEventContext = MakeBuildEventContext() });
+                logger.DisplayNodes();
+                terminal.Width = resizedWidth;
+                output.GetStringBuilder().Clear();
+
+                source.InvokeMessageRaised(new BuildMessageEventArgs(_immediateMessageString, null, null, MessageImportance.High) { BuildEventContext = MakeBuildEventContext() });
+                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}{cursorMove}{AnsiCodes.MoveUpToLineStart}");
+                output.ToString().ShouldContain(_immediateMessageString);
+                output.GetStringBuilder().Clear();
+
+                source.InvokeMessageRaised(new BuildMessageEventArgs(_immediateMessageString, null, null, MessageImportance.High) { BuildEventContext = MakeBuildEventContext() });
+                output.ToString().ShouldBe(_immediateMessageString + Environment.NewLine);
+                output.GetStringBuilder().Clear();
+                logger.Refresh();
+                output.ToString().ShouldContain($"{AnsiCodes.CSI}1{AnsiCodes.MoveUpToLineStart}");
+            }
+            finally
+            {
+                logger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ProgressAndNestedOperationIdsAreQualifiedByTaskContext()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 120, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink source = new(0);
+            var logger = new TerminalLogger(terminal);
+            try
+            {
+                logger.Initialize(source, _nodeCount);
+                source.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext first = MakeBuildEventContext(nodeId: 1);
+                BuildEventContext second = MakeBuildEventContext(nodeId: 2);
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(1, "First parent", TaskProgressUnit.Items) { BuildEventContext = first });
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(1, "Second parent", TaskProgressUnit.Items) { BuildEventContext = second });
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(2, "First child", TaskProgressUnit.Items) { BuildEventContext = first, ParentOperationId = 1 });
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(2, "Second child", TaskProgressUnit.Items) { BuildEventContext = second, ParentOperationId = 1 });
+                logger.DisplayNodes();
+                output.ToString().ShouldContain("First child");
+                output.ToString().ShouldContain("Second child");
+
+                output.GetStringBuilder().Clear();
+                source.InvokeMessageRaised(new TaskProgressFinishedEventArgs(1, 1, TaskProgressOutcome.Completed, 1, 1, null) { BuildEventContext = MakeBuildEventContext(nodeId: 1) });
+                source.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(2, 1, 7, 10, "Remaining child") { BuildEventContext = second });
+                logger.Refresh();
+                string rendered = output.ToString();
+                rendered.ShouldNotContain("First parent");
+                rendered.ShouldNotContain("First child");
+                rendered.ShouldContain("Second parent");
+                rendered.ShouldContain("Second child: Remaining child");
+                rendered.ShouldContain("7 of 10 items");
+            }
+            finally
+            {
+                logger.Shutdown();
+            }
+        }
+
         [Fact]
         public void ProgressEventsAreIgnoredWhenTerminalDoesNotSupportThem()
         {

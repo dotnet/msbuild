@@ -14,6 +14,7 @@ internal sealed class TerminalProgressStatus
     internal TerminalProgressStatus(TaskProgressStartedEventArgs progress, int nodeIndex, TerminalProgressStatus? parent = null)
     {
         OperationId = progress.OperationId;
+        BuildEventContext = progress.BuildEventContext;
         NodeIndex = nodeIndex;
         Title = Sanitize(progress.Title);
         Unit = progress.Unit;
@@ -23,6 +24,7 @@ internal sealed class TerminalProgressStatus
     }
 
     internal long OperationId { get; }
+    internal BuildEventContext? BuildEventContext { get; }
 
     /// <summary>
     /// The node running the task that reported this operation, so the renderer can show the operation
@@ -132,7 +134,7 @@ internal sealed class TerminalProgressStatus
     private static string RenderBar(long completed, long total)
     {
         long boundedCompleted = Math.Min(Math.Max(completed, 0), total);
-        int filled = (int)(boundedCompleted * 10 / total);
+        int filled = (int)(boundedCompleted * 10m / total);
         return $"{new string('#', filled)}{new string('-', 10 - filled)}";
     }
 

@@ -360,7 +360,7 @@ namespace Microsoft.Build.Logging
                 // would drop them everywhere except detailed verbosity. Forward them wherever ordinary
                 // messages are wanted instead. The updates in between are high volume and are only
                 // useful to a live display, so they keep following the ordinary rules.
-                if (_forwardNormalImportanceMessages)
+                if (_forwardNormalImportanceMessages || _forwardLowImportanceMessages)
                 {
                     ForwardToCentralLogger(e);
                 }
