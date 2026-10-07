@@ -2089,11 +2089,6 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <target state="translated">Compilación iniciada.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
         <target state="translated">MSBUILD : error MSB1050: Especifique el archivo de proyecto o de solución que se va a utilizar ya que la carpeta "{0}" contiene más de un archivo de proyecto o de solución.</target>

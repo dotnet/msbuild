@@ -2082,11 +2082,6 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">La génération a démarré.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
         <target state="translated">MSBUILD : error MSB1050: Spécifiez le fichier projet ou solution à utiliser, car le dossier "{0}" contient plusieurs fichiers projet ou solution.</target>
