@@ -20,12 +20,6 @@ internal readonly record struct EvaluationInputValidationFailure(string? Reason,
 internal static class EvaluationInputValidator
 {
     /// <summary>
-    /// A directory timestamp this close to now cannot prove the directory is quiet: a file system with coarse timestamps
-    /// (FAT stamps in two-second steps) could give a later change the same timestamp.
-    /// </summary>
-    private static readonly TimeSpan RacyTimestampWindow = TimeSpan.FromSeconds(2);
-
-    /// <summary>
     /// Returns true when recording completed without a non-cacheable reason, direct environment reads are unchanged,
     /// and every recorded path still has the required kind and metadata or matching glob results.
     /// </summary>
@@ -35,13 +29,17 @@ internal static class EvaluationInputValidator
     /// An optional cache shared across every entry validated in the same build, so the metadata of SDK and package
     /// files is read once per build instead of once per project.
     /// </param>
+    /// <param name="directoryListings">
+    /// Optional directory listings kept from earlier replays, so a glob replay reads only the directories that changed.
+    /// </param>
     /// <param name="measurements">Optional diagnostics sink for where this validation spent its time; never affects the result.</param>
     internal static bool IsFileSystemCurrent(
         EvaluationInputs inputs,
         out string? reason,
         ImmutableFileStatCache? sharedStats = null,
+        ValidatedDirectoryListings? directoryListings = null,
         ValidationMeasurements? measurements = null)
-        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _, sharedStats, measurements);
+        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _, sharedStats, directoryListings, measurements);
 
     /// <summary>
     /// Checks recorded inputs, retaining the legacy reason separately from privacy-safe failure details.
@@ -51,8 +49,9 @@ internal static class EvaluationInputValidator
         out string? reason,
         out EvaluationInputValidationFailure failure,
         ImmutableFileStatCache? sharedStats = null,
+        ValidatedDirectoryListings? directoryListings = null,
         ValidationMeasurements? measurements = null)
-        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure, sharedStats, measurements);
+        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure, sharedStats, directoryListings, measurements);
 
     private static bool IsFileSystemCurrentCore(
         EvaluationInputs inputs,
@@ -60,6 +59,7 @@ internal static class EvaluationInputValidator
         out string? reason,
         out EvaluationInputValidationFailure failure,
         ImmutableFileStatCache? sharedStats,
+        ValidatedDirectoryListings? directoryListings,
         ValidationMeasurements? measurements)
     {
         failure = default;
@@ -95,6 +95,7 @@ internal static class EvaluationInputValidator
             }
 
             List<KeyValuePair<string, FileDependency>>? changedGlobDirectories = null;
+            List<KeyValuePair<string, FileDependency>>? directoryStates = null;
             long statStart = measurements is null ? 0 : ValidationMeasurements.Now();
             try
             {
@@ -155,13 +156,21 @@ internal static class EvaluationInputValidator
                         }
                     }
 
-                    if (file.Value.RequiresGlobValidation && metadataChanged)
+                    if (file.Value.RequiresGlobValidation)
                     {
-                        changedGlobDirectory ??= file.Key;
-                        (changedGlobDirectories ??= []).Add(new(file.Key, current));
-                        if (measurements is not null)
+                        if (directoryListings is not null)
                         {
-                            measurements.ChangedGlobDirectories++;
+                            (directoryStates ??= []).Add(new(file.Key, current));
+                        }
+
+                        if (metadataChanged)
+                        {
+                            changedGlobDirectory ??= file.Key;
+                            (changedGlobDirectories ??= []).Add(new(file.Key, current));
+                            if (measurements is not null)
+                            {
+                                measurements.ChangedGlobDirectories++;
+                            }
                         }
                     }
                 }
@@ -187,11 +196,38 @@ internal static class EvaluationInputValidator
 
             if (!inputs.Globs.IsDefaultOrEmpty)
             {
+                bool replayNeeded = changedGlobDirectory is not null;
+                if (!replayNeeded)
+                {
+                    foreach (GlobDependency glob in inputs.Globs)
+                    {
+                        if (glob.FromCache)
+                        {
+                            replayNeeded = true;
+                            break;
+                        }
+                    }
+                }
+
                 // Validating one entry is a single instant, so its globs can share the directory listings that
-                // each would otherwise read again from the same tree. Listings never outlive this validation:
-                // a file added after it must be visible to the next one.
-                ConcurrentDictionary<string, IReadOnlyList<string>>? listings =
-                    inputs.Globs.Length > 1 || measurements is not null ? new(StringComparer.Ordinal) : null;
+                // each would otherwise read again from the same tree. A listing taken from an earlier replay is only
+                // used while its directory still has the state it was read at, so a file added since is always visible.
+                ValidatedDirectoryListings.Replay? replay = null;
+                ConcurrentDictionary<string, IReadOnlyList<string>>? listings = null;
+                if (replayNeeded && directoryListings is not null && directoryStates is not null)
+                {
+                    replay = directoryListings.BeginReplay(directoryStates);
+                    listings = replay.Listings;
+                    if (measurements is not null)
+                    {
+                        measurements.ListingsSupplied += replay.Supplied;
+                    }
+                }
+                else if (inputs.Globs.Length > 1 || measurements is not null)
+                {
+                    listings = new(StringComparer.Ordinal);
+                }
+
                 if (measurements is not null)
                 {
                     measurements.GlobsRecorded += inputs.Globs.Length;
@@ -254,6 +290,7 @@ internal static class EvaluationInputValidator
                         }
                     }
 
+                    replay?.KeepReadListings(DateTime.UtcNow);
                     if (changedGlobDirectories is not null)
                     {
                         RememberQuietDirectories(inputs, changedGlobDirectories, measurements);
@@ -306,7 +343,7 @@ internal static class EvaluationInputValidator
         List<KeyValuePair<string, FileDependency>> changedDirectories,
         ValidationMeasurements? measurements)
     {
-        DateTime newestTrusted = DateTime.UtcNow - RacyTimestampWindow;
+        DateTime newestTrusted = DateTime.UtcNow - ValidatedDirectoryListings.RacyTimestampWindow;
         List<KeyValuePair<string, FileDependency>>? quiet = null;
         foreach (KeyValuePair<string, FileDependency> directory in changedDirectories)
         {

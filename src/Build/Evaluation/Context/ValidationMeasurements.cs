@@ -49,6 +49,7 @@ internal sealed class ValidationMeasurements
     internal long ReplaysWithoutEntryCache;
 
     internal long ListedDirectories;
+    internal long ListingsSupplied;
     internal long ListedEntries;
 
     // What replaying only the globs that traverse a changed directory would have done. Computed beside the real
@@ -278,6 +279,7 @@ internal sealed class ValidationMeasurements
         Add(request, nameof(DriverOptimizedDirect), DriverOptimizedDirect);
         Add(request, nameof(ReplaysWithoutEntryCache), ReplaysWithoutEntryCache);
         Add(request, nameof(ListedDirectories), ListedDirectories);
+        Add(request, nameof(ListingsSupplied), ListingsSupplied);
         Add(request, nameof(ListedEntries), ListedEntries);
         Add(request, nameof(GlobsNeededByAttribution), GlobsNeededByAttribution);
         Add(request, nameof(GlobsAvoidableByAttribution), GlobsAvoidableByAttribution);

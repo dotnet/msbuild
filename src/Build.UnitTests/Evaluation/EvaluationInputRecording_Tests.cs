@@ -772,6 +772,103 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     }
 
     [Fact]
+    public void AStoredListingIsReusedOnlyWhileItsDirectoryKeepsTheStateItWasReadAt()
+    {
+        (EvaluationInputs inputs, string first, string second) = EvaluateTwoGlobDirectoriesWithUnrelatedChanges();
+        var listings = new ValidatedDirectoryListings();
+
+        IsCurrent(inputs, listings, out string? reason).ShouldBeTrue(reason);
+        listings.DirectoryCount.ShouldBe(2);
+
+        // The second directory changes, so every glob of the entry replays; the first keeps its state and its stored
+        // listing is used, which a member added with a restored timestamp shows. A directory length that tracks its
+        // entries would reveal the member, so only forge where it does not.
+        EvaluationInputRecorder.TryStat(first, out FileDependency stored).ShouldBeTrue();
+        File.WriteAllText(Path.Combine(first, "forged.props"), "<Project />");
+        Directory.SetLastWriteTimeUtc(first, stored.LastWriteTimeUtc);
+        EvaluationInputRecorder.TryStat(first, out FileDependency forged).ShouldBeTrue();
+        Assert.SkipUnless(forged.Length == stored.Length, "This file system reports a directory length that tracks its entries.");
+        File.WriteAllText(Path.Combine(second, "another-unrelated.log"), "x");
+        Directory.SetLastWriteTimeUtc(second, DateTime.UtcNow.AddSeconds(-20));
+
+        IsCurrent(inputs, listings, out reason).ShouldBeTrue(reason);
+    }
+
+    [Fact]
+    public void AChangeToADirectoryWithAStoredListingIsSeen()
+    {
+        (EvaluationInputs inputs, string first, string _) = EvaluateTwoGlobDirectoriesWithUnrelatedChanges();
+        var listings = new ValidatedDirectoryListings();
+        IsCurrent(inputs, listings, out string? reason).ShouldBeTrue(reason);
+
+        File.WriteAllText(Path.Combine(first, "after.props"), "<Project />");
+        Directory.SetLastWriteTimeUtc(first, DateTime.UtcNow.AddSeconds(-5));
+
+        IsCurrent(inputs, listings, out reason).ShouldBeFalse();
+        reason.ShouldBe(first);
+    }
+
+    [Fact]
+    public void ListingsOfADirectoryThatIsStillChangingAreNotStored()
+    {
+        (EvaluationInputs inputs, string _, string second) = EvaluateTwoGlobDirectoriesWithUnrelatedChanges();
+        Directory.SetLastWriteTimeUtc(second, DateTime.UtcNow);
+        var listings = new ValidatedDirectoryListings();
+
+        IsCurrent(inputs, listings, out string? reason).ShouldBeTrue(reason);
+
+        listings.DirectoryCount.ShouldBe(1);
+    }
+
+    [Fact]
+    public void AReplayThatDoesNotMatchStoresNoListings()
+    {
+        (EvaluationInputs inputs, string first, string _) = EvaluateTwoGlobDirectoriesWithUnrelatedChanges();
+        File.WriteAllText(Path.Combine(first, "after.props"), "<Project />");
+        Directory.SetLastWriteTimeUtc(first, DateTime.UtcNow.AddSeconds(-30));
+        var listings = new ValidatedDirectoryListings();
+
+        IsCurrent(inputs, listings, out _).ShouldBeFalse();
+
+        listings.DirectoryCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public void StoredListingsAreBoundedByTheirMaximum()
+    {
+        (EvaluationInputs inputs, string _, string _) = EvaluateTwoGlobDirectoriesWithUnrelatedChanges();
+        var listings = new ValidatedDirectoryListings(maximumDirectories: 1);
+
+        IsCurrent(inputs, listings, out string? reason).ShouldBeTrue(reason);
+
+        listings.DirectoryCount.ShouldBeLessThanOrEqualTo(1);
+    }
+
+    private (EvaluationInputs Inputs, string First, string Second) EvaluateTwoGlobDirectoriesWithUnrelatedChanges()
+    {
+        string first = Path.Combine(_folder.Path, "first");
+        string second = Path.Combine(_folder.Path, "second");
+        Directory.CreateDirectory(first);
+        Directory.CreateDirectory(second);
+        File.WriteAllText(Path.Combine(first, "a.props"), "<Project />");
+        File.WriteAllText(Path.Combine(second, "b.props"), "<Project />");
+        string project = CreateProject("""
+            <Project>
+              <ItemGroup>
+                <First Include="first/*.props" />
+                <Second Include="second/*.props" />
+              </ItemGroup>
+            </Project>
+            """);
+        EvaluationInputs inputs = Evaluate(project);
+        File.WriteAllText(Path.Combine(first, "unrelated.log"), "x");
+        File.WriteAllText(Path.Combine(second, "unrelated.log"), "x");
+        Directory.SetLastWriteTimeUtc(first, DateTime.UtcNow.AddSeconds(-40));
+        Directory.SetLastWriteTimeUtc(second, DateTime.UtcNow.AddSeconds(-30));
+        return (inputs, first, second);
+    }
+
+    [Fact]
     public void EachGlobRecordsTheDirectoriesItAloneTraversed()
     {
         string first = Path.Combine(_folder.Path, "first");
@@ -2703,6 +2800,9 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
 
     private static bool IsCurrent(EvaluationInputs inputs, out string? reason) =>
         EvaluationInputValidator.IsFileSystemCurrent(inputs, out reason);
+
+    private static bool IsCurrent(EvaluationInputs inputs, ValidatedDirectoryListings listings, out string? reason) =>
+        EvaluationInputValidator.IsFileSystemCurrent(inputs, out reason, directoryListings: listings);
 
     /// <summary>
     /// Rewrites a file and moves its timestamp forward so the change is visible on file systems with coarse timestamps.

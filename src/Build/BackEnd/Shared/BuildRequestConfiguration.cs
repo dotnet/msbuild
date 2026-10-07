@@ -716,7 +716,8 @@ namespace Microsoft.Build.BackEnd
                                             componentHost.LoggingService,
                                             buildEventContext,
                                             submissionId,
-                                            snapshotCache.ImmutableFileStats);
+                                            snapshotCache.ImmutableFileStats,
+                                            snapshotCache.ValidatedDirectoryListings);
                                         hasUnverifiableCachedProjectRootElement =
                                             HasUnverifiableCachedProjectRootElement(
                                                 componentHost.BuildParameters.ProjectRootElementCache,

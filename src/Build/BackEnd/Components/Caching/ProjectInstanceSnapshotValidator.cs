@@ -158,8 +158,8 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
         using (diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.ManifestValidation))
         {
             fileSystemCurrent = captureDetails
-                ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure, validationContext?.FileStatCache, measurements)
-                : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, validationContext?.FileStatCache, measurements);
+                ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure, validationContext?.FileStatCache, validationContext?.DirectoryListings, measurements)
+                : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, validationContext?.FileStatCache, validationContext?.DirectoryListings, measurements);
         }
 
         if (measurements is not null && diagnosticRequest is not null)
@@ -218,7 +218,8 @@ internal sealed class ProjectInstanceSnapshotValidationContext
         ILoggingService loggingService,
         BuildEventContext buildEventContext,
         int submissionId,
-        ImmutableFileStatCache? fileStatCache = null)
+        ImmutableFileStatCache? fileStatCache = null,
+        ValidatedDirectoryListings? directoryListings = null)
     {
         ArgumentNullException.ThrowIfNull(sdkResolverService);
         ArgumentNullException.ThrowIfNull(loggingService);
@@ -228,6 +229,7 @@ internal sealed class ProjectInstanceSnapshotValidationContext
         _buildEventContext = buildEventContext;
         _submissionId = submissionId;
         FileStatCache = fileStatCache;
+        DirectoryListings = directoryListings;
     }
 
     /// <summary>
@@ -235,6 +237,12 @@ internal sealed class ProjectInstanceSnapshotValidationContext
     /// not provide one (e.g. tests constructing this context directly).
     /// </summary>
     internal ImmutableFileStatCache? FileStatCache { get; }
+
+    /// <summary>
+    /// Directory listings kept from earlier glob replays and reused while their directories are unchanged. Null when
+    /// the owning cache does not provide one.
+    /// </summary>
+    internal ValidatedDirectoryListings? DirectoryListings { get; }
 
     internal bool Validate(SdkDependency dependency) => ValidateCore(dependency, captureDetails: false, out _);
 

@@ -703,7 +703,7 @@ internal sealed class EvaluationInputRecorder
     /// Full path without a trailing separator, so a directory is one entry however it was spelled. The result is
     /// interned so manifests of different projects share one string per SDK file instead of each holding its own.
     /// </summary>
-    private static string Canonicalize(string path)
+    internal static string Canonicalize(string path)
     {
         string fixedPath = FileUtilities.FixFilePath(path);
         string fullPath = FileUtilities.NormalizePath(
