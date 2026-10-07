@@ -25,6 +25,7 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
     private readonly Dictionary<ProjectInstanceSnapshotCacheKey, LinkedListNode<CacheEntry>> _entries = [];
     private readonly LinkedList<CacheEntry> _leastRecentlyUsed = [];
     private readonly ImmutableFileStatCache _immutableFileStats = new();
+    private readonly ValidatedDirectoryListings _validatedDirectoryListings = new();
     private readonly long _maximumSizeBytes;
     private long _currentSizeBytes;
     private long _buildsServed;
@@ -225,6 +226,12 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
     /// current build. Cleared when a build starts so a server or other long-lived host sees later changes.
     /// </summary>
     internal ImmutableFileStatCache ImmutableFileStats => _immutableFileStats;
+
+    /// <summary>
+    /// Directory listings read by glob replay, reused only while each directory still has the state its listing was read at.
+    /// They outlive a build because every use compares that state; they are discarded with the cache's entries.
+    /// </summary>
+    internal ValidatedDirectoryListings ValidatedDirectoryListings => _validatedDirectoryListings;
 
     internal void NotifyBuildStarted()
     {
@@ -431,6 +438,8 @@ internal sealed class ProjectInstanceSnapshotCache : IBuildComponent
             _leastRecentlyUsed.Clear();
             _currentSizeBytes = 0;
         }
+
+        _validatedDirectoryListings.Clear();
     }
 
     /// <summary>
