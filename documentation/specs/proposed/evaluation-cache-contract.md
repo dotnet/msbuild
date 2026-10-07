@@ -187,6 +187,14 @@ can create or change them between two validations. The globs of one entry share 
 during that entry's validation; a listing never outlives it, so a file added afterwards is always
 visible to glob replay.
 
+When a glob-traversed directory's timestamp differs from the recorded one and every glob of the entry
+matches its recorded result on replay, the entry remembers the timestamp observed before that replay
+and compares against it from then on, so the same unrelated change is not replayed on every later
+hit. The recorded manifest is never rewritten, a replay that does not match remembers nothing, and a
+later change gives the directory a timestamp that differs from the remembered one. Only a timestamp
+more than two seconds older than the check is remembered, so a coarse-resolution file system cannot
+give a later change the same timestamp.
+
 The supported operating model assumes relevant edits change timestamp or length and that
 inputs are not concurrently written during validation and materialization. Same-size edits that
 preserve timestamps, timestamp aliasing, and concurrent writers are outside this guarantee. Content
