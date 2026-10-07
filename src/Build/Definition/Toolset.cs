@@ -951,7 +951,7 @@ namespace Microsoft.Build.Evaluation
             catch (XmlException e)
             {
                 // handle XML errors in the default tasks file
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(currentTasksFile, e),
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(ElementLocation.CreateFrom(currentTasksFile, e)),
                     taskFileError, e.Message);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

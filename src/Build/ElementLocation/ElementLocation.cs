@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
@@ -165,6 +166,32 @@ public abstract class ElementLocation : IElementLocation, IImmutable
             : new FileOnly(file);
 
     /// <summary>
+    ///  Creates a location from a file and optional line number.
+    /// </summary>
+    /// <param name="file">The file containing the element, or <see langword="null"/> if unknown.</param>
+    /// <param name="line">The one-based line number, or <c>0</c> if unknown.</param>
+    /// <returns>
+    ///  A location containing the supplied information.
+    /// </returns>
+    internal static ElementLocation Create(string? file, int line)
+    {
+        Assumed.PositiveOrZero(line, "Use zero for unknown");
+
+        string normalizedFile = file ?? string.Empty;
+
+        if (line == 0)
+        {
+            return normalizedFile.Length == 0
+                ? Empty
+                : new FileOnly(normalizedFile);
+        }
+
+        return line <= ushort.MaxValue
+            ? new Small(normalizedFile, (ushort)line, 0)
+            : new Regular(normalizedFile, line, 0);
+    }
+
+    /// <summary>
     ///  Creates a location from a file and optional line and column coordinates.
     /// </summary>
     /// <param name="file">The file containing the element, or <see langword="null"/> if unknown.</param>
@@ -194,6 +221,40 @@ public abstract class ElementLocation : IElementLocation, IImmutable
         return line <= ushort.MaxValue && column <= ushort.MaxValue
             ? new Small(normalizedFile, (ushort)line, (ushort)column)
             : new Regular(normalizedFile, line, column);
+    }
+
+    /// <summary>
+    ///  Creates a location from an XML exception.
+    /// </summary>
+    /// <param name="exception">The exception containing the location information.</param>
+    /// <returns>
+    ///  A location containing the exception's source URI, line, and column.
+    /// </returns>
+    internal static ElementLocation CreateFrom(XmlException exception)
+    {
+        Assumed.NotNull(exception, "Need exception context.");
+
+        string? sourceUri = exception.SourceUri;
+        string file = sourceUri.IsNullOrEmpty()
+            ? string.Empty
+            : new Uri(sourceUri).LocalPath;
+
+        return Create(file, exception.LineNumber, exception.LinePosition);
+    }
+
+    /// <summary>
+    ///  Creates a location from a file and an XML exception.
+    /// </summary>
+    /// <param name="file">The file containing the XML, or <see langword="null"/> if unknown.</param>
+    /// <param name="exception">The exception containing the line and column information.</param>
+    /// <returns>
+    ///  A location containing the supplied file and the exception's line and column.
+    /// </returns>
+    internal static ElementLocation CreateFrom(string? file, XmlException exception)
+    {
+        Assumed.NotNull(exception, "Need exception context.");
+
+        return Create(file, exception.LineNumber, exception.LinePosition);
     }
 
     /// <summary>

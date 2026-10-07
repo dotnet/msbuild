@@ -70,6 +70,49 @@ public sealed class ElementLocation_Tests(ITestOutputHelper output)
     }
 
     [Theory]
+    [InlineData(0, "FileOnly")]
+    [InlineData(65_535, "Small")]
+    [InlineData(65_536, "Regular")]
+    public void LineOnlyFactoryUsesExpectedRepresentation(int line, string representation)
+    {
+        ElementLocation location = ElementLocation.Create("file", line);
+
+        location.File.ShouldBe("file");
+        location.Line.ShouldBe(line);
+        location.Column.ShouldBe(0);
+        location.GetType().Name.ShouldBe(representation);
+    }
+
+    [Fact]
+    public void CreateFromXmlExceptionUsesSourceUri()
+    {
+        const string sourceUri = "file:///C:/project.proj";
+        using XmlReader reader = XmlReader.Create(new StringReader("<Project>"), null, sourceUri);
+        var document = new XmlDocument();
+        XmlException exception = Should.Throw<XmlException>(() => document.Load(reader));
+
+        ElementLocation location = ElementLocation.CreateFrom(exception);
+
+        location.File.ShouldBe(new Uri(sourceUri).LocalPath);
+        location.Line.ShouldBe(exception.LineNumber);
+        location.Column.ShouldBe(exception.LinePosition);
+    }
+
+    [Theory]
+    [InlineData(null, "")]
+    [InlineData("file", "file")]
+    public void CreateFromXmlExceptionUsesSuppliedFile(string? file, string expectedFile)
+    {
+        var exception = new XmlException("message", null, 12, 34);
+
+        ElementLocation location = ElementLocation.CreateFrom(file, exception);
+
+        location.File.ShouldBe(expectedFile);
+        location.Line.ShouldBe(12);
+        location.Column.ShouldBe(34);
+    }
+
+    [Theory]
     [InlineData("file", 0, 0, "file")]
     [InlineData("file", 1, 0, "file (1)")]
     [InlineData("file", 1, 2, "file (1,2)")]

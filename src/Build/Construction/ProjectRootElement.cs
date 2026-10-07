@@ -2118,7 +2118,7 @@ namespace Microsoft.Build.Construction
             catch (Exception ex) when (!ExceptionHandling.NotExpectedIoOrXmlException(ex))
             {
                 BuildEventFileInfo fileInfo = ex is XmlException xmlException
-                    ? new BuildEventFileInfo(fullPath, xmlException)
+                    ? new BuildEventFileInfo(ElementLocation.CreateFrom(fullPath, xmlException))
                     : new BuildEventFileInfo(fullPath);
 
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
@@ -2143,7 +2143,7 @@ namespace Microsoft.Build.Construction
             }
             catch (XmlException ex)
             {
-                BuildEventFileInfo fileInfo = new BuildEventFileInfo(ex);
+                BuildEventFileInfo fileInfo = new BuildEventFileInfo(ElementLocation.CreateFrom(ex));
 
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, "InvalidProjectFile", ex.Message);
             }
