@@ -2252,9 +2252,9 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Replays the recorded matching semantics against fresh physical entries, bypassing the result cache and observers.
-        /// An optional directory-listing cache (<paramref name="sharedEntryCache"/>) may be passed so multiple validation
-        /// replays within the same build share directory listings instead of each re-enumerating the physical filesystem;
-        /// doing so never changes which changes are detected, only how much enumeration work is repeated.
+        /// An optional directory-listing cache (<paramref name="sharedEntryCache"/>) may be passed so the globs of one
+        /// entry's validation share directory listings instead of each re-enumerating the physical filesystem. It must
+        /// not outlive that validation; doing so would hide files added since the listing was read.
         /// </summary>
         internal static (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? GlobFailure) GetFilesForValidation(
             string projectDirectory,

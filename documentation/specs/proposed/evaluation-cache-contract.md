@@ -179,6 +179,15 @@ This avoids treating excluded-subtree existence checks as reads of their content
 `bin`, `obj`, or any other directory by name. Matching file additions, removals, and renames still
 invalidate glob results. Direct metadata reads and imported generated files remain metadata dependencies.
 
+Validation shares work only where sharing cannot hide a change. Within one build, the metadata of
+each existing file under the toolset, .NET SDK, and NuGet package roots is read once and reused by
+every entry, because those roots are not modified while a build runs. The shared results are
+discarded when the next build starts, so a long-lived host observes edits between builds. Missing
+paths, directories, links, and files elsewhere are always read from the file system, because tasks
+can create or change them between two validations. The globs of one entry share directory listings
+during that entry's validation; a listing never outlives it, so a file added afterwards is always
+visible to glob replay.
+
 The supported operating model assumes relevant edits change timestamp or length and that
 inputs are not concurrently written during validation and materialization. Same-size edits that
 preserve timestamps, timestamp aliasing, and concurrent writers are outside this guarantee. Content
