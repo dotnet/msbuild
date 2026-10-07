@@ -868,51 +868,6 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
         return (inputs, first, second);
     }
 
-    [Fact]
-    public void EachGlobRecordsTheDirectoriesItAloneTraversed()
-    {
-        string first = Path.Combine(_folder.Path, "first");
-        string second = Path.Combine(_folder.Path, "second");
-        string deep = Path.Combine(_folder.Path, "deep");
-        string nested = Path.Combine(deep, "nested");
-        Directory.CreateDirectory(first);
-        Directory.CreateDirectory(second);
-        Directory.CreateDirectory(nested);
-        File.WriteAllText(Path.Combine(first, "a.props"), "<Project />");
-        File.WriteAllText(Path.Combine(second, "b.props"), "<Project />");
-        File.WriteAllText(Path.Combine(nested, "c.props"), "<Project />");
-        string project = CreateProject("""
-            <Project>
-              <ItemGroup>
-                <First Include="first/*.props" />
-                <Second Include="second/*.props" />
-                <Deep Include="deep/**/*.props" />
-              </ItemGroup>
-            </Project>
-            """);
-
-        EvaluationInputs inputs = Evaluate(project);
-
-        static bool Has(string[] directories, string path) =>
-            directories.Any(directory => string.Equals(directory, path, FileUtilities.PathComparison));
-        GlobDependency firstGlob = inputs.Globs.Single(glob => glob.Filespec.Contains("first", StringComparison.Ordinal));
-        GlobDependency secondGlob = inputs.Globs.Single(glob => glob.Filespec.Contains("second", StringComparison.Ordinal));
-        GlobDependency deepGlob = inputs.Globs.Single(glob => glob.Filespec.Contains("deep", StringComparison.Ordinal));
-        Has(firstGlob.TraversedDirectories.ShouldNotBeNull(), first).ShouldBeTrue();
-        Has(firstGlob.TraversedDirectories, second).ShouldBeFalse();
-        Has(secondGlob.TraversedDirectories.ShouldNotBeNull(), second).ShouldBeTrue();
-        Has(secondGlob.TraversedDirectories, first).ShouldBeFalse();
-        Has(deepGlob.TraversedDirectories.ShouldNotBeNull(), deep).ShouldBeTrue();
-        Has(deepGlob.TraversedDirectories, nested).ShouldBeTrue();
-        Has(deepGlob.TraversedDirectories, first).ShouldBeFalse();
-
-        string[] allClaimed = [.. inputs.Globs.SelectMany(glob => glob.TraversedDirectories ?? [])];
-        foreach (KeyValuePair<string, FileDependency> file in inputs.Files.Where(file => file.Value.RequiresGlobValidation))
-        {
-            Has(allClaimed, file.Key).ShouldBeTrue($"{file.Key} needs glob validation but no glob claims it.");
-        }
-    }
-
     private (EvaluationInputs Inputs, string Directory) EvaluateGlobDirectoryWithUnrelatedChange(DateTime timestamp)
     {
         string directory = Path.Combine(_folder.Path, "files");

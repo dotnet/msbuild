@@ -225,44 +225,6 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         second.ShouldNotContain("ValidationDetail.GlobsReplayed");
     }
 
-    [Fact]
-    public void AttributionShadowCountsGlobsThatDoNotTraverseTheChangedDirectory()
-    {
-        using TestEnvironment env = TestEnvironment.Create(_output);
-        Configure(env, true, EvaluationCacheMode.SnapshotFileSystem);
-        TransientTestFolder folder = env.CreateFolder();
-        TransientTestFolder changed = env.CreateFolder(Path.Combine(folder.Path, "changed"));
-        TransientTestFolder untouched = env.CreateFolder(Path.Combine(folder.Path, "untouched"));
-        env.CreateFile(changed, "a.txt", "a");
-        env.CreateFile(untouched, "b.txt", "b");
-        string project = env.CreateFile(folder, "glob.proj", "<Project><ItemGroup><A Include=\"changed/*.txt\" /><B Include=\"untouched/*.txt\" /></ItemGroup></Project>").Path;
-        var cache = new ProjectInstanceSnapshotCache();
-        var parameters = new BuildParameters
-        {
-            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
-            ProjectInstanceSnapshotCache = cache,
-        };
-        cache.ConfigureValidator(EvaluationCacheValidationPolicy.FileSystem);
-        cache.ConfigureDiagnostics(true, "manager", 1, EvaluationCacheMode.SnapshotFileSystem, parameters.EnvironmentPropertiesInternal);
-        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
-        Load(project, parameters, host);
-        Flush(cache.Diagnostics!);
-
-        File.WriteAllText(Path.Combine(changed.Path, "unrelated.log"), "x");
-        Directory.SetLastWriteTimeUtc(changed.Path, DateTime.UtcNow.AddSeconds(-30));
-        Load(project, parameters, host);
-        string log = Flush(cache.Diagnostics!);
-
-        log.ShouldContain("ValidationDetail.GlobsReplayed:2");
-        log.ShouldContain("ValidationDetail.GlobsNeededByAttribution:1");
-        log.ShouldContain("ValidationDetail.GlobsAvoidableByAttribution:1");
-        log.ShouldContain("ValidationDetail.EntriesReplayed:1");
-        log.ShouldNotContain("ValidationDetail.EntriesReplayAvoidableEntirely");
-        log.ShouldNotContain("ValidationDetail.ChangedDirectoriesUnclaimed");
-        log.ShouldNotContain("ValidationDetail.GlobsWithoutRecordedDirectories");
-        log.ShouldContain("ValidationDetail.ChangedDirectoriesOther:1");
-    }
-
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
