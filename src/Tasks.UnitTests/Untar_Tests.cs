@@ -316,6 +316,12 @@ namespace Microsoft.Build.Tasks.UnitTests
                 using (FileStream tarStream = new FileStream(tarFilePath, FileMode.Create, FileAccess.Write))
                 using (System.Formats.Tar.TarWriter writer = new System.Formats.Tar.TarWriter(tarStream, System.Formats.Tar.TarEntryFormat.Pax))
                 {
+                    System.Formats.Tar.PaxTarEntry validEntry = new System.Formats.Tar.PaxTarEntry(System.Formats.Tar.TarEntryType.RegularFile, "valid.txt")
+                    {
+                        DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("valid")),
+                    };
+                    writer.WriteEntry(validEntry);
+
                     System.Formats.Tar.PaxTarEntry entry = new System.Formats.Tar.PaxTarEntry(System.Formats.Tar.TarEntryType.RegularFile, maliciousEntryName)
                     {
                         DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("pwned")),
@@ -324,6 +330,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
 
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
 
                 Untar untar = new Untar
                 {
@@ -343,6 +351,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // The failure must surface the dedicated "outside destination directory" error (MSB4334),
                 // not a generic "could not open file" (MSB4333).
                 _mockEngine.Log.ShouldContain("MSB4334");
+                progress.IsFailed.ShouldBeTrue();
             }
         }
 

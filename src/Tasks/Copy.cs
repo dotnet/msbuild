@@ -126,12 +126,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private ITaskProgressReporter _progress;
 
-        /// <summary>
-        /// The number of source files processed so far, incremented atomically because the parallel copy path
-        /// processes partitions on several threads.
-        /// </summary>
-        private int _filesProcessed;
-
         private static readonly bool s_copyInParallel = GetParallelismFromEnvironment();
 
         /// <summary>
@@ -488,6 +482,7 @@ namespace Microsoft.Build.Tasks
                 _progress = (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
                     DestinationFolder is null ? "Copying files" : $"Copying files to {DestinationFolder.ItemSpec}",
                     TaskProgressUnit.Items);
+                _progress?.SetTotal(SourceFiles.Length);
             }
 
             try
@@ -608,9 +603,10 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            // The parallel path calls this from several threads at once, so the counter must be atomic.
-            int processed = Interlocked.Increment(ref _filesProcessed);
-            _progress.Report(new TaskProgressUpdate(processed, SourceFiles.Length, destinationSpec));
+            // The parallel path calls this from several threads at once, so update the reporter's counter
+            // atomically instead of reporting a snapshot that could arrive after a newer one.
+            _progress.SetStatus(destinationSpec);
+            _progress.Increment();
         }
 
         private static void ParallelCopyTask(object state)

@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -136,6 +137,47 @@ namespace Microsoft.Build.Tasks.UnitTests
                 progress.Total.ShouldBe(2);
                 progress.IsComplete.ShouldBeTrue();
                 _mockEngine.TaskProgressReporterTitle.ShouldBe($"Extracting {Path.GetFileName(zipArchive.Path)}");
+            }
+        }
+
+        [Fact]
+        public void ReportsFailedProgressWhenExtractionLogsAnError()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                string zipPath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "malicious.zip");
+                using (FileStream fileStream = new FileStream(zipPath, FileMode.Create, FileAccess.Write))
+                using (ZipArchive archive = new ZipArchive(fileStream, ZipArchiveMode.Create))
+                {
+                    using (StreamWriter writer = new StreamWriter(archive.CreateEntry("valid.txt").Open()))
+                    {
+                        writer.Write("valid");
+                    }
+
+                    using (StreamWriter writer = new StreamWriter(archive.CreateEntry("../outside.txt").Open()))
+                    {
+                        writer.Write("outside");
+                    }
+                }
+
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                Unzip unzip = new Unzip
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    SkipUnchangedFiles = false,
+                    SourceFiles = [new TaskItem(zipPath)],
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                unzip.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                progress.IsFailed.ShouldBeTrue();
+                progress.IsComplete.ShouldBeFalse();
+                progress.IsCanceled.ShouldBeFalse();
             }
         }
 

@@ -112,6 +112,9 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
+        /// <summary>Optional per-entry write override for deterministic cancellation tests.</summary>
+        internal Func<Func<System.Threading.Tasks.Task>, System.Threading.Tasks.Task>? EntryWriteAsyncOverride { get; set; }
+
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
         {
@@ -248,32 +251,48 @@ namespace Microsoft.Build.Tasks
                             $"Creating {_destinationFile.Name}",
                             TaskProgressUnit.Items);
 
-                    foreach ((FileSystemInfo info, string entryName) in entries)
+                    bool archiveWritten = false;
+                    try
                     {
-                        // Check for cancellation on every iteration so a cancelled build stops promptly rather than
-                        // writing out the entire remaining archive.
-                        if (cancellationToken.IsCancellationRequested)
+                        foreach ((FileSystemInfo info, string entryName) in entries)
                         {
-                            break;
+                            // Check for cancellation on every iteration so a cancelled build stops promptly rather than
+                            // writing out the entire remaining archive.
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                break;
+                            }
+
+                            if (EntryWriteAsyncOverride is { } entryWriteAsyncOverride)
+                            {
+                                Func<System.Threading.Tasks.Task> writeEntry = deterministicTimestamp is DateTimeOffset timestamp
+                                    ? () => WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken)
+                                    : () => writer.WriteEntryAsync(info.FullName, entryName, cancellationToken);
+
+                                await entryWriteAsyncOverride(writeEntry).ConfigureAwait(continueOnCapturedContext: false);
+                            }
+                            else if (deterministicTimestamp is DateTimeOffset timestamp)
+                            {
+                                await WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                            }
+                            else
+                            {
+                                // Flow the cancellation token into the runtime's write so a large entry's stream copy
+                                // can be interrupted mid-entry rather than only between entries.
+                                await writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
+                                    .ConfigureAwait(continueOnCapturedContext: false);
+                            }
+
+                            writtenEntries++;
+                            progress?.Report(new TaskProgressUpdate(writtenEntries, entries.Count, entryName));
                         }
 
-                        if (deterministicTimestamp is DateTimeOffset timestamp)
-                        {
-                            await WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-                        }
-                        else
-                        {
-                            // Flow the cancellation token into the runtime's write so a large entry's stream copy
-                            // can be interrupted mid-entry rather than only between entries.
-                            await writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
-                                .ConfigureAwait(continueOnCapturedContext: false);
-                        }
-
-                        writtenEntries++;
-                        progress?.Report(new TaskProgressUpdate(writtenEntries, entries.Count, entryName));
+                        archiveWritten = !cancellationToken.IsCancellationRequested;
                     }
-
-                    progress?.Finish(succeeded: true, cancellationToken);
+                    finally
+                    {
+                        progress?.Finish(archiveWritten, cancellationToken);
+                    }
                 }
 
                 // A break out of the loop above (rather than an OperationCanceledException from a mid-entry write)

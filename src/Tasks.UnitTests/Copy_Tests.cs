@@ -2161,17 +2161,23 @@ namespace Microsoft.Build.UnitTests
 
                 copy.Execute(CopyFileWithState, !isUseSingleThreadedCopy).ShouldBeTrue(engine.Log);
 
-                progress.Updates.Count.ShouldBe(FileCount);
+                progress.Updates.ShouldNotBeEmpty();
                 progress.Completed.ShouldBe(FileCount);
                 progress.Total.ShouldBe(FileCount);
                 progress.IsComplete.ShouldBeTrue();
                 progress.IsCanceled.ShouldBeFalse();
 
-                // Every file must be counted exactly once, even though the parallel path reports from
-                // several threads and the updates therefore arrive out of order.
-                progress.Updates.Select(update => update.Completed)
-                    .OrderBy(completed => completed)
-                    .ShouldBe(Enumerable.Range(1, FileCount).Select(value => (long)value));
+                // The reporter applies concurrent increments atomically, so accepted snapshots never regress.
+                IReadOnlyList<TaskProgressUpdate> updates = progress.Updates;
+                for (int i = 1; i < updates.Count; i++)
+                {
+                    updates[i].Completed.ShouldBeGreaterThanOrEqualTo(updates[i - 1].Completed);
+                }
+
+                updates.Select(update => update.Completed)
+                    .Distinct()
+                    .ShouldBe(Enumerable.Range(0, FileCount + 1).Select(value => (long)value));
+                updates.Where(update => update.Status is not null).ShouldNotBeEmpty();
             }
 
             static bool? CopyFileWithState(FileState source, FileState destination) => true;

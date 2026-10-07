@@ -391,7 +391,7 @@ namespace Microsoft.Build.Tasks
 
             if (progress is not null)
             {
-                progress.Finish(succeeded: true, _cancellationTokenSource.Token);
+                progress.Finish(succeeded: !Log.HasLoggedErrors, _cancellationTokenSource.Token);
                 progress.Dispose();
             }
         }

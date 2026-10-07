@@ -207,6 +207,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 testEnvironment.CreateFile(sourceFolder, "A9E8E0B7F0C24F3E8F7F1B2C3D4E5F60.txt", "A9E8E0B7F0C24F3E8F7F1B2C3D4E5F60");
 
                 string tarFilePath = Path.Combine(testEnvironment.DefaultTestDirectory.Path, "test.tar");
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
 
                 TarDirectory tarDirectory = new TarDirectory
                 {
@@ -216,7 +218,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
-                // Cancelling before Execute means the very first write-loop iteration observes cancellation and stops.
+                // With a nonempty source, creating the progress reporter starts the operation even though the
+                // pre-canceled token prevents the first entry write.
                 tarDirectory.Cancel();
 
                 tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -226,6 +229,53 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 // The partially-written archive is cleaned up so a later non-Overwrite build is not blocked.
                 File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+                progress.IsCanceled.ShouldBeTrue();
+                progress.IsAbandoned.ShouldBeFalse();
+                _mockEngine.TaskProgressReporterTitle.ShouldBe("Creating test.tar");
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReportsCanceledProgressWhenEntryWriteIsCanceled(bool useDeterministicTimestamp)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+                testEnvironment.CreateFile(sourceFolder, "file.txt", "contents");
+
+                string tarFilePath = Path.Combine(testEnvironment.DefaultTestDirectory.Path, "test.tar");
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    DeterministicTimestamp = useDeterministicTimestamp ? "1704067200" : null,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                int writeAttempts = 0;
+                tarDirectory.EntryWriteAsyncOverride = _ =>
+                {
+                    writeAttempts++;
+                    File.Exists(tarFilePath).ShouldBeTrue();
+                    progress.Outcome.ShouldBeNull();
+                    tarDirectory.Cancel();
+                    return System.Threading.Tasks.Task.FromException(new OperationCanceledException());
+                };
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                writeAttempts.ShouldBe(1);
+                _mockEngine.TaskProgressReporterTitle.ShouldBe("Creating test.tar");
+                progress.IsCanceled.ShouldBeTrue();
+                progress.IsAbandoned.ShouldBeFalse();
+                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+                _mockEngine.Log.ShouldNotContain("MSB432", customMessage: _mockEngine.Log);
             }
         }
 
