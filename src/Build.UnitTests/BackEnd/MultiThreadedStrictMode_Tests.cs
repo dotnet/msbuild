@@ -1519,7 +1519,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 manager.BuildRequest(new BuildRequestData(project.Path, new Dictionary<string, string?>(), null, ["Build"], null))
                     .ShouldHaveSucceeded();
                 ((IBuildComponentHost)manager).LoggingService.LogWarningFromText(
-                    BuildEventContext.Invalid, null, "OTHER0001", null, BuildEventFileInfo.Empty, "Unrelated warning");
+                    BuildEventContext.Invalid, null, "OTHER0001", null, ElementLocation.Empty, "Unrelated warning");
                 File.WriteAllText(Path.Combine(MultiThreadedStrictModeScope.ActiveScope!.SentinelDirectory, "late.txt"), "late output");
             }
             finally

@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -132,21 +133,21 @@ namespace Microsoft.Build.BackEnd.Logging
         ///  Helper method to create a message build event from a string resource and some parameters
         /// </summary>
         /// <param name="importance">Importance level of the message</param>
-        /// <param name="file">The file in which the event occurred</param>
+        /// <param name="location">The location where the event occurred</param>
         /// <param name="messageResourceName">string within the resource which indicates the format string to use</param>
         /// <param name="messageArgs">string resource arguments</param>
-        internal void LogComment(MessageImportance importance, BuildEventFileInfo file, string messageResourceName, params object?[]? messageArgs)
+        internal void LogComment(MessageImportance importance, IElementLocation location, string messageResourceName, params object?[]? messageArgs)
         {
             CheckValidity();
 
             _loggingService.LogBuildEvent(new BuildMessageEventArgs(
                 null,
                 null,
-                file.File,
-                file.Line,
-                file.Column,
-                file.EndLine,
-                file.EndColumn,
+                location.File,
+                location.Line,
+                location.Column,
+                endLineNumber: 0,
+                endColumnNumber: 0,
                 ResourceUtilities.GetResourceString(messageResourceName),
                 helpKeyword: null,
                 senderName: "MSBuild",
@@ -184,13 +185,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error
         /// </summary>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="messageResourceName">The resource name for the error</param>
         /// <param name="messageArgs">Parameters for the resource string</param>
-        internal void LogError(BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        internal void LogError(IElementLocation location, string messageResourceName, params object[] messageArgs)
         {
             CheckValidity();
-            _loggingService.LogError(_eventContext, file, messageResourceName, messageArgs);
+            _loggingService.LogError(_eventContext, location, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
 
@@ -198,13 +199,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log an error
         /// </summary>
         /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="messageResourceName">The resource name for the error</param>
         /// <param name="messageArgs">Parameters for the resource string</param>
-        internal void LogErrorWithSubcategory(string? subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
+        internal void LogErrorWithSubcategory(string? subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs)
         {
             CheckValidity();
-            _loggingService.LogError(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
+            _loggingService.LogError(_eventContext, subcategoryResourceName, location, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
 
@@ -214,12 +215,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
         /// <param name="errorCode"> Error code</param>
         /// <param name="helpKeyword">Help keyword</param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="message">Error message</param>
-        internal void LogErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+        internal void LogErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, IElementLocation location, string message)
         {
             CheckValidity();
-            _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+            _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, location, message);
             _hasLoggedErrors = true;
         }
 
@@ -238,33 +239,33 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log an error based on an exception
         /// </summary>
         /// <param name="exception">The exception wich is to be logged</param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="messageResourceName">The string resource which has the formatting string for the error</param>
         /// <param name="messageArgs">The arguments for the error message</param>
-        internal void LogFatalError(Exception exception, BuildEventFileInfo file, string messageResourceName, params object?[]? messageArgs)
+        internal void LogFatalError(Exception exception, IElementLocation location, string messageResourceName, params object?[]? messageArgs)
         {
             CheckValidity();
-            _loggingService.LogFatalError(_eventContext, exception, file, messageResourceName, messageArgs);
+            _loggingService.LogFatalError(_eventContext, exception, location, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
 
         internal void LogWarning(string messageResourceName, params object[] messageArgs)
         {
             CheckValidity();
-            _loggingService.LogWarning(_eventContext, null, BuildEventFileInfo.Empty, messageResourceName, messageArgs);
+            _loggingService.LogWarning(_eventContext, null, ElementLocation.Empty, messageResourceName, messageArgs);
         }
 
         /// <summary>
         /// Log a warning
         /// </summary>
         /// <param name="subcategoryResourceName">The subcategory resource name</param>
-        /// <param name="file">The file in which the warning occurred</param>
+        /// <param name="location">The location where the warning occurred</param>
         /// <param name="messageResourceName">The string resource which contains the formatted warning string</param>
         /// <param name="messageArgs">parameters for the string resource</param>
-        internal void LogWarning(string? subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object?[]? messageArgs)
+        internal void LogWarning(string? subcategoryResourceName, IElementLocation location, string messageResourceName, params object?[]? messageArgs)
         {
             CheckValidity();
-            _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
+            _loggingService.LogWarning(_eventContext, subcategoryResourceName, location, messageResourceName, messageArgs);
         }
 
         /// <summary>
@@ -273,12 +274,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="subcategoryResourceName">The subcategory resource name</param>
         /// <param name="warningCode"> Warning code</param>
         /// <param name="helpKeyword"> Help keyword</param>
-        /// <param name="file">The file in which the warning occurred</param>
+        /// <param name="location">The location where the warning occurred</param>
         /// <param name="message">The message to be logged as a warning</param>
-        internal void LogWarningFromText(string? subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
+        internal void LogWarningFromText(string? subcategoryResourceName, string warningCode, string helpKeyword, IElementLocation location, string message)
         {
             CheckValidity();
-            _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
+            _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, location, message);
         }
 
         /// <summary>
@@ -295,11 +296,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log an error based on an exception
         /// </summary>
         /// <param name="exception">The exception to be logged</param>
-        /// <param name="file">The file in which the error occurred</param>
-        internal void LogFatalBuildError(Exception exception, BuildEventFileInfo file)
+        /// <param name="location">The location where the error occurred</param>
+        internal void LogFatalBuildError(Exception exception, IElementLocation location)
         {
             CheckValidity();
-            LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
+            LoggingService.LogFatalBuildError(BuildEventContext, exception, location);
             _hasLoggedErrors = true;
         }
 

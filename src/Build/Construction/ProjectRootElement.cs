@@ -2054,7 +2054,7 @@ namespace Microsoft.Build.Construction
             {
                 if (FileUtilities.IsVCProjFilename(projectFile))
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(projectFile), "ProjectUpgradeNeededToVcxProj", projectFile);
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.Create(projectFile), "ProjectUpgradeNeededToVcxProj", projectFile);
                 }
 
                 // OK it's a regular project file, load it normally.
@@ -2066,7 +2066,7 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(projectFile), ex, "InvalidProjectFile", ex.Message);
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.Create(projectFile), ex, "InvalidProjectFile", ex.Message);
                 throw; // Without this there's a spurious CS0161 because csc 1.2.0.60317 can't see that the above is an unconditional throw.
             }
         }
@@ -2117,11 +2117,11 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception ex) when (!ExceptionHandling.NotExpectedIoOrXmlException(ex))
             {
-                BuildEventFileInfo fileInfo = ex is XmlException xmlException
-                    ? new BuildEventFileInfo(ElementLocation.CreateFrom(fullPath, xmlException))
-                    : new BuildEventFileInfo(fullPath);
+                ElementLocation location = ex is XmlException xmlException
+                    ? ElementLocation.CreateFrom(fullPath, xmlException)
+                    : ElementLocation.Create(fullPath);
 
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, ex, "InvalidProjectFile", ex.Message);
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(location, ex, "InvalidProjectFile", ex.Message);
             }
             MSBuildEventSource.Log.LoadDocumentStop(fullPath);
 
@@ -2143,9 +2143,9 @@ namespace Microsoft.Build.Construction
             }
             catch (XmlException ex)
             {
-                BuildEventFileInfo fileInfo = new BuildEventFileInfo(ElementLocation.CreateFrom(ex));
+                ElementLocation location = ElementLocation.CreateFrom(ex);
 
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(fileInfo, "InvalidProjectFile", ex.Message);
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(location, "InvalidProjectFile", ex.Message);
             }
 
             return document;

@@ -306,7 +306,10 @@ namespace Microsoft.Build.BackEnd
                 if (!taskCleanedUp)
                 {
                     // This can happen when a task has locked us up.
-                    _projectLoggingContext.LogError(new BuildEventFileInfo(String.Empty), "FailedToReceiveTaskThreadStatus", BuildParameters.RequestBuilderShutdownTimeout);
+                    _projectLoggingContext.LogError(
+                        ElementLocation.Empty,
+                        "FailedToReceiveTaskThreadStatus",
+                        BuildParameters.RequestBuilderShutdownTimeout);
                     ErrorUtilities.ThrowInvalidOperation("UnableToCancel");
                 }
             }
@@ -832,7 +835,7 @@ namespace Microsoft.Build.BackEnd
                     string realMessage = TaskLoggingHelper.GetInnerExceptionMessageString(ex);
                     LoggingContext loggingContext = ((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext;
                     loggingContext.LogError(
-                        BuildEventFileInfo.Empty,
+                        ElementLocation.Empty,
                         "FatalErrorWhileLoggingWithInnerException",
                         realMessage);
 
@@ -846,7 +849,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else if (ex is not CriticalTaskException)
                 {
-                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(ElementLocation.Empty, "UnhandledMSBuildError", ex.ToString());
                 }
 
                 if (ExceptionHandling.IsCriticalException(ex))
@@ -1266,12 +1269,12 @@ namespace Microsoft.Build.BackEnd
                     string entries = scope.VerifyUnresolvedPathWrites(location, out bool recovered);
                     if (recovered)
                     {
-                        _projectLoggingContext.LogWarning(null, new BuildEventFileInfo(location),
+                        _projectLoggingContext.LogWarning(null, location,
                             "MultiThreadedStrictModeSentinelMissing", scope.SentinelDirectory);
                     }
                     else if (entries is not null)
                     {
-                        _projectLoggingContext.LogWarning(null, new BuildEventFileInfo(location),
+                        _projectLoggingContext.LogWarning(null, location,
                             "MultiThreadedStrictModeUnresolvedPathWrite", entries, scope.SentinelDirectory);
                     }
                 }

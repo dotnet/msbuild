@@ -170,7 +170,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     loggingContext.LogWarning(
                         null,
-                        new BuildEventFileInfo(taskInstance.Location),
+                        taskInstance.Location,
                         "HostObjectFailure",
                         _taskNode.Name,
                         ex.Message);
@@ -881,7 +881,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         taskLoggingContext.LogFatalTaskError(
                             ex,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _targetChildInstance.Location,
                             _taskNode.Name);
 
                         throw new CriticalTaskException(ex);
@@ -989,7 +989,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             taskLoggingContext.LogTaskWarningFromException(
                                 exceptionToLog,
-                                new BuildEventFileInfo(_targetChildInstance.Location),
+                                _targetChildInstance.Location,
                                 _taskNode.Name);
 
                             // Log a message explaining why we converted the previous error into a warning.
@@ -999,7 +999,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             taskLoggingContext.LogFatalTaskError(
                                 exceptionToLog,
-                                new BuildEventFileInfo(_targetChildInstance.Location),
+                                _targetChildInstance.Location,
                                 _taskNode.Name);
                         }
                     }
@@ -1028,7 +1028,7 @@ namespace Microsoft.Build.BackEnd
                     else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
                         taskLoggingContext.LogWarning(null,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _targetChildInstance.Location,
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);
 
@@ -1036,7 +1036,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                        taskLoggingContext.LogError(_targetChildInstance.Location,
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);
                     }

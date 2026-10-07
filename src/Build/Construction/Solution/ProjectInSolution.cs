@@ -19,7 +19,6 @@ using Microsoft.Build.Framework;
 
 using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
 using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
-using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 
 
 
@@ -423,7 +422,7 @@ namespace Microsoft.Build.Construction
                             !ParentSolution.SolutionFoldersByGuid.TryGetValue(ParentProjectGuid, out solutionFolder))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null || solutionFolder != null, "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid, ParentProjectGuid);
+                                ElementLocation.Create(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid, ParentProjectGuid);
                         }
 
                         uniqueName = (proj != null ? proj.GetUniqueProjectName() : solutionFolder.GetUniqueProjectName()) + "\\";
@@ -465,7 +464,7 @@ namespace Microsoft.Build.Construction
                             !ParentSolution.SolutionFoldersByGuid.TryGetValue(ParentProjectGuid, out solutionFolder))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null || solutionFolder != null, "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid, ParentProjectGuid);
+                                ElementLocation.Create(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid, ParentProjectGuid);
                         }
 
                         projectName = (proj != null ? proj.GetOriginalProjectName() : solutionFolder.GetOriginalProjectName()) + "\\";
