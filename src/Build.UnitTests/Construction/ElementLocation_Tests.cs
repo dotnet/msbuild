@@ -3,7 +3,9 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
@@ -11,461 +13,339 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
+using Shouldly;
 using Xunit;
 
-#nullable disable
+namespace Microsoft.Build.UnitTests.Construction;
 
-namespace Microsoft.Build.UnitTests.Construction
+public sealed class ElementLocation_Tests(ITestOutputHelper output)
 {
-    /// <summary>
-    /// Tests for the ElementLocation class
-    /// </summary>
-    public class ElementLocation_Tests
-    {
-        /// <summary>
-        /// Path to the common targets
-        /// </summary>
-        private string _pathToCommonTargets =
+    private static readonly string s_pathToCommonTargets =
 #if FEATURE_INSTALLED_MSBUILD
-            Path.Combine(FrameworkLocationHelper.PathToDotNetFrameworkV45, "Microsoft.Common.targets");
+        Path.Combine(FrameworkLocationHelper.PathToDotNetFrameworkV45, "Microsoft.Common.targets");
 #else
-            Path.Combine(AppContext.BaseDirectory, "Microsoft.Common.targets");
+        Path.Combine(AppContext.BaseDirectory, "Microsoft.Common.targets");
 #endif
 
-        /// <summary>
-        /// Tests constructor specifying only file.
-        /// </summary>
-        [Fact]
-        public void ConstructorTest1()
-        {
-            IElementLocation location = ElementLocation.Create("file", 65536, 0);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65536, location.Line);
-            Assert.Equal(0, location.Column);
-            Assert.Contains("RegularElementLocation", location.GetType().FullName);
-        }
+    private readonly ITestOutputHelper _output = output;
 
-        /// <summary>
-        /// Tests constructor specifying only file.
-        /// </summary>
-        [Fact]
-        public void ConstructorTest2()
-        {
-            IElementLocation location = ElementLocation.Create("file", 0, 65536);
-            Assert.Equal("file", location.File);
-            Assert.Equal(0, location.Line);
-            Assert.Equal(65536, location.Column);
-            Assert.Contains("RegularElementLocation", location.GetType().FullName);
-        }
+    [Theory]
+    [InlineData(0, 0, "FileOnly")]
+    [InlineData(0, 1, "Small")]
+    [InlineData(1, 0, "Small")]
+    [InlineData(65_535, 65_535, "Small")]
+    [InlineData(0, 65536, "Regular")]
+    [InlineData(65536, 0, "Regular")]
+    [InlineData(65536, 65536, "Regular")]
+    public void CreateUsesExpectedRepresentation(int line, int column, string representation)
+    {
+        ElementLocation location = ElementLocation.Create("file", line, column);
 
-        /// <summary>
-        /// Tests constructor specifying only file.
-        /// </summary>
-        [Fact]
-        public void ConstructorTest3()
-        {
-            IElementLocation location = ElementLocation.Create("file", 65536, 65537);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65536, location.Line);
-            Assert.Equal(65537, location.Column);
-            Assert.Contains("RegularElementLocation", location.GetType().FullName);
-        }
+        location.File.ShouldBe("file");
+        location.Line.ShouldBe(line);
+        location.Column.ShouldBe(column);
+        location.GetType().Name.ShouldBe(representation);
+    }
 
-        /// <summary>
-        /// Test equality
-        /// </summary>
-        [Fact]
-        public void Equality()
-        {
-            IElementLocation location1 = ElementLocation.Create("file", 65536, 65537);
-            IElementLocation location2 = ElementLocation.Create("file", 0, 1);
-            IElementLocation location3 = ElementLocation.Create("file", 0, 65537);
-            IElementLocation location4 = ElementLocation.Create("file", 65536, 1);
-            IElementLocation location5 = ElementLocation.Create("file", 0, 1);
-            IElementLocation location6 = ElementLocation.Create("file", 65536, 65537);
+    [Fact]
+    public void RegularAllowsEmptyFile()
+    {
+        ElementLocation location = ElementLocation.Create(string.Empty, 65536, 0);
 
-            Assert.True(location1.Equals(location6));
-            Assert.True(location2.Equals(location5));
-            Assert.False(location3.Equals(location1));
-            Assert.False(location4.Equals(location2));
-            Assert.False(location4.Equals(location6));
-        }
+        location.File.ShouldBeEmpty();
+        location.Line.ShouldBe(65536);
+        location.Column.ShouldBe(0);
+        location.GetType().Name.ShouldBe("Regular");
+    }
 
-        /// <summary>
-        /// Check it will use large element location when it should.
-        /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
-        /// </summary>
-        [Fact]
-        public void TestLargeElementLocationUsedLargeColumn()
-        {
-            string file = null;
+    [Fact]
+    public void FileOnlyFactoryUsesFileOnlyRepresentation()
+    {
+        ElementLocation location = ElementLocation.Create("file");
 
-            try
-            {
-                file = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        location.File.ShouldBe("file");
+        location.Line.ShouldBe(0);
+        location.Column.ShouldBe(0);
+        location.GetType().Name.ShouldBe("FileOnly");
+    }
 
-                File.WriteAllText(file, ObjectModelHelpers.CleanupFileContents("<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>\r\n<ItemGroup>") + new string(' ', 70000) + @"<x/></ItemGroup></Project>");
+    [Theory]
+    [InlineData("file", 0, 0, "file")]
+    [InlineData("file", 1, 0, "file (1)")]
+    [InlineData("file", 1, 2, "file (1,2)")]
+    [InlineData("file", 0, 2, "file")]
+    public void LocationStringUsesAvailableCoordinates(string file, int line, int column, string expected)
+        => ElementLocation.Create(file, line, column).LocationString.ShouldBe(expected);
 
-                ProjectRootElement.Open(file);
-            }
-            catch (InvalidProjectFileException ex)
-            {
-                Assert.Equal(70012, ex.ColumnNumber);
-                Assert.Equal(2, ex.LineNumber);
-            }
-            finally
-            {
-                File.Delete(file);
-            }
-        }
+    [Fact]
+    public void EqualsUsesFileLineAndColumn()
+    {
+        ElementLocation location = ElementLocation.Create("file", 1, 2);
 
-        /// <summary>
-        /// Check it will use large element location when it should.
-        /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
-        /// </summary>
-        [Fact]
-        public void TestLargeElementLocationUsedLargeLine()
-        {
-            string file = null;
+        location.Equals(location).ShouldBeTrue();
+        location.Equals(ElementLocation.Create("FILE", 1, 2)).ShouldBeTrue();
+        location.Equals(ElementLocation.Create("other", 1, 2)).ShouldBeFalse();
+        location.Equals(ElementLocation.Create("file", 2, 2)).ShouldBeFalse();
+        location.Equals(ElementLocation.Create("file", 1, 3)).ShouldBeFalse();
+        location.Equals(null).ShouldBeFalse();
+    }
 
-            try
-            {
-                string longstring = String.Empty;
+    [Fact]
+    public void EqualityIsLimitedToElementLocations()
+    {
+        var registryLocation = new RegistryLocation("registry");
 
-                for (int i = 0; i < 7000; i++)
-                {
-                    longstring += "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n";
-                }
+        ElementLocation.Empty.Equals(registryLocation).ShouldBeFalse();
+        registryLocation.Equals(ElementLocation.Empty).ShouldBeFalse();
+    }
 
-                file = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+    [Fact]
+    public void EqualLocationsHaveEqualHashCodes()
+    {
+        ElementLocation location1 = ElementLocation.Create("FILE", 1, 2);
+        ElementLocation location2 = ElementLocation.Create("file", 1, 2);
 
-                File.WriteAllText(file, ObjectModelHelpers.CleanupFileContents("<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>\r\n<ItemGroup>") + longstring + @" <x/></ItemGroup></Project>");
+        location1.Equals(location2).ShouldBeTrue();
+        location1.GetHashCode().ShouldBe(location2.GetHashCode());
+    }
 
-                ProjectRootElement.Open(file);
-            }
-            catch (InvalidProjectFileException ex)
-            {
-                Assert.Equal(70002, ex.LineNumber);
-                Assert.Equal(2, ex.ColumnNumber);
-            }
-            finally
-            {
-                File.Delete(file);
-            }
-        }
+    [Fact]
+    public void ExternalSubclassUsesStructuralEquality()
+    {
+        ElementLocation location = ElementLocation.Create("FILE", 1, 2);
+        ElementLocation externalLocation = new TestElementLocation("file", 1, 2);
 
-        /// <summary>
-        /// Tests serialization.
-        /// </summary>
-        [Fact]
-        public void SerializationTest()
-        {
-            IElementLocation location = ElementLocation.Create("file", 65536, 65537);
+        location.Equals(externalLocation).ShouldBeTrue();
+        externalLocation.Equals(location).ShouldBeTrue();
+        location.GetHashCode().ShouldBe(externalLocation.GetHashCode());
+    }
 
-            TranslationHelpers.GetWriteTranslator().Translate(ref location, ElementLocation.FactoryForDeserialization);
-            IElementLocation deserializedLocation = null;
-            TranslationHelpers.GetReadTranslator().Translate(ref deserializedLocation, ElementLocation.FactoryForDeserialization);
+    [Theory]
+    [InlineData(-1, 2)]
+    [InlineData(1, -2)]
+    public void CreateRejectsNegativeCoordinates(int line, int column)
+        => Should.Throw<InternalErrorException>(() => ElementLocation.Create("file", line, column));
 
-            Assert.Equal(location.File, deserializedLocation.File);
-            Assert.Equal(location.Line, deserializedLocation.Line);
-            Assert.Equal(location.Column, deserializedLocation.Column);
-            Assert.Contains("RegularElementLocation", location.GetType().FullName);
-        }
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void CreateWithoutFileReturnsEmpty(string? file)
+    {
+        ElementLocation.Create(file).ShouldBeSameAs(ElementLocation.Empty);
+        ElementLocation.Create(file, 0, 0).ShouldBeSameAs(ElementLocation.Empty);
+    }
 
-        /// <summary>
-        /// Tests serialization of empty location.
-        /// </summary>
-        [Fact]
-        public void SerializationTestForEmptyLocation()
-        {
-            IElementLocation location = ElementLocation.EmptyLocation;
+    [Fact]
+    public void EmptyLocationReturnsEmpty()
+        => ElementLocation.EmptyLocation.ShouldBeSameAs(ElementLocation.Empty);
 
-            TranslationHelpers.GetWriteTranslator().Translate(ref location, ElementLocation.FactoryForDeserialization);
-            IElementLocation deserializedLocation = null;
-            TranslationHelpers.GetReadTranslator().Translate(ref deserializedLocation, ElementLocation.FactoryForDeserialization);
+    [Fact]
+    public void LargeColumnIsPreserved()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string content = ObjectModelHelpers.CleanupFileContents(
+            $"""
+            <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+            <ItemGroup>{new string(' ', 70_000)}<x/></ItemGroup></Project>
+            """);
 
-            Assert.Equal(location.File, deserializedLocation.File);
-            Assert.Equal(location.Line, deserializedLocation.Line);
-            Assert.Equal(location.Column, deserializedLocation.Column);
-            Assert.Contains("SmallElementLocation", deserializedLocation.GetType().FullName);
-        }
+        string file = env.CreateFile("large-column.proj", content).Path;
 
-        /// <summary>
-        /// Tests constructor specifying file, line and column.
-        /// </summary>
-        [Fact]
-        public void ConstructorWithIndicesTest_SmallElementLocation()
-        {
-            IElementLocation location = ElementLocation.Create("file", 65535, 65534);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65535, location.Line);
-            Assert.Equal(65534, location.Column);
-            Assert.Contains("SmallElementLocation", location.GetType().FullName);
-        }
+        InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => ProjectRootElement.Open(file));
 
-        /// <summary>
-        /// Tests constructor specifying file, negative line, column
-        /// </summary>
-        [Fact]
-        public void ConstructorWithNegativeIndicesTest1()
-        {
-            Assert.Throws<InternalErrorException>(() =>
-            {
-                ElementLocation.Create("file", -1, 2);
-            });
-        }
-        /// <summary>
-        /// Tests constructor specifying file, line, negative column
-        /// </summary>
-        [Fact]
-        public void ConstructorWithNegativeIndicesTest2n()
-        {
-            Assert.Throws<InternalErrorException>(() =>
-            {
-                ElementLocation.Create("file", 1, -2);
-            });
-        }
-        /// <summary>
-        /// Tests constructor with invalid null file.
-        /// </summary>
-        [Fact]
-        public void ConstructorTestNullFile()
-        {
-            IElementLocation location = ElementLocation.Create(null);
-            Assert.Equal(location.File, String.Empty);
-        }
+        exception.ColumnNumber.ShouldBe(70_012);
+        exception.LineNumber.ShouldBe(2);
+    }
 
-        /// <summary>
-        /// Tests constructor specifying only file.
-        /// </summary>
-        [Fact]
-        public void ConstructorTest1_SmallElementLocation()
-        {
-            IElementLocation location = ElementLocation.Create("file", 65535, 0);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65535, location.Line);
-            Assert.Equal(0, location.Column);
-            Assert.Contains("SmallElementLocation", location.GetType().FullName);
-        }
+    [Fact]
+    public void LargeLineIsPreserved()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string content = ObjectModelHelpers.CleanupFileContents(
+            $"""
+            <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+            <ItemGroup>{string.Concat(Enumerable.Repeat("\r\n", 70_000))} <x/></ItemGroup></Project>
+            """);
+        string file = env.CreateFile("large-line.proj", content).Path;
 
-        /// <summary>
-        /// Tests constructor specifying only file.
-        /// </summary>
-        [Fact]
-        public void ConstructorTest2_SmallElementLocation()
-        {
-            IElementLocation location = ElementLocation.Create("file", 0, 65535);
-            Assert.Equal("file", location.File);
-            Assert.Equal(0, location.Line);
-            Assert.Equal(65535, location.Column);
-            Assert.Contains("SmallElementLocation", location.GetType().FullName);
-        }
+        InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => ProjectRootElement.Open(file));
 
-        /// <summary>
-        /// Tests constructor specifying only file.
-        /// </summary>
-        [Fact]
-        public void ConstructorTest3_SmallElementLocation()
-        {
-            IElementLocation location = ElementLocation.Create("file", 65535, 65534);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65535, location.Line);
-            Assert.Equal(65534, location.Column);
-            Assert.Contains("SmallElementLocation", location.GetType().FullName);
-        }
+        exception.LineNumber.ShouldBe(70_002);
+        exception.ColumnNumber.ShouldBe(2);
+    }
 
-        /// <summary>
-        /// Tests serialization.
-        /// </summary>
-        [Fact]
-        public void SerializationTest_SmallElementLocation()
-        {
-            IElementLocation location = ElementLocation.Create("file", 65535, 2);
+    [Theory]
+    [InlineData(null, 0, 0, "FileOnly")]
+    [InlineData("file", 65_535, 2, "Small")]
+    [InlineData("file", 65_536, 65_537, "Regular")]
+    public void SerializationPreservesLocationAndRepresentation(string? file, int line, int column, string representation)
+    {
+        ElementLocation location = ElementLocation.Create(file, line, column);
+        ElementLocation deserializedLocation = RoundTrip(location).ShouldNotBeNull();
 
-            TranslationHelpers.GetWriteTranslator().Translate(ref location, ElementLocation.FactoryForDeserialization);
-            IElementLocation deserializedLocation = null;
-            TranslationHelpers.GetReadTranslator().Translate(ref deserializedLocation, ElementLocation.FactoryForDeserialization);
+        deserializedLocation.File.ShouldBe(location.File);
+        deserializedLocation.Line.ShouldBe(location.Line);
+        deserializedLocation.Column.ShouldBe(location.Column);
+        deserializedLocation.GetType().Name.ShouldBe(representation);
+    }
 
-            Assert.Equal(location.File, deserializedLocation.File);
-            Assert.Equal(location.Line, deserializedLocation.Line);
-            Assert.Equal(location.Column, deserializedLocation.Column);
-            Assert.Contains("SmallElementLocation", location.GetType().FullName);
-        }
-
-        /// <summary>
-        /// Test many of the getters
-        /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void LocationStringsMedleyReadOnlyLoad()
-        {
-            string content = ObjectModelHelpers.CleanupFileContents(@"
+    [Fact]
+    [Trait("Category", "netcore-osx-failing")]
+    [Trait("Category", "netcore-linux-failing")]
+    public void LocationStringsAreSameForReadOnlyAndWritableLoads()
+    {
+        string content = ObjectModelHelpers.CleanupFileContents("""
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
-                    <UsingTask TaskName='t' AssemblyName='a' Condition='true'/>
-                    <UsingTask TaskName='t' AssemblyFile='a' Condition='true'/>
-                    <ItemDefinitionGroup Condition='true' Label='l'>
-                        <m Condition='true'>  foo  bar
-  </m>
-                    </ItemDefinitionGroup>
+                <UsingTask TaskName='t' AssemblyName='a' Condition='true'/>
+                <UsingTask TaskName='t' AssemblyFile='a' Condition='true'/>
+                <ItemDefinitionGroup Condition='true' Label='l'>
+                    <m Condition='true'>  foo  bar
+                    </m>
+                </ItemDefinitionGroup>
+                <ItemGroup>
+                    <i Include='i' Condition='true' Exclude='r'>
+                        <m Condition='true'/>
+                    </i>
+                </ItemGroup>
+                <PropertyGroup>
+                    <p Condition='true'/>
+                </PropertyGroup>
+                <!-- A comment -->
+                <Target Name='Build' Condition='true' Inputs='i' Outputs='o'>
                     <ItemGroup>
                         <i Include='i' Condition='true' Exclude='r'>
                             <m Condition='true'/>
                         </i>
+                        <i Remove='r'/>
                     </ItemGroup>
-                    <PropertyGroup>
-                        <p Condition='true'/>
+                    <PropertyGroup xml:space= 'preserve'>             <x/>
+                        <p     Condition='true'/>
                     </PropertyGroup>
-                   <!-- A comment -->
-                    <Target Name='Build' Condition='true' Inputs='i' Outputs='o'>
-                        <ItemGroup>
-                            <i Include='i' Condition='true' Exclude='r'>
-                                <m Condition='true'/>
-                            </i>
-                            <i Remove='r'/>
-                        </ItemGroup>
-                        <PropertyGroup xml:space= 'preserve'>             <x/>
-                            <p     Condition='true'/>
-                        </PropertyGroup>
-                        <Error Text='xyz' ContinueOnError='true' Importance='high'/>
-                    </Target>
-                    <Import Project='p' Condition='false'/>
-                </Project>
-                ");
+                    <Error Text='xyz' ContinueOnError='true' Importance='high'/>
+                </Target>
+                <Import Project='p' Condition='false'/>
+            </Project>
+            """);
 
-            string readWriteLoadLocations = GetLocations(content, readOnly: false);
-            string readOnlyLoadLocations = GetLocations(content, readOnly: true);
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string readWriteLoadLocations = GetLocations(env, content, readOnly: false);
+        string readOnlyLoadLocations = GetLocations(env, content, readOnly: true);
 
-            Console.WriteLine(readWriteLoadLocations);
+        _output.WriteLine(readWriteLoadLocations);
 
-            Helpers.VerifyAssertLineByLine(readWriteLoadLocations, readOnlyLoadLocations);
-        }
+        Helpers.VerifyAssertLineByLine(readWriteLoadLocations, readOnlyLoadLocations);
+    }
 
-        /// <summary>
-        /// Save read only fails
-        /// </summary>
-        [Fact]
-        public void SaveReadOnly1()
+    [Fact]
+    public void SaveToFileThrowsWhenReadOnly()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        XmlDocumentWithLocation document = LoadXmlDocumentWithLocation(s_pathToCommonTargets, readOnly: true);
+        string outputFile = env.CreateFile("output.xml").Path;
+
+        document.IsReadOnly.ShouldBeTrue();
+        Should.Throw<InvalidOperationException>(() => document.Save(outputFile));
+    }
+
+    [Fact]
+    [Trait("Category", "netcore-osx-failing")]
+    [Trait("Category", "netcore-linux-failing")]
+    public void SaveToStreamThrowsWhenReadOnly()
+    {
+        XmlDocumentWithLocation document = LoadXmlDocumentWithLocation(s_pathToCommonTargets, readOnly: true);
+        using var stream = new MemoryStream();
+
+        document.IsReadOnly.ShouldBeTrue();
+        Should.Throw<InvalidOperationException>(() => document.Save(stream));
+    }
+
+    [Fact]
+    [Trait("Category", "netcore-osx-failing")]
+    [Trait("Category", "netcore-linux-failing")]
+    public void SaveToTextWriterThrowsWhenReadOnly()
+    {
+        XmlDocumentWithLocation document = LoadXmlDocumentWithLocation(s_pathToCommonTargets, readOnly: true);
+        using var writer = new StringWriter();
+
+        document.IsReadOnly.ShouldBeTrue();
+        Should.Throw<InvalidOperationException>(() => document.Save(writer));
+    }
+
+    [Fact]
+    [Trait("Category", "netcore-osx-failing")]
+    [Trait("Category", "netcore-linux-failing")]
+    public void SaveToXmlWriterThrowsWhenReadOnly()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        XmlDocumentWithLocation document = LoadXmlDocumentWithLocation(s_pathToCommonTargets, readOnly: true);
+        using XmlWriter writer = XmlWriter.Create(env.CreateFile("output.xml").Path);
+
+        document.IsReadOnly.ShouldBeTrue();
+        Should.Throw<InvalidOperationException>(() => document.Save(writer));
+    }
+
+    private static ElementLocation? RoundTrip(ElementLocation location)
+    {
+        IElementLocation translatableLocation = location;
+        TranslationHelpers.GetWriteTranslator().Translate(ref translatableLocation, ElementLocation.FactoryForDeserialization);
+
+        IElementLocation? deserializedLocation = null;
+        TranslationHelpers.GetReadTranslator().Translate(ref deserializedLocation, ElementLocation.FactoryForDeserialization);
+
+        return (ElementLocation?)deserializedLocation;
+    }
+
+    private static XmlDocumentWithLocation LoadXmlDocumentWithLocation(string file, bool readOnly)
+    {
+        var document = new XmlDocumentWithLocation(loadAsReadOnly: readOnly)
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-                LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
-                Assert.True(doc.IsReadOnly);
-                doc.Save(FileUtilities.GetTemporaryFile());
-            });
-        }
+            FullPath = file,
+            XmlResolver = null,
+        };
 
-        /// <summary>
-        /// Save read only fails
-        /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void SaveReadOnly2()
+        var settings = new XmlReaderSettings
         {
-            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-            LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
-            Assert.True(doc.IsReadOnly);
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                doc.Save(new MemoryStream());
-            });
-        }
+            DtdProcessing = DtdProcessing.Ignore,
+            XmlResolver = null,
+        };
 
-        /// <summary>
-        /// Save read only fails
-        /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void SaveReadOnly3()
-        {
-            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-            LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
-            Assert.True(doc.IsReadOnly);
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                doc.Save(new StringWriter());
-            });
-        }
+        using XmlReader reader = XmlReader.Create(file, settings);
+        document.Load(reader);
+        return document;
+    }
 
-        /// <summary>
-        /// Save read only fails
-        /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void SaveReadOnly4()
+    private static string GetLocations(TestEnvironment env, string content, bool readOnly)
+    {
+        string file = env.CreateFile($"locations-{readOnly}.proj", content).Path;
+        XmlDocumentWithLocation document = LoadXmlDocumentWithLocation(file, readOnly);
+        document.IsReadOnly.ShouldBe(readOnly);
+
+        XmlNodeList? allNodes = document.SelectNodes("//*|//@*");
+        allNodes.ShouldNotBeNull();
+
+        var locations = new StringBuilder();
+        foreach (XmlNode node in allNodes)
         {
-            var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-            LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
-            Assert.True(doc.IsReadOnly);
-            using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFileName(), FileMode.Create)))
+            foreach (PropertyInfo property in node.GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
-                Assert.Throws<InvalidOperationException>(() =>
+                if (property.Name == "Location" && property.GetValue(node) is ElementLocation location)
                 {
-                    doc.Save(wr);
-                });
-            }
-        }
-
-        private static void LoadXmlDocumentWithLocation(XmlDocumentWithLocation doc, string file)
-        {
-            doc.FullPath = file;
-            doc.XmlResolver = null;
-
-            var settings = new XmlReaderSettings
-            {
-                DtdProcessing = DtdProcessing.Ignore,
-                XmlResolver = null,
-            };
-
-            using (XmlReader reader = XmlReader.Create(file, settings))
-            {
-                doc.Load(reader);
-            }
-        }
-
-        /// <summary>
-        /// Get location strings for the content, loading as readonly if specified
-        /// </summary>
-        private string GetLocations(string content, bool readOnly)
-        {
-            string file = null;
-
-            try
-            {
-                file = FileUtilities.GetTemporaryFileName();
-                File.WriteAllText(file, content);
-                var doc = new XmlDocumentWithLocation(loadAsReadOnly: readOnly);
-                LoadXmlDocumentWithLocation(doc, file);
-                Assert.Equal(readOnly, doc.IsReadOnly);
-                var allNodes = doc.SelectNodes("//*|//@*");
-
-                string locations = String.Empty;
-                foreach (var node in allNodes)
-                {
-                    foreach (var property in node.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                    {
-                        if (property.Name.Equals("Location"))
-                        {
-                            var value = ((ElementLocation)property.GetValue(node, null));
-
-                            if (value != null) // null means attribute is not present
-                            {
-                                locations += ((XmlNode)node).Name + "==" + ((XmlNode)node).Value ?? String.Empty + ":  " + value.LocationString + "\r\n";
-                            }
-                        }
-                    }
+                    locations.Append($"{node.Name}=={node.Value ?? string.Empty}: {location.LocationString}\r\n");
                 }
-
-                return locations.Replace(file, "c:\\foo\\bar.csproj");
-            }
-            finally
-            {
-                File.Delete(file);
             }
         }
+
+        locations.Length.ShouldBeGreaterThan(0);
+        return locations.ToString().Replace(file, @"c:\foo\bar.csproj");
+    }
+
+    private sealed class TestElementLocation(string file, int line, int column) : ElementLocation
+    {
+        public override string File { get; } = file;
+
+        public override int Line { get; } = line;
+
+        public override int Column { get; } = column;
     }
 }
