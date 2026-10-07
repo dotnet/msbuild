@@ -206,8 +206,6 @@ Before the upload-on-exit behavior described above, `MSBuild.exe` only saved eve
 - If no delivery happens before exit, the `.trn` file sits in the shared folder until another process using the same collector key starts, acquires the now-free sender mutex, and uploads it. That process can be Visual Studio itself (`devenv.exe`, since many builds happen under VS or a VS Developer Command Prompt) or simply a later `MSBuild.exe` invocation on the same machine. On a reused dev or build machine, a single drain can pick up leftovers from several prior runs if nothing drained them in between.
 - This was verified experimentally: a second `MSBuild.exe` process uploaded a first process's leftover file, and a minimal harness using the same `TelemetryService.DefaultSession` API that Visual Studio uses delivered a child `MSBuild.exe` process's file about 7 seconds after the child exited.
 
-**The gap this change closes**: on a persistent machine, a drain partner (Visual Studio, or a later build) is usually present eventually, so pre-fix delivery was opportunistic rather than reliably lost. On an ephemeral CI agent, no later process ever starts, so pending events were never delivered. The CI-aware upload-before-exit behavior described above under "Delivery" removes the dependence on an external drain partner.
-
 ## Related Files
 
 | File | Description |
