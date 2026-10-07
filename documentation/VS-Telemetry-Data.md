@@ -193,6 +193,21 @@ Set `MSBUILD_TELEMETRY_DIAGNOSTICS=1` to write telemetry status lines, prefixed 
 
 The messages contain no session identifiers or event data. CI steps that fail on any standard error output (for example `failOnStderr`) will fail when this is on.
 
+### Background: how delivery happened before this change
+
+Before the upload-on-exit behavior described above, `MSBuild.exe` only saved events to the local store on exit; it never uploaded them itself. Whether those events still reached the collector depended on which of two mechanisms applied.
+
+**In-process hosting (for example, Visual Studio's own build engine).** `BuildManager.EndBuildTelemetry` calls `TelemetryManager.Instance.Initialize(isStandalone: false)`, which resolves the session through `TelemetryService.DefaultSession` rather than creating one. When MSBuild's Framework assemblies are loaded in-process by a host that already created a default session (Visual Studio does this early at startup for its own telemetry), MSBuild's build event is posted onto that same live session object. MSBuild does not own or dispose it; the host's own long-running session delivers it through its normal flush cadence. This path is unaffected by this change and was always reliable.
+
+**Separate `MSBuild.exe` processes (standalone, including CI and builds started from a VS Developer Command Prompt).** `XMake.cs` always calls `Initialize(isStandalone: true)` first, so every `MSBuild.exe` process owns its own session, created with `TelemetryService.CreateAndGetDefaultSession`, regardless of how it was launched. That session persists events to a storage folder keyed by the collector's instrumentation key (`%LOCALAPPDATA%\Microsoft\VSApplicationInsights\vstel<hash>\*.trn`), shared by every process on the machine that uses the same collector key. Before this change, delivery from that folder depended entirely on some process acting as sender:
+
+- The owning `PersistenceTransmitter` tries to acquire a named, cross-process mutex over the folder. Only the process holding the mutex runs a `Sender` that polls the folder and uploads files.
+- A sufficiently long-running process can deliver its own data: the in-memory buffer auto-flushes to disk every 30 seconds (`FlushManager.FlushDelay`), and the sender polls every 10 seconds when idle (`Sender.sendingIntervalOnNoData`). But events raised close to exit, including the build's own end event, can still be left in a final `.trn` file written during session disposal, after the last auto-flush.
+- If no delivery happens before exit, the `.trn` file sits in the shared folder until another process using the same collector key starts, acquires the now-free sender mutex, and uploads it. That process can be Visual Studio itself (`devenv.exe`, since many builds happen under VS or a VS Developer Command Prompt) or simply a later `MSBuild.exe` invocation on the same machine. On a reused dev or build machine, a single drain can pick up leftovers from several prior runs if nothing drained them in between.
+- This was verified experimentally: a second `MSBuild.exe` process uploaded a first process's leftover file, and a minimal harness using the same `TelemetryService.DefaultSession` API that Visual Studio uses delivered a child `MSBuild.exe` process's file about 7 seconds after the child exited.
+
+**The gap this change closes**: on a persistent machine, a drain partner (Visual Studio, or a later build) is usually present eventually, so pre-fix delivery was opportunistic rather than reliably lost. On an ephemeral CI agent, no later process ever starts, so pending events were never delivered. The CI-aware upload-before-exit behavior described above under "Delivery" removes the dependence on an external drain partner.
+
 ## Related Files
 
 | File | Description |
