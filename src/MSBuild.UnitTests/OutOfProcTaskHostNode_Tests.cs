@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Execution;
@@ -41,6 +42,49 @@ namespace Microsoft.Build.UnitTests
         public OutOfProcTaskHostNode_Tests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [Fact]
+        public void ConcurrentProgressManagerCreationSharesCleanup()
+        {
+            var configuration = (TaskHostConfiguration)Activator.CreateInstance(typeof(TaskHostConfiguration), nonPublic: true)!;
+            using var context = new TaskExecutionContext(1, configuration);
+            var managers = new ConcurrentBag<TaskProgressManager>();
+            var events = new ConcurrentQueue<BuildEventArgs>();
+
+            Parallel.For(0, 128, _ =>
+            {
+                TaskProgressManager manager = context.ProgressManager;
+                managers.Add(manager);
+                manager.CreateReporter("Work", TaskProgressUnit.Items, BuildEventContext.Invalid, events.Enqueue);
+            });
+
+            foreach (TaskProgressManager manager in managers)
+            {
+                manager.ShouldBeSameAs(context.ProgressManager);
+            }
+            context.Dispose();
+            events.OfType<TaskProgressFinishedEventArgs>().Count().ShouldBe(128);
+            events.OfType<TaskProgressFinishedEventArgs>().ShouldAllBe(e => e.Outcome == TaskProgressOutcome.Abandoned);
+        }
+
+        [Theory]
+        [InlineData(8, false)]
+        [InlineData(9, true)]
+        public void ProgressFactoryRequiresPeerSupport(byte version, bool supported)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var configuration = (TaskHostConfiguration)Activator.CreateInstance(typeof(TaskHostConfiguration), nonPublic: true)!;
+            using var context = new TaskExecutionContext(1, configuration);
+            RedirectedNodeState state = env.WithTransientTestState(new RedirectedNodeState(_ => { }, _ => { }));
+            state.SetField("_parentPacketVersion", version);
+            var current = (AsyncLocal<TaskExecutionContext>)typeof(OutOfProcTaskHostNode)
+                .GetField("_currentTaskContext", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(state.Node)!;
+            current.Value = context;
+
+            using ITaskProgressReporter reporter = state.Node.EngineServices.CreateTaskProgressReporter("Work", TaskProgressUnit.Items);
+            reporter.Report(new TaskProgressUpdate(1, 2, null));
+            (reporter is TaskProgressReporter).ShouldBe(supported);
         }
 
         [Theory]

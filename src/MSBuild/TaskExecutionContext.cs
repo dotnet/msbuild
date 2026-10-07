@@ -104,7 +104,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Lazily created so tasks that never request progress reporting incur no overhead.
         /// </remarks>
-        public TaskProgressManager ProgressManager => _progressManager ??= new TaskProgressManager();
+        public TaskProgressManager ProgressManager => LazyInitializer.EnsureInitialized(ref _progressManager)!;
 
         /// <summary>
         /// Creates a new task execution context.

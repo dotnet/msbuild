@@ -323,10 +323,21 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Encapsulates the buildEventArg in this packet.
         /// </summary>
-        internal LogMessagePacketBase(KeyValuePair<int, BuildEventArgs>? nodeBuildEvent)
+        internal LogMessagePacketBase(KeyValuePair<int, BuildEventArgs>? nodeBuildEvent, byte? taskHostPacketVersion = null)
         {
             Assumed.NotNull(nodeBuildEvent, "nodeBuildEvent was null");
             _buildEvent = nodeBuildEvent.Value.Value;
+            if (taskHostPacketVersion is byte version
+                && version < NodePacketTypeExtensions.TaskProgressMinVersion
+                && _buildEvent is TaskProgressStartedEventArgs or TaskProgressUpdatedEventArgs or TaskProgressFinishedEventArgs)
+            {
+                // Only task-host connections negotiate progress support. Worker nodes use a
+                // same-version handshake and must preserve structured events.
+                _buildEvent = new BuildMessageEventArgs(_buildEvent.Message, _buildEvent.HelpKeyword, _buildEvent.SenderName, MessageImportance.Low, _buildEvent.Timestamp)
+                {
+                    BuildEventContext = _buildEvent.BuildEventContext,
+                };
+            }
             _sinkId = nodeBuildEvent.Value.Key;
             _eventType = GetLoggingEventId(_buildEvent);
         }

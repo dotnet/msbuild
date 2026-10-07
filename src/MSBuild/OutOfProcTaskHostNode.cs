@@ -810,7 +810,7 @@ namespace Microsoft.Build.CommandLine
                 TaskProgressUnit unit = TaskProgressUnit.Unspecified)
             {
                 TaskExecutionContext context = _taskHost.GetCurrentTaskContext();
-                if (context is null)
+                if (context is null || _taskHost._parentPacketVersion < NodePacketTypeExtensions.TaskProgressMinVersion)
                 {
                     return base.CreateTaskProgressReporter(title, unit);
                 }
@@ -2069,7 +2069,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 TaskHostConfiguration configuration = EffectiveConfiguration;
-                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(configuration.NodeId, e));
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(configuration.NodeId, e), _parentPacketVersion);
                 _nodeEndpoint.SendData(logMessage);
             }
         }
