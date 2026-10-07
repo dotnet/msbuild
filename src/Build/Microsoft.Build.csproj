@@ -594,6 +594,7 @@
     <Compile Include="Instance\TaskFactoryEngineContext.cs" />
     <Compile Include="Instance\TaskFactoryWrapper.cs" />
     <Compile Include="Instance\TaskRegistry.cs" />
+    <Compile Include="Instance\TaskRegistry.UsingTaskInfo.cs" />
     <!-- ######################## -->
     <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
     <Compile Include="Logging\BaseConsoleLogger.cs" />

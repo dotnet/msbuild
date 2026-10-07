@@ -66,6 +66,11 @@
         <target state="translated">二进制日志事件筛选器在文件格式版本 {2} 中引发了记录 {0} ({1})的异常。生成上下文: [{3}]。原始生成上下文: [{4}]。请参阅内部异常以了解详细信息。</target>
         <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
       </trans-unit>
+      <trans-unit id="Binlog_FilteredLog">
+        <source>This binary log is filtered. Excluded event kinds: {0}.</source>
+        <target state="new">This binary log is filtered. Excluded event kinds: {0}.</target>
+        <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">文件格式版本 {0} 不支持向前兼容读取(需要 &gt;= 18)。</target>
