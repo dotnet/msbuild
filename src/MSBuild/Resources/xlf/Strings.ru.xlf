@@ -249,17 +249,13 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded[:true|false]
+        <target state="translated">  -multithreaded[:true|false]
                      Включает ЭКСПЕРИМЕНТАЛЬНЫЙ многопоточный режим в MSBuild.
                      Это означает, что MSBuild будет использовать несколько потоков
                      для параллельной сборки проектов
                      вместо использования нескольких процессов.
-                     Этот параметр не поддерживается.
                      Максимальное количество используемых потоков определяется
                      параметром -maxCpuCount.
-                     Если многопоточный режим включен
-                     и MSBUILDFORCEALLTASKSOUTOFPROC=1,
-                     maxCpuCount не может быть больше 256.
                      (Краткая форма: -mt)
     </target>
         <note />
@@ -1844,37 +1840,37 @@
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: отфильтрованное воспроизведение двоичного журнала отменено. Выходные данные не опубликованы.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: сбой отфильтрованного двоичного воспроизведения журнала. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: недопустимый отфильтрованный путь вывода двоичного журнала. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: назначение двоичного журнала уже существует или указано несколько раз. Выберите новый выходной путь.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: этот параметр не поддерживается при повторном воспроизведение двоичного журнала с Exclude=.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: отфильтрованное воспроизведение поддерживает ProjectImports=Embed или ProjectImports=None, а не ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: Многопоточный режим и -reportFileAccesses нельзя использовать вместе. Атрибуты отчетов о доступе к файлам относят доступ к одному проекту на рабочий процесс, но многопоточный режим может выполнять несколько проектов в одном процессе. Удалите -reportFileAccesses или отключите многопоточный режим с помощью -mt:false. Если задана переменная MSBUILDFORCEMULTITHREADED, сначала отмените ее, MSBUILDENABLEMULTITHREADED можно переопределить с помощью -mt:false.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
@@ -2237,7 +2233,7 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Сериализует все события сборки в сжатый двоичный файл.
                      По умолчанию файл находится в текущем каталоге и называется
                      "msbuild.binlog". Двоичный журнал включает подробное описание
@@ -2246,6 +2242,19 @@
                      обычно в 10–20 раз меньше самого подробного текстового
                      журнала уровня диагностики, но содержит больше информации.
                      (Краткая форма: -bl)
+
+                     Exclude=kind[,kind...] исключает именуемые типы событий из
+                     этого двоичного журнала во время сборки и воспроизведения. На консоль и
+                     другие регистраторы это не влияет. Регистр в именах не учитывается.
+                     Укажите исключение один раз для каждого регистратора. Выбор соответствует точным
+                     типам записей, а не всем производным событиям сообщений или предупреждений.
+                     События жизненного цикла сборки, проекта, цели и задачи
+                     защищены. Исключите параметры ProjectEvaluationStarted и
+                     ProjectEvaluationFinished вместе или ни один из них.
+                     Пример: -bl:"out.binlog; Exclude=Message,Warning"
+                     Фильтрация воспроизведения требует новых выходных путей и не
+                     поддерживает ProjectImports=ZipFile.
+                     Фильтрация не является повторной: внедренные файлы независимы.
 
                      Необязательный параметр LogFile указывает путь, по которому
                      сохраняется двоичный журнал. Чтобы создать отдельный файл журнала

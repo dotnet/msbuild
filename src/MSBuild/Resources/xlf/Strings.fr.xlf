@@ -249,17 +249,13 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded[:true|false]
+        <target state="translated">  -multithreaded[:true|false]
                      Active le mode EXPERIMENTAL multithread dans MSBuild.
                      Cela signifie que MSBuild utilisera plusieurs threads
                      pour générer des projets en parallèle,
                      au lieu de plusieurs processus.
-                     Cette option n’est pas prise en charge.
                      Le nombre maximal de threads utilisés est déterminé par le
                      commutateur -maxCpuCount.
-                     En cas d’activation du mode multithread
-                     et de MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount ne doit pas être supérieur à 256.
                      (Forme courte : -m)
     </target>
         <note />
@@ -1845,37 +1841,37 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: la relecture du journal binaire filtré a été annulée. Aucun résultat n’a été publié.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: nous n’avons pas pu effectuer la relecture du journal binaire filtré. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: chemin d’accès de sortie du journal binaire filtré non valide. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: la destination du journal binaire existe déjà ou est spécifiée plusieurs fois. Choisissez un nouveau chemin d’accès de sortie.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: ce commutateur n’est pas pris en charge lors de la relecture d’un journal binaire avec Exclude=.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: la relecture filtrée prend en charge ProjectImports=Embed ou ProjectImports=None, et non ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: vous ne pouvez pas utiliser le mode multithread et -reportFileAccesses conjointement. La création de rapports sur les accès aux fichiers attribue les accès à un seul projet par processus Worker, mais le mode multithread peut exécuter plusieurs projets dans le même processus. Supprimez -reportFileAccesses ou désactivez le mode multithread avec -mt:false. Si MSBUILDFORCEMULTITHREADED est défini, annulez-le d’abord de l’environnement. MSBUILDENABLEMULTITHREADED peut être remplacé par -mt:false.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
@@ -2237,25 +2233,38 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Sérialise tous les événements de génération dans un fichier binaire compressé.
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Permet de sérialiser tous les événements de génération dans un fichier binaire compressé.
                      Par défaut, le fichier se trouve dans le répertoire actuel et son nom est 
-                     "msbuild.binlog". Le journal binaire est une description détaillée
+                     « msbuild.binlog ». Le journal binaire est une description détaillée
                      du processus de génération que vous pouvez utiliser plus tard pour reconstruire
                      des journaux texte et être utilisé par d’autres outils d’analyse. Un journal binaire
                      est généralement 10 à 20 fois plus petit que le journal au niveau du diagnostic
                      du texte le plus détaillé, mais il contient d’autres informations.
                      (Forme abrégée : -bl)
 
+                     Exclude=kind[,kind...] omet les types d’événements indiqués de
+                     cet enregistreur de journal binaire pendant la génération et la relecture. La console et
+                     les autres enregistreurs de journaux ne sont pas concernés. Les noms ne sont pas sensibles à la casse.
+                     Spécifiez Exclure une seule fois par enregistreur de journal. Sélectionnez les types d’enregistrement de correspondances exactes,
+                     et non tous les événements de message ou d’avertissement dérivés.
+                     Les événements de cycle de vie de la génération, du projet, de la cible et de la tâche sont
+                     Protégés. Excluez ProjectEvaluationStarted et
+                     ProjectEvaluationFinished ensemble ou n’excluez aucun d’entre deux.
+                     Exemple : -bl:"out.binlog;Exclude=Message,Warning"
+                     La relecture filtrée nécessite de nouveaux chemins d’accès de sortie et ne
+                     prend pas en charge ProjectImports=ZipFile.
+                     Le filtrage n’est pas une opération de rédaction : les fichiers incorporés restent indépendants.
+
                      Le LogFile facultatif spécifie le chemin d’accès où le
-                     journal binaire est enregistré. Pour générer un fichier journal distinct
+                     journal binaire est enregistré. Si vous souhaitez générer un fichier journal distinct
                      pour chaque génération, vous pouvez ajouter le jeton « {} » dans le
                      chemin d’accès, par exemple : LogFile=output-{}-log.binlog. Chaque 
                      « {} » dans le chemin d’accès du journal est remplacé par une chaîne unique
                      en utilisant un timestamp, ce qui exécute l’ID de processus et une
                      empreinte de chaîne aléatoire.
 
-                     L’enregistreur binaire collecte par défaut le texte source des
+                     L’enregistreur de journal binaire collecte par défaut le texte source des
                      fichiers de projet, notamment tous les projets importés et les
                      fichiers cibles rencontrés pendant la génération. Le commutateur
                      ProjectImports facultatif contrôle ce comportement :
@@ -2270,12 +2279,12 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                                                 que le nom du fichier journal binaire.
 
                      Le paramètre par défaut pour ProjectImports est Incorporé.
-                     Remarque : l’enregistreur ne collecte pas les fichiers sources non-MSBuild
+                     Remarque : l’enregistreur de journal ne collecte pas les fichiers sources non MSBuild
                      tels que .cs, .cpp etc.
 
-                     Vous pouvez « lire » un fichier .binlog en le passant à
+                     Vous pouvez « relire » un fichier .binlog en le passant à
                      msbuild.exe en tant qu’argument au lieu d’une solution/d’un projet.
-                     D’autres enregistreurs reçoivent les informations contenues
+                     D’autres enregistreurs de journal reçoivent les informations contenues
                      dans le fichier journal comme si la génération d’origine se produisait.
                      Vous pouvez lire plus d’informations sur le journal binaire et ses utilisations sur :
                      https://aka.ms/msbuild/binlog

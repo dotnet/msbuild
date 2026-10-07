@@ -124,6 +124,122 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        [Theory]
+        [InlineData("Microsoft.Build.Tasks.v4.0")]
+        [InlineData("Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+        [InlineData("Microsoft.Build.Tasks.v12.0")]
+        [InlineData("Microsoft.Build.Tasks.v12.0, Version=12.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+        public void RegisterLegacyCodeTaskFactoryAssemblyNameRedirectsToCurrent(string assemblyName)
+        {
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", null, assemblyName);
+            element.TaskFactory = "CodeTaskFactory";
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks([element]);
+
+            TaskRegistry.RegisteredTaskRecord record = registry.TaskRegistrations[
+                new TaskRegistry.RegisteredTaskIdentity(element.TaskName, TaskHostParameters.Empty)].ShouldHaveSingleItem();
+
+            record.TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe("Microsoft.Build.Tasks.Core");
+        }
+
+        [Theory]
+        [InlineData("Microsoft.Build.Tasks.v4.0.dll")]
+        [InlineData("Microsoft.Build.Tasks.v12.0.dll")]
+        public void RegisterLegacyCodeTaskFactoryAssemblyFileRedirectsToCurrentEvenWhenItExists(string fileName)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFile legacyTasksAssembly = env.CreateFile(fileName: fileName);
+
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", legacyTasksAssembly.Path, null);
+            element.TaskFactory = "CodeTaskFactory";
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks([element]);
+
+            TaskRegistry.RegisteredTaskRecord record = registry.TaskRegistrations[
+                new TaskRegistry.RegisteredTaskIdentity(element.TaskName, TaskHostParameters.Empty)].ShouldHaveSingleItem();
+
+            record.TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(
+                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "Microsoft.Build.Tasks.Core.dll"));
+        }
+
+        [Theory]
+        [InlineData("Microsoft.Build.Tasks.v4.0.dll")]
+        [InlineData("Microsoft.Build.Tasks.v12.0.dll")]
+        public void RegisterLegacyCodeTaskFactoryAssemblyFileRedirectsToAdjacentCurrentEvenWhenItExists(string fileName)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFolder folder = env.CreateFolder(createFolder: true);
+            TransientTestFile legacyTasksAssembly = env.CreateFile(folder, fileName: fileName);
+            TransientTestFile currentTasksAssembly = env.CreateFile(folder, fileName: "Microsoft.Build.Tasks.Core.dll");
+
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", legacyTasksAssembly.Path, null);
+            element.TaskFactory = "CodeTaskFactory";
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(
+                [element],
+                fileSystem: new CurrentToolsTasksCoreHiddenFileSystem());
+
+            TaskRegistry.RegisteredTaskRecord record = registry.TaskRegistrations[
+                new TaskRegistry.RegisteredTaskIdentity(element.TaskName, TaskHostParameters.Empty)].ShouldHaveSingleItem();
+
+            record.TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(currentTasksAssembly.Path);
+        }
+
+        [Fact]
+        public void RegisterCustomCodeTaskFactoryDoesNotRedirectToCurrent()
+        {
+            const string assemblyName = "Contoso.Tasks, Version=4.0.0.0, Culture=neutral, PublicKeyToken=null";
+
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", null, assemblyName);
+            element.TaskFactory = "CodeTaskFactory";
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks([element]);
+
+            TaskRegistry.RegisteredTaskRecord record = registry.TaskRegistrations[
+                new TaskRegistry.RegisteredTaskIdentity(element.TaskName, TaskHostParameters.Empty)].ShouldHaveSingleItem();
+
+            record.TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe(assemblyName);
+        }
+
+        [Fact]
+        public void RegisterCustomCodeTaskFactoryAssemblyFileDoesNotRedirectToCurrent()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFile customTasksAssembly = env.CreateFile("Contoso.Microsoft.Build.Tasks.v4.0.dll");
+
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", customTasksAssembly.Path, null);
+            element.TaskFactory = "CodeTaskFactory";
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks([element]);
+
+            TaskRegistry.RegisteredTaskRecord record = registry.TaskRegistrations[
+                new TaskRegistry.RegisteredTaskIdentity(element.TaskName, TaskHostParameters.Empty)].ShouldHaveSingleItem();
+
+            record.TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(customTasksAssembly.Path);
+        }
+
+        [Fact]
+        public void RegisterLegacyStrongNamedXamlTaskFactoryDoesNotRedirectToCurrent()
+        {
+            const string assemblyName = "Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+
+            ProjectRootElement project = ProjectRootElement.Create();
+            ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", null, assemblyName);
+            element.TaskFactory = "XamlTaskFactory";
+
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks([element]);
+
+            TaskRegistry.RegisteredTaskRecord record = registry.TaskRegistrations[
+                new TaskRegistry.RegisteredTaskIdentity(element.TaskName, TaskHostParameters.Empty)].ShouldHaveSingleItem();
+
+            record.TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe(assemblyName);
+        }
+
         /// <summary>
         /// Register many tasks with different names
         /// Expect:
@@ -2021,7 +2137,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Create and fill a task registry based on some using task elements.
         /// </summary>
-        internal TaskRegistry CreateTaskRegistryAndRegisterTasks(List<ProjectUsingTaskElement> usingTaskElements, Toolset toolset = null)
+        internal TaskRegistry CreateTaskRegistryAndRegisterTasks(
+            List<ProjectUsingTaskElement> usingTaskElements,
+            Toolset toolset = null,
+            IFileSystem fileSystem = null)
         {
             TaskRegistry registry = toolset != null
                 ? new TaskRegistry(toolset, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache)
@@ -2034,9 +2153,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 registry,
                 RegistryExpander,
                 ExpanderOptions.ExpandPropertiesAndItems,
-                FileSystems.Default);
+                fileSystem ?? FileSystems.Default);
 
             return registry;
+        }
+
+        private sealed class CurrentToolsTasksCoreHiddenFileSystem : ManagedFileSystem
+        {
+            private static readonly string s_currentTasksCorePath =
+                Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "Microsoft.Build.Tasks.Core.dll");
+
+            public override bool FileExists(string path)
+                => !string.Equals(path, s_currentTasksCorePath, StringComparison.OrdinalIgnoreCase) && base.FileExists(path);
         }
 
         /// <summary>

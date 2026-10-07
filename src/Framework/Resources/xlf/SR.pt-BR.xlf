@@ -230,7 +230,7 @@
       </trans-unit>
       <trans-unit id="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
-        <target state="translated">Localizações de AssemblyFoldersEx consideradas.</target>
+        <target state="translated">Locais AssemblyFoldersEx considerados.</target>
         <note />
       </trans-unit>
       <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">

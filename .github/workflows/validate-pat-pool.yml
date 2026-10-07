@@ -17,10 +17,14 @@ jobs:
     env:
       VALIDATE_PAT: |
         if [ -z "$COPILOT_GITHUB_TOKEN" ]; then echo "status=empty" >> "$GITHUB_OUTPUT"; exit 0; fi
-        set +e; timeout 30 copilot --prompt "Say OK" --available-tools="" --silent --effort=low; rc=$?; set -e
+        set +e; output=$(timeout 30 copilot --prompt "Say OK" --available-tools="" --silent 2>&1); rc=$?; set -e
         if [ $rc -eq 0 ]; then echo "status=valid" >> "$GITHUB_OUTPUT"
-        elif [ $rc -eq 124 ]; then echo "status=unknown" >> "$GITHUB_OUTPUT"
-        else echo "status=invalid" >> "$GITHUB_OUTPUT"; fi
+        elif grep -Eqi '\b(authentication failed|bad credentials|invalid token)\b' <<< "$output"; then
+          echo "status=invalid" >> "$GITHUB_OUTPUT"
+        else
+          echo "::error::Copilot CLI probe failed (exit $rc) without a recognized authentication error; treating as unknown"
+          echo "status=unknown" >> "$GITHUB_OUTPUT"
+        fi
     steps:
       - name: Setup gh-aw scripts
         uses: github/gh-aw-actions/setup@49dc896ccb7d6d975514cfe232bcbd68cc12e2c1 # v0.87.9

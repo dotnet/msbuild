@@ -37,6 +37,8 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.13
 - [Tasks that report structured progress no longer announce the same operation twice.](https://github.com/dotnet/msbuild/pull/15164) `DownloadFile` and `TarDirectory` log their "Downloading"/"Creating archive" message at `Normal` importance instead of `High`, because Terminal Logger already renders a live progress row for the same operation. The messages are unchanged in text and are still written to binary logs and to console output at normal verbosity; only the duplicate Terminal Logger line is removed. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.13` to restore `High` importance.
+- [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
+- [ClickOnce application manifest generation resolves relative sentinel assembly dependencies against the task project directory before reading their identities, preventing duplicate .NET Framework 3.0/3.5 prerequisite entries.](https://github.com/dotnet/msbuild/pull/15222)
 
 ### 18.12
 - [Multi-threaded builds use an empty sentinel current directory, check CWD after tasks, and detect unresolved relative-path writes at project/build completion.](https://github.com/dotnet/msbuild/pull/14917)

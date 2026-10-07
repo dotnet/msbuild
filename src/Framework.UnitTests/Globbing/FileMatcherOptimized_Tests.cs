@@ -25,6 +25,9 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
     public FileMatcherOptimized_Tests(ITestOutputHelper output)
     {
         _environment = TestEnvironment.Create(output);
+
+        // Initialize the process-global default before tests temporarily enable process-wide caching.
+        _ = FileMatcher.Default;
     }
 
     public void Dispose() => _environment.Dispose();

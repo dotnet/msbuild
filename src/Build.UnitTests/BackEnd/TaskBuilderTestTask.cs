@@ -1418,6 +1418,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// A task item array output with a null entry.
+        /// </summary>
+        [Output]
+        public ITaskItem[] ItemArrayWithNullOutput
+        {
+            get
+            {
+                ITaskItem[] output = [_itemArrayOutput[0], null, _itemArrayOutput[1]];
+                _testTaskHost?.OutputRead("ItemArrayWithNullOutput", output);
+                return output;
+            }
+        }
+
+        /// <summary>
         /// A task item array output that is null.
         /// </summary>
         [Output]

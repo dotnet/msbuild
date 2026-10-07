@@ -249,17 +249,13 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreading[:true|false]
+        <target state="translated">  -multithreading[:true|false]
                      Abilitare la modalità multithread SPERIMENTALE in MSBuild.
                      Ciò significa che MSBuild userà più thread
                      per creare progetti in parallelo,
                      invece di più processi.
-                     Questa opzione non è supportata.
                      Il numero massimo di thread usati è determinato da
                      Opzione -maxCpuCount.
-                     In caso di modalità multithread su
-                     e MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount non può essere maggiore di 256.
                      (Forma breve: -mt)
     </target>
         <note />
@@ -1855,37 +1851,37 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="ReplayFilterCanceled">
         <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
-        <target state="new">MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</target>
+        <target state="translated">MSBUILD : error MSB1082: La riproduzione del log binario filtrato è stata annullata. Non è stato pubblicato alcun output.</target>
         <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterFailed">
         <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
-        <target state="new">MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</target>
+        <target state="translated">MSBUILD : error MSB1081: la riesecuzione del log binario filtrato non è riuscita. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterInvalidOutput">
         <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
-        <target state="new">MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</target>
+        <target state="translated">MSBUILD : error MSB1085: il percorso di output del log binario filtrato non è valido. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterOutputExists">
         <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
-        <target state="new">MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</target>
+        <target state="translated">MSBUILD : error MSB1080: La destinazione del log binario esiste già, oppure è specificata più di una volta. Scegliere un nuovo percorso di output.</target>
         <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
       </trans-unit>
       <trans-unit id="ReplayFilterUnsupportedSwitch">
         <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
-        <target state="new">MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</target>
+        <target state="translated">MSBUILD : error MSB1077: Questa opzione non è supportata durante la riproduzione di un log binario con Exclude=.</target>
         <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
       </trans-unit>
       <trans-unit id="ReplayFilterZipNotSupported">
         <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
-        <target state="new">MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</target>
+        <target state="translated">MSBUILD : error MSB1084: La riproduzione filtrata supporta ProjectImports=Embed o ProjectImports=None, ma non ProjectImports=ZipFile.</target>
         <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
         <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
-        <target state="new">MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</target>
+        <target state="translated">MSBUILD : error MSB1073: impossibile utilizzare contemporaneamente la modalità multithread e -reportFileAccesses. La creazione di rapporti di accesso ai file accede a un progetto per processo di lavoro, ma la modalità multithread può eseguire più progetti nello stesso processo. Rimuovere -reportFileAccesses o disabilitare la modalità multithreading con -mt:false. Se MSBUILDFORCEMULTITHREADED è impostato, annullarne prima l'impostazione; È possibile eseguire l'override di MSBUILDENABLEMULTITHREADED con -mt:false.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1073: "}
       LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
@@ -2248,15 +2244,28 @@ Nota: livello di dettaglio dei logger di file
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializza tutti gli eventi di compilazione in un file binario compresso.
-                     Per impostazione predefinita, il file csi trova nella directory corrente e si chiama
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializza gli eventi di compilazione in un file binario compresso.
+                     Per impostazione predefinita, il file si trova nella directory corrente e si chiama
                      "msbuild.binlog". Il log binario è una descrizione
                      dettagliata del processo di compilazione utilizzabile in
                      seguito per ricostruire i log di testo e viene usato da altri strumenti di analisi. Un log binario è in genere
                      10-20 volte più piccolo del più dettagliato log di testo
                      di livello diagnostico, ma contiene maggiori informazioni.
                      (Forma breve: -bl)
+
+                     Exclude=kind[,kind...] esclude i tipi di evento specificati da
+                     questo logger binario durante le compilazioni e la riproduzione. La console e
+                     gli altri logger non sono interessati. I nomi non fanno distinzione tra maiuscole e minuscole.
+                     Specificare Exclude una sola volta per logger. La selezione corrisponde esattamente a
+                     tipi di record esatti, non a tutti gli eventi messaggio o avviso derivati.
+                     Gli eventi del ciclo di vita di compilazioni, progetti, destinazioni e attività sono
+                     protetti. Escludere sia ProjectEvaluationStarted che
+                     ProjectEvaluationFinished o nessuno dei due.
+                     Esempio: -bl:"out.binlog;Exclude=Message,Warning"
+                     La riproduzione filtrata richiede nuovi percorsi di output e non
+                     supporta ProjectImports=ZipFile.
+                     Il filtro non è un offuscamento dei dati sensibili: i file incorporati sono indipendenti.
 
                      Il LogFile facoltativo specifica il percorso in cui il
                      il log binario viene salvato. Per generare un file di log distinto
