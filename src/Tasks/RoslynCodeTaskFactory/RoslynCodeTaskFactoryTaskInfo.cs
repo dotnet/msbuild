@@ -77,7 +77,10 @@ namespace Microsoft.Build.Tasks
         public override int GetHashCode()
         {
             // Include both Name and SourceCode to avoid cache collisions between different task names
-            return HashCode.Combine(Name?.GetHashCode() ?? 0, SourceCode?.GetHashCode() ?? 0, CompileForOutOfProcess);
+            return HashCode.Combine(
+                Name is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(Name),
+                SourceCode is null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(SourceCode),
+                CompileForOutOfProcess);
         }
     }
 }
