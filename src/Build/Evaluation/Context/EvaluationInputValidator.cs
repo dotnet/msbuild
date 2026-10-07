@@ -20,6 +20,12 @@ internal readonly record struct EvaluationInputValidationFailure(string? Reason,
 internal static class EvaluationInputValidator
 {
     /// <summary>
+    /// A directory timestamp this close to now cannot prove the directory is quiet: a file system with coarse timestamps
+    /// (FAT stamps in two-second steps) could give a later change the same timestamp.
+    /// </summary>
+    private static readonly TimeSpan RacyTimestampWindow = TimeSpan.FromSeconds(2);
+
+    /// <summary>
     /// Returns true when recording completed without a non-cacheable reason, direct environment reads are unchanged,
     /// and every recorded path still has the required kind and metadata or matching glob results.
     /// </summary>
@@ -88,6 +94,7 @@ internal static class EvaluationInputValidator
                 }
             }
 
+            List<KeyValuePair<string, FileDependency>>? changedGlobDirectories = null;
             long statStart = measurements is null ? 0 : ValidationMeasurements.Now();
             try
             {
@@ -115,8 +122,18 @@ internal static class EvaluationInputValidator
                         return false;
                     }
 
-                    bool metadataChanged = current.LastWriteTimeUtc != file.Value.LastWriteTimeUtc
-                        || current.Length != file.Value.Length;
+                    bool rememberedStateUsed = false;
+                    FileDependency recorded = file.Value;
+                    if (recorded.RequiresGlobValidation
+                        && !recorded.RequiresMetadata
+                        && inputs.TryGetValidatedGlobDirectory(file.Key, out FileDependency validated))
+                    {
+                        recorded = validated;
+                        rememberedStateUsed = true;
+                    }
+
+                    bool metadataChanged = current.LastWriteTimeUtc != recorded.LastWriteTimeUtc
+                        || current.Length != recorded.Length;
                     if (current.Kind != file.Value.Kind
                         || (file.Value.RequiresMetadata && metadataChanged))
                     {
@@ -129,9 +146,19 @@ internal static class EvaluationInputValidator
                         return false;
                     }
 
+                    if (rememberedStateUsed && measurements is not null)
+                    {
+                        measurements.DirectoriesComparedToRememberedState++;
+                        if (!metadataChanged)
+                        {
+                            measurements.DirectoriesQuietSinceRememberedState++;
+                        }
+                    }
+
                     if (file.Value.RequiresGlobValidation && metadataChanged)
                     {
                         changedGlobDirectory ??= file.Key;
+                        (changedGlobDirectories ??= []).Add(new(file.Key, current));
                         if (measurements is not null)
                         {
                             measurements.ChangedGlobDirectories++;
@@ -223,6 +250,11 @@ internal static class EvaluationInputValidator
                             return false;
                         }
                     }
+
+                    if (changedGlobDirectories is not null)
+                    {
+                        RememberQuietDirectories(inputs, changedGlobDirectories, measurements);
+                    }
                 }
                 finally
                 {
@@ -254,5 +286,39 @@ internal static class EvaluationInputValidator
 
         reason = null;
         return true;
+    }
+
+    /// <summary>
+    /// After every glob of an entry matched its recorded result, remembers the state each changed directory had when it
+    /// was observed, which preceded the replay. A change after that observation gives the directory a newer timestamp,
+    /// and a change a coarse timestamp could hide is excluded by only trusting timestamps older than the clock's reach.
+    /// </summary>
+    private static void RememberQuietDirectories(
+        EvaluationInputs inputs,
+        List<KeyValuePair<string, FileDependency>> changedDirectories,
+        ValidationMeasurements? measurements)
+    {
+        DateTime newestTrusted = DateTime.UtcNow - RacyTimestampWindow;
+        List<KeyValuePair<string, FileDependency>>? quiet = null;
+        foreach (KeyValuePair<string, FileDependency> directory in changedDirectories)
+        {
+            if (directory.Value.LastWriteTimeUtc <= newestTrusted)
+            {
+                (quiet ??= []).Add(directory);
+            }
+            else if (measurements is not null)
+            {
+                measurements.DirectoriesTooRecentToRemember++;
+            }
+        }
+
+        if (quiet is not null)
+        {
+            inputs.RememberValidatedGlobDirectories(quiet);
+            if (measurements is not null)
+            {
+                measurements.DirectoriesRemembered += quiet.Count;
+            }
+        }
     }
 }

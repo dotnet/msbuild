@@ -191,6 +191,40 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         System.Text.RegularExpressions.Regex.IsMatch(log, "ValidationDetail\\.Driver(Legacy|OptimizedCallback|OptimizedDirect):1").ShouldBeTrue();
     }
 
+    [Fact]
+    public void ReplayedDirectoryStateIsRememberedAndNotReplayedAgain()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        Configure(env, true, EvaluationCacheMode.SnapshotFileSystem);
+        TransientTestFolder folder = env.CreateFolder();
+        env.CreateFile(folder, "a.txt", "a");
+        string project = env.CreateFile(folder, "glob.proj", "<Project><ItemGroup><Item Include=\"*.txt\" /></ItemGroup></Project>").Path;
+        var cache = new ProjectInstanceSnapshotCache();
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        cache.ConfigureValidator(EvaluationCacheValidationPolicy.FileSystem);
+        cache.ConfigureDiagnostics(true, "manager", 1, EvaluationCacheMode.SnapshotFileSystem, parameters.EnvironmentPropertiesInternal);
+        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
+        Load(project, parameters, host);
+        Flush(cache.Diagnostics!);
+
+        File.WriteAllText(Path.Combine(folder.Path, "unrelated.log"), "x");
+        Directory.SetLastWriteTimeUtc(folder.Path, DateTime.UtcNow.AddSeconds(-30));
+        Load(project, parameters, host);
+        string first = Flush(cache.Diagnostics!);
+        Load(project, parameters, host);
+        string second = Flush(cache.Diagnostics!);
+
+        first.ShouldContain("ValidationDetail.GlobsReplayed:1");
+        first.ShouldContain("ValidationDetail.DirectoriesRemembered:1");
+        second.ShouldContain("ValidationDetail.DirectoriesComparedToRememberedState:1");
+        second.ShouldContain("ValidationDetail.DirectoriesQuietSinceRememberedState:1");
+        second.ShouldNotContain("ValidationDetail.GlobsReplayed");
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

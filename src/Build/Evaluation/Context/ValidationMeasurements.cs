@@ -34,6 +34,10 @@ internal sealed class ValidationMeasurements
     internal long ReplaysByCachedExpansion;
     internal long ReplayMismatches;
     internal long ChangedGlobDirectories;
+    internal long DirectoriesComparedToRememberedState;
+    internal long DirectoriesQuietSinceRememberedState;
+    internal long DirectoriesRemembered;
+    internal long DirectoriesTooRecentToRemember;
 
     internal long DriverLegacy;
     internal long DriverOptimizedCallback;
@@ -98,6 +102,10 @@ internal sealed class ValidationMeasurements
         Add(request, nameof(ReplaysByCachedExpansion), ReplaysByCachedExpansion);
         Add(request, nameof(ReplayMismatches), ReplayMismatches);
         Add(request, nameof(ChangedGlobDirectories), ChangedGlobDirectories);
+        Add(request, nameof(DirectoriesComparedToRememberedState), DirectoriesComparedToRememberedState);
+        Add(request, nameof(DirectoriesQuietSinceRememberedState), DirectoriesQuietSinceRememberedState);
+        Add(request, nameof(DirectoriesRemembered), DirectoriesRemembered);
+        Add(request, nameof(DirectoriesTooRecentToRemember), DirectoriesTooRecentToRemember);
         Add(request, nameof(DriverLegacy), DriverLegacy);
         Add(request, nameof(DriverOptimizedCallback), DriverOptimizedCallback);
         Add(request, nameof(DriverOptimizedDirect), DriverOptimizedDirect);

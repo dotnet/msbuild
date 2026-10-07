@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Threading;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -519,5 +520,44 @@ internal sealed record EvaluationInputs(
     string? NonCacheableDetail,
     ImmutableArray<GlobDependency> Globs = default)
 {
+    private ConcurrentDictionary<string, FileDependency>? _validatedGlobDirectories;
+
     internal bool IsCacheable => NonCacheable == NonCacheableReason.None;
+
+    /// <summary>
+    /// The state of a glob-traversed directory at which every glob of this entry was last replayed and matched,
+    /// when that differs from the state evaluation recorded. Only a directory whose timestamp alone signals a replay
+    /// can have one, because a changed timestamp is the only thing that makes the entry replay.
+    /// </summary>
+    internal bool TryGetValidatedGlobDirectory(string path, out FileDependency validated)
+    {
+        ConcurrentDictionary<string, FileDependency>? directories = Volatile.Read(ref _validatedGlobDirectories);
+        if (directories is not null)
+        {
+            return directories.TryGetValue(path, out validated);
+        }
+
+        validated = default;
+        return false;
+    }
+
+    /// <summary>
+    /// Remembers the directory states observed before a replay in which every glob matched, so an unchanged state is not
+    /// replayed again. The manifest itself stays immutable: a later change to a directory produces a state that differs
+    /// from the remembered one, and a replay that does not match remembers nothing.
+    /// </summary>
+    internal void RememberValidatedGlobDirectories(IEnumerable<KeyValuePair<string, FileDependency>> directories)
+    {
+        ConcurrentDictionary<string, FileDependency>? remembered = Volatile.Read(ref _validatedGlobDirectories);
+        if (remembered is null)
+        {
+            Interlocked.CompareExchange(ref _validatedGlobDirectories, new(FileUtilities.PathComparer), null);
+            remembered = _validatedGlobDirectories!;
+        }
+
+        foreach (KeyValuePair<string, FileDependency> directory in directories)
+        {
+            remembered[directory.Key] = directory.Value;
+        }
+    }
 }

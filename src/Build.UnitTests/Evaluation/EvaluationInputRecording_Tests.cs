@@ -704,6 +704,92 @@ public sealed class EvaluationInputRecording_Tests : IDisposable
     }
 
     [Fact]
+    public void AnUnrelatedDirectoryChangeIsReplayedOnlyOnce()
+    {
+        (EvaluationInputs inputs, string directory) = EvaluateGlobDirectoryWithUnrelatedChange(DateTime.UtcNow.AddSeconds(-30));
+
+        IsCurrent(inputs, out string? reason).ShouldBeTrue(reason);
+        inputs.TryGetValidatedGlobDirectory(directory, out FileDependency validated).ShouldBeTrue();
+        validated.LastWriteTimeUtc.ShouldBe(Directory.GetLastWriteTimeUtc(directory));
+
+        // The remembered state is trusted without another replay, as an unchanged recorded timestamp always was.
+        // A directory length that tracks its entries would make this change visible, so only forge where it does not.
+        File.WriteAllText(Path.Combine(directory, "after.props"), "<Project />");
+        Directory.SetLastWriteTimeUtc(directory, validated.LastWriteTimeUtc);
+        EvaluationInputRecorder.TryStat(directory, out FileDependency forged).ShouldBeTrue();
+        Assert.SkipUnless(forged.Length == validated.Length, "This file system reports a directory length that tracks its entries.");
+        IsCurrent(inputs, out reason).ShouldBeTrue(reason);
+    }
+
+    [Theory]
+    [InlineData("add")]
+    [InlineData("remove")]
+    [InlineData("rename")]
+    public void AMatchingChangeAfterARememberedDirectoryStateInvalidates(string mutation)
+    {
+        (EvaluationInputs inputs, string directory) = EvaluateGlobDirectoryWithUnrelatedChange(DateTime.UtcNow.AddSeconds(-30));
+        IsCurrent(inputs, out string? reason).ShouldBeTrue(reason);
+        inputs.TryGetValidatedGlobDirectory(directory, out _).ShouldBeTrue();
+
+        string existing = Path.Combine(directory, "before.props");
+        switch (mutation)
+        {
+            case "add":
+                AddFile(directory, "after.props");
+                break;
+            case "remove":
+                File.Delete(existing);
+                break;
+            case "rename":
+                File.Move(existing, Path.Combine(directory, "renamed.props"));
+                break;
+        }
+
+        Directory.SetLastWriteTimeUtc(directory, DateTime.UtcNow.AddSeconds(-5));
+        IsCurrent(inputs, out reason).ShouldBeFalse();
+        reason.ShouldBe(directory);
+    }
+
+    [Fact]
+    public void ADirectoryThatIsStillChangingIsNotRemembered()
+    {
+        (EvaluationInputs inputs, string directory) = EvaluateGlobDirectoryWithUnrelatedChange(DateTime.UtcNow);
+
+        IsCurrent(inputs, out string? reason).ShouldBeTrue(reason);
+        inputs.TryGetValidatedGlobDirectory(directory, out _).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AReplayThatDoesNotMatchRemembersNothing()
+    {
+        (EvaluationInputs inputs, string directory) = EvaluateGlobDirectoryWithUnrelatedChange(DateTime.UtcNow.AddSeconds(-30));
+        File.WriteAllText(Path.Combine(directory, "after.props"), "<Project />");
+        Directory.SetLastWriteTimeUtc(directory, DateTime.UtcNow.AddSeconds(-30));
+
+        IsCurrent(inputs, out string? reason).ShouldBeFalse();
+        reason.ShouldBe(directory);
+        inputs.TryGetValidatedGlobDirectory(directory, out _).ShouldBeFalse();
+    }
+
+    private (EvaluationInputs Inputs, string Directory) EvaluateGlobDirectoryWithUnrelatedChange(DateTime timestamp)
+    {
+        string directory = Path.Combine(_folder.Path, "files");
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(Path.Combine(directory, "before.props"), "<Project />");
+        string project = CreateProject("""
+            <Project>
+              <ItemGroup>
+                <Input Include="files/*.props" />
+              </ItemGroup>
+            </Project>
+            """);
+        EvaluationInputs inputs = Evaluate(project);
+        File.WriteAllText(Path.Combine(directory, "unrelated.txt"), string.Empty);
+        Directory.SetLastWriteTimeUtc(directory, timestamp);
+        return (inputs, directory);
+    }
+
+    [Fact]
     public void CachedGlobResultsAreCheckedEvenWhenReplayedDirectoryStatsAreCurrent()
     {
         string directory = Path.Combine(_folder.Path, "files");
