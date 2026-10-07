@@ -117,8 +117,8 @@ internal sealed class GlobDependency
     }
 
     /// <param name="sharedEntryCache">
-    /// An optional directory-listing cache shared across every glob replayed while validating one build, so
-    /// overlapping directory trees (within or across projects) are only enumerated once per build.
+    /// An optional directory-listing cache shared by the globs of one entry's validation, so overlapping directory
+    /// trees are listed once. It must not outlive that validation: a file added later has to be visible.
     /// </param>
     internal bool IsCurrent(ConcurrentDictionary<string, IReadOnlyList<string>>? sharedEntryCache = null)
     {
