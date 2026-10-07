@@ -77,7 +77,7 @@ internal sealed class SharedOutputPathCheck : Check
             context.ReportResult(BuildCheckResult.CreateBuiltIn(
                 SupportedRule,
                 // Populating precise location tracked via https://github.com/dotnet/msbuild/issues/10383
-                ElementLocation.EmptyLocation,
+                ElementLocation.Empty,
                 Path.GetFileName(projectPath),
                 Path.GetFileName(conflictingProject),
                 path!));

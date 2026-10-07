@@ -82,5 +82,5 @@ public class PropertyBagCardinalityBenchmark
         => _fixture.Expander.ExpandIntoStringLeaveEscaped(
             expression,
             ExpanderOptions.ExpandProperties,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 }

@@ -70,7 +70,7 @@ public class PropertyExpansionScalingBenchmark
         => _fixture.Expander.ExpandIntoStringLeaveEscaped(
             expression,
             ExpanderOptions.ExpandProperties,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 
     private static string CreateExpression(int referenceCount, bool repeated)
     {

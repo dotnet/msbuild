@@ -1220,7 +1220,7 @@ namespace Microsoft.Build.Execution
                     bool recovered;
                     try
                     {
-                        entries = _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out recovered);
+                        entries = _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.Empty, out recovered);
                     }
                     catch (InvalidProjectFileException e)
                     {

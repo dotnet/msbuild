@@ -61,7 +61,7 @@ public class MetadataExpansionScalingBenchmark
         => _fixture.Expander.ExpandIntoStringLeaveEscaped(
             expression,
             ExpanderOptions.ExpandMetadata,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 
     private static string CreateExpression(int referenceCount, bool repeated)
     {

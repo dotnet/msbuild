@@ -653,7 +653,7 @@ namespace Microsoft.Build.Construction
         /// If the file has not been given a name, returns an empty location.
         /// This is a case where it is legitimate to "not have a location".
         /// </summary>
-        public ElementLocation ProjectFileLocation => Link != null ? RootLink.ProjectFileLocation : _projectFileLocation ?? ElementLocation.EmptyLocation;
+        public ElementLocation ProjectFileLocation => Link != null ? RootLink.ProjectFileLocation : _projectFileLocation ?? ElementLocation.Empty;
 
         /// <summary>
         /// Location of the toolsversion attribute, if any
