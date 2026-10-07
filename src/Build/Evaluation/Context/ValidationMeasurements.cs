@@ -1,8 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable enable
@@ -46,6 +50,169 @@ internal sealed class ValidationMeasurements
 
     internal long ListedDirectories;
     internal long ListedEntries;
+
+    // What replaying only the globs that traverse a changed directory would have done. Computed beside the real
+    // replay, which still replays every glob of the entry.
+    internal long GlobsNeededByAttribution;
+    internal long GlobsAvoidableByAttribution;
+    internal long GlobReplayTicksAvoidable;
+    internal long ReplayDirectoriesAll;
+    internal long ReplayDirectoriesNeeded;
+    internal long ChangedDirectoriesUnclaimed;
+    internal long ChangedDirectoriesObjOrBin;
+    internal long ChangedDirectoriesOther;
+    internal long GlobsWithoutRecordedDirectories;
+    internal long GlobsTraversingObjOrBin;
+    internal long RecordedGlobDirectories;
+    internal long EntriesReplayed;
+    internal long EntriesReplayAvoidableEntirely;
+
+    private HashSet<string>? _changedDirectories;
+    private HashSet<string>? _replayedDirectories;
+    private HashSet<string>? _neededDirectories;
+    private bool _attributionFallsBackToAll;
+    private long _entryReplayed;
+    private long _entryNeeded;
+
+    /// <summary>Starts the attribution shadow for one entry's globs.</summary>
+    internal void BeginAttribution(
+        ImmutableArray<GlobDependency> globs,
+        List<KeyValuePair<string, FileDependency>>? changedDirectories)
+    {
+        _changedDirectories = new HashSet<string>(FileUtilities.PathComparer);
+        if (changedDirectories is not null)
+        {
+            foreach (KeyValuePair<string, FileDependency> changed in changedDirectories)
+            {
+                _changedDirectories.Add(changed.Key);
+                if (IsObjOrBin(changed.Key))
+                {
+                    ChangedDirectoriesObjOrBin++;
+                }
+                else
+                {
+                    ChangedDirectoriesOther++;
+                }
+            }
+        }
+
+        var claimed = new HashSet<string>(FileUtilities.PathComparer);
+        bool anyWithoutDirectories = false;
+        foreach (GlobDependency glob in globs)
+        {
+            if (glob.TraversedDirectories is null)
+            {
+                GlobsWithoutRecordedDirectories++;
+                anyWithoutDirectories = true;
+                continue;
+            }
+
+            RecordedGlobDirectories += glob.TraversedDirectories.Length;
+            foreach (string directory in glob.TraversedDirectories)
+            {
+                claimed.Add(directory);
+            }
+        }
+
+        int unclaimed = 0;
+        foreach (string changed in _changedDirectories)
+        {
+            if (!claimed.Contains(changed))
+            {
+                unclaimed++;
+            }
+        }
+
+        ChangedDirectoriesUnclaimed += unclaimed;
+        _attributionFallsBackToAll = anyWithoutDirectories || unclaimed > 0;
+        _replayedDirectories = new HashSet<string>(FileUtilities.PathComparer);
+        _neededDirectories = new HashSet<string>(FileUtilities.PathComparer);
+        _entryReplayed = 0;
+        _entryNeeded = 0;
+    }
+
+    /// <summary>Classifies one replayed glob as needed or avoidable under attribution.</summary>
+    internal void ObserveReplayedGlob(GlobDependency glob, long replayTicks)
+    {
+        string[]? directories = glob.TraversedDirectories;
+        bool intersectsChange = false;
+        bool traversesObjOrBin = false;
+        if (directories is not null)
+        {
+            foreach (string directory in directories)
+            {
+                intersectsChange |= _changedDirectories!.Contains(directory);
+                traversesObjOrBin |= IsObjOrBin(directory);
+                _replayedDirectories!.Add(directory);
+            }
+        }
+
+        if (traversesObjOrBin)
+        {
+            GlobsTraversingObjOrBin++;
+        }
+
+        _entryReplayed++;
+        if (glob.FromCache || _attributionFallsBackToAll || intersectsChange)
+        {
+            GlobsNeededByAttribution++;
+            _entryNeeded++;
+            if (directories is not null)
+            {
+                foreach (string directory in directories)
+                {
+                    _neededDirectories!.Add(directory);
+                }
+            }
+        }
+        else
+        {
+            GlobsAvoidableByAttribution++;
+            GlobReplayTicksAvoidable += replayTicks;
+        }
+    }
+
+    internal void EndAttribution()
+    {
+        if (_replayedDirectories is null)
+        {
+            return;
+        }
+
+        if (_entryReplayed > 0)
+        {
+            EntriesReplayed++;
+            if (_entryNeeded == 0)
+            {
+                EntriesReplayAvoidableEntirely++;
+            }
+        }
+
+        ReplayDirectoriesAll += _replayedDirectories.Count;
+        ReplayDirectoriesNeeded += _neededDirectories!.Count;
+        _replayedDirectories = null;
+    }
+
+    private static bool IsObjOrBin(string path) => ContainsSegment(path, "obj") || ContainsSegment(path, "bin");
+
+    private static bool ContainsSegment(string path, string segment)
+    {
+        int index = 0;
+        while ((index = path.IndexOf(segment, index, StringComparison.OrdinalIgnoreCase)) >= 0)
+        {
+            int end = index + segment.Length;
+            if (index > 0
+                && (path[index - 1] == '\\' || path[index - 1] == '/')
+                && (end == path.Length || path[end] == '\\' || path[end] == '/'))
+            {
+                return true;
+            }
+
+            index = end;
+        }
+
+        return false;
+    }
 
     internal void CountRecorded(PathKind kind)
     {
@@ -112,6 +279,19 @@ internal sealed class ValidationMeasurements
         Add(request, nameof(ReplaysWithoutEntryCache), ReplaysWithoutEntryCache);
         Add(request, nameof(ListedDirectories), ListedDirectories);
         Add(request, nameof(ListedEntries), ListedEntries);
+        Add(request, nameof(GlobsNeededByAttribution), GlobsNeededByAttribution);
+        Add(request, nameof(GlobsAvoidableByAttribution), GlobsAvoidableByAttribution);
+        Add(request, "GlobReplayMicrosAvoidable", GlobReplayTicksAvoidable * 1_000_000 / Stopwatch.Frequency);
+        Add(request, nameof(ReplayDirectoriesAll), ReplayDirectoriesAll);
+        Add(request, nameof(ReplayDirectoriesNeeded), ReplayDirectoriesNeeded);
+        Add(request, nameof(ChangedDirectoriesUnclaimed), ChangedDirectoriesUnclaimed);
+        Add(request, nameof(ChangedDirectoriesObjOrBin), ChangedDirectoriesObjOrBin);
+        Add(request, nameof(ChangedDirectoriesOther), ChangedDirectoriesOther);
+        Add(request, nameof(GlobsWithoutRecordedDirectories), GlobsWithoutRecordedDirectories);
+        Add(request, nameof(GlobsTraversingObjOrBin), GlobsTraversingObjOrBin);
+        Add(request, nameof(RecordedGlobDirectories), RecordedGlobDirectories);
+        Add(request, nameof(EntriesReplayed), EntriesReplayed);
+        Add(request, nameof(EntriesReplayAvoidableEntirely), EntriesReplayAvoidableEntirely);
     }
 
     internal static long Now() => Stopwatch.GetTimestamp();

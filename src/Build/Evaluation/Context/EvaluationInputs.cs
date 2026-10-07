@@ -82,11 +82,12 @@ internal sealed class GlobDependency
     private readonly bool _usesFileSystemEntryCache;
     private readonly string _culture;
 
-    internal GlobDependency(FileMatcher.GlobResultObservation observation)
+    internal GlobDependency(FileMatcher.GlobResultObservation observation, string[]? traversedDirectories = null)
     {
         ProjectDirectory = observation.ProjectDirectory;
         Filespec = observation.Filespec;
         FromCache = observation.FromCache;
+        TraversedDirectories = traversedDirectories;
         _driver = observation.Driver;
         _caseFolding = observation.CaseFolding;
         _usesFileSystemEntryCache = observation.UsesFileSystemEntryCache;
@@ -105,6 +106,9 @@ internal sealed class GlobDependency
     internal bool FromCache { get; }
     internal ReadOnlySpan<string> Files => _files;
 
+    /// <summary>The canonical directories this glob's expansion depended on, or null when they were not recorded.</summary>
+    internal string[]? TraversedDirectories { get; }
+
     internal long RetainedSizeBytes
     {
         get
@@ -113,6 +117,11 @@ internal sealed class GlobDependency
             size = RetainedSizeEstimator.AddString(size, Filespec);
             size = RetainedSizeEstimator.AddString(size, _culture);
             size = RetainedSizeEstimator.AddStrings(RetainedSizeEstimator.Add(size, 24), _files);
+            if (TraversedDirectories is not null)
+            {
+                size = RetainedSizeEstimator.AddStrings(RetainedSizeEstimator.Add(size, 24), TraversedDirectories);
+            }
+
             return _excludes is null
                 ? size
                 : RetainedSizeEstimator.AddStrings(RetainedSizeEstimator.Add(size, 56), _excludes);

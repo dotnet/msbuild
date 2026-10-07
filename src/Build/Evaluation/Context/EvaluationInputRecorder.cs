@@ -162,7 +162,17 @@ internal sealed class EvaluationInputRecorder
                 return;
             }
 
-            var dependency = new GlobDependency(observation);
+            string[]? traversedDirectories = null;
+            if (observation.TraversedDirectories is { } traversed)
+            {
+                traversedDirectories = new string[traversed.Length];
+                for (int i = 0; i < traversed.Length; i++)
+                {
+                    traversedDirectories[i] = Canonicalize(traversed[i]);
+                }
+            }
+
+            var dependency = new GlobDependency(observation, traversedDirectories);
             lock (_files)
             {
                 (_globs ??= []).Add(dependency);

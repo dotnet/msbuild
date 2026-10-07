@@ -195,6 +195,7 @@ internal static class EvaluationInputValidator
                 if (measurements is not null)
                 {
                     measurements.GlobsRecorded += inputs.Globs.Length;
+                    measurements.BeginAttribution(inputs.Globs, changedGlobDirectories);
                 }
 
                 try
@@ -216,7 +217,9 @@ internal static class EvaluationInputValidator
                         bool current = glob.IsCurrent(listings);
                         if (measurements is not null)
                         {
-                            measurements.GlobReplayTicks += ValidationMeasurements.Now() - replayStart;
+                            long replayTicks = ValidationMeasurements.Now() - replayStart;
+                            measurements.GlobReplayTicks += replayTicks;
+                            measurements.ObserveReplayedGlob(glob, replayTicks);
                             measurements.GlobsReplayed++;
                             measurements.CountDriver(glob.Driver);
                             if (!glob.UsesFileSystemEntryCache)
@@ -258,6 +261,11 @@ internal static class EvaluationInputValidator
                 }
                 finally
                 {
+                    if (measurements is not null)
+                    {
+                        measurements.EndAttribution();
+                    }
+
                     if (measurements is not null && listings is not null)
                     {
                         measurements.ListedDirectories += listings.Count;
