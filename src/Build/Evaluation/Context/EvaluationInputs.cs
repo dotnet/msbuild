@@ -98,6 +98,8 @@ internal sealed class GlobDependency
 
     internal string ProjectDirectory { get; }
     internal string Filespec { get; }
+    internal FileMatcherDriver Driver => _driver;
+    internal bool UsesFileSystemEntryCache => _usesFileSystemEntryCache;
     /// <summary>Whether the cached result may predate this manifest's directory observations.</summary>
     internal bool FromCache { get; }
     internal ReadOnlySpan<string> Files => _files;

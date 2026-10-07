@@ -154,11 +154,17 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
         }
 
         bool fileSystemCurrent;
+        ValidationMeasurements? measurements = diagnosticRequest is null ? null : new ValidationMeasurements();
         using (diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.ManifestValidation))
         {
             fileSystemCurrent = captureDetails
-                ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure, validationContext?.FileStatCache)
-                : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, validationContext?.FileStatCache);
+                ? EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, out failure, validationContext?.FileStatCache, measurements)
+                : EvaluationInputValidator.IsFileSystemCurrent(data.Inputs, out _, validationContext?.FileStatCache, measurements);
+        }
+
+        if (measurements is not null && diagnosticRequest is not null)
+        {
+            measurements.Publish(diagnosticRequest);
         }
         if (!fileSystemCurrent)
         {

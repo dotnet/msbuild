@@ -74,6 +74,54 @@ internal sealed class ImmutableFileStatCache
         return true;
     }
 
+    internal bool TryStat(string fullPath, out FileDependency dependency, ValidationMeasurements? measurements)
+    {
+        if (!IsUnderRoot(fullPath))
+        {
+            if (measurements is not null)
+            {
+                measurements.LiveStats++;
+            }
+
+            return EvaluationInputRecorder.TryStat(fullPath, out dependency);
+        }
+
+        if (_files.TryGetValue(fullPath, out dependency))
+        {
+            if (measurements is not null)
+            {
+                measurements.SharedStatHits++;
+            }
+
+            return true;
+        }
+
+        if (!EvaluationInputRecorder.TryStat(fullPath, out dependency))
+        {
+            if (measurements is not null)
+            {
+                measurements.SharedStatNotCacheable++;
+            }
+
+            return false;
+        }
+
+        if (dependency.Kind == PathKind.File)
+        {
+            _files.TryAdd(fullPath, dependency);
+            if (measurements is not null)
+            {
+                measurements.SharedStatMisses++;
+            }
+        }
+        else if (measurements is not null)
+        {
+            measurements.SharedStatNotCacheable++;
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Discards every result. Called when a build starts, so a server or other long-lived host re-reads
     /// SDK and package files that changed between builds.

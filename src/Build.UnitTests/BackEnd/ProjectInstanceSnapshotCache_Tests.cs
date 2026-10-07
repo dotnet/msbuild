@@ -1665,7 +1665,7 @@ public sealed class ProjectInstanceSnapshotCache_Tests(ITestOutputHelper output)
                 cache.Diagnostics!.Flush(new MockLoggingService(messages.Add));
                 string log = string.Join(Environment.NewLine, messages);
                 EvaluationCacheDiagnostics_Tests.AssertPhases(log,
-                    ("RequestKey", 3), ("CacheLookup", 3), ("Validation", 2), ("ManifestValidation", 2), ("SdkValidation", 2),
+                    ("RequestKey", 3), ("CacheLookup", 3), ("Validation", 2), ("ManifestValidation", 2), ("FileStatLoop", 2), ("SdkValidation", 2),
                     ("Materialization", 1), ("FreshEvaluation", 2), ("SnapshotCreation", 2), ("CacheAdmission", 3),
                     ("FallbackPreparation", 1));
                 messages.Single(message => message.StartsWith("EvaluationCacheTimingExample|", StringComparison.Ordinal))

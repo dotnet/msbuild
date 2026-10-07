@@ -60,7 +60,7 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
                 else
                 {
                     AssertPhases(buildLog, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1),
-                        ("ManifestValidation", 1), ("Materialization", 1));
+                        ("ManifestValidation", 1), ("FileStatLoop", 1), ("Materialization", 1));
                 }
             }
         }
@@ -149,9 +149,46 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         log.ShouldContain(EvaluationCacheDiagnostics.Escape(project));
         log.ShouldNotContain("private-restore-value");
         cache.GetStatistics().FreshEvaluations.ShouldBe(3);
-        AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1), ("ManifestValidation", 1),
+        AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1), ("ManifestValidation", 1), ("FileStatLoop", 1),
             ("FreshEvaluation", 1), ("SnapshotCreation", 1), ("CacheAdmission", 2), ("FallbackPreparation", 1));
         Examples(log).Single().ShouldContain("|Event=Validation|Reason=FileSystemInputChanged|");
+    }
+
+    [Fact]
+    public void ValidationDetailSeparatesStatTimeFromGlobReplay()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        Configure(env, true, EvaluationCacheMode.SnapshotFileSystem);
+        TransientTestFolder folder = env.CreateFolder();
+        env.CreateFile(folder, "a.txt", "a");
+        string project = env.CreateFile(folder, "glob.proj", "<Project><ItemGroup><Item Include=\"*.txt\" /></ItemGroup></Project>").Path;
+        var cache = new ProjectInstanceSnapshotCache();
+        var parameters = new BuildParameters
+        {
+            EvaluationCacheConfiguration = Traits.Instance.EvaluationCache,
+            ProjectInstanceSnapshotCache = cache,
+        };
+        cache.ConfigureValidator(EvaluationCacheValidationPolicy.FileSystem);
+        cache.ConfigureDiagnostics(true, "manager", 1, EvaluationCacheMode.SnapshotFileSystem, parameters.EnvironmentPropertiesInternal);
+        var host = new MockHost(parameters) { LoggingService = new MockLoggingService(_output.WriteLine) };
+        Load(project, parameters, host);
+        Flush(cache.Diagnostics!);
+
+        File.WriteAllText(Path.Combine(folder.Path, "b.txt"), "b");
+        Directory.SetLastWriteTimeUtc(folder.Path, Directory.GetLastWriteTimeUtc(folder.Path).AddSeconds(2));
+        Load(project, parameters, host);
+        string log = Flush(cache.Diagnostics!);
+
+        log.ShouldContain("|Phase=FileStatLoop|NestedUnder=ManifestValidation|Count=1|");
+        log.ShouldContain("|Phase=GlobReplay|NestedUnder=ManifestValidation|Count=1|");
+        log.ShouldContain("ValidationDetail.GlobsRecorded:1");
+        log.ShouldContain("ValidationDetail.GlobsReplayed:1");
+        log.ShouldContain("ValidationDetail.ReplaysByDirectoryStamp:1");
+        log.ShouldContain("ValidationDetail.ReplayMismatches:1");
+        log.ShouldContain("ValidationDetail.ChangedGlobDirectories:");
+        log.ShouldContain("ValidationDetail.RecordedFiles:");
+        log.ShouldContain("ValidationDetail.ListedDirectories:");
+        System.Text.RegularExpressions.Regex.IsMatch(log, "ValidationDetail\\.Driver(Legacy|OptimizedCallback|OptimizedDirect):1").ShouldBeTrue();
     }
 
     [Theory]
@@ -728,6 +765,11 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
             {
                 fields["NestedUnder"].ShouldBe("Validation");
                 total.ShouldBeLessThanOrEqualTo(long.Parse(phases["Validation"]["TotalTicks"], CultureInfo.InvariantCulture));
+            }
+            else if (phase is "FileStatLoop" or "GlobReplay")
+            {
+                fields["NestedUnder"].ShouldBe("ManifestValidation");
+                total.ShouldBeLessThanOrEqualTo(long.Parse(phases["ManifestValidation"]["TotalTicks"], CultureInfo.InvariantCulture));
             }
             else
             {

@@ -29,11 +29,13 @@ internal static class EvaluationInputValidator
     /// An optional cache shared across every entry validated in the same build, so the metadata of SDK and package
     /// files is read once per build instead of once per project.
     /// </param>
+    /// <param name="measurements">Optional diagnostics sink for where this validation spent its time; never affects the result.</param>
     internal static bool IsFileSystemCurrent(
         EvaluationInputs inputs,
         out string? reason,
-        ImmutableFileStatCache? sharedStats = null)
-        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _, sharedStats);
+        ImmutableFileStatCache? sharedStats = null,
+        ValidationMeasurements? measurements = null)
+        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _, sharedStats, measurements);
 
     /// <summary>
     /// Checks recorded inputs, retaining the legacy reason separately from privacy-safe failure details.
@@ -42,15 +44,17 @@ internal static class EvaluationInputValidator
         EvaluationInputs inputs,
         out string? reason,
         out EvaluationInputValidationFailure failure,
-        ImmutableFileStatCache? sharedStats = null)
-        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure, sharedStats);
+        ImmutableFileStatCache? sharedStats = null,
+        ValidationMeasurements? measurements = null)
+        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure, sharedStats, measurements);
 
     private static bool IsFileSystemCurrentCore(
         EvaluationInputs inputs,
         bool captureDetails,
         out string? reason,
         out EvaluationInputValidationFailure failure,
-        ImmutableFileStatCache? sharedStats)
+        ImmutableFileStatCache? sharedStats,
+        ValidationMeasurements? measurements)
     {
         failure = default;
         if (!inputs.IsCacheable)
@@ -84,38 +88,62 @@ internal static class EvaluationInputValidator
                 }
             }
 
-            foreach (KeyValuePair<string, FileDependency> file in inputs.Files)
+            long statStart = measurements is null ? 0 : ValidationMeasurements.Now();
+            try
             {
-                if (!(sharedStats is null
-                        ? EvaluationInputRecorder.TryStat(file.Key, out FileDependency current)
-                        : sharedStats.TryStat(file.Key, out current)))
+                foreach (KeyValuePair<string, FileDependency> file in inputs.Files)
                 {
-                    reason = file.Key;
-                    if (captureDetails)
+                    if (measurements is not null)
                     {
-                        failure = new("FileSystemInputUnstatable", file.Key);
+                        measurements.CountRecorded(file.Value.Kind);
+                        if (sharedStats is null)
+                        {
+                            measurements.LiveStats++;
+                        }
                     }
 
-                    return false;
-                }
-
-                bool metadataChanged = current.LastWriteTimeUtc != file.Value.LastWriteTimeUtc
-                    || current.Length != file.Value.Length;
-                if (current.Kind != file.Value.Kind
-                    || (file.Value.RequiresMetadata && metadataChanged))
-                {
-                    reason = file.Key;
-                    if (captureDetails)
+                    if (!(sharedStats is null
+                            ? EvaluationInputRecorder.TryStat(file.Key, out FileDependency current)
+                            : sharedStats.TryStat(file.Key, out current, measurements)))
                     {
-                        failure = new("FileSystemInputChanged", file.Key);
+                        reason = file.Key;
+                        if (captureDetails)
+                        {
+                            failure = new("FileSystemInputUnstatable", file.Key);
+                        }
+
+                        return false;
                     }
 
-                    return false;
-                }
+                    bool metadataChanged = current.LastWriteTimeUtc != file.Value.LastWriteTimeUtc
+                        || current.Length != file.Value.Length;
+                    if (current.Kind != file.Value.Kind
+                        || (file.Value.RequiresMetadata && metadataChanged))
+                    {
+                        reason = file.Key;
+                        if (captureDetails)
+                        {
+                            failure = new("FileSystemInputChanged", file.Key);
+                        }
 
-                if (file.Value.RequiresGlobValidation && metadataChanged)
+                        return false;
+                    }
+
+                    if (file.Value.RequiresGlobValidation && metadataChanged)
+                    {
+                        changedGlobDirectory ??= file.Key;
+                        if (measurements is not null)
+                        {
+                            measurements.ChangedGlobDirectories++;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (measurements is not null)
                 {
-                    changedGlobDirectory ??= file.Key;
+                    measurements.StatLoopTicks += ValidationMeasurements.Now() - statStart;
                 }
             }
 
@@ -136,19 +164,75 @@ internal static class EvaluationInputValidator
                 // each would otherwise read again from the same tree. Listings never outlive this validation:
                 // a file added after it must be visible to the next one.
                 ConcurrentDictionary<string, IReadOnlyList<string>>? listings =
-                    inputs.Globs.Length > 1 ? new(StringComparer.Ordinal) : null;
-                foreach (GlobDependency glob in inputs.Globs)
+                    inputs.Globs.Length > 1 || measurements is not null ? new(StringComparer.Ordinal) : null;
+                if (measurements is not null)
                 {
-                    // Cached expansions may precede the directory stats captured by this evaluation.
-                    if ((changedGlobDirectory is not null || glob.FromCache) && !glob.IsCurrent(listings))
+                    measurements.GlobsRecorded += inputs.Globs.Length;
+                }
+
+                try
+                {
+                    foreach (GlobDependency glob in inputs.Globs)
                     {
-                        reason = changedGlobDirectory ?? glob.ProjectDirectory;
-                        if (captureDetails)
+                        // Cached expansions may precede the directory stats captured by this evaluation.
+                        if (changedGlobDirectory is null && !glob.FromCache)
                         {
-                            failure = new("FileSystemInputChanged", reason);
+                            if (measurements is not null)
+                            {
+                                measurements.GlobsSkipped++;
+                            }
+
+                            continue;
                         }
 
-                        return false;
+                        long replayStart = measurements is null ? 0 : ValidationMeasurements.Now();
+                        bool current = glob.IsCurrent(listings);
+                        if (measurements is not null)
+                        {
+                            measurements.GlobReplayTicks += ValidationMeasurements.Now() - replayStart;
+                            measurements.GlobsReplayed++;
+                            measurements.CountDriver(glob.Driver);
+                            if (!glob.UsesFileSystemEntryCache)
+                            {
+                                measurements.ReplaysWithoutEntryCache++;
+                            }
+
+                            if (changedGlobDirectory is not null)
+                            {
+                                measurements.ReplaysByDirectoryStamp++;
+                            }
+                            else
+                            {
+                                measurements.ReplaysByCachedExpansion++;
+                            }
+
+                            if (!current)
+                            {
+                                measurements.ReplayMismatches++;
+                            }
+                        }
+
+                        if (!current)
+                        {
+                            reason = changedGlobDirectory ?? glob.ProjectDirectory;
+                            if (captureDetails)
+                            {
+                                failure = new("FileSystemInputChanged", reason);
+                            }
+
+                            return false;
+                        }
+                    }
+                }
+                finally
+                {
+                    if (measurements is not null && listings is not null)
+                    {
+                        measurements.ListedDirectories += listings.Count;
+                        foreach (KeyValuePair<string, IReadOnlyList<string>> listing in listings)
+                        {
+                            measurements.ListedEntries += listing.Value.Count;
+                        }
                     }
                 }
             }

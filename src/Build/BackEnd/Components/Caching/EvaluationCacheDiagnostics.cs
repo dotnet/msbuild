@@ -42,6 +42,8 @@ internal sealed class EvaluationCacheDiagnostics
         FallbackPreparation,
         ManifestValidation,
         SdkValidation,
+        FileStatLoop,
+        GlobReplay,
         Count,
     }
 
@@ -212,6 +214,14 @@ internal sealed class EvaluationCacheDiagnostics
         }
     }
 
+    internal void AddCount(string name, long delta)
+    {
+        lock (_lock)
+        {
+            _counts[name] = _counts.TryGetValue(name, out long count) ? count + delta : delta;
+        }
+    }
+
     internal void Flush(ILoggingService loggingService, BuildEventContext? context = null)
     {
         string[] events;
@@ -263,7 +273,12 @@ internal sealed class EvaluationCacheDiagnostics
             }
 
             Phase phase = (Phase)i;
-            string nestedUnder = phase is Phase.ManifestValidation or Phase.SdkValidation ? nameof(Phase.Validation) : string.Empty;
+            string nestedUnder = phase switch
+            {
+                Phase.ManifestValidation or Phase.SdkValidation => nameof(Phase.Validation),
+                Phase.FileStatLoop or Phase.GlobReplay => nameof(Phase.ManifestValidation),
+                _ => string.Empty,
+            };
             string message = FormattableString.Invariant(
                 $"EvaluationCacheTimingSummary|Version=1|{identity}|Kind=Phase|Phase={phase}|NestedUnder={nestedUnder}|Count={timing.Count}|TotalTicks={timing.TotalTicks}|MaxTicks={timing.MaxTicks}|TotalMilliseconds={timing.TotalTicks * 1000.0 / Stopwatch.Frequency:F3}|MaxMilliseconds={timing.MaxTicks * 1000.0 / Stopwatch.Frequency:F3}|SlowestProject={EscapeBounded(timing.SlowestProject)}");
             loggingService.LogCommentFromText(context ?? BuildEventContext.Invalid, MessageImportance.High, message);
@@ -377,6 +392,10 @@ internal sealed class EvaluationCacheDiagnostics
         internal string? KeyId { get; set; }
 
         internal TimingScope Time(Phase phase) => new(owner, phase, Project);
+
+        internal void AddTiming(Phase phase, long elapsedTicks) => owner.RecordTiming(phase, Project, elapsedTicks);
+
+        internal void AddCount(string name, long delta) => owner.AddCount(name, delta);
 
         internal void BindKey(ProjectInstanceSnapshotCacheKey key) => KeyId = owner.GetKeyId(key);
 
