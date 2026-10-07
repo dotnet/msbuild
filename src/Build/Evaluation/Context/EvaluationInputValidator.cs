@@ -77,20 +77,32 @@ internal static class EvaluationInputValidator
         try
         {
             string? changedGlobDirectory = null;
-            foreach (KeyValuePair<string, string?> environmentRead in inputs.EnvironmentReads)
+            long environmentStart = measurements is null ? 0 : ValidationMeasurements.Now();
+            try
             {
-                if (!string.Equals(
-                        Environment.GetEnvironmentVariable(environmentRead.Key),
-                        environmentRead.Value,
-                        StringComparison.Ordinal))
+                foreach (KeyValuePair<string, string?> environmentRead in inputs.EnvironmentReads)
                 {
-                    reason = environmentRead.Key;
-                    if (captureDetails)
+                    if (!string.Equals(
+                            Environment.GetEnvironmentVariable(environmentRead.Key),
+                            environmentRead.Value,
+                            StringComparison.Ordinal))
                     {
-                        failure = new("EnvironmentReadChanged", environmentRead.Key);
-                    }
+                        reason = environmentRead.Key;
+                        if (captureDetails)
+                        {
+                            failure = new("EnvironmentReadChanged", environmentRead.Key);
+                        }
 
-                    return false;
+                        return false;
+                    }
+                }
+            }
+            finally
+            {
+                if (measurements is not null)
+                {
+                    measurements.EnvironmentCheckTicks += ValidationMeasurements.Now() - environmentStart;
+                    measurements.EnvironmentReads += inputs.EnvironmentReads.Count;
                 }
             }
 
@@ -214,6 +226,7 @@ internal static class EvaluationInputValidator
                 // used while its directory still has the state it was read at, so a file added since is always visible.
                 ValidatedDirectoryListings.Replay? replay = null;
                 ConcurrentDictionary<string, IReadOnlyList<string>>? listings = null;
+                long bookkeepingStart = measurements is null ? 0 : ValidationMeasurements.Now();
                 if (replayNeeded && directoryListings is not null && directoryStates is not null)
                 {
                     replay = directoryListings.BeginReplay(directoryStates);
@@ -230,6 +243,7 @@ internal static class EvaluationInputValidator
 
                 if (measurements is not null)
                 {
+                    measurements.GlobBookkeepingTicks += ValidationMeasurements.Now() - bookkeepingStart;
                     measurements.GlobsRecorded += inputs.Globs.Length;
                 }
 
@@ -287,10 +301,16 @@ internal static class EvaluationInputValidator
                         }
                     }
 
+                    long rememberStart = measurements is null ? 0 : ValidationMeasurements.Now();
                     replay?.KeepReadListings(DateTime.UtcNow);
                     if (changedGlobDirectories is not null)
                     {
                         RememberQuietDirectories(inputs, changedGlobDirectories, measurements);
+                    }
+
+                    if (measurements is not null)
+                    {
+                        measurements.GlobBookkeepingTicks += ValidationMeasurements.Now() - rememberStart;
                     }
                 }
                 finally

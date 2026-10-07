@@ -170,6 +170,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCache.cs" />
     <Compile Include="BackEnd\Components\Caching\EvaluationCacheDiagnostics.cs" />
+    <Compile Include="BackEnd\Components\Caching\TimedBuckets.cs" />
     <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCacheEntry.cs" />
     <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotCacheKey.cs" />
     <Compile Include="BackEnd\Components\Caching\ProjectInstanceSnapshotValidator.cs" />

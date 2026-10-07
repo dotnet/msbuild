@@ -705,6 +705,8 @@ namespace Microsoft.Build.BackEnd
                                 bool hasUnverifiableCachedProjectRootElement = false;
                                 bool validationErrored = false;
                                 EvaluationInputValidationFailure diagnosticFailure = default;
+                                long rootCacheProbes = 0;
+                                long rootCacheHits = 0;
                                 try
                                 {
                                     using var validationTiming = diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.Validation);
@@ -718,12 +720,17 @@ namespace Microsoft.Build.BackEnd
                                             submissionId,
                                             snapshotCache.ImmutableFileStats,
                                             snapshotCache.ValidatedDirectoryListings);
-                                        hasUnverifiableCachedProjectRootElement =
-                                            HasUnverifiableCachedProjectRootElement(
-                                                componentHost.BuildParameters.ProjectRootElementCache,
-                                                projectRootElement,
-                                                cachedEntry,
-                                                out diagnosticFailure);
+                                        using (diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.RootElementCheck))
+                                        {
+                                            hasUnverifiableCachedProjectRootElement =
+                                                HasUnverifiableCachedProjectRootElement(
+                                                    componentHost.BuildParameters.ProjectRootElementCache,
+                                                    projectRootElement,
+                                                    cachedEntry,
+                                                    out diagnosticFailure,
+                                                    out rootCacheProbes,
+                                                    out rootCacheHits);
+                                        }
                                         validationResult = hasUnverifiableCachedProjectRootElement
                                             ? ProjectInstanceSnapshotValidationResult.Invalid
                                             : snapshotCache.Validator is FileSystemProjectInstanceSnapshotValidator fileSystemValidator
@@ -759,6 +766,12 @@ namespace Microsoft.Build.BackEnd
                                         ex.Message);
                                     validationResult = ProjectInstanceSnapshotValidationResult.Invalid;
                                     validationErrored = true;
+                                }
+
+                                if (diagnosticRequest is not null && rootCacheProbes > 0)
+                                {
+                                    diagnosticRequest.AddCount("ValidationDetail.RootCacheProbes", rootCacheProbes);
+                                    diagnosticRequest.AddCount("ValidationDetail.RootCacheHits", rootCacheHits);
                                 }
 
                                 if (validationResult == ProjectInstanceSnapshotValidationResult.Valid)
@@ -931,9 +944,13 @@ namespace Microsoft.Build.BackEnd
             ProjectRootElementCacheBase projectRootElementCache,
             ProjectRootElement selectedRoot,
             ProjectInstanceSnapshotCacheEntry entry,
-            out EvaluationInputValidationFailure failure)
+            out EvaluationInputValidationFailure failure,
+            out long probes,
+            out long hits)
         {
             failure = default;
+            probes = 0;
+            hits = 0;
             if (HasUnverifiableFileProvenance(selectedRoot))
             {
                 failure = new EvaluationInputValidationFailure(
@@ -955,7 +972,13 @@ namespace Microsoft.Build.BackEnd
                     continue;
                 }
 
+                probes++;
                 ProjectRootElement cachedRoot = projectRootElementCache.TryGet(input.Key);
+                if (cachedRoot is not null)
+                {
+                    hits++;
+                }
+
                 if (cachedRoot is not null
                     && (input.Value.Kind == PathKind.Missing
                         || HasUnverifiableFileProvenance(cachedRoot)))

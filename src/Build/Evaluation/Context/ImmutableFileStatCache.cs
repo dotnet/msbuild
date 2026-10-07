@@ -25,6 +25,9 @@ internal sealed class ImmutableFileStatCache
     private readonly ConcurrentDictionary<string, FileDependency> _files = new(FileUtilities.PathComparer);
     private readonly string[] _roots;
 
+    // Paths stat from the file system in the current build; only maintained while diagnostics are on.
+    private ConcurrentDictionary<string, bool>? _statedPaths;
+
     internal ImmutableFileStatCache()
         : this(s_defaultRoots.Value)
     {
@@ -83,7 +86,7 @@ internal sealed class ImmutableFileStatCache
                 measurements.LiveStats++;
             }
 
-            return EvaluationInputRecorder.TryStat(fullPath, out dependency);
+            return Stat(fullPath, out dependency, measurements, underSharedRoot: false);
         }
 
         if (_files.TryGetValue(fullPath, out dependency))
@@ -96,7 +99,7 @@ internal sealed class ImmutableFileStatCache
             return true;
         }
 
-        if (!EvaluationInputRecorder.TryStat(fullPath, out dependency))
+        if (!Stat(fullPath, out dependency, measurements, underSharedRoot: true))
         {
             if (measurements is not null)
             {
@@ -126,7 +129,45 @@ internal sealed class ImmutableFileStatCache
     /// Discards every result. Called when a build starts, so a server or other long-lived host re-reads
     /// SDK and package files that changed between builds.
     /// </summary>
-    internal void NotifyBuildStarted() => _files.Clear();
+    internal void NotifyBuildStarted()
+    {
+        _files.Clear();
+        _statedPaths?.Clear();
+    }
+
+    // Reads the file system. With diagnostics on, also classifies the stat and times it, which never changes the result.
+    private bool Stat(string fullPath, out FileDependency dependency, ValidationMeasurements? measurements, bool underSharedRoot)
+    {
+        if (measurements is null)
+        {
+            return EvaluationInputRecorder.TryStat(fullPath, out dependency);
+        }
+
+        long start = ValidationMeasurements.Now();
+        bool found = EvaluationInputRecorder.TryStat(fullPath, out dependency);
+        long statEnd = ValidationMeasurements.Now();
+        if (found)
+        {
+            bool repeat = !StatedPaths.TryAdd(fullPath, true);
+            measurements.CountStat(fullPath, dependency.Kind, underSharedRoot, repeat, statEnd - start);
+            measurements.StatClassificationTicks += ValidationMeasurements.Now() - statEnd;
+        }
+
+        return found;
+    }
+
+    private ConcurrentDictionary<string, bool> StatedPaths
+    {
+        get
+        {
+            if (_statedPaths is null)
+            {
+                System.Threading.Interlocked.CompareExchange(ref _statedPaths, new ConcurrentDictionary<string, bool>(FileUtilities.PathComparer), null);
+            }
+
+            return _statedPaths!;
+        }
+    }
 
     private bool IsUnderRoot(string fullPath)
     {

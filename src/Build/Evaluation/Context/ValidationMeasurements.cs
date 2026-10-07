@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
@@ -15,8 +16,20 @@ namespace Microsoft.Build.Evaluation.Context;
 /// </summary>
 internal sealed class ValidationMeasurements
 {
+    private static readonly string[] s_statClassLabels = CreateStatClassLabels();
+
     internal long StatLoopTicks;
+    internal long StatClassificationTicks;
     internal long GlobReplayTicks;
+    internal long EnvironmentCheckTicks;
+    internal long GlobBookkeepingTicks;
+    internal long EnvironmentReads;
+
+    // Stats that reached the file system, by where the path is, what was found, and whether the build stat it before.
+    private TimedBuckets? _statClasses;
+
+    // The same stats by how long each took.
+    private TimedBuckets? _statLatency;
 
     internal long RecordedFiles;
     internal long RecordedMissing;
@@ -64,6 +77,56 @@ internal sealed class ValidationMeasurements
         }
     }
 
+    // Classifies one stat that reached the file system. underSharedRoot: the path is under the SDK, toolset or
+    // package roots. repeat: an earlier validation in this build already stat the same path.
+    internal void CountStat(string path, PathKind kind, bool underSharedRoot, bool repeat, long ticks)
+    {
+        int region = underSharedRoot ? 0 : IsBuildOutput(path) ? 1 : 2;
+        (_statClasses ??= new TimedBuckets(s_statClassLabels)).Add((((region * 3) + (int)kind) * 2) + (repeat ? 1 : 0), ticks);
+        (_statLatency ??= new TimedBuckets(LatencyBuckets.Labels)).Add(LatencyBuckets.Index(ticks), ticks);
+    }
+
+    private static string[] CreateStatClassLabels()
+    {
+        string[] regions = ["Toolset", "Output", "Repo"];
+        string[] kinds = ["Missing", "File", "Directory"];
+        string[] labels = new string[regions.Length * kinds.Length * 2];
+        int index = 0;
+        foreach (string region in regions)
+        {
+            foreach (string kind in kinds)
+            {
+                labels[index++] = $"{region}.{kind}.First";
+                labels[index++] = $"{region}.{kind}.Repeat";
+            }
+        }
+
+        return labels;
+    }
+
+    // Heuristic: any obj or bin directory segment in the path marks build output, so a checkout that itself lives
+    // under a directory with one of those names reports all of its stats as Output.
+    private static bool IsBuildOutput(string path) => ContainsSegment(path, "obj") || ContainsSegment(path, "bin");
+
+    private static bool ContainsSegment(string path, string segment)
+    {
+        int index = 0;
+        while ((index = path.IndexOf(segment, index, StringComparison.OrdinalIgnoreCase)) >= 0)
+        {
+            int end = index + segment.Length;
+            if (index > 0
+                && (path[index - 1] == '\\' || path[index - 1] == '/')
+                && (end == path.Length || path[end] == '\\' || path[end] == '/'))
+            {
+                return true;
+            }
+
+            index = end;
+        }
+
+        return false;
+    }
+
     internal void CountDriver(FileMatcherDriver driver)
     {
         switch (driver)
@@ -83,12 +146,34 @@ internal sealed class ValidationMeasurements
     /// <summary>Adds the totals of this validation to the build's diagnostics.</summary>
     internal void Publish(EvaluationCacheDiagnostics.Request request)
     {
-        request.AddTiming(EvaluationCacheDiagnostics.Phase.FileStatLoop, StatLoopTicks);
+        // The loop timer also ran while stats were being classified, which the diagnostics do and a normal build does not.
+        request.AddTiming(EvaluationCacheDiagnostics.Phase.FileStatLoop, Math.Max(0, StatLoopTicks - StatClassificationTicks));
+        if (_statClasses is not null)
+        {
+            request.AddTiming(EvaluationCacheDiagnostics.Phase.StatClassification, StatClassificationTicks);
+        }
+        request.AddTiming(EvaluationCacheDiagnostics.Phase.EnvironmentCheck, EnvironmentCheckTicks);
+        if (GlobsRecorded > 0)
+        {
+            request.AddTiming(EvaluationCacheDiagnostics.Phase.GlobBookkeeping, GlobBookkeepingTicks);
+        }
+
         if (GlobsReplayed > 0)
         {
             request.AddTiming(EvaluationCacheDiagnostics.Phase.GlobReplay, GlobReplayTicks);
         }
 
+        if (_statClasses is not null)
+        {
+            request.AddBuckets("StatClass", _statClasses);
+        }
+
+        if (_statLatency is not null)
+        {
+            request.AddBuckets("StatLatency", _statLatency);
+        }
+
+        Add(request, nameof(EnvironmentReads), EnvironmentReads);
         Add(request, nameof(RecordedFiles), RecordedFiles);
         Add(request, nameof(RecordedMissing), RecordedMissing);
         Add(request, nameof(RecordedDirectories), RecordedDirectories);

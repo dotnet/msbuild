@@ -143,7 +143,13 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
             return ProjectInstanceSnapshotValidationResult.Invalid;
         }
 
-        if (key.GetMismatch(data.Inputs.Key) is string field)
+        string? mismatchedField;
+        using (diagnosticRequest?.Time(EvaluationCacheDiagnostics.Phase.KeyCheck))
+        {
+            mismatchedField = key.GetMismatch(data.Inputs.Key);
+        }
+
+        if (mismatchedField is string field)
         {
             if (captureDetails)
             {
@@ -164,7 +170,10 @@ internal sealed class FileSystemProjectInstanceSnapshotValidator : IProjectInsta
 
         if (measurements is not null && diagnosticRequest is not null)
         {
-            measurements.Publish(diagnosticRequest);
+            using (diagnosticRequest.Time(EvaluationCacheDiagnostics.Phase.DiagnosticsPublish))
+            {
+                measurements.Publish(diagnosticRequest);
+            }
         }
         if (!fileSystemCurrent)
         {

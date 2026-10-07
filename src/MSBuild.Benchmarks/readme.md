@@ -196,7 +196,9 @@ Search console logs for `EvaluationCacheTimingSummary|Version=1|`:
 | Record | Fields |
 | --- | --- |
 | `Kind=Counts` (one per flush) | Process, BuildManager, TraceId, build ordinal and mode; `Requests`, `DroppedEvents`, `ForgottenHistory`, `SuppressedExamples`, `StopwatchFrequency`, and the same `Counts` reason totals as the original diagnostic summary. |
-| `Kind=Phase` (at most eleven per flush, only entered phases) | The same owner identities; `Phase`, `NestedUnder`, `Count`, `TotalTicks`, `MaxTicks`, invariant `TotalMilliseconds`/`MaxMilliseconds`, and `SlowestProject`. Ticks use `Stopwatch.GetTimestamp`, not `TimeSpan` ticks. |
+| `Kind=Phase` (at most nineteen per flush, only entered phases) | The same owner identities; `Phase`, `NestedUnder`, `Count`, `TotalTicks`, `MaxTicks`, invariant `TotalMilliseconds`/`MaxMilliseconds` and `SlowestProject`. A phase that requests entered as scopes also has `PeakActive` (the most requests inside at once) and `BusyMilliseconds` (wall time with at least one request inside); phases added after the fact (`FileStatLoop`, `GlobReplay`, `EnvironmentCheck`, `GlobBookkeeping`, `StatClassification`) have neither. Ticks use `Stopwatch.GetTimestamp`, not `TimeSpan` ticks. |
+| `Kind=Buckets` (one per used family) | `Family` and `Buckets`, a comma-separated list of `label:count:microseconds` for the buckets that were used. Families: `Phase.<name>` (how long each request spent in a phase), `StatLatency` (each stat that reached the file system), `StatClass` (those stats by `Toolset`/`Output`/`Repo` path, `Missing`/`File`/`Directory` result, and `First`/`Repeat` within the build; `Output` is any path with an `obj` or `bin` directory segment, so a checkout under such a directory is all `Output`). Labels `Le10us` to `Le250ms` are upper bounds; `Gt250ms` is open ended. |
+| `Kind=Process` (one per build) | `WallMilliseconds` from `BeginBuild` to the end of the build (taken before the flush writes its own records), `CpuMilliseconds`, `GcCollections0`/`1`/`2`, `GcPauseMilliseconds` and `AllocatedBytes` (both -1 on .NET Framework), `WorkingSetBytes` at the flush, and `ProcessorCount`. They put thread time next to wall time, GC and memory. |
 
 The nonoverlapping top-level phases within a request are:
 
@@ -212,10 +214,18 @@ The nonoverlapping top-level phases within a request are:
 | `SnapshotCreation` | Check admission eligibility, freeze the snapshot, create validation data and calculate its retained-size admission estimate. Rejected eligibility checks count as attempts. |
 | `CacheAdmission` | Add/replace/evict a snapshot, or remove a rejected candidate. A rejected candidate followed by a new admission counts twice. |
 
-`ManifestValidation` (filesystem/environment manifest checks) and `SdkValidation`
+`ManifestValidation` (filesystem/environment manifest checks), `SdkValidation`
 (one scope around the SDK loop, only for SDK-bearing manifests reached after cheaper
-checks) are nested within `Validation`, identified by `NestedUnder=Validation`.
-SDK resolution and validators are not rerun for timing. Counts include unsuccessful
+checks), `RootElementCheck` (looking up every recorded input in the project-XML cache
+before validating), `KeyCheck` (comparing the request key with the recorded one) and
+`DiagnosticsPublish` (publishing these measurements, which shows what the diagnostics
+themselves cost) are nested within `Validation`, identified by `NestedUnder=Validation`.
+`EnvironmentCheck`, `FileStatLoop` (stat of every recorded path), `GlobReplay` (re-running
+the recorded globs), `GlobBookkeeping` (preparing and remembering directory listings) and
+`StatClassification` (the diagnostics sorting each stat into the `StatClass` buckets, kept
+out of `FileStatLoop`) are nested within `ManifestValidation`. What a parent has left over
+after its children is its unattributed time. `ValidationDetail.RootCacheProbes`/`RootCacheHits`
+count the project-XML cache lookups.  SDK resolution and validators are not rerun for timing. Counts include unsuccessful
 attempts; scopes end on success, early rejection, fallback, and exception unwinding.
 The phases exclude some request setup/diagnostic/fallback plumbing and are not an
 exhaustive build timeline. Nested durations are already included in their parent.
@@ -232,7 +242,7 @@ reuse have no High-importance per-project examples. Reason counts continue witho
 sampling; `SuppressedExamples` counts eligible examples omitted by either limit.
 Project/detail fields and the slowest-project display are limited to 512 UTF-16 code
 units (then delimiter-escaped), backing off by one rather than splitting a surrogate
-pair, with `<truncated>` when shortened. The eleven timing
+pair, with `<truncated>` when shortened. The timing
 accumulators retain only one slowest-project path each, not per-project timing history.
 
 `Event`/`Reason` distinguish intentional restore/record-only bypass, unavailable

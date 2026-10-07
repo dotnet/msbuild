@@ -60,7 +60,8 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
                 else
                 {
                     AssertPhases(buildLog, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1),
-                        ("ManifestValidation", 1), ("FileStatLoop", 1), ("Materialization", 1));
+                        ("RootElementCheck", 1), ("KeyCheck", 1), ("ManifestValidation", 1), ("EnvironmentCheck", 1),
+                        ("FileStatLoop", 1), ("StatClassification", 1), ("DiagnosticsPublish", 1), ("Materialization", 1));
                 }
             }
         }
@@ -72,6 +73,8 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
             logger.FullLog.ShouldContain("|Reason=NoEntryOrHistory|");
             logger.FullLog.ShouldContain("|Reason=Materialized|");
             logger.FullLog.ShouldContain("|Build=2|");
+            logger.FullLog.ShouldContain("|Kind=Process|WallMilliseconds=");
+            logger.FullLog.ShouldContain("|GcPauseMilliseconds=");
             logger.FullLog.ShouldContain("|Counts=Lifecycle.BuildStarted:1,Lookup.CandidateFound:1,Reuse.Materialized:1,Validation.Accepted:1");
             logger.BuildMessageEvents.Where(message => message.Message?.StartsWith("EvaluationCacheTiming", StringComparison.Ordinal) == true)
                 .ShouldAllBe(message => message.Importance == MessageImportance.High);
@@ -149,7 +152,8 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         log.ShouldContain(EvaluationCacheDiagnostics.Escape(project));
         log.ShouldNotContain("private-restore-value");
         cache.GetStatistics().FreshEvaluations.ShouldBe(3);
-        AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1), ("ManifestValidation", 1), ("FileStatLoop", 1),
+        AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1), ("RootElementCheck", 1), ("KeyCheck", 1),
+            ("ManifestValidation", 1), ("EnvironmentCheck", 1), ("FileStatLoop", 1), ("StatClassification", 1), ("DiagnosticsPublish", 1),
             ("FreshEvaluation", 1), ("SnapshotCreation", 1), ("CacheAdmission", 2), ("FallbackPreparation", 1));
         Examples(log).Single().ShouldContain("|Event=Validation|Reason=FileSystemInputChanged|");
     }
@@ -181,6 +185,21 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
 
         log.ShouldContain("|Phase=FileStatLoop|NestedUnder=ManifestValidation|Count=1|");
         log.ShouldContain("|Phase=GlobReplay|NestedUnder=ManifestValidation|Count=1|");
+        log.ShouldContain("|Phase=EnvironmentCheck|NestedUnder=ManifestValidation|Count=1|");
+        log.ShouldContain("|Phase=StatClassification|NestedUnder=ManifestValidation|Count=1|");
+        log.ShouldContain("|Phase=GlobBookkeeping|NestedUnder=ManifestValidation|Count=1|");
+        log.ShouldContain("|Phase=RootElementCheck|NestedUnder=Validation|Count=1|");
+        log.ShouldContain("|Phase=KeyCheck|NestedUnder=Validation|Count=1|");
+        log.ShouldContain("|Phase=DiagnosticsPublish|NestedUnder=Validation|Count=1|");
+        System.Text.RegularExpressions.Regex.IsMatch(log, "\\|Phase=Validation\\|[^\\r\\n]*\\|PeakActive=1\\|BusyMilliseconds=").ShouldBeTrue();
+
+        // Phases added after the fact never had a request inside them, so they report no concurrency at all.
+        System.Text.RegularExpressions.Regex.IsMatch(log, "\\|Phase=FileStatLoop\\|[^\\r\\n]*PeakActive").ShouldBeFalse();
+        log.ShouldContain("|Kind=Buckets|Family=StatClass|Buckets=");
+        log.ShouldContain("|Kind=Buckets|Family=StatLatency|Buckets=");
+        log.ShouldContain("|Kind=Buckets|Family=Phase.Validation|Buckets=");
+        log.ShouldContain("ValidationDetail.RootCacheProbes:");
+        log.ShouldContain("ValidationDetail.RootCacheHits:");
         log.ShouldContain("ValidationDetail.GlobsRecorded:1");
         log.ShouldContain("ValidationDetail.GlobsReplayed:1");
         log.ShouldContain("ValidationDetail.ReplaysByDirectoryStamp:1");
@@ -189,6 +208,170 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         log.ShouldContain("ValidationDetail.RecordedFiles:");
         log.ShouldContain("ValidationDetail.ListedDirectories:");
         System.Text.RegularExpressions.Regex.IsMatch(log, "ValidationDetail\\.Driver(Legacy|OptimizedCallback|OptimizedDirect):1").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void OverlappingScopesOnTwoThreadsReportPeakAndBusyTime()
+    {
+        var diagnostics = new EvaluationCacheDiagnostics();
+        diagnostics.BeginBuild("manager", 1, EvaluationCacheMode.SnapshotFileSystem, []);
+        EvaluationCacheDiagnostics.Request first = diagnostics.StartRequest("first.proj", 1, 1, 1);
+        EvaluationCacheDiagnostics.Request second = diagnostics.StartRequest("second.proj", 2, 1, 2);
+        using var firstEntered = new System.Threading.ManualResetEventSlim();
+        using var secondExited = new System.Threading.ManualResetEventSlim();
+
+        // The second request runs entirely inside the first, so the time with someone inside is exactly the first's.
+        Task outer = Task.Run(() =>
+        {
+            using (first.Time(EvaluationCacheDiagnostics.Phase.Validation))
+            {
+                firstEntered.Set();
+                secondExited.Wait();
+                System.Threading.Thread.Sleep(20);
+            }
+        });
+        Task inner = Task.Run(() =>
+        {
+            firstEntered.Wait();
+            using (second.Time(EvaluationCacheDiagnostics.Phase.Validation))
+            {
+                System.Threading.Thread.Sleep(20);
+            }
+
+            secondExited.Set();
+        });
+        Task.WaitAll([outer, inner], TimeSpan.FromSeconds(30)).ShouldBeTrue();
+
+        string log = Flush(diagnostics);
+        Dictionary<string, string> validation = PhaseFields(log, "Validation");
+        validation["Count"].ShouldBe("2");
+        validation["PeakActive"].ShouldBe("2");
+        validation["BusyMilliseconds"].ShouldBe(validation["MaxMilliseconds"]);
+        double.Parse(validation["TotalMilliseconds"], CultureInfo.InvariantCulture)
+            .ShouldBeGreaterThan(double.Parse(validation["BusyMilliseconds"], CultureInfo.InvariantCulture));
+        Buckets(log, "Phase.Validation").Values.Sum().ShouldBe(2);
+    }
+
+    [Fact]
+    public void ManyThreadsEnteringAndLeavingAPhaseStayWithinWallTime()
+    {
+        var diagnostics = new EvaluationCacheDiagnostics();
+        diagnostics.BeginBuild("manager", 1, EvaluationCacheMode.SnapshotFileSystem, []);
+        EvaluationCacheDiagnostics.Request request = diagnostics.StartRequest("many.proj", 1, 1, 1);
+
+        long start = Stopwatch.GetTimestamp();
+        Parallel.For(0, 4000, new ParallelOptions { MaxDegreeOfParallelism = 8 }, _ =>
+        {
+            using (request.Time(EvaluationCacheDiagnostics.Phase.Validation))
+            {
+                System.Threading.Thread.SpinWait(200);
+            }
+        });
+        double wallMilliseconds = (Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency;
+
+        Dictionary<string, string> validation = PhaseFields(Flush(diagnostics), "Validation");
+        validation["Count"].ShouldBe("4000");
+        int peak = int.Parse(validation["PeakActive"], CultureInfo.InvariantCulture);
+        peak.ShouldBeInRange(1, 8);
+        double busy = double.Parse(validation["BusyMilliseconds"], CultureInfo.InvariantCulture);
+        busy.ShouldBeGreaterThan(0);
+        busy.ShouldBeLessThanOrEqualTo(wallMilliseconds + 5);
+    }
+
+    [Fact]
+    public void StatsThatReachTheFileSystemAreClassifiedByPlaceResultAndRepetition()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFolder root = env.CreateFolder();
+        TransientTestFolder repo = env.CreateFolder();
+        string underRoot = env.CreateFile(root, "toolset.props", "x").Path;
+        string missingUnderRoot = Path.Combine(root.Path, "absent.props");
+        string repoFile = env.CreateFile(repo, "repo.props", "x").Path;
+        string output = Path.Combine(repo.Path, "obj");
+        Directory.CreateDirectory(output);
+
+        var cache = new Microsoft.Build.Evaluation.Context.ImmutableFileStatCache([root.Path]);
+        var measurements = new Microsoft.Build.Evaluation.Context.ValidationMeasurements();
+        foreach (string path in new[] { underRoot, underRoot, missingUnderRoot, missingUnderRoot, repoFile, repoFile, output })
+        {
+            cache.TryStat(path, out _, measurements).ShouldBeTrue();
+        }
+
+        var diagnostics = new EvaluationCacheDiagnostics();
+        measurements.Publish(diagnostics.StartRequest("stats.proj", 1, 1, 1));
+        string log = Flush(diagnostics);
+
+        // The second look at the existing file under the root is served from the shared cache and never reaches the file system.
+        Buckets(log, "StatClass").ShouldBe(
+            new Dictionary<string, long>
+            {
+                ["Toolset.File.First"] = 1,
+                ["Toolset.Missing.First"] = 1,
+                ["Toolset.Missing.Repeat"] = 1,
+                ["Repo.File.First"] = 1,
+                ["Repo.File.Repeat"] = 1,
+                ["Output.Directory.First"] = 1,
+            },
+            ignoreOrder: true);
+        Buckets(log, "StatLatency").Values.Sum().ShouldBe(6);
+        log.ShouldContain("|Phase=StatClassification|NestedUnder=ManifestValidation|Count=1|");
+    }
+
+    [Fact]
+    public void FileStatLoopExcludesTheTimeTheDiagnosticsSpentClassifyingStats()
+    {
+        static (string FileStatLoop, string StatClassification) Publish(long loopTicks, long classificationTicks)
+        {
+            var measurements = new Microsoft.Build.Evaluation.Context.ValidationMeasurements();
+            measurements.CountStat(Path.Combine(Path.GetTempPath(), "x.props"), Microsoft.Build.Evaluation.Context.PathKind.File, underSharedRoot: false, repeat: false, ticks: 1);
+            measurements.StatLoopTicks = loopTicks;
+            measurements.StatClassificationTicks = classificationTicks;
+            var diagnostics = new EvaluationCacheDiagnostics();
+            measurements.Publish(diagnostics.StartRequest("loop.proj", 1, 1, 1));
+            string log = Flush(diagnostics);
+            return (PhaseFields(log, "FileStatLoop")["TotalTicks"], PhaseFields(log, "StatClassification")["TotalTicks"]);
+        }
+
+        Publish(100, 30).ShouldBe(("70", "30"));
+        Publish(10, 30).ShouldBe(("0", "30"));
+    }
+
+    [Fact]
+    public void ProcessSummaryReportsGcAndAllocationOnlyWhereTheRuntimeProvidesThem()
+    {
+        var diagnostics = new EvaluationCacheDiagnostics();
+        diagnostics.BeginBuild("manager", 1, EvaluationCacheMode.SnapshotFileSystem, []);
+        string log = Flush(diagnostics);
+
+        Dictionary<string, string> process = log.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
+            .Single(message => message.Contains("|Kind=Process|"))
+            .Split('|').Skip(1).Select(field => field.Split(['='], 2)).ToDictionary(pair => pair[0], pair => pair[1]);
+        double.Parse(process["WallMilliseconds"], CultureInfo.InvariantCulture).ShouldBeGreaterThanOrEqualTo(0);
+        long.Parse(process["WorkingSetBytes"], CultureInfo.InvariantCulture).ShouldBeGreaterThan(0);
+#if NET
+        double.Parse(process["GcPauseMilliseconds"], CultureInfo.InvariantCulture).ShouldBeGreaterThanOrEqualTo(0);
+        long.Parse(process["AllocatedBytes"], CultureInfo.InvariantCulture).ShouldBeGreaterThanOrEqualTo(0);
+#else
+        process["GcPauseMilliseconds"].ShouldBe("-1.000");
+        process["AllocatedBytes"].ShouldBe("-1");
+#endif
+    }
+
+    [Fact]
+    public void LatencyBucketsPlaceADurationAtTheFirstBoundItDoesNotExceed()
+    {
+        static long Ticks(long microseconds) => microseconds * Stopwatch.Frequency / 1_000_000;
+        LatencyBuckets.Index(0).ShouldBe(0);
+        LatencyBuckets.Index(Ticks(10)).ShouldBe(0);
+        LatencyBuckets.Index(Ticks(10) + 1).ShouldBe(1);
+        LatencyBuckets.Index(Ticks(250_000)).ShouldBe(LatencyBuckets.Labels.Length - 2);
+        LatencyBuckets.Index(Ticks(250_000) + 1).ShouldBe(LatencyBuckets.Labels.Length - 1);
+
+        // A whole second is exact at any timer frequency.
+        var buckets = new TimedBuckets(LatencyBuckets.Labels);
+        buckets.Add(LatencyBuckets.Index(Stopwatch.Frequency), Stopwatch.Frequency);
+        buckets.Add(LatencyBuckets.Index(Stopwatch.Frequency), Stopwatch.Frequency);
+        buckets.Format().ShouldBe("Gt250ms:2:2000000");
     }
 
     [Fact]
@@ -405,8 +588,9 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         string log = Flush(diagnostics);
         log.ShouldContain("|DroppedEvents=6|ForgottenHistory=1|");
         log.ShouldContain("Lookup.NoEntryOrHistory:10005");
+        // The events, the detailed and timing count summaries, and the process summary.
         log.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries).Length
-            .ShouldBe(EvaluationCacheDiagnostics.MaximumEventsPerBuild + 2);
+            .ShouldBe(EvaluationCacheDiagnostics.MaximumEventsPerBuild + 3);
         Flush(diagnostics).ShouldContain("|DroppedEvents=0|ForgottenHistory=0|Counts=");
     }
 
@@ -614,13 +798,13 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         log.ShouldNotContain("private-exception-text");
         if (failure == "Recoverable")
         {
-            AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1),
+            AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1), ("RootElementCheck", 1),
                 ("FreshEvaluation", 1), ("SnapshotCreation", 1), ("CacheAdmission", 2), ("FallbackPreparation", 1));
             Examples(log).Single().ShouldContain("|Event=Fallback|Reason=ValidationError|Detail=System.InvalidOperationException");
         }
         else
         {
-            AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1));
+            AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1), ("RootElementCheck", 1));
             Examples(log).ShouldBeEmpty();
             cache.GetStatistics().FreshEvaluations.ShouldBe(1);
         }
@@ -664,13 +848,13 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
         log.ShouldNotContain("private-cleanup-text");
         if (cancellation)
         {
-            AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1),
+            AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1), ("RootElementCheck", 1),
                 ("CacheAdmission", 1), ("FallbackPreparation", 1));
             cache.GetStatistics().FreshEvaluations.ShouldBe(1);
         }
         else
         {
-            AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1),
+            AssertPhases(log, ("RequestKey", 1), ("CacheLookup", 1), ("Validation", 1), ("RootElementCheck", 1),
                 ("CacheAdmission", 1), ("FallbackPreparation", 1), ("FreshEvaluation", 1));
             cache.GetStatistics().FreshEvaluations.ShouldBe(2);
             Examples(log).ShouldContain(message => message.Contains("|Event=Fallback|Reason=KeyOrLookupError|Detail=System.InvalidOperationException"));
@@ -795,12 +979,12 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
             total.ShouldBeGreaterThanOrEqualTo(0);
             maximum.ShouldBeInRange(0, total);
             fields["SlowestProject"].ShouldNotBeNullOrEmpty();
-            if (phase is "ManifestValidation" or "SdkValidation")
+            if (phase is "ManifestValidation" or "SdkValidation" or "RootElementCheck" or "KeyCheck" or "DiagnosticsPublish")
             {
                 fields["NestedUnder"].ShouldBe("Validation");
                 total.ShouldBeLessThanOrEqualTo(long.Parse(phases["Validation"]["TotalTicks"], CultureInfo.InvariantCulture));
             }
-            else if (phase is "FileStatLoop" or "GlobReplay")
+            else if (phase is "FileStatLoop" or "GlobReplay" or "EnvironmentCheck" or "GlobBookkeeping" or "StatClassification")
             {
                 fields["NestedUnder"].ShouldBe("ManifestValidation");
                 total.ShouldBeLessThanOrEqualTo(long.Parse(phases["ManifestValidation"]["TotalTicks"], CultureInfo.InvariantCulture));
@@ -815,6 +999,21 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
     private static string[] Examples(string log) =>
         log.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
             .Where(message => message.Contains("EvaluationCacheTimingExample|")).ToArray();
+
+    private static Dictionary<string, string> PhaseFields(string log, string phase) =>
+        log.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
+            .Single(message => message.Contains("|Kind=Phase|Phase=" + phase + "|"))
+            .Split('|').Skip(1).Select(field => field.Split(['='], 2)).ToDictionary(pair => pair[0], pair => pair[1]);
+
+    // label -> count for one bucket family of a flush
+    private static Dictionary<string, long> Buckets(string log, string family)
+    {
+        string line = log.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries)
+            .Single(message => message.Contains("|Kind=Buckets|Family=" + family + "|"));
+        return line.Substring(line.IndexOf("|Buckets=", StringComparison.Ordinal) + "|Buckets=".Length)
+            .Split(',').Select(bucket => bucket.Split(':'))
+            .ToDictionary(parts => parts[0], parts => long.Parse(parts[1], CultureInfo.InvariantCulture));
+    }
 
     private static void Configure(TestEnvironment env, bool enabled, EvaluationCacheMode mode)
     {
