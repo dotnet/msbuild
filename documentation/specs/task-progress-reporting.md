@@ -361,7 +361,8 @@ MSBuild would need its own differently named interface rather than a `System` na
 
 The engine assigns the following data when a reporter is created:
 
-- `OperationId`: unique within the build,
+- `OperationId`: engine-generated within its originating process; combine it with the task's
+  `BuildEventContext` to identify the operation across the build,
 - `BuildEventContext`: the current submission, project, target, task, and node correlation,
 - `Title`: a short stable description,
 - `Unit`: the meaning of `Completed` and `Total`,
@@ -571,8 +572,11 @@ shape must support:
 - final summary on end, and
 - protocol-version negotiation or graceful fallback for mixed-version nodes.
 
-Unknown progress packets must not terminate a node connection. Until the node compatibility
-strategy is proven, the distributed slice must remain separate from the public API slice.
+Task-host packet version 9 introduces structured progress events. When the negotiated version
+is older, the task-host factory returns a no-op reporter. Progress events logged directly are
+translated to ordinary low-importance messages before crossing such a connection, so the receiver
+never sees an unknown progress event ID. Same-version worker nodes preserve the structured events.
+Parent IDs are resolved within the child's task context, not across unrelated tasks or nodes.
 
 ## Logger behavior
 
@@ -897,8 +901,9 @@ Two lessons generalize to other adopters:
   warnings and errors remain responsible for diagnostics.
 - Integrate immediate output and resize behavior.
 - Add OSC 9;4 where supported: one determinate operation publishes its bounded percentage,
-  multiple active operations publish indeterminate state, and the last operation publishes the
-  removal sequence. This is capability-gated and does not change authoritative build error state.
+  multiple active operations publish indeterminate state, and the last operation restores the
+  build-level indeterminate state until the build finishes. This is capability-gated and does not
+  change authoritative build error state.
 - Renderer unit tests cover sanitization/truncation and stale-update rejection. Terminal Logger
   integration tests cover lifecycle rendering, determinate and indeterminate OSC state, prompt
   removal on finish, bounded concurrent operations, resize, cancellation, immediate-message
@@ -919,6 +924,11 @@ records use the
 existing length-delimited framing, and the new record kinds are appended to the record-kind enum
 so forward-compatible readers can skip them, while strict older readers reject the newer format
 version as they do for other format additions.
+
+Structured Log Viewer's forward-compatible reader can open these length-framed logs while skipping
+the new lifecycle records. Such versions cannot display task progress or reconstruct its nesting;
+native progress support requires a coordinated viewer update. The viewer can also request an
+available update rather than use its forward-compatible mode.
 
 ### Phase 6: first-party tasks
 
@@ -1160,7 +1170,8 @@ reporter.
 - The maximum active operations allowed per task and per build.
 - Whether begin/update/end should be public `BuildEventArgs` types.
 - How new progress event types are represented so old binary-log readers degrade safely.
-- The exact negotiation strategy for mixed-version node and task-host processes.
+- Mixed-version task hosts use negotiated packet version 9 for progress support; older peers
+  receive no-op reporters or ordinary message fallbacks.
 - Whether classic console/file loggers emit final summaries by default.
 - Whether one operation can expose an optional parent/child relationship in a later version.
   Resolved: `CreateNestedReporter` adds nested operations. See "Nested operations".
