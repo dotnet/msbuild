@@ -195,6 +195,14 @@ later change gives the directory a timestamp that differs from the remembered on
 more than two seconds older than the check is remembered, so a coarse-resolution file system cannot
 give a later change the same timestamp.
 
+A glob replay reads each directory listing it needs from the file system. A listing read by a replay in
+which every glob matched is kept together with the state its directory had when it was observed, which
+preceded the read. A later replay takes a stored listing only while the directory has exactly that state,
+so only directories that changed are read again; a change gives the directory a new timestamp and the
+stored listing is not used. Listings are shared by every entry and survive a build, because each use
+compares the directory state, and the same two-second timestamp rule applies when a listing is kept.
+Their number is bounded, and they are discarded with the cache's entries.
+
 The supported operating model assumes relevant edits change timestamp or length and that
 inputs are not concurrently written during validation and materialization. Same-size edits that
 preserve timestamps, timestamp aliasing, and concurrent writers are outside this guarantee. Content
