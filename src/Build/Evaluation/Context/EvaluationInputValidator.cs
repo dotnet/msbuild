@@ -25,15 +25,15 @@ internal static class EvaluationInputValidator
     /// </summary>
     /// <param name="inputs">The recorded inputs.</param>
     /// <param name="reason">The first input that differs, or the non-cacheable reason.</param>
-    /// <param name="sharedGlobEntryCache">
-    /// An optional directory-listing cache shared across every entry validated in the same build, so glob replay
-    /// does not redundantly re-enumerate directories already listed earlier in the same build.
+    /// <param name="sharedStats">
+    /// An optional cache shared across every entry validated in the same build, so the metadata of SDK and package
+    /// files is read once per build instead of once per project.
     /// </param>
     internal static bool IsFileSystemCurrent(
         EvaluationInputs inputs,
         out string? reason,
-        ConcurrentDictionary<string, IReadOnlyList<string>>? sharedGlobEntryCache = null)
-        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _, sharedGlobEntryCache);
+        ImmutableFileStatCache? sharedStats = null)
+        => IsFileSystemCurrentCore(inputs, captureDetails: false, out reason, out _, sharedStats);
 
     /// <summary>
     /// Checks recorded inputs, retaining the legacy reason separately from privacy-safe failure details.
@@ -42,15 +42,15 @@ internal static class EvaluationInputValidator
         EvaluationInputs inputs,
         out string? reason,
         out EvaluationInputValidationFailure failure,
-        ConcurrentDictionary<string, IReadOnlyList<string>>? sharedGlobEntryCache = null)
-        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure, sharedGlobEntryCache);
+        ImmutableFileStatCache? sharedStats = null)
+        => IsFileSystemCurrentCore(inputs, captureDetails: true, out reason, out failure, sharedStats);
 
     private static bool IsFileSystemCurrentCore(
         EvaluationInputs inputs,
         bool captureDetails,
         out string? reason,
         out EvaluationInputValidationFailure failure,
-        ConcurrentDictionary<string, IReadOnlyList<string>>? sharedGlobEntryCache)
+        ImmutableFileStatCache? sharedStats)
     {
         failure = default;
         if (!inputs.IsCacheable)
@@ -86,7 +86,9 @@ internal static class EvaluationInputValidator
 
             foreach (KeyValuePair<string, FileDependency> file in inputs.Files)
             {
-                if (!EvaluationInputRecorder.TryStat(file.Key, out FileDependency current))
+                if (!(sharedStats is null
+                        ? EvaluationInputRecorder.TryStat(file.Key, out FileDependency current)
+                        : sharedStats.TryStat(file.Key, out current)))
                 {
                     reason = file.Key;
                     if (captureDetails)
@@ -130,10 +132,15 @@ internal static class EvaluationInputValidator
 
             if (!inputs.Globs.IsDefaultOrEmpty)
             {
+                // Validating one entry is a single instant, so its globs can share the directory listings that
+                // each would otherwise read again from the same tree. Listings never outlive this validation:
+                // a file added after it must be visible to the next one.
+                ConcurrentDictionary<string, IReadOnlyList<string>>? listings =
+                    inputs.Globs.Length > 1 ? new(StringComparer.Ordinal) : null;
                 foreach (GlobDependency glob in inputs.Globs)
                 {
                     // Cached expansions may precede the directory stats captured by this evaluation.
-                    if ((changedGlobDirectory is not null || glob.FromCache) && !glob.IsCurrent(sharedGlobEntryCache))
+                    if ((changedGlobDirectory is not null || glob.FromCache) && !glob.IsCurrent(listings))
                     {
                         reason = changedGlobDirectory ?? glob.ProjectDirectory;
                         if (captureDetails)
