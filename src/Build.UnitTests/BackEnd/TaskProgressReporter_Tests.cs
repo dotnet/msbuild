@@ -129,6 +129,91 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void AbandonRemainingClosesManagerAgainstLaterReporters()
+        {
+            var manager = new TaskProgressManager();
+            var forwarded = new System.Collections.Generic.List<BuildEventArgs>();
+
+            manager.AbandonRemaining();
+            ITaskProgressReporter reporter = manager.CreateReporter("Late", TaskProgressUnit.Unspecified, BuildEventContext.Invalid, forwarded.Add);
+
+            reporter.Report(new TaskProgressUpdate(1, 2));
+            reporter.Complete();
+
+            forwarded.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void ReentrantAbandonDuringStartedEventForwardsTerminalEventAfterStart()
+        {
+            var manager = new TaskProgressManager();
+            var forwarded = new System.Collections.Generic.List<BuildEventArgs>();
+
+            manager.CreateReporter(
+                "Starting",
+                TaskProgressUnit.Unspecified,
+                BuildEventContext.Invalid,
+                e =>
+                {
+                    forwarded.Add(e);
+                    if (e is TaskProgressStartedEventArgs)
+                    {
+                        manager.AbandonRemaining();
+                    }
+                });
+
+            forwarded.Select(e => e.GetType()).ShouldBe([typeof(TaskProgressStartedEventArgs), typeof(TaskProgressFinishedEventArgs)]);
+            forwarded.OfType<TaskProgressFinishedEventArgs>().ShouldHaveSingleItem().Outcome.ShouldBe(TaskProgressOutcome.Abandoned);
+        }
+
+        [Fact]
+        public void AbandonRemainingCannotMissReporterDuringStartedEvent()
+        {
+            var manager = new TaskProgressManager();
+            var forwarded = new System.Collections.Concurrent.ConcurrentQueue<BuildEventArgs>();
+            using var started = new ManualResetEventSlim();
+            using var continueStart = new ManualResetEventSlim();
+            using var teardownStarted = new ManualResetEventSlim();
+
+            Task<ITaskProgressReporter> creating = Task.Run(() => manager.CreateReporter(
+                "Creating",
+                TaskProgressUnit.Unspecified,
+                BuildEventContext.Invalid,
+                e =>
+                {
+                    forwarded.Enqueue(e);
+                    if (e is TaskProgressStartedEventArgs)
+                    {
+                        started.Set();
+                        continueStart.Wait();
+                    }
+                }));
+
+            started.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            Task abandoning = Task.Run(() =>
+            {
+                teardownStarted.Set();
+                manager.AbandonRemaining();
+            });
+
+            try
+            {
+                teardownStarted.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+                abandoning.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            }
+            finally
+            {
+                continueStart.Set();
+            }
+
+            Task.WaitAll(creating, abandoning);
+
+            ((TaskProgressReporter)creating.Result).IsActive.ShouldBeFalse();
+            forwarded.ToArray().Select(e => e.GetType()).ShouldBe([typeof(TaskProgressStartedEventArgs), typeof(TaskProgressFinishedEventArgs)]);
+            forwarded.ToArray().OfType<TaskProgressFinishedEventArgs>().ShouldHaveSingleItem().Outcome.ShouldBe(TaskProgressOutcome.Abandoned);
+        }
+
+        [Fact]
         public void ConcurrentReportsDoNotCorruptStateAndTerminalTransitionWins()
         {
             var manager = new TaskProgressManager();

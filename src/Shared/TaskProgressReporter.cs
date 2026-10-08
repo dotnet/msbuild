@@ -45,6 +45,8 @@ namespace Microsoft.Build.BackEnd
         private readonly TaskProgressManager _manager;
         private readonly Action<BuildEventArgs>? _logEvent;
         private readonly object _stateLock = new object();
+        private readonly object _eventLock = new object();
+        private readonly TaskProgressStartedEventArgs _startedEvent;
         private int _state = (int)ReporterState.Active;
         private long _sequence;
         private int _lastForwardedTicks;
@@ -57,6 +59,9 @@ namespace Microsoft.Build.BackEnd
         private Func<string?>? _statusProvider;
         private int _polling;
         private List<TaskProgressReporter>? _nestedReporters;
+        private bool _started;
+        // Teardown can race the start callback after this reporter has been registered with its manager.
+        private BuildEventArgs? _pendingTerminalEvent;
 
         internal TaskProgressReporter(
             TaskProgressManager manager,
@@ -65,8 +70,8 @@ namespace Microsoft.Build.BackEnd
             TaskProgressUnit unit,
             BuildEventContext buildEventContext,
             Action<BuildEventArgs>? logEvent,
-            long parentOperationId = 0,
-            TaskProgressNestedRetention retention = TaskProgressNestedRetention.Remove)
+            long parentOperationId,
+            TaskProgressNestedRetention retention)
         {
             _manager = manager;
             _logEvent = logEvent;
@@ -75,13 +80,30 @@ namespace Microsoft.Build.BackEnd
             Unit = unit;
             BuildEventContext = buildEventContext;
             _latestUpdate = new TaskProgressUpdate(0);
-
-            TryLogEvent(new TaskProgressStartedEventArgs(operationId, title, unit)
+            _startedEvent = new TaskProgressStartedEventArgs(OperationId, Title, Unit)
             {
-                BuildEventContext = buildEventContext,
+                BuildEventContext = BuildEventContext,
                 ParentOperationId = parentOperationId,
                 Retention = retention,
-            });
+            };
+        }
+
+        internal void Start()
+        {
+            LogEvent(_startedEvent);
+
+            BuildEventArgs? pendingTerminalEvent;
+            lock (_eventLock)
+            {
+                _started = true;
+                pendingTerminalEvent = _pendingTerminalEvent;
+                _pendingTerminalEvent = null;
+            }
+
+            if (pendingTerminalEvent is not null)
+            {
+                LogEvent(pendingTerminalEvent);
+            }
         }
 
         /// <summary>
@@ -166,8 +188,12 @@ namespace Microsoft.Build.BackEnd
                 _nestedReporters ??= new List<TaskProgressReporter>();
                 _nestedReporters.RemoveAll(static nested => !nested.IsActive);
 
-                TaskProgressReporter reporter = _manager.CreateNestedReporter(title, unit, BuildEventContext, _logEvent, OperationId, retention);
-                _nestedReporters.Add(reporter);
+                ITaskProgressReporter reporter = _manager.CreateNestedReporter(title, unit, BuildEventContext, _logEvent, OperationId, retention);
+                if (reporter is TaskProgressReporter nestedReporter)
+                {
+                    _nestedReporters.Add(nestedReporter);
+                }
+
                 return reporter;
             }
         }
@@ -555,6 +581,20 @@ namespace Microsoft.Build.BackEnd
         /// terminate the process.
         /// </summary>
         private void TryLogEvent(BuildEventArgs e)
+        {
+            lock (_eventLock)
+            {
+                if (!_started)
+                {
+                    _pendingTerminalEvent = e;
+                    return;
+                }
+            }
+
+            LogEvent(e);
+        }
+
+        private void LogEvent(BuildEventArgs e)
         {
             try
             {

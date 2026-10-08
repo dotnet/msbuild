@@ -35,6 +35,7 @@ namespace Microsoft.Build.BackEnd
 
         private readonly object _lock = new object();
         private readonly List<TaskProgressReporter> _activeReporters = new List<TaskProgressReporter>();
+        private bool _closed;
 
         /// <summary>
         /// Creates a new reporter for one operation, correlated to the supplied build event context.
@@ -61,7 +62,7 @@ namespace Microsoft.Build.BackEnd
         /// The caller validates <paramref name="title"/>. The new reporter is tracked like a top-level reporter, so it is
         /// abandoned if the task leaks it.
         /// </remarks>
-        internal TaskProgressReporter CreateNestedReporter(
+        internal ITaskProgressReporter CreateNestedReporter(
             string title,
             TaskProgressUnit unit,
             BuildEventContext buildEventContext,
@@ -83,7 +84,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private TaskProgressReporter CreateReporterCore(
+        private ITaskProgressReporter CreateReporterCore(
             string title,
             TaskProgressUnit unit,
             BuildEventContext buildEventContext,
@@ -91,14 +92,20 @@ namespace Microsoft.Build.BackEnd
             long parentOperationId,
             TaskProgressNestedRetention retention)
         {
-            long operationId = Interlocked.Increment(ref s_nextOperationId);
-            var reporter = new TaskProgressReporter(this, operationId, title, unit, buildEventContext, logEvent, parentOperationId, retention);
-
+            TaskProgressReporter reporter;
             lock (_lock)
             {
+                if (_closed)
+                {
+                    return EngineServices.NullTaskProgressReporter.Instance;
+                }
+
+                long operationId = Interlocked.Increment(ref s_nextOperationId);
+                reporter = new TaskProgressReporter(this, operationId, title, unit, buildEventContext, logEvent, parentOperationId, retention);
                 _activeReporters.Add(reporter);
             }
 
+            reporter.Start();
             return reporter;
         }
 
@@ -122,6 +129,7 @@ namespace Microsoft.Build.BackEnd
 
             lock (_lock)
             {
+                _closed = true;
                 if (_activeReporters.Count == 0)
                 {
                     return;

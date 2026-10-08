@@ -109,7 +109,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Owns all task progress reporters created during this task invocation.
         /// </summary>
-        private readonly TaskProgressManager _taskProgressManager = new TaskProgressManager();
+        private readonly object _taskProgressLock = new object();
+        private TaskProgressManager _taskProgressManager;
+        private bool _taskProgressClosed;
 
         /// <summary>
         /// Constructor
@@ -1022,10 +1024,21 @@ namespace Microsoft.Build.BackEnd
             string title,
             TaskProgressUnit unit = TaskProgressUnit.Unspecified)
         {
+            TaskProgressManager progressManager;
+            lock (_taskProgressLock)
+            {
+                if (_taskProgressClosed)
+                {
+                    return EngineServices.NullTaskProgressReporter.Instance;
+                }
+
+                progressManager = _taskProgressManager ??= new TaskProgressManager();
+            }
+
             TaskLoggingContext loggingContext = _taskLoggingContext;
             BuildEventContext buildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
             Action<BuildEventArgs> logEvent = loggingContext is null ? null : loggingContext.LoggingService.LogBuildEvent;
-            return _taskProgressManager.CreateReporter(title, unit, buildEventContext, logEvent);
+            return progressManager.CreateReporter(title, unit, buildEventContext, logEvent);
         }
 
         /// <summary>
@@ -1151,7 +1164,14 @@ namespace Microsoft.Build.BackEnd
                 ReleaseAllCores();
 
                 // Close out any progress reporters the task did not explicitly complete, cancel, or fail.
-                _taskProgressManager.AbandonRemaining();
+                TaskProgressManager taskProgressManager;
+                lock (_taskProgressLock)
+                {
+                    _taskProgressClosed = true;
+                    taskProgressManager = _taskProgressManager;
+                }
+
+                taskProgressManager?.AbandonRemaining();
 
                 // Since the task has a pointer to this class it may store it in a static field. Null out
                 // internal data so the leak of this object doesn't lead to a major memory leak.
