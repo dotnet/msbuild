@@ -198,6 +198,7 @@ namespace Microsoft.Build.Evaluation
 
             protected override void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)
             {
+                listBuilder.ReserveAppend(items.Length);
                 foreach (var item in items)
                 {
                     listBuilder.Add(new ItemData(item, _itemElement, _elementOrder, _conditionResult));
