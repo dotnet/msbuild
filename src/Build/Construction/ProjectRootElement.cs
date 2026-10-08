@@ -143,6 +143,11 @@ namespace Microsoft.Build.Construction
         private DateTime _lastWriteTimeWhenReadUtc;
 
         /// <summary>
+        /// The length of the file whose content was read, or null when no authoritative file observation is available.
+        /// </summary>
+        private long? _fileLengthWhenRead;
+
+        /// <summary>
         /// Reason it was last marked dirty; unlocalized, for debugging
         /// </summary>
         private string _dirtyReason = "first created project {0}";
@@ -639,6 +644,16 @@ namespace Microsoft.Build.Construction
         /// by an external means.
         /// </summary>
         public DateTime LastWriteTimeWhenRead => Link != null ? RootLink.LastWriteTimeWhenRead : _lastWriteTimeWhenReadUtc.ToLocalTime();
+
+        /// <summary>
+        /// The UTC last write time of the file when it was read, or default when this element was not read from a file.
+        /// </summary>
+        internal DateTime LastWriteTimeWhenReadUtc => Link != null ? RootLink.LastWriteTimeWhenRead.ToUniversalTime() : _lastWriteTimeWhenReadUtc;
+
+        /// <summary>
+        /// The length of the file when it was read, or null when this element was not read from a local file.
+        /// </summary>
+        internal long? FileLengthWhenRead => Link != null ? null : _fileLengthWhenRead;
 
         internal DateTime? StreamTimeUtc = null;
 
@@ -1561,6 +1576,7 @@ namespace Microsoft.Build.Construction
                 _encoding = saveEncoding;
 
                 FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(_projectFileLocation.File);
+                _fileLengthWhenRead = fileInfo?.Length;
 
                 // If the file was deleted by a race with someone else immediately after it was written above
                 // then we obviously can't read the write time. In this obscure case, we'll retain the
@@ -1627,6 +1643,7 @@ namespace Microsoft.Build.Construction
             }
 
             StreamTimeUtc = DateTime.UtcNow;
+            _fileLengthWhenRead = null;
             _versionOnDisk = Version;
         }
 
@@ -1716,13 +1733,27 @@ namespace Microsoft.Build.Construction
             ThrowIfUnsavedChanges(throwIfUnsavedChanges);
 
             var oldDocument = XmlDocument;
-            XmlDocumentWithLocation newDocument = documentProducer(preserveFormatting ?? PreserveFormatting);
+            DateTime lastWriteTimeWhenReadUtc = _lastWriteTimeWhenReadUtc;
+            long? fileLengthWhenRead = _fileLengthWhenRead;
+            DateTime? streamTimeUtc = StreamTimeUtc;
+            XmlDocumentWithLocation newDocument;
 
-            // Reload should only mutate the state if there are no parse errors.
-            ThrowIfDocumentHasParsingErrors(newDocument);
+            try
+            {
+                newDocument = documentProducer(preserveFormatting ?? PreserveFormatting);
+
+                // Reload should only mutate the state if there are no parse errors.
+                ThrowIfDocumentHasParsingErrors(newDocument);
+            }
+            catch
+            {
+                _lastWriteTimeWhenReadUtc = lastWriteTimeWhenReadUtc;
+                _fileLengthWhenRead = fileLengthWhenRead;
+                StreamTimeUtc = streamTimeUtc;
+                throw;
+            }
 
             RemoveAllChildren();
-
             ProjectParser.Parse(newDocument, this, ProjectRootElementCache.ParserIgnoreConfiguration);
 
             MarkDirty("Project reloaded", null);
@@ -2094,6 +2125,11 @@ namespace Microsoft.Build.Construction
             try
             {
                 MSBuildEventSource.Log.LoadDocumentStart(fullPath);
+
+                // Take source metadata before reading the content, so a later change is not attributed to cached XML.
+                FileInfo fileInfoBeforeRead = FileUtilities.GetFileInfoNoThrow(fullPath);
+                DateTime? lastWriteTimeBeforeReadUtc = fileInfoBeforeRead?.LastWriteTimeUtc;
+                long? fileLengthBeforeRead = fileInfoBeforeRead?.Length;
                 using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath, loadAsReadOnly))
                 {
                     _encoding = xtr.Encoding;
@@ -2109,7 +2145,15 @@ namespace Microsoft.Build.Construction
                     XmlDocument.FullPath = fullPath;
                 }
 
-                _lastWriteTimeWhenReadUtc = FileUtilities.GetFileInfoNoThrow(fullPath).LastWriteTimeUtc;
+                // Retain the PRE cache's timestamp fallback, but not as recording provenance: without the pre-read
+                // length the recorder fails closed.
+                FileInfo fileInfoForTimestamp = fileInfoBeforeRead ?? FileUtilities.GetFileInfoNoThrow(fullPath);
+                if (fileInfoForTimestamp != null)
+                {
+                    _lastWriteTimeWhenReadUtc = lastWriteTimeBeforeReadUtc ?? fileInfoForTimestamp.LastWriteTimeUtc;
+                }
+
+                _fileLengthWhenRead = fileLengthBeforeRead;
                 if (StreamTimeUtc < _lastWriteTimeWhenReadUtc)
                 {
                     StreamTimeUtc = null;

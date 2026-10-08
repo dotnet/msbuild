@@ -16,6 +16,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Windows.Win32;
@@ -689,6 +690,78 @@ internal static class NativeMethods
     /// Native architecture getter
     /// </summary>
     internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
+
+    /// <summary>
+    /// Reads whether a path is a file or a directory, its last write time, and its size with one system call on Windows.
+    /// Returns false when the path does not exist.
+    /// </summary>
+    /// <param name="fullPath">Full path to the file or directory in the filesystem</param>
+    /// <param name="isDirectory">True when the path is a directory</param>
+    /// <param name="isReparsePoint">True when the entry is a reparse point, such as a symbolic link or a junction</param>
+    /// <param name="lastWriteTimeUtc">The UTC last write time</param>
+    /// <param name="length">The file size in bytes, or zero for a directory</param>
+    internal static bool TryGetFileSystemEntry(string fullPath, out bool isDirectory, out bool isReparsePoint, out DateTime lastWriteTimeUtc, out long length)
+    {
+#if FEATURE_WINDOWSINTEROP
+        if (IsWindows)
+        {
+            if (PInvoke.GetFileAttributesEx(fullPath, out WIN32_FILE_ATTRIBUTE_DATA data))
+            {
+                var attributes = (FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes;
+                isDirectory = (attributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0;
+                isReparsePoint = (attributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+                lastWriteTimeUtc = DateTime.FromFileTimeUtc(data.ftLastWriteTime.ToLong());
+                length = isDirectory ? 0 : ((long)data.nFileSizeHigh << 32) | data.nFileSizeLow;
+                return true;
+            }
+
+            isDirectory = false;
+            isReparsePoint = false;
+            lastWriteTimeUtc = DateTime.MinValue;
+            length = 0;
+            return false;
+        }
+#endif
+
+        // One stat: FileInfo reports the attributes and timestamp of a directory as well, only Exists and Length are file-specific.
+        var entry = new FileInfo(fullPath);
+        FileAttributes entryAttributes = entry.Attributes;
+        if ((int)entryAttributes == -1)
+        {
+            isDirectory = false;
+            isReparsePoint = false;
+            lastWriteTimeUtc = DateTime.MinValue;
+            length = 0;
+            return false;
+        }
+
+        isDirectory = (entryAttributes & FileAttributes.Directory) != 0;
+        isReparsePoint = (entryAttributes & FileAttributes.ReparsePoint) != 0;
+        lastWriteTimeUtc = entry.LastWriteTimeUtc;
+        length = isDirectory ? 0 : entry.Length;
+        return true;
+    }
+
+    /// <summary>
+    /// True when a Windows entry is a symbolic link or a junction. Other reparse points, such as cloud file placeholders
+    /// and deduplicated files, do not redirect to another path. Always false on other platforms.
+    /// </summary>
+    internal static bool IsSymbolicLinkOrJunction(string fullPath)
+    {
+#if FEATURE_WINDOWSINTEROP
+        if (IsWindows)
+        {
+            const uint MountPointTag = 0xA0000003;
+            const uint SymbolicLinkTag = 0xA000000C;
+            using SafeFindFileHandle handle = WindowsNative.FindFirstFileW(fullPath, out WindowsNative.Win32FindData data);
+            return !handle.IsInvalid
+                && (data.DwFileAttributes & FileAttributes.ReparsePoint) != 0
+                && data.DwReserved0 is MountPointTag or SymbolicLinkTag;
+        }
+#endif
+
+        return false;
+    }
 
     /// <summary>
     /// Get the last write time of the fullpath to a directory. If the pointed path is not a directory, or

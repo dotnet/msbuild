@@ -22,7 +22,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public override void LogMessage(string message, MessageImportance messageImportance = MessageImportance.Low)
         {
-            _loggingContext.LogCommentFromText(messageImportance, message);
+            _loggingContext.LogSdkMessage(messageImportance, message);
         }
     }
 }

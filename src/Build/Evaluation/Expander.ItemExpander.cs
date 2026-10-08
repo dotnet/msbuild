@@ -155,6 +155,30 @@ internal partial class Expander<P, I>
                     }
                 }
 
+                if (expander._propertiesUseTracker.InputRecorder is { } inputRecorder)
+                {
+                    switch (kind)
+                    {
+                        case TransformKind.ItemSpecModifierFunction:
+                            inputRecorder.RecordMetadataName(functionName);
+                            break;
+                        case TransformKind.ExpandQuotedExpressionFunction:
+                            inputRecorder.RecordMetadataExpression(function);
+                            break;
+                        case TransformKind.Metadata:
+                        case TransformKind.HasMetadata:
+                        case TransformKind.WithMetadataValue:
+                        case TransformKind.WithoutMetadataValue:
+                        case TransformKind.AnyHaveMetadataValue:
+                            if (arguments is { Length: > 0 })
+                            {
+                                inputRecorder.RecordMetadataName(arguments[0]);
+                            }
+
+                            break;
+                    }
+                }
+
                 switch (kind)
                 {
                     case TransformKind.ItemSpecModifierFunction:
@@ -164,7 +188,7 @@ internal partial class Expander<P, I>
                         Transforms.Count(input, output);
                         break;
                     case TransformKind.Exists:
-                        Transforms.Exists(input, output, arguments, functionName, elementLocation);
+                        Transforms.Exists(input, output, arguments, functionName, elementLocation, expander._fileSystem);
                         break;
                     case TransformKind.Combine:
                         Transforms.Combine(input, output, arguments, functionName, elementLocation);
