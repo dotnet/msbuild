@@ -9,13 +9,13 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Evaluation.Context;
 
 /// <summary>
-/// Checks recorded file-system inputs without authorizing reuse of an evaluation.
+/// Checks recorded inputs that can be validated without rerunning external resolvers.
 /// </summary>
 internal static class EvaluationInputValidator
 {
     /// <summary>
-    /// Returns true when recording completed without a non-cacheable reason and every recorded path still has the
-    /// same kind, last-write time, and length.
+    /// Returns true when recording completed without a non-cacheable reason, direct environment reads are unchanged,
+    /// and every recorded path still has the same kind, timestamp, and length.
     /// </summary>
     /// <param name="inputs">The recorded inputs.</param>
     /// <param name="reason">The first input that differs, or the non-cacheable reason.</param>
@@ -29,6 +29,18 @@ internal static class EvaluationInputValidator
 
         try
         {
+            foreach (KeyValuePair<string, string?> environmentRead in inputs.EnvironmentReads)
+            {
+                if (!string.Equals(
+                        Environment.GetEnvironmentVariable(environmentRead.Key),
+                        environmentRead.Value,
+                        StringComparison.Ordinal))
+                {
+                    reason = environmentRead.Key;
+                    return false;
+                }
+            }
+
             foreach (KeyValuePair<string, FileDependency> file in inputs.Files)
             {
                 if (!EvaluationInputRecorder.TryStat(file.Key, out FileDependency current) || current != file.Value)
