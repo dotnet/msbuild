@@ -138,8 +138,11 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Size in bytes of the kernel buffers backing the named pipes used to communicate with out-of-process
-        /// .NET nodes (worker nodes and .NET TaskHosts). Defaults to the historical 128 KB. Tunable via
-        /// MSBUILDNODECONNECTIONBUFFERSIZE for anyone who wants to opt into a larger (or smaller) buffer.
+        /// .NET nodes (worker nodes and .NET TaskHosts). A larger buffer lets the sending side queue more (or
+        /// larger) packets before it blocks waiting for the receiver to drain, which removes most of the
+        /// backpressure stalls when shipping large TaskHostConfiguration packets to sidecar TaskHosts in
+        /// multi-threaded (-mt) builds. Tunable via MSBUILDNODECONNECTIONBUFFERSIZE; when unset it defaults to
+        /// 1 MB under change wave 18.9, falling back to the historical 128 KB when that wave is opted out.
         /// Note: the legacy .NET Framework 3.5 task host (MSBuildTaskHost) uses its own endpoint and is
         /// intentionally unaffected by this setting - it keeps the historical 128 KB buffer.
         /// </summary>
@@ -153,8 +156,9 @@ namespace Microsoft.Build.Framework
                 return configured;
             }
 
+            const int DefaultBufferSize = 128 * 1024;
             const int LegacyBufferSize = 128 * 1024;
-            return LegacyBufferSize;
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9) ? DefaultBufferSize : LegacyBufferSize;
         }
 
         /// <summary>

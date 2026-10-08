@@ -232,24 +232,37 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void NodeConnectionBufferSizeDefaultsToLegacyRegardlessOfChangeWave()
+        public void NodeConnectionBufferSizeIsLargeWhenWaveEnabled()
         {
-            // NOTE: this test covers the value produced by Traits.NodeConnectionBufferSize only.
+            // NOTE: these tests cover the value produced by Traits.NodeConnectionBufferSize only.
             // The single delegation that wires it into the pipe
             // (NodeEndpointOutOfProcBase.PipeBufferSize => Traits.Instance.NodeConnectionBufferSize)
             // is intentionally not unit-tested - exercising it would require spawning a real node and
             // inspecting the kernel pipe buffer. It is a trivial, verified-by-inspection delegation.
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                // No MSBUILDDISABLEFEATURESFROMVERSION => all waves enabled => 1 MB buffer.
                 // In unit tests BuildEnvironmentState.s_runningTests is true, so Traits.Instance
                 // returns a fresh instance each access and reflects the current environment.
                 env.SetEnvironmentVariable("MSBUILDNODECONNECTIONBUFFERSIZE", null);
+                SetChangeWave(string.Empty, env);
 
-                foreach (string changeWaveSetting in new[] { string.Empty, ChangeWaves.Wave18_9.ToString() })
-                {
-                    SetChangeWave(changeWaveSetting, env);
-                    Traits.Instance.NodeConnectionBufferSize.ShouldBe(128 * 1024);
-                }
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9).ShouldBeTrue();
+                Traits.Instance.NodeConnectionBufferSize.ShouldBe(1024 * 1024);
+            }
+        }
+
+        [Fact]
+        public void NodeConnectionBufferSizeStaysLegacyWhenWaveDisabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Opting out of wave 18.9 must restore the historical 128 KB buffer.
+                env.SetEnvironmentVariable("MSBUILDNODECONNECTIONBUFFERSIZE", null);
+                SetChangeWave(ChangeWaves.Wave18_9.ToString(), env);
+
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9).ShouldBeFalse();
+                Traits.Instance.NodeConnectionBufferSize.ShouldBe(128 * 1024);
             }
         }
 
