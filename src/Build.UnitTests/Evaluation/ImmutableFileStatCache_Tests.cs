@@ -168,6 +168,37 @@ public sealed class ImmutableFileStatCache_Tests
         IsCurrent(inputs, cache).ShouldBeFalse();
     }
 
+    [Fact]
+    public void UserExtensionsPathFollowsLocalAppData()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFolder localAppData = env.CreateFolder();
+        env.SetEnvironmentVariable("LOCALAPPDATA", localAppData.Path);
+
+        ImmutableFileStatCache.ComputeUserExtensionsPath(toolsDirectory: null)
+            .ShouldBe(Path.Combine(localAppData.Path, "Microsoft", "MSBuild"));
+    }
+
+    [Fact]
+    public void DefaultRootsShareTheUserExtensionsHooksUntilTheNextBuild()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFolder localAppData = env.CreateFolder();
+        env.SetEnvironmentVariable("LOCALAPPDATA", localAppData.Path);
+        string hooks = Path.Combine(localAppData.Path, "Microsoft", "MSBuild", "Current", "Imports", "Microsoft.Common.props", "ImportBefore");
+        (string[] roots, string[] probeRoots) = ImmutableFileStatCache.ComputeDefaultRoots();
+        var cache = new ImmutableFileStatCache(roots, probeRoots);
+        EvaluationInputs inputs = Record(r => r.RecordProbe(hooks, ProbeKind.Directory, exists: false));
+
+        IsCurrent(inputs, cache).ShouldBeTrue();
+        Directory.CreateDirectory(hooks);
+
+        // Every project in the build reuses the absence the first one read; the next build sees the new hook.
+        IsCurrent(inputs, cache).ShouldBeTrue();
+        cache.NotifyBuildStarted();
+        IsCurrent(inputs, cache).ShouldBeFalse();
+    }
+
     private static EvaluationInputs Record(Action<EvaluationInputRecorder> record)
     {
         var recorder = new EvaluationInputRecorder();
