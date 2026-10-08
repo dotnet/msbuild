@@ -37,6 +37,11 @@ namespace Microsoft.Build.BackEnd
         ResultsCache,
 
         /// <summary>
+        /// Project instance snapshot cache
+        /// </summary>
+        ProjectInstanceSnapshotCache,
+
+        /// <summary>
         /// Property Cache
         /// </summary>
         PropertyCache,
