@@ -28,6 +28,9 @@ internal sealed class EvaluationCacheDiagnostics
     internal const int MaximumExamplesPerReason = 3;
     internal const int MaximumExamplesPerBuild = 96;
     internal const int MaximumExampleFieldLength = 512;
+    internal const int MaximumSlowPaths = 4096;
+    internal const int ReportedSlowPaths = 40;
+    internal const int ReportedSlowDirectories = 25;
 
     internal enum Phase
     {
@@ -64,6 +67,8 @@ internal sealed class EvaluationCacheDiagnostics
     private readonly PhaseTiming[] _timings = new PhaseTiming[(int)Phase.Count];
     private readonly TimedBuckets?[] _phaseBuckets = new TimedBuckets?[(int)Phase.Count];
     private readonly SortedDictionary<string, TimedBuckets> _buckets = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, SlowPath> _slowPaths = new(StringComparer.Ordinal);
+    private long _slowPathsDropped;
     private ProcessSnapshot? _processStart;
     private readonly List<string> _examples = [];
     private readonly Dictionary<string, int> _exampleCounts = new(StringComparer.Ordinal);
@@ -267,6 +272,30 @@ internal sealed class EvaluationCacheDiagnostics
         }
     }
 
+    internal void AddSlowStats(List<(string Path, long Ticks)> stats)
+    {
+        lock (_lock)
+        {
+            foreach ((string path, long ticks) in stats)
+            {
+                if (_slowPaths.TryGetValue(path, out SlowPath existing))
+                {
+                    _slowPaths[path] = new SlowPath(existing.Count + 1, existing.Ticks + ticks);
+                }
+                else if (_slowPaths.Count < MaximumSlowPaths)
+                {
+                    _slowPaths[path] = new SlowPath(1, ticks);
+                }
+                else
+                {
+                    _slowPathsDropped++;
+                }
+            }
+        }
+    }
+
+    private readonly record struct SlowPath(long Count, long Ticks);
+
     private void RecordTimingCore(Phase phase, string project, long elapsedTicks)
     {
         ref PhaseTiming timing = ref _timings[(int)phase];
@@ -299,6 +328,8 @@ internal sealed class EvaluationCacheDiagnostics
         PhaseTiming[] timings;
         TimedBuckets?[] phaseBuckets;
         KeyValuePair<string, TimedBuckets>[] bucketFamilies;
+        KeyValuePair<string, SlowPath>[] slowPaths;
+        long slowPathsDropped;
         ProcessSnapshot? processStart;
         lock (_lock)
         {
@@ -318,6 +349,8 @@ internal sealed class EvaluationCacheDiagnostics
             timings = (PhaseTiming[])_timings.Clone();
             phaseBuckets = (TimedBuckets?[])_phaseBuckets.Clone();
             bucketFamilies = [.. _buckets];
+            slowPaths = [.. _slowPaths];
+            slowPathsDropped = _slowPathsDropped;
             processStart = _processStart;
             examples = [.. _examples];
             _events.Clear();
@@ -325,6 +358,8 @@ internal sealed class EvaluationCacheDiagnostics
             Array.Clear(_timings, 0, _timings.Length);
             Array.Clear(_phaseBuckets, 0, _phaseBuckets.Length);
             _buckets.Clear();
+            _slowPaths.Clear();
+            _slowPathsDropped = 0;
             _processStart = null;
             _examples.Clear();
             _exampleCounts.Clear();
@@ -380,6 +415,7 @@ internal sealed class EvaluationCacheDiagnostics
         {
             LogBuckets(loggingService, context, identity, family.Key, family.Value);
         }
+        LogSlowPaths(loggingService, context, identity, slowPaths, slowPathsDropped);
         if (processStart is { } started && processEnd is { } ended)
         {
             string process = FormattableString.Invariant(
@@ -396,6 +432,58 @@ internal sealed class EvaluationCacheDiagnostics
     private static double Delta(double start, double end) => start < 0 || end < 0 ? -1 : end - start;
 
     private static long Delta(long start, long end) => start < 0 || end < 0 ? -1 : end - start;
+
+    private static void LogSlowPaths(
+        ILoggingService loggingService,
+        BuildEventContext? context,
+        string identity,
+        KeyValuePair<string, SlowPath>[] slowPaths,
+        long dropped)
+    {
+        if (slowPaths.Length == 0)
+        {
+            return;
+        }
+
+        BuildEventContext target = context ?? BuildEventContext.Invalid;
+        long totalCount = 0;
+        long totalTicks = 0;
+        var directories = new Dictionary<string, (long Count, long Ticks, int Paths)>(StringComparer.Ordinal);
+        foreach (KeyValuePair<string, SlowPath> entry in slowPaths)
+        {
+            totalCount += entry.Value.Count;
+            totalTicks += entry.Value.Ticks;
+            string directory = Path.GetDirectoryName(entry.Key) ?? string.Empty;
+            (long count, long ticks, int paths) = directories.TryGetValue(directory, out var existing) ? existing : default;
+            directories[directory] = (count + entry.Value.Count, ticks + entry.Value.Ticks, paths + 1);
+        }
+
+        loggingService.LogCommentFromText(
+            target,
+            MessageImportance.High,
+            FormattableString.Invariant($"EvaluationCacheTimingSummary|Version=1|{identity}|Kind=SlowPathTotals|DistinctPaths={slowPaths.Length}|DistinctDirectories={directories.Count}|DroppedStats={dropped}|Count={totalCount}|Microseconds={Microseconds(totalTicks)}"));
+
+        Array.Sort(slowPaths, static (left, right) => right.Value.Ticks.CompareTo(left.Value.Ticks));
+        for (int i = 0; i < Math.Min(ReportedSlowPaths, slowPaths.Length); i++)
+        {
+            loggingService.LogCommentFromText(
+                target,
+                MessageImportance.High,
+                FormattableString.Invariant($"EvaluationCacheTimingSummary|Version=1|{identity}|Kind=SlowPath|Rank={i + 1}|Count={slowPaths[i].Value.Count}|Microseconds={Microseconds(slowPaths[i].Value.Ticks)}|Path={EscapeBounded(slowPaths[i].Key)}"));
+        }
+
+        KeyValuePair<string, (long Count, long Ticks, int Paths)>[] byDirectory = [.. directories];
+        Array.Sort(byDirectory, static (left, right) => right.Value.Ticks.CompareTo(left.Value.Ticks));
+        for (int i = 0; i < Math.Min(ReportedSlowDirectories, byDirectory.Length); i++)
+        {
+            loggingService.LogCommentFromText(
+                target,
+                MessageImportance.High,
+                FormattableString.Invariant($"EvaluationCacheTimingSummary|Version=1|{identity}|Kind=SlowDirectory|Rank={i + 1}|Count={byDirectory[i].Value.Count}|DistinctPaths={byDirectory[i].Value.Paths}|Microseconds={Microseconds(byDirectory[i].Value.Ticks)}|Path={EscapeBounded(byDirectory[i].Key)}"));
+        }
+    }
+
+    private static long Microseconds(long ticks) => ticks * 1_000_000 / Stopwatch.Frequency;
 
     private static void LogBuckets(ILoggingService loggingService, BuildEventContext? context, string identity, string family, TimedBuckets buckets)
     {
@@ -590,6 +678,8 @@ internal sealed class EvaluationCacheDiagnostics
         internal void AddCount(string name, long delta) => owner.AddCount(name, delta);
 
         internal void AddBuckets(string family, TimedBuckets buckets) => owner.AddBuckets(family, buckets);
+
+        internal void AddSlowStats(List<(string Path, long Ticks)> stats) => owner.AddSlowStats(stats);
 
         internal void BindKey(ProjectInstanceSnapshotCacheKey key) => KeyId = owner.GetKeyId(key);
 

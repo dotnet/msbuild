@@ -32,6 +32,10 @@ internal sealed class ImmutableFileStatCache
     // Paths stat from the file system in the current build; only maintained while diagnostics are on.
     private ConcurrentDictionary<string, bool>? _statedPaths;
 
+    // Also only maintained while diagnostics are on: stats running right now, and when the build's first one started.
+    private int _statsInFlight;
+    private long _firstStatTicks;
+
     internal ImmutableFileStatCache()
         : this(s_defaultRoots.Value.Roots, s_defaultRoots.Value.ProbeRoots)
     {
@@ -142,6 +146,7 @@ internal sealed class ImmutableFileStatCache
     {
         _stats.Clear();
         _statedPaths?.Clear();
+        System.Threading.Volatile.Write(ref _firstStatTicks, 0);
     }
 
     private static string[] Normalize(IEnumerable<string> roots)
@@ -166,13 +171,19 @@ internal sealed class ImmutableFileStatCache
             return EvaluationInputRecorder.TryStat(fullPath, out dependency);
         }
 
+        int inFlight = System.Threading.Interlocked.Increment(ref _statsInFlight);
+        int collectionsBefore = GC.CollectionCount(0);
         long start = ValidationMeasurements.Now();
+        System.Threading.Interlocked.CompareExchange(ref _firstStatTicks, start, 0);
         bool found = EvaluationInputRecorder.TryStat(fullPath, out dependency);
         long statEnd = ValidationMeasurements.Now();
+        bool collected = GC.CollectionCount(0) != collectionsBefore;
+        System.Threading.Interlocked.Decrement(ref _statsInFlight);
         if (found)
         {
             bool repeat = !StatedPaths.TryAdd(fullPath, true);
             measurements.CountStat(fullPath, dependency.Kind, underSharedRoot, repeat, statEnd - start);
+            measurements.CountStatContext(fullPath, inFlight, start - System.Threading.Volatile.Read(ref _firstStatTicks), collected, statEnd - start);
             measurements.StatClassificationTicks += ValidationMeasurements.Now() - statEnd;
         }
 

@@ -314,7 +314,68 @@ public sealed class EvaluationCacheDiagnostics_Tests(ITestOutputHelper output)
             },
             ignoreOrder: true);
         Buckets(log, "StatLatency").Values.Sum().ShouldBe(6);
+        Buckets(log, "StatLatencyByInFlight").Values.Sum().ShouldBe(6);
+        Buckets(log, "StatBurstAll").Values.Sum().ShouldBe(6);
+        Buckets(log, "StatGc").Where(bucket => bucket.Key.StartsWith("All.", StringComparison.Ordinal)).Sum(bucket => bucket.Value).ShouldBe(6);
         log.ShouldContain("|Phase=StatClassification|NestedUnder=ManifestValidation|Count=1|");
+    }
+
+    [Fact]
+    public void SlowStatsAreReportedByPathAndDirectoryAndEveryStatIsBandedByConcurrencyAndTime()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), "slow-directory");
+        string slow = Path.Combine(directory, "missing.props");
+        string alsoSlow = Path.Combine(directory, "other.props");
+        long slowTicks = 5 * Stopwatch.Frequency / 1000;
+        long Milliseconds(long value) => value * Stopwatch.Frequency / 1000;
+
+        var measurements = new Microsoft.Build.Evaluation.Context.ValidationMeasurements();
+        measurements.CountStatContext(slow, inFlight: 40, startOffsetTicks: Milliseconds(120), gcOverlapped: false, ticks: slowTicks);
+        measurements.CountStatContext(slow, inFlight: 1, startOffsetTicks: 0, gcOverlapped: false, ticks: 1);
+        measurements.CountStatContext(alsoSlow, inFlight: 3, startOffsetTicks: Milliseconds(5_000), gcOverlapped: true, ticks: slowTicks);
+
+        var diagnostics = new EvaluationCacheDiagnostics();
+        measurements.Publish(diagnostics.StartRequest("slow.proj", 1, 1, 1));
+        string log = Flush(diagnostics);
+
+        Buckets(log, "StatLatencyByInFlight").ShouldBe(
+            new Dictionary<string, long> { ["FlGt32.Le5ms"] = 1, ["Fl1.Le10us"] = 1, ["Fl4.Le5ms"] = 1 },
+            ignoreOrder: true);
+        Buckets(log, "StatBurstAll").ShouldBe(
+            new Dictionary<string, long> { ["T0100ms"] = 1, ["T0000ms"] = 1, ["Gt2000ms"] = 1 },
+            ignoreOrder: true);
+        Buckets(log, "StatBurstSlow").ShouldBe(
+            new Dictionary<string, long> { ["T0100ms"] = 1, ["Gt2000ms"] = 1 },
+            ignoreOrder: true);
+        Buckets(log, "StatGc").ShouldBe(
+            new Dictionary<string, long> { ["Slow.NoGc"] = 1, ["Slow.GcOverlap"] = 1, ["All.NoGc"] = 2, ["All.GcOverlap"] = 1 },
+            ignoreOrder: true);
+
+        log.ShouldContain("|Kind=SlowPathTotals|DistinctPaths=2|DistinctDirectories=1|DroppedStats=0|Count=2|Microseconds=10000");
+        log.ShouldContain("|Kind=SlowPath|Rank=1|Count=1|Microseconds=5000|Path=" + EvaluationCacheDiagnostics.Escape(slow));
+        log.ShouldContain("|Kind=SlowDirectory|Rank=1|Count=2|DistinctPaths=2|Microseconds=10000|Path=" + EvaluationCacheDiagnostics.Escape(directory));
+        Flush(diagnostics).ShouldNotContain("|Kind=SlowPath");
+    }
+
+    [Fact]
+    public void RealStatsReportTheStatsInFlightAndTheTimeSinceTheBuildsFirstStat()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFolder repo = env.CreateFolder();
+        string file = env.CreateFile(repo, "one.props", "x").Path;
+
+        var cache = new Microsoft.Build.Evaluation.Context.ImmutableFileStatCache([]);
+        var measurements = new Microsoft.Build.Evaluation.Context.ValidationMeasurements();
+        cache.TryStat(file, out _, measurements).ShouldBeTrue();
+        cache.TryStat(file, out _, measurements).ShouldBeTrue();
+
+        var diagnostics = new EvaluationCacheDiagnostics();
+        measurements.Publish(diagnostics.StartRequest("inflight.proj", 1, 1, 1));
+        string log = Flush(diagnostics);
+
+        // Nothing else runs, so each stat is the only one in flight, and both start within the first slice.
+        Buckets(log, "StatLatencyByInFlight").Keys.ShouldAllBe(label => label.StartsWith("Fl1.", StringComparison.Ordinal));
+        Buckets(log, "StatBurstAll").Keys.ShouldBe(["T0000ms"]);
     }
 
     [Fact]
