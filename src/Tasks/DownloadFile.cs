@@ -106,11 +106,9 @@ namespace Microsoft.Build.Tasks
             ITaskProgressReporter? progress = null;
 
             ITaskProgressReporter? GetProgressReporter(string filename)
-            {
-                return progress ??= (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                => progress ??= (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
                     $"Downloading {filename}",
                     TaskProgressUnit.Bytes);
-            }
 
             CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
@@ -435,15 +433,10 @@ namespace Microsoft.Build.Tasks
                 Report(count);
             }
 
-            private void Report(int bytesRead)
+            private void Report(int bytesWritten)
             {
-                _completed += bytesRead;
+                _completed += bytesWritten;
                 _progress?.Report(new TaskProgressUpdate(_completed, _total, "Downloading"));
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                base.Dispose(disposing);
             }
         }
 

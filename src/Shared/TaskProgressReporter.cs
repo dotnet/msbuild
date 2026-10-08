@@ -44,8 +44,8 @@ namespace Microsoft.Build.BackEnd
 
         private readonly TaskProgressManager _manager;
         private readonly Action<BuildEventArgs>? _logEvent;
-        private readonly object _stateLock = new object();
-        private readonly object _eventLock = new object();
+        private readonly object _stateLock = new();
+        private readonly object _eventLock = new();
         private readonly TaskProgressStartedEventArgs _startedEvent;
         private int _state = (int)ReporterState.Active;
         private long _sequence;
@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd
                     return EngineServices.NullTaskProgressReporter.Instance;
                 }
 
-                _nestedReporters ??= new List<TaskProgressReporter>();
+                _nestedReporters ??= [];
                 _nestedReporters.RemoveAll(static nested => !nested.IsActive);
 
                 ITaskProgressReporter reporter = _manager.CreateNestedReporter(title, unit, BuildEventContext, _logEvent, OperationId, retention);
@@ -493,9 +493,9 @@ namespace Microsoft.Build.BackEnd
 
         private void RemoveFailedStatusProvider(Func<string?> provider)
         {
-            bool shouldForward = false;
-            long sequence = 0;
-            TaskProgressUpdate update = default;
+            bool shouldForward;
+            long sequence;
+            TaskProgressUpdate update;
 
             lock (_stateLock)
             {
@@ -612,10 +612,9 @@ namespace Microsoft.Build.BackEnd
 
         private void TryTransition(ReporterState target, string? summary)
         {
-            bool transitioned;
-            long sequence = 0;
-            TaskProgressUpdate finalUpdate = default;
-            List<TaskProgressReporter>? nestedReporters = null;
+            long sequence;
+            TaskProgressUpdate finalUpdate;
+            List<TaskProgressReporter>? nestedReporters;
 
             // The final record carries the provider's latest value unless the task supplied a summary.
             // The provider is task code, so it runs before the lock is taken.
@@ -629,57 +628,54 @@ namespace Microsoft.Build.BackEnd
 
             lock (_stateLock)
             {
-                transitioned = _state == (int)ReporterState.Active;
-
-                if (transitioned)
+                if (_state != (int)ReporterState.Active)
                 {
-                    _flushScheduled = false;
-                    _flushTimer?.Dispose();
-                    _flushTimer = null;
-
-                    if (summary != null)
-                    {
-                        _latestUpdate = new TaskProgressUpdate(_latestUpdate.Completed, _latestUpdate.Total, summary);
-                    }
-                    else if (hasProviderStatus && ReferenceEquals(_statusProvider, provider))
-                    {
-                        _latestUpdate = new TaskProgressUpdate(_latestUpdate.Completed, _latestUpdate.Total, providerStatus);
-                    }
-
-                    _statusProvider = null;
-                    sequence = ++_sequence;
-                    finalUpdate = _latestUpdate;
-                    _state = (int)target;
-                    nestedReporters = _nestedReporters;
-                    _nestedReporters = null;
+                    return;
                 }
+
+                _flushScheduled = false;
+                _flushTimer?.Dispose();
+                _flushTimer = null;
+
+                if (summary is not null)
+                {
+                    _latestUpdate = new TaskProgressUpdate(_latestUpdate.Completed, _latestUpdate.Total, summary);
+                }
+                else if (hasProviderStatus && ReferenceEquals(_statusProvider, provider))
+                {
+                    _latestUpdate = new TaskProgressUpdate(_latestUpdate.Completed, _latestUpdate.Total, providerStatus);
+                }
+
+                _statusProvider = null;
+                sequence = ++_sequence;
+                finalUpdate = _latestUpdate;
+                _state = (int)target;
+                nestedReporters = _nestedReporters;
+                _nestedReporters = null;
             }
 
-            if (transitioned)
+            // A nested operation cannot outlive its parent. End records of nested operations come first, so
+            // loggers never see a nested operation whose parent already ended.
+            if (nestedReporters is not null)
             {
-                // A nested operation cannot outlive its parent. End records of nested operations come first, so
-                // loggers never see a nested operation whose parent already ended.
-                if (nestedReporters is not null)
+                foreach (TaskProgressReporter nested in nestedReporters)
                 {
-                    foreach (TaskProgressReporter nested in nestedReporters)
-                    {
-                        nested.Abandon();
-                    }
+                    nested.Abandon();
                 }
-
-                TryLogEvent(new TaskProgressFinishedEventArgs(
-                    OperationId,
-                    sequence,
-                    ToOutcome(target),
-                    finalUpdate.Completed,
-                    finalUpdate.Total,
-                    finalUpdate.Status)
-                {
-                    BuildEventContext = BuildEventContext,
-                });
-
-                _manager.OnReporterClosed(this);
             }
+
+            TryLogEvent(new TaskProgressFinishedEventArgs(
+                OperationId,
+                sequence,
+                ToOutcome(target),
+                finalUpdate.Completed,
+                finalUpdate.Total,
+                finalUpdate.Status)
+            {
+                BuildEventContext = BuildEventContext,
+            });
+
+            _manager.OnReporterClosed(this);
         }
 
         private static TaskProgressOutcome ToOutcome(ReporterState state) => state switch

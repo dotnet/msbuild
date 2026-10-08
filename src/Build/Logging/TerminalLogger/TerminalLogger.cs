@@ -579,26 +579,14 @@ public sealed partial class TerminalLogger : INodeLogger
             }
         }
 
-        if (topLevelCount == 0)
-        {
-            // The build is still running, so return to the build-level busy state set in BuildStarted.
-            Terminal.Write(AnsiCodes.SetProgressIndeterminate);
-            return;
-        }
-
-        if (topLevelCount != 1)
-        {
-            Terminal.Write(AnsiCodes.SetProgressIndeterminate);
-            return;
-        }
-
-        if (progress!.Total is long total && total > 0)
+        if (topLevelCount == 1 && progress is { Total: long total } && total > 0)
         {
             int percent = (int)(Math.Min(total, Math.Max(0L, progress.Completed)) * 100m / total);
             Terminal.Write(AnsiCodes.SetProgress(percent));
         }
         else
         {
+            // No single determinate operation owns the taskbar, so show the build-level busy state.
             Terminal.Write(AnsiCodes.SetProgressIndeterminate);
         }
     }

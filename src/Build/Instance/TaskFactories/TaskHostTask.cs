@@ -46,8 +46,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskLoggingContext _taskLoggingContext;
 
-        internal BuildEventContext TaskBuildEventContext => _taskLoggingContext?.BuildEventContext;
-
         /// <summary>
         /// Location of the task in the project file.
         /// </summary>
@@ -779,12 +777,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         internal bool MatchesTaskBuildEventContext(BuildEventContext buildEventContext)
-        {
-            BuildEventContext taskBuildEventContext = TaskBuildEventContext;
-            return taskBuildEventContext is not null
+            => _taskLoggingContext?.BuildEventContext is { } taskBuildEventContext
                 && taskBuildEventContext == buildEventContext
                 && taskBuildEventContext.SubmissionId == buildEventContext.SubmissionId;
-        }
 
         /// <summary>
         /// Handle IsRunningMultipleNodes request from the TaskHost.

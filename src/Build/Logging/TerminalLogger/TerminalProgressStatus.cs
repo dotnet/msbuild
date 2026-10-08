@@ -140,15 +140,14 @@ internal sealed class TerminalProgressStatus
 
     private static string Sanitize(string? value)
     {
-        if (string.IsNullOrEmpty(value))
+        if (value is not { Length: > 0 })
         {
             return string.Empty;
         }
 
-        string text = value!;
-        char[] buffer = new char[text.Length];
+        char[] buffer = new char[value.Length];
         int count = 0;
-        foreach (char character in text)
+        foreach (char character in value)
         {
             if (!char.IsControl(character))
             {

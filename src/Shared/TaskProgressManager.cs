@@ -33,8 +33,8 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         private static long s_nextOperationId;
 
-        private readonly object _lock = new object();
-        private readonly List<TaskProgressReporter> _activeReporters = new List<TaskProgressReporter>();
+        private readonly object _lock = new();
+        private readonly List<TaskProgressReporter> _activeReporters = [];
         private bool _closed;
 
         /// <summary>
