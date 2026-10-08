@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
+using Microsoft.Build.Internal;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -29,7 +29,7 @@ namespace Microsoft.Build.Shared
             string resourceName,
             params object[] args)
         {
-            ThrowInvalidProjectFile(null, location, resourceName, args);
+            ThrowInvalidProjectFile(DiagnosticSubcategory.None, location, resourceName, args);
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Shared
             string resourceName,
             params object[] args)
         {
-            VerifyThrowInvalidProjectFile(false, null, location, innerException, resourceName, args);
+            VerifyThrowInvalidProjectFile(false, DiagnosticSubcategory.None, location, innerException, resourceName, args);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Shared
             string resourceName,
             params object[] args)
         {
-            VerifyThrowInvalidProjectFile(condition, null, location, resourceName, args);
+            VerifyThrowInvalidProjectFile(condition, DiagnosticSubcategory.None, location, resourceName, args);
         }
 
         /// <summary>
@@ -79,17 +79,17 @@ namespace Microsoft.Build.Shared
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
-        /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location in the invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void ThrowInvalidProjectFile(
-            string errorSubCategoryResourceName,
+            DiagnosticSubcategory subcategory,
             IElementLocation location,
             string resourceName,
             params object[] args)
         {
-            VerifyThrowInvalidProjectFile(false, errorSubCategoryResourceName, location, null, resourceName, args);
+            VerifyThrowInvalidProjectFile(false, subcategory, location, null, resourceName, args);
         }
 
         /// <summary>
@@ -100,18 +100,18 @@ namespace Microsoft.Build.Shared
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
         /// <param name="condition">The condition to check.</param>
-        /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location in the invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile(
             bool condition,
-            string errorSubCategoryResourceName,
+            DiagnosticSubcategory subcategory,
             IElementLocation location,
             string resourceName,
             params object[] args)
         {
-            VerifyThrowInvalidProjectFile(condition, errorSubCategoryResourceName, location, null, resourceName, args);
+            VerifyThrowInvalidProjectFile(condition, subcategory, location, null, resourceName, args);
         }
 
         /// <summary>
@@ -122,14 +122,14 @@ namespace Microsoft.Build.Shared
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
         /// <param name="condition">The condition to check.</param>
-        /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location in the invalid project file.</param>
         /// <param name="innerException">The inner <see cref="Exception"/>.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile(
             bool condition,
-            string errorSubCategoryResourceName,
+            DiagnosticSubcategory subcategory,
             IElementLocation location,
             Exception innerException,
             string resourceName,
@@ -138,16 +138,11 @@ namespace Microsoft.Build.Shared
             Assumed.NotNull(location, "Must specify the invalid project file. If project file is not available, use VerifyThrowInvalidProject() and pass in the XML node instead.");
 
 #if DEBUG
-            if (errorSubCategoryResourceName != null)
-            {
-                ResourceUtilities.VerifyResourceStringExists(errorSubCategoryResourceName);
-            }
-
             ResourceUtilities.VerifyResourceStringExists(resourceName);
 #endif
             if (!condition)
             {
-                string errorSubCategory = errorSubCategoryResourceName is null ? null : AssemblyResources.GetString(errorSubCategoryResourceName);
+                string subcategoryText = subcategory.GetDisplayString();
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, resourceName, args);
 
                 throw new InvalidProjectFileException(
@@ -157,7 +152,7 @@ namespace Microsoft.Build.Shared
                     endLineNumber: 0,
                     endColumnNumber: 0,
                     message,
-                    errorSubCategory,
+                    subcategoryText,
                     errorCode,
                     helpKeyword,
                     innerException);

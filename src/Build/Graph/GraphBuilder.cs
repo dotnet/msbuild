@@ -16,6 +16,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -365,7 +366,7 @@ namespace Microsoft.Build.Graph
                         if (!Solution.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                         {
                             ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                                "SubCategoryForSolutionParsingErrors",
+                                DiagnosticSubcategory.SolutionFile,
                                 ElementLocation.Create(Solution.FullPath),
                                 "SolutionParseProjectDepNotFoundError",
                                 project.ProjectGuid,
