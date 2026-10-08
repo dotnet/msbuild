@@ -18,8 +18,11 @@ namespace Microsoft.Build.Evaluation.Context;
 /// files while nothing writes to those roots during a build. Under the toolset and .NET SDK roots, missing paths
 /// and directories are read once per build as well: every project probes the same few dozen absent import hooks and
 /// wildcard import directories. The package root shares only existing files, because restore creates new package
-/// folders and files there. Links and paths elsewhere are always read from the file system, because tasks can
-/// create or change them between two validations.
+/// folders and files there. The user extensions folder (MSBuildUserExtensionsPath) is shared like the toolset roots:
+/// every project probes the same absent import hooks there, and sharing them assumes nothing creates or changes a
+/// hook while a build runs. A project that overrides MSBuildUserExtensionsPath probes outside this root, so those
+/// paths are read from the file system. Links and paths elsewhere are always read from the file system, because tasks
+/// can create or change them between two validations.
 /// </summary>
 internal sealed class ImmutableFileStatCache
 {
@@ -115,10 +118,10 @@ internal sealed class ImmutableFileStatCache
         return false;
     }
 
-    // The toolset roots are probe roots. The package root is not: restore creates package folders and files in it.
-    private static (string[] Roots, string[] ProbeRoots) ComputeDefaultRoots()
+    // The toolset roots and the user extensions path are probe roots. The package root is not: restore creates package folders and files in it.
+    internal static (string[] Roots, string[] ProbeRoots) ComputeDefaultRoots()
     {
-        var toolsetRoots = new List<string>(2);
+        var toolsetRoots = new List<string>(3);
         BuildEnvironment environment = BuildEnvironmentHelper.Instance;
         string? toolsDirectory = environment.CurrentMSBuildToolsDirectory;
         if (!string.IsNullOrEmpty(toolsDirectory))
@@ -136,11 +139,40 @@ internal sealed class ImmutableFileStatCache
             toolsetRoots.Add(environment.MSBuildExtensionsPath);
         }
 
+        string? userExtensionsPath = ComputeUserExtensionsPath(toolsDirectory);
+        if (userExtensionsPath is not null)
+        {
+            toolsetRoots.Add(userExtensionsPath);
+        }
+
         string? packages = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
         string packageRoot = !string.IsNullOrEmpty(packages)
             ? packages
             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
 
         return ([.. toolsetRoots, packageRoot], [.. toolsetRoots]);
+    }
+
+    // Follows how the MSBuildUserExtensionsPath property is computed (Utilities.GetEnvironmentProperties). If the result
+    // differs from the property, the hooks are simply read from the file system instead of shared.
+    internal static string? ComputeUserExtensionsPath(string? toolsDirectory)
+    {
+        string? localAppData = Environment.GetEnvironmentVariable("LOCALAPPDATA");
+        if (string.IsNullOrEmpty(localAppData))
+        {
+            localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        }
+
+        if (string.IsNullOrEmpty(localAppData))
+        {
+            localAppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        }
+
+        if (string.IsNullOrEmpty(localAppData))
+        {
+            localAppData = toolsDirectory;
+        }
+
+        return string.IsNullOrEmpty(localAppData) ? null : Path.Combine(localAppData, "Microsoft", "MSBuild");
     }
 }
