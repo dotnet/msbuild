@@ -75,10 +75,11 @@ public abstract class ElementLocation : IElementLocation, IImmutable
     ///  Returns a hash code for this location.
     /// </summary>
     /// <returns>
-    ///  A hash code derived from the file, line, and column.
+    ///  A hash code derived from the line and column. This is done to avoid breaking changes
+    ///  with potential user-derived <see cref="ElementLocation"/> instances.
     /// </returns>
     public override int GetHashCode()
-        => StringComparer.OrdinalIgnoreCase.GetHashCode(File) ^ Line ^ Column;
+        => Line ^ Column;
 
     /// <summary>
     ///  Determines whether an object represents the same file, line, and column as this location.
@@ -93,10 +94,22 @@ public abstract class ElementLocation : IElementLocation, IImmutable
     /// </remarks>
     public override bool Equals(object? obj)
         => ReferenceEquals(this, obj)
-        || (obj is ElementLocation other
-            && Line == other.Line
-            && Column == other.Column
-            && StringComparer.OrdinalIgnoreCase.Equals(File, other.File));
+        || (obj is ElementLocation other && Equals(other));
+
+    /// <summary>
+    ///  Determines whether an <see cref="ElementLocation"/> represents the same file, line, and column as this location.
+    /// </summary>
+    /// <param name="other">The <see cref="ElementLocation"/> to compare with this location.</param>
+    /// <returns>
+    ///  <see langword="true"/> when <paramref name="other"/> has the same file, line, and column; otherwise, <see langword="false"/>.
+    /// </returns>
+    /// <remarks>
+    ///  File names are compared using <see cref="StringComparison.OrdinalIgnoreCase"/> on all platforms.
+    /// </remarks>
+    private bool Equals(ElementLocation other)
+        => Line == other.Line
+        && Column == other.Column
+        && StringComparer.OrdinalIgnoreCase.Equals(File, other.File);
 
     /// <summary>
     ///  Returns the location formatted for inclusion in a message.
@@ -281,6 +294,7 @@ public abstract class ElementLocation : IElementLocation, IImmutable
     /// <summary>
     ///  Stores a location with no line or column information.
     /// </summary>
+    /// <param name="file">The file associated with the location. This will never be <see langword="null"/>.</param>
     private sealed class FileOnly(string file) : ElementLocation
     {
         private readonly string _file = file;
@@ -290,11 +304,40 @@ public abstract class ElementLocation : IElementLocation, IImmutable
         public override int Line => 0;
 
         public override int Column => 0;
+
+        public override int GetHashCode() => 0;
+
+        public override bool Equals(object? obj)
+            => ReferenceEquals(this, obj)
+            || obj switch
+            {
+                FileOnly other => StringComparer.OrdinalIgnoreCase.Equals(File, other.File),
+
+                // FileOnly can never be equal to Small or Regular.
+                Small or Regular => false,
+
+                ElementLocation { Line: 0, Column: 0 } other => StringComparer.OrdinalIgnoreCase.Equals(File, other.File),
+
+                _ => false,
+            };
     }
 
     /// <summary>
     ///  Stores a location when either coordinate does not fit in an unsigned 16-bit integer.
     /// </summary>
+    /// <param name="file">The file associated with the location. This will never be <see langword="null"/>.</param>
+    /// <param name="line">
+    ///  The one-based line number, or <c>0</c> if unknown. At least one coordinate will be greater than
+    ///  <see cref="ushort.MaxValue"/>.
+    /// </param>
+    /// <param name="column">
+    ///  The one-based column number, or <c>0</c> if unknown. At least one coordinate will be greater than
+    ///  <see cref="ushort.MaxValue"/>.
+    /// </param>
+    /// <remarks>
+    ///  At most one of <paramref name="line"/> and <paramref name="column"/> may be <c>0</c>. When both are
+    ///  <c>0</c>, the file-only representation is used instead.
+    /// </remarks>
     private sealed class Regular(string file, int line, int column) : ElementLocation
     {
         private readonly string _file = file;
@@ -306,14 +349,44 @@ public abstract class ElementLocation : IElementLocation, IImmutable
         public override int Line => _line;
 
         public override int Column => _column;
+
+        public override int GetHashCode()
+            => _line ^ _column;
+
+        public override bool Equals(object? obj)
+            => ReferenceEquals(this, obj)
+            || obj switch
+            {
+                Regular other
+                    => _line == other._line
+                    && _column == other._column
+                    && StringComparer.OrdinalIgnoreCase.Equals(_file, other._file),
+
+                // Regular can never be equal to Small or FileOnly.
+                Small or FileOnly => false,
+
+                ElementLocation other => Equals(other),
+                _ => false,
+            };
     }
 
     /// <summary>
     ///  Stores the common case in which both coordinates fit in unsigned 16-bit integers.
     /// </summary>
+    /// <param name="file">The file associated with the location. This will never be <see langword="null"/>.</param>
+    /// <param name="line">
+    ///  The one-based line number, or <c>0</c> if unknown.
+    /// </param>
+    /// <param name="column">
+    ///  The one-based column number, or <c>0</c> if unknown.
+    /// </param>
     /// <remarks>
-    ///  Using compact coordinate fields reduces memory consumption in projects containing many thousands of
-    ///  locations.
+    ///  At most one of <paramref name="line"/> and <paramref name="column"/> may be <c>0</c>. When both are
+    ///  <c>0</c>, the file-only representation is used instead.
+    ///  <para>
+    ///   Using compact coordinate fields reduces memory consumption in projects containing many thousands of
+    ///   locations.
+    ///  </para>
     /// </remarks>
     private sealed class Small(string file, ushort line, ushort column) : ElementLocation
     {
@@ -326,5 +399,24 @@ public abstract class ElementLocation : IElementLocation, IImmutable
         public override int Line => _line;
 
         public override int Column => _column;
+
+        public override int GetHashCode()
+            => _line ^ _column;
+
+        public override bool Equals(object? obj)
+            => ReferenceEquals(this, obj)
+            || obj switch
+            {
+                Small other
+                    => _line == other._line
+                    && _column == other._column
+                    && StringComparer.OrdinalIgnoreCase.Equals(_file, other._file),
+
+                // Small can never be equal to Regular or FileOnly.
+                Regular or FileOnly => false,
+
+                ElementLocation other => Equals(other),
+                _ => false,
+            };
     }
 }

@@ -152,11 +152,14 @@ public sealed class ElementLocation_Tests(ITestOutputHelper output)
         location1.GetHashCode().ShouldBe(location2.GetHashCode());
     }
 
-    [Fact]
-    public void ExternalSubclassUsesStructuralEquality()
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 2)]
+    [InlineData(65_536, 2)]
+    public void ExternalSubclassUsesStructuralEquality(int line, int column)
     {
-        ElementLocation location = ElementLocation.Create("FILE", 1, 2);
-        ElementLocation externalLocation = new TestElementLocation("file", 1, 2);
+        ElementLocation location = ElementLocation.Create("FILE", line, column);
+        ElementLocation externalLocation = new TestElementLocation("file", line, column);
 
         location.Equals(externalLocation).ShouldBeTrue();
         externalLocation.Equals(location).ShouldBeTrue();
