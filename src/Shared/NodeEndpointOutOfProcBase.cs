@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The size of the buffers to use for named pipes. Re-evaluated on each access via
-        /// <see cref="Traits.NodeConnectionBufferSize"/> so it honors the change wave / env override
+        /// <see cref="Traits.NodeConnectionBufferSize"/> so it honors the env override
         /// (and the per-access <see cref="Traits.Instance"/> reset used in tests).
         /// </summary>
         private static int PipeBufferSize => Traits.Instance.NodeConnectionBufferSize;
