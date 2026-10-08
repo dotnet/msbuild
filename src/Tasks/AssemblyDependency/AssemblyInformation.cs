@@ -790,9 +790,9 @@ namespace Microsoft.Build.Tasks
                         uint pubKeyBytes;
                         uint asmNameLength;
                         CorAssemblyFlags flags;
+                        // make sure to pass hashValue and hashSize even if they aren't expected to be used because they change the failure behavior in some cases
                         void* hashValue;
                         uint hashSize;
-                        // Preserve the legacy read failure for malformed hash-blob metadata.
                         asmImport.Pointer->GetAssemblyRefProps(
                             asmRefTokens[i],
                             &pubKeyPtr,
