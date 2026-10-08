@@ -90,7 +90,8 @@ See [assigning-msb-error-code.md](../../../documentation/assigning-msb-error-cod
 
 ## Consuming Error Resources in Code
 
-Use the standard formatting method that extracts and applies the error code:
+Use the standard formatting method that extracts and applies the error code. Engine-level project
+errors use `Microsoft.Build.Internal.ProjectErrorUtilities`:
 
 ```csharp
 // For errors
@@ -100,7 +101,7 @@ Log.LogErrorWithCodeFromResources("Copy.Error", sourceFile, destFile, ex.Message
 Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.Conflict", assemblyName);
 
 // For engine-level errors (not in tasks)
-ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+ProjectErrorUtilities.ThrowInvalidProject(
     elementLocation,
     "InvalidProjectFile",
     arg1, arg2);

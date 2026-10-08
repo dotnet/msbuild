@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -21,11 +21,11 @@ namespace Microsoft.Build.Evaluation
             if (!LeftChild.TryBoolEvaluate(state, out bool leftBool))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
-                     state.ElementLocation,
-                     "ExpressionDoesNotEvaluateToBoolean",
-                     LeftChild.GetUnexpandedValue(state),
-                     LeftChild.GetExpandedValue(state),
-                     state.Condition);
+                    state.ElementLocation,
+                    "ExpressionDoesNotEvaluateToBoolean",
+                    LeftChild.GetUnexpandedValue(state),
+                    LeftChild.GetExpandedValue(state),
+                    state.Condition);
             }
 
             if (!leftBool)
@@ -38,11 +38,11 @@ namespace Microsoft.Build.Evaluation
                 if (!RightChild.TryBoolEvaluate(state, out bool rightBool))
                 {
                     ProjectErrorUtilities.ThrowInvalidProject(
-                         state.ElementLocation,
-                         "ExpressionDoesNotEvaluateToBoolean",
-                         RightChild.GetUnexpandedValue(state),
-                         RightChild.GetExpandedValue(state),
-                         state.Condition);
+                        state.ElementLocation,
+                        "ExpressionDoesNotEvaluateToBoolean",
+                        RightChild.GetUnexpandedValue(state),
+                        RightChild.GetExpandedValue(state),
+                        state.Condition);
                 }
 
                 return rightBool;

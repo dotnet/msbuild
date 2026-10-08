@@ -21,7 +21,6 @@ using Microsoft.VisualStudio.SolutionPersistence;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
-using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using VisualStudioConstants = Microsoft.Build.Shared.VisualStudioConstants;
 
@@ -311,7 +310,7 @@ namespace Microsoft.Build.Construction
 
             if (serializer == null)
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                ProjectErrorUtilities.ThrowInvalidProject(
                     ElementLocation.Create(FullPath),
                     $"InvalidProjectFile",
                     $"No solution serializer was found for {FullPath}");
@@ -326,14 +325,14 @@ namespace Microsoft.Build.Construction
                 catch (SolutionException solutionEx)
                 {
                     var errorLocation = ElementLocation.Create(FullPath, solutionEx.Line ?? 0, solutionEx.Column ?? 0);
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         errorLocation,
                         "InvalidProjectFile",
                         solutionEx.ToString());
                 }
                 catch (Exception ex)
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         ElementLocation.Create(FullPath),
                         "InvalidProjectFile",
                         ex.ToString());
@@ -577,7 +576,7 @@ namespace Microsoft.Build.Construction
 
                         if (!System.Version.TryParse(fileVersionFromHeader, out Version version))
                         {
-                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                            ProjectErrorUtilities.ThrowInvalidProject(
                                 DiagnosticSubcategory.SolutionFile,
                                 ElementLocation.Create(solutionFile),
                                 "SolutionParseVersionMismatchError",
@@ -588,7 +587,7 @@ namespace Microsoft.Build.Construction
                         solutionVersion = version.Major;
 
                         // Validate against our min & max
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                             solutionVersion >= slnFileMinUpgradableVersion,
                             DiagnosticSubcategory.SolutionFile,
                             ElementLocation.Create(solutionFile),
@@ -620,7 +619,7 @@ namespace Microsoft.Build.Construction
             }
 
             // Didn't find the header in lines 1-4, so the solution file is invalid.
-            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+            ProjectErrorUtilities.ThrowInvalidProject(
                 DiagnosticSubcategory.SolutionFile,
                 ElementLocation.Create(solutionFile),
                 "SolutionParseNoHeaderError");
@@ -634,7 +633,7 @@ namespace Microsoft.Build.Construction
                 _solutionFile = ParseSolutionFromSolutionFilter(solutionFilterFile, out JsonElement solution);
                 if (!FileSystems.Default.FileExists(_solutionFile))
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         DiagnosticSubcategory.SolutionFile,
                         ElementLocation.Create(_solutionFile),
                         "SolutionFilterMissingSolutionError",
@@ -652,8 +651,7 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    false, /* Just throw the exception */
+                ProjectErrorUtilities.ThrowInvalidProject(
                     DiagnosticSubcategory.SolutionFile,
                     ElementLocation.Create(solutionFilterFile),
                     e,
@@ -675,8 +673,7 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    false, /* Just throw the exception */
+                ProjectErrorUtilities.ThrowInvalidProject(
                     DiagnosticSubcategory.SolutionFile,
                     ElementLocation.Create(solutionFilterFile),
                     e,
@@ -750,7 +747,7 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.Create(_solutionFile), "InvalidProjectFile", e.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(_solutionFile), "InvalidProjectFile", e.Message);
             }
             finally
             {
@@ -895,7 +892,7 @@ namespace Microsoft.Build.Construction
 
                 bool didntAlreadyExist = !uniqueNameExists && projectsByOriginalName.Add(proj.GetOriginalProjectName());
 
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     didntAlreadyExist,
                     DiagnosticSubcategory.SolutionFile,
                     ElementLocation.Create(FullPath),
@@ -917,7 +914,7 @@ namespace Microsoft.Build.Construction
             {
                 if (!projectPaths.Contains(project))
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         DiagnosticSubcategory.SolutionFile,
                         ElementLocation.Create(FileUtilities.GetFullPath(project, Path.GetDirectoryName(_solutionFile))),
                         "SolutionFilterFilterContainsProjectNotInSolution",
@@ -962,8 +959,7 @@ namespace Microsoft.Build.Construction
 
             // Didn't find the header on either the first or second line, so the solution file
             // is invalid.
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                false,
+            ProjectErrorUtilities.ThrowInvalidProject(
                 DiagnosticSubcategory.SolutionFile,
                 ElementLocation.Create(FullPath),
                 "SolutionParseNoHeaderError");
@@ -1011,8 +1007,7 @@ namespace Microsoft.Build.Construction
 
             if (!System.Version.TryParse(versionString, out Version version))
             {
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                    false,
+                ProjectErrorUtilities.ThrowInvalidProject(
                     DiagnosticSubcategory.SolutionFile,
                     GetCurrentLocation(),
                     "SolutionParseVersionMismatchError",
@@ -1023,7 +1018,7 @@ namespace Microsoft.Build.Construction
             Version = version.Major;
 
             // Validate against our min & max
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 Version >= slnFileMinUpgradableVersion,
                 DiagnosticSubcategory.SolutionFile,
                 GetCurrentLocation(),
@@ -1086,7 +1081,7 @@ namespace Microsoft.Build.Construction
                         // This should be a dependency.  The GUID identifying the parent project should
                         // be both the property name and the property value.
                         Match match = CrackPropertyLineRegex.Match(line);
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                             match.Success,
                             DiagnosticSubcategory.SolutionFile,
                             GetCurrentLocation(),
@@ -1108,7 +1103,7 @@ namespace Microsoft.Build.Construction
                     while ((line?.StartsWith("EndProjectSection", StringComparison.Ordinal) == false))
                     {
                         Match match = CrackPropertyLineRegex.Match(line);
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                             match.Success,
                             DiagnosticSubcategory.SolutionFile,
                             GetCurrentLocation(),
@@ -1138,7 +1133,7 @@ namespace Microsoft.Build.Construction
                 }
             }
 
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 line != null,
                 DiagnosticSubcategory.SolutionFile,
                 ElementLocation.Create(FullPath),
@@ -1326,7 +1321,7 @@ namespace Microsoft.Build.Construction
             Assumed.NotNull(proj.RelativePath, "Project relative path cannot be null.");
 
             // Verify the relative path does not contain invalid characters
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 proj.RelativePath.AsSpan().IndexOfAny(MSBuildConstants.InvalidPathChars) < 0,
                 DiagnosticSubcategory.SolutionFile,
                 GetCurrentLocation(),
@@ -1334,7 +1329,7 @@ namespace Microsoft.Build.Construction
                 proj.ProjectName, proj.RelativePath);
 
             // Verify the relative path is not empty string
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 proj.RelativePath.Length > 0,
                 DiagnosticSubcategory.SolutionFile,
                 GetCurrentLocation(),
@@ -1526,7 +1521,7 @@ namespace Microsoft.Build.Construction
             ProjectInSolution proj)
         {
             Match match = CrackProjectLineRegex.Match(firstLine);
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 match.Success,
                 DiagnosticSubcategory.SolutionFile,
                 GetCurrentLocation(),
@@ -1582,7 +1577,7 @@ namespace Microsoft.Build.Construction
                 {
                     if (!_parsingForConversionOnly)
                     {
-                        ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.Create(FullPath), "ProjectUpgradeNeededToVcxProj", proj.RelativePath);
+                        ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(FullPath), "ProjectUpgradeNeededToVcxProj", proj.RelativePath);
                     }
                     // otherwise, we're parsing this solution file because we want the P2P information during
                     // conversion, and it's perfectly valid for an unconverted solution file to still contain .vcprojs
@@ -1629,7 +1624,7 @@ namespace Microsoft.Build.Construction
                 }
 
                 Match match = CrackPropertyLineRegex.Match(str);
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     match.Success,
                     DiagnosticSubcategory.SolutionFile,
                     GetCurrentLocation(),
@@ -1640,7 +1635,7 @@ namespace Microsoft.Build.Construction
 
                 if (!_projectsByGuid.TryGetValue(projectGuid, out ProjectInSolution proj))
                 {
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(
                         proj != null,
                         DiagnosticSubcategory.SolutionFile,
                         GetCurrentLocation(),
@@ -1686,7 +1681,7 @@ namespace Microsoft.Build.Construction
                 string[] configurationNames = str.Split(nameValueSeparators);
 
                 // There should be exactly one '=' character, separating two names.
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     configurationNames.Length == 2,
                     DiagnosticSubcategory.SolutionFile,
                     GetCurrentLocation(),
@@ -1702,7 +1697,7 @@ namespace Microsoft.Build.Construction
                 }
 
                 // Both names must be identical
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     fullConfigurationName == configurationNames[1].Trim(),
                     DiagnosticSubcategory.SolutionFile,
                     GetCurrentLocation(),
@@ -1719,7 +1714,7 @@ namespace Microsoft.Build.Construction
         {
             string[] configurationPlatformParts = fullConfigurationName.Split(SolutionConfigurationInSolution.ConfigurationPlatformSeparatorArray);
 
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 configurationPlatformParts.Length == 2,
                 DiagnosticSubcategory.SolutionFile,
                 ElementLocation.Create(projectPath, lineNumber, 0),
@@ -1771,7 +1766,7 @@ namespace Microsoft.Build.Construction
                 string[] nameValue = str.Split('=');
 
                 // There should be exactly one '=' character, separating the name and value.
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     nameValue.Length == 2,
                     DiagnosticSubcategory.SolutionFile,
                     GetCurrentLocation(),
@@ -1821,7 +1816,7 @@ namespace Microsoft.Build.Construction
                             string[] configurationPlatformParts = configurationPlatform.Split(SolutionConfigurationInSolution.ConfigurationPlatformSeparatorArray);
 
                             // Project configuration may not necessarily contain the platform part. Some project support only the configuration part.
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                            ProjectErrorUtilities.VerifyThrowInvalidProject(
                                 configurationPlatformParts.Length <= 2,
                                 DiagnosticSubcategory.SolutionFile,
                                 ElementLocation.Create(FullPath),

@@ -283,7 +283,7 @@ namespace Microsoft.Build.Construction
                             if (!solutionFile.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                             {
                                 // If it's not itself part of the solution, that's an invalid solution
-                                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                                ProjectErrorUtilities.VerifyThrowInvalidProject(
                                     dependencyProject != null,
                                     DiagnosticSubcategory.SolutionFile,
                                     ElementLocation.Create(solutionFile.FullPath),
@@ -748,7 +748,7 @@ namespace Microsoft.Build.Construction
             if (!_solutionFile.UseNewParser)
             {
                 // Validate against our minimum for upgradable projects
-                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     _solutionFile.Version >= SolutionFile.slnFileMinVersion,
                     DiagnosticSubcategory.SolutionFile,
                     ElementLocation.Create(_solutionFile.FullPath),
@@ -1221,7 +1221,7 @@ namespace Microsoft.Build.Construction
                 {
                     if (!_solutionFile.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                     {
-                        ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        ProjectErrorUtilities.ThrowInvalidProject(
                             DiagnosticSubcategory.SolutionFile,
                             ElementLocation.Create(traversalProject.FullPath),
                             "SolutionParseProjectDepNotFoundError",
@@ -1291,7 +1291,7 @@ namespace Microsoft.Build.Construction
             if (project.ProjectType == SolutionProjectType.WebProject)
             {
 #if !FEATURE_ASPNET_COMPILER
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                ProjectErrorUtilities.ThrowInvalidProject(
                     DiagnosticSubcategory.SolutionFile,
                     ElementLocation.Create(_solutionFile.FullPath),
                     "AspNetCompiler.UnsupportedMSBuildVersion",
@@ -1387,7 +1387,7 @@ namespace Microsoft.Build.Construction
             {
                 if (!_solutionFile.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         DiagnosticSubcategory.SolutionFile,
                         ElementLocation.Create(traversalProject.FullPath),
                         "SolutionParseProjectDepNotFoundError",
@@ -1617,7 +1617,7 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                ProjectErrorUtilities.ThrowInvalidProject(
                     ElementLocation.Create(_solutionFile.FullPath),
                     e,
                     "AspNetCompiler.InvalidTargetFrameworkMonikerFromException",
@@ -1643,7 +1643,7 @@ namespace Microsoft.Build.Construction
             }
             if (!isDotNetFramework)
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                ProjectErrorUtilities.ThrowInvalidProject(
                     DiagnosticSubcategory.SolutionFile,
                     ElementLocation.Create(_solutionFile.FullPath),
                     "AspNetCompiler.InvalidTargetFrameworkMonikerNotDotNET",
@@ -1663,7 +1663,7 @@ namespace Microsoft.Build.Construction
             Version aspnetCompilerVersion = shouldDefaultToVersion40 ? _version40 : _version20;
             string aspnetCompilerPath = FrameworkLocationHelper.GetPathToDotNetFramework(aspnetCompilerVersion);
 
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 aspnetCompilerPath != null,
                 DiagnosticSubcategory.SolutionFile,
                 ElementLocation.Create(_solutionFile.FullPath),
@@ -1792,8 +1792,7 @@ namespace Microsoft.Build.Construction
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                        false,
+                    ProjectErrorUtilities.ThrowInvalidProject(
                         DiagnosticSubcategory.SolutionFile,
                         ElementLocation.Create(solutionFile),
                         e,

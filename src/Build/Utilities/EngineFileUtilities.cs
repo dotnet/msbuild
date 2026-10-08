@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -509,7 +509,7 @@ namespace Microsoft.Build.Internal
         private static void ThrowDriveEnumerationExceptionWithLoggingService(IElementLocation? includeLocation, string filespecUnescaped)
         {
             ProjectErrorUtilities.ThrowInvalidProject(
-                includeLocation,
+                includeLocation!,
                 DriveEnumeratingWildcardMessageResourceName,
                 filespecUnescaped,
                 XMakeAttributes.include,

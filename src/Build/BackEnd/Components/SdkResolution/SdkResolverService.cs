@@ -12,6 +12,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -289,7 +290,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                             // reaches here genuinely needs a dynamically loaded resolver. Fail observably with a
                             // reported project error (so a host such as the AOT dotnet CLI can detect it and fall
                             // back to a JIT MSBuild) rather than attempting an Assembly.LoadFrom that cannot work here.
-                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                            ProjectErrorUtilities.ThrowInvalidProject(
                                 sdkReferenceLocation,
                                 "SdkResolverDynamicLoadingNotSupported",
                                 sdk.Name,

@@ -1198,7 +1198,7 @@ namespace Microsoft.Build.BackEnd
             }
             if (FileUtilities.IsVCProjFilename(data.ProjectFullPath))
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.Create(data.ProjectFullPath), "ProjectUpgradeNeededToVcxProj", data.ProjectFullPath);
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(data.ProjectFullPath), "ProjectUpgradeNeededToVcxProj", data.ProjectFullPath);
             }
 
             // We used to "sniff" the tools version from the project XML by opening it and reading the attribute.

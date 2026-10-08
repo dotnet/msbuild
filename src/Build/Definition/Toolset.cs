@@ -14,7 +14,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -955,7 +954,7 @@ namespace Microsoft.Build.Evaluation
             catch (XmlException e)
             {
                 // handle XML errors in the default tasks file
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.CreateFrom(currentTasksFile, e),
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.CreateFrom(currentTasksFile, e),
                     taskFileError, e.Message);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

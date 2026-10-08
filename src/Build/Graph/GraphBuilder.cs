@@ -365,7 +365,7 @@ namespace Microsoft.Build.Graph
                     {
                         if (!Solution.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
                         {
-                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                            ProjectErrorUtilities.ThrowInvalidProject(
                                 DiagnosticSubcategory.SolutionFile,
                                 ElementLocation.Create(Solution.FullPath),
                                 "SolutionParseProjectDepNotFoundError",
