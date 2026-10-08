@@ -390,7 +390,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(0)]
         [InlineData(8)]
         [InlineData(9)]
-        [InlineData(10)]
         public void TaskProgressTransportFallsBackForOlderPeers(byte version)
         {
             var context = new BuildEventContext(1, 2, 3, 4);

@@ -588,7 +588,7 @@ namespace Microsoft.Build.BackEnd
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
 
-            if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskProgressTaskContextMinVersion)
+            if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskProgressMinVersion)
             {
                 translator.Translate(ref _taskBuildEventContext);
             }
