@@ -1284,24 +1284,33 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void ProgressEventsAreIgnoredWhenTerminalDoesNotSupportThem()
+        public void ProgressRowsRenderWhenTerminalDoesNotSupportTaskbarReporting()
         {
             using StringWriter output = new();
             using ResizableTerminal terminal = new(output, width: 80, height: 40);
             MockBuildEventSink eventSource = new(0);
             TerminalLogger terminalLogger = new(terminal);
+            BuildEventContext context = MakeBuildEventContext();
 
             try
             {
                 terminalLogger.Initialize(eventSource, _nodeCount);
                 eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(8, "Hidden progress", TaskProgressUnit.Items)
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(8, "Restoring packages", TaskProgressUnit.Items)
                 {
-                    BuildEventContext = MakeBuildEventContext(),
+                    BuildEventContext = context,
                 });
-                terminalLogger.Refresh();
+                eventSource.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(8, 1, 7, 10, "Installing package")
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.DisplayNodes();
 
-                output.ToString().ShouldNotContain("Hidden progress");
+                string rendered = output.ToString();
+                rendered.ShouldContain("Restoring packages");
+                rendered.ShouldContain("Installing package");
+                rendered.ShouldContain("7 of 10 items");
+                rendered.ShouldNotContain(AnsiCodes.SetProgressIndeterminate);
             }
             finally
             {

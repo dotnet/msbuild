@@ -470,11 +470,6 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private void ProgressMessageRaised(object sender, BuildMessageEventArgs e)
     {
-        if (!Terminal.SupportsProgressReporting)
-        {
-            return;
-        }
-
         if (e is not (TaskProgressStartedEventArgs or TaskProgressUpdatedEventArgs or TaskProgressFinishedEventArgs))
         {
             return;
