@@ -109,7 +109,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Owns all task progress reporters created during this task invocation.
         /// </summary>
-        private readonly object _taskProgressLock = new object();
+        private readonly LockType _taskProgressLock = new();
         private TaskProgressManager _taskProgressManager;
         private bool _taskProgressClosed;
 
