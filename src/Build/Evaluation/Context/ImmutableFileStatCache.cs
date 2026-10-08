@@ -241,7 +241,7 @@ internal sealed class ImmutableFileStatCache
         // Experiment: every project probes the same absent import-hook folders under MSBuildUserExtensionsPath. Sharing
         // them assumes nothing creates or changes a hook there while a build runs.
         string? userExtensionsPath = ComputeUserExtensionsPath(toolsDirectory);
-        if (!string.IsNullOrEmpty(userExtensionsPath))
+        if (userExtensionsPath is not null)
         {
             toolsetRoots.Add(userExtensionsPath);
         }
