@@ -46,6 +46,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskLoggingContext _taskLoggingContext;
 
+        internal BuildEventContext TaskBuildEventContext => _taskLoggingContext?.BuildEventContext;
+
         /// <summary>
         /// Location of the task in the project file.
         /// </summary>
@@ -400,7 +402,8 @@ namespace Microsoft.Build.BackEnd
                             GetGlobalPropertiesForTaskHost(),
                             _taskLoggingContext.GetWarningsAsErrors(),
                             _taskLoggingContext.GetWarningsNotAsErrors(),
-                            _taskLoggingContext.GetWarningsAsMessages());
+                            _taskLoggingContext.GetWarningsAsMessages(),
+                            _taskLoggingContext.BuildEventContext);
 
                 try
                 {
@@ -773,6 +776,14 @@ namespace Microsoft.Build.BackEnd
                     buildEngine5.LogTelemetry(telemetry.EventName, telemetry.Properties);
                     break;
             }
+        }
+
+        internal bool MatchesTaskBuildEventContext(BuildEventContext buildEventContext)
+        {
+            BuildEventContext taskBuildEventContext = TaskBuildEventContext;
+            return taskBuildEventContext is not null
+                && taskBuildEventContext == buildEventContext
+                && taskBuildEventContext.SubmissionId == buildEventContext.SubmissionId;
         }
 
         /// <summary>

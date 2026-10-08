@@ -3,10 +3,12 @@
 
 #nullable enable
 
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -57,6 +59,83 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("external task host");
 
             AssertTwoOperationsReachedLoggerInOrder(logger);
+        }
+
+        [Fact]
+        public void ProgressReporting_FromBlockedTaskHost_RetainsItsContextDuringNestedTask()
+        {
+            var logger = new MockLogger(_output);
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string taskAssembly = Assembly.GetExecutingAssembly().Location;
+            TransientTestFolder folder = env.CreateFolder();
+            string childProject = Path.Combine(folder.Path, "NestedProgressProject.proj");
+            string parentProject = Path.Combine(folder.Path, "ParentProgressProject.proj");
+
+            File.WriteAllText(childProject, $"""
+                <Project>
+                    <UsingTask TaskName="{nameof(NestedProgressChildTask)}" AssemblyFile="{taskAssembly}" TaskFactory="TaskHostFactory" />
+                    <Target Name="Build">
+                        <{nameof(NestedProgressChildTask)} />
+                    </Target>
+                </Project>
+                """);
+
+            File.WriteAllText(parentProject, $"""
+                <Project>
+                    <UsingTask TaskName="{nameof(NestedProgressParentTask)}" AssemblyFile="{taskAssembly}" TaskFactory="TaskHostFactory" />
+                    <Target Name="Build">
+                        <{nameof(NestedProgressParentTask)} ChildProject="$(ChildProject)" />
+                    </Target>
+                </Project>
+                """);
+
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = false,
+                Loggers = [logger],
+                DisableInProcNode = false,
+                EnableNodeReuse = false,
+                MaxNodeCount = 1,
+            };
+
+            var buildRequestData = new BuildRequestData(
+                parentProject,
+                new Dictionary<string, string?> { ["ChildProject"] = childProject },
+                null,
+                ["Build"],
+                null);
+
+            BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            TaskProgressStartedEventArgs parentStarted = logger.AllBuildEvents
+                .OfType<TaskProgressStartedEventArgs>()
+                .Single(e => e.Title == "Parent operation");
+            TaskProgressStartedEventArgs childStarted = logger.AllBuildEvents
+                .OfType<TaskProgressStartedEventArgs>()
+                .Single(e => e.Title == "Nested operation");
+            parentStarted.BuildEventContext.ShouldNotBeNull();
+            childStarted.BuildEventContext.ShouldNotBeNull();
+            parentStarted.BuildEventContext.ShouldNotBe(childStarted.BuildEventContext);
+
+            TaskProgressUpdatedEventArgs parentUpdate = logger.AllBuildEvents
+                .OfType<TaskProgressUpdatedEventArgs>()
+                .Single(e => e.Status == "Waiting for nested task");
+            parentUpdate.BuildEventContext.ShouldBe(parentStarted.BuildEventContext);
+            logger.AllBuildEvents
+                .OfType<TaskProgressFinishedEventArgs>()
+                .Single(e => e.OperationId == parentStarted.OperationId)
+                .BuildEventContext.ShouldBe(parentStarted.BuildEventContext);
+
+            logger.AllBuildEvents
+                .OfType<TaskProgressUpdatedEventArgs>()
+                .Single(e => e.OperationId == childStarted.OperationId)
+                .BuildEventContext.ShouldBe(childStarted.BuildEventContext);
+            logger.AllBuildEvents
+                .OfType<TaskProgressFinishedEventArgs>()
+                .Single(e => e.OperationId == childStarted.OperationId)
+                .BuildEventContext.ShouldBe(childStarted.BuildEventContext);
         }
 
         [Fact]
@@ -226,6 +305,37 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 extract.Complete("Extracted");
             }
 
+            return true;
+        }
+    }
+
+    public sealed class NestedProgressParentTask : Task
+    {
+        public string ChildProject { get; set; } = string.Empty;
+
+        public override bool Execute()
+        {
+            EngineServices services = ((IBuildEngine10)BuildEngine).EngineServices;
+            using ITaskProgressReporter reporter = services.CreateTaskProgressReporter("Parent operation");
+            reporter.Report(new TaskProgressUpdate(0, 1, "Waiting"));
+            reporter.SetStatusProvider(static () => "Waiting for nested task");
+
+            bool success = BuildEngine.BuildProjectFile(ChildProject, ["Build"], new Hashtable(), new Hashtable());
+            reporter.Complete();
+            return success;
+        }
+    }
+
+    public sealed class NestedProgressChildTask : Task
+    {
+        public override bool Execute()
+        {
+            Thread.Sleep(1000);
+
+            EngineServices services = ((IBuildEngine10)BuildEngine).EngineServices;
+            using ITaskProgressReporter reporter = services.CreateTaskProgressReporter("Nested operation");
+            reporter.Report(new TaskProgressUpdate(1, 1, "Nested work"));
+            reporter.Complete();
             return true;
         }
     }

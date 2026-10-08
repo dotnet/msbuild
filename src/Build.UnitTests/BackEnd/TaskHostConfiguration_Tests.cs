@@ -911,7 +911,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserializedConfig.BuildProcessEnvironment["PATH"].ShouldBe(@"c:\windows");
         }
 
-        private TaskHostConfiguration CreateConfigurationWithGlobalProperties(Dictionary<string, string> globalProperties)
+        [Theory]
+        [InlineData(9, false)]
+        [InlineData(10, true)]
+        public void TaskBuildEventContext_IsVersioned(byte version, bool expectedToRoundTrip)
+        {
+            var expectedContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7);
+            TaskHostConfiguration config = CreateConfigurationWithGlobalProperties(
+                new Dictionary<string, string>(),
+                expectedContext);
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = version;
+            ((ITranslatable)config).Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = version;
+            TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
+
+            deserializedConfig.TaskBuildEventContext.ShouldBe(expectedToRoundTrip ? expectedContext : BuildEventContext.Invalid);
+        }
+
+        private TaskHostConfiguration CreateConfigurationWithGlobalProperties(
+            Dictionary<string, string> globalProperties,
+            BuildEventContext taskBuildEventContext = null)
         {
             return new TaskHostConfiguration(
                 nodeId: 1,
@@ -936,7 +959,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 globalParameters: globalProperties,
                 warningsAsErrors: null,
                 warningsNotAsErrors: null,
-                warningsAsMessages: null);
+                warningsAsMessages: null,
+                taskBuildEventContext: taskBuildEventContext);
         }
 
         private TaskHostConfiguration CreateConfigurationWithEnvironment(Dictionary<string, string> environment)

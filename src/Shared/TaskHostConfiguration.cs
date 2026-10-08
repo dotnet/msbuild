@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -118,6 +119,8 @@ namespace Microsoft.Build.BackEnd
 
         private ICollection<string> _warningsAsMessages;
 
+        private BuildEventContext _taskBuildEventContext = BuildEventContext.Invalid;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
@@ -143,6 +146,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsAsErrors">A collection of warning codes to be treated as errors.</param>
         /// <param name="warningsNotAsErrors">A collection of warning codes not to be treated as errors.</param>
         /// <param name="warningsAsMessages">A collection of warning codes to be treated as messages.</param>
+        /// <param name="taskBuildEventContext">The originating task context for progress events.</param>
 #else
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
@@ -167,6 +171,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsAsErrors">A collection of warning codes to be treated as errors.</param>
         /// <param name="warningsNotAsErrors">A collection of warning codes not to be treated as errors.</param>
         /// <param name="warningsAsMessages">A collection of warning codes to be treated as messages.</param>
+        /// <param name="taskBuildEventContext">The originating task context for progress events.</param>
 #endif
         public TaskHostConfiguration(
             int nodeId,
@@ -191,7 +196,8 @@ namespace Microsoft.Build.BackEnd
             Dictionary<string, string> globalParameters,
             ICollection<string> warningsAsErrors,
             ICollection<string> warningsNotAsErrors,
-            ICollection<string> warningsAsMessages)
+            ICollection<string> warningsAsMessages,
+            BuildEventContext taskBuildEventContext = null)
         {
             Assumed.NotNullOrEmpty(taskName);
             Assumed.NotNullOrEmpty(taskLocation);
@@ -227,6 +233,7 @@ namespace Microsoft.Build.BackEnd
             _warningsAsErrors = warningsAsErrors;
             _warningsNotAsErrors = warningsNotAsErrors;
             _warningsAsMessages = warningsAsMessages;
+            _taskBuildEventContext = taskBuildEventContext ?? BuildEventContext.Invalid;
 
             if (taskParameters != null)
             {
@@ -511,6 +518,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// The originating task context used to route asynchronous progress events.
+        /// </summary>
+        public BuildEventContext TaskBuildEventContext => _taskBuildEventContext;
+
+        /// <summary>
         /// Translates the packet to/from binary form.
         /// </summary>
         /// <param name="translator">The translator to use.</param>
@@ -575,6 +587,11 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+
+            if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.TaskProgressTaskContextMinVersion)
+            {
+                translator.Translate(ref _taskBuildEventContext);
+            }
         }
 
         /// <summary>
