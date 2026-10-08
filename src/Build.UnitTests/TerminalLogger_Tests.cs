@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
     [UseInvariantCulture]
     public class TerminalLogger_Tests
     {
-        private sealed class ResizableTerminal(TextWriter output, int width, int height) : ITerminal
+        private sealed class ResizableTerminal(TextWriter output, int width, int height, bool supportsProgressReporting = false) : ITerminal
         {
             private readonly Terminal _terminal = new(output);
 
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
                 return (Width, Height);
             }
 
-            public bool SupportsProgressReporting => false;
+            public bool SupportsProgressReporting => supportsProgressReporting;
 
             public void BeginUpdate() => _terminal.BeginUpdate();
             public void EndUpdate() => _terminal.EndUpdate();
@@ -1134,6 +1134,388 @@ namespace Microsoft.Build.UnitTests
                 resizedOutput.ShouldStartWith($"{AnsiCodes.CSI}{expectedCursorMove}{AnsiCodes.MoveUpToLineStart}");
                 resizedOutput.ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
                 resizedOutput.ShouldContain("project");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ProgressEventsRenderInLiveFrameAndDisappearOnFinish()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(7, "Download package", TaskProgressUnit.Bytes)
+                {
+                    BuildEventContext = context,
+                });
+                eventSource.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(7, 1, 50, 100, "Receiving content")
+                {
+                    BuildEventContext = context,
+                });
+
+                terminalLogger.DisplayNodes();
+                output.ToString().ShouldContain("[#####----- 50 of 100 bytes] Download package: Receiving content");
+                output.ToString().ShouldContain(AnsiCodes.SetProgress(50));
+
+                output.GetStringBuilder().Clear();
+                eventSource.InvokeMessageRaised(new TaskProgressFinishedEventArgs(7, 2, TaskProgressOutcome.Completed, 100, 100, "Complete")
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.Refresh();
+                output.ToString().ShouldContain(AnsiCodes.EraseInDisplay);
+                output.ToString().ShouldContain(AnsiCodes.SetProgressIndeterminate);
+                output.ToString().ShouldNotContain(AnsiCodes.RemoveProgress);
+                output.ToString().ShouldNotContain("Download package");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Theory]
+        [InlineData(1L << 60, 1L << 60, 100)]
+        [InlineData(long.MaxValue, long.MaxValue, 100)]
+        [InlineData(long.MaxValue / 2, long.MaxValue, 49)]
+        public void ProgressTaskbarPercentageDoesNotOverflow(long completed, long total, int expectedPercent)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink source = new(0);
+            var logger = new TerminalLogger(terminal);
+            try
+            {
+                logger.Initialize(source, _nodeCount);
+                source.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items) { BuildEventContext = MakeBuildEventContext() });
+                output.GetStringBuilder().Clear();
+                source.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(1, 1, completed, total, null) { BuildEventContext = MakeBuildEventContext() });
+                output.ToString().ShouldContain(AnsiCodes.SetProgress(expectedPercent));
+            }
+            finally
+            {
+                logger.Shutdown();
+            }
+        }
+
+        [Theory]
+        [InlineData(80, 2)]
+        [InlineData(20, 5)]
+        public void ImmediateMessagesEraseProgressRowsOnlyOnce(int resizedWidth, int cursorMove)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink source = new(0);
+            var logger = new TerminalLogger(terminal);
+            try
+            {
+                logger.Initialize(source, _nodeCount);
+                source.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(1, new string('x', 100), TaskProgressUnit.Items) { BuildEventContext = MakeBuildEventContext() });
+                logger.DisplayNodes();
+                terminal.Width = resizedWidth;
+                output.GetStringBuilder().Clear();
+
+                source.InvokeMessageRaised(new BuildMessageEventArgs(_immediateMessageString, null, null, MessageImportance.High) { BuildEventContext = MakeBuildEventContext() });
+                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}{cursorMove}{AnsiCodes.MoveUpToLineStart}");
+                output.ToString().ShouldContain(_immediateMessageString);
+                output.GetStringBuilder().Clear();
+
+                source.InvokeMessageRaised(new BuildMessageEventArgs(_immediateMessageString, null, null, MessageImportance.High) { BuildEventContext = MakeBuildEventContext() });
+                output.ToString().ShouldBe(_immediateMessageString + Environment.NewLine);
+                output.GetStringBuilder().Clear();
+                logger.Refresh();
+                output.ToString().ShouldContain($"{AnsiCodes.CSI}1{AnsiCodes.MoveUpToLineStart}");
+            }
+            finally
+            {
+                logger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ProgressAndNestedOperationIdsAreQualifiedByTaskContext()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 120, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink source = new(0);
+            var logger = new TerminalLogger(terminal);
+            try
+            {
+                logger.Initialize(source, _nodeCount);
+                source.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext first = MakeBuildEventContext(nodeId: 1);
+                BuildEventContext second = MakeBuildEventContext(nodeId: 2);
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(1, "First parent", TaskProgressUnit.Items) { BuildEventContext = first });
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(1, "Second parent", TaskProgressUnit.Items) { BuildEventContext = second });
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(2, "First child", TaskProgressUnit.Items) { BuildEventContext = first, ParentOperationId = 1 });
+                source.InvokeMessageRaised(new TaskProgressStartedEventArgs(2, "Second child", TaskProgressUnit.Items) { BuildEventContext = second, ParentOperationId = 1 });
+                logger.DisplayNodes();
+                output.ToString().ShouldContain("First child");
+                output.ToString().ShouldContain("Second child");
+
+                output.GetStringBuilder().Clear();
+                source.InvokeMessageRaised(new TaskProgressFinishedEventArgs(1, 1, TaskProgressOutcome.Completed, 1, 1, null) { BuildEventContext = MakeBuildEventContext(nodeId: 1) });
+                source.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(2, 1, 7, 10, "Remaining child") { BuildEventContext = second });
+                logger.Refresh();
+                string rendered = output.ToString();
+                rendered.ShouldNotContain("First parent");
+                rendered.ShouldNotContain("First child");
+                rendered.ShouldContain("Second parent");
+                rendered.ShouldContain("Second child: Remaining child");
+                rendered.ShouldContain("7 of 10 items");
+            }
+            finally
+            {
+                logger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ProgressRowsRenderWhenTerminalDoesNotSupportTaskbarReporting()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            BuildEventContext context = MakeBuildEventContext();
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(8, "Restoring packages", TaskProgressUnit.Items)
+                {
+                    BuildEventContext = context,
+                });
+                eventSource.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(8, 1, 7, 10, "Installing package")
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.DisplayNodes();
+
+                string rendered = output.ToString();
+                rendered.ShouldContain("Restoring packages");
+                rendered.ShouldContain("Installing package");
+                rendered.ShouldContain("7 of 10 items");
+                rendered.ShouldNotContain(AnsiCodes.SetProgressIndeterminate);
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ProgressRowsAreBoundedAndResizeWithTheTerminal()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+
+                for (long operationId = 1; operationId <= 9; operationId++)
+                {
+                    eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(operationId, $"Operation {operationId}", TaskProgressUnit.Items)
+                    {
+                        BuildEventContext = context,
+                    });
+                }
+
+                terminalLogger.DisplayNodes();
+                string rendered = output.ToString();
+                rendered.ShouldContain("Operation 1");
+                rendered.ShouldContain("Operation 8");
+                rendered.ShouldNotContain("Operation 9");
+                rendered.ShouldContain(AnsiCodes.SetProgressIndeterminate);
+
+                output.GetStringBuilder().Clear();
+                terminal.Width = 24;
+                terminalLogger.Refresh();
+                output.ToString().ShouldContain(AnsiCodes.EraseInDisplay);
+                output.ToString().ShouldContain("Operation");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void ImmediateMessageErasesAndProgressRefreshesAfterward()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(20, "Download", TaskProgressUnit.Bytes)
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.DisplayNodes();
+                output.GetStringBuilder().Clear();
+
+                eventSource.InvokeErrorRaised(MakeErrorEventArgs("Immediate error"));
+                string immediateOutput = output.ToString();
+                immediateOutput.ShouldContain("Immediate error");
+                immediateOutput.ShouldContain(AnsiCodes.EraseInDisplay);
+
+                output.GetStringBuilder().Clear();
+                terminalLogger.Refresh();
+                output.ToString().ShouldContain("Download");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void CanceledProgressIsRemovedFromTheLiveFrame()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(30, "Canceled download", TaskProgressUnit.Bytes)
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.DisplayNodes();
+                output.GetStringBuilder().Clear();
+
+                eventSource.InvokeMessageRaised(new TaskProgressFinishedEventArgs(30, 1, TaskProgressOutcome.Canceled, 0, null, "Canceled")
+                {
+                    BuildEventContext = context,
+                });
+                terminalLogger.Refresh();
+
+                output.ToString().ShouldContain(AnsiCodes.EraseInDisplay);
+                output.ToString().ShouldNotContain("Canceled download");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void NestedProgressRendersBelowParentAndFollowsRetention()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 100, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                BuildEventContext context = MakeBuildEventContext();
+
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(40, "Restoring projects", TaskProgressUnit.Items) { BuildEventContext = context });
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(41, "Unrelated", TaskProgressUnit.Items) { BuildEventContext = context });
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(42, "Transient packages", TaskProgressUnit.Items)
+                {
+                    BuildEventContext = context,
+                    ParentOperationId = 40,
+                });
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(43, "Persistent packages", TaskProgressUnit.Items)
+                {
+                    BuildEventContext = context,
+                    ParentOperationId = 40,
+                    Retention = TaskProgressNestedRetention.Persist,
+                });
+                eventSource.InvokeMessageRaised(new TaskProgressUpdatedEventArgs(40, 1, 1, 2, null) { BuildEventContext = context });
+
+                terminalLogger.DisplayNodes();
+                string rendered = output.ToString();
+                int parentIndex = rendered.IndexOf("Restoring projects", StringComparison.Ordinal);
+                int transientIndex = rendered.IndexOf("└─ [0 items] Transient packages", StringComparison.Ordinal);
+                int persistentIndex = rendered.IndexOf("└─ [0 items] Persistent packages", StringComparison.Ordinal);
+                int unrelatedIndex = rendered.IndexOf("Unrelated", StringComparison.Ordinal);
+                parentIndex.ShouldBeGreaterThanOrEqualTo(0);
+                transientIndex.ShouldBeGreaterThan(parentIndex);
+                persistentIndex.ShouldBeGreaterThan(transientIndex);
+                unrelatedIndex.ShouldBeGreaterThan(persistentIndex);
+
+                // Nested operations do not count as separate operations for the taskbar.
+                eventSource.InvokeMessageRaised(new TaskProgressFinishedEventArgs(41, 1, TaskProgressOutcome.Completed, 0, null, null) { BuildEventContext = context });
+                output.ToString().ShouldContain(AnsiCodes.SetProgress(50));
+
+                output.GetStringBuilder().Clear();
+                eventSource.InvokeMessageRaised(new TaskProgressFinishedEventArgs(42, 1, TaskProgressOutcome.Completed, 3, 3, null) { BuildEventContext = context });
+                eventSource.InvokeMessageRaised(new TaskProgressFinishedEventArgs(43, 1, TaskProgressOutcome.Completed, 5, 5, "Packages installed") { BuildEventContext = context });
+                terminalLogger.Refresh();
+                rendered = output.ToString();
+                rendered.ShouldNotContain("Transient packages");
+                rendered.ShouldContain("└─ [########## 5 of 5 items] Persistent packages: Packages installed");
+
+                output.GetStringBuilder().Clear();
+                eventSource.InvokeMessageRaised(new TaskProgressFinishedEventArgs(40, 2, TaskProgressOutcome.Completed, 2, 2, null) { BuildEventContext = context });
+                terminalLogger.Refresh();
+                rendered = output.ToString();
+                rendered.ShouldNotContain("Persistent packages");
+                rendered.ShouldNotContain("Restoring projects");
+                rendered.ShouldContain(AnsiCodes.SetProgressIndeterminate);
+                rendered.ShouldNotContain(AnsiCodes.RemoveProgress);
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void NestedProgressWithoutShownParentIsNotShown()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 40, supportsProgressReporting: true);
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeMessageRaised(new TaskProgressStartedEventArgs(51, "Orphan", TaskProgressUnit.Items)
+                {
+                    BuildEventContext = MakeBuildEventContext(),
+                    ParentOperationId = 50,
+                });
+
+                terminalLogger.DisplayNodes();
+                output.ToString().ShouldNotContain("Orphan");
             }
             finally
             {

@@ -44,6 +44,20 @@ internal static class BinaryWriterExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void WriteOptionalInt64(this BinaryWriter writer, long? value)
+    {
+        if (value == null)
+        {
+            writer.Write((byte)0);
+        }
+        else
+        {
+            writer.Write((byte)1);
+            writer.Write(value.Value);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void WriteTimestamp(this BinaryWriter writer, DateTime timestamp)
     {
         writer.Write(timestamp.Ticks);

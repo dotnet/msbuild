@@ -44,6 +44,7 @@ namespace Microsoft.Build.UnitTests
         private readonly ConcurrentQueue<BuildErrorEventArgs> _errorEvents = new ConcurrentQueue<BuildErrorEventArgs>();
         private readonly ConcurrentQueue<BuildWarningEventArgs> _warningEvents = new ConcurrentQueue<BuildWarningEventArgs>();
         private readonly ConcurrentQueue<BuildMessageEventArgs> _messageEvents = new ConcurrentQueue<BuildMessageEventArgs>();
+        private readonly ConcurrentQueue<RecordingTaskProgressReporter> _taskProgressReporters = new ConcurrentQueue<RecordingTaskProgressReporter>();
 
         public MockEngine() : this(false)
         {
@@ -68,6 +69,23 @@ namespace Microsoft.Build.UnitTests
         public MockLogger MockLogger { get; }
 
         /// <summary>
+        /// Gets or sets a reporter to return from every <see cref="CreateTaskProgressReporter"/> call. When it is
+        /// <see langword="null"/>, each call returns a new <see cref="RecordingTaskProgressReporter"/>.
+        /// </summary>
+        public ITaskProgressReporter TaskProgressReporter { get; set; }
+
+        /// <summary>
+        /// Gets the title passed to the most recent <see cref="CreateTaskProgressReporter"/> call.
+        /// </summary>
+        public string TaskProgressReporterTitle { get; private set; }
+
+        /// <summary>
+        /// Gets every recorder created by <see cref="CreateTaskProgressReporter"/>, in creation order. A recorder
+        /// assigned to <see cref="TaskProgressReporter"/> is listed once for each call that returned it.
+        /// </summary>
+        public IReadOnlyList<RecordingTaskProgressReporter> TaskProgressReporters => _taskProgressReporters.ToArray();
+
+        /// <summary>
         /// Gets or sets whether the mock engine should report multi-threaded build mode.
         /// Used to test ITaskFactoryBuildParameterProvider implementation.
         /// </summary>
@@ -90,6 +108,25 @@ namespace Microsoft.Build.UnitTests
             _output = output;
             MockLogger = new MockLogger(output);
             _logToConsole = false; // We have a better place to put it.
+        }
+
+        public override ITaskProgressReporter CreateTaskProgressReporter(string title, TaskProgressUnit unit = TaskProgressUnit.Unspecified)
+        {
+            TaskProgressReporterTitle = title;
+
+            ITaskProgressReporter reporter = TaskProgressReporter ?? new RecordingTaskProgressReporter(title, unit);
+            if (reporter is RecordingTaskProgressReporter recorder)
+            {
+                recorder.Title ??= title;
+                if (recorder.Unit == TaskProgressUnit.Unspecified)
+                {
+                    recorder.Unit = unit;
+                }
+
+                _taskProgressReporters.Enqueue(recorder);
+            }
+
+            return reporter;
         }
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)

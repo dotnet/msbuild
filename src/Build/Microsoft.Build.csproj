@@ -112,6 +112,12 @@
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\InvariantPayloadTransferMode.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
+    <Compile Include="..\Shared\TaskProgressManager.cs">
+      <Link>BackEnd\Components\RequestBuilder\TaskProgressManager.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\TaskProgressReporter.cs">
+      <Link>BackEnd\Components\RequestBuilder\TaskProgressReporter.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
@@ -598,6 +604,8 @@
     <!-- ######################## -->
     <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
     <Compile Include="Logging\BaseConsoleLogger.cs" />
+    <Compile Include="Logging\ConsoleProgressTracker.cs" />
+    <Compile Include="Logging\TaskProgressFormatter.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogEventFilter.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />

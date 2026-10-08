@@ -620,6 +620,34 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
+            if (packet is LogMessagePacket logMessagePacket
+                && logMessagePacket.NodeBuildEvent is KeyValuePair<int, BuildEventArgs> nodeBuildEvent
+                && nodeBuildEvent.Value is TaskProgressStartedEventArgs or TaskProgressUpdatedEventArgs or TaskProgressFinishedEventArgs)
+            {
+                BuildEventContext progressContext = nodeBuildEvent.Value.BuildEventContext;
+                if (progressContext is not null
+                    && progressContext.TaskId != BuildEventContext.InvalidTaskId
+                    && _nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> progressHandlerStack))
+                {
+                    lock (progressHandlerStack)
+                    {
+                        foreach (INodePacketHandler handler in progressHandlerStack)
+                        {
+                            if (handler is TaskHostTask taskHostTask
+                                && taskHostTask.MatchesTaskBuildEventContext(progressContext))
+                            {
+                                taskHostTask.PacketReceived(node, packet);
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // A delayed progress event for a task that has already disconnected must not be
+                // attributed to whichever nested task currently owns the top of the handler stack.
+                return;
+            }
+
             if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack))
             {
                 lock (handlerStack)

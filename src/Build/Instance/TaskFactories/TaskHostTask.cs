@@ -400,7 +400,8 @@ namespace Microsoft.Build.BackEnd
                             GetGlobalPropertiesForTaskHost(),
                             _taskLoggingContext.GetWarningsAsErrors(),
                             _taskLoggingContext.GetWarningsNotAsErrors(),
-                            _taskLoggingContext.GetWarningsAsMessages());
+                            _taskLoggingContext.GetWarningsAsMessages(),
+                            _taskLoggingContext.BuildEventContext);
 
                 try
                 {
@@ -774,6 +775,11 @@ namespace Microsoft.Build.BackEnd
                     break;
             }
         }
+
+        internal bool MatchesTaskBuildEventContext(BuildEventContext buildEventContext)
+            => _taskLoggingContext?.BuildEventContext is { } taskBuildEventContext
+                && taskBuildEventContext == buildEventContext
+                && taskBuildEventContext.SubmissionId == buildEventContext.SubmissionId;
 
         /// <summary>
         /// Handle IsRunningMultipleNodes request from the TaskHost.

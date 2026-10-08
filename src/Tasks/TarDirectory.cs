@@ -112,6 +112,9 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
+        /// <summary>Optional per-entry write override for deterministic cancellation tests.</summary>
+        internal Func<Func<System.Threading.Tasks.Task>, System.Threading.Tasks.Task>? EntryWriteAsyncOverride { get; set; }
+
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
         {
@@ -202,9 +205,30 @@ namespace Microsoft.Build.Tasks
 
             BuildEngine3.Yield();
 
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
+            ITaskProgressReporter? progress = null;
+            bool archiveWritten = false;
+
             try
             {
-                Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", _sourceDirectory.FullName, _destinationFile.FullName);
+                // Terminal Logger renders a progress row for the archive, which reports the same
+                // operation this message announces. Under the change wave the message drops to
+                // Normal so it is not shown twice; it is still written to binary logs and to
+                // console output at normal verbosity.
+                Log.LogMessageFromResources(
+                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13) ? MessageImportance.Normal : MessageImportance.High,
+                    "TarDirectory.Comment",
+                    _sourceDirectory.FullName,
+                    _destinationFile.FullName);
+
+                List<(FileSystemInfo Info, string EntryName)> entries = EnumerateEntriesInDeterministicOrder();
+                long writtenEntries = 0;
+
+                progress = entries.Count == 0
+                    ? null
+                    : (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                        Log.FormatResourceString("TarDirectory.ProgressTitle", _destinationFile.Name),
+                        TaskProgressUnit.Items);
 
                 // Scope the write streams to this block so they are flushed and closed before Execute returns,
                 // and — importantly — before the catch below attempts to delete a partially-written archive.
@@ -229,9 +253,7 @@ namespace Microsoft.Build.Tasks
                     // per-entry metadata is written exactly as TarFile.CreateFromDirectory would via WriteEntry.
                     using TarWriter writer = new TarWriter(compressionStream ?? destinationStream, format, leaveOpen: true);
 
-                    CancellationToken cancellationToken = _cancellationTokenSource.Token;
-
-                    foreach ((FileSystemInfo info, string entryName) in EnumerateEntriesInDeterministicOrder())
+                    foreach ((FileSystemInfo info, string entryName) in entries)
                     {
                         // Check for cancellation on every iteration so a cancelled build stops promptly rather than
                         // writing out the entire remaining archive.
@@ -240,7 +262,15 @@ namespace Microsoft.Build.Tasks
                             break;
                         }
 
-                        if (deterministicTimestamp is DateTimeOffset timestamp)
+                        if (EntryWriteAsyncOverride is { } entryWriteAsyncOverride)
+                        {
+                            Func<System.Threading.Tasks.Task> writeEntry = deterministicTimestamp is DateTimeOffset timestamp
+                                ? () => WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken)
+                                : () => writer.WriteEntryAsync(info.FullName, entryName, cancellationToken);
+
+                            await entryWriteAsyncOverride(writeEntry).ConfigureAwait(continueOnCapturedContext: false);
+                        }
+                        else if (deterministicTimestamp is DateTimeOffset timestamp)
                         {
                             await WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
                         }
@@ -251,8 +281,13 @@ namespace Microsoft.Build.Tasks
                             await writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
                                 .ConfigureAwait(continueOnCapturedContext: false);
                         }
+
+                        writtenEntries++;
+                        progress?.Report(new TaskProgressUpdate(writtenEntries, entries.Count, entryName));
                     }
                 }
+
+                archiveWritten = !cancellationToken.IsCancellationRequested;
 
                 // A break out of the loop above (rather than an OperationCanceledException from a mid-entry write)
                 // leaves a truncated or empty archive on disk. The write streams are now flushed and closed, so the
@@ -279,7 +314,24 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                BuildEngine3.Reacquire();
+                try
+                {
+                    if (progress is not null)
+                    {
+                        try
+                        {
+                            progress.Finish(archiveWritten, cancellationToken);
+                        }
+                        finally
+                        {
+                            progress.Dispose();
+                        }
+                    }
+                }
+                finally
+                {
+                    BuildEngine3.Reacquire();
+                }
             }
 
             return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;

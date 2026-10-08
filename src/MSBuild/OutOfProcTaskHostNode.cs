@@ -797,6 +797,31 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
+            /// <inheritdoc />
+            /// <remarks>
+            /// Forwards begin/update/end records to the parent node over the existing logging
+            /// channel (<see cref="SendBuildEvent"/>), which restamps the correlating
+            /// <see cref="BuildEventContext"/> on receipt (see <c>TaskHostTask.HandleLoggedMessage</c>
+            /// and <c>TaskHost.LogMessageEvent</c>). Falls back to a no-op reporter if called outside
+            /// of a task execution (no current task context).
+            /// </remarks>
+            public override ITaskProgressReporter CreateTaskProgressReporter(
+                string title,
+                TaskProgressUnit unit = TaskProgressUnit.Unspecified)
+            {
+                TaskExecutionContext context = _taskHost.GetCurrentTaskContext();
+                if (context is null || _taskHost._parentPacketVersion < NodePacketTypeExtensions.TaskProgressMinVersion)
+                {
+                    return base.CreateTaskProgressReporter(title, unit);
+                }
+
+                return context.ProgressManager.CreateReporter(
+                    title,
+                    unit,
+                    context.Configuration.TaskBuildEventContext,
+                    e => _taskHost.SendBuildEvent(context.Configuration, e));
+            }
+
 #if FEATURE_REPORTFILEACCESSES
             /// <summary>
             /// Reports a file access from a task.
@@ -2032,6 +2057,9 @@ namespace Microsoft.Build.CommandLine
         /// Sends the requested packet across to the main node.
         /// </summary>
         private void SendBuildEvent(BuildEventArgs e)
+            => SendBuildEvent(EffectiveConfiguration, e);
+
+        private void SendBuildEvent(TaskHostConfiguration configuration, BuildEventArgs e)
         {
             if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
             {
@@ -2047,8 +2075,7 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                TaskHostConfiguration configuration = EffectiveConfiguration;
-                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(configuration.NodeId, e));
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(configuration.NodeId, e), _parentPacketVersion);
                 _nodeEndpoint.SendData(logMessage);
             }
         }

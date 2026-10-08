@@ -50,6 +50,108 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void ReportsExtractionProgress()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+                testEnvironment.CreateFile(sourceFolder, "F1.txt", "F1");
+                testEnvironment.CreateFile(sourceFolder, "F2.txt", "F2");
+
+                string tarFilePath = CreateTar(testEnvironment, sourceFolder);
+
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                Untar untar = new Untar
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    SkipUnchangedFiles = false,
+                    SourceFiles = [new TaskItem(tarFilePath)],
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                untar.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                progress.Updates.ShouldNotBeEmpty();
+                progress.Completed.ShouldBe(2);
+
+                // A tar archive is read as a stream, so the entry count is not known up front.
+                progress.Total.ShouldBeNull();
+                progress.IsComplete.ShouldBeTrue();
+                _mockEngine.TaskProgressReporterTitle.ShouldContain(Path.GetFileName(tarFilePath));
+            }
+        }
+
+        [Fact]
+        public void ReportsFailedProgressWhenArchiveReadFailsAfterExtraction()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "truncated.tar");
+                using (FileStream tarStream = new FileStream(tarFilePath, FileMode.Create, FileAccess.Write))
+                using (System.Formats.Tar.TarWriter writer = new System.Formats.Tar.TarWriter(tarStream, System.Formats.Tar.TarEntryFormat.Pax))
+                {
+                    System.Formats.Tar.PaxTarEntry entry = new System.Formats.Tar.PaxTarEntry(System.Formats.Tar.TarEntryType.RegularFile, "file.txt")
+                    {
+                        DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("valid")),
+                    };
+                    writer.WriteEntry(entry);
+                }
+
+                // Replace the first end-of-archive block with a malformed header. This locates the marker after
+                // any format-specific extended headers emitted by TarWriter.
+                byte[] archiveBytes = File.ReadAllBytes(tarFilePath);
+                int endOfEntriesOffset = 0;
+                while (endOfEntriesOffset + 512 <= archiveBytes.Length)
+                {
+                    bool isZeroBlock = true;
+                    for (int i = 0; i < 512; i++)
+                    {
+                        if (archiveBytes[endOfEntriesOffset + i] != 0)
+                        {
+                            isZeroBlock = false;
+                            break;
+                        }
+                    }
+
+                    if (isZeroBlock)
+                    {
+                        break;
+                    }
+
+                    endOfEntriesOffset += 512;
+                }
+
+                endOfEntriesOffset.ShouldBeLessThan(archiveBytes.Length);
+                Array.Fill(archiveBytes, byte.MaxValue, endOfEntriesOffset, 512);
+                File.WriteAllBytes(tarFilePath, archiveBytes);
+
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                Untar untar = new Untar
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    SkipUnchangedFiles = false,
+                    SourceFiles = [new TaskItem(tarFilePath)],
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                untar.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                File.Exists(Path.Combine(destination.Path, "file.txt")).ShouldBeTrue();
+                _mockEngine.Log.ShouldContain("MSB4333");
+                progress.IsFailed.ShouldBeTrue();
+            }
+        }
+
+        [Fact]
         public void CanUntarWithIncludeFilter()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -279,6 +381,12 @@ namespace Microsoft.Build.Tasks.UnitTests
                 using (FileStream tarStream = new FileStream(tarFilePath, FileMode.Create, FileAccess.Write))
                 using (System.Formats.Tar.TarWriter writer = new System.Formats.Tar.TarWriter(tarStream, System.Formats.Tar.TarEntryFormat.Pax))
                 {
+                    System.Formats.Tar.PaxTarEntry validEntry = new System.Formats.Tar.PaxTarEntry(System.Formats.Tar.TarEntryType.RegularFile, "valid.txt")
+                    {
+                        DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("valid")),
+                    };
+                    writer.WriteEntry(validEntry);
+
                     System.Formats.Tar.PaxTarEntry entry = new System.Formats.Tar.PaxTarEntry(System.Formats.Tar.TarEntryType.RegularFile, maliciousEntryName)
                     {
                         DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("pwned")),
@@ -287,6 +395,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
 
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
 
                 Untar untar = new Untar
                 {
@@ -306,6 +416,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // The failure must surface the dedicated "outside destination directory" error (MSB4334),
                 // not a generic "could not open file" (MSB4333).
                 _mockEngine.Log.ShouldContain("MSB4334");
+                progress.IsFailed.ShouldBeTrue();
             }
         }
 
@@ -380,5 +491,3 @@ namespace Microsoft.Build.Tasks.UnitTests
 }
 
 #endif
-
-

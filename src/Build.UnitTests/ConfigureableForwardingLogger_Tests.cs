@@ -262,6 +262,60 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
+        /// <summary>
+        /// A central logger describes a finished progress operation as an ordinary message, and it needs
+        /// the started event to do it because only that event carries the title. Both are low importance,
+        /// so they must be forwarded wherever ordinary messages are rather than only at detailed
+        /// verbosity. The updates in between are high volume and follow the ordinary rules.
+        /// </summary>
+        [Theory]
+        [InlineData(LoggerVerbosity.Minimal, false, false)]
+        [InlineData(LoggerVerbosity.Normal, true, false)]
+        [InlineData(LoggerVerbosity.Detailed, true, true)]
+        [InlineData(LoggerVerbosity.Diagnostic, true, true)]
+        public void ForwardsTheStartAndEndOfProgressOperations(LoggerVerbosity verbosity, bool expectOperation, bool expectUpdates)
+        {
+            var context = new BuildEventContext(1, 2, 3, 4);
+            var started = new TaskProgressStartedEventArgs(7, "Downloading tools.zip", TaskProgressUnit.Bytes) { BuildEventContext = context };
+            var updated = new TaskProgressUpdatedEventArgs(7, 1, 512, 1024, "halfway") { BuildEventContext = context };
+            var finished = new TaskProgressFinishedEventArgs(7, 2, TaskProgressOutcome.Completed, 1024, 1024, null) { BuildEventContext = context };
+
+            EventSourceSink source = new EventSourceSink();
+            TestForwardingLogger logger = new TestForwardingLogger
+            {
+                BuildEventRedirector = null,
+                Verbosity = verbosity,
+            };
+            logger.Initialize(source, 4);
+
+            source.Consume(started);
+            source.Consume(updated);
+            source.Consume(finished);
+
+            logger.ForwardedEvents.Contains(started).ShouldBe(expectOperation);
+            logger.ForwardedEvents.Contains(finished).ShouldBe(expectOperation);
+            logger.ForwardedEvents.Contains(updated).ShouldBe(expectUpdates);
+        }
+
+        [Fact]
+        public void LowMessageSubscriptionForwardsEntireProgressLifecycle()
+        {
+            var source = new EventSourceSink();
+            var logger = new TestForwardingLogger { Parameters = "LOWMESSAGEEVENT", Verbosity = LoggerVerbosity.Minimal };
+            logger.Initialize(source, 4);
+            BuildEventArgs[] events =
+            [
+                new TaskProgressStartedEventArgs(1, "Work", TaskProgressUnit.Items),
+                new TaskProgressUpdatedEventArgs(1, 1, 1, 2, null),
+                new TaskProgressFinishedEventArgs(1, 2, TaskProgressOutcome.Completed, 2, 2, null),
+            ];
+            foreach (BuildEventArgs progress in events)
+            {
+                source.Consume(progress);
+                logger.ForwardedEvents.ShouldContain(progress);
+            }
+        }
+
         private void RaiseEvents(EventSourceSink source)
         {
             source.Consume(_buildStarted);

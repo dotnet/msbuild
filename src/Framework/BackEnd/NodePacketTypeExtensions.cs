@@ -35,11 +35,12 @@ internal static class NodePacketTypeExtensions
     /// 6: Added explicit TaskHost lifetime actions and retained-connection cleanup acknowledgment.
     /// 7: Added console output forwarding from OOP TaskHost.
     /// 8: Added deferred task parameter conversion in .NET task hosts.
+    /// 9: Added structured task progress logging events and the originating task context for nested TaskHost callbacks.
     /// 
     /// When incrementing this version, ensure compatibility with existing
     /// task hosts and update the corresponding deserialization logic.
     /// </summary>
-    public const byte PacketVersion = 8;
+    public const byte PacketVersion = 9;
 
     /// <summary>
     /// The minimum negotiated packet version that supports delta transfer of the invariant
@@ -59,6 +60,8 @@ internal static class NodePacketTypeExtensions
     /// Minimum packet version at which task hosts can convert deferred parameter values.
     /// </summary>
     public const byte TaskParameterConversionMinVersion = 8;
+
+    public const byte TaskProgressMinVersion = 9;
 
     // Flag bits in upper 2 bits
     private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000

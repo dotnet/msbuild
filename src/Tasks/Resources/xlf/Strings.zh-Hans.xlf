@@ -319,6 +319,16 @@
         <target state="translated">{0} 库调用失败，错误代码如下: {1}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Copy.ProgressTitle">
+        <source>Copying files</source>
+        <target state="new">Copying files</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Copy.ProgressTitleToFolder">
+        <source>Copying files to "{0}"</source>
+        <target state="new">Copying files to "{0}"</target>
+        <note>LOCALIZATION: {0} is a destination folder path.</note>
+      </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
         <target state="translated">未能使用链接将“{0}”复制到“{1}”。请改为复制文件。{2}</target>
@@ -2616,6 +2626,11 @@
         <target state="translated">MSB4326: 格式值 "{0}" 无效。请指定 "Pax"、"Ustar"、"V7" 或 "Gnu" 中的一个。</target>
         <note>{StrBegin="MSB4326: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.ProgressTitle">
+        <source>Creating archive "{0}"</source>
+        <target state="new">Creating archive "{0}"</target>
+        <note>LOCALIZATION: {0} is the archive file name.</note>
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: .NET Core 版本的 MSBuild 不支持“{0}”。请使用 .NET Framework 版本的 MSBuild。有关更多详细信息，请参阅 https://aka.ms/msbuild/MSB4803。</target>
@@ -2785,6 +2800,11 @@
         <source>Untarring file "{0}" to "{1}".</source>
         <target state="translated">正在将文件 "{0}" 解压到 "{1}"。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Untar.ProgressTitle">
+        <source>Extracting "{0}"</source>
+        <target state="new">Extracting "{0}"</target>
+        <note>LOCALIZATION: {0} is the archive file name.</note>
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
