@@ -15,23 +15,80 @@ namespace Microsoft.Build.Evaluation.Context;
 /// <summary>
 /// Metadata of files that already exist under the toolset, .NET SDK, and NuGet package roots, read once per build.
 /// Validating a cached evaluation stats every file it imported, and every project imports the same hundreds of SDK
-/// files while nothing writes to those roots during a build. Missing paths, directories, links, and files elsewhere
-/// are always read from the file system, because tasks can create or change them between two validations.
+/// files while nothing writes to those roots during a build. Under the toolset and .NET SDK roots, missing paths
+/// and directories are read once per build as well: every project probes the same few dozen absent import hooks and
+/// wildcard import directories. The package root shares only existing files, because restore creates new package
+/// folders and files there. Links and paths elsewhere are always read from the file system, because tasks can
+/// create or change them between two validations.
 /// </summary>
 internal sealed class ImmutableFileStatCache
 {
-    private static readonly Lazy<string[]> s_defaultRoots = new(ComputeDefaultRoots);
+    private static readonly Lazy<(string[] Roots, string[] ProbeRoots)> s_defaultRoots = new(ComputeDefaultRoots);
 
-    private readonly ConcurrentDictionary<string, FileDependency> _files = new(FileUtilities.PathComparer);
+    private readonly ConcurrentDictionary<string, FileDependency> _stats = new(FileUtilities.PathComparer);
     private readonly string[] _roots;
+    private readonly string[] _probeRoots;
 
     internal ImmutableFileStatCache()
-        : this(s_defaultRoots.Value)
+        : this(s_defaultRoots.Value.Roots, s_defaultRoots.Value.ProbeRoots)
     {
     }
 
     /// <param name="roots">Directories whose existing files are not modified while a build runs.</param>
     internal ImmutableFileStatCache(IEnumerable<string> roots)
+        : this(roots, [])
+    {
+    }
+
+    /// <param name="roots">Directories whose existing files are not modified while a build runs.</param>
+    /// <param name="probeRoots">
+    /// Directories where nothing is created, deleted, or changed while a build runs, so a missing path or a directory
+    /// read once stays as it was. They are shared roots as well.
+    /// </param>
+    internal ImmutableFileStatCache(IEnumerable<string> roots, IEnumerable<string> probeRoots)
+    {
+        _probeRoots = Normalize(probeRoots);
+        _roots = [.. Normalize(roots), .. _probeRoots];
+    }
+
+    /// <summary>
+    /// Reads the metadata of a recorded path, reusing the result for existing files under the roots and for any
+    /// result under the probe roots. Returns false for a symbolic link or junction, like
+    /// <see cref="EvaluationInputRecorder.TryStat"/>.
+    /// </summary>
+    internal bool TryStat(string fullPath, out FileDependency dependency)
+    {
+        bool underProbeRoot = IsUnderRoot(_probeRoots, fullPath);
+        if (!underProbeRoot && !IsUnderRoot(_roots, fullPath))
+        {
+            return EvaluationInputRecorder.TryStat(fullPath, out dependency);
+        }
+
+        if (_stats.TryGetValue(fullPath, out dependency))
+        {
+            return true;
+        }
+
+        if (!EvaluationInputRecorder.TryStat(fullPath, out dependency))
+        {
+            return false;
+        }
+
+        if (underProbeRoot || dependency.Kind == PathKind.File)
+        {
+            _stats.TryAdd(fullPath, dependency);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Discards every result. Called when a build starts, so a server or other long-lived host re-reads
+    /// SDK and package files that changed between builds, and sees paths that restore or an install created.
+    /// </summary>
+    internal void NotifyBuildStarted() => _stats.Clear();
+
+    private static string[] Normalize(IEnumerable<string> roots)
     {
         var normalized = new List<string>();
         foreach (string root in roots)
@@ -42,47 +99,12 @@ internal sealed class ImmutableFileStatCache
             }
         }
 
-        _roots = [.. normalized];
+        return [.. normalized];
     }
 
-    /// <summary>
-    /// Reads the metadata of a recorded path, reusing the result for existing files under the roots.
-    /// Returns false for a symbolic link or junction, like <see cref="EvaluationInputRecorder.TryStat"/>.
-    /// </summary>
-    internal bool TryStat(string fullPath, out FileDependency dependency)
+    private static bool IsUnderRoot(string[] roots, string fullPath)
     {
-        if (!IsUnderRoot(fullPath))
-        {
-            return EvaluationInputRecorder.TryStat(fullPath, out dependency);
-        }
-
-        if (_files.TryGetValue(fullPath, out dependency))
-        {
-            return true;
-        }
-
-        if (!EvaluationInputRecorder.TryStat(fullPath, out dependency))
-        {
-            return false;
-        }
-
-        if (dependency.Kind == PathKind.File)
-        {
-            _files.TryAdd(fullPath, dependency);
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Discards every result. Called when a build starts, so a server or other long-lived host re-reads
-    /// SDK and package files that changed between builds.
-    /// </summary>
-    internal void NotifyBuildStarted() => _files.Clear();
-
-    private bool IsUnderRoot(string fullPath)
-    {
-        foreach (string root in _roots)
+        foreach (string root in roots)
         {
             if (fullPath.StartsWith(root, FileUtilities.PathComparison))
             {
@@ -93,16 +115,17 @@ internal sealed class ImmutableFileStatCache
         return false;
     }
 
-    private static string[] ComputeDefaultRoots()
+    // The toolset roots are probe roots. The package root is not: restore creates package folders and files in it.
+    private static (string[] Roots, string[] ProbeRoots) ComputeDefaultRoots()
     {
-        var roots = new List<string>(3);
+        var toolsetRoots = new List<string>(2);
         BuildEnvironment environment = BuildEnvironmentHelper.Instance;
         string? toolsDirectory = environment.CurrentMSBuildToolsDirectory;
         if (!string.IsNullOrEmpty(toolsDirectory))
         {
             // The .NET SDK layout is <dotnet root>/sdk/<version>; the root also holds packs and workload manifests.
             DirectoryInfo? sdkDirectory = Directory.GetParent(toolsDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-            roots.Add(
+            toolsetRoots.Add(
                 sdkDirectory?.Parent is not null && string.Equals(sdkDirectory.Name, "sdk", StringComparison.OrdinalIgnoreCase)
                     ? sdkDirectory.Parent.FullName
                     : toolsDirectory);
@@ -110,15 +133,14 @@ internal sealed class ImmutableFileStatCache
 
         if (!string.IsNullOrEmpty(environment.MSBuildExtensionsPath))
         {
-            roots.Add(environment.MSBuildExtensionsPath);
+            toolsetRoots.Add(environment.MSBuildExtensionsPath);
         }
 
         string? packages = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
-        roots.Add(
-            !string.IsNullOrEmpty(packages)
-                ? packages
-                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages"));
+        string packageRoot = !string.IsNullOrEmpty(packages)
+            ? packages
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
 
-        return [.. roots];
+        return ([.. toolsetRoots, packageRoot], [.. toolsetRoots]);
     }
 }
