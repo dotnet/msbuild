@@ -111,6 +111,63 @@ public sealed class ImmutableFileStatCache_Tests
         IsCurrent(inputs, cache).ShouldBeFalse();
     }
 
+    [Fact]
+    public void MissingPathUnderProbeRootIsReadOnceUntilTheNextBuild()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFolder root = env.CreateFolder();
+        string file = Path.Combine(root.Path, "ImportAfter", "hook.props");
+        var cache = new ImmutableFileStatCache([], [root.Path]);
+        EvaluationInputs first = Record(r => r.RecordProbe(file, ProbeKind.File, exists: false));
+        EvaluationInputs second = Record(r => r.RecordProbe(file, ProbeKind.File, exists: false));
+
+        IsCurrent(first, cache).ShouldBeTrue();
+        Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+        File.WriteAllText(file, "<Project />");
+
+        // The second project reuses the absence the first one read instead of probing again.
+        IsCurrent(second, cache).ShouldBeTrue();
+        cache.NotifyBuildStarted();
+        IsCurrent(second, cache).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void DirectoryUnderProbeRootIsReadOnceUntilTheNextBuild()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFolder root = env.CreateFolder();
+        string directory = Path.Combine(root.Path, "listed");
+        Directory.CreateDirectory(directory);
+        Directory.SetLastWriteTimeUtc(directory, s_oldTimestamp);
+        var cache = new ImmutableFileStatCache([], [root.Path]);
+        EvaluationInputs inputs = Record(r => r.RecordGlobDirectory(directory));
+
+        IsCurrent(inputs, cache).ShouldBeTrue();
+        File.WriteAllText(Path.Combine(directory, "added.cs"), string.Empty);
+        Directory.SetLastWriteTimeUtc(directory, s_oldTimestamp.AddDays(1));
+
+        IsCurrent(inputs, cache).ShouldBeTrue();
+        cache.NotifyBuildStarted();
+        IsCurrent(inputs, cache).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ProbeRootDoesNotShareMissingPathsUnderAnotherRoot()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        TransientTestFolder probeRoot = env.CreateFolder();
+        TransientTestFolder packageRoot = env.CreateFolder();
+        string restored = Path.Combine(packageRoot.Path, "package", "build", "package.props");
+        var cache = new ImmutableFileStatCache([packageRoot.Path], [probeRoot.Path]);
+        EvaluationInputs inputs = Record(r => r.RecordProbe(restored, ProbeKind.File, exists: false));
+
+        IsCurrent(inputs, cache).ShouldBeTrue();
+        Directory.CreateDirectory(Path.GetDirectoryName(restored)!);
+        File.WriteAllText(restored, "<Project />");
+
+        IsCurrent(inputs, cache).ShouldBeFalse();
+    }
+
     private static EvaluationInputs Record(Action<EvaluationInputRecorder> record)
     {
         var recorder = new EvaluationInputRecorder();
