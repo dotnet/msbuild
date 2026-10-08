@@ -8,6 +8,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -198,29 +199,29 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log an error
         /// </summary>
-        /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location where the error occurred</param>
         /// <param name="messageResourceName">The resource name for the error</param>
         /// <param name="messageArgs">Parameters for the resource string</param>
-        internal void LogErrorWithSubcategory(string? subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs)
+        internal void LogErrorWithSubcategory(DiagnosticSubcategory subcategory, IElementLocation location, string messageResourceName, params object[] messageArgs)
         {
             CheckValidity();
-            _loggingService.LogError(_eventContext, subcategoryResourceName, location, messageResourceName, messageArgs);
+            _loggingService.LogError(_eventContext, subcategory, location, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
 
         /// <summary>
         /// Log an error
         /// </summary>
-        /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="errorCode"> Error code</param>
         /// <param name="helpKeyword">Help keyword</param>
         /// <param name="location">The location where the error occurred</param>
         /// <param name="message">Error message</param>
-        internal void LogErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, IElementLocation location, string message)
+        internal void LogErrorFromText(DiagnosticSubcategory subcategory, string? errorCode, string? helpKeyword, IElementLocation location, string message)
         {
             CheckValidity();
-            _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, location, message);
+            _loggingService.LogErrorFromText(_eventContext, subcategory, errorCode, helpKeyword, location, message);
             _hasLoggedErrors = true;
         }
 
@@ -252,34 +253,34 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogWarning(string messageResourceName, params object[] messageArgs)
         {
             CheckValidity();
-            _loggingService.LogWarning(_eventContext, null, ElementLocation.Empty, messageResourceName, messageArgs);
+            _loggingService.LogWarning(_eventContext, DiagnosticSubcategory.None, ElementLocation.Empty, messageResourceName, messageArgs);
         }
 
         /// <summary>
         /// Log a warning
         /// </summary>
-        /// <param name="subcategoryResourceName">The subcategory resource name</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location where the warning occurred</param>
         /// <param name="messageResourceName">The string resource which contains the formatted warning string</param>
         /// <param name="messageArgs">parameters for the string resource</param>
-        internal void LogWarning(string? subcategoryResourceName, IElementLocation location, string messageResourceName, params object?[]? messageArgs)
+        internal void LogWarning(DiagnosticSubcategory subcategory, IElementLocation location, string messageResourceName, params object?[]? messageArgs)
         {
             CheckValidity();
-            _loggingService.LogWarning(_eventContext, subcategoryResourceName, location, messageResourceName, messageArgs);
+            _loggingService.LogWarning(_eventContext, subcategory, location, messageResourceName, messageArgs);
         }
 
         /// <summary>
         /// Log a warning based on a text message
         /// </summary>
-        /// <param name="subcategoryResourceName">The subcategory resource name</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="warningCode"> Warning code</param>
         /// <param name="helpKeyword"> Help keyword</param>
         /// <param name="location">The location where the warning occurred</param>
         /// <param name="message">The message to be logged as a warning</param>
-        internal void LogWarningFromText(string? subcategoryResourceName, string warningCode, string helpKeyword, IElementLocation location, string message)
+        internal void LogWarningFromText(DiagnosticSubcategory subcategory, string warningCode, string helpKeyword, IElementLocation location, string message)
         {
             CheckValidity();
-            _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, location, message);
+            _loggingService.LogWarningFromText(_eventContext, subcategory, warningCode, helpKeyword, location, message);
         }
 
         /// <summary>

@@ -595,7 +595,7 @@ namespace Microsoft.Build.Evaluation
                 if (defaultTasksFiles.Length == 0)
                 {
                     loggingContext.LogWarning(
-                        null,
+                        DiagnosticSubcategory.None,
                         ElementLocation.Empty,
                         taskFileWarning,
                         taskPattern,
@@ -606,7 +606,7 @@ namespace Microsoft.Build.Evaluation
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 loggingContext.LogWarning(
-                    null,
+                    DiagnosticSubcategory.None,
                     ElementLocation.Empty,
                     taskFileWarning,
                     taskPattern,
@@ -907,14 +907,14 @@ namespace Microsoft.Build.Evaluation
                                     if (!overrideDirectoryExists)
                                     {
                                         string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
-                                        loggingContext.LogWarning(null, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
+                                        loggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
                                     }
                                 }
                             }
                             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                             {
                                 string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
-                                loggingContext.LogWarning(null, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
+                                loggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
                             }
 
                             if (overrideDirectoryExists)

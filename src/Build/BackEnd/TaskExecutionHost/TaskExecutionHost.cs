@@ -2195,7 +2195,7 @@ namespace Microsoft.Build.BackEnd
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out string helpKeyword, "UnableToCancelTask", _taskName);
             try
             {
-                _taskLoggingContext.LogWarningFromText(null, warningCode, helpKeyword, _taskLocation, message);
+                _taskLoggingContext.LogWarningFromText(DiagnosticSubcategory.None, warningCode, helpKeyword, _taskLocation, message);
             }
             catch (InternalErrorException) when (!_taskLoggingContext.IsValid)
             {

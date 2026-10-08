@@ -1331,12 +1331,12 @@ namespace Microsoft.Build.Execution
                                         if (initialized && containsArchOrRuntimeParam)
                                         {
                                             targetLoggingContext.LogWarning(
-                                                null,
-                                                    elementLocation,
-                                                    "TaskFactoryWillIgnoreTaskFactoryParameters",
-                                                    factory.FactoryName,
-                                                    XMakeAttributes.runtime,
-                                                    XMakeAttributes.architecture,
+                                                DiagnosticSubcategory.None,
+                                                elementLocation,
+                                                "TaskFactoryWillIgnoreTaskFactoryParameters",
+                                                factory.FactoryName,
+                                                XMakeAttributes.runtime,
+                                                XMakeAttributes.architecture,
                                                 RegisteredName);
                                         }
                                     }

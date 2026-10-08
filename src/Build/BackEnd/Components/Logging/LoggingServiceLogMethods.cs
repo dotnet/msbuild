@@ -9,6 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
@@ -97,41 +98,41 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageArgs">Arguments for the string resource</param>
         public void LogError(BuildEventContext buildEventContext, IElementLocation location, string messageResourceName, params object[] messageArgs)
         {
-            LogError(buildEventContext, null, location, messageResourceName, messageArgs);
+            LogError(buildEventContext, DiagnosticSubcategory.None, location, messageResourceName, messageArgs);
         }
 
         /// <summary>
         /// Logs an error
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
-        /// <param name="subcategoryResourceName">Can be null.</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location where the error happened</param>
         /// <param name="messageResourceName">String index into the string.resx file</param>
         /// <param name="messageArgs">Arguments for the format string in the resource file</param>
         /// <exception cref="InternalErrorException">MessageResourceName is null</exception>
-        public void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs)
+        public void LogError(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, IElementLocation location, string messageResourceName, params object[] messageArgs)
         {
             Assumed.NotNullOrEmpty(messageResourceName, "Need resource string for error message.");
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, messageResourceName, messageArgs);
 
-            LogErrorFromText(buildEventContext, subcategoryResourceName, errorCode, helpKeyword, location, message);
+            LogErrorFromText(buildEventContext, subcategory, errorCode, helpKeyword, location, message);
         }
 
         /// <summary>
         /// Logs an error with a given message
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
-        /// <param name="subcategoryResourceName">Can be null.</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="errorCode">Can be null.</param>
         /// <param name="helpKeyword">Can be null.</param>
         /// <param name="location">The location where the error happened</param>
         /// <param name="message">Error message which will be displayed</param>
         /// <exception cref="InternalErrorException">Location is null</exception>
         /// <exception cref="InternalErrorException">Message is null</exception>
-        public void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, IElementLocation location, string message)
+        public void LogErrorFromText(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, string errorCode, string helpKeyword, IElementLocation location, string message)
         {
-            BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(buildEventContext, subcategoryResourceName, errorCode, helpKeyword, location, message);
+            BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(buildEventContext, subcategory, errorCode, helpKeyword, location, message);
 
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
@@ -236,7 +237,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 message += Environment.NewLine + exception.ToString();
             }
 
-            LogErrorFromText(buildEventContext, null, errorCode, helpKeyword, location, message);
+            LogErrorFromText(buildEventContext, DiagnosticSubcategory.None, errorCode, helpKeyword, location, message);
         }
 
         #endregion
@@ -271,60 +272,39 @@ namespace Microsoft.Build.BackEnd.Logging
                 message += Environment.NewLine + exception.ToString();
             }
 
-            LogWarningFromText(buildEventContext, null, warningCode, helpKeyword, location, message);
+            LogWarningFromText(buildEventContext, DiagnosticSubcategory.None, warningCode, helpKeyword, location, message);
         }
 
         /// <summary>
         /// Logs a warning using the specified resource string.
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
-        /// <param name="subcategoryResourceName">Can be null.</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location where the warning happened</param>
         /// <param name="messageResourceName">String name for the resource string to be used</param>
         /// <param name="messageArgs">Arguments for messageResourceName</param>
-        public void LogWarning(BuildEventContext buildEventContext, string subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs)
+        public void LogWarning(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, IElementLocation location, string messageResourceName, params object[] messageArgs)
         {
             Assumed.NotNullOrEmpty(messageResourceName, "Need resource string for warning message.");
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out string helpKeyword, messageResourceName, messageArgs);
-            LogWarningFromText(buildEventContext, subcategoryResourceName, warningCode, helpKeyword, location, message);
+            LogWarningFromText(buildEventContext, subcategory, warningCode, helpKeyword, location, message);
         }
 
         /// <summary>
         /// Logs a warning
         /// </summary>
         /// <param name="buildEventContext">Event context information which describes who is logging the event</param>
-        /// <param name="subcategoryResourceName">Subcategory resource Name. Can be null.</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="warningCode">The warning code of the message. Can be null.</param>
         /// <param name="helpKeyword">Help keyword for the message. Can be null.</param>
         /// <param name="location">The location where the warning happened</param>
         /// <param name="message">Warning message to log</param>
-        public void LogWarningFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string warningCode, string helpKeyword, IElementLocation location, string message)
+        public void LogWarningFromText(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, string warningCode, string helpKeyword, IElementLocation location, string message)
         {
-            Assumed.NotNull(location, "Must specify the associated location.");
-            Assumed.NotNull(message, "Need warning message.");
-            Assumed.NotNull(buildEventContext, "Need a BuildEventContext");
+            BuildWarningEventArgs buildEvent = EventsCreatorHelper.CreateWarningEventFromText(
+                buildEventContext, subcategory, warningCode, helpKeyword, location, message);
 
-            string subcategory = null;
-
-            if (!string.IsNullOrWhiteSpace(subcategoryResourceName))
-            {
-                subcategory = AssemblyResources.GetString(subcategoryResourceName);
-            }
-
-            BuildWarningEventArgs buildEvent = new BuildWarningEventArgs(
-                    subcategory,
-                    warningCode,
-                    location.File,
-                    location.Line,
-                    location.Column,
-                    endLineNumber: 0,
-                    endColumnNumber: 0,
-                    message,
-                    helpKeyword,
-                    "MSBuild");
-
-            buildEvent.BuildEventContext = buildEventContext;
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
                 _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
