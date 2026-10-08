@@ -82,7 +82,72 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // A tar archive is read as a stream, so the entry count is not known up front.
                 progress.Total.ShouldBeNull();
                 progress.IsComplete.ShouldBeTrue();
-                _mockEngine.TaskProgressReporterTitle.ShouldBe($"Extracting {Path.GetFileName(tarFilePath)}");
+                _mockEngine.TaskProgressReporterTitle.ShouldContain(Path.GetFileName(tarFilePath));
+            }
+        }
+
+        [Fact]
+        public void ReportsFailedProgressWhenArchiveReadFailsAfterExtraction()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "truncated.tar");
+                using (FileStream tarStream = new FileStream(tarFilePath, FileMode.Create, FileAccess.Write))
+                using (System.Formats.Tar.TarWriter writer = new System.Formats.Tar.TarWriter(tarStream, System.Formats.Tar.TarEntryFormat.Pax))
+                {
+                    System.Formats.Tar.PaxTarEntry entry = new System.Formats.Tar.PaxTarEntry(System.Formats.Tar.TarEntryType.RegularFile, "file.txt")
+                    {
+                        DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("valid")),
+                    };
+                    writer.WriteEntry(entry);
+                }
+
+                // Replace the first end-of-archive block with a malformed header. This locates the marker after
+                // any format-specific extended headers emitted by TarWriter.
+                byte[] archiveBytes = File.ReadAllBytes(tarFilePath);
+                int endOfEntriesOffset = 0;
+                while (endOfEntriesOffset + 512 <= archiveBytes.Length)
+                {
+                    bool isZeroBlock = true;
+                    for (int i = 0; i < 512; i++)
+                    {
+                        if (archiveBytes[endOfEntriesOffset + i] != 0)
+                        {
+                            isZeroBlock = false;
+                            break;
+                        }
+                    }
+
+                    if (isZeroBlock)
+                    {
+                        break;
+                    }
+
+                    endOfEntriesOffset += 512;
+                }
+
+                endOfEntriesOffset.ShouldBeLessThan(archiveBytes.Length);
+                Array.Fill(archiveBytes, byte.MaxValue, endOfEntriesOffset, 512);
+                File.WriteAllBytes(tarFilePath, archiveBytes);
+
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+                RecordingTaskProgressReporter progress = new RecordingTaskProgressReporter();
+                _mockEngine.TaskProgressReporter = progress;
+
+                Untar untar = new Untar
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new TaskItem(destination.Path),
+                    SkipUnchangedFiles = false,
+                    SourceFiles = [new TaskItem(tarFilePath)],
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                untar.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                File.Exists(Path.Combine(destination.Path, "file.txt")).ShouldBeTrue();
+                _mockEngine.Log.ShouldContain("MSB4333");
+                progress.IsFailed.ShouldBeTrue();
             }
         }
 
@@ -426,5 +491,3 @@ namespace Microsoft.Build.Tasks.UnitTests
 }
 
 #endif
-
-

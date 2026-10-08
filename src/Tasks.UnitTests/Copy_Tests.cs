@@ -2166,6 +2166,7 @@ namespace Microsoft.Build.UnitTests
                 progress.Total.ShouldBe(FileCount);
                 progress.IsComplete.ShouldBeTrue();
                 progress.IsCanceled.ShouldBeFalse();
+                progress.Title.ShouldContain(destinationFolder.Path);
 
                 // The reporter applies concurrent increments atomically, so accepted snapshots never regress.
                 IReadOnlyList<TaskProgressUpdate> updates = progress.Updates;

@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 progress.Completed.ShouldBe(2);
                 progress.Total.ShouldBe(2);
                 progress.IsComplete.ShouldBeTrue();
-                _mockEngine.TaskProgressReporterTitle.ShouldBe("Creating test.tar");
+                _mockEngine.TaskProgressReporterTitle.ShouldContain("test.tar");
             }
         }
 
@@ -231,7 +231,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
                 progress.IsCanceled.ShouldBeTrue();
                 progress.IsAbandoned.ShouldBeFalse();
-                _mockEngine.TaskProgressReporterTitle.ShouldBe("Creating test.tar");
+                _mockEngine.TaskProgressReporterTitle.ShouldContain("test.tar");
             }
         }
 
@@ -271,7 +271,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
 
                 writeAttempts.ShouldBe(1);
-                _mockEngine.TaskProgressReporterTitle.ShouldBe("Creating test.tar");
+                _mockEngine.TaskProgressReporterTitle.ShouldContain("test.tar");
                 progress.IsCanceled.ShouldBeTrue();
                 progress.IsAbandoned.ShouldBeFalse();
                 File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);

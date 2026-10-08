@@ -275,124 +275,138 @@ namespace Microsoft.Build.Tasks
             // is reported without a total.
             long extractedEntries = 0;
             ITaskProgressReporter? progress = null;
+            bool extractionCompleted = false;
 
-            for (TarEntry? tarEntry = reader.GetNextEntry(); tarEntry is not null && !_cancellationTokenSource.IsCancellationRequested; tarEntry = reader.GetNextEntry())
+            try
             {
-                string entryName = tarEntry.Name;
-
-                if (ShouldSkipEntry(entryName))
+                for (TarEntry? tarEntry = reader.GetNextEntry(); tarEntry is not null && !_cancellationTokenSource.IsCancellationRequested; tarEntry = reader.GetNextEntry())
                 {
-                    Log.LogMessageFromResources(MessageImportance.Low, "Untar.DidNotUntarBecauseOfFilter", entryName);
-                    continue;
-                }
+                    string entryName = tarEntry.Name;
 
-                AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, entryName)).GetCanonicalForm();
-
-                // Guard against tar-slip: an entry whose name contains ".." traversal segments (or an absolute path)
-                // can resolve to a location outside the destination directory. Reject such entries and continue so
-                // one malicious entry doesn't abort extraction of the rest of the (benign) archive.
-                if (!fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison))
-                {
-                    Log.LogErrorWithCodeFromResources("Untar.ErrorExtractingResultsInFilesOutsideDestination", fullDestinationPath.Value, fullDestinationDirectoryPath.Value);
-                    continue;
-                }
-
-                FileInfo destinationPath = new(fullDestinationPath);
-
-                // Directory entries and entries whose name refers to a directory should be created and skipped.
-                if (tarEntry.EntryType is TarEntryType.Directory || Path.GetFileName(destinationPath.FullName).Length == 0)
-                {
-                    try
+                    if (ShouldSkipEntry(entryName))
                     {
-                        Directory.CreateDirectory(destinationPath.FullName);
-                    }
-                    catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-                    {
-                        // Creating the directory can fail (e.g. a file already exists at that path, or permissions
-                        // are denied). Report it against the entry and continue so one bad entry doesn't abort
-                        // extraction of the rest of the archive.
-                        Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", destinationPath.FullName, e.Message);
+                        Log.LogMessageFromResources(MessageImportance.Low, "Untar.DidNotUntarBecauseOfFilter", entryName);
+                        continue;
                     }
 
-                    continue;
-                }
+                    AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, entryName)).GetCanonicalForm();
 
-                // Only regular files are extracted. Other entry types (symbolic/hard links, devices, etc.) are skipped.
-                if (tarEntry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "Untar.DidNotUntarBecauseOfEntryType", entryName, tarEntry.EntryType.ToString());
-                    continue;
-                }
+                    // Guard against tar-slip: an entry whose name contains ".." traversal segments (or an absolute path)
+                    // can resolve to a location outside the destination directory. Reject such entries and continue so
+                    // one malicious entry doesn't abort extraction of the rest of the (benign) archive.
+                    if (!fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison))
+                    {
+                        Log.LogErrorWithCodeFromResources("Untar.ErrorExtractingResultsInFilesOutsideDestination", fullDestinationPath.Value, fullDestinationDirectoryPath.Value);
+                        continue;
+                    }
 
-                if (ShouldSkipEntry(tarEntry, destinationPath))
-                {
-                    Log.LogMessageFromResources(MessageImportance.Low, "Untar.DidNotUntarBecauseOfFileMatch", entryName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
-                    continue;
-                }
-                else if (FailIfNotIncremental)
-                {
-                    Log.LogErrorWithCodeFromResources("Untar.ErrorFailIfNotIncremental", entryName, destinationPath.FullName);
-                    continue;
-                }
+                    FileInfo destinationPath = new(fullDestinationPath);
 
-                try
-                {
-                    destinationPath.Directory?.Create();
-                }
-                catch (Exception e)
-                {
-                    Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", destinationPath.DirectoryName, e.Message);
-                    continue;
-                }
+                    // Directory entries and entries whose name refers to a directory should be created and skipped.
+                    if (tarEntry.EntryType is TarEntryType.Directory || Path.GetFileName(destinationPath.FullName).Length == 0)
+                    {
+                        try
+                        {
+                            Directory.CreateDirectory(destinationPath.FullName);
+                        }
+                        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                        {
+                            // Creating the directory can fail (e.g. a file already exists at that path, or permissions
+                            // are denied). Report it against the entry and continue so one bad entry doesn't abort
+                            // extraction of the rest of the archive.
+                            Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", destinationPath.FullName, e.Message);
+                        }
 
-                if (OverwriteReadOnlyFiles && destinationPath.Exists && destinationPath.IsReadOnly)
-                {
+                        continue;
+                    }
+
+                    // Only regular files are extracted. Other entry types (symbolic/hard links, devices, etc.) are skipped.
+                    if (tarEntry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "Untar.DidNotUntarBecauseOfEntryType", entryName, tarEntry.EntryType.ToString());
+                        continue;
+                    }
+
+                    if (ShouldSkipEntry(tarEntry, destinationPath))
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "Untar.DidNotUntarBecauseOfFileMatch", entryName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
+                        continue;
+                    }
+                    else if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorWithCodeFromResources("Untar.ErrorFailIfNotIncremental", entryName, destinationPath.FullName);
+                        continue;
+                    }
+
                     try
                     {
-                        destinationPath.IsReadOnly = false;
+                        destinationPath.Directory?.Create();
                     }
                     catch (Exception e)
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationPath.FullName);
-                        Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotMakeFileWriteable", entryName, destinationPath.FullName, e.Message, lockedFileMessage);
+                        Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", destinationPath.DirectoryName, e.Message);
                         continue;
+                    }
+
+                    if (OverwriteReadOnlyFiles && destinationPath.Exists && destinationPath.IsReadOnly)
+                    {
+                        try
+                        {
+                            destinationPath.IsReadOnly = false;
+                        }
+                        catch (Exception e)
+                        {
+                            string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationPath.FullName);
+                            Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotMakeFileWriteable", entryName, destinationPath.FullName, e.Message, lockedFileMessage);
+                            continue;
+                        }
+                    }
+
+                    try
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Normal, "Untar.FileComment", entryName, destinationPath.FullName);
+
+                        // Only start an operation once an entry actually needs extracting, so archives that are
+                        // entirely up to date or filtered out do not create a progress operation at all.
+                        progress ??= (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                            Log.FormatResourceString("Untar.ProgressTitle", archiveName),
+                            TaskProgressUnit.Items);
+
+                        // Delegate to the runtime's extraction, which restores the archived modification time and
+                        // (on Unix) applies the archived permissions masked to the 9 ownership rwx bits, dropping the
+                        // setuid/setgid/sticky bits for security and respecting the process umask. The cancellation
+                        // token is flowed through so extraction stops promptly when the task is cancelled.
+                        await tarEntry.ExtractToFileAsync(destinationPath.FullName, overwrite: true, _cancellationTokenSource.Token)
+                            .ConfigureAwait(continueOnCapturedContext: false);
+
+                        extractedEntries++;
+                        progress?.Report(new TaskProgressUpdate(extractedEntries, total: null, entryName));
+                    }
+                    catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                    {
+                        // Both IOException (e.g. a destination file locked by another process) and
+                        // UnauthorizedAccessException (e.g. denied permissions on the destination) are per-entry
+                        // failures. Log against the entry being extracted and continue so one problematic
+                        // destination doesn't abort extraction of the rest of the archive.
+                        Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotExtractFile", entryName, destinationPath.FullName, e.Message);
                     }
                 }
 
-                try
-                {
-                    Log.LogMessageFromResources(MessageImportance.Normal, "Untar.FileComment", entryName, destinationPath.FullName);
-
-                    // Only start an operation once an entry actually needs extracting, so archives that are
-                    // entirely up to date or filtered out do not create a progress operation at all.
-                    progress ??= (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
-                        $"Extracting {archiveName}",
-                        TaskProgressUnit.Items);
-
-                    // Delegate to the runtime's extraction, which restores the archived modification time and
-                    // (on Unix) applies the archived permissions masked to the 9 ownership rwx bits, dropping the
-                    // setuid/setgid/sticky bits for security and respecting the process umask. The cancellation
-                    // token is flowed through so extraction stops promptly when the task is cancelled.
-                    await tarEntry.ExtractToFileAsync(destinationPath.FullName, overwrite: true, _cancellationTokenSource.Token)
-                        .ConfigureAwait(continueOnCapturedContext: false);
-
-                    extractedEntries++;
-                    progress?.Report(new TaskProgressUpdate(extractedEntries, total: null, entryName));
-                }
-                catch (Exception e) when (e is IOException or UnauthorizedAccessException)
-                {
-                    // Both IOException (e.g. a destination file locked by another process) and
-                    // UnauthorizedAccessException (e.g. denied permissions on the destination) are per-entry
-                    // failures. Log against the entry being extracted and continue so one problematic
-                    // destination doesn't abort extraction of the rest of the archive.
-                    Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotExtractFile", entryName, destinationPath.FullName, e.Message);
-                }
+                extractionCompleted = true;
             }
-
-            if (progress is not null)
+            finally
             {
-                progress.Finish(succeeded: !Log.HasLoggedErrors, _cancellationTokenSource.Token);
-                progress.Dispose();
+                if (progress is not null)
+                {
+                    try
+                    {
+                        progress.Finish(succeeded: extractionCompleted && !Log.HasLoggedErrors, _cancellationTokenSource.Token);
+                    }
+                    finally
+                    {
+                        progress.Dispose();
+                    }
+                }
             }
         }
 

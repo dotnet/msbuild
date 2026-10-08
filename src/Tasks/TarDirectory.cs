@@ -205,6 +205,10 @@ namespace Microsoft.Build.Tasks
 
             BuildEngine3.Yield();
 
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
+            ITaskProgressReporter? progress = null;
+            bool archiveWritten = false;
+
             try
             {
                 // Terminal Logger renders a progress row for the archive, which reports the same
@@ -216,6 +220,15 @@ namespace Microsoft.Build.Tasks
                     "TarDirectory.Comment",
                     _sourceDirectory.FullName,
                     _destinationFile.FullName);
+
+                List<(FileSystemInfo Info, string EntryName)> entries = EnumerateEntriesInDeterministicOrder();
+                long writtenEntries = 0;
+
+                progress = entries.Count == 0
+                    ? null
+                    : (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
+                        Log.FormatResourceString("TarDirectory.ProgressTitle", _destinationFile.Name),
+                        TaskProgressUnit.Items);
 
                 // Scope the write streams to this block so they are flushed and closed before Execute returns,
                 // and — importantly — before the catch below attempts to delete a partially-written archive.
@@ -240,60 +253,41 @@ namespace Microsoft.Build.Tasks
                     // per-entry metadata is written exactly as TarFile.CreateFromDirectory would via WriteEntry.
                     using TarWriter writer = new TarWriter(compressionStream ?? destinationStream, format, leaveOpen: true);
 
-                    CancellationToken cancellationToken = _cancellationTokenSource.Token;
-
-                    List<(FileSystemInfo Info, string EntryName)> entries = EnumerateEntriesInDeterministicOrder();
-                    long writtenEntries = 0;
-
-                    using ITaskProgressReporter? progress = entries.Count == 0
-                        ? null
-                        : (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
-                            $"Creating {_destinationFile.Name}",
-                            TaskProgressUnit.Items);
-
-                    bool archiveWritten = false;
-                    try
+                    foreach ((FileSystemInfo info, string entryName) in entries)
                     {
-                        foreach ((FileSystemInfo info, string entryName) in entries)
+                        // Check for cancellation on every iteration so a cancelled build stops promptly rather than
+                        // writing out the entire remaining archive.
+                        if (cancellationToken.IsCancellationRequested)
                         {
-                            // Check for cancellation on every iteration so a cancelled build stops promptly rather than
-                            // writing out the entire remaining archive.
-                            if (cancellationToken.IsCancellationRequested)
-                            {
-                                break;
-                            }
-
-                            if (EntryWriteAsyncOverride is { } entryWriteAsyncOverride)
-                            {
-                                Func<System.Threading.Tasks.Task> writeEntry = deterministicTimestamp is DateTimeOffset timestamp
-                                    ? () => WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken)
-                                    : () => writer.WriteEntryAsync(info.FullName, entryName, cancellationToken);
-
-                                await entryWriteAsyncOverride(writeEntry).ConfigureAwait(continueOnCapturedContext: false);
-                            }
-                            else if (deterministicTimestamp is DateTimeOffset timestamp)
-                            {
-                                await WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
-                            }
-                            else
-                            {
-                                // Flow the cancellation token into the runtime's write so a large entry's stream copy
-                                // can be interrupted mid-entry rather than only between entries.
-                                await writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
-                                    .ConfigureAwait(continueOnCapturedContext: false);
-                            }
-
-                            writtenEntries++;
-                            progress?.Report(new TaskProgressUpdate(writtenEntries, entries.Count, entryName));
+                            break;
                         }
 
-                        archiveWritten = !cancellationToken.IsCancellationRequested;
-                    }
-                    finally
-                    {
-                        progress?.Finish(archiveWritten, cancellationToken);
+                        if (EntryWriteAsyncOverride is { } entryWriteAsyncOverride)
+                        {
+                            Func<System.Threading.Tasks.Task> writeEntry = deterministicTimestamp is DateTimeOffset timestamp
+                                ? () => WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken)
+                                : () => writer.WriteEntryAsync(info.FullName, entryName, cancellationToken);
+
+                            await entryWriteAsyncOverride(writeEntry).ConfigureAwait(continueOnCapturedContext: false);
+                        }
+                        else if (deterministicTimestamp is DateTimeOffset timestamp)
+                        {
+                            await WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                        }
+                        else
+                        {
+                            // Flow the cancellation token into the runtime's write so a large entry's stream copy
+                            // can be interrupted mid-entry rather than only between entries.
+                            await writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
+                                .ConfigureAwait(continueOnCapturedContext: false);
+                        }
+
+                        writtenEntries++;
+                        progress?.Report(new TaskProgressUpdate(writtenEntries, entries.Count, entryName));
                     }
                 }
+
+                archiveWritten = !cancellationToken.IsCancellationRequested;
 
                 // A break out of the loop above (rather than an OperationCanceledException from a mid-entry write)
                 // leaves a truncated or empty archive on disk. The write streams are now flushed and closed, so the
@@ -320,7 +314,24 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                BuildEngine3.Reacquire();
+                try
+                {
+                    if (progress is not null)
+                    {
+                        try
+                        {
+                            progress.Finish(archiveWritten, cancellationToken);
+                        }
+                        finally
+                        {
+                            progress.Dispose();
+                        }
+                    }
+                }
+                finally
+                {
+                    BuildEngine3.Reacquire();
+                }
             }
 
             return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;

@@ -319,6 +319,16 @@
         <target state="translated">Fehler beim Aufruf der {0}-Bibliothek. Fehlercode: {1}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Copy.ProgressTitle">
+        <source>Copying files</source>
+        <target state="new">Copying files</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Copy.ProgressTitleToFolder">
+        <source>Copying files to "{0}"</source>
+        <target state="new">Copying files to "{0}"</target>
+        <note>LOCALIZATION: {0} is a destination folder path.</note>
+      </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
         <target state="translated">Es konnte kein Link verwendet werden, um "{0}" in "{1}" zu kopieren. Stattdessen wird die Datei kopiert. {2}</target>
@@ -2616,6 +2626,11 @@
         <target state="translated">MSB4326: Der Formatwert „{0}“ ist ungültig. Geben Sie „Pax“, „Ustar“, „V7“ oder „Gnu“ an.</target>
         <note>{StrBegin="MSB4326: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.ProgressTitle">
+        <source>Creating archive "{0}"</source>
+        <target state="new">Creating archive "{0}"</target>
+        <note>LOCALIZATION: {0} is the archive file name.</note>
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: Die Aufgabe "{0}" wird für die .NET Core-Version von MSBuild nicht unterstützt. Verwenden Sie die .NET Framework-Version von MSBuild. Weitere Informationen finden Sie unter https://aka.ms/msbuild/MSB4803.</target>
@@ -2785,6 +2800,11 @@
         <source>Untarring file "{0}" to "{1}".</source>
         <target state="translated">Datei „{0}“ wird nach „{1}“ entpackt.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Untar.ProgressTitle">
+        <source>Extracting "{0}"</source>
+        <target state="new">Extracting "{0}"</target>
+        <note>LOCALIZATION: {0} is the archive file name.</note>
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>

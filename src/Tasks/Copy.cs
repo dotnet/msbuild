@@ -480,7 +480,9 @@ namespace Microsoft.Build.Tasks
             if (DestinationFiles.Length > 1)
             {
                 _progress = (BuildEngine as IBuildEngine10)?.EngineServices.CreateTaskProgressReporter(
-                    DestinationFolder is null ? "Copying files" : $"Copying files to {DestinationFolder.ItemSpec}",
+                    DestinationFolder is null
+                        ? Log.FormatResourceString("Copy.ProgressTitle")
+                        : Log.FormatResourceString("Copy.ProgressTitleToFolder", DestinationFolder.ItemSpec),
                     TaskProgressUnit.Items);
                 _progress?.SetTotal(SourceFiles.Length);
             }
