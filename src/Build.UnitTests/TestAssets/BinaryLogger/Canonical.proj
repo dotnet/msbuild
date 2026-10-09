@@ -1,0 +1,27 @@
+<Project DefaultTargets="Build">
+  <PropertyGroup>
+    <FirstProperty>InitialValue</FirstProperty>
+    <SecondProperty Condition="'$(FirstProperty)' != ''">SecondValue</SecondProperty>
+    <FirstProperty>ReassignedValue</FirstProperty>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Input>
+      <DefaultMetadata>DefaultValue</DefaultMetadata>
+    </Input>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Input Include="one">
+      <CustomMetadata>CustomValue</CustomMetadata>
+    </Input>
+  </ItemGroup>
+  <Target Name="Prepare" />
+  <Target Name="Build" DependsOnTargets="Prepare" Outputs="@(ResultItem)">
+    <PropertyGroup>
+      <InsideTarget>InsideValue</InsideTarget>
+    </PropertyGroup>
+    <ItemGroup>
+      <ResultItem Include="one" />
+      <ResultItem Include="two" />
+    </ItemGroup>
+  </Target>
+</Project>
