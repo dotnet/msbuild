@@ -807,6 +807,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 _buildManagerState = BuildManagerState.Building;
+                NodeLifecycleJournal.Record(NodeJournalEvent.BuildStarted, NodeJournalKind.InProc, detail: _hostName);
 
                 _noActiveSubmissionsEvent!.Set();
                 _noNodesActiveEvent!.Set();
@@ -1414,6 +1415,7 @@ namespace Microsoft.Build.Execution
 
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
+                    NodeLifecycleJournal.Record(NodeJournalEvent.BuildEnded, NodeJournalKind.InProc, detail: _hostName);
 
                     MSBuildEventSource.Log.BuildStop();
 
