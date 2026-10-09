@@ -4,11 +4,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -89,7 +90,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             if (sdkResult.Version != null && !SdkResolverService.IsReferenceSameVersion(sdk, sdkResult.Version))
             {
                 // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The SDK version "{1}" already specified by "{2}" will be used and the version "{3}" will be ignored.
-                loggingContext.LogWarning(null, sdkReferenceLocation, "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, sdkResult.Version, sdkResult.ElementLocation, sdk.Version);
+                loggingContext.LogWarning(DiagnosticSubcategory.None, sdkReferenceLocation, "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, sdkResult.Version, sdkResult.ElementLocation, sdk.Version);
             }
 
             MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(submissionId, sdk.Name, solutionPath, projectPath, _lastResponse.Success, wasResultCached);

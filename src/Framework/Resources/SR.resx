@@ -231,6 +231,22 @@
     <value>"{0}" is a reserved item metadata, and cannot be modified or deleted.</value>
     <comment>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</comment>
   </data>
+  <data name="SubCategoryForSchemaValidationErrors" xml:space="preserve">
+    <value>Schema validation</value>
+    <comment>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </comment>
+  </data>
+  <data name="SubCategoryForSolutionParsingErrors" xml:space="preserve">
+    <value>Solution file</value>
+    <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
+      "MSBUILD : Solution file error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.</comment>
+  </data>
   <data name="TaskNotMarshalByRef" xml:space="preserve">
     <value>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</value>
     <comment>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</comment>

@@ -2677,13 +2677,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</value>
     <comment>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</comment>
   </data>
-  <data name="SubCategoryForSolutionParsingErrors" xml:space="preserve">
-    <value>Solution file</value>
-    <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
-      "MSBUILD : Solution file error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.</comment>
-  </data>
   <data name="UnrecognizedSolutionComment" xml:space="preserve">
     <value>Unrecognized solution version "{0}", attempting to continue.</value>
   </data>

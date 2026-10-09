@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,11 +15,8 @@ using System.Text;
 using System.Buffers;
 using Microsoft.Build.Framework;
 #endif
-
+using Microsoft.Build.Internal;
 using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
-using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
-
-
 
 #nullable disable
 
@@ -421,8 +417,14 @@ namespace Microsoft.Build.Construction
                         if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out proj) &&
                             !ParentSolution.SolutionFoldersByGuid.TryGetValue(ParentProjectGuid, out solutionFolder))
                         {
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null || solutionFolder != null, "SubCategoryForSolutionParsingErrors",
-                                ElementLocation.Create(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid, ParentProjectGuid);
+                            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                                proj != null || solutionFolder != null,
+                                DiagnosticSubcategory.SolutionFile,
+                                ElementLocation.Create(ParentSolution.FullPath),
+                                "SolutionParseNestedProjectErrorWithNameAndGuid",
+                                ProjectName,
+                                ProjectGuid,
+                                ParentProjectGuid);
                         }
 
                         uniqueName = (proj != null ? proj.GetUniqueProjectName() : solutionFolder.GetUniqueProjectName()) + "\\";
@@ -463,8 +465,14 @@ namespace Microsoft.Build.Construction
                         if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out proj) &&
                             !ParentSolution.SolutionFoldersByGuid.TryGetValue(ParentProjectGuid, out solutionFolder))
                         {
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null || solutionFolder != null, "SubCategoryForSolutionParsingErrors",
-                                ElementLocation.Create(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid, ParentProjectGuid);
+                            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                                proj != null || solutionFolder != null,
+                                DiagnosticSubcategory.SolutionFile,
+                                ElementLocation.Create(ParentSolution.FullPath),
+                                "SolutionParseNestedProjectErrorWithNameAndGuid",
+                                ProjectName,
+                                ProjectGuid,
+                                ParentProjectGuid);
                         }
 
                         projectName = (proj != null ? proj.GetOriginalProjectName() : solutionFolder.GetOriginalProjectName()) + "\\";

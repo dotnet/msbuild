@@ -501,6 +501,7 @@
     <Compile Include="Errors\InternalLoggerException.cs" />
     <Compile Include="Errors\InvalidProjectFileException.cs" />
     <Compile Include="Errors\InvalidToolsetDefinitionException.cs" />
+    <Compile Include="Errors\ProjectErrorUtilities.cs" />
     <Compile Include="Errors\RegistryException.cs" />
     <!-- #### EVALUATION ### -->
     <Compile Include="Evaluation\ConditionEvaluator.cs" />
@@ -656,12 +657,6 @@
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectErrorUtilities.cs">
-      <Link>Errors\ProjectErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectFileErrorUtilities.cs">
-      <Link>Errors\ProjectFileErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>SharedUtilities\ResourceUtilities.cs</Link>

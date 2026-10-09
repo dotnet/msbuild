@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
@@ -419,22 +420,22 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log an error
         /// </summary>
         /// <param name="buildEventContext">The event context for where the error occurred</param>
-        /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location where the error occurred</param>
         /// <param name="messageResourceName">The resource name for the error</param>
         /// <param name="messageArgs">Parameters for the resource string</param>
-        void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs);
+        void LogError(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, IElementLocation location, string messageResourceName, params object[] messageArgs);
 
         /// <summary>
         /// Log an error
         /// </summary>
         /// <param name="buildEventContext">The event context for where the error occurred</param>
-        /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="errorCode"> Error code</param>
         /// <param name="helpKeyword">Help keyword</param>
         /// <param name="location">The location where the error occurred</param>
         /// <param name="message">Error message</param>
-        void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, IElementLocation location, string message);
+        void LogErrorFromText(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, string errorCode, string helpKeyword, IElementLocation location, string message);
 
         /// <summary>
         /// Log an invalid project file exception
@@ -485,22 +486,22 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log a warning
         /// </summary>
         /// <param name="buildEventContext">The event context for where the warning occurred</param>
-        /// <param name="subcategoryResourceName">The subcategory resource name</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="location">The location where the warning occurred</param>
         /// <param name="messageResourceName">The string resource which contains the formatted warning string</param>
         /// <param name="messageArgs">parameters for the string resource</param>
-        void LogWarning(BuildEventContext buildEventContext, string subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs);
+        void LogWarning(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, IElementLocation location, string messageResourceName, params object[] messageArgs);
 
         /// <summary>
         /// Log a warning based on a text message
         /// </summary>
         /// <param name="buildEventContext">The event context for where the warning occurred</param>
-        /// <param name="subcategoryResourceName">The subcategory resource name</param>
+        /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
         /// <param name="warningCode"> Warning code</param>
         /// <param name="helpKeyword"> Help keyword</param>
         /// <param name="location">The location where the warning occurred</param>
         /// <param name="message">The message to be logged as a warning</param>
-        void LogWarningFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string warningCode, string helpKeyword, IElementLocation location, string message);
+        void LogWarningFromText(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, string warningCode, string helpKeyword, IElementLocation location, string message);
         #endregion
 
         #region Log status

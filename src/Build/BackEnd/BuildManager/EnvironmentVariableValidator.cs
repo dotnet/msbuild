@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 using Constants = Microsoft.Build.Framework.Constants;
 
@@ -42,7 +43,7 @@ namespace Microsoft.Build.Execution
             {
                 if (FileSystems.Default.DirectoryExists(dotnetHostPath))
                 {
-                    loggingService.LogWarning(BuildEventContext.Invalid, null, ElementLocation.Empty, "DotnetHostPathIsDirectory", dotnetHostPath);
+                    loggingService.LogWarning(BuildEventContext.Invalid, DiagnosticSubcategory.None, ElementLocation.Empty, "DotnetHostPathIsDirectory", dotnetHostPath);
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

@@ -7,13 +7,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -231,9 +232,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                             catch (BuildCheckConfigurationException e)
                             {
                                 checkContext.DispatchAsWarningFromText(
-                                    null,
-                                    null,
-                                    null,
+                                    DiagnosticSubcategory.None,
+                                    warningCode: null,
+                                    helpKeyword: null,
                                     ElementLocation.Create(projectPath),
                                     e.Message);
                                 invalidChecksToRemove.Add(checkFactoryContext);
@@ -342,9 +343,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 catch (BuildCheckConfigurationException e)
                 {
                     checkContext.DispatchAsWarningFromText(
-                        null,
-                        null,
-                        null,
+                        DiagnosticSubcategory.None,
+                        warningCode: null,
+                        helpKeyword: null,
                         ElementLocation.Create(projectFullPath),
                         e.Message);
                     invalidChecksToRemove.Add(checkFactoryContext);
@@ -394,7 +395,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private void RemoveCheck(CheckFactoryContext checkToRemove)
         {
             var tempColl = new ConcurrentBag<CheckFactoryContext>();
-            
+
             // Take items one by one and only keep those we don't want to remove
             while (_checkRegistry.TryTake(out var item))
             {
@@ -405,13 +406,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 else if (item.MaterializedCheck is not null)
                 {
                     _buildCheckCentralContext.DeregisterCheck(item.MaterializedCheck);
-                    
+
                     var telemetryData = item.MaterializedCheck.GetRuleTelemetryData();
                     foreach (var data in telemetryData)
                     {
                         _ruleTelemetryData.Add(data);
                     }
-                    
+
                     item.MaterializedCheck.Check.Dispose();
                 }
             }

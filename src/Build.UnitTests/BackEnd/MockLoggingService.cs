@@ -15,6 +15,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -393,11 +394,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Logs an error with a subcategory
         /// </summary>
         /// <param name="buildEventContext">The build event context</param>
-        /// <param name="subcategoryResourceName">The subcategory resource</param>
+        /// <param name="subcategory">The subcategory</param>
         /// <param name="location">The location</param>
         /// <param name="messageResourceName">The message resource</param>
         /// <param name="messageArgs">The message args</param>
-        public void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs)
+        public void LogError(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, IElementLocation location, string messageResourceName, params object[] messageArgs)
         {
             _writer(messageResourceName);
             foreach (object o in messageArgs)
@@ -410,12 +411,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Logs a text error
         /// </summary>
         /// <param name="buildEventContext">The event context</param>
-        /// <param name="subcategoryResourceName">The subcategory resource</param>
+        /// <param name="subcategory">The subcategory</param>
         /// <param name="errorCode">The error code</param>
         /// <param name="helpKeyword">A help keyword</param>
         /// <param name="location">The location</param>
         /// <param name="message">The message</param>
-        public void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, IElementLocation location, string message)
+        public void LogErrorFromText(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, string errorCode, string helpKeyword, IElementLocation location, string message)
         {
             _writer(message);
         }
@@ -478,11 +479,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Logs a warning
         /// </summary>
         /// <param name="buildEventContext">The event context</param>
-        /// <param name="subcategoryResourceName">The subcategory resource</param>
+        /// <param name="subcategory">The subcategory</param>
         /// <param name="location">The location</param>
         /// <param name="messageResourceName">The message resource</param>
         /// <param name="messageArgs">The message args</param>
-        public void LogWarning(BuildEventContext buildEventContext, string subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs)
+        public void LogWarning(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, IElementLocation location, string messageResourceName, params object[] messageArgs)
         {
             _writer(messageResourceName);
             foreach (object o in messageArgs)
@@ -495,12 +496,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Logs a text warning
         /// </summary>
         /// <param name="buildEventContext">The build context</param>
-        /// <param name="subcategoryResourceName">The subcategory resource</param>
+        /// <param name="subcategory">The subcategory</param>
         /// <param name="warningCode">The warning code</param>
         /// <param name="helpKeyword">A help keyword</param>
         /// <param name="location">The location</param>
         /// <param name="message">The message</param>
-        public void LogWarningFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string warningCode, string helpKeyword, IElementLocation location, string message)
+        public void LogWarningFromText(BuildEventContext buildEventContext, DiagnosticSubcategory subcategory, string warningCode, string helpKeyword, IElementLocation location, string message)
         {
             _writer(message);
         }

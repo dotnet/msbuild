@@ -3492,14 +3492,6 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <target state="translated">MSB5015: Özellikler, "{0}" projesinin WebsiteProperties bölümünden okunamadı.</target>
         <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
-      <trans-unit id="SubCategoryForSolutionParsingErrors">
-        <source>Solution file</source>
-        <target state="translated">Çözüm dosyası</target>
-        <note>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
-      "MSBUILD : Solution file error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.</note>
-      </trans-unit>
       <trans-unit id="UnrecognizedSolutionComment">
         <source>Unrecognized solution version "{0}", attempting to continue.</source>
         <target state="translated">Tanınmayan çözüm sürümü "{0}"; devam edilmeye çalışılıyor.</target>
