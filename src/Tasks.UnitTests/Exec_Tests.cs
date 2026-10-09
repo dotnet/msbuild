@@ -122,6 +122,18 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [WindowsOnlyFact]
+        public void ExecWithCommandProcessorUsesCmdExe()
+        {
+            Exec exec = PrepareExec("echo ExecWithCommandProcessorUsesCmdExe");
+            exec.UseCommandProcessor = true;
+            exec.ConsoleToMSBuild = true;
+
+            exec.Execute().ShouldBeTrue();
+            exec.UseCommandProcessor.ShouldBeTrue();
+            exec.ConsoleOutput.Select(item => item.ItemSpec).ShouldContain("ExecWithCommandProcessorUsesCmdExe");
+        }
+
         [Fact]
         public void ExitCodeCausesFailure()
         {
