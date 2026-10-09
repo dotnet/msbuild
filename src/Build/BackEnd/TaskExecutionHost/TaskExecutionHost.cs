@@ -235,6 +235,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal ITask TaskInstance { get; private set; }
 
+        internal LoadedType TaskLoadedType => _taskFactoryWrapper?.TaskFactoryLoadedType;
+
         /// <summary>
         /// FOR UNIT TESTING ONLY
         /// </summary>
