@@ -259,6 +259,8 @@ namespace Microsoft.Build.Shared
                     bool hasTimestamp = DirectoryListingCache.TryReadDirectoryTimestamp(path, out DateTime before);
                     entries = enumerate(type, path, "*", directory, false);
                     if (hasTimestamp
+                        // Empty results can also mean enumeration was denied, not that the directory was empty.
+                        && entries.Count != 0
                         && DirectoryListingCache.TryReadDirectoryTimestamp(path, out DateTime after)
                         && before == after)
                     {

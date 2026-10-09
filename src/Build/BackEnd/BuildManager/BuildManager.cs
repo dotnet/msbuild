@@ -898,7 +898,7 @@ namespace Microsoft.Build.Execution
 
                 if (!usesInputCaches && (_buildParameters.ResetCaches || _configCache!.IsConfigCacheSizeLargerThanThreshold()))
                 {
-                    ResetCaches();
+                    ResetCaches(clearDirectoryListings: false);
                 }
                 else
                 {
@@ -1045,11 +1045,19 @@ namespace Microsoft.Build.Execution
         /// Clears out all of the cached information.
         /// </summary>
         public void ResetCaches()
+            => ResetCaches(clearDirectoryListings: true);
+
+        private void ResetCaches(bool clearDirectoryListings)
         {
             lock (_syncLock)
             {
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
                 ErrorIfState(BuildManagerState.Building, "BuildInProgress");
+
+                if (clearDirectoryListings)
+                {
+                    _directoryListingCache?.Clear();
+                }
 
                 _configCache = ((IBuildComponentHost)this).GetComponent<IConfigCache>(BuildComponentType.ConfigCache);
                 _resultsCache = ((IBuildComponentHost)this).GetComponent<IResultsCache>(BuildComponentType.ResultsCache);

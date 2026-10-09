@@ -55,7 +55,7 @@ internal sealed class DirectoryListingCache
     {
         try
         {
-            return NativeMethods.GetLastWriteDirectoryUtcTime(directory, out lastWriteTimeUtc);
+            return NativeMethods.GetLastWriteDirectoryUtcTime(directory, out lastWriteTimeUtc, rejectReparsePoints: true);
         }
         catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
         {

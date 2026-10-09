@@ -697,12 +697,16 @@ internal static class NativeMethods
     /// <param name="fullPath">Full path to the file in the filesystem</param>
     /// <param name="fileModifiedTimeUtc">The UTC last write time for the directory</param>
     internal static bool GetLastWriteDirectoryUtcTime(string fullPath, out DateTime fileModifiedTimeUtc)
+        => GetLastWriteDirectoryUtcTime(fullPath, out fileModifiedTimeUtc, rejectReparsePoints: false);
+
+    internal static bool GetLastWriteDirectoryUtcTime(string fullPath, out DateTime fileModifiedTimeUtc, bool rejectReparsePoints)
     {
 #if FEATURE_WINDOWSINTEROP
         if (IsWindows)
         {
             if (PInvoke.GetFileAttributesEx(fullPath, out WIN32_FILE_ATTRIBUTE_DATA data)
-                && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0)
+                && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0
+                && (!rejectReparsePoints || ((FileAttributes)data.dwFileAttributes & FileAttributes.ReparsePoint) == 0))
             {
                 fileModifiedTimeUtc = DateTime.FromFileTimeUtc(data.ftLastWriteTime.ToLong());
                 return true;
@@ -715,6 +719,12 @@ internal static class NativeMethods
 
         if (Directory.Exists(fullPath))
         {
+            if (rejectReparsePoints && (File.GetAttributes(fullPath) & FileAttributes.ReparsePoint) != 0)
+            {
+                fileModifiedTimeUtc = DateTime.MinValue;
+                return false;
+            }
+
             fileModifiedTimeUtc = Directory.GetLastWriteTimeUtc(fullPath);
             return true;
         }
