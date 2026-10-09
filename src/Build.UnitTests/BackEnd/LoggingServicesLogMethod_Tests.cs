@@ -68,8 +68,8 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildMessageEventArgs messageEvent = new BuildMessageEventArgs("MyMessage", "HelpKeyword", "Sender", MessageImportance.High);
 
             // These three should be logged when OnlyLogCritical Events is on or off
-            BuildWarningEventArgs warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-            BuildErrorEventArgs error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+            BuildWarningEventArgs warning = new BuildWarningEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+            BuildErrorEventArgs error = new BuildErrorEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
             ExternalProjectStartedEventArgs externalStartedEvent = new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames");
 
             ProcessBuildEventHelper loggingService = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
