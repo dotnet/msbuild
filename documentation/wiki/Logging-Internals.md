@@ -133,7 +133,7 @@ The logging mode is dictated by the `LoggerMode` that is injected into the `Logg
 
 Regardless of the mode used - sequential and isolated delivery of events is always guaranteed (single logger will not receive next event before returning from the previous, any logger will not receive an event while it's being processed by a different logger). The future versions might decide to deliver messages to separate loggers in independent mode - where a processing event by a single logger won't block other loggers.
 
-In asynchronous mode, ordinary events enter the FIFO queue immediately, but consumer notifications are coalesced (currently at 64 events or a 16 ms coalescing wait). Errors, warnings, build lifecycle events, critical messages, and custom events request immediate processing.
+In asynchronous mode, events enter the FIFO queue immediately, but consumer notifications are coalesced (currently at 64 events or a 16 ms coalescing wait). All event types use the same notification policy.
 
 Explicit drain requests also bypass coalescing. They wait until the queue is empty and its last logger callback has completed, including any additional events logged by callbacks.
 

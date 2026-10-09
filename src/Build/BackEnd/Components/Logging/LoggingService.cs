@@ -338,6 +338,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _eventSinkDictionary = new Dictionary<int, IBuildEventSink>();
             _nodeId = nodeId;
             _configCache = new Lazy<IConfigCache>(() => (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache), LazyThreadSafetyMode.PublicationOnly);
+
             // Start the project context id count at the nodeId
             _nextProjectId = nodeId;
             _nextEvaluationId = nodeId;
@@ -1401,9 +1402,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     eventQueue.Enqueue(buildEvent);
-                    NotifyLoggingEventProcessor(
-                        enqueueEvent,
-                        buildEvent);
+                    NotifyLoggingEventProcessor(enqueueEvent);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -1512,33 +1511,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private readonly record struct WarningsConfigKey(int InstanceId, int ContextId);
 
-        private static bool ShouldProcessLoggingEventImmediately(object loggingEvent)
+        private void NotifyLoggingEventProcessor(AutoResetEvent enqueueEvent)
         {
-            BuildEventArgs buildEventArgs = loggingEvent switch
-            {
-                BuildEventArgs args => args,
-                KeyValuePair<int, BuildEventArgs> packet => packet.Value,
-                _ => null
-            };
-
-            return buildEventArgs is BuildErrorEventArgs
-                or BuildWarningEventArgs
-                or BuildStartedEventArgs
-                or BuildFinishedEventArgs
-                or BuildCanceledEventArgs
-                or CriticalBuildMessageEventArgs
-                or CustomBuildEventArgs;
-        }
-
-        private void NotifyLoggingEventProcessor(
-            AutoResetEvent enqueueEvent,
-            object loggingEvent)
-        {
-            int eventCount =
-                Interlocked.Increment(ref _loggingEventsSinceLastDrain);
-
-            if (eventCount >= LoggingEventNotificationBatchSize ||
-                ShouldProcessLoggingEventImmediately(loggingEvent))
+            if (Interlocked.Increment(ref _loggingEventsSinceLastDrain) >= LoggingEventNotificationBatchSize)
             {
                 RequestImmediateLoggingEventProcessing(enqueueEvent);
                 return;
@@ -1554,8 +1529,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
-        private void RequestImmediateLoggingEventProcessing(
-            AutoResetEvent enqueueEvent)
+        private void RequestImmediateLoggingEventProcessing(AutoResetEvent enqueueEvent)
         {
             if (Interlocked.Exchange(
                     ref _loggingEventNotificationState,
@@ -1677,9 +1651,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Capture pump task in local variable as cancelling event processing is nulling _loggingEventProcessingThread.
             var pumpTask = _loggingEventProcessingThread;
-            Interlocked.Exchange(
-                ref _loggingEventNotificationState,
-                LoggingEventNotificationActive);
             _loggingEventProcessingCancellation.Cancel();
             pumpTask.Join();
         }
