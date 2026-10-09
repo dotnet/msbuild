@@ -19,7 +19,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     where M : class, IMetadatum
     where D : class, IItemDefinition<M>
 {
-    private class MemoizedOperation : IItemOperation
+    private class MemoizedOperation
     {
         public LazyItemOperation Operation { get; }
         private Dictionary<ISet<string>, OrderedItemDataCollection> _cache;
