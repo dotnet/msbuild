@@ -32,6 +32,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     private readonly LoggingContext _loggingContext;
     private readonly EvaluationProfiler _evaluationProfiler;
 
+    /// <summary>
+    ///  Records condition-true item elements for optional evaluated-element tracking
+    ///  and item-glob synthesis.
+    /// </summary>
+    private readonly EvaluatedItemElementRecorder _evaluatedItemElementRecorder;
+
     private int _nextElementOrder = 0;
 
     private Dictionary<string, LazyItemList> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
@@ -44,7 +50,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
     protected FileMatcher FileMatcher => EvaluationContext.FileMatcher;
 
-    public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
+    public LazyItemEvaluator(
+        IEvaluatorData<P, I, M, D> data,
+        IItemFactory<I, I> itemFactory,
+        LoggingContext loggingContext,
+        EvaluationProfiler evaluationProfiler,
+        EvaluationContext evaluationContext,
+        EvaluatedItemElementRecorder evaluatedItemElementRecorder)
     {
         _outerEvaluatorData = data;
         _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext, loggingContext);
@@ -53,40 +65,93 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         _itemFactory = itemFactory;
         _loggingContext = loggingContext;
         _evaluationProfiler = evaluationProfiler;
+        _evaluatedItemElementRecorder = evaluatedItemElementRecorder;
 
         EvaluationContext = evaluationContext;
     }
 
-    public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
+    /// <summary>
+    ///  Processes item groups in order and collects their applicable item operations.
+    /// </summary>
+    /// <param name="itemGroupElements">The item groups in evaluation order.</param>
+    /// <param name="rootDirectory">The root project's directory, including for imported item elements.</param>
+    public void ProcessItemGroups(List<ProjectItemGroupElement> itemGroupElements, string rootDirectory)
     {
-        return EvaluateCondition(element.Condition, element, expanderOptions, parserOptions, _expander, this);
+        foreach (ProjectItemGroupElement itemGroup in itemGroupElements)
+        {
+            using (_evaluationProfiler.TrackElement(itemGroup))
+            {
+                ProcessItemGroupElement(itemGroup, rootDirectory);
+            }
+        }
     }
 
-    private static bool EvaluateCondition(
-        string condition,
-        ProjectElement element,
-        ExpanderOptions expanderOptions,
-        ParserOptions parserOptions,
-        Expander<P, I> expander,
-        LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+    /// <summary>
+    ///  Processes the items in an item group and collects the applicable item operations.
+    /// </summary>
+    /// <param name="itemGroupElement">The item group to process.</param>
+    /// <param name="rootDirectory">The root project's directory, including for imported item elements.</param>
+    private void ProcessItemGroupElement(ProjectItemGroupElement itemGroupElement, string rootDirectory)
     {
+        bool groupCondition = EvaluateCondition(
+            itemGroupElement,
+            ExpanderOptions.ExpandPropertiesAndItems,
+            ParserOptions.AllowPropertiesAndItemLists);
+
+        bool keepEvaluating = _outerEvaluatorData.ShouldEvaluateForDesignTime && _outerEvaluatorData.CanEvaluateElementsWithFalseConditions;
+
+        if (groupCondition || keepEvaluating)
+        {
+            foreach (ProjectItemElement itemElement in itemGroupElement.Items)
+            {
+                using (_evaluationProfiler.TrackElement(itemElement))
+                {
+                    bool itemCondition = EvaluateCondition(
+                        itemElement,
+                        ExpanderOptions.ExpandPropertiesAndItems,
+                        ParserOptions.AllowPropertiesAndItemLists);
+
+                    if (itemCondition || keepEvaluating)
+                    {
+                        bool conditionResult = groupCondition && itemCondition;
+
+                        AddItemOperation(itemElement, rootDirectory, conditionResult);
+
+                        if (conditionResult)
+                        {
+                            _evaluatedItemElementRecorder.Record(itemElement);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
+        => EvaluateCondition(element, _expander, expanderOptions, parserOptions);
+
+    private bool EvaluateCondition(ProjectElement element, Expander<P, I> expander, ExpanderOptions expanderOptions, ParserOptions parserOptions)
+    {
+        string condition = element.Condition;
         if (condition?.Length == 0)
         {
             return true;
         }
+
         MSBuildEventSource.Log.EvaluateConditionStart(condition);
 
-        using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
+        using (_evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
         {
             bool result = ConditionEvaluator.EvaluateCondition(
                 condition,
                 parserOptions,
                 expander,
                 expanderOptions,
-                GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
+                GetCurrentDirectoryForConditionEvaluation(element),
                 element.ConditionLocation,
-                lazyEvaluator.FileSystem,
-                loggingContext: lazyEvaluator._loggingContext);
+                FileSystem,
+                loggingContext: _loggingContext);
+
             MSBuildEventSource.Log.EvaluateConditionStop(condition, result);
 
             return result;
@@ -99,17 +164,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     /// For Dev10+, we'll fix this, and use the current project file/targets directory for Import, ImportGroup and PropertyGroup
     /// but the root project file for the rest. Inside of targets will use the root project file as always.
     /// </summary>
-    private static string GetCurrentDirectoryForConditionEvaluation(ProjectElement element, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
-    {
-        if (element is ProjectPropertyGroupElement || element is ProjectImportElement || element is ProjectImportGroupElement)
-        {
-            return element.ContainingProject.DirectoryPath;
-        }
-        else
-        {
-            return lazyEvaluator._outerEvaluatorData.Directory;
-        }
-    }
+    private string GetCurrentDirectoryForConditionEvaluation(ProjectElement element)
+        => element is ProjectPropertyGroupElement or ProjectImportElement or ProjectImportGroupElement
+            ? element.ContainingProject.DirectoryPath
+            : _outerEvaluatorData.Directory;
 
     private void AddReferencedItemList(string itemType, IDictionary<string, LazyItemList> referencedItemLists)
     {
@@ -126,7 +184,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                                 .OrderBy(itemData => itemData.ElementOrder);
     }
 
-    public void ProcessItemElement(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
+    private void AddItemOperation(ProjectItemElement itemElement, string rootDirectory, bool conditionResult)
     {
         LazyItemOperation operation = null;
 
@@ -173,8 +231,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         // Process include
         ProcessItemSpec(rootDirectory, itemElement.Include, itemElement.IncludeLocation, operationBuilder);
-
-        // Code corresponds to Evaluator.EvaluateItemElement
 
         // Process exclude (STEP 4: Evaluate, split, expand and subtract any Exclude)
         if (itemElement.Exclude.Length > 0)

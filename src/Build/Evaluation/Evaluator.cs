@@ -81,19 +81,6 @@ namespace Microsoft.Build.Evaluation
         private readonly List<ProjectItemGroupElement> _itemGroupElements;
 
         /// <summary>
-        /// When <c>MSBuildProvideItemGlobs</c> requests glob information, the set of
-        /// item types to expose; otherwise <see langword="null"/> (the feature is off and costs nothing).
-        /// </summary>
-        private HashSet<string> _itemGlobRequestedTypes;
-
-        /// <summary>
-        /// Evaluated include/exclude/remove item elements (condition-true, in document order) of the item types in
-        /// <see cref="_itemGlobRequestedTypes"/>, collected during the items pass so that <c>MSBuildItemGlob</c>
-        /// items can be synthesized from them. <see langword="null"/> when the feature is off.
-        /// </summary>
-        private List<ProjectItemElement> _itemGlobElements;
-
-        /// <summary>
         /// List of ProjectItemDefinitionElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
@@ -451,7 +438,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Helper that creates a list of ProjectItem's given an unevaluated Include and a ProjectRootElement.
-        /// Used by both Evaluator.EvaluateItemElement and by Project.AddItem.
+        /// Used by Project.AddItem.
         /// </summary>
         internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string projectFilePath, BuildEventContext buildEventContext)
         {
@@ -801,28 +788,24 @@ namespace Microsoft.Build.Evaluation
                     return;
                 }
 
-                LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
-                long pass3MeasurementStart = 0;
+                // Pass3: evaluate project items
+                MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
+                long pass3MeasurementStart = EvaluationInstrumentation.StartMeasurement();
+
+                EvaluatedItemElementRecorder evaluatedItemElementRecorder = CreateEvaluatedItemElementRecorder();
+                LazyItemEvaluator<P, I, M, D> lazyEvaluator = new(
+                    _data,
+                    _itemFactory,
+                    _evaluationLoggingContext,
+                    _evaluationProfiler,
+                    _evaluationContext,
+                    evaluatedItemElementRecorder);
+
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
-                    // comment next line to turn off lazy Evaluation
-                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext);
-
-                    // Pass3: evaluate project items
-                    MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
-                    pass3MeasurementStart = EvaluationInstrumentation.StartMeasurement();
-
                     SynthesizeImportedProjectItems();
 
-                    DetectItemGlobRequest();
-
-                    foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
-                    {
-                        using (_evaluationProfiler.TrackElement(itemGroup))
-                        {
-                            EvaluateItemGroupElement(itemGroup, lazyEvaluator);
-                        }
-                    }
+                    lazyEvaluator.ProcessItemGroups(_itemGroupElements, _projectRootElement.DirectoryPath);
                 }
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.LazyItems))
@@ -850,7 +833,7 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator = null;
                 }
 
-                SynthesizeItemGlobItems();
+                SynthesizeItemGlobItems(evaluatedItemElementRecorder.ItemGlobElements);
 
                 double pass3DurationSeconds = EvaluationInstrumentation.EndPassMeasurement(pass3MeasurementStart);
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
@@ -1165,25 +1148,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Evaluate the items in the itemgroup and add the applicable ones to the data passed in
-        /// </summary>
-        private void EvaluateItemGroupElement(ProjectItemGroupElement itemGroupElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
-        {
-            bool itemGroupConditionResult = lazyEvaluator.EvaluateConditionWithCurrentState(itemGroupElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
-
-            if (itemGroupConditionResult || (_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
-            {
-                foreach (ProjectItemElement itemElement in itemGroupElement.Items)
-                {
-                    using (_evaluationProfiler.TrackElement(itemElement))
-                    {
-                        EvaluateItemElement(itemGroupConditionResult, itemElement, lazyEvaluator);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Retrieve the matching ProjectTargetInstance from the cache and add it to the provided collection.
         /// If it is not cached already, read it and cache it.
         /// Do not evaluate anything: this occurs during build.
@@ -1471,25 +1435,6 @@ namespace Microsoft.Build.Evaluation
                 _expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
 
                 _data.SetProperty(propertyElement, evaluatedValue, _evaluationLoggingContext);
-            }
-        }
-
-        private void EvaluateItemElement(bool itemGroupConditionResult, ProjectItemElement itemElement, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
-        {
-            bool itemConditionResult = lazyEvaluator.EvaluateConditionWithCurrentState(itemElement, ExpanderOptions.ExpandPropertiesAndItems, ParserOptions.AllowPropertiesAndItemLists);
-
-            if (!itemConditionResult && !(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
-            {
-                return;
-            }
-
-            var conditionResult = itemGroupConditionResult && itemConditionResult;
-
-            lazyEvaluator.ProcessItemElement(_projectRootElement.DirectoryPath, itemElement, conditionResult);
-
-            if (conditionResult)
-            {
-                RecordEvaluatedItemElement(itemElement);
             }
         }
 
@@ -2657,17 +2602,24 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private void RecordEvaluatedItemElement(ProjectItemElement itemElement)
+        /// <summary>
+        ///  Creates an item-element recorder using the project load settings and requested item globs.
+        /// </summary>
+        /// <returns>
+        ///  A recorder for the requested collections, or the default value when no recording is requested.
+        /// </returns>
+        private EvaluatedItemElementRecorder CreateEvaluatedItemElementRecorder()
         {
-            if ((_loadSettings & ProjectLoadSettings.RecordEvaluatedItemElements) == ProjectLoadSettings.RecordEvaluatedItemElements)
-            {
-                _data.EvaluatedItemElements.Add(itemElement);
-            }
+            bool recordEvaluatedItemElements = (_loadSettings & ProjectLoadSettings.RecordEvaluatedItemElements) == ProjectLoadSettings.RecordEvaluatedItemElements;
+            string provideItemGlobsValue = _data.GetProperty(Constants.MSBuildProvideItemGlobsPropertyName)?.EvaluatedValue;
 
-            if (_itemGlobRequestedTypes != null && _itemGlobRequestedTypes.Contains(itemElement.ItemType))
-            {
-                _itemGlobElements.Add(itemElement);
-            }
+            return recordEvaluatedItemElements && provideItemGlobsValue is not null
+                ? EvaluatedItemElementRecorder.Create(_data.EvaluatedItemElements, provideItemGlobsValue)
+                    : recordEvaluatedItemElements
+                ? EvaluatedItemElementRecorder.Create(_data.EvaluatedItemElements)
+                    : provideItemGlobsValue is not null
+                ? EvaluatedItemElementRecorder.Create(provideItemGlobsValue)
+                    : default;
         }
 
         /// <summary>
@@ -2830,45 +2782,27 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Detects whether <c>MSBuildProvideItemGlobs</c> requests glob information
-        /// for one or more item types and, if so, prepares to collect their evaluated item elements. Does nothing
-        /// (and allocates nothing) when the property is unset or empty, keeping the feature zero-cost when unused.
-        /// </summary>
-        private void DetectItemGlobRequest()
-        {
-            P provideProperty = _data.GetProperty(Constants.MSBuildProvideItemGlobsPropertyName);
-            if (provideProperty is null || string.IsNullOrWhiteSpace(provideProperty.EvaluatedValue))
-            {
-                return;
-            }
-
-            _itemGlobRequestedTypes = new HashSet<string>(
-                ExpressionShredder.SplitSemiColonSeparatedList(provideProperty.EvaluatedValue),
-                StringComparer.OrdinalIgnoreCase);
-            _itemGlobElements = new List<ProjectItemElement>();
-        }
-
-        /// <summary>
         /// When one or more item types were requested via <c>MSBuildProvideItemGlobs</c>,
         /// synthesizes <c>MSBuildItemGlob</c> items exposing the unevaluated include/exclude/remove glob patterns of
         /// those item types. Each include element yields one item whose identity is the item type and whose
         /// <c>Include</c>, <c>Exclude</c> and <c>Remove</c> metadata carry the patterns with wildcards preserved.
         /// The patterns match what <see cref="Project.GetAllGlobs()"/> returns.
         /// </summary>
+        /// <param name="itemGlobElements">The recorded item elements, or <see langword="null"/> when glob recording is disabled.</param>
         /// <remarks>
         /// Called at the end of the items pass, after all items have been evaluated, so that item references in
         /// exclude/remove specs resolve to their final values — the same point at which <c>GetAllGlobs</c> operates.
         /// The patterns live in metadata rather than in the item's include, so they are never expanded against the
         /// file system.
         /// </remarks>
-        private void SynthesizeItemGlobItems()
+        private void SynthesizeItemGlobItems(IReadOnlyList<ProjectItemElement> itemGlobElements)
         {
-            if (_itemGlobElements is null || _itemGlobElements.Count == 0)
+            if (itemGlobElements is null || itemGlobElements.Count == 0)
             {
                 return;
             }
 
-            List<GlobResult> globResults = GlobResultBuilder.BuildGlobResults(_itemGlobElements, _expander);
+            List<GlobResult> globResults = GlobResultBuilder.BuildGlobResults(itemGlobElements, _expander);
             if (globResults.Count == 0)
             {
                 return;
