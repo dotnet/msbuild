@@ -77,6 +77,16 @@
         <target state="translated">"{0}" yolundan ve "{1}" framework adından bir başvuru bütünleştirilmiş kod yolu oluşturmaya çalışılırken bir hata oluştu. {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">"{0}" yeniden dağıtım liste dosyası okunurken bir hata oluştu. {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">"{0}" yolunda bulunan Framework, başvuru derlemesi yolları olarak "{1}" yolundaki framework'ü eklemek istedi, ancak bir hata oluştu. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Hata ayıklama günlükleri için kullanılan "{0}" yolu çok uzun. MSBUILDDEBUGPATH ortam değişkenini kullanarak yolu daha kısa bir değere ayarlayın veya sistem yapılandırmanızı uzun yollara izin verecek şekilde değiştirin.</target>
@@ -122,7 +132,17 @@
         <target state="translated">Yol: {0}, işletim sisteminin en yüksek yol sınırını aşıyor. Tam dosya adı en fazla {1} karakter olmalıdır.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: Platform bildirim dosyası, "{0}" konumunda bulunamadı.</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">.NET Framework "{0}" sürümü desteklenmiyor. Lütfen Microsoft.Build.Utilities.TargetDotNetFrameworkVersion sabit listesinden bir değer belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">.NET Framework "{0}" sürümü desteklenmiyor. Lütfen Microsoft.Build.Utilities.TargetDotNetFrameworkVersion sabit listesinden bir değer belirtin.</target>
         <note />

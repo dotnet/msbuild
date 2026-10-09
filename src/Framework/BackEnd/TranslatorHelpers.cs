@@ -8,6 +8,9 @@ using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
 using System.Reflection;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using AssemblyHashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm;
 
 #nullable disable
@@ -386,7 +389,13 @@ namespace Microsoft.Build.BackEnd
                 cultureInfo = assemblyName.CultureInfo;
                 hashAlgorithm = assemblyName.HashAlgorithm;
                 versionCompatibility = assemblyName.VersionCompatibility;
+#if NET
+                // CodeBase always returns an empty string under Native AOT. Avoid the incompatible read so ILC can
+                // remove it without changing the result.
+                codeBase = RuntimeFeature.IsDynamicCodeSupported ? assemblyName.CodeBase : string.Empty;
+#else
                 codeBase = assemblyName.CodeBase;
+#endif
 
                 publicKey = assemblyName.GetPublicKey(); // TODO: no need to serialize, public key is not used anywhere in context of RAR, only public key token
                 publicKeyToken = assemblyName.GetPublicKeyToken();

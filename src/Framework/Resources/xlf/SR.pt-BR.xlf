@@ -77,6 +77,16 @@
         <target state="translated">Erro ao tentar gerar um caminho de assembly de referência no caminho "{0}" e o moniker de estrutura "{1}". {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidRedistFile">
+        <source>There was an error reading the redist list file "{0}". {1}</source>
+        <target state="needs-review-translation">Erro ao ler o arquivo da lista de pacote redistribuível "{0}". {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotCreateChain">
+        <source>The Framework at path "{0}" tried to include the framework at path "{1}" as part of its reference assembly paths but there was an error. {2}</source>
+        <target state="needs-review-translation">A estrutura no caminho "{0}" tentou incluir a estrutura do caminho "{1}" como parte de seus caminhos de assembly de referência, mas ocorreu um erro. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">O caminho "{0}" usado para logs de depuração é muito longo. Defina-o para um valor mais curto usando a variável de ambiente MSBUILDDEBUGPATH ou altere a configuração do sistema para permitir caminhos longos.</target>
@@ -122,7 +132,17 @@
         <target state="translated">Caminho: {0} excede o limite máximo do caminho do SO. O nome do arquivo totalmente qualificado deve ter menos de {1} caracteres.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformManifest_MissingPlatformXml">
+        <source>MSB6010: Could not find platform manifest file at "{0}".</source>
+        <target state="translated">MSB6010: não foi possível encontrar o arquivo de manifesto da plataforma em "{0}".</target>
+        <note>{StrBegin="MSB6010: "}</note>
+      </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">Não há suporte para a versão "{0}" do .NET Framework. Especifique um valor da enumeração Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolLocationHelper_UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
         <target state="translated">Não há suporte para a versão "{0}" do .NET Framework. Especifique um valor da enumeração Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
