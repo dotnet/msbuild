@@ -29,13 +29,12 @@ namespace Microsoft.Build.Execution
     /// Wraps an evaluated item for build purposes
     /// </summary>
     /// <remarks>
-    /// Does not store XML location information. That is not needed by the build process as all correctness checks
-    /// and evaluation has already been performed, so it is unnecessary bulk.
+    /// Stores the source line and column so tasks can associate diagnostics with the XML element that produced the item.
     /// </remarks>
     [DebuggerDisplay("{ItemType}={EvaluatedInclude} #DirectMetadata={DirectMetadataCount})")]
     public class ProjectItemInstance :
         IItem<ProjectMetadataInstance>,
-        ITaskItem2,
+        ITaskItem3,
         IMetadataTable,
         ITranslatable,
         IMetadataContainer,
@@ -67,8 +66,8 @@ namespace Microsoft.Build.Execution
         /// and during the build when tasks emit items.
         /// Mutability follows the project.
         /// </summary>
-        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, string definingFileEscaped)
-            : this(project, itemType, includeEscaped, includeEscaped, definingFileEscaped)
+        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, string definingFileEscaped, int sourceLineNumber = 0, int sourceColumnNumber = 0)
+            : this(project, itemType, includeEscaped, includeEscaped, definingFileEscaped, sourceLineNumber, sourceColumnNumber)
         {
         }
 
@@ -79,8 +78,8 @@ namespace Microsoft.Build.Execution
         /// and during the build when tasks emit items.
         /// Mutability follows the project.
         /// </summary>
-        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, string includeBeforeWildcardExpansionEscaped, string definingFileEscaped)
-            : this(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, null /* no direct metadata */, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false)
+        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, string includeBeforeWildcardExpansionEscaped, string definingFileEscaped, int sourceLineNumber = 0, int sourceColumnNumber = 0)
+            : this(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, null /* no direct metadata */, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false, sourceLineNumber, sourceColumnNumber)
         {
         }
 
@@ -105,9 +104,11 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<string, string> directMetadata,
             IList<ProjectItemDefinitionInstance> itemDefinitions,
             string definingFileEscaped,
-            bool useItemDefinitionsWithoutModification)
+            bool useItemDefinitionsWithoutModification,
+            int sourceLineNumber = 0,
+            int sourceColumnNumber = 0)
         {
-            CommonConstructor(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, directMetadata, itemDefinitions, definingFileEscaped, useItemDefinitionsWithoutModification);
+            CommonConstructor(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, directMetadata, itemDefinitions, definingFileEscaped, useItemDefinitionsWithoutModification, sourceLineNumber, sourceColumnNumber);
         }
 
         /// <summary>
@@ -121,7 +122,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Not public since the only creation scenario is setting on a project.
         /// </remarks>
-        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, IEnumerable<KeyValuePair<string, string>> directMetadata, string definingFileEscaped)
+        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, IEnumerable<KeyValuePair<string, string>> directMetadata, string definingFileEscaped, int sourceLineNumber = 0, int sourceColumnNumber = 0)
         {
             ImmutableDictionary<string, string> metadata = null;
 
@@ -131,7 +132,7 @@ namespace Microsoft.Build.Execution
                     .SetItems(directMetadata, ProjectMetadataInstance.VerifyThrowReservedName);
             }
 
-            CommonConstructor(project, itemType, includeEscaped, includeEscaped, metadata, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false);
+            CommonConstructor(project, itemType, includeEscaped, includeEscaped, metadata, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false, sourceLineNumber, sourceColumnNumber);
         }
 
         /// <summary>
@@ -170,6 +171,11 @@ namespace Microsoft.Build.Execution
         {
             get { return _project; }
         }
+
+        /// <summary>
+        /// Gets the source location of the XML element that produced this item.
+        /// </summary>
+        public TaskItemLocation? Location => _taskItem.Location;
 
         /// <summary>
         /// Item type, for example "Compile"
@@ -732,7 +738,9 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<string, string> directMetadata,
             IList<ProjectItemDefinitionInstance> itemDefinitions,
             string definingFileEscaped,
-            bool useItemDefinitionsWithoutModification)
+            bool useItemDefinitionsWithoutModification,
+            int sourceLineNumber,
+            int sourceColumnNumber)
         {
             ArgumentNullException.ThrowIfNull(projectToUse, "project");
             ArgumentException.ThrowIfNullOrEmpty(itemTypeToUse, "itemType");
@@ -771,7 +779,9 @@ namespace Microsoft.Build.Execution
                             inheritedItemDefinitions,
                             _project.Directory,
                             _project.IsImmutable,
-                            definingFileEscaped);
+                            definingFileEscaped,
+                            sourceLineNumber,
+                            sourceColumnNumber);
         }
 
         /// <summary>
@@ -782,7 +792,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif
-            ITaskItem2,
+            ITaskItem3,
             IItem<ProjectMetadataInstance>,
             ITranslatable,
             IEquatable<TaskItem>,
@@ -792,6 +802,10 @@ namespace Microsoft.Build.Execution
             /// The source file that defined this item.
             /// </summary>
             private string _definingFileEscaped;
+
+            private int _sourceLineNumber;
+
+            private int _sourceColumnNumber;
 
             /// <summary>
             /// Evaluated include, escaped as necessary.
@@ -845,8 +859,8 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Creates an instance of this class given the item-spec.
             /// </summary>
-            internal TaskItem(string includeEscaped, string definingFileEscaped)
-                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped)
+            internal TaskItem(string includeEscaped, string definingFileEscaped, int sourceLineNumber = 0, int sourceColumnNumber = 0)
+                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped, sourceLineNumber, sourceColumnNumber)
             {
             }
 
@@ -861,7 +875,9 @@ namespace Microsoft.Build.Execution
                               IList<ProjectItemDefinitionInstance> itemDefinitions,
                               string projectDirectory,
                               bool immutable,
-                              string definingFileEscaped) // the actual project file (or import) that defines this item.
+                              string definingFileEscaped,
+                              int sourceLineNumber = 0,
+                              int sourceColumnNumber = 0) // the actual project file (or import) that defines this item.
             {
                 ArgumentException.ThrowIfNullOrEmpty(includeEscaped);
                 ArgumentException.ThrowIfNullOrEmpty(includeBeforeWildcardExpansionEscaped);
@@ -873,6 +889,8 @@ namespace Microsoft.Build.Execution
                 _projectDirectory = projectDirectory;
                 _isImmutable = immutable;
                 _definingFileEscaped = definingFileEscaped;
+                _sourceLineNumber = sourceLineNumber;
+                _sourceColumnNumber = sourceColumnNumber;
             }
 
             /// <summary>
@@ -895,6 +913,8 @@ namespace Microsoft.Build.Execution
                 source.CopyMetadataTo(this, addOriginalItemSpec);
                 _cachedModifiers = source._cachedModifiers;
                 _definingFileEscaped = source._definingFileEscaped;
+                _sourceLineNumber = source._sourceLineNumber;
+                _sourceColumnNumber = source._sourceColumnNumber;
             }
 
             /// <summary>
@@ -912,6 +932,11 @@ namespace Microsoft.Build.Execution
             {
                 this.TranslateWithInterning(translator, interner);
             }
+
+            /// <inheritdoc/>
+            public TaskItemLocation? Location => _sourceLineNumber == 0
+                ? null
+                : new TaskItemLocation(EscapingUtilities.UnescapeAll(_definingFileEscaped), _sourceLineNumber, _sourceColumnNumber);
 
             /// <summary>
             /// Gets or sets the unescaped include, or "name", for the item.
@@ -1672,6 +1697,8 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _includeBeforeWildcardExpansionEscaped);
                 translator.Translate(ref _isImmutable);
                 translator.Translate(ref _definingFileEscaped);
+                translator.Translate(ref _sourceLineNumber);
+                translator.Translate(ref _sourceColumnNumber);
 
                 TranslatorHelpers.Translate(
                     translator,
@@ -1890,6 +1917,8 @@ namespace Microsoft.Build.Execution
                     (capacity) => new List<ProjectItemDefinitionInstance>(capacity));
                 translator.Translate(ref _isImmutable);
                 translator.Translate(ref _includeEscaped);
+                translator.Translate(ref _sourceLineNumber);
+                translator.Translate(ref _sourceColumnNumber);
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
                 {
@@ -2210,6 +2239,10 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 private ProjectInstance _project;
 
+                private int _sourceLineNumber;
+
+                private int _sourceColumnNumber;
+
                 /// <summary>
                 /// Constructor not taking an item type.
                 /// This indicates that the user of this factory should set the item type
@@ -2245,7 +2278,20 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public ProjectItemElement ItemElement
                 {
-                    set { ItemType = value.ItemType; }
+                    set
+                    {
+                        ItemType = value.ItemType;
+                        SourceLocation = value.Location;
+                    }
+                }
+
+                internal ElementLocation SourceLocation
+                {
+                    set
+                    {
+                        _sourceLineNumber = value?.Line ?? 0;
+                        _sourceColumnNumber = value?.Column ?? 0;
+                    }
                 }
 
                 /// <summary>
@@ -2258,7 +2304,7 @@ namespace Microsoft.Build.Execution
                 {
                     Assumed.NotNullOrEmpty(ItemType);
 
-                    ProjectItemInstance item = new ProjectItemInstance(_project, ItemType, include, definingProject);
+                    ProjectItemInstance item = new ProjectItemInstance(_project, ItemType, include, definingProject, _sourceLineNumber, _sourceColumnNumber);
 
                     return item;
                 }
@@ -2291,7 +2337,7 @@ namespace Microsoft.Build.Execution
                 {
                     Assumed.NotNullOrEmpty(ItemType);
 
-                    return new ProjectItemInstance(_project, ItemType, evaluatedInclude, evaluatedIncludeBeforeWildcardExpansion, definingProject);
+                    return new ProjectItemInstance(_project, ItemType, evaluatedInclude, evaluatedIncludeBeforeWildcardExpansion, definingProject, _sourceLineNumber, _sourceColumnNumber);
                 }
 
                 /// <summary>
@@ -2344,7 +2390,7 @@ namespace Microsoft.Build.Execution
                         itemDefinitionsClone.Add(sourceItemDefinition);
                     }
 
-                    return new ProjectItemInstance(_project, ItemType, includeEscaped, includeBeforeWildcardExpansionEscaped, source._taskItem.DirectMetadata, itemDefinitionsClone, definingProject, useItemDefinitionsWithoutModification: false);
+                    return new ProjectItemInstance(_project, ItemType, includeEscaped, includeBeforeWildcardExpansionEscaped, source._taskItem.DirectMetadata, itemDefinitionsClone, definingProject, useItemDefinitionsWithoutModification: false, _sourceLineNumber, _sourceColumnNumber);
                 }
             }
 

@@ -14,6 +14,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -1683,6 +1684,61 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 TaskItemComparer.Instance.Compare(_twoItems[index], new TaskItem(outputItem)).ShouldBe(0);
                 index++;
+            }
+        }
+
+        [Fact]
+        public void TaskItemOutputsTrackOutputLocation()
+        {
+            ProjectItemInstance source = new(CreateTestProject(), "Source", "item%3Bname.txt", "source.proj", 3, 4);
+            source.SetMetadata("Custom", "value%3B");
+            ITaskItem[] outputs =
+            [
+                new TaskItem(source),
+                new Microsoft.Build.Utilities.TaskItem(source),
+                new TaskItem<string>(source),
+                new TaskThatReturnsDictionaryTaskItem.MinimalDictionaryTaskItem(
+                    new MinimalDictionary<string, string> { { "Custom", source.GetMetadataValue("Custom") } }),
+            ];
+            TaskBuilderTestTask task = Assert.IsType<TaskBuilderTestTask>(_host.TaskInstance);
+            task.ItemArrayParam = [null, outputs[0], outputs[1], null, outputs[2], outputs[3], null];
+            ElementLocation parameterLocation = ElementLocation.Create(
+                Path.Combine(Path.GetTempPath(), "output%3B;$(literal).proj"), 17, 9);
+
+            _host.GatherTaskOutputs("ItemArrayOutput", parameterLocation, true, "output").ShouldBeTrue();
+
+            ProjectItemInstance[] items = _bucket.Lookup.GetItems("output").ToArray();
+            items.Length.ShouldBe(outputs.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                items[i].EvaluatedInclude.ShouldBe(outputs[i].ItemSpec);
+                items[i].GetMetadataValue("Custom").ShouldBe(source.GetMetadataValue("Custom"));
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(parameterLocation.File);
+                items[i].Location.ShouldBe(new TaskItemLocation(parameterLocation.File, parameterLocation.Line, parameterLocation.Column));
+            }
+        }
+
+        [Theory]
+        [InlineData("StringParam", "StringOutput", "FOO")]
+        [InlineData("StringArrayParam", "StringArrayOutput", "FOO;bar")]
+        [InlineData("IntParam", "IntOutput", "42")]
+        [InlineData("IntArrayParam", "IntArrayOutput", "42;99")]
+        public void PrimitiveOutputsTrackOutputLocation(string parameterName, string outputName, string value)
+        {
+            SetTaskParameter(parameterName, value);
+            ElementLocation parameterLocation = ElementLocation.Create(
+                Path.Combine(Path.GetTempPath(), "output%3B;$(literal).proj"), 17, 9);
+
+            _host.GatherTaskOutputs(outputName, parameterLocation, true, "output").ShouldBeTrue();
+
+            ProjectItemInstance[] items = _bucket.Lookup.GetItems("output").ToArray();
+            string[] expectedIncludes = value.Split(';');
+            items.Length.ShouldBe(expectedIncludes.Length);
+            for (int i = 0; i < items.Length; i++)
+            {
+                items[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(parameterLocation.File);
+                items[i].Location.ShouldBe(new TaskItemLocation(parameterLocation.File, parameterLocation.Line, parameterLocation.Column));
             }
         }
 
