@@ -28,6 +28,8 @@ namespace Microsoft.Build.UnitTests.Logging
     /// </summary>
     public class LoggingService_Tests
     {
+        private readonly ITestOutputHelper _output;
+
         #region Data
         /// <summary>
         /// An already instantiated and initialized service.
@@ -44,8 +46,9 @@ namespace Microsoft.Build.UnitTests.Logging
         /// This method is run before each test case is run.
         /// We instantiate and initialize a new logging service each time
         /// </summary>
-        public LoggingService_Tests()
+        public LoggingService_Tests(ITestOutputHelper output)
         {
+            _output = output;
             InitializeLoggingService();
         }
 
@@ -1157,6 +1160,181 @@ namespace Microsoft.Build.UnitTests.Logging
             _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Normal));
             _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
         }
+        #endregion
+
+        #region Asynchronous Logging Tests
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(3)]
+        public void WaitForLoggingToProcessEventsDrainsCallbackGeneratedEvents(int waiterCount)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            using ManualResetEventSlim initialEntered = new(false);
+            using ManualResetEventSlim releaseInitial = new(false);
+            using ManualResetEventSlim nestedEntered = new(false);
+            using ManualResetEventSlim releaseNested = new(false);
+            TimeSpan timeout = TimeSpan.FromSeconds(10);
+
+            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            loggingService.InitializeComponent(new MockHost());
+            MockLogger logger = new(_output);
+            logger.AdditionalHandlers.Add((_, args) =>
+            {
+                switch (args.Message)
+                {
+                    case "initial":
+                        initialEntered.Set();
+                        releaseInitial.Wait(timeout).ShouldBeTrue();
+                        loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("follow-up", null, null, MessageImportance.High));
+                        break;
+                    case "follow-up":
+                        loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("nested", null, null, MessageImportance.High));
+                        break;
+                    case "nested":
+                        nestedEntered.Set();
+                        releaseNested.Wait(timeout).ShouldBeTrue();
+                        break;
+                }
+            });
+            loggingService.RegisterLogger(logger);
+
+            Exception loggingException = null;
+            loggingService.OnLoggingThreadException += ex =>
+                Interlocked.CompareExchange(ref loggingException, ex, null);
+
+            Thread[] waiters = new Thread[waiterCount];
+            for (int i = 0; i < waiters.Length; i++)
+            {
+                waiters[i] = new Thread(loggingService.WaitForLoggingToProcessEvents) { IsBackground = true };
+            }
+
+            try
+            {
+                loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("initial", null, null, MessageImportance.High));
+                initialEntered.Wait(timeout).ShouldBeTrue();
+                foreach (Thread waiter in waiters)
+                {
+                    waiter.Start();
+                    // Hold the initial callback until each flush caller is actually waiting.
+                    SpinWait.SpinUntil(
+                        () => (waiter.ThreadState & ThreadState.WaitSleepJoin) != 0,
+                        timeout).ShouldBeTrue();
+                }
+
+                releaseInitial.Set();
+                nestedEntered.Wait(timeout).ShouldBeTrue();
+                foreach (Thread waiter in waiters)
+                {
+                    waiter.Join(TimeSpan.FromMilliseconds(100)).ShouldBeFalse("Flush returned while a callback-generated event was still being handled.");
+                }
+
+                releaseNested.Set();
+                foreach (Thread waiter in waiters)
+                {
+                    waiter.Join(timeout).ShouldBeTrue();
+                }
+
+                logger.BuildMessageEvents.Select(e => e.Message).ShouldBe(["initial", "follow-up", "nested"]);
+            }
+            finally
+            {
+                releaseInitial.Set();
+                releaseNested.Set();
+                foreach (Thread waiter in waiters)
+                {
+                    if (waiter.IsAlive)
+                    {
+                        waiter.Join(timeout).ShouldBeTrue();
+                    }
+                }
+
+                loggingService.ShutdownComponent();
+            }
+
+            loggingException.ShouldBeNull();
+        }
+
+        [Fact]
+        public void AsynchronousLoggingPreservesProducerOrderWithQueueBackpressure()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDLOGGINGQUEUECAPACITY", "4");
+            const int ProducerCount = 4;
+            const int EventsPerProducer = 32;
+            TimeSpan timeout = TimeSpan.FromSeconds(10);
+
+            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            loggingService.InitializeComponent(new MockHost());
+            MockLogger logger = new(_output);
+            loggingService.RegisterLogger(logger);
+            Exception loggingException = null;
+            loggingService.OnLoggingThreadException += ex =>
+                Interlocked.CompareExchange(ref loggingException, ex, null);
+
+            Thread[] producers = new Thread[ProducerCount];
+            Exception[] producerExceptions = new Exception[ProducerCount];
+            for (int i = 0; i < producers.Length; i++)
+            {
+                int producer = i;
+                producers[i] = new Thread(() =>
+                {
+                    try
+                    {
+                        for (int sequence = 0; sequence < EventsPerProducer; sequence++)
+                        {
+                            loggingService.ProcessLoggingEvent(new BuildMessageEventArgs($"{producer}:{sequence}", null, null, MessageImportance.High));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        producerExceptions[producer] = ex;
+                    }
+                })
+                {
+                    IsBackground = true
+                };
+            }
+
+            try
+            {
+                foreach (Thread producer in producers)
+                {
+                    producer.Start();
+                }
+
+                foreach (Thread producer in producers)
+                {
+                    producer.Join(timeout).ShouldBeTrue();
+                }
+
+                loggingService.WaitForLoggingToProcessEvents();
+                logger.BuildMessageEvents.Count.ShouldBe(ProducerCount * EventsPerProducer);
+                for (int i = 0; i < ProducerCount; i++)
+                {
+                    producerExceptions[i].ShouldBeNull();
+                    string prefix = $"{i}:";
+                    logger.BuildMessageEvents
+                        .Where(e => e.Message.StartsWith(prefix, StringComparison.Ordinal))
+                        .Select(e => e.Message)
+                        .ShouldBe(Enumerable.Range(0, EventsPerProducer).Select(sequence => $"{prefix}{sequence}"));
+                }
+            }
+            finally
+            {
+                loggingService.ShutdownComponent();
+                foreach (Thread producer in producers)
+                {
+                    if (producer.IsAlive)
+                    {
+                        producer.Join(timeout).ShouldBeTrue();
+                    }
+                }
+            }
+
+            loggingException.ShouldBeNull();
+        }
+
         #endregion
 
         #region ProcessLoggingEvent After Shutdown Tests
