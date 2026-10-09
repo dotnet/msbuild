@@ -206,6 +206,17 @@
     <Compile Include="Evaluation\ExpanderOptions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\IntrinsicFunctionOverload.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperationBuilder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ItemData.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.LazyItemList.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.ItemBatchingContext.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.ItemOperationMetadataTable.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.MemoizedOperation.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.OperationBuilder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.OperationBuilderWithMetadata.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.OrderedItemDataCollection.Builder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperationBuilder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.MatchResult.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />

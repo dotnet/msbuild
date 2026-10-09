@@ -3,13 +3,12 @@
 
 using System.Collections.Immutable;
 
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Evaluation;
+
+internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    internal partial class LazyItemEvaluator<P, I, M, D>
+    internal interface IItemOperation
     {
-        internal interface IItemOperation
-        {
-            void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
-        }
+        void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
     }
 }

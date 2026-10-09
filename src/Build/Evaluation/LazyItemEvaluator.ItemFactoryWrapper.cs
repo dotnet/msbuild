@@ -5,78 +5,77 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Evaluation;
+
+internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    internal partial class LazyItemEvaluator<P, I, M, D>
+    private class ItemFactoryWrapper : IItemFactory<I, I>
     {
-        private class ItemFactoryWrapper : IItemFactory<I, I>
+        private ProjectItemElement _itemElement;
+        private IItemFactory<I, I> _wrappedItemFactory;
+
+        public ItemFactoryWrapper(ProjectItemElement itemElement, IItemFactory<I, I> wrappedItemFactory)
         {
-            private ProjectItemElement _itemElement;
-            private IItemFactory<I, I> _wrappedItemFactory;
+            _itemElement = itemElement;
+            _wrappedItemFactory = wrappedItemFactory;
+        }
 
-            public ItemFactoryWrapper(ProjectItemElement itemElement, IItemFactory<I, I> wrappedItemFactory)
+        private void SetItemElement()
+        {
+            _wrappedItemFactory.ItemElement = _itemElement;
+        }
+
+        public ProjectItemElement ItemElement
+        {
+            set
             {
-                _itemElement = itemElement;
-                _wrappedItemFactory = wrappedItemFactory;
+                _itemElement = value;
+                SetItemElement();
             }
+        }
 
-            private void SetItemElement()
-            {
-                _wrappedItemFactory.ItemElement = _itemElement;
-            }
-
-            public ProjectItemElement ItemElement
-            {
-                set
-                {
-                    _itemElement = value;
-                    SetItemElement();
-                }
-            }
-
-            public string ItemType
-            {
-                get
-                {
-                    SetItemElement();
-                    return _wrappedItemFactory.ItemType;
-                }
-
-                set
-                {
-                    throw new NotSupportedException();
-                }
-            }
-
-            public I CreateItem(I source, string definingProject)
+        public string ItemType
+        {
+            get
             {
                 SetItemElement();
-                return _wrappedItemFactory.CreateItem(source, definingProject);
+                return _wrappedItemFactory.ItemType;
             }
 
-            public I CreateItem(string include, string definingProject)
+            set
             {
-                SetItemElement();
-                return _wrappedItemFactory.CreateItem(include, definingProject);
+                throw new NotSupportedException();
             }
+        }
 
-            public I CreateItem(string include, string includeBeforeWildcardExpansion, string definingProject)
-            {
-                SetItemElement();
-                return _wrappedItemFactory.CreateItem(include, includeBeforeWildcardExpansion, definingProject);
-            }
+        public I CreateItem(I source, string definingProject)
+        {
+            SetItemElement();
+            return _wrappedItemFactory.CreateItem(source, definingProject);
+        }
 
-            public I CreateItem(string include, I baseItem, string definingProject)
-            {
-                SetItemElement();
-                return _wrappedItemFactory.CreateItem(include, baseItem, definingProject);
-            }
+        public I CreateItem(string include, string definingProject)
+        {
+            SetItemElement();
+            return _wrappedItemFactory.CreateItem(include, definingProject);
+        }
 
-            public void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<I> destinationItems)
-            {
-                SetItemElement();
-                _wrappedItemFactory.SetMetadata(metadata, destinationItems);
-            }
+        public I CreateItem(string include, string includeBeforeWildcardExpansion, string definingProject)
+        {
+            SetItemElement();
+            return _wrappedItemFactory.CreateItem(include, includeBeforeWildcardExpansion, definingProject);
+        }
+
+        public I CreateItem(string include, I baseItem, string definingProject)
+        {
+            SetItemElement();
+            return _wrappedItemFactory.CreateItem(include, baseItem, definingProject);
+        }
+
+        public void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<I> destinationItems)
+        {
+            SetItemElement();
+            _wrappedItemFactory.SetMetadata(metadata, destinationItems);
         }
     }
 }

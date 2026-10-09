@@ -13,207 +13,194 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.CodeAnalysis.Collections;
 
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Evaluation;
+
+internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    internal partial class LazyItemEvaluator<P, I, M, D>
+    private class IncludeOperation : LazyItemOperation
     {
-        private class IncludeOperation : LazyItemOperation
+        private readonly int _elementOrder;
+        private readonly string? _rootDirectory;
+        private readonly ImmutableSegmentedList<string> _excludes;
+        private readonly ImmutableArray<ProjectMetadataElement> _metadata;
+
+        public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+            : base(builder, lazyEvaluator)
         {
-            private readonly int _elementOrder;
-            private readonly string? _rootDirectory;
-            private readonly ImmutableSegmentedList<string> _excludes;
-            private readonly ImmutableArray<ProjectMetadataElement> _metadata;
+            _elementOrder = builder.ElementOrder;
+            _rootDirectory = builder.RootDirectory;
 
-            public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
-                : base(builder, lazyEvaluator)
+            _excludes = builder.Excludes.ToImmutable();
+            _metadata = builder.Metadata.ToImmutable();
+        }
+
+        [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "_lazyEvaluator._evaluationProfiler has own dipose logic.")]
+        protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        {
+            ImmutableArray<I>.Builder? itemsToAdd = null;
+
+            ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
+            if (_excludes != null)
             {
-                _elementOrder = builder.ElementOrder;
-                _rootDirectory = builder.RootDirectory;
-
-                _excludes = builder.Excludes.ToImmutable();
-                _metadata = builder.Metadata.ToImmutable();
+                // STEP 4: Evaluate, split, expand and subtract any Exclude
+                foreach (string exclude in _excludes)
+                {
+                    string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
+                    var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
+                    excludePatterns.AddRange(excludeSplits);
+                }
             }
 
-            [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "_lazyEvaluator._evaluationProfiler has own dipose logic.")]
-            protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            ISet<string>? excludePatternsForGlobs = null;
+            FileSpecMatcherTester?[]? matchers = null;
+
+            foreach (var fragment in _itemSpec.Fragments)
             {
-                ImmutableArray<I>.Builder? itemsToAdd = null;
-
-                ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
-                if (_excludes != null)
+                if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemReferenceFragment)
                 {
-                    // STEP 4: Evaluate, split, expand and subtract any Exclude
-                    foreach (string exclude in _excludes)
+                    // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
+                    var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
+                        itemReferenceFragment.Capture,
+                        _evaluatorData,
+                        _itemFactory,
+                        ExpanderOptions.ExpandItems,
+                        includeNullEntries: false,
+                        isTransformExpression: out _,
+                        elementLocation: _itemElement.IncludeLocation);
+
+                    itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
+
+                    if (excludePatterns.Count > 0)
                     {
-                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
-                        var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
-                        excludePatterns.AddRange(excludeSplits);
-                    }
-                }
-
-                ISet<string>? excludePatternsForGlobs = null;
-                FileSpecMatcherTester?[]? matchers = null;
-
-                foreach (var fragment in _itemSpec.Fragments)
-                {
-                    if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemReferenceFragment)
-                    {
-                        // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                        var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
-                            itemReferenceFragment.Capture,
-                            _evaluatorData,
-                            _itemFactory,
-                            ExpanderOptions.ExpandItems,
-                            includeNullEntries: false,
-                            isTransformExpression: out _,
-                            elementLocation: _itemElement.IncludeLocation);
-
-                        itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
-
-                        if (excludePatterns.Count > 0)
-                        {
-                            matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
-
-                            foreach (var item in itemsFromExpression)
-                            {
-                                if (!ExcludeTester(_rootDirectory, excludePatterns, matchers, item.EvaluatedInclude))
-                                {
-                                    itemsToAdd.Add(item);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            itemsToAdd.AddRange(itemsFromExpression);
-                        }
-                    }
-                    else if (fragment is ValueFragment valueFragment)
-                    {
-                        string value = valueFragment.TextFragment;
                         matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
 
-                        if (excludePatterns.Count == 0 || !ExcludeTester(_rootDirectory, excludePatterns, matchers, EscapingUtilities.UnescapeAll(value)))
+                        foreach (var item in itemsFromExpression)
                         {
-                            itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
-                            itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
-                        }
-                    }
-                    else if (fragment is GlobFragment globFragment)
-                    {
-                        // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
-                        // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
-                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
-                        if (!skipGlob)
-                        {
-                            string glob = globFragment.TextFragment;
-
-                            if (excludePatternsForGlobs == null)
+                            if (!ExcludeTester(_rootDirectory, excludePatterns, matchers, item.EvaluatedInclude))
                             {
-                                excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
-                            }
-
-                            string[] includeSplitFilesEscaped;
-                            if (MSBuildEventSource.Log.IsEnabled())
-                            {
-                                MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
-                            }
-
-                            using (_lazyEvaluator?._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
-                            {
-                                includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
-                                    _rootDirectory,
-                                    glob,
-                                    excludePatternsForGlobs,
-                                    fileMatcher: FileMatcher,
-                                    loggingMechanism: _lazyEvaluator?._loggingContext,
-                                    includeLocation: _itemElement.IncludeLocation,
-                                    excludeLocation: _itemElement.ExcludeLocation);
-                            }
-
-                            if (MSBuildEventSource.Log.IsEnabled())
-                            {
-                                MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
-                            }
-
-                            foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
-                            {
-                                itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
-                                itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
+                                itemsToAdd.Add(item);
                             }
                         }
                     }
                     else
                     {
-                        throw new InvalidOperationException(fragment.GetType().ToString());
+                        itemsToAdd.AddRange(itemsFromExpression);
                     }
                 }
-
-                return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
-
-                static bool ExcludeTester(string? directory, ImmutableList<string>.Builder excludePatterns, FileSpecMatcherTester?[] matchers, string item)
+                else if (fragment is ValueFragment valueFragment)
                 {
-                    if (excludePatterns.Count == 0)
-                    {
-                        return false;
-                    }
+                    string value = valueFragment.TextFragment;
+                    matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
 
-                    bool found = false;
-                    for (int i = 0; i < matchers.Length; ++i)
+                    if (excludePatterns.Count == 0 || !ExcludeTester(_rootDirectory, excludePatterns, matchers, EscapingUtilities.UnescapeAll(value)))
                     {
-                        FileSpecMatcherTester? matcher = matchers[i];
-                        if (!matcher.HasValue)
+                        itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
+                        itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
+                    }
+                }
+                else if (fragment is GlobFragment globFragment)
+                {
+                    // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
+                    // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
+                    bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
+                    if (!skipGlob)
+                    {
+                        string glob = globFragment.TextFragment;
+
+                        if (excludePatternsForGlobs == null)
                         {
-                            matcher = FileSpecMatcherTester.Parse(directory, excludePatterns[i]);
-                            matchers[i] = matcher;
+                            excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
                         }
 
-                        if (matcher.Value.IsMatch(item))
+                        string[] includeSplitFilesEscaped;
+                        if (MSBuildEventSource.Log.IsEnabled())
                         {
-                            found = true;
-                            break;
+                            MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
+                        }
+
+                        using (_lazyEvaluator?._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                        {
+                            includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
+                                _rootDirectory,
+                                glob,
+                                excludePatternsForGlobs,
+                                fileMatcher: FileMatcher,
+                                loggingMechanism: _lazyEvaluator?._loggingContext,
+                                includeLocation: _itemElement.IncludeLocation,
+                                excludeLocation: _itemElement.ExcludeLocation);
+                        }
+
+                        if (MSBuildEventSource.Log.IsEnabled())
+                        {
+                            MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
+                        }
+
+                        foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
+                        {
+                            itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
+                            itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
                         }
                     }
-
-                    return found;
                 }
-            }
-
-            private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
-            {
-                var anyExcludes = excludePatterns.Count > 0;
-                var anyGlobsToIgnore = globsToIgnore.Count > 0;
-
-                if (anyGlobsToIgnore && anyExcludes)
+                else
                 {
-                    return excludePatterns.Concat(globsToIgnore).ToImmutableHashSet();
+                    throw new InvalidOperationException(fragment.GetType().ToString());
                 }
-
-                return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
             }
 
-            protected override void MutateItems(ImmutableArray<I> items)
-            {
-                DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
-            }
+            return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
 
-            protected override void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)
+            static bool ExcludeTester(string? directory, ImmutableList<string>.Builder excludePatterns, FileSpecMatcherTester?[] matchers, string item)
             {
-                foreach (var item in items)
+                if (excludePatterns.Count == 0)
                 {
-                    listBuilder.Add(new ItemData(item, _itemElement, _elementOrder, _conditionResult));
+                    return false;
                 }
+
+                bool found = false;
+                for (int i = 0; i < matchers.Length; ++i)
+                {
+                    FileSpecMatcherTester? matcher = matchers[i];
+                    if (!matcher.HasValue)
+                    {
+                        matcher = FileSpecMatcherTester.Parse(directory, excludePatterns[i]);
+                        matchers[i] = matcher;
+                    }
+
+                    if (matcher.Value.IsMatch(item))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                return found;
             }
         }
 
-        private class IncludeOperationBuilder : OperationBuilderWithMetadata
+        private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
         {
-            public int ElementOrder { get; set; }
-            public string? RootDirectory { get; set; }
+            var anyExcludes = excludePatterns.Count > 0;
+            var anyGlobsToIgnore = globsToIgnore.Count > 0;
 
-            public ImmutableSegmentedList<string>.Builder Excludes { get; } = ImmutableSegmentedList.CreateBuilder<string>();
-
-            public IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
+            if (anyGlobsToIgnore && anyExcludes)
             {
+                return excludePatterns.Concat(globsToIgnore).ToImmutableHashSet();
+            }
+
+            return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
+        }
+
+        protected override void MutateItems(ImmutableArray<I> items)
+        {
+            DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
+        }
+
+        protected override void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)
+        {
+            foreach (var item in items)
+            {
+                listBuilder.Add(new ItemData(item, _itemElement, _elementOrder, _conditionResult));
             }
         }
     }
