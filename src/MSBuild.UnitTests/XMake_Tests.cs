@@ -717,6 +717,22 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void TheEntryProcessAndTheServerNodeOwnTheTelemetrySession()
+        {
+            // A process that wasn't started with a node mode is the entry process.
+            MSBuildApp.OwnsProcessTelemetrySession(null).ShouldBeTrue();
+            MSBuildApp.OwnsProcessTelemetrySession(NodeMode.OutOfProcServerNode).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void NodesThatDoNotReportBuildsDoNotOwnTheTelemetrySession()
+        {
+            MSBuildApp.OwnsProcessTelemetrySession(NodeMode.OutOfProcNode).ShouldBeFalse();
+            MSBuildApp.OwnsProcessTelemetrySession(NodeMode.OutOfProcTaskHostNode).ShouldBeFalse();
+            MSBuildApp.OwnsProcessTelemetrySession(NodeMode.OutOfProcRarNode).ShouldBeFalse();
+        }
+
+        [Fact]
         public void InvalidMaxCPUCountSwitch4()
         {
             Should.Throw<CommandLineSwitchException>(() =>

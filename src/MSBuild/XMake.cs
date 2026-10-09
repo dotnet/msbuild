@@ -301,10 +301,9 @@ namespace Microsoft.Build.CommandLine
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
 
-            if (OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
-            {
-                TelemetryManager.Instance.Initialize(isStandalone: true);
-            }
+            // This process may create and own a telemetry session. It does so lazily, right before it builds
+            // (see InitializeTelemetryForInProcessBuild), or when it crashes (see CrashTelemetryRecorder).
+            TelemetryManager.IsStandaloneProcess = true;
 
             try
             {
@@ -312,14 +311,37 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                // No-op if no session was created.
                 TelemetryManager.Instance.Dispose();
             }
         }
 
         /// <summary>
-        /// Only the entry process and the server node report builds, so worker, task host and RAR nodes don't own a telemetry session.
+        /// Only the entry process and the server node report builds, so worker, task host and RAR nodes don't create a session for builds.
         /// </summary>
-        private static bool OwnsProcessTelemetrySession(NodeMode? nodeMode) => nodeMode is null or NodeMode.OutOfProcServerNode;
+        /// <remarks>
+        /// The node mode comes from the command line (see <see cref="FrameworkDebugUtils.GetProcessNodeMode"/>),
+        /// so a node mode that is supplied only through a response file is not detected and the process is treated as an entry process.
+        /// MSBuild itself always launches nodes with <c>/nodemode:N</c> on the command line.
+        /// </remarks>
+        internal static bool OwnsProcessTelemetrySession(NodeMode? nodeMode) => nodeMode is null or NodeMode.OutOfProcServerNode;
+
+        /// <summary>
+        /// Creates this process's telemetry session right before it runs a build in-process, unless the process doesn't report builds.
+        /// </summary>
+        /// <remarks>
+        /// Creating a session takes about 200 ms and, in automated environments, shutting it down can wait for the network.
+        /// So a process that doesn't report a build doesn't create one: worker, task host and RAR nodes (see <see cref="OwnsProcessTelemetrySession"/>),
+        /// and the thin client while the MSBuild server runs the build. The client creates its session only if it falls back to building in-process.
+        /// This is not done in <see cref="Execute(string[])"/> because tests call it in-process without wanting a session.
+        /// </remarks>
+        internal static void InitializeTelemetryForInProcessBuild()
+        {
+            if (OwnsProcessTelemetrySession(FrameworkDebugUtils.GetProcessNodeMode()))
+            {
+                TelemetryManager.Instance.Initialize(isStandalone: true);
+            }
+        }
 
         private static int RunMain(string[] args)
         {
@@ -379,6 +401,9 @@ namespace Microsoft.Build.CommandLine
                             ServerNotUsedReasonCodeStdOutRedirected)
                         : serverDisabled;
                 }
+
+                // This process builds, so (unless it is a worker, task host or RAR node) it reports the build and needs a telemetry session.
+                InitializeTelemetryForInProcessBuild();
 
                 // return 0 on success, non-zero on failure. Reuse the switches already gathered above (when the
                 // parse succeeded) so the command line is not parsed a second time; on parse failure they are null
@@ -1538,6 +1563,10 @@ namespace Microsoft.Build.CommandLine
                     // Server node shall terminate after it received CancelKey press.
                     if (s_isServerNode)
                     {
+                        // Environment.Exit skips the finally block of Main, so the server saves or uploads its telemetry here.
+                        // This is bounded by the shutdown budget, and a second call from Main waits for this one instead of repeating it.
+                        TelemetryManager.Instance.Dispose();
+
                         Environment.Exit(0); // the process can now be terminated as everything has already been gracefully cancelled.
                     }
                 }

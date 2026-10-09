@@ -81,10 +81,12 @@ internal static class CrashTelemetryRecorder
         {
             CrashTelemetry crashTelemetry = CreateCrashTelemetry(exception, exitType, isUnhandled, isCritical);
 
-            // Initialize here because the process is about to die — this may be
-            // the only chance to set up telemetry (e.g., crash before Main() init,
-            // or in a task AppDomain with separate static state).
-            TelemetryManager.Instance.Initialize(isStandalone: false);
+            // Initialize here because the process is about to die — this may be the only chance to set up telemetry.
+            // A worker, task host or RAR node has no session, because only the process that builds in-process starts one,
+            // and nothing else can report its crash. In MSBuild.exe a session is created just for the crash.
+            // Before Main ran (the MSBuildApp static constructor) or in a task AppDomain (separate static state),
+            // and in a process that MSBuild is hosted in, the host's session is used if there is one.
+            TelemetryManager.Instance.InitializeForCrash();
 
             using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
@@ -99,6 +101,7 @@ internal static class CrashTelemetryRecorder
         }
 
         // The process is about to terminate without reaching Main's telemetry shutdown.
+        // This is bounded by the shutdown budget (MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS) like any other shutdown.
         try
         {
             TelemetryManager.Instance.Dispose();
@@ -111,7 +114,10 @@ internal static class CrashTelemetryRecorder
 
     /// <summary>
     /// Flushes any pending crash telemetry via the telemetry manager.
-    /// Requires that TelemetryManager has already been initialized by the caller.
+    /// The caller (the entry process, the server node, or <c>BuildManager</c>) normally started the session already.
+    /// In MSBuild.exe, a process that has none, such as a worker, task host or RAR node, or the thin client of a build server,
+    /// starts one just for the crash (see <see cref="TelemetryManager.InitializeForCrash"/>), and <c>Main</c> shuts it down on exit.
+    /// A process that MSBuild is hosted in only uses a session that already exists.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void FlushCrashTelemetry()
@@ -126,10 +132,13 @@ internal static class CrashTelemetryRecorder
 
             KnownTelemetry.CrashTelemetry = null;
 
-            // Do not call TelemetryManager.Initialize here — the caller (Main or BuildManager)
-            // is responsible for initialization. Calling Initialize from here would create a
-            // VS telemetry session when tests call MSBuildApp.Execute() in-process, causing
-            // environment variable side effects.
+            // Only MSBuild.exe itself creates a session here. Creating one when tests call MSBuildApp.Execute()
+            // in-process would create a VS telemetry session, causing environment variable side effects.
+            if (TelemetryManager.IsStandaloneProcess)
+            {
+                TelemetryManager.Instance.InitializeForCrash();
+            }
+
             using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
             activity?.SetTags(crashTelemetry);
@@ -228,6 +237,8 @@ internal static class CrashTelemetryRecorder
     /// even if the hang never resolves (crash telemetry in the finally block would be unreachable).
     /// The caller is responsible for populating the <see cref="CrashTelemetry"/> with
     /// all relevant hang diagnostic data.
+    /// Only <c>BuildManager</c> emits these, in the process that owns the build (the entry process or the server node),
+    /// which already has a session: its own, or the host's. A worker, task host or RAR node never emits hang diagnostics.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void EmitEndBuildHangDiagnostics(CrashTelemetry crashTelemetry)

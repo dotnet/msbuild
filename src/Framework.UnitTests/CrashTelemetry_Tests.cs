@@ -663,6 +663,9 @@ public class CrashTelemetry_Tests
     [Fact]
     public void EndBuildHang_GetProperties_IncludesHangDiagnostics()
     {
+        string loggerTypeNames = CrashTelemetry.FormatRegisteredLoggerTypeNames(
+            ["Microsoft.Build.Logging.ConsoleLogger", "Microsoft.Build.Logging.BinaryLogger"]);
+
         CrashTelemetry telemetry = new()
         {
             ExitType = CrashExitType.EndBuildHang,
@@ -678,7 +681,7 @@ public class CrashTelemetry_Tests
             IsCancellationRequested = false,
             WorkQueueDepth = 5,
             SubmissionDetails = "1:True:True:False:False;2:True:False:False:False;3:False:False:False:False",
-            RegisteredLoggerTypeNames = "Microsoft.Build.Logging.ConsoleLogger;Microsoft.Build.Logging.BinaryLogger",
+            RegisteredLoggerTypeNames = loggerTypeNames,
         };
 
         IDictionary<string, string> props = telemetry.GetProperties();
@@ -695,7 +698,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.IsCancellationRequested)].ShouldBe("False");
         props[nameof(CrashTelemetry.WorkQueueDepth)].ShouldBe("5");
         props[nameof(CrashTelemetry.SubmissionDetails)].ShouldBe("1:True:True:False:False;2:True:False:False:False;3:False:False:False:False");
-        props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe("Microsoft.Build.Logging.ConsoleLogger;Microsoft.Build.Logging.BinaryLogger");
+        props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe(loggerTypeNames);
         props.ShouldNotContainKey(nameof(CrashTelemetry.ActiveNodeIds));
         props.ShouldNotContainKey(nameof(CrashTelemetry.ActiveNodeDetails));
     }
@@ -703,6 +706,15 @@ public class CrashTelemetry_Tests
     [Fact]
     public void EndBuildHang_GetActivityProperties_IncludesHangDiagnostics()
     {
+        string loggerTypeNames = CrashTelemetry.FormatRegisteredLoggerTypeNames(["Microsoft.Build.Logging.ConsoleLogger"]);
+        string activeNodeDetails = string.Join(
+            ";",
+            CrashTelemetry.FormatActiveNodeDetail(2, 10, "MyProject.csproj"),
+            "3:idle",
+            CrashTelemetry.FormatActiveNodeDetail(5, 12, "OtherProject.csproj"),
+            "7:idle",
+            "9:error");
+
         CrashTelemetry telemetry = new()
         {
             ExitType = CrashExitType.EndBuildHang,
@@ -718,10 +730,10 @@ public class CrashTelemetry_Tests
             IsCancellationRequested = false,
             WorkQueueDepth = 0,
             SubmissionDetails = null,
-            RegisteredLoggerTypeNames = "Microsoft.Build.Logging.ConsoleLogger",
+            RegisteredLoggerTypeNames = loggerTypeNames,
             ActiveNodeIds = "2,3,5,7,9",
             EnableNodeReuse = true,
-            ActiveNodeDetails = "2:10:MyProject.csproj;3:idle;5:12:OtherProject.csproj;7:idle;9:error",
+            ActiveNodeDetails = activeNodeDetails,
         };
 
         Dictionary<string, object> props = telemetry.GetActivityProperties();
@@ -737,10 +749,10 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.IsCancellationRequested)].ShouldBe(false);
         props[nameof(CrashTelemetry.WorkQueueDepth)].ShouldBe(0);
         props.ShouldNotContainKey(nameof(CrashTelemetry.SubmissionDetails));
-        props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe("Microsoft.Build.Logging.ConsoleLogger");
+        props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe(loggerTypeNames);
         props[nameof(CrashTelemetry.ActiveNodeIds)].ShouldBe("2,3,5,7,9");
         props[nameof(CrashTelemetry.EnableNodeReuse)].ShouldBe(true);
-        props[nameof(CrashTelemetry.ActiveNodeDetails)].ShouldBe("2:10:MyProject.csproj;3:idle;5:12:OtherProject.csproj;7:idle;9:error");
+        props[nameof(CrashTelemetry.ActiveNodeDetails)].ShouldBe(activeNodeDetails);
     }
 
     [Fact]
@@ -780,6 +792,51 @@ public class CrashTelemetry_Tests
         props.ShouldNotContainKey("ShuttingDown");
         props.ShouldNotContainKey("SchedulerHitNoLoggingCompleted");
         props.ShouldNotContainKey("SchedulerNoLoggingDetails");
+    }
+
+    [Fact]
+    public void FormatActiveNodeDetail_ReportsOnlyTheHashOfTheProjectFileName()
+    {
+        string projectFile = Path.Combine(Path.GetTempPath(), "someone", "src", "MyProject.csproj");
+
+        string detail = CrashTelemetry.FormatActiveNodeDetail(2, 10, projectFile);
+
+        detail.ShouldBe($"2:10:{TelemetryDataUtils.GetHashed("MyProject.csproj")}");
+        detail.ShouldNotContain("MyProject");
+        detail.ShouldNotContain("someone");
+    }
+
+    [Fact]
+    public void FormatActiveNodeDetail_HashesTheSameFileNameInDifferentDirectoriesAlike()
+    {
+        string first = CrashTelemetry.FormatActiveNodeDetail(1, 1, Path.Combine(Path.GetTempPath(), "first", "MyProject.csproj"));
+        string second = CrashTelemetry.FormatActiveNodeDetail(1, 1, Path.Combine(Path.GetTempPath(), "second", "MyProject.csproj"));
+
+        first.ShouldBe(second);
+    }
+
+    [Fact]
+    public void FormatActiveNodeDetail_ReportsAQuestionMarkWhenTheProjectFileIsNotKnown()
+    {
+        CrashTelemetry.FormatActiveNodeDetail(3, 7, projectFile: null).ShouldBe("3:7:?");
+    }
+
+    [Fact]
+    public void FormatRegisteredLoggerTypeNames_ReportsOnlyTheHashesOfAllTheTypeNames()
+    {
+        string[] typeNames = ["Contoso.Billing.CustomerLogger", "Microsoft.Build.Logging.ConsoleLogger"];
+
+        string formatted = CrashTelemetry.FormatRegisteredLoggerTypeNames(typeNames);
+
+        formatted.ShouldBe($"{TelemetryDataUtils.GetHashed(typeNames[0])};{TelemetryDataUtils.GetHashed(typeNames[1])}");
+        formatted.ShouldNotContain("Contoso");
+        formatted.ShouldNotContain("ConsoleLogger");
+    }
+
+    [Fact]
+    public void FormatRegisteredLoggerTypeNames_ReportsNothingWhenNoLoggerIsRegistered()
+    {
+        CrashTelemetry.FormatRegisteredLoggerTypeNames([]).ShouldBeEmpty();
     }
 
     /// <summary>

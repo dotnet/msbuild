@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -318,8 +320,8 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public string? SubmissionDetails { get; set; }
 
     /// <summary>
-    /// Semicolon-separated list of registered logger type names.
-    /// Identifies which loggers could be blocking the logging pipeline.
+    /// Semicolon-separated list of the SHA-256 hashes of the registered logger type names, see <see cref="FormatRegisteredLoggerTypeNames"/>.
+    /// Identifies which loggers could be blocking the logging pipeline without revealing the names of custom loggers.
     /// </summary>
     public string? RegisteredLoggerTypeNames { get; set; }
 
@@ -337,8 +339,8 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
     /// <summary>
     /// Per-node diagnostic summary for active nodes.
-    /// Format: "nodeId:configurationId:projectFile" separated by semicolons.
-    /// Shows what each stuck node was last working on.
+    /// Format: "nodeId:configurationId:projectFileHash" separated by semicolons, see <see cref="FormatActiveNodeDetail"/>.
+    /// Shows what each stuck node was last working on without revealing the project file name.
     /// </summary>
     public string? ActiveNodeDetails { get; set; }
 
@@ -832,6 +834,26 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         const int maxLength = 256;
         return message.Length <= maxLength ? message : message.Substring(0, maxLength);
     }
+
+    /// <summary>
+    /// Formats one entry of <see cref="ActiveNodeDetails"/>: what a node that has not shut down was last executing.
+    /// The name of a project file can reveal customer data, so only its SHA-256 hash is reported, in the same way as other custom names.
+    /// </summary>
+    /// <param name="nodeId">The node that is executing the request.</param>
+    /// <param name="configurationId">The configuration of the request.</param>
+    /// <param name="projectFile">The project file of the configuration, or <c>null</c> when it is not known.</param>
+    internal static string FormatActiveNodeDetail(int nodeId, int configurationId, string? projectFile)
+    {
+        string project = projectFile is null ? "?" : TelemetryDataUtils.GetHashed(Path.GetFileName(projectFile));
+        return $"{nodeId}:{configurationId}:{project}";
+    }
+
+    /// <summary>
+    /// Formats <see cref="RegisteredLoggerTypeNames"/>. The type name of a custom logger can reveal customer data,
+    /// so each name is reported as its SHA-256 hash, in the same way as other custom names.
+    /// </summary>
+    internal static string FormatRegisteredLoggerTypeNames(IEnumerable<string> loggerTypeNames)
+        => string.Join(";", loggerTypeNames.Select(loggerTypeName => TelemetryDataUtils.GetHashed(loggerTypeName)));
 
     /// <summary>
     /// Known throw-helper method suffixes. When the top stack frame ends with one of
