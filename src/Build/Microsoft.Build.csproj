@@ -161,6 +161,17 @@
     <Compile Include="Evaluation\ExpanderOptions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\IntrinsicFunctionOverload.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperationBuilder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ItemData.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.LazyItemList.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ItemOperation.ItemBatchingContext.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ItemOperation.ItemOperationMetadataTable.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.MemoizedOperation.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.OperationBuilder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.OperationBuilderWithMetadata.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.OrderedItemDataCollection.Builder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperationBuilder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.MatchResult.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />
@@ -547,7 +558,7 @@
     <Compile Include="Instance\TaskRegistry.cs" />
     <Compile Include="Instance\TaskRegistry.UsingTaskInfo.cs" />
     <!-- ######################## -->
-    <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ItemOperation.cs" />
     <Compile Include="Logging\BaseConsoleLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogEventFilter.cs" />

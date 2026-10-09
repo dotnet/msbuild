@@ -2289,7 +2289,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Circular dependencies (e.g. t0.targets imports t1.targets, t1.targets imports t2.targets and t2.targets imports t0.targets) will be
                     // caught by the check for duplicate imports which is done later in the method. However, if the project load setting requires throwing
-                    // on circular imports or recording duplicate-but-not-circular imports, then we need to do exclusive check for circular imports here.
+                    // on circular imports or operation collection duplicate-but-not-circular imports, then we need to do exclusive check for circular imports here.
                     if ((_loadSettings & ProjectLoadSettings.RejectCircularImports) != 0 || (_loadSettings & ProjectLoadSettings.RecordDuplicateButNotCircularImports) != 0)
                     {
                         // Check if this import introduces circularity.
