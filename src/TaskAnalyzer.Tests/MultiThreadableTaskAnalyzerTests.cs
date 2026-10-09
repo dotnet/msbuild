@@ -1475,7 +1475,61 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.Length.ShouldBe(1);
+        diags[0].Id.ShouldBe(DiagnosticIds.TaskEnvironmentRequired);
+        diags[0].GetMessage().ShouldBe(
+            "'Path.GetTempFileName()' should use TaskEnvironment alternative: create a unique file under TaskEnvironment.GetTempPath() with Path.GetRandomFileName() and FileMode.CreateNew");
+    }
+
+    [Fact]
+    public async Task TaskEnvironmentTempFilePattern_NoDiagnostics()
+    {
+        var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
+            """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+
+                public override bool Execute()
+                {
+                    AbsolutePath filePath = CreateTempFile(TaskEnvironment);
+                    File.Delete(filePath);
+                    return true;
+                }
+
+                private static AbsolutePath CreateTempFile(TaskEnvironment taskEnvironment)
+                {
+                    const int maximumAttempts = 10;
+                    AbsolutePath tempPath = taskEnvironment.GetTempPath();
+
+                    for (int attempt = 1; ; attempt++)
+                    {
+                        AbsolutePath filePath = new(Path.GetRandomFileName(), tempPath);
+
+                        try
+                        {
+                            using FileStream stream = new(
+                                filePath,
+                                FileMode.CreateNew,
+                                FileAccess.Write,
+                                FileShare.None);
+
+                            return filePath;
+                        }
+                        catch (IOException) when (attempt < maximumAttempts && File.Exists(filePath))
+                        {
+                        }
+                    }
+                }
+            }
+            """,
+            new MultiThreadableTaskAnalyzer());
+
+        diagnostics.Where(diagnostic => diagnostic.Id.StartsWith("CS", System.StringComparison.Ordinal)).ShouldBeEmpty();
+        diagnostics.Where(diagnostic => diagnostic.Id.StartsWith("MSBuildTask", System.StringComparison.Ordinal)).ShouldBeEmpty();
     }
 
     [Theory]
