@@ -229,17 +229,5 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             analyzeAllTasksByTree.TryAdd(syntaxTree, analyzeAllTasks);
             return analyzeAllTasks;
         }
-
-        private static DiagnosticDescriptor GetDescriptor(BannedApiDefinitions.ApiCategory category)
-        {
-            return category switch
-            {
-                BannedApiDefinitions.ApiCategory.CriticalError => DiagnosticDescriptors.CriticalError,
-                BannedApiDefinitions.ApiCategory.TaskEnvironment => DiagnosticDescriptors.TaskEnvironmentRequired,
-                BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute => DiagnosticDescriptors.FilePathRequiresAbsolute,
-                BannedApiDefinitions.ApiCategory.PotentialIssue => DiagnosticDescriptors.PotentialIssue,
-                _ => DiagnosticDescriptors.TaskEnvironmentRequired,
-            };
-        }
     }
 }

@@ -36,8 +36,8 @@ Inheriting `IMultiThreadableTask` from a base class does not make a task MT-scop
 | **MSBuildTask0001** | API is never safe in an MSBuild task | Enabled | Info | All task implementations and MT-scoped helpers |
 | **MSBuildTask0002** | API requires a `TaskEnvironment` alternative | Enabled | Warning | MT-scoped code only |
 | **MSBuildTask0003** | File system API requires an absolute path | Enabled | Warning | MT-scoped code only |
-| **MSBuildTask0004** | API requires review for MT execution | Enabled | Warning | All task implementations and MT-scoped helpers |
-| **MSBuildTask0005** | A task call chain reaches an unsafe API | Enabled | Warning | All tasks for transitive MSBuildTask0001 and MSBuildTask0004 violations; MT tasks for all supported transitive violations |
+| **MSBuildTask0004** | API requires review for MT execution | Enabled | Info | All task implementations and MT-scoped helpers |
+| **MSBuildTask0005** | A task call chain reaches an unsafe API | Enabled | Inherits the originating rule | All tasks for transitive MSBuildTask0001 and MSBuildTask0004 violations; MT tasks for all supported transitive violations |
 | **MSBuildTask0006** | Prefer a typed path property | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
 | **MSBuildTask0007** | Prefer `ITaskItem<T>` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
 | **MSBuildTask0008** | Initialize a relative path default in `Execute()` | Enabled | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly |
@@ -196,6 +196,8 @@ void Helper(AbsolutePath p) => File.Exists(p);
 
 These APIs may cause version conflicts or other issues in a shared task host.
 
+The rule defaults to Info for all tasks, including MT-scoped tasks, to avoid breaking builds that consume a newer analyzer package. Repositories can enforce it through `dotnet_diagnostic.MSBuildTask0004.severity`.
+
 | API | Concern |
 |---|---|
 | `Assembly.Load`, `LoadFrom`, `LoadFile` | May cause version conflicts in shared task host |
@@ -210,10 +212,12 @@ MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class 
 
 The call graph can pass through another task class. If an MT task reaches an MSBuildTask0002 or MSBuildTask0003 violation in a regular task class, MSBuildTask0005 reports the call chain. When direct analysis already reports that violation, MSBuildTask0005 does not report a duplicate.
 
+MSBuildTask0005 inherits the originating rule's severity: Info for MSBuildTask0001/0004 and Warning for MSBuildTask0002/0003. It also inherits the originating rule's configured severity or suppression at the unsafe call site. An explicit `dotnet_diagnostic.MSBuildTask0005.severity` setting takes precedence. Setting MSBuildTask0005 to `default` retains this inheritance. Existing MSBuildTask0005 pragmas and suppression attributes continue to apply.
+
 The diagnostic is reported **at the unsafe call site** — inside the helper — and names the task entry point plus the full call chain in the message:
 
 ```
-ProcessService.cs(23,9): warning MSBuildTask0005: 'CreateSourceArtifact.Execute' transitively calls
+ProcessService.cs(23,9): info MSBuildTask0005: 'CreateSourceArtifact.Execute' transitively calls
 unsafe API 'Process.Kill(bool)' via: CreateSourceArtifact.Execute → CreateSourceArtifact.ExecuteAsync
 → ProcessService.RunProcessAsync → Process.Kill(bool)
 ```
@@ -550,8 +554,9 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 ### Severity Levels
 
-- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0012, and MSBuildTask0014** have a default severity of **Warning**.
-- **MSBuildTask0001 and MSBuildTask0006–MSBuildTask0011** have a default severity of **Info**. MSBuildTask0001, MSBuildTask0009, and MSBuildTask0010 default to **Info** rather than a stronger severity to avoid breaking builds that consume a newer analyzer package.
+- **MSBuildTask0002–MSBuildTask0003, MSBuildTask0012, and MSBuildTask0014** have a default severity of **Warning**.
+- **MSBuildTask0001, MSBuildTask0004, and MSBuildTask0006–MSBuildTask0011** have a default severity of **Info**. MSBuildTask0001, MSBuildTask0004, MSBuildTask0009, and MSBuildTask0010 default to **Info** rather than a stronger severity to avoid breaking builds that consume a newer analyzer package.
+- **MSBuildTask0005** inherits the originating rule's severity unless its own severity is explicitly configured.
 - Any of these defaults can be raised or lowered with `dotnet_diagnostic.<ID>.severity` in an .editorconfig.
 - **MSBuildTask0013** has a severity of **Info**, but the rule is disabled by default.
 

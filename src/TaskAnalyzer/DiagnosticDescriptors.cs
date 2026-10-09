@@ -44,7 +44,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "API may cause issues in multithreaded MSBuild tasks",
             messageFormat: "'{0}' may cause issues in multithreaded tasks: {1}",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Warning,
+            defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: "This API may cause threading issues or version conflicts. Review usage carefully.");
 
@@ -53,7 +53,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "Transitive unsafe API usage in task call chain",
             messageFormat: "'{0}' transitively calls unsafe API '{1}' via: {2}",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Warning,
+            defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: "A method called from this task transitively uses an API that is unsafe in multithreaded task execution. Review the call chain and migrate the callee.",
             customTags: WellKnownDiagnosticTags.CompilationEnd);
