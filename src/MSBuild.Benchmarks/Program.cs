@@ -10,6 +10,18 @@ using static MSBuild.Benchmarks.Extensions;
 
 var argList = new List<string>(args);
 
+// Deterministic allocation A/B harness for the BuildEventArgsWriter NameValueList change.
+// Runs a fixed matrix of workloads and prints machine-readable results plus assembly provenance.
+// This path is intentionally independent of BenchmarkDotNet so the exact-parent vs fixed
+// allocation delta can be measured deterministically and reproducibly. Scoped to .NET (Core);
+// the harness uses .NET 5+ APIs and is excluded on net472 (see BinlogAllocationHarness.cs).
+#if NET
+if (argList.Remove("--alloc-harness"))
+{
+    return MSBuild.Benchmarks.AllocHarnessRunner.Run(argList);
+}
+#endif
+
 ParseAndRemoveBooleanParameter(argList, "--collect-etw", out bool collectEtw);
 ParseAndRemoveBooleanParameter(argList, "--disable-ngen", out bool disableNGen);
 ParseAndRemoveBooleanParameter(argList, "--disable-inlining", out bool disableJitInlining);
