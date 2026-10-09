@@ -190,7 +190,8 @@ namespace Microsoft.Build.Shared
             IFileSystem fileSystem,
             ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null,
             FileMatcherImplementation implementation = FileMatcherImplementation.Auto,
-            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto) : this(
+            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto,
+            DirectoryListingCache directoryListingCache = null) : this(
             fileSystem,
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
@@ -202,7 +203,8 @@ namespace Microsoft.Build.Shared
             fileEntryExpansionCache,
             implementation,
             allowDirectEnumeration: true,
-            caseFolding)
+            caseFolding,
+            directoryListingCache)
         {
         }
 
@@ -212,7 +214,8 @@ namespace Microsoft.Build.Shared
             ConcurrentDictionary<string, IReadOnlyList<string>> getFileSystemDirectoryEntriesCache = null,
             FileMatcherImplementation implementation = FileMatcherImplementation.Auto,
             bool allowDirectEnumeration = false,
-            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto)
+            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto,
+            DirectoryListingCache directoryListingCache = null)
         {
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -228,35 +231,78 @@ namespace Microsoft.Build.Shared
             _implementation = implementation;
             _caseFolding = caseFolding;
             _allowDirectEnumeration = allowDirectEnumeration;
-            _usesFileSystemEntryCache = getFileSystemDirectoryEntriesCache is not null;
+            if (directoryListingCache is not null && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                _usesFileSystemEntryCache = true;
+                _getFileSystemEntries = CreateDirectoryListingEnumeration(directoryListingCache, getFileSystemEntries);
+            }
+            else if (getFileSystemDirectoryEntriesCache is not null)
+            {
+                _usesFileSystemEntryCache = true;
+                _getFileSystemEntries = CreateFileEntryExpansionEnumeration(getFileSystemDirectoryEntriesCache, getFileSystemEntries);
+            }
+            else
+            {
+                _usesFileSystemEntryCache = false;
+                _getFileSystemEntries = getFileSystemEntries;
+            }
+        }
 
-            _getFileSystemEntries = getFileSystemDirectoryEntriesCache == null
-                ? getFileSystemEntries
-                : (type, path, pattern, directory, stripProjectDirectory) =>
+        private static GetFileSystemEntries CreateDirectoryListingEnumeration(
+            DirectoryListingCache cache,
+            GetFileSystemEntries enumerate)
+        {
+            return (type, path, pattern, directory, stripProjectDirectory) =>
+            {
+                if (!cache.TryGet(path, type, out var entries))
                 {
-                    // Always hit the filesystem with "*" pattern, cache the results, and do the filtering here.
-                    string cacheKey = type switch
+                    bool hasTimestamp = DirectoryListingCache.TryReadDirectoryTimestamp(path, out DateTime before);
+                    entries = enumerate(type, path, "*", directory, false);
+                    if (hasTimestamp
+                        && DirectoryListingCache.TryReadDirectoryTimestamp(path, out DateTime after)
+                        && before == after)
                     {
-                        FileSystemEntity.Files => "F",
-                        FileSystemEntity.Directories => "D",
-                        FileSystemEntity.FilesAndDirectories => "A",
-                        _ => throw new NotImplementedException()
-                    } + ";" + path;
-                    IReadOnlyList<string> allEntriesForPath = getFileSystemDirectoryEntriesCache.GetOrAdd(
-                            cacheKey,
-                            s => getFileSystemEntries(
-                                type,
-                                path,
-                                "*",
-                                directory,
-                                false));
-                    IEnumerable<string> filteredEntriesForPath = (pattern != null && !IsAllFilesWildcard(pattern))
-                        ? allEntriesForPath.Where(o => IsFileNameMatch(o, pattern))
-                        : allEntriesForPath;
-                    return stripProjectDirectory
-                        ? RemoveProjectDirectory(filteredEntriesForPath, directory).ToList()
-                        : filteredEntriesForPath.ToList();
-                };
+                        cache.Store(path, type, entries, before);
+                    }
+                }
+
+                return FilterDirectoryEntries(entries, pattern, directory, stripProjectDirectory);
+            };
+        }
+
+        private static GetFileSystemEntries CreateFileEntryExpansionEnumeration(
+            ConcurrentDictionary<string, IReadOnlyList<string>> cache,
+            GetFileSystemEntries enumerate)
+        {
+            return (type, path, pattern, directory, stripProjectDirectory) =>
+            {
+                string cacheKey = type switch
+                {
+                    FileSystemEntity.Files => "F",
+                    FileSystemEntity.Directories => "D",
+                    FileSystemEntity.FilesAndDirectories => "A",
+                    _ => throw new NotImplementedException()
+                } + ";" + path;
+                IReadOnlyList<string> entries = cache.GetOrAdd(
+                    cacheKey,
+                    _ => enumerate(type, path, "*", directory, false));
+
+                return FilterDirectoryEntries(entries, pattern, directory, stripProjectDirectory);
+            };
+        }
+
+        private static IReadOnlyList<string> FilterDirectoryEntries(
+            IReadOnlyList<string> entries,
+            string pattern,
+            string projectDirectory,
+            bool stripProjectDirectory)
+        {
+            IEnumerable<string> filteredEntries = pattern is not null && !IsAllFilesWildcard(pattern)
+                ? entries.Where(entry => IsFileNameMatch(entry, pattern))
+                : entries;
+            return stripProjectDirectory
+                ? RemoveProjectDirectory(filteredEntries, projectDirectory).ToList()
+                : filteredEntries.ToList();
         }
 
         /// <summary>

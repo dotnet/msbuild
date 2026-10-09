@@ -159,6 +159,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildParameters? _buildParameters;
 
+        private DirectoryListingCache? _directoryListingCache;
+
         /// <summary>
         /// The current pending and active submissions.
         /// </summary>
@@ -636,6 +638,9 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
+                _buildParameters.DirectoryListingCache = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                    ? _directoryListingCache ??= new DirectoryListingCache()
+                    : null;
                 bool strictMode = _buildParameters.MultiThreaded
                     && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_12);
                 var buildEntryDirectory = strictMode
@@ -2692,6 +2697,8 @@ namespace Microsoft.Build.Execution
             _nodeIdToKnownConfigurations.Clear();
             _nextUnnamedProjectId = 1;
 
+            _buildParameters?.DirectoryListingCache = null;
+
             if (_configCache != null)
             {
                 foreach (BuildRequestConfiguration config in _configCache)
@@ -3723,6 +3730,8 @@ namespace Microsoft.Build.Execution
 
                     // We should always have finished cleaning up before calling Dispose.
                     RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
+
+                    _directoryListingCache = null;
 
                     _componentFactories?.ShutdownComponents();
 

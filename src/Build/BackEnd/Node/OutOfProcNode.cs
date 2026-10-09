@@ -47,6 +47,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private static ProjectRootElementCacheBase s_projectRootElementCacheBase;
 
+        // A reused worker process constructs a new node object for each build.
+        private static DirectoryListingCache s_directoryListingCache;
+
         /// <summary>
         /// The endpoint used to talk to the host.
         /// </summary>
@@ -568,6 +571,15 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CleanupCaches()
         {
+            if (_shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
+            {
+                s_directoryListingCache = null;
+            }
+            if (_buildParameters is not null)
+            {
+                _buildParameters.DirectoryListingCache = null;
+            }
+
             if (_componentFactories.GetComponent(BuildComponentType.ConfigCache) is IConfigCache configCache)
             {
                 configCache.ClearConfigurations();
@@ -764,6 +776,9 @@ namespace Microsoft.Build.Execution
 
             Traits.UpdateFromEnvironment();
             DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(_buildParameters.BuildProcessEnvironment);
+            _buildParameters.DirectoryListingCache = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                ? s_directoryListingCache ??= new DirectoryListingCache()
+                : null;
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
             // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are
