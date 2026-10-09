@@ -320,7 +320,8 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public string? SubmissionDetails { get; set; }
 
     /// <summary>
-    /// Semicolon-separated list of the SHA-256 hashes of the registered logger type names, see <see cref="FormatRegisteredLoggerTypeNames"/>.
+    /// Semicolon-separated list of the registered logger type names, see <see cref="FormatRegisteredLoggerTypeNames"/>.
+    /// The name of a logger type in a <c>Microsoft.</c> namespace is reported as is and any other name as its SHA-256 hash.
     /// Identifies which loggers could be blocking the logging pipeline without revealing the names of custom loggers.
     /// </summary>
     public string? RegisteredLoggerTypeNames { get; set; }
@@ -849,11 +850,12 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     }
 
     /// <summary>
-    /// Formats <see cref="RegisteredLoggerTypeNames"/>. The type name of a custom logger can reveal customer data,
-    /// so each name is reported as its SHA-256 hash, in the same way as other custom names.
+    /// Formats <see cref="RegisteredLoggerTypeNames"/>. The type name of a custom logger can reveal customer data, so it is reported
+    /// as its SHA-256 hash, in the same way as other custom names. The name of a logger type in a <c>Microsoft.</c> namespace is reported as is,
+    /// which identifies the Microsoft loggers that are registered, see <see cref="TelemetryDataUtils.GetHashedUnlessMicrosoftType"/>.
     /// </summary>
     internal static string FormatRegisteredLoggerTypeNames(IEnumerable<string> loggerTypeNames)
-        => string.Join(";", loggerTypeNames.Select(loggerTypeName => TelemetryDataUtils.GetHashed(loggerTypeName)));
+        => string.Join(";", loggerTypeNames.Select(TelemetryDataUtils.GetHashedUnlessMicrosoftType));
 
     /// <summary>
     /// Known throw-helper method suffixes. When the top stack frame ends with one of

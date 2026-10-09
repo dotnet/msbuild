@@ -149,7 +149,7 @@ Custom and potentially sensitive data is hashed using SHA-256 before being sent:
 - **Custom target names** - Hashed to protect proprietary target names
 - **Custom task factory names** - Hashed if not in the known list
 - **Metaproj target names** - Hashed to protect solution structure
-- **Logger type names** - Hashed in hang diagnostics, including the names of the built-in loggers, to protect custom logger names
+- **Custom logger type names** - Hashed in hang diagnostics to protect custom logger names. The names of types in a `Microsoft.` namespace, such as the built-in loggers, are sent in plain text
 - **Project file names** - Hashed in hang diagnostics, which use only the file name, without its directory
 - **BuildCheck custom check loading failure messages** - Paths are removed from the message and it is truncated, and then hashed
 
@@ -167,7 +167,7 @@ The following Microsoft-owned task factory names are sent in plain text:
 
 Crash events don't include exception messages, which can contain customer data. They include exception types, HRESULTs, a stack hash, and stack traces with file paths removed.
 
-Hang diagnostics are crash events that MSBuild emits while `EndBuild` waits too long. They describe the state of the build: the wait phase and its duration, counts, node and submission ids, and state flags. They contain no project paths or logger names. The project that a node was working on, and the registered logger types, are identified by hashes.
+Hang diagnostics are crash events that MSBuild emits while `EndBuild` waits too long. They describe the state of the build: the wait phase and its duration, counts, node and submission ids, and state flags. They contain no project paths. The project that a node was working on is identified by the hash of its file name. A registered logger type is identified by its name when the type is in a `Microsoft.` namespace, and by the hash of its name otherwise.
 
 ## Collection and Delivery
 

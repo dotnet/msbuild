@@ -822,15 +822,19 @@ public class CrashTelemetry_Tests
     }
 
     [Fact]
-    public void FormatRegisteredLoggerTypeNames_ReportsOnlyTheHashesOfAllTheTypeNames()
+    public void FormatRegisteredLoggerTypeNames_ReportsTheNamesOfMicrosoftLoggersAsIsAndHashesTheOthers()
     {
-        string[] typeNames = ["Contoso.Billing.CustomerLogger", "Microsoft.Build.Logging.ConsoleLogger"];
+        string formatted = CrashTelemetry.FormatRegisteredLoggerTypeNames(
+            [
+                "Microsoft.Build.Logging.ConsoleLogger",
+                "Contoso.Billing.CustomerLogger",
+                "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger",
+            ]);
 
-        string formatted = CrashTelemetry.FormatRegisteredLoggerTypeNames(typeNames);
-
-        formatted.ShouldBe($"{TelemetryDataUtils.GetHashed(typeNames[0])};{TelemetryDataUtils.GetHashed(typeNames[1])}");
+        formatted.ShouldBe(
+            $"Microsoft.Build.Logging.ConsoleLogger;{TelemetryDataUtils.GetHashed("Contoso.Billing.CustomerLogger")};Microsoft.Build.BackEnd.Logging.CentralForwardingLogger");
         formatted.ShouldNotContain("Contoso");
-        formatted.ShouldNotContain("ConsoleLogger");
+        formatted.ShouldNotContain("Billing");
     }
 
     [Fact]
