@@ -281,7 +281,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (exception != null)
                     {
-                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, exception.Message);
+                        targetLoggingContext.LogError(
+                            ElementLocation.Create(taskProjectFile),
+                            "TaskLoadFailure",
+                            taskName,
+                            loadInfo.AssemblyLocation,
+                            exception.Message);
                     }
                 }
 
@@ -395,7 +400,10 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.Line,
                     taskLocation.Column,
                     new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
-                        taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
+                        taskLoggingContext.LogError(
+                            ElementLocation.Create(taskLoc, taskLine, taskColumn),
+                            message,
+                            messageArgs)),
                     taskEnvironment,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
@@ -481,7 +489,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (exception != null)
                     {
-                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, exception.Message);
+                        targetLoggingContext.LogError(
+                            ElementLocation.Create(taskProjectFile),
+                            "TaskLoadFailure",
+                            taskName,
+                            _loadedType.Assembly.AssemblyLocation,
+                            exception.Message);
                     }
                 }
 

@@ -274,7 +274,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (question)
                     {
-                        _loggingService.LogError(_buildEventContext, new BuildEventFileInfo(String.Empty), "BuildTargetCompletely", _targetToAnalyze.Name);
+                        _loggingService.LogError(
+                            _buildEventContext,
+                            ElementLocation.Empty,
+                            "BuildTargetCompletely",
+                            _targetToAnalyze.Name);
                     }
                     else
                     {
@@ -292,7 +296,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (question)
                     {
-                        _loggingService.LogError(_buildEventContext, new BuildEventFileInfo(String.Empty), "BuildTargetPartially", _targetToAnalyze.Name);
+                        _loggingService.LogError(
+                            _buildEventContext,
+                            ElementLocation.Empty,
+                            "BuildTargetPartially",
+                            _targetToAnalyze.Name);
                     }
                     else
                     {

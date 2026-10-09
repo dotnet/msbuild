@@ -1757,10 +1757,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildStarted" xml:space="preserve">
     <value>Build started.</value>
   </data>
-  <data name="FileLocation" xml:space="preserve">
-    <value>{0} ({1},{2})</value>
-    <comment>A file location to be embedded in a string.</comment>
-  </data>
   <data name="MSBuild.CannotRebaseOutputItemPath" xml:space="preserve">
     <value>MSB3203: The output path "{0}" cannot be rebased. {1}</value>
     <comment>{StrBegin="MSB3203: "}UE: This message is shown when the user asks the "MSBuild" task to rebase the paths of its output items relative to the project from where the "MSBuild" task is called (as opposed to the project(s) on which the "MSBuild" task is called), and one of the output item paths is invalid. LOCALIZATION: "{1}" is a localized message from a CLR/FX exception explaining the problem.</comment>

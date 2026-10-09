@@ -64,7 +64,7 @@ public class ConditionEvaluationBenchmark
 
         _fixture = builder.Build();
         _expander = _fixture.Expander;
-        _elementLocation = ElementLocation.EmptyLocation;
+        _elementLocation = ElementLocation.Empty;
 
         foreach (string condition in AllConditions)
         {

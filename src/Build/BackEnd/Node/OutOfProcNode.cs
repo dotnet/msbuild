@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
@@ -627,7 +628,7 @@ namespace Microsoft.Build.Execution
 #else
                     _loggingService.LogWarning(
 #endif
-                        _loggingContext?.BuildEventContext ?? BuildEventContext.Invalid, null, BuildEventFileInfo.Empty,
+                        _loggingContext?.BuildEventContext ?? BuildEventContext.Invalid, null, ElementLocation.Empty,
                         "DeprecatedEventSerialization",
                         buildEvent?.GetType().Name ?? string.Empty);
                 }

@@ -196,9 +196,7 @@ else
         null,
         errorCode,
         helpKeyword,
-        string.IsNullOrEmpty(acquisitionData.ProjectPath)
-          ? BuildEventFileInfo.Empty
-          : new BuildEventFileInfo(acquisitionData.ProjectPath),
+        ElementLocation.Create(acquisitionData.ProjectPath),
         message);
 }
 ```

@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Element location to use when logging
         /// </summary>
-        private readonly ElementLocation _elementLocation = ElementLocation.Create("c:\\project.proj", 0, 0);
+        private readonly ElementLocation _elementLocation = ElementLocation.Create("c:\\project.proj");
 
         private readonly ITestOutputHelper _output;
 

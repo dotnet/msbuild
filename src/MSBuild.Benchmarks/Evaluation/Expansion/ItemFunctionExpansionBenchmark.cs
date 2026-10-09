@@ -69,5 +69,5 @@ public class ItemFunctionExpansionBenchmark
         => _fixture.Expander.ExpandIntoStringLeaveEscaped(
             expression,
             ExpanderOptions.ExpandItems,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 }

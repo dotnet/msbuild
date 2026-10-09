@@ -73,11 +73,11 @@ public class PropertyExpansionBenchmark
         => _fixture.Expander.ExpandIntoStringAndUnescape(
             MultipleProperties,
             ExpanderOptions.ExpandProperties,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 
     private string Expand(string expression)
         => _fixture.Expander.ExpandIntoStringLeaveEscaped(
             expression,
             ExpanderOptions.ExpandProperties,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 }

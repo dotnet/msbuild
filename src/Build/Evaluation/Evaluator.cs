@@ -409,7 +409,7 @@ namespace Microsoft.Build.Evaluation
             }
             catch (PathTooLongException ex)
             {
-                evaluator._evaluationLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(root.ProjectFileLocation.File),
+                evaluator._evaluationLoggingContext.LogErrorFromText(null, null, null, ElementLocation.Create(root.ProjectFileLocation.File),
                     ex.Message);
             }
             finally
@@ -449,7 +449,7 @@ namespace Microsoft.Build.Evaluation
         /// Helper that creates a list of ProjectItem's given an unevaluated Include and a ProjectRootElement.
         /// Used by both Evaluator.EvaluateItemElement and by Project.AddItem.
         /// </summary>
-        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
+        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string projectFilePath, BuildEventContext buildEventContext)
         {
             ArgumentException.ThrowIfNullOrEmpty(unevaluatedIncludeEscaped);
 
@@ -489,7 +489,7 @@ namespace Microsoft.Build.Evaluation
                             fileMatcher: expander.EvaluationContext?.FileMatcher,
                             loggingMechanism: loggingService,
                             includeLocation: itemElement.IncludeLocation,
-                            buildEventFileInfoFullPath: buildEventFileInfoFullPath,
+                            projectFilePath: projectFilePath,
                             buildEventContext: buildEventContext);
 
                         if (includeSplitFilesEscaped.Length > 0)
@@ -1267,10 +1267,10 @@ namespace Microsoft.Build.Evaluation
             switch (ChangeWaves.ConversionState)
             {
                 case ChangeWaveConversionState.InvalidFormat:
-                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
+                    _evaluationLoggingContext.LogWarning("", ElementLocation.Empty, "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
                     break;
                 case ChangeWaveConversionState.OutOfRotation:
-                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
+                    _evaluationLoggingContext.LogWarning("", ElementLocation.Empty, "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
                     break;
             }
         }
@@ -2277,7 +2277,7 @@ namespace Microsoft.Build.Evaluation
                     // and issue a warning to that effect.
                     if (string.Equals(_projectRootElement.FullPath, importFileUnescaped, StringComparison.OrdinalIgnoreCase) /* We are trying to import ourselves */)
                     {
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "SelfImport", importFileUnescaped);
+                        _evaluationLoggingContext.LogWarning(null, importLocationInProject, "SelfImport", importFileUnescaped);
                         atleastOneImportIgnored = true;
 
                         continue;
@@ -2294,7 +2294,7 @@ namespace Microsoft.Build.Evaluation
                             // Get the full path of the MSBuild file that has this import.
                             string importedBy = importElement.ContainingProject.FullPath ?? string.Empty;
 
-                            _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "ImportIntroducesCircularity", importFileUnescaped, importedBy);
+                            _evaluationLoggingContext.LogWarning(null, importLocationInProject, "ImportIntroducesCircularity", importFileUnescaped, importedBy);
 
                             // Throw exception if the project load settings requires us to stop the evaluation of a project when circular imports are detected.
                             if ((_loadSettings & ProjectLoadSettings.RejectCircularImports) != 0)
@@ -2321,7 +2321,7 @@ namespace Microsoft.Build.Evaluation
                             parenthesizedProjectLocation = $"[{_projectRootElement.FullPath}]";
                         }
                         // TODO: Detect if the duplicate import came from an SDK attribute
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
+                        _evaluationLoggingContext.LogWarning(null, importLocationInProject, "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
                         duplicateImport = true;
                     }
 
