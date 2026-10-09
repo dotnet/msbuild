@@ -1401,7 +1401,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
                 {
-                    resolvedPath = FileUtilities.FixFilePath(_taskEnvironment.GetAbsolutePath(resolvedPath).GetCanonicalForm()).Value;
+                    resolvedPath = FileUtilities.FixFilePath(_taskEnvironment.GetAbsolutePath(resolvedPath).GetCanonicalForm());
                 }
                 else
                 {

@@ -189,10 +189,10 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                             // project directory via process CWD. Preserve that behavior by explicitly resolving
                             // empty entries against the project directory via TaskEnvironment.
                             string directoryPath = assemblyFolder.DirectoryPath.Length == 0
-                                ? taskEnvironment.ProjectDirectory.Value
+                                ? taskEnvironment.ProjectDirectory
                                 // Absolutize via TaskEnvironment: config paths may be relative, and the
                                 // process CWD is no longer guaranteed to be the project directory under MT.
-                                : taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
+                                : taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath);
 
                             string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directoryPath, assembliesConsideredAndRejected);
 

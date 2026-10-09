@@ -63,10 +63,10 @@ namespace Microsoft.Build.Tasks
         /// later combine with other path segments.
         /// </summary>
         internal static string GetAbsolutePathOrEmpty(this TaskEnvironment taskEnvironment, string path)
-            => string.IsNullOrEmpty(path) ? path : taskEnvironment.GetAbsolutePath(path).Value;
+            => string.IsNullOrEmpty(path) ? path : taskEnvironment.GetAbsolutePath(path);
 
         /// <summary>
-        /// Converts an array of <see cref="AbsolutePath"/> to a string array of <see cref="AbsolutePath.Value"/>s.
+        /// Converts an array of <see cref="AbsolutePath"/> to a string array using the implicit conversion.
         /// Returns <see langword="null"/> if <paramref name="paths"/> is <see langword="null"/>.
         /// </summary>
         internal static string[]? ToStringArray(this AbsolutePath[]? paths)
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks
             var result = new string[paths.Length];
             for (int i = 0; i < paths.Length; i++)
             {
-                result[i] = paths[i].Value;
+                result[i] = paths[i];
             }
 
             return result;
