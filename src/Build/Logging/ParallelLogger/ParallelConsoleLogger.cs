@@ -6,7 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
@@ -607,6 +609,13 @@ namespace Microsoft.Build.BackEnd.Logging
             if (items == null)
             {
                 return null;
+            }
+
+            if (items is CopyOnReadEnumerable<ProjectItemInstance, DictionaryEntry> copyOnReadItems)
+            {
+                // Filter before the selector snapshots every item and its metadata.
+                items = copyOnReadItems.Filter(static item =>
+                    string.Equals(item.ItemType, ItemMetadataNames.ProjectConfigurationDescription, StringComparison.OrdinalIgnoreCase));
             }
 
             ReuseableStringBuilder projectConfigurationDescription = null;

@@ -10,6 +10,7 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -267,6 +268,66 @@ namespace Microsoft.Build.UnitTests
             p.Build().ShouldBeFalse();
             sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + "::Number=1]");
             sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + "::Number=2]");
+        }
+
+        [Theory]
+        [InlineData(0, "ProjectConfigurationDescription")]
+        [InlineData(1, "projectconfigurationdescription")]
+        [InlineData(2, "PROJECTCONFIGURATIONDESCRIPTION")]
+        public void ProjectConfigurationDescriptionDoesNotCopyUnrelatedItems(int descriptionCount, string itemType)
+        {
+            using var env = TestEnvironment.Create(_output);
+            var collection = env.CreateProjectCollection();
+            var project = new ProjectInstance(ProjectRootElement.Create(collection.Collection));
+            project.AddItem("Compile", "File.cs");
+            project.AddItem("Reference", "Reference.dll");
+
+            List<string> expectedDescriptions = [];
+            for (int i = 0; i < descriptionCount; i++)
+            {
+                string description = $"Configuration;{i}";
+                project.AddItem(itemType, description);
+                expectedDescriptions.Add(description);
+            }
+
+            List<string> copiedItemTypes = [];
+            var items = new CopyOnReadEnumerable<ProjectItemInstance, DictionaryEntry>(
+                project.Items,
+                new object(),
+                item =>
+                {
+                    copiedItemTypes.Add(item.ItemType);
+                    return new DictionaryEntry(item.ItemType, new TaskItem(item));
+                });
+            var logger = new ParallelConsoleLogger(LoggerVerbosity.Minimal, static _ => { }, null, null);
+            logger.Initialize(new EventSourceSink(), 2);
+            BuildEventContext context = new(1, 2, 3, 4);
+            var projectStarted = new ProjectStartedEventArgs(-1, null, null, "project.proj", null, null, items, context)
+            {
+                BuildEventContext = context
+            };
+
+            logger.ProjectStartedHandler(null, projectStarted);
+
+            copiedItemTypes.Count.ShouldBe(descriptionCount);
+            copiedItemTypes.ShouldAllBe(type => type == itemType);
+            if (descriptionCount == 0)
+            {
+                logger.propertyOutputMap.ShouldBeEmpty();
+            }
+            else
+            {
+                logger.propertyOutputMap[(context.NodeId, context.ProjectContextId)]
+                    .ShouldBe(string.Join(" ", expectedDescriptions));
+            }
+
+            copiedItemTypes.Clear();
+            foreach (DictionaryEntry item in items)
+            {
+                item.Value.ShouldBeOfType<TaskItem>();
+            }
+            copiedItemTypes.Count.ShouldBe(descriptionCount + 2);
+            logger.Shutdown();
         }
 
         [Theory]
