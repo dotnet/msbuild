@@ -47,7 +47,9 @@ namespace Microsoft.Build.Tasks
             if (InputUrl.Length > 0 && NativeMethodsShared.IsWindows && string.IsNullOrWhiteSpace(InputUrl))
             {
                 Log.LogErrorWithCodeFromResources("FormatUrl.WhitespaceInputUrlNotAllowedOnWindows", InputUrl);
+#pragma warning disable MSBuildTask0002 // Whitespace input throws ArgumentException on Windows without resolving a path.
                 Path.GetFullPath(InputUrl);
+#pragma warning restore MSBuildTask0002
             }
 
             OutputUrl = PathUtil.Format(InputUrl, TaskEnvironment.ProjectDirectory);

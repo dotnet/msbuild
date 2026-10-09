@@ -626,14 +626,10 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
   <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
-  <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
+  <ItemGroup>
     <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <GlobalAnalyzerConfigFiles Include="$(MSBuildThisFileDirectory)TaskAnalyzer.globalconfig" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
-    <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
-    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005;MSBuildTask0006;MSBuildTask0007;MSBuildTask0008</WarningsNotAsErrors>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>

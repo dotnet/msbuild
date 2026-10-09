@@ -72,7 +72,9 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
+#pragma warning disable MSBuildTask0005 // ResolveComReference loads PIAs in its per-invocation AppDomain, isolated from other tasks.
                     Assembly assembly = Assembly.Load(asmName);
+#pragma warning restore MSBuildTask0005
 
                     // got here? then assembly must have been loaded successfully.
                     wrapperInfo = new ComReferenceWrapperInfo

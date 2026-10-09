@@ -24,6 +24,7 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 * Performance is the top priority - minimize allocations, avoid LINQ in hot paths, use efficient algorithms.
 * Always use the latest C# features, currently C# 14, especially collection expressions (`[]` over `new Type[]`).
 * Match the style of surrounding code when making edits, but modernize aggressively for substantial changes.
+* When assessing MT task safety, treat Wave18_8-disabled migration paths as non-MT compatibility fallbacks.
 
 ## Code Review Instructions
 
@@ -52,6 +53,7 @@ When reviewing pull requests:
 * Insert a newline before the opening curly brace of any code block.
 * Use pattern matching and switch expressions wherever possible.
 * Use `nameof` instead of string literals when referring to member names.
+* Comments describe the current behavior and invariants, not the change history or why an edit was introduced. Match surrounding comment verbosity.
 
 ### Nullable Reference Types
 

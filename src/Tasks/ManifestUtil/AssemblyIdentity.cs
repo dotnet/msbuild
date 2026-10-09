@@ -205,7 +205,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             try
             {
                 var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                // TODO: Manifest.ResolvePath can leave drive-relative paths that depend on process state.
+                // Tracked by https://github.com/dotnet/msbuild/issues/13196.
+#pragma warning disable MSBuildTask0005
                 FileStream fs = File.OpenRead(path);
+#pragma warning restore MSBuildTask0005
                 using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                 {
                     document.Load(xmlReader);

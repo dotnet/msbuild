@@ -332,7 +332,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 if (!String.IsNullOrEmpty(searchPath))
                 {
                     string resolvedPath = Path.Combine(searchPath, path);
+#pragma warning disable MSBuildTask0005 // MT callers supply ProjectDirectory as searchPath; path is unrooted in this branch.
                     resolvedPath = Path.GetFullPath(resolvedPath);
+#pragma warning restore MSBuildTask0005
                     if (FileSystems.Default.FileExists(resolvedPath))
                     {
                         return resolvedPath;
@@ -381,7 +383,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             var document = new XmlDocument();
             var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+#pragma warning disable MSBuildTask0005 // UpdateManifest supplies a TaskEnvironment-resolved inputPath.
             FileStream fs = File.OpenRead(inputPath);
+#pragma warning restore MSBuildTask0005
             using (XmlReader xr = XmlReader.Create(fs, xrSettings))
             {
                 document.Load(xr);

@@ -33,7 +33,9 @@ namespace Microsoft.Build.Tasks
             Microsoft.IO.File.Move(source, destination, overwrite: true);
 #elif NET
             // File.Move(overwrite) is available natively on .NET 5+.
+#pragma warning disable MSBuildTask0003 // SaveAtomically supplies a fully qualified destination and a sibling temporary file.
             System.IO.File.Move(source, destination, overwrite: true);
+#pragma warning restore MSBuildTask0003
 #else
             // netstandard2.0 output is ref asm only and never executed at runtime.
             throw new PlatformNotSupportedException();
