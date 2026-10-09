@@ -94,12 +94,13 @@ parameters:
   type: boolean
   default: false
 
-# When true (the default), test results are reported to Azure DevOps using the fully qualified test
-# name (Namespace.Type.Method) as the stable automatedTestName and the visible title is qualified as
-# well (--use-fully-qualified-test-name). Set to false to preserve framework-provided display names.
+# When true, test results are reported to Azure DevOps using the fully qualified test name
+# (Namespace.Type.Method) as the stable automatedTestName and the visible title is qualified as
+# well (--use-fully-qualified-test-name). Opt-in because it changes AzDO test identity and display;
+# primarily useful for frameworks like MSTest whose display name is only the method name.
 - name: useFullyQualifiedTestName
   type: boolean
-  default: true
+  default: false
 
 # Controls per-test output attachments. Defaults to Failed.
 - name: testResultAttachmentMode
