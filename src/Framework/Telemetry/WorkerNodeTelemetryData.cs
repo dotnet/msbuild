@@ -8,10 +8,16 @@ namespace Microsoft.Build.Framework.Telemetry;
 
 internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 {
-    public WorkerNodeTelemetryData(Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData, Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData)
+    public WorkerNodeTelemetryData(
+        Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData,
+        Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData,
+        int upToDateInputOutputTargetsCount = 0,
+        int executedInputOutputTargetsCount = 0)
     {
         TasksExecutionData = tasksExecutionData;
         TargetsExecutionData = targetsExecutionData;
+        UpToDateInputOutputTargetsCount = upToDateInputOutputTargetsCount;
+        ExecutedInputOutputTargetsCount = executedInputOutputTargetsCount;
     }
 
     /// <summary>
@@ -28,6 +34,9 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         {
             AddTarget(target.Key, target.Value.WasExecuted, target.Value.SkipReason);
         }
+
+        UpToDateInputOutputTargetsCount += other.UpToDateInputOutputTargetsCount;
+        ExecutedInputOutputTargetsCount += other.ExecutedInputOutputTargetsCount;
     }
 
     /// <summary>
@@ -79,9 +88,25 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 
     public WorkerNodeTelemetryData() : this([], []) { }
 
+    public void AddInputOutputTarget(bool upToDate)
+    {
+        if (upToDate)
+        {
+            UpToDateInputOutputTargetsCount++;
+        }
+        else
+        {
+            ExecutedInputOutputTargetsCount++;
+        }
+    }
+
     public bool IsEmpty => TasksExecutionData.Count == 0 && TargetsExecutionData.Count == 0;
 
     public Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
 
     public Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> TargetsExecutionData { get; }
+
+    public int UpToDateInputOutputTargetsCount { get; private set; }
+
+    public int ExecutedInputOutputTargetsCount { get; private set; }
 }

@@ -42,3 +42,11 @@ Some of the env variables listed here are unsupported, meaning there is no guara
   - Enable multi-threaded mode by default while allowing an explicit `-multiThreaded:false` / `-mt:false` command-line switch to disable it.
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
   - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system.
+- `MSBUILD_TELEMETRY_OPTOUT=1`
+  - Turns off telemetry for `MSBuild.exe` on .NET Framework. `DOTNET_CLI_TELEMETRY_OPTOUT` also turns it off and applies to MSBuild running on .NET. See [Collection and Delivery](../VS-Telemetry-Data.md#collection-and-delivery).
+- `MSBUILD_HOST_NAME`
+  - Overrides the host name reported in build telemetry, which is otherwise detected from CI environment variables such as `TF_BUILD` and `GITHUB_ACTIONS`. See [Host identification](../VS-Telemetry-Data.md#host-identification).
+- `MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS`
+  - Total time in milliseconds that `MSBuild.exe` on .NET Framework waits on exit to save or upload telemetry. The default is `10000`, and `0` means don't wait.
+- `MSBUILD_TELEMETRY_DIAGNOSTICS=1`
+  - Writes telemetry status messages, without event data, to standard error.

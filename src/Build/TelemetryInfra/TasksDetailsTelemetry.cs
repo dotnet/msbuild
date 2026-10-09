@@ -35,12 +35,17 @@ internal static class TasksDetailsTelemetry
 
     internal static Dictionary<string, string>? GetTasksDetailsProperties(this IWorkerNodeTelemetryData? telemetryData)
     {
-        if (telemetryData is null || telemetryData.TasksExecutionData.Count == 0)
+        if (telemetryData is null)
         {
             return null;
         }
 
         List<TaskDetailInfo> allTasks = GetTasksDetails(telemetryData.TasksExecutionData);
+        if (allTasks.Count == 0)
+        {
+            return null;
+        }
+
         List<TaskDetailInfo> topTasks = allTasks
             .OrderByDescending(t => t.ExecutionsCount)
             .Take(MaxTaskDetailsForTelemetryEvent)

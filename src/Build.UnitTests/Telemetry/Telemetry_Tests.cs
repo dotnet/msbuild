@@ -340,7 +340,7 @@ namespace Microsoft.Build.Engine.UnitTests
             // Verify Message task execution metrics 
             messageTaskData.ExecutionsCount.ShouldBe(3);
             messageTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
-            messageTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+            messageTaskData.TotalMemoryBytes.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(0);
             messageTaskData.IsCustom.ShouldBe(false);
 
             // Verify CreateItem task execution metrics
@@ -348,7 +348,7 @@ namespace Microsoft.Build.Engine.UnitTests
             createItemTaskData.ShouldNotBeNull();
             createItemTaskData.ExecutionsCount.ShouldBe(1);
             createItemTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
-            createItemTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+            createItemTaskData.TotalMemoryBytes.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(0);
 
             // Verify TaskFactoryName is populated for built-in tasks
             messageTaskData.FactoryName.ShouldBe("AssemblyTaskFactory");
@@ -371,7 +371,7 @@ namespace Microsoft.Build.Engine.UnitTests
             tasksSummary.Microsoft!.Total!.TotalMilliseconds.ShouldBeGreaterThan(0);
 
             // Allowing 0 for TotalMemoryBytes as it is possible for tasks to allocate no memory in certain scenarios.
-            tasksSummary.Microsoft.Total.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+            tasksSummary.Microsoft.Total.TotalMemoryBytes.ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(0);
         }
 #endif
 
@@ -404,7 +404,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 { new TaskOrTargetTelemetryKey("Pack", false, false), TargetExecutionStats.Executed() },
             };
             var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
-            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
+            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData, upToDateInputOutputTargetsCount: 0, executedInputOutputTargetsCount: 3);
 
             // Act
             var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: false, includeTargetDetails: false);
@@ -418,13 +418,14 @@ namespace Microsoft.Build.Engine.UnitTests
             incrementality.TotalTargetsCount.ShouldBe(4);
             incrementality.ExecutedTargetsCount.ShouldBe(4);
             incrementality.SkippedTargetsCount.ShouldBe(0);
+            incrementality.ExecutedInputOutputTargetsCount.ShouldBe(3);
             incrementality.IncrementalityRatio.ShouldBe(0.0);
         }
 
         [Fact]
-        public void BuildIncrementalityInfo_MostTargetsSkipped_ClassifiedAsIncremental()
+        public void BuildIncrementalityInfo_MostInputOutputTargetsUpToDate_ClassifiedAsIncremental()
         {
-            // Arrange: Most targets were skipped (>70%)
+            // Arrange: 3 of 4 target instances with Inputs and Outputs were up to date.
             var targetsData = new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>
             {
                 { new TaskOrTargetTelemetryKey("Build", false, false), TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
@@ -433,7 +434,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 { new TaskOrTargetTelemetryKey("Pack", false, false), TargetExecutionStats.Executed() }, // Only one executed
             };
             var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
-            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
+            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData, upToDateInputOutputTargetsCount: 3, executedInputOutputTargetsCount: 1);
 
             // Act
             var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: false, includeTargetDetails: false);
@@ -449,7 +450,8 @@ namespace Microsoft.Build.Engine.UnitTests
             incrementality.SkippedTargetsCount.ShouldBe(3);
             incrementality.SkippedDueToUpToDateCount.ShouldBe(2);
             incrementality.SkippedDueToConditionCount.ShouldBe(1);
-            incrementality.SkippedDueToPreviouslyBuiltCount.ShouldBe(0);
+            incrementality.UpToDateInputOutputTargetsCount.ShouldBe(3);
+            incrementality.ExecutedInputOutputTargetsCount.ShouldBe(1);
             incrementality.IncrementalityRatio.ShouldBe(0.75);
         }
 
@@ -537,7 +539,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
         /// <summary>
         /// Standard three-task fixture used by the <c>GetTasksDetailsProperties_*</c> tests:
-        /// Copy (10 executions), Csc (5 executions), and a custom task (3 executions).
+        /// Copy (10 executions), Csc (5 executions), and a custom task (3 executions), plus a registered task that never executed.
         /// </summary>
         private static Dictionary<string, string> BuildThreeTaskFixtureProperties()
         {
@@ -546,6 +548,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(500), 10, 2048, "AssemblyTaskFactory", null) },
                 { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Csc", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(3000), 5, 4096, "AssemblyTaskFactory", null) },
                 { new TaskOrTargetTelemetryKey("MyCustomTask", true, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(100), 3, 512, "MyCompany.Factory", null) },
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Exec", false, false), new TaskExecutionStats(TimeSpan.Zero, 0, 0, "AssemblyTaskFactory", null) },
             };
             var data = new WorkerNodeTelemetryData(tasksData, []);
             Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
@@ -663,7 +666,11 @@ namespace Microsoft.Build.Engine.UnitTests
             first.GetProperty("Name").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.String);
             first.GetProperty("ExecutionsCount").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
             first.GetProperty("TotalMilliseconds").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
+#if NET
             first.GetProperty("TotalMemoryBytes").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
+#else
+            first.TryGetProperty("TotalMemoryBytes", out _).ShouldBeFalse();
+#endif
             first.GetProperty("IsCustom").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.False);
             first.GetProperty("IsNuget").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.False);
         }
@@ -731,7 +738,9 @@ namespace Microsoft.Build.Engine.UnitTests
             var task = doc.RootElement[0];
 
             task.GetProperty("ExecutionsCount").GetInt32().ShouldBe(7);
+#if NET
             task.GetProperty("TotalMemoryBytes").GetInt64().ShouldBe(8192);
+#endif
             task.GetProperty("TotalMilliseconds").GetDouble().ShouldBe(123.4);
             task.GetProperty("IsCustom").GetBoolean().ShouldBeFalse();
             task.GetProperty("IsNuget").GetBoolean().ShouldBeTrue();

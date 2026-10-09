@@ -430,6 +430,8 @@ namespace Microsoft.Build.BackEnd
                 WorkUnitResult aggregateResult = new WorkUnitResult();
                 TargetLoggingContext targetLoggingContext = null;
                 bool targetSuccess = false;
+                bool anyBucketUpToDate = false;
+                bool anyBucketOutOfDate = false;
                 int numberOfBuckets = buckets.Count;
                 string projectFullPath = requestEntry.RequestConfiguration.ProjectFullPath;
 
@@ -484,6 +486,9 @@ namespace Microsoft.Build.BackEnd
                             case DependencyAnalysisResult.FullBuild:
                             case DependencyAnalysisResult.IncrementalBuild:
                             case DependencyAnalysisResult.SkipUpToDate:
+                                anyBucketUpToDate |= dependencyResult == DependencyAnalysisResult.SkipUpToDate;
+                                anyBucketOutOfDate |= dependencyResult != DependencyAnalysisResult.SkipUpToDate;
+
                                 if (dependencyResult != DependencyAnalysisResult.SkipUpToDate && _host.BuildParameters.Question && !string.IsNullOrEmpty(_target.Inputs) && !string.IsNullOrEmpty(_target.Outputs))
                                 {
                                     targetSuccess = false;
@@ -672,7 +677,11 @@ namespace Microsoft.Build.BackEnd
                     targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems.Length > 0 ? targetOutputItems : null);
                 }
 
-                _targetResult = new TargetResult(targetOutputItems, aggregateResult, targetLoggingContext?.BuildEventContext);
+                _targetResult = new TargetResult(
+                    targetOutputItems,
+                    aggregateResult,
+                    targetLoggingContext?.BuildEventContext,
+                    anyBucketUpToDate && !anyBucketOutOfDate ? TargetSkipReason.OutputsUpToDate : TargetSkipReason.None);
 
                 if (aggregateResult.ResultCode == WorkUnitResultCode.Failed && aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                 {

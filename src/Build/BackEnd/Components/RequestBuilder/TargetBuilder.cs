@@ -583,9 +583,6 @@ namespace Microsoft.Build.BackEnd
                     // Otherwise we don't want anything more to do with it.
                     bool success = targetResult.ResultCode == TargetResultCode.Success;
 
-                    // Update the skip reason on the existing result for telemetry purposes
-                    targetResult.SkipReason = success ? TargetSkipReason.PreviouslyBuiltSuccessfully : TargetSkipReason.PreviouslyBuiltUnsuccessfully;
-
                     var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                     {
                         BuildEventContext = _projectLoggingContext.BuildEventContext,
@@ -594,7 +591,7 @@ namespace Microsoft.Build.BackEnd
                         ParentTarget = currentTargetEntry.ParentEntry?.Target.Name,
                         BuildReason = currentTargetEntry.BuildReason,
                         OriginallySucceeded = success,
-                        SkipReason = targetResult.SkipReason,
+                        SkipReason = success ? TargetSkipReason.PreviouslyBuiltSuccessfully : TargetSkipReason.PreviouslyBuiltUnsuccessfully,
                         OriginalBuildEventContext = targetResult.OriginalBuildEventContext
                     };
 

@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if NETFRAMEWORK
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.Telemetry;
 #endif
 
@@ -59,7 +62,8 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             lock (s_lock)
             {
-                if (s_initialized)
+                // A session created after Dispose would never be shut down.
+                if (s_initialized || s_disposed)
                 {
                     return;
                 }
@@ -68,6 +72,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 if (IsOptOut())
                 {
+                    WriteDiagnostic("opted out.");
                     return;
                 }
 
@@ -113,6 +118,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 // (when MSBuild.exe is invoked directly). The telemetry stack itself can also throw, for example when the machine is
                 // configured to opt out of Visual Studio telemetry, so any non-critical failure simply disables telemetry for this process.
                 DefaultActivitySource = null;
+                WriteDiagnostic("initialization failed, telemetry is disabled for this process: " + ex);
             }
         }
 
@@ -129,22 +135,23 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 // Nothing may use the activity source once the underlying session is gone.
                 DefaultActivitySource = null;
+            }
 
 #if NETFRAMEWORK
-                try
-                {
-                    DisposeVsTelemetry();
-                }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    // Telemetry is best effort and must never fail a build.
-                    // The Visual Studio telemetry assembly may never have been loaded (FileNotFoundException,
-                    // FileLoadException, TypeLoadException), and disposing the session can itself throw when the
-                    // telemetry stack was not fully started - for example when telemetry is opted out machine wide.
-                    // Critical exceptions still propagate because the process is not safe to continue.
-                }
-#endif
+            try
+            {
+                DisposeVsTelemetry();
             }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                // Telemetry is best effort and must never fail a build.
+                // The Visual Studio telemetry assembly may never have been loaded (FileNotFoundException,
+                // FileLoadException, TypeLoadException), and disposing the session can itself throw when the
+                // telemetry stack was not fully started - for example when telemetry is opted out machine wide.
+                // Critical exceptions still propagate because the process is not safe to continue.
+                WriteDiagnostic("shutdown failed: " + ex);
+            }
+#endif
         }
 
         /// <summary>
@@ -152,10 +159,28 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         internal static bool IsOptOut() =>
 #if NETFRAMEWORK
-            Traits.Instance.FrameworkTelemetryOptOut;
+            Traits.Instance.FrameworkTelemetryOptOut || Traits.Instance.SdkTelemetryOptOut;
 #else
             Traits.Instance.SdkTelemetryOptOut;
 #endif
+
+        /// <summary>
+        /// Writes a message to the standard error stream when MSBUILD_TELEMETRY_DIAGNOSTICS is set.
+        /// </summary>
+        internal static void WriteDiagnostic(string message)
+        {
+            if (Traits.Instance.TelemetryDiagnostics)
+            {
+                try
+                {
+                    Console.Error.WriteLine("MSBuild telemetry: " + message);
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Console may not be available (e.g. redirected to a broken pipe).
+                }
+            }
+        }
 
 #if NETFRAMEWORK
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -199,6 +224,15 @@ namespace Microsoft.Build.Framework.Telemetry
                 session.Start();
             }
 
+            if (Traits.Instance.TelemetryDiagnostics)
+            {
+                string state = session is null
+                    ? "no session is available"
+                    : $"{(isStandalone ? "owned" : "host")} session, {(session.IsOptedIn ? "opted in" : "not opted in, events will not be sent")}";
+                TelemetryManager.WriteDiagnostic(
+                    $"initialized ({state}, CI: {BuildEnvironmentState.IsAutomatedEnvironment()}) using {typeof(TelemetrySession).Assembly.Location}.");
+            }
+
             return new MSBuildActivitySource(session);
         }
 
@@ -213,10 +247,49 @@ namespace Microsoft.Build.Framework.Telemetry
             s_telemetrySession = null;
             s_ownsSession = false;
 
-            if (ownsSession && telemetrySession is TelemetrySession session)
+            // Checked without telemetry types, so that processes without a session do not load the telemetry assembly.
+            if (ownsSession && telemetrySession is not null)
             {
-                session.Dispose();
+                DisposeOwnedSession(telemetrySession);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void DisposeOwnedSession(object telemetrySession)
+        {
+            TelemetrySession session = (TelemetrySession)telemetrySession;
+
+            // An ephemeral CI agent may be discarded before another process uploads the persisted events.
+            bool upload = BuildEnvironmentState.IsAutomatedEnvironment();
+            int timeoutMs = Traits.Instance.TelemetryShutdownTimeoutMs;
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            bool completed = DisposeOwnedSession(
+                upload,
+                timeoutMs,
+                () => session.DisposeToNetworkAsync(CancellationToken.None),
+                session.Dispose);
+
+            TelemetryManager.WriteDiagnostic(
+                $"{(upload ? "upload" : "save")} {(completed ? "completed" : "timed out, pending events may be lost")} after {stopwatch.ElapsedMilliseconds} ms, budget {timeoutMs} ms.");
+        }
+
+        /// <summary>
+        /// Disposes an owned telemetry session using the CI-specific upload path or the local-save path.
+        /// Exposed for deterministic testing without creating a real Visual Studio telemetry session.
+        /// </summary>
+        internal static bool DisposeOwnedSession(
+            bool upload,
+            int timeoutMs,
+            Func<Task> disposeToNetworkAsync,
+            Action dispose)
+        {
+            // Disposing can block on the network, so the exiting process abandons the thread after the budget.
+            Task disposalTask = upload
+                ? Task.Run(disposeToNetworkAsync)
+                : Task.Run(dispose);
+
+            return disposalTask.Wait(timeoutMs);
         }
     }
 #endif

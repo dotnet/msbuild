@@ -1118,7 +1118,12 @@ namespace Microsoft.Build.Execution
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
                     _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
-                    _buildTelemetry.BuildTarget ??= string.Join(",", requestData.TargetNames);
+
+                    // With -restore, the Restore submission precedes the build; report the build's targets instead.
+                    if (_buildTelemetry.BuildTarget is null or MSBuildConstants.RestoreTargetName)
+                    {
+                        _buildTelemetry.BuildTarget = string.Join(",", requestData.TargetNames);
+                    }
                 }
 
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -1366,6 +1371,7 @@ namespace Microsoft.Build.Execution
                             string? host = BuildEnvironmentState.GetHostName();
 
                             _buildTelemetry.BuildEngineHost = host;
+                            _buildTelemetry.IsCI = BuildEnvironmentState.IsAutomatedEnvironment();
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
                             _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
@@ -1458,6 +1464,11 @@ namespace Microsoft.Build.Execution
                 .SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                     includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                     includeTargetDetails: false));
+
+            if (_buildTelemetry?.BuildSuccess == false)
+            {
+                activity?.SetUserFault();
+            }
         }
 
         /// <summary>
@@ -1531,6 +1542,7 @@ namespace Microsoft.Build.Execution
                     telemetry.ThreadExceptionRecorded = _threadException is not null;
                     telemetry.UnmatchedProjectStartedCount = _projectStartedEvents.Count;
                     telemetry.BuildEngineHost = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
+                    telemetry.IsCI = BuildEnvironmentState.IsAutomatedEnvironment();
                     telemetry.IsShuttingDown = _shuttingDown;
                     telemetry.IsCancellationRequested = _executionCancellationTokenSource?.IsCancellationRequested ?? false;
                     telemetry.WorkQueueDepth = _workQueue?.InputCount;

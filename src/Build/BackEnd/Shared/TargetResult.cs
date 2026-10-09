@@ -163,9 +163,6 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get => _skipReason;
-
-            [DebuggerStepThrough]
-            set => _skipReason = value;
         }
 
         public string TargetResultCodeToString()
