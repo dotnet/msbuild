@@ -915,7 +915,7 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task AssemblyLoadFrom_ProducesWarning()
+    public async Task AssemblyLoadFrom_ProducesInfo()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Reflection;
@@ -929,11 +929,12 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.PotentialIssue);
+        diags.ShouldHaveSingleItem().Severity.ShouldBe(DiagnosticSeverity.Info);
+        diags[0].Id.ShouldBe(DiagnosticIds.PotentialIssue);
     }
 
     [Fact]
-    public async Task AssemblyLoad_ByteArray_ProducesWarning()
+    public async Task AssemblyLoad_ByteArray_ProducesInfo()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Reflection;
@@ -947,7 +948,64 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.PotentialIssue);
+        diags.ShouldHaveSingleItem().Severity.ShouldBe(DiagnosticSeverity.Info);
+        diags[0].Id.ShouldBe(DiagnosticIds.PotentialIssue);
+    }
+
+    [Fact]
+    public async Task AssemblyLoadFrom_InMtScopedTask_ProducesInfo()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Reflection;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    Assembly.LoadFrom("mylib.dll");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldHaveSingleItem().Severity.ShouldBe(DiagnosticSeverity.Info);
+        diags[0].Id.ShouldBe(DiagnosticIds.PotentialIssue);
+    }
+
+    [Theory]
+    [InlineData("warning", DiagnosticSeverity.Warning)]
+    [InlineData("error", DiagnosticSeverity.Error)]
+    public async Task MSBuildTask0004_ConfiguredSeverity_OverridesInfoDefault(
+        string configuredSeverity,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        {|#0:System.Reflection.Assembly.LoadFrom("mylib.dll")|};
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", $$"""
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0004.severity = {{configuredSeverity}}
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.PotentialIssue, expectedSeverity).WithLocation(0));
+
+        await test.RunAsync();
     }
 
     // ═══════════════════════════════════════════════════════════════════════

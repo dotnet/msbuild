@@ -195,7 +195,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 {
                     return;
                 }
-                
+
                 if (IsReportedByDirectAnalyzer(context, entry.Category, directAnalysisState))
                 {
                     return;
@@ -525,6 +525,22 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             bool hasCallSite = violation.Location.SourceTree is not null;
             var location = hasCallSite ? violation.Location : taskMethodLocation;
 
+            DiagnosticDescriptor originatingDescriptor = GetDescriptor(violation.Category);
+            ReportDiagnostic severity = GetConfiguredSeverity(context, location, DiagnosticIds.TransitiveUnsafeCall);
+            if (severity == ReportDiagnostic.Default)
+            {
+                severity = GetConfiguredSeverity(context, location, originatingDescriptor.Id);
+                if (severity == ReportDiagnostic.Default)
+                {
+                    severity = originatingDescriptor.GetEffectiveSeverity(context.Compilation.Options);
+                }
+            }
+
+            if (severity == ReportDiagnostic.Suppress)
+            {
+                return;
+            }
+
             // Deduplicate by the location the diagnostic is actually reported at, plus the target API. Keying
             // on the call site means a suppression on one reviewed call does not hide a second, unreviewed
             // call to the same API; keying on the *effective* location means the fallback above does not
@@ -544,10 +560,44 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             context.ReportDiagnostic(Diagnostic.Create(
                 DiagnosticDescriptors.TransitiveUnsafeCall,
                 location,
+                severity switch
+                {
+                    ReportDiagnostic.Error => DiagnosticSeverity.Error,
+                    ReportDiagnostic.Warn => DiagnosticSeverity.Warning,
+                    ReportDiagnostic.Info => DiagnosticSeverity.Info,
+                    ReportDiagnostic.Hidden => DiagnosticSeverity.Hidden,
+                    _ => originatingDescriptor.DefaultSeverity,
+                },
                 additionalLocations,
+                properties: null,
                 FormatMethodFull(taskMethod),
                 violation.ApiDisplayName,
                 chainStr));
+        }
+
+        private static ReportDiagnostic GetConfiguredSeverity(
+            CompilationAnalysisContext context,
+            Location location,
+            string diagnosticId)
+        {
+            SyntaxTreeOptionsProvider? optionsProvider = context.Compilation.Options.SyntaxTreeOptionsProvider;
+            if (optionsProvider is not null)
+            {
+                if (location.SourceTree is SyntaxTree tree &&
+                    optionsProvider.TryGetDiagnosticValue(tree, diagnosticId, context.CancellationToken, out ReportDiagnostic treeSeverity))
+                {
+                    return treeSeverity;
+                }
+
+                if (optionsProvider.TryGetGlobalDiagnosticValue(diagnosticId, context.CancellationToken, out ReportDiagnostic globalSeverity))
+                {
+                    return globalSeverity;
+                }
+            }
+
+            return context.Compilation.Options.SpecificDiagnosticOptions.TryGetValue(diagnosticId, out ReportDiagnostic severity)
+                ? severity
+                : ReportDiagnostic.Default;
         }
 
         /// <summary>

@@ -21,6 +21,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// </summary>
         internal const string AnalyzeAllTasksOptionKey = "msbuild_task_analyzer.run_mt_analyzers_on_all_tasks";
 
+        internal static DiagnosticDescriptor GetDescriptor(BannedApiDefinitions.ApiCategory category) => category switch
+        {
+            BannedApiDefinitions.ApiCategory.CriticalError => DiagnosticDescriptors.CriticalError,
+            BannedApiDefinitions.ApiCategory.TaskEnvironment => DiagnosticDescriptors.TaskEnvironmentRequired,
+            BannedApiDefinitions.ApiCategory.FilePathRequiresAbsolute => DiagnosticDescriptors.FilePathRequiresAbsolute,
+            BannedApiDefinitions.ApiCategory.PotentialIssue => DiagnosticDescriptors.PotentialIssue,
+            _ => throw new ArgumentOutOfRangeException(nameof(category), category, null),
+        };
+
         /// <summary>
         /// Reads the effective option for a source tree from the analyzer config options provider.
         /// Returns true only when all-task migration analysis is explicitly enabled.

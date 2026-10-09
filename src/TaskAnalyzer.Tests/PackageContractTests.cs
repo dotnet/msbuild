@@ -145,7 +145,20 @@ public sealed class PackageContractTests
 
             public sealed class Task : Microsoft.Build.Framework.ITask
             {
-                public void Execute() => Assembly.Load("Unsafe");
+                public void Execute()
+                {
+                    Assembly.Load("Unsafe");
+                    Helper.Run();
+                }
+            }
+
+            public static class Helper
+            {
+                public static void Run()
+                {
+                    Assembly.Load("Unsafe");
+                    System.Environment.Exit(1);
+                }
             }
             """);
 
@@ -156,10 +169,33 @@ public sealed class PackageContractTests
             "Consumer.csproj",
             "--nologo",
             "--disable-build-servers",
+            "-p:TreatWarningsAsErrors=true",
             $"-p:RestoreSources={packageOutput}",
             $"-p:RestorePackagesPath={Path.Combine(packageOutput, "packages")}");
 
+        output.ShouldNotContain("warning MSBuildTask");
+        await File.WriteAllTextAsync(
+            Path.Combine(consumerDirectory, ".editorconfig"),
+            """
+            root = true
+
+            [*.cs]
+            dotnet_diagnostic.MSBuildTask0004.severity = warning
+            dotnet_diagnostic.MSBuildTask0005.severity = warning
+            """);
+
+        output = await RunDotNet(
+            repositoryRoot,
+            consumerDirectory,
+            "build",
+            "Consumer.csproj",
+            "--nologo",
+            "--disable-build-servers",
+            "--no-restore",
+            "-t:Rebuild");
+
         output.ShouldContain("MSBuildTask0004");
+        output.ShouldContain("MSBuildTask0005");
     }
 
     private async Task PackProject(

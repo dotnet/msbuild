@@ -21,6 +21,193 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 /// </summary>
 public class TransitiveCallChainAnalyzerTests
 {
+    [Fact]
+    public async Task InfoDiagnostics_DoNotFailWarningsAsErrorsBuild()
+    {
+        var compilation = CreateCompilation("""
+            public static class Helper
+            {
+                public static void Run()
+                {
+                    System.Environment.Exit(1);
+                    System.Reflection.Assembly.LoadFrom("helper.dll");
+                }
+            }
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    System.Environment.Exit(1);
+                    System.Reflection.Assembly.LoadFrom("helper.dll");
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+        compilation = compilation.WithOptions(
+            compilation.Options.WithGeneralDiagnosticOption(ReportDiagnostic.Error));
+        var diags = await compilation.WithAnalyzers(
+            [new MultiThreadableTaskAnalyzer(), new TransitiveCallChainAnalyzer()])
+            .GetAllDiagnosticsAsync();
+
+        diags.Length.ShouldBe(4);
+        diags.ShouldAllBe(d => d.Severity == DiagnosticSeverity.Info);
+        diags.Count(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBe(2);
+        using var output = new System.IO.MemoryStream();
+        compilation.Emit(output).Success.ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData("System.Environment.Exit(1);", DiagnosticIds.CriticalError, DiagnosticSeverity.Info)]
+    [InlineData("System.Console.WriteLine(\"test\");", DiagnosticIds.CriticalError, DiagnosticSeverity.Info)]
+    [InlineData("System.Environment.GetEnvironmentVariable(\"KEY\");", DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Warning)]
+    [InlineData("System.IO.File.Exists(\"test.txt\");", DiagnosticIds.FilePathRequiresAbsolute, DiagnosticSeverity.Warning)]
+    [InlineData("System.Reflection.Assembly.LoadFrom(\"helper.dll\");", DiagnosticIds.PotentialIssue, DiagnosticSeverity.Info)]
+    public async Task TransitiveDiagnostic_InheritsOriginatingDefaultSeverity(
+        string unsafeCall,
+        string originatingId,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var diags = await GetAllDiagnosticsAsync($$"""
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() { {{unsafeCall}} }
+            }
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    {{unsafeCall}}
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == originatingId).ShouldHaveSingleItem().Severity.ShouldBe(expectedSeverity);
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem().Severity.ShouldBe(expectedSeverity);
+        diags.Length.ShouldBe(2);
+    }
+
+    [Theory]
+    [InlineData(DiagnosticIds.CriticalError, "System.Environment.Exit(1)", "error", "", DiagnosticSeverity.Error)]
+    [InlineData(DiagnosticIds.PotentialIssue, "System.Reflection.Assembly.LoadFrom(\"helper.dll\")", "warning", "", DiagnosticSeverity.Warning)]
+    [InlineData(DiagnosticIds.TaskEnvironmentRequired, "System.Environment.GetEnvironmentVariable(\"KEY\")", "suggestion", "", DiagnosticSeverity.Info)]
+    [InlineData(DiagnosticIds.FilePathRequiresAbsolute, "System.IO.File.Exists(\"test.txt\")", "silent", "", DiagnosticSeverity.Hidden)]
+    [InlineData(DiagnosticIds.CriticalError, "System.Environment.Exit(1)", "error", "suggestion", DiagnosticSeverity.Info)]
+    [InlineData(DiagnosticIds.PotentialIssue, "System.Reflection.Assembly.LoadFrom(\"helper.dll\")", "suggestion", "error", DiagnosticSeverity.Error)]
+    [InlineData(DiagnosticIds.TaskEnvironmentRequired, "System.Environment.GetEnvironmentVariable(\"KEY\")", "suggestion", "warning", DiagnosticSeverity.Warning)]
+    [InlineData(DiagnosticIds.TaskEnvironmentRequired, "System.Environment.GetEnvironmentVariable(\"KEY\")", "default", "default", DiagnosticSeverity.Warning)]
+    [InlineData(DiagnosticIds.CriticalError, "System.Environment.Exit(1)", "none", "warning", DiagnosticSeverity.Warning)]
+    public async Task TransitiveDiagnostic_InheritsConfiguredSeverity_UnlessExplicitlyOverridden(
+        string originatingId,
+        string unsafeCall,
+        string originatingSeverity,
+        string transitiveSeverity,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var test = CreateTransitiveSeverityTest(
+            originatingId, unsafeCall, originatingSeverity, transitiveSeverity);
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, expectedSeverity)
+                .WithLocation(0)
+                .WithLocation(1));
+
+        await test.RunAsync();
+    }
+
+    [Theory]
+    [InlineData("none", "")]
+    [InlineData("error", "none")]
+    public async Task TransitiveDiagnostic_ConfiguredSuppression_IsHonored(
+        string originatingSeverity,
+        string transitiveSeverity)
+    {
+        var test = CreateTransitiveSeverityTest(
+            DiagnosticIds.CriticalError, "System.Environment.Exit(1)", originatingSeverity, transitiveSeverity);
+
+        await test.RunAsync();
+    }
+
+    [Theory]
+    [InlineData("", DiagnosticSeverity.Error)]
+    [InlineData("suggestion", DiagnosticSeverity.Info)]
+    [InlineData("default", DiagnosticSeverity.Error)]
+    public async Task TransitiveDiagnostic_GlobalConfigSeverity_CanBeOverriddenAtCallSite(
+        string transitiveSeverity,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var test = CreateTransitiveSeverityTest(
+            DiagnosticIds.CriticalError, "System.Environment.Exit(1)", "", "");
+        test.TestState.AnalyzerConfigFiles.Clear();
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", """
+            is_global = true
+            dotnet_diagnostic.MSBuildTask0001.severity = error
+            """));
+        if (transitiveSeverity.Length > 0)
+        {
+            test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", $$"""
+                root = true
+
+                [Helpers/*.cs]
+                dotnet_diagnostic.MSBuildTask0005.severity = {{transitiveSeverity}}
+                """));
+        }
+
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, expectedSeverity)
+                .WithLocation(0)
+                .WithLocation(1));
+
+        await test.RunAsync();
+    }
+
+    private static CSharpAnalyzerTest<TransitiveCallChainAnalyzer, DefaultVerifier> CreateTransitiveSeverityTest(
+        string originatingId,
+        string unsafeCall,
+        string originatingSeverity,
+        string transitiveSeverity)
+    {
+        var test = new CSharpAnalyzerTest<TransitiveCallChainAnalyzer, DefaultVerifier>
+        {
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("/Tasks/MyTask.cs", """
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool {|#1:Execute|}()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """));
+        test.TestState.Sources.Add(("/Helpers/Helper.cs", $$"""
+            public static class Helper
+            {
+                public static void Run() { {|#0:{{unsafeCall}}|}; }
+            }
+            """));
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", $$"""
+            root = true
+
+            [Tasks/*.cs]
+            dotnet_diagnostic.{{originatingId}}.severity = warning
+
+            [Helpers/*.cs]
+            dotnet_diagnostic.{{originatingId}}.severity = {{originatingSeverity}}
+            dotnet_diagnostic.MSBuildTask0005.severity = {{transitiveSeverity}}
+            """));
+        return test;
+    }
+
     [Theory]
     [InlineData("using System;", "Console.WriteLine(\"test\");", "Console.WriteLine")]
     [InlineData("using System.IO;", "File.Exists(\"test.txt\");", "File.Exists")]
@@ -454,7 +641,7 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem().Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
@@ -476,7 +663,7 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem().Severity.ShouldBe(DiagnosticSeverity.Info);
     }
 
     [Fact]
