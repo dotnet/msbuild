@@ -337,6 +337,7 @@
     <Compile Include="Evaluation\Profiler\EvaluationProfiler.cs" />
     <Compile Include="Evaluation\ItemSpec.cs" />
     <Compile Include="Evaluation\ItemsAndMetadataPair.cs" />
+    <Compile Include="Evaluation\EvaluatedItemElementRecorder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.IncludeOperation.cs" />

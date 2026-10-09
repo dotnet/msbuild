@@ -49,7 +49,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // The future operation will compute this list but since no ahead of time notifications have been made by callers, it won't cache the
             // intermediary operations that would be requested by those callers.
             //   - Callers of GetItems that cannot announce ahead of time. This includes item referencing conditions on
-            // Item Groups and Item Elements. However, those conditions are performed eagerly outside of the LazyItemEvaluator, so they will run before
+            // Item Groups and Item Elements. However, those conditions are performed eagerly while collecting item operations, so they will run before
             // any item referencing operations from inside the LazyItemEvaluator. This
             //
             // If the head of this LazyItemList is uncached, then the tail may contain cached and un-cached nodes.
