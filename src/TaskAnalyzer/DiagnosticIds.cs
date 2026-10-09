@@ -9,8 +9,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// </summary>
     public static class DiagnosticIds
     {
-        internal const string IsTransitiveProperty = "MSBuildTask.IsTransitive";
-
         /// <summary>Critical APIs with no safe alternative (Environment.Exit, Console.*, ThreadPool).</summary>
         public const string CriticalError = "MSBuildTask0001";
 
@@ -22,6 +20,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Potentially problematic APIs (Assembly.Load*, Activator.CreateInstance*).</summary>
         public const string PotentialIssue = "MSBuildTask0004";
+
+        /// <summary>Transitive unsafe API usage detected in task call chain.</summary>
+        public const string TransitiveUnsafeCall = "MSBuildTask0005";
 
         /// <summary>Task input property should use AbsolutePath, FileInfo, or DirectoryInfo instead of string.</summary>
         public const string PreferTypedPathParameter = "MSBuildTask0006";
@@ -40,5 +41,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task should receive TaskEnvironment through constructor injection.</summary>
         public const string PreferTaskEnvironmentConstructorInjection = "MSBuildTask0011";
+
+        /// <summary>Task declares a TaskEnvironment property but does not implement IMultiThreadableTask, so MSBuild never assigns it.</summary>
+        public const string TaskEnvironmentNeverAssigned = "MSBuildTask0012";
+
+        /// <summary>Task implements IMultiThreadableTask but lacks [MSBuildMultiThreadableTask], so it still runs in an out-of-proc TaskHost.</summary>
+        public const string MissingMultiThreadableTaskAttribute = "MSBuildTask0013";
+
+        /// <summary>[MSBuildMultiThreadableTask] is applied to a type MSBuild never routes as a task, so it has no effect.</summary>
+        public const string MultiThreadableTaskAttributeHasNoEffect = "MSBuildTask0014";
     }
 }

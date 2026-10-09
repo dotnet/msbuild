@@ -73,6 +73,59 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void TaskIsCleanedUpWhenBuildEngineSetterThrows()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            string cleanupFile = Path.Combine(env.CreateFolder().Path, "cleanup.txt");
+            using ProjectFromString project = new($$"""
+                <Project>
+                  <UsingTask TaskName="ThrowOnInitialize"
+                             TaskFactory="{{typeof(ThrowingInitializationFactory).FullName}}"
+                             AssemblyFile="{{typeof(ThrowingInitializationFactory).Assembly.Location}}">
+                    <Task>{{cleanupFile}}</Task>
+                  </UsingTask>
+                  <Target Name="Build">
+                    <ThrowOnInitialize />
+                  </Target>
+                </Project>
+                """);
+            var logger = new MockLogger(_testOutput);
+
+            project.Project.Build("Build", [logger]).ShouldBeFalse();
+            File.ReadAllText(cleanupFile).ShouldBe("cleanup");
+        }
+
+        public sealed class ThrowingInitializationFactory : ITaskFactory
+        {
+            private string _cleanupFile;
+
+            public string FactoryName => nameof(ThrowingInitializationFactory);
+            public Type TaskType => typeof(ThrowingInitializationTask);
+
+            public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
+            {
+                _cleanupFile = taskBody.Trim();
+                return true;
+            }
+
+            public TaskPropertyInfo[] GetTaskParameters() => [];
+            public ITask CreateTask(IBuildEngine taskFactoryLoggingHost) => new ThrowingInitializationTask();
+            public void CleanupTask(ITask task) => File.AppendAllText(_cleanupFile, "cleanup");
+        }
+
+        public sealed class ThrowingInitializationTask : ITask
+        {
+            public IBuildEngine BuildEngine
+            {
+                get => null;
+                set => throw new InvalidOperationException("BuildEngine setter failed.");
+            }
+
+            public ITaskHost HostObject { get; set; }
+            public bool Execute() => throw new InvalidOperationException("Task should not execute.");
+        }
+
+        [Fact]
         public void TasksOnlyLogStartedEventOnceEach()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -124,11 +177,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("Made it");
         }
 
-        [Fact]
-        public void CanceledTasksDoNotLogMSB4181()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CanceledTasksDoNotLogMSB4181(bool strict)
         {
             using (TestEnvironment env = TestEnvironment.Create(_testOutput))
             {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+                ChangeWaves.ResetStateForTests();
                 BuildManager manager = new BuildManager();
                 ProjectCollection collection = new ProjectCollection();
 
@@ -157,6 +214,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 var _parameters = new BuildParameters
                 {
+                    MultiThreaded = strict,
                     ShutdownInProcNodeOnBuildFinish = true,
                     Loggers = new ILogger[] { logger },
                     EnableNodeReuse = false
@@ -186,6 +244,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 logger.AssertLogContains("MSB5021");
                 // Should NOT log "exec failed without logging error"
                 logger.AssertLogDoesntContain("MSB4181");
+                logger.AssertLogDoesntContain("MSB4286");
+                logger.AssertLogDoesntContain("MSB4287");
 
                 collection.Dispose();
                 manager.Dispose();

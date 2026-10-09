@@ -10,8 +10,6 @@ trigger:
     - .github/**
 
 variables:
-- ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-  - group: AzureDevOps-Artifact-Feeds-Pats
 - name: cfsNugetWarnLevel
   value: warn
 - name: nugetMultiFeedWarnLevel
@@ -44,10 +42,10 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
-    displayName: Build (with -mt in stage2)
+    displayName: Build (with stage2)
     inputs:
       filename: 'build.cmd'
-      arguments: '-ci -test -stage2Argument /mt'
+      arguments: '-ci -test -stage2'
     condition: eq(variables.onlyDocChanged, 0)
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
@@ -155,10 +153,10 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
-    displayName: Build (with -mt in stage2)
+    displayName: Build (with stage2)
     inputs:
       filename: 'build.cmd'
-      arguments: '-msbuildEngine dotnet -ci -test -stage2Argument /mt'
+      arguments: '-msbuildEngine dotnet -ci -test -stage2'
     condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
@@ -237,8 +235,8 @@ jobs:
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
   # Intentionally not running tests
-  - bash: . 'build.sh' --ci --stage2Argument '/mt' --stage2Argument '/p:BuildAnalyzer=true'
-    displayName: Build (with -mt in stage2)
+  - bash: . 'build.sh' --ci --stage2 --stage2Argument '/p:BuildAnalyzer=true'
+    displayName: Build (with stage2)
     condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
@@ -353,8 +351,8 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'build.sh' --ci --test --stage2Argument '/mt'
-    displayName: Build (with -mt in stage2)
+  - bash: . 'build.sh' --ci --test --stage2
+    displayName: Build (with stage2)
     condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"
@@ -442,8 +440,8 @@ jobs:
         arguments: $(Build.SourcesDirectory)/NuGet.config $Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - bash: . 'build.sh' --ci --test --stage2Argument '/mt'
-    displayName: Build (with -mt in stage2)
+  - bash: . 'build.sh' --ci --test --stage2
+    displayName: Build (with stage2)
     condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"

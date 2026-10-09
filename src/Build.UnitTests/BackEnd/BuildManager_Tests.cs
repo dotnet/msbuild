@@ -957,6 +957,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void DeferredMessagesAreClearedWhenBeginBuildThrows()
+        {
+            const string deferredMessage = "Message from a failed BeginBuild";
+
+            _buildManager.BeginBuild(_parameters);
+            Should.Throw<InvalidOperationException>(() => _buildManager.BeginBuild(
+                _parameters,
+                [new BuildManager.DeferredBuildMessage(deferredMessage, MessageImportance.High)]));
+            _buildManager.EndBuild();
+
+            BuildResult result = _buildManager.Build(
+                _parameters,
+                GetBuildRequestData("<Project><Target Name='test' /></Project>"));
+
+            result.ShouldHaveSucceeded();
+            _logger.AssertLogDoesntContain(deferredMessage);
+        }
+
+        [Fact]
         public void DeferredMessageShouldBeLogged()
         {
             string contents = CleanupFileContents(@"
@@ -4492,6 +4511,140 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
+        public void GraphBuildPreservesTransitiveThenDirectTargetOrder()
+        {
+            TransientTestFile leaf = _env.CreateFile("leaf.proj", """
+                <Project DefaultTargets="LeafDefault">
+                  <PropertyGroup>
+                    <GeneratedInput>$(MSBuildProjectDirectory)/generated-input.txt</GeneratedInput>
+                  </PropertyGroup>
+                  <Target Name="LeafDefault">
+                    <WriteLinesToFile File="$(GeneratedInput)" Lines="generated" Overwrite="true" />
+                  </Target>
+                  <Target Name="LeafExplicit">
+                    <Error Condition="!Exists('$(GeneratedInput)')"
+                           Text="LeafDefault must run before LeafExplicit." />
+                  </Target>
+                </Project>
+                """.Cleanup());
+
+            TransientTestFile middle = _env.CreateFile("middle.proj", $"""
+                <Project DefaultTargets="MiddleDefault">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{leaf.Path}" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="MiddleDefault" />
+                </Project>
+                """.Cleanup());
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{middle.Path}" />
+                    <ProjectReference Include="{leaf.Path}" Targets="LeafExplicit" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """.Cleanup());
+
+            string generatedInput = Path.Combine(_env.DefaultTestDirectory.Path, "generated-input.txt");
+            File.Exists(generatedInput).ShouldBeFalse();
+
+            var graph = new ProjectGraph(root.Path);
+            ProjectGraphNode leafNode = graph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == leaf.Path);
+            graph.GetTargetLists(["Build"])[leafNode].ShouldBe(["LeafDefault", "LeafExplicit"]);
+
+            var data = new GraphBuildRequestData(graph, ["Build"]);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            File.Exists(generatedInput).ShouldBeTrue();
+            _logger.AssertNoErrors();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GraphBuildDoesNotRunArtificialDefaultTargetOnExplicitInnerReference(bool explicitReferenceFirst)
+        {
+            TransientTestFile child = _env.CreateFile("child.proj", """
+                <Project DefaultTargets="ChildDefault">
+                  <PropertyGroup>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+                  </PropertyGroup>
+                  <Target Name="ChildDefault">
+                    <Error Text="ChildDefault should not run." />
+                  </Target>
+                  <Target Name="OuterTarget" />
+                  <Target Name="ExplicitTarget" />
+                </Project>
+                """.Cleanup());
+
+            string outerReference = $"""<ProjectReference Include="{child.Path}" Targets="OuterTarget" />""";
+            string explicitReference = $"""
+                <ProjectReference Include="{child.Path}"
+                                  SetTargetFramework="TargetFramework=net8.0"
+                                  Targets="ExplicitTarget" />
+                """;
+            string projectReferences = explicitReferenceFirst
+                ? $"{explicitReference}{Environment.NewLine}{outerReference}"
+                : $"{outerReference}{Environment.NewLine}{explicitReference}";
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    {projectReferences}
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}"
+                                             OuterBuild="true" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """.Cleanup());
+
+            var graph = new ProjectGraph(root.Path);
+            ProjectGraphNode outerBuild = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        !node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            ProjectGraphNode net8Build = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        node.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out string targetFramework) &&
+                        targetFramework == "net8.0");
+            ProjectGraphNode net9Build = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        node.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out string targetFramework) &&
+                        targetFramework == "net9.0");
+            var targetLists = graph.GetTargetLists(["Build"]);
+
+            targetLists[outerBuild].ShouldBe(["OuterTarget"]);
+            targetLists[net8Build].ShouldBe(["ExplicitTarget", "OuterTarget"]);
+            targetLists[net9Build].ShouldBe(["OuterTarget"]);
+
+            var data = new GraphBuildRequestData(graph, ["Build"]);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            _logger.AssertNoErrors();
+        }
+
+        [Fact]
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildInvalid()
         {
@@ -4714,6 +4867,27 @@ $@"<Project InitialTargets=`Sleep`>
 
             _logger.AssertLogContains("MSB4040");
         }
+
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Ensures programmatic callers receive an actionable failure for the unsupported combination from
+        /// https://github.com/dotnet/msbuild/issues/14825.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedAndReportFileAccessesAreRejectedBeforeBuildStarts()
+        {
+            BuildParameters parameters = new()
+            {
+                MultiThreaded = true,
+                ReportFileAccesses = true,
+            };
+
+            InvalidOperationException exception = Should.Throw<InvalidOperationException>(
+                () => _buildManager.BeginBuild(parameters));
+
+            exception.Message.ShouldContain("File-access reporting cannot be used with multi-threaded mode.");
+        }
+#endif
 
         /// <summary>
         /// Verifies that MT mode builds with multiple projects referencing the same dependency

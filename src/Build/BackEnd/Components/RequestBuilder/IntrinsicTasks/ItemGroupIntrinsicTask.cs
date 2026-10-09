@@ -188,7 +188,7 @@ namespace Microsoft.Build.BackEnd
                     if (// If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
                         bucket.BucketSequenceNumber == 0 &&
                         // Referring to unqualified metadata of other item (transform) is fine.
-                        !child.Include.Contains("@("))
+                        !ExpressionShredder.ContainsItemVectorMarker(child.Include))
                     {
                         expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
                     }
@@ -661,7 +661,7 @@ namespace Microsoft.Build.BackEnd
             ItemSpec<ProjectPropertyInstance, ProjectItemInstance> itemSpec = new ItemSpec<ProjectPropertyInstance, ProjectItemInstance>(child.Remove, expander, child.RemoveLocation, Project.Directory, true);
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
                 itemSpec.Fragments.All(f => f is ItemSpec<ProjectPropertyInstance, ProjectItemInstance>.ItemExpressionFragment),
-                BuildEventFileInfo.Empty,
+                ElementLocation.Empty,
                 "OM_MatchOnMetadataIsRestrictedToReferencedItems",
                 child.RemoveLocation,
                 child.Remove);

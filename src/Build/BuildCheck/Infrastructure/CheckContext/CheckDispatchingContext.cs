@@ -51,16 +51,16 @@ internal class CheckDispatchingContext : ICheckContext
         _eventDispatcher.Dispatch(buildEvent);
     }
 
-    public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+    public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, IElementLocation location, string message)
     {
-        BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+        BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, location, message);
 
         _eventDispatcher.Dispatch(buildEvent);
     }
 
-    public void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+    public void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, IElementLocation location, string message)
     {
-        BuildWarningEventArgs buildEvent = EventsCreatorHelper.CreateWarningEventFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+        BuildWarningEventArgs buildEvent = EventsCreatorHelper.CreateWarningEventFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, location, message);
 
         _eventDispatcher.Dispatch(buildEvent);
     }

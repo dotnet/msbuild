@@ -245,25 +245,17 @@
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
-                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded
-                     Habilita o modo multithread EXPERIMENTAL no MSBuild.
-                     Isso significa que o MSBuild usará vários threads
-                     para criar projetos em paralelo,
-                     em vez de vários processos.
-                     Essa opção não tem suporte.
-                     O número máximo de threads usados é determinado pela
-                     opção -maxCpuCount.
-                     No caso do modo multithread em
-                     e MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount não pode ser maior que 256.
+        <target state="translated">  -multithreaded[:true|false]
+                     Habilita o modo multithread EXPERIMENTAL no MSBuild.
+                     Isso significa que o MSBuild usará vários threads
+                     para construir projetos em paralelo,
+                     em vez de vários processos.
+                     O número máximo de threads usados é determinado pelo
+                     -maxCpuCount opção.
                      (Forma abreviada: -mt)
     </target>
         <note />
@@ -316,7 +308,7 @@
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
         <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1072: o valor do modo multithread não é válido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -391,62 +383,62 @@
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
-        <target state="needs-review-translation">não foi possível se conectar ao servidor dentro do período de tempo limite; o servidor pode ter falhado ao iniciar</target>
+        <target state="translated">não foi possível se conectar ao servidor dentro do período de tempo limite; o servidor pode ter falhado ao iniciar</target>
         <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerCrashedOnLaunch">
         <source>the server process exited with code {0} immediately after launch</source>
-        <target state="needs-review-translation">o processo do servidor foi encerrado com o código {0} imediatamente após o início</target>
+        <target state="translated">o processo do servidor foi encerrado com o código {0} imediatamente após o início</target>
         <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
-        <target state="needs-review-translation">o processo do servidor não pôde ser iniciado</target>
+        <target state="translated">o processo do servidor não pôde ser iniciado</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">Reutilizando o nó do Servidor do MSBuild em execução para esta compilação (ID do processo {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">Nó do Servidor do MSBuild iniciado para esta compilação (ID do processo {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">Nó do Servidor do MSBuild iniciado somente para esta compilação; ele será encerrado depois (ID do processo {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">O Servidor do MSBuild foi solicitado, mas não usado para esta compilação: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">o servidor estava ocupado com outra compilação</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">esta invocação não é compatível com o Servidor do MSBuild</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">a reutilização do nó está desabilitada (-nodeReuse:false ou MSBUILDDISABLENODEREUSE=1)</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">A hachura de escape MSBUILDENSURESTDOUTFORTASKPROCESSES está habilitada</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
-        <target state="needs-review-translation">o estado atual do servidor não pode ser determinado</target>
+        <target state="translated">o estado atual do servidor não pode ser determinado</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerUnavailable">
@@ -1848,6 +1840,44 @@ arquivo de resposta.
     exact @ switch that resulted in the duplicate response file.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ReplayFilterCanceled">
+        <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
+        <target state="translated">MSBUILD : error MSB1082: a reprodução do log binário filtrado foi cancelada. Nenhuma saída foi publicada.</target>
+        <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterFailed">
+        <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
+        <target state="translated">MSBUILD : error MSB1081: a reprodução filtrada do log binário falhou. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterInvalidOutput">
+        <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
+        <target state="translated">MSBUILD : error MSB1085: caminho de saída do log binário filtrado inválido. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterOutputExists">
+        <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
+        <target state="translated">MSBUILD : error MSB1080: o destino do log binário já existe ou foi especificado mais de uma vez. Escolha um novo caminho de saída.</target>
+        <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterUnsupportedSwitch">
+        <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
+        <target state="translated">MSBUILD : error MSB1077: esse parâmetro não tem suporte ao reproduzir um log binário com Exclude=.</target>
+        <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterZipNotSupported">
+        <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
+        <target state="translated">MSBUILD : error MSB1084: a reprodução filtrada dá suporte a ProjectImports=Embed ou ProjectImports=None, mas não a ProjectImports=ZipFile.</target>
+        <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
+        <target state="translated">MSBUILD : error MSB1073: o modo multithread e -reportFileAccesses não podem ser usados juntos. Os atributos de relatório de acesso a arquivos acessam um projeto por processo de trabalho, mas o modo multi-threaded pode executar vários projetos no mesmo processo. Remova -reportFileAccesses ou desabilite o modo multi-threaded com -mt:false. Se a variável de ambiente MSBUILDFORCEMULTITHREADED estiver definida, remova-a primeiro. MSBUILDENABLEMULTITHREADED pode ser substituída por -mt:false.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
         <source>MSBUILD : error MSB1022: Response file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1022: Arquivo de resposta não existe.</target>
@@ -2053,11 +2083,6 @@ arquivo de resposta.
         <target state="translated">Compilação iniciada.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
         <target state="translated">MSBUILD : error MSB1050: especifique qual arquivo de projeto ou de solução será usado, pois a pasta "{0}" contém mais de um projeto ou arquivo de solução.</target>
@@ -2140,7 +2165,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="HelpMessage_30_BinaryLoggerSwitch">
         <source>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
+                     Serializes build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
                      of the build process that can later be used to reconstruct
@@ -2148,6 +2173,19 @@ arquivo de resposta.
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
+
+                     Exclude=kind[,kind...] omits the named event kinds from
+                     this binary logger during builds and replay. Console and
+                     other loggers are unaffected. Names are case-insensitive.
+                     Specify Exclude once per logger. Selection matches exact
+                     record kinds, not all derived message or warning events.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Example: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtered replay requires new output paths and does not
+                     support ProjectImports=ZipFile.
+                     Filtering is not redaction: embedded files are independent.
 
                      The optional LogFile specifies the path where the
                      binary log is saved. To generate a distinct log file
@@ -2191,45 +2229,58 @@ arquivo de resposta.
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializa todos os eventos da compilação em um arquivo binário compactado.
-                     Por padrão, o arquivo está no diretório atual e é chamado de
+                     Serializa eventos de compilação em um arquivo binário compactado.
+                     Por padrão, o arquivo fica no diretório atual e é denominado
                      "msbuild.binlog". O log binário é uma descrição detalhada
-                     do processo de compilação que pode mais tarde ser usado para reconstruir
-                     logs de texto e usados por outras ferramentas de análise. Um log binário
-                     normalmente é 10 a 20x menor do que os log de nível
-                     de diagnóstico do texto mais detalhado, mas contém mais informações.
+                     do processo de compilação que pode ser usada posteriormente para reconstruir
+                     logs de texto e usada por outras ferramentas de análise. Um log binário
+                     geralmente é 10-20x menor que o texto mais detalhado
+                     de log de nível de diagnóstico, mas contém mais informações.
                      (Forma abreviada: -bl)
 
-                     O LogFile opcional especifica o caminho em que o
+                     Exclude=kind[,kind...] omite os tipos de evento nomeados deste
+                     agente de log binário durante as compilações e a reprodução. O console e
+                     outros agentes de log não são afetados. Os nomes não diferenciam maiúsculas de minúsculas.
+                     Especifique Exclude uma vez por agente de log. A seleção corresponde exatamente aos
+                     tipos de registro, não a todos os eventos de mensagem ou aviso derivados.
+                     Os eventos de ciclo de vida de compilação, projeto, destino e tarefa são
+                     protegidos. Exclua ProjectEvaluationStarted e
+                     ProjectEvaluationFinished juntos ou nenhum dos dois.
+                     Exemplo: -bl:"out.binlog;Exclude=Message,Warning"
+                     A reprodução filtrada requer novos caminhos de saída e não
+                     dá suporte a ProjectImports=ZipFile.
+                     A filtragem não é redação: os arquivos incorporados são independentes.
+
+                     O LogFile opcional especifica o caminho onde o
                      log binário é salvo. Para gerar um arquivo de log distinto
                      para cada compilação, o token "{}" pode ser adicionado ao
                      caminho, por exemplo: LogFile=output-{}-log.binlog. Cada 
-                     "{}" no caminho de log é substituído por uma cadeia de caracteres exclusiva
-                     usando o carimbo de data/hora, executando a ID do processo e aleatoriamente
-                     o aplicar selo de cadeia de caracteres.
+                     "{}" no caminho do log é substituído por uma cadeia exclusiva
+                     usando o carimbo de data/hora, a ID do processo em execução e um
+                     sufixo de cadeia aleatório.
 
-                     O agente binário, por padrão, coleta o texto fonte dos
-                     arquivos de projeto, incluindo todos os projetos importados e arquivos
-                     de destino encontrados durante a compilação. A opção
-                     ProjectImports controla este comportamento:
+                     Por padrão, o agente de log binário coleta o texto-fonte dos
+                     arquivos de projeto, incluindo todos os projetos importados e arquivos de destino
+                     encontrados durante a compilação. O parâmetro opcional
+                     ProjectImports controla esse comportamento:
 
-                      ProjectImports=None     – Não coletar as importações
-                                                do projeto.
-                      ProjectImports=Embed    – Inserir as importações do projeto no
+                      ProjectImports=None     - Não coleta as importações de projeto
+                                                .
+                      ProjectImports=Embed    - Incorpora as importações de projeto no
                                                 arquivo de log.
-                      ProjectImports=ZipFile  – Salvar os arquivos de projeto em
+                      ProjectImports=ZipFile  - Salva os arquivos de projeto em
                                                 output.projectimports.zip
-                                                em que a saída tem o mesmo nome que o
-                                                nome do arquivo de log binário.
+                                                em que a saída é o mesmo nome
+                                                do nome do arquivo de log binário.
 
-                     A configuração padrão para ProjectImports é Embed.
-                     Observação: o agente não coleta arquivos de origem não MSBuild
-                     tais como .cs, .cpp etc.
+                     A configuração padrão de ProjectImports é Embed.
+                     Observação: o agente de log não coleta arquivos-fonte que não são do MSBuild
+                     como .cs, .cpp etc.
 
-                     Um arquivo .binlog pode ser "reproduzido novamente", passando-o para
+                     Um arquivo .binlog pode ser "reproduzido" passando-o para
                      msbuild.exe como um argumento em vez de um projeto/solução.
-                     Outros agentes receberão as informações contidas
-                     no arquivo de log como se a compilação original estivesse acontecendo.
+                     Outros agentes de log receberão as informações contidas
+                     no arquivo de log como se a compilação original estivesse ocorrendo.
                      Você pode ler mais sobre o log binário e seus usos em:
                      https://aka.ms/msbuild/binlog
 

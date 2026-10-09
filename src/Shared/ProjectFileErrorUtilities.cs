@@ -21,15 +21,15 @@ namespace Microsoft.Build.Shared
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
-        /// <param name="projectFile">The invalid project file.</param>
+        /// <param name="location">The location in the invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void ThrowInvalidProjectFile(
-            BuildEventFileInfo projectFile,
+            IElementLocation location,
             string resourceName,
             params object[] args)
         {
-            ThrowInvalidProjectFile(null, projectFile, resourceName, args);
+            ThrowInvalidProjectFile(null, location, resourceName, args);
         }
 
         /// <summary>
@@ -39,17 +39,17 @@ namespace Microsoft.Build.Shared
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
-        /// <param name="projectFile">The invalid project file.</param>
+        /// <param name="location">The location in the invalid project file.</param>
         /// <param name="innerException">Any inner exception. May be null.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void ThrowInvalidProjectFile(
-            BuildEventFileInfo projectFile,
+            IElementLocation location,
             Exception innerException,
             string resourceName,
             params object[] args)
         {
-            VerifyThrowInvalidProjectFile(false, null, projectFile, innerException, resourceName, args);
+            VerifyThrowInvalidProjectFile(false, null, location, innerException, resourceName, args);
         }
 
         /// <summary>
@@ -60,16 +60,16 @@ namespace Microsoft.Build.Shared
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
         /// <param name="condition">The condition to check.</param>
-        /// <param name="projectFile">The invalid project file.</param>
+        /// <param name="location">The location in the invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile(
             bool condition,
-            BuildEventFileInfo projectFile,
+            IElementLocation location,
             string resourceName,
             params object[] args)
         {
-            VerifyThrowInvalidProjectFile(condition, null, projectFile, resourceName, args);
+            VerifyThrowInvalidProjectFile(condition, null, location, resourceName, args);
         }
 
         /// <summary>
@@ -80,16 +80,16 @@ namespace Microsoft.Build.Shared
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
         /// </summary>
         /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
-        /// <param name="projectFile">The invalid project file.</param>
+        /// <param name="location">The location in the invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void ThrowInvalidProjectFile(
             string errorSubCategoryResourceName,
-            BuildEventFileInfo projectFile,
+            IElementLocation location,
             string resourceName,
             params object[] args)
         {
-            VerifyThrowInvalidProjectFile(false, errorSubCategoryResourceName, projectFile, null, resourceName, args);
+            VerifyThrowInvalidProjectFile(false, errorSubCategoryResourceName, location, null, resourceName, args);
         }
 
         /// <summary>
@@ -101,17 +101,17 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
-        /// <param name="projectFile">The invalid project file.</param>
+        /// <param name="location">The location in the invalid project file.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile(
             bool condition,
             string errorSubCategoryResourceName,
-            BuildEventFileInfo projectFile,
+            IElementLocation location,
             string resourceName,
             params object[] args)
         {
-            VerifyThrowInvalidProjectFile(condition, errorSubCategoryResourceName, projectFile, null, resourceName, args);
+            VerifyThrowInvalidProjectFile(condition, errorSubCategoryResourceName, location, null, resourceName, args);
         }
 
         /// <summary>
@@ -123,19 +123,19 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
-        /// <param name="projectFile">The invalid project file.</param>
+        /// <param name="location">The location in the invalid project file.</param>
         /// <param name="innerException">The inner <see cref="Exception"/>.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile(
             bool condition,
             string errorSubCategoryResourceName,
-            BuildEventFileInfo projectFile,
+            IElementLocation location,
             Exception innerException,
             string resourceName,
             params object[] args)
         {
-            Assumed.NotNull(projectFile, "Must specify the invalid project file. If project file is not available, use VerifyThrowInvalidProject() and pass in the XML node instead.");
+            Assumed.NotNull(location, "Must specify the invalid project file. If project file is not available, use VerifyThrowInvalidProject() and pass in the XML node instead.");
 
 #if DEBUG
             if (errorSubCategoryResourceName != null)
@@ -150,7 +150,17 @@ namespace Microsoft.Build.Shared
                 string errorSubCategory = errorSubCategoryResourceName is null ? null : AssemblyResources.GetString(errorSubCategoryResourceName);
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, resourceName, args);
 
-                throw new InvalidProjectFileException(projectFile.File, projectFile.Line, projectFile.Column, projectFile.EndLine, projectFile.EndColumn, message, errorSubCategory, errorCode, helpKeyword, innerException);
+                throw new InvalidProjectFileException(
+                    location.File,
+                    location.Line,
+                    location.Column,
+                    endLineNumber: 0,
+                    endColumnNumber: 0,
+                    message,
+                    errorSubCategory,
+                    errorCode,
+                    helpKeyword,
+                    innerException);
             }
         }
     }

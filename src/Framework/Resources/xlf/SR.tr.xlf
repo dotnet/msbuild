@@ -218,6 +218,102 @@
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPath">
+        <source>For SearchPath "{0}".</source>
+        <target state="translated">SearchPath "{0}" için.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">"{0}" SearchPath için ("{1}" başvuru derlemesi tarafından eklendi).</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
+        <source>Considered AssemblyFoldersEx locations.</source>
+        <target state="translated">AssemblyFoldersEx konumları dikkate alındı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">
+        <source>Considered "{0}",
+			but its name "{1}"
+			didn't match the expected name "{2}".</source>
+        <target state="translated">"{0}" denendi,
+			ancak adı ("{1}")
+			beklenen adla eşleşmedi: "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile">
+        <source>Considered "{0}", but it didn't exist.</source>
+        <target state="translated">"{0}" denendi, ancak böyle bir öğe yoktu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk">
+        <source>Considered treating "{0}" as a file name, but it didn't exist.</source>
+        <target state="translated">"{0}" öğesini bir dosya adı olarak kabul etme denendi, ancak böyle bir öğe yoktu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac">
+        <source>Considered "{0}", which was not found in the GAC.</source>
+        <target state="translated">GAC içinde bulunmayan "{0}" denendi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">Mevcut olan ancak geçerli bir .NET derlemesi gibi görünmeyen "{0}" değerlendirildi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch">
+        <source>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</source>
+        <target state="translated">Var olan ancak hedeflenen "{2}" işlemci mimarisiyle eşleşmeyen "{1}" işlemci mimarisine sahip "{0}" değerlendirildi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictFound">
+        <source>There was a conflict between "{0}" and "{1}".</source>
+        <target state="translated">"{0}" ve "{1}" arasında çakışma vardı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictHigherVersionChosen">
+        <source>"{0}" was chosen because it had a higher version.</source>
+        <target state="translated">Sürümü daha yüksek olduğundan "{0}" seçildi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictPrimaryChosen">
+        <source>"{0}" was chosen because it was primary and "{1}" was not.</source>
+        <target state="translated">"{0}" seçildi, çünkü bu birincil, "{1}" ise birincil değil.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ConflictUnsolvable">
+        <source>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</source>
+        <target state="translated">MSB3243: "{0}" ve "{1}" arasındaki çakışmayı çözümleyecek bir yöntem yok. Rastgele olarak "{0}" seçiliyor.</target>
+        <note>{StrBegin="MSB3243: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_FoundConflicts">
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="translated">MSB3277: Farklı "{0}" sürümleri arasında çözümlenemeyen çakışmalar bulundu.
+{1}</target>
+        <note>{StrBegin="MSB3277: "}</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_ReferenceDependsOn">
+        <source>References which depend on "{0}" [{1}].</source>
+        <target state="translated">"{0}" [{1}] öğesine bağlı başvurular.</target>
+        <note> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">"{0}" [{1}] öğesine bağlı veya öğesi biçiminde birleştirilen başvurular.</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_UnResolvedPrimaryItemSpec">
+        <source>Unresolved primary reference with an item include of "{0}".</source>
+        <target state="translated">"{0}" öğe içerikli çözümlenmemiş birincil başvuru.</target>
+        <note> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</note>
+      </trans-unit>
+      <trans-unit id="AssemblyConflict_PrimarySourceItemsForReference">
+        <source>Project file item includes which caused reference "{0}".</source>
+        <target state="translated">Proje dosyası öğesi, başvuruya neden olan "{0}" dosyasını içeriyor.</target>
+        <note> This will look like, Project file item includes which caused reference "a.dll".</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

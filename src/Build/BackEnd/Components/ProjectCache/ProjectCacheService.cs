@@ -205,16 +205,16 @@ namespace Microsoft.Build.ProjectCache
             CancellationToken cancellationToken)
         {
             BuildEventContext buildEventContext = BuildEventContext.Invalid;
-            BuildEventFileInfo buildEventFileInfo = BuildEventFileInfo.Empty;
+            IElementLocation elementLocation = ElementLocation.Empty;
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             IProjectCachePluginBase? pluginInstance = null;
             string pluginTypeName;
@@ -490,11 +490,9 @@ namespace Microsoft.Build.ProjectCache
                 return false;
             }
 
-            // We need to retrieve the configuration if it's already loaded in order to access the Project property below.
-            if (buildRequestConfiguration.IsCached)
-            {
-                buildRequestConfiguration.RetrieveFromCache();
-            }
+            // Retrieve the project if it is cached and keep it in memory while checking its cache descriptors.
+            using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                buildRequestConfiguration.AcquireProjectInstanceUsage();
 
             // Check if there are any project cache items defined in the project
             return GetProjectCacheDescriptors(buildRequestConfiguration.Project).Any();
@@ -530,6 +528,12 @@ namespace Microsoft.Build.ProjectCache
 
             async ValueTask<(CacheResult Result, int ProjectContextId)> ProcessCacheRequestAsync()
             {
+                // The configuration cache is shared with the in-proc node's BuildRequestEngine, which may run a
+                // memory-pressure sweep on its own thread. Keep the project in memory for this entire operation:
+                // the ProjectInstance below is handed to the plugin and is used until the query completes.
+                using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                    cacheRequest.Configuration.AcquireProjectInstanceUsage();
+
                 EvaluateProjectIfNecessary(cacheRequest.Submission, cacheRequest.Configuration);
 
                 BuildRequestData buildRequest = new BuildRequestData(
@@ -582,15 +586,15 @@ namespace Microsoft.Build.ProjectCache
         {
             Assumed.NotNull(buildRequest.ProjectInstance);
 
-            var buildEventFileInfo = new BuildEventFileInfo(buildRequest.ProjectFullPath);
+            ElementLocation elementLocation = ElementLocation.Create(buildRequest.ProjectFullPath);
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
             var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             string? targetNames = buildRequest.TargetNames != null && buildRequest.TargetNames.Count > 0
                 ? string.Join(", ", buildRequest.TargetNames)
@@ -839,15 +843,13 @@ namespace Microsoft.Build.ProjectCache
                 return;
             }
 
-            // If the ProjectInstance was evicted to disk to save memory, restore it before accessing
-            // the Project property below (whose getter asserts !IsCached).
-            if (requestConfiguration.IsCached)
+            List<ProjectCacheDescriptor> projectCacheDescriptors;
+            // Retrieve the project if it is cached and keep it in memory while determining which plugins apply.
+            using (requestConfiguration.AcquireProjectInstanceUsage())
             {
-                requestConfiguration.RetrieveFromCache();
+                projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();
             }
 
-            // Filter to plugins which apply to the project, if any
-            List<ProjectCacheDescriptor> projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();
             if (projectCacheDescriptors.Count == 0)
             {
                 return;
@@ -870,16 +872,16 @@ namespace Microsoft.Build.ProjectCache
             Experimental.ProjectCache.FileAccessContext experimentalFileAccessContext = new(requestConfiguration.ProjectFullPath, globalProperties, targets);
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            var buildEventFileInfo = new BuildEventFileInfo(requestConfiguration.ProjectFullPath);
+            ElementLocation elementLocation = ElementLocation.Create(requestConfiguration.ProjectFullPath);
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             Task[] tasks = new Task[projectCacheDescriptors.Count];
             int idx = 0;
@@ -951,16 +953,16 @@ namespace Microsoft.Build.ProjectCache
             }
 
             BuildEventContext buildEventContext = BuildEventContext.Invalid;
-            BuildEventFileInfo buildEventFileInfo = BuildEventFileInfo.Empty;
+            IElementLocation elementLocation = ElementLocation.Empty;
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             _loggingService.LogComment(buildEventContext, MessageImportance.Low, "ProjectCacheEndBuild");
 
@@ -1047,18 +1049,18 @@ namespace Microsoft.Build.ProjectCache
 
             private readonly BuildEventContext _buildEventContext;
 
-            private readonly BuildEventFileInfo _buildEventFileInfo;
+            private readonly IElementLocation _elementLocation;
 
             public override bool HasLoggedErrors { get; protected set; }
 
             public LoggingServiceToPluginLoggerAdapter(
                 ILoggingService loggingService,
                 BuildEventContext buildEventContext,
-                BuildEventFileInfo buildEventFileInfo)
+                IElementLocation elementLocation)
             {
                 _loggingService = loggingService;
                 _buildEventContext = buildEventContext;
-                _buildEventFileInfo = buildEventFileInfo;
+                _elementLocation = elementLocation;
             }
 
             public override void LogMessage(string message, MessageImportance? messageImportance = null)
@@ -1076,7 +1078,7 @@ namespace Microsoft.Build.ProjectCache
                     subcategoryResourceName: null,
                     warningCode: null,
                     helpKeyword: null,
-                    _buildEventFileInfo,
+                    _elementLocation,
                     warning);
             }
 
@@ -1089,7 +1091,7 @@ namespace Microsoft.Build.ProjectCache
                     subcategoryResourceName: null,
                     errorCode: null,
                     helpKeyword: null,
-                    _buildEventFileInfo,
+                    _elementLocation,
                     error);
             }
         }
@@ -1102,18 +1104,18 @@ namespace Microsoft.Build.ProjectCache
 
             private readonly BuildEventContext _buildEventContext;
 
-            private readonly BuildEventFileInfo _buildEventFileInfo;
+            private readonly IElementLocation _elementLocation;
 
             public override bool HasLoggedErrors { get; protected set; }
 
             public LoggingServiceToExperimentalPluginLoggerAdapter(
                 ILoggingService loggingService,
                 BuildEventContext buildEventContext,
-                BuildEventFileInfo buildEventFileInfo)
+                IElementLocation elementLocation)
             {
                 _loggingService = loggingService;
                 _buildEventContext = buildEventContext;
-                _buildEventFileInfo = buildEventFileInfo;
+                _elementLocation = elementLocation;
             }
 
             public override void LogMessage(string message, MessageImportance? messageImportance = null)
@@ -1131,7 +1133,7 @@ namespace Microsoft.Build.ProjectCache
                     subcategoryResourceName: null,
                     warningCode: null,
                     helpKeyword: null,
-                    _buildEventFileInfo,
+                    _elementLocation,
                     warning);
             }
 
@@ -1144,7 +1146,7 @@ namespace Microsoft.Build.ProjectCache
                     subcategoryResourceName: null,
                     errorCode: null,
                     helpKeyword: null,
-                    _buildEventFileInfo,
+                    _elementLocation,
                     error);
             }
         }

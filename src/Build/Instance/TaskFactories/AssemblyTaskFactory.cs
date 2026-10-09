@@ -64,6 +64,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters _factoryIdentityParameters;
 
+        private bool _taskHostExplicitlyRequested;
+
 
         #endregion
 
@@ -247,6 +249,7 @@ namespace Microsoft.Build.BackEnd
         {
             ArgumentNullException.ThrowIfNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
+            _taskHostExplicitlyRequested = taskHostExplicitlyRequested;
 
             bool taskHostParamsMatchCurrentProc = true;
             if (!taskFactoryIdentityParameters.IsEmpty)
@@ -278,7 +281,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (exception != null)
                     {
-                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, exception.Message);
+                        targetLoggingContext.LogError(
+                            ElementLocation.Create(taskProjectFile),
+                            "TaskLoadFailure",
+                            taskName,
+                            loadInfo.AssemblyLocation,
+                            exception.Message);
                     }
                 }
 
@@ -319,6 +327,7 @@ namespace Microsoft.Build.BackEnd
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
 
             TaskHostParameters mergedParameters = TaskHostParameters.Empty;
+            bool useTaskHostForMultiThreadedCompatibility = false;
 
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
             // the task factory parameters if we have any to calculate; otherwise even if we
@@ -340,6 +349,8 @@ namespace Microsoft.Build.BackEnd
                 if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
                 {
                     useTaskFactory = true;
+                    useTaskHostForMultiThreadedCompatibility =
+                        !_taskHostExplicitlyRequested;
                 }
             }
 
@@ -352,12 +363,11 @@ namespace Microsoft.Build.BackEnd
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
                 mergedParameters = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
-                // Sidecar here means that the task host is launched with /nodeReuse:true and doesn't terminate
-                // after the task execution. This improves performance for tasks that run multiple times in a build.
-                // If the task host factory is explicitly requested, do not act as a sidecar task host.
-                // This is important as customers use task host factories for short lived tasks to release
-                // potential locks.
-                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
+                // Launching with /nodeReuse:true keeps the task host alive after the task finishes,
+                // which improves performance for tasks that run multiple times in a build. An
+                // explicitly requested task host factory is deliberately excluded: customers use it
+                // for short lived tasks precisely so the process exits and releases its locks.
+                bool allowNodeReuse = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
@@ -365,7 +375,8 @@ namespace Microsoft.Build.BackEnd
                     buildComponentHost,
                     mergedParameters,
                     _loadedType,
-                    useSidecarTaskHost: useSidecarTaskHost,
+                    allowNodeReuse: allowNodeReuse,
+                    forwardConsoleOutput: useTaskHostForMultiThreadedCompatibility,
                     projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
@@ -389,7 +400,10 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.Line,
                     taskLocation.Column,
                     new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
-                        taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
+                        taskLoggingContext.LogError(
+                            ElementLocation.Create(taskLoc, taskLine, taskColumn),
+                            message,
+                            messageArgs)),
                     taskEnvironment,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
@@ -475,7 +489,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (exception != null)
                     {
-                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, exception.Message);
+                        targetLoggingContext.LogError(
+                            ElementLocation.Create(taskProjectFile),
+                            "TaskLoadFailure",
+                            taskName,
+                            _loadedType.Assembly.AssemblyLocation,
+                            exception.Message);
                     }
                 }
 

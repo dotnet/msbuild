@@ -2721,7 +2721,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Result is inconclusive if properties are present
-                    if (itemSpec.ItemSpecString.Contains("$("))
+                    if (ExpressionShredder.ContainsPropertyMarker(itemSpec.ItemSpecString))
                     {
                         provenance |= Provenance.Inconclusive;
                     }
@@ -3211,7 +3211,10 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!IsBuildEnabled)
                 {
-                    LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
+                    LoggingService.LogError(
+                        s_buildEventContext,
+                        ElementLocation.Create(FullPath),
+                        "SecurityProjectBuildDisabled");
                     if (LoggingService is LoggingService defaultLoggingService)
                     {
                         defaultLoggingService.WaitForLoggingToProcessEvents();

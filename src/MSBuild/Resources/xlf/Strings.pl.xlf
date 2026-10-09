@@ -245,25 +245,17 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
-                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multithreaded
+        <target state="translated">  -wielowątkowy[:true|false]
                      Włącza tryb EKSPERYMENTALNY wielowątkowości w programie MSBuild.
                      Oznacza to, że program MSBuild będzie używać wielu wątków
                      do równoległego kompilowania projektów,
                      zamiast wielu procesów.
-                     Ta opcja nie jest obsługiwana.
                      Maksymalna liczba używanych wątków jest określana przez
                      przełącznik -maxCpuCount.
-                     W przypadku trybu wielowątkowego włączonego
-                     i MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     Wartość maxCpuCount nie może być większa niż 256.
                      (Krótka forma: -mt)
     </target>
         <note />
@@ -316,7 +308,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
         <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1072: wartość trybu wielowątkowego jest nieprawidłowa. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -391,62 +383,62 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
-        <target state="needs-review-translation">nie można było połączyć się z serwerem w oknie limitu czasu; serwer mógł się nie uruchomić</target>
+        <target state="translated">nie można było połączyć się z serwerem w oknie limitu czasu; serwer mógł się nie uruchomić</target>
         <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerCrashedOnLaunch">
         <source>the server process exited with code {0} immediately after launch</source>
-        <target state="needs-review-translation">proces serwera zakończył działanie z kodem {0} zaraz po uruchomieniu</target>
+        <target state="translated">proces serwera zakończył działanie z kodem {0} zaraz po uruchomieniu</target>
         <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
-        <target state="needs-review-translation">nie można uruchomić procesu serwera</target>
+        <target state="translated">nie można uruchomić procesu serwera</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">Ponowne użycie uruchomionego węzła serwera MSBuild dla tej kompilacji (identyfikator procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">Węzeł serwera MSBuild został uruchomiony dla tej kompilacji (identyfikator procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">Węzeł serwera MSBuild został uruchomiony tylko dla tej kompilacji; zostanie ona później zamknięta (identyfikator procesu {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">Zażądano serwera MSBuild Server, ale nie użyto go dla tej kompilacji: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">serwer był zajęty inną kompilacją</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">to wywołanie nie jest zgodne z serwerem MSBuild</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">ponowne użycie węzła jest wyłączone (-nodeReuse:false lub MSBUILDDISABLENODEREUSE=1)</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">kreskowanie ucieczki MSBUILDENSURESTDOUTFORTASKPROCESSES jest włączone</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
-        <target state="needs-review-translation">nie można określić bieżącego stanu serwera</target>
+        <target state="translated">nie można określić bieżącego stanu serwera</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerUnavailable">
@@ -578,25 +570,24 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -isolateProjects[:True|MessageUponIsolationViolation|False]
-                     Powoduje, że program MSBuild kompiluje każdy projekt osobno.
+                     Powoduje, że program MSBuild kompiluje każdy projekt w izolacji.
 
                      Po ustawieniu na wartość „MessageUponIsolationViolation” (lub jej skróconą
                      formę „Message”), serializowane są tylko wyniki z celów najwyższego poziomu
                      , jeśli przełącznik -outputResultsCache jest
                      dostarczony. Ma to na celu zmniejszenie szans na to, że cel 
-                     naruszy izolację w projekcie zależnym przy użyciu
-                     nieprawidłowego stanu z powodu jego zależności od buforowanego celu
+                     naruszy izolację w projekcie zależności przy użyciu
+                     nieprawidłowego stanu z powodu jego zależności od buforowanego celu,
                      którego efekty uboczne nie byłyby brane pod uwagę.
                      (Na przykład definicja właściwości).
 
-                     Jest to bardziej restrykcyjny tryb MSBuild, ponieważ wymaga
-,
+                     Jest to bardziej restrykcyjny tryb programu MSBuild, ponieważ wymaga,
                      aby graf projektu był statycznie wykrywalny w
-                     czasie ewaluacji, ale może też poprawiać planowanie i zmniejszyć
-                     pamięć podczas budowania dużego zestawu projektów.
+                     czasie oceny, ale może też poprawiać planowanie i zmniejszać
+                     zapas pamięci podczas budowania dużego zestawu projektów.
                      (Skrócona forma: -isolate)
 
-                     Ta flaga jest eksperymentalna i może nie działać zgodnie z przeznaczeniem.
+                     Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -1857,6 +1848,44 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     exact @ switch that resulted in the duplicate response file.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="ReplayFilterCanceled">
+        <source>MSBUILD : error MSB1082: Filtered binary log replay was canceled. No output was published.</source>
+        <target state="translated">MSBUILD : error MSB1082: anulowano odtwarzanie przefiltrowanego dziennika binarnego. Nie opublikowano żadnych danych wyjściowych.</target>
+        <note>{StrBegin="MSBUILD : error MSB1082: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterFailed">
+        <source>MSBUILD : error MSB1081: Filtered binary log replay failed. {0}</source>
+        <target state="translated">MSBUILD : error MSB1081: nie można odtworzyć przefiltrowanego dziennika binarnego. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1081: "}{0} is the exception, including inner exceptions.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterInvalidOutput">
+        <source>MSBUILD : error MSB1085: Invalid filtered binary log output path. {0}</source>
+        <target state="translated">MSBUILD : error MSB1085: nieprawidłowa przefiltrowana ścieżka wyjściowa dziennika binarnego. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1085: "}{0} is the path error.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterOutputExists">
+        <source>MSBUILD : error MSB1080: The binary log destination already exists or is specified more than once. Choose a new output path.</source>
+        <target state="translated">MSBUILD : error MSB1080: miejsce docelowe dziennika binarnego już istnieje lub jest określone więcej niż raz. Wybierz nową ścieżkę wyjściową.</target>
+        <note>{StrBegin="MSBUILD : error MSB1080: "}</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterUnsupportedSwitch">
+        <source>MSBUILD : error MSB1077: This switch is not supported when replaying a binary log with Exclude=.</source>
+        <target state="translated">MSBUILD : error MSB1077: ten przełącznik nie jest obsługiwany podczas odtwarzania dziennika binarnego z exclude=.</target>
+        <note>{StrBegin="MSBUILD : error MSB1077: "}Do not localize Exclude=.</note>
+      </trans-unit>
+      <trans-unit id="ReplayFilterZipNotSupported">
+        <source>MSBUILD : error MSB1084: Filtered replay supports ProjectImports=Embed or ProjectImports=None, not ProjectImports=ZipFile.</source>
+        <target state="translated">MSBUILD : error MSB1084: odfiltrowane ponowne odtwarzanie obsługuje projectImports=Embed lub ProjectImports=None, nie ProjectImports=ZipFile.</target>
+        <note>{StrBegin="MSBUILD : error MSB1084: "}Do not localize ProjectImports values.</note>
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesIncompatibleWithMultiThreaded">
+        <source>MSBUILD : error MSB1073: Multi-threaded mode and -reportFileAccesses cannot be used together. File-access reporting attributes accesses to one project per worker process, but multi-threaded mode can execute multiple projects in the same process. Remove -reportFileAccesses, or disable multi-threaded mode with -mt:false. If MSBUILDFORCEMULTITHREADED is set, unset it first; MSBUILDENABLEMULTITHREADED can be overridden by -mt:false.</source>
+        <target state="translated">MSBUILD : error MSB1073: trybu wielowątkowego i opcji -reportFileAccesses nie można używać jednocześnie. Raportowanie dostępu do plików rejestruje dostępy dla jednego projektu na proces roboczy, ale tryb wielowątkowy może wykonywać wiele projektów w tym samym procesie. Usuń opcję -reportFileAccesses albo wyłącz tryb wielowątkowy za pomocą opcji -mt:false. Jeśli ustawiono zmienną środowiskową MSBUILDFORCEMULTITHREADED, najpierw usuń jej ustawienie. Ustawienie zmiennej MSBUILDENABLEMULTITHREADED można przesłonić opcją -mt:false.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1073: "}
+      LOCALIZATION: "-reportFileAccesses" and "-mt:false" are command-line switches, and "MSBUILDFORCEMULTITHREADED" and "MSBUILDENABLEMULTITHREADED" are environment variables. They should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="ResponseFileNotFoundError">
         <source>MSBUILD : error MSB1022: Response file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1022: plik odpowiedzi nie istnieje.</target>
@@ -2062,11 +2091,6 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
         <target state="translated">Kompilacja rozpoczęła się.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
         <target state="translated">MSBUILD : error MSB1050: określ plik projektu lub rozwiązania, który zostanie użyty, ponieważ folder „{0}” zawiera więcej niż jeden plik projektu lub rozwiązania.</target>
@@ -2149,7 +2173,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="HelpMessage_30_BinaryLoggerSwitch">
         <source>  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
+                     Serializes build events to a compressed binary file.
                      By default the file is in the current directory and named
                      "msbuild.binlog". The binary log is a detailed description
                      of the build process that can later be used to reconstruct
@@ -2157,6 +2181,19 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      is usually 10-20x smaller than the most detailed text
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
+
+                     Exclude=kind[,kind...] omits the named event kinds from
+                     this binary logger during builds and replay. Console and
+                     other loggers are unaffected. Names are case-insensitive.
+                     Specify Exclude once per logger. Selection matches exact
+                     record kinds, not all derived message or warning events.
+                     Build, project, target and task lifecycle events are
+                     protected. Exclude both ProjectEvaluationStarted and
+                     ProjectEvaluationFinished together, or neither.
+                     Example: -bl:"out.binlog;Exclude=Message,Warning"
+                     Filtered replay requires new output paths and does not
+                     support ProjectImports=ZipFile.
+                     Filtering is not redaction: embedded files are independent.
 
                      The optional LogFile specifies the path where the
                      binary log is saved. To generate a distinct log file
@@ -2208,6 +2245,19 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      jest zwykle 10–20 razy mniejszy od najbardziej szczegółowych
                      tekstowych dzienników na poziomie diagnostycznym, ale zawiera więcej informacji.
                      (Krótka forma: -bl)
+
+                     Exclude=kind[,kind...] pomija nazwane rodzaje zdarzeń z
+                     tego rejestratora binarnego podczas kompilacji i odtwarzania. Konsola i
+                     inne rejestratory nie są tym objęte. W nazwach nie jest rozróżniana wielkość liter.
+                     Określ opcję Wyklucz raz dla rejestratora. Wybór jest dokładnie zgodny z
+                     typami rekordów, nie wszystkimi pochodnymi komunikatami lub zdarzeniami ostrzegawczymi.
+                     Zdarzenia cyklu życia kompilacji, projektu, miejsca docelowego i zadania są
+                     chronione. Wyklucz obie wartości ProjectEvaluationStarted i
+                     ProjectEvaluation jednocześnie lub żadną z nich.
+                     Przykład: -bl:"out.binlog; Exclude=Message,Ostrzeżenie"
+                     Przefiltrowane ponowne odtwarzanie wymaga nowych ścieżek wyjściowych i nie
+                     obsługuje elementu ProjectImports=ZipFile.
+                     Filtrowanie nie jest redagowaniem: pliki osadzone są niezależne.
 
                      Opcjonalny LogFile określa ścieżkę, w której
                      zapisany jest dziennik binarny. Aby wygenerować osobny plik dziennika

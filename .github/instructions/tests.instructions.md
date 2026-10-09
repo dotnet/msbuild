@@ -47,6 +47,8 @@ Test assemblies use assembly fixtures (for example, `Microsoft.Build.UnitTests.M
 
 ## Data-Driven and Async Tests
 
+Prefer a focused regression that directly proves the requested behavior over a Boolean matrix covering unrelated modes or languages. For task-routing tests, compare the task's PID with a known in-process assembly task. Avoid duplicating existing end-to-end routing coverage.
+
 Use `[Theory]` with `[InlineData]` for simple inputs. Use `[MemberData]` or `TheoryData<T>` for complex objects (returning `IEnumerable<object[]>`). If the data type is custom, implement `IXunitSerializable`.
 
 ```csharp
@@ -77,4 +79,4 @@ ObjectModelHelpers.AssertItemsMatch(
     project.GetItems("MyItem"));
 ```
 
-Use `ObjectModelHelpers.AssertSingleItem`, `AssertItems`, and `AssertItemHasMetadata` for item/property assertions, and `NormalizeSlashes` for cross-platform path comparisons.
+Use `ObjectModelHelpers.AssertSingleItem`, `AssertItems`, and `AssertItemHasMetadata` for item/property assertions, and `NormalizeSlashes` for cross-platform path comparisons. Never hardcode `\` as a path separator in item/metadata values within test XML (it is not a valid separator on Unix); build such paths with `Path.Combine` instead.

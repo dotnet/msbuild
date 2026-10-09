@@ -263,7 +263,7 @@ private List<SdkResolver> GetResolvers(IReadOnlyList<SdkResolverManifest> resolv
                     // Trimmed / Native AOT host: we cannot load a plugin SDK resolver by reflection.
                     // Fail observably so the caller (e.g. the AOT dotnet CLI) can fall back to a JIT MSBuild.
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                        new BuildEventFileInfo(sdkReferenceLocation),
+                        sdkReferenceLocation,
                         "SdkResolverDynamicLoadingNotSupported",
                         sdk.Name,
                         resolverManifest.DisplayName);

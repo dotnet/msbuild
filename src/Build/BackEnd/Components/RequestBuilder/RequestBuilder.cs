@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -305,7 +306,10 @@ namespace Microsoft.Build.BackEnd
                 if (!taskCleanedUp)
                 {
                     // This can happen when a task has locked us up.
-                    _projectLoggingContext.LogError(new BuildEventFileInfo(String.Empty), "FailedToReceiveTaskThreadStatus", BuildParameters.RequestBuilderShutdownTimeout);
+                    _projectLoggingContext.LogError(
+                        ElementLocation.Empty,
+                        "FailedToReceiveTaskThreadStatus",
+                        BuildParameters.RequestBuilderShutdownTimeout);
                     ErrorUtilities.ThrowInvalidOperation("UnableToCancel");
                 }
             }
@@ -831,7 +835,7 @@ namespace Microsoft.Build.BackEnd
                     string realMessage = TaskLoggingHelper.GetInnerExceptionMessageString(ex);
                     LoggingContext loggingContext = ((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext;
                     loggingContext.LogError(
-                        BuildEventFileInfo.Empty,
+                        ElementLocation.Empty,
                         "FatalErrorWhileLoggingWithInnerException",
                         realMessage);
 
@@ -845,7 +849,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else if (ex is not CriticalTaskException)
                 {
-                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                    (((LoggingContext)_projectLoggingContext) ?? _nodeLoggingContext).LogError(ElementLocation.Empty, "UnhandledMSBuildError", ex.ToString());
                 }
 
                 if (ExceptionHandling.IsCriticalException(ex))
@@ -1152,10 +1156,15 @@ namespace Microsoft.Build.BackEnd
 
             buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
-            // Make sure it is null before loading the configuration into the request, because if there is a problem
-            // we do not wand to have an invalid projectLoggingContext floating around. Also if this is null the error will be
-            // logged with the node logging context
+            // Make sure it is null before loading or restoring the configuration so an invalid context is not reused.
+            // The failure paths below create a temporary project logging context before propagating the error.
             _projectLoggingContext = null;
+
+            // The configuration cache is shared across the node and may be swept for memory pressure on a
+            // BuildRequestEngine thread. A configuration becomes cacheable after its last target, but post-build
+            // telemetry still accesses its ProjectInstance, so keep the project in memory for this entire operation.
+            using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                AcquireProjectInstanceUsageWithProjectLoggingContext();
 
             try
             {
@@ -1192,11 +1201,7 @@ namespace Microsoft.Build.BackEnd
             catch
             {
                 // make sure that any errors thrown by a child project are logged in the context of their parent project: create a temporary projectLoggingContext
-                _projectLoggingContext = new ProjectLoggingContext(
-                    _nodeLoggingContext,
-                    _requestEntry.Request,
-                    _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion);
+                CreateTemporaryProjectLoggingContext();
 
                 throw;
             }
@@ -1206,23 +1211,22 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-
+            string tracedTargets = null;
             try
             {
                 // Determine the set of targets we need to build
                 (string name, TargetBuiltReason reason)[] allTargets = _requestEntry.RequestConfiguration
-   .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
+                    .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
-                    MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
+                    tracedTargets = string.Join(", ", allTargets);
+                    MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, tracedTargets);
                 }
                 HandleProjectStarted(buildCheckManager);
 
                 // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
                 ConfigureKnownImmutableFolders();
 
-                // See comment on Microsoft.Build.Internal.Utilities.GenerateToolsVersionToUse
-                _requestEntry.RequestConfiguration.RetrieveFromCache();
                 if (_requestEntry.RequestConfiguration.Project.UsingDifferentToolsVersionFromProjectFile)
                 {
                     _projectLoggingContext.LogComment(MessageImportance.Low,
@@ -1257,6 +1261,24 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+                if (!_cancellationTokenSource.IsCancellationRequested
+                    && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
+                    && scope.BuildId == _componentHost.BuildParameters.BuildId)
+                {
+                    ElementLocation location = _requestEntry.RequestConfiguration.Project.ProjectFileLocation;
+                    string entries = scope.VerifyUnresolvedPathWrites(location, out bool recovered);
+                    if (recovered)
+                    {
+                        _projectLoggingContext.LogWarning(null, location,
+                            "MultiThreadedStrictModeSentinelMissing", scope.SentinelDirectory);
+                    }
+                    else if (entries is not null)
+                    {
+                        _projectLoggingContext.LogWarning(null, location,
+                            "MultiThreadedStrictModeUnresolvedPathWrite", entries, scope.SentinelDirectory);
+                    }
+                }
+
                 // Populate the evaluation ID from the configuration for sending to the central node.
                 result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
 
@@ -1266,16 +1288,15 @@ namespace Microsoft.Build.BackEnd
                     ? result
                     : CopyTargetResultsFromProxyTargetsToRealTargets(result);
 
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath,
-                        string.Join(", ", allTargets));
-                }
-
                 return result;
             }
             finally
             {
+                if (tracedTargets is not null)
+                {
+                    MSBuildEventSource.Log.BuildProjectStop(_requestEntry.RequestConfiguration.ProjectFullPath, tracedTargets);
+                }
+
                 if (buildCheckManager is not null && _projectLoggingContext is not null)
                 {
                     buildCheckManager.EndProjectRequest(
@@ -1312,6 +1333,28 @@ namespace Microsoft.Build.BackEnd
 
                 return resultFromTargetBuilder;
             }
+        }
+
+        private BuildRequestConfiguration.ProjectInstanceUsageScope AcquireProjectInstanceUsageWithProjectLoggingContext()
+        {
+            try
+            {
+                return _requestEntry.RequestConfiguration.AcquireProjectInstanceUsage();
+            }
+            catch
+            {
+                CreateTemporaryProjectLoggingContext();
+                throw;
+            }
+        }
+
+        private void CreateTemporaryProjectLoggingContext()
+        {
+            _projectLoggingContext = new ProjectLoggingContext(
+                _nodeLoggingContext,
+                _requestEntry.Request,
+                _requestEntry.RequestConfiguration.ProjectFullPath,
+                _requestEntry.RequestConfiguration.ToolsVersion);
         }
 
         private void UpdateStatisticsPostBuild()

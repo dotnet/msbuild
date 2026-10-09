@@ -295,6 +295,13 @@ namespace Microsoft.Build.BackEnd.Logging
         bool HasBuildSubmissionLoggedErrors(int submissionId);
 
         /// <summary>
+        /// Determines whether a warning will be promoted to an error after applying suppression and global and project settings.
+        /// </summary>
+        /// <param name="buildEventContext">The context in which the warning will be logged.</param>
+        /// <param name="warningCode">The warning code.</param>
+        bool ShouldTreatWarningAsError(BuildEventContext buildEventContext, string warningCode);
+
+        /// <summary>
         /// Populates build telemetry with error categorization data.
         /// </summary>
         /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
@@ -403,20 +410,20 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log an error
         /// </summary>
         /// <param name="buildEventContext">The event context information as to where the error occurred </param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="messageResourceName">The resource name for the error</param>
         /// <param name="messageArgs">Parameters for the resource string</param>
-        void LogError(BuildEventContext buildEventContext, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs);
+        void LogError(BuildEventContext buildEventContext, IElementLocation location, string messageResourceName, params object[] messageArgs);
 
         /// <summary>
         /// Log an error
         /// </summary>
         /// <param name="buildEventContext">The event context for where the error occurred</param>
         /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="messageResourceName">The resource name for the error</param>
         /// <param name="messageArgs">Parameters for the resource string</param>
-        void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs);
+        void LogError(BuildEventContext buildEventContext, string subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs);
 
         /// <summary>
         /// Log an error
@@ -425,9 +432,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="subcategoryResourceName">The resource name which indicates the subCategory</param>
         /// <param name="errorCode"> Error code</param>
         /// <param name="helpKeyword">Help keyword</param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="message">Error message</param>
-        void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, BuildEventFileInfo file, string message);
+        void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, IElementLocation location, string message);
 
         /// <summary>
         /// Log an invalid project file exception
@@ -441,27 +448,27 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="buildEventContext">The event context for where the error occurred</param>
         /// <param name="exception">The exception wich is to be logged</param>
-        /// <param name="file">The file in which the error occurred</param>
-        void LogFatalBuildError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file);
+        /// <param name="location">The location where the error occurred</param>
+        void LogFatalBuildError(BuildEventContext buildEventContext, Exception exception, IElementLocation location);
 
         /// <summary>
         /// Log an error based on an exception during the execution of a task
         /// </summary>
         /// <param name="buildEventContext">The event context for where the error occurred</param>
         /// <param name="exception">The exception wich is to be logged</param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="taskName">The task in which the error occurred</param>
-        void LogFatalTaskError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string taskName);
+        void LogFatalTaskError(BuildEventContext buildEventContext, Exception exception, IElementLocation location, string taskName);
 
         /// <summary>
         /// Log an error based on an exception
         /// </summary>
         /// <param name="buildEventContext">The event context for where the error occurred</param>
         /// <param name="exception">The exception wich is to be logged</param>
-        /// <param name="file">The file in which the error occurred</param>
+        /// <param name="location">The location where the error occurred</param>
         /// <param name="messageResourceName">The string resource which has the formatting string for the error</param>
         /// <param name="messageArgs">The arguments for the error message</param>
-        void LogFatalError(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs);
+        void LogFatalError(BuildEventContext buildEventContext, Exception exception, IElementLocation location, string messageResourceName, params object[] messageArgs);
         #endregion
 
         #region Log warnings
@@ -470,19 +477,19 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="buildEventContext">The event context for where the warning occurred</param>
         /// <param name="exception">The exception to be logged as a warning</param>
-        /// <param name="file">The file in which the warning occurred</param>
+        /// <param name="location">The location where the warning occurred</param>
         /// <param name="taskName">The task in which the warning occurred</param>
-        void LogTaskWarningFromException(BuildEventContext buildEventContext, Exception exception, BuildEventFileInfo file, string taskName);
+        void LogTaskWarningFromException(BuildEventContext buildEventContext, Exception exception, IElementLocation location, string taskName);
 
         /// <summary>
         /// Log a warning
         /// </summary>
         /// <param name="buildEventContext">The event context for where the warning occurred</param>
         /// <param name="subcategoryResourceName">The subcategory resource name</param>
-        /// <param name="file">The file in which the warning occurred</param>
+        /// <param name="location">The location where the warning occurred</param>
         /// <param name="messageResourceName">The string resource which contains the formatted warning string</param>
         /// <param name="messageArgs">parameters for the string resource</param>
-        void LogWarning(BuildEventContext buildEventContext, string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs);
+        void LogWarning(BuildEventContext buildEventContext, string subcategoryResourceName, IElementLocation location, string messageResourceName, params object[] messageArgs);
 
         /// <summary>
         /// Log a warning based on a text message
@@ -491,9 +498,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="subcategoryResourceName">The subcategory resource name</param>
         /// <param name="warningCode"> Warning code</param>
         /// <param name="helpKeyword"> Help keyword</param>
-        /// <param name="file">The file in which the warning occurred</param>
+        /// <param name="location">The location where the warning occurred</param>
         /// <param name="message">The message to be logged as a warning</param>
-        void LogWarningFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message);
+        void LogWarningFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string warningCode, string helpKeyword, IElementLocation location, string message);
         #endregion
 
         #region Log status

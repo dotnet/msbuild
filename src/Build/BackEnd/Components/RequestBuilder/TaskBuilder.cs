@@ -170,7 +170,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     loggingContext.LogWarning(
                         null,
-                        new BuildEventFileInfo(taskInstance.Location),
+                        taskInstance.Location,
                         "HostObjectFailure",
                         _taskNode.Name,
                         ex.Message);
@@ -477,6 +477,36 @@ namespace Microsoft.Build.BackEnd
                                 taskResult = await InitializeAndExecuteTask(taskLoggingContext, bucket, taskIdentityParameters, taskHost, howToExecuteTask);
                             }
 
+                            // Both execution paths have gathered outputs and cleaned up the task before returning.
+                            if (!_cancellationToken.IsCancellationRequested
+                                && MultiThreadedStrictModeScope.ActiveScope is MultiThreadedStrictModeScope scope
+                                && scope.BuildId == _componentHost.BuildParameters.BuildId)
+                            {
+                                bool violation;
+                                try
+                                {
+                                    violation = scope.VerifyAndReportCurrentDirectory(
+                                        taskLoggingContext, _taskNode.Name, _targetChildInstance.Location,
+                                        convertErrorsToWarnings: _continueOnError == ContinueOnError.WarnAndContinue);
+                                }
+                                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                                {
+                                    _continueOnError = ContinueOnError.ErrorAndStop;
+                                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                                    taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, e);
+                                    throw;
+                                }
+
+                                if (violation)
+                                {
+                                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, "false", true, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                                    taskResult = new WorkUnitResult(
+                                        WorkUnitResultCode.Failed,
+                                        _continueOnError == ContinueOnError.ErrorAndStop ? WorkUnitActionCode.Stop : WorkUnitActionCode.Continue,
+                                        taskResult.Exception);
+                                }
+                            }
+
                             if (lookupHash != null)
                             {
                                 List<string> overrideMessages = bucket.Lookup.GetPropertyOverrideMessages(lookupHash);
@@ -550,8 +580,8 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.NotNull(_taskNode); // taskNode should never be null when we're calling this method.
 
-            string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
-            string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);
+            string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.Empty);
+            string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.Empty);
 
             // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
             // a null set will be treated as equivalent to all parameters being "don't care".
@@ -672,22 +702,26 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, TaskHostParameters taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
-            if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
-            {
-                ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
-            }
-
-            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
-
+            IDisposable assemblyLoadsTracker = null;
             try
             {
+                if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
+                }
+
+                assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
+
                 // UNDONE: Move this and the task host.
                 taskHost.LoggingContext = taskLoggingContext;
                 return await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
             }
             finally
             {
-                _taskExecutionHost.CleanupForBatch();
+                using (assemblyLoadsTracker)
+                {
+                    _taskExecutionHost.CleanupForBatch();
+                }
             }
         }
 
@@ -847,7 +881,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         taskLoggingContext.LogFatalTaskError(
                             ex,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _targetChildInstance.Location,
                             _taskNode.Name);
 
                         throw new CriticalTaskException(ex);
@@ -955,7 +989,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             taskLoggingContext.LogTaskWarningFromException(
                                 exceptionToLog,
-                                new BuildEventFileInfo(_targetChildInstance.Location),
+                                _targetChildInstance.Location,
                                 _taskNode.Name);
 
                             // Log a message explaining why we converted the previous error into a warning.
@@ -965,7 +999,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             taskLoggingContext.LogFatalTaskError(
                                 exceptionToLog,
-                                new BuildEventFileInfo(_targetChildInstance.Location),
+                                _targetChildInstance.Location,
                                 _taskNode.Name);
                         }
                     }
@@ -994,7 +1028,7 @@ namespace Microsoft.Build.BackEnd
                     else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
                         taskLoggingContext.LogWarning(null,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _targetChildInstance.Location,
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);
 
@@ -1002,7 +1036,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                        taskLoggingContext.LogError(_targetChildInstance.Location,
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);
                     }
@@ -1061,12 +1095,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             var projectReferenceItems = _buildRequestEntry.RequestConfiguration.Project.GetItems(ItemTypeNames.ProjectReference);
+            string projectDirectory = _buildRequestEntry.TaskEnvironment.ProjectDirectory.Value;
 
             var declaredProjects = new HashSet<string>(projectReferenceItems.Count + 1, FileUtilities.PathComparer);
 
             foreach (var projectReferenceItem in projectReferenceItems)
             {
-                declaredProjects.Add(FileUtilities.NormalizePath(projectReferenceItem.EvaluatedInclude));
+                declaredProjects.Add(FileUtilities.NormalizePath(projectDirectory, projectReferenceItem.EvaluatedInclude));
             }
 
             // allow a project to msbuild itself
@@ -1076,7 +1111,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (var msbuildProject in msbuildTask.Projects)
             {
-                var normalizedMSBuildProject = FileUtilities.NormalizePath(msbuildProject.ItemSpec);
+                var normalizedMSBuildProject = FileUtilities.NormalizePath(projectDirectory, msbuildProject.ItemSpec);
 
                 if (
                     !(declaredProjects.Contains(normalizedMSBuildProject)

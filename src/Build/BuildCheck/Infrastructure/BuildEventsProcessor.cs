@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -149,7 +150,9 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
             // Add a new entry to _tasksBeingExecuted. TaskParameters are initialized empty and will be recorded
             // based on TaskParameterEventArgs we receive later.
-            Dictionary<string, TaskInvocationCheckData.TaskParameter> taskParameters = new();
+            // Parameter names are MSBuild names - compare them case-insensitively so checks are not sensitive
+            // to the casing a project author happened to use.
+            Dictionary<string, TaskInvocationCheckData.TaskParameter> taskParameters = new(MSBuildNameIgnoreCaseComparer.Default);
 
             ExecutingTaskData taskData = new()
             {
@@ -247,7 +250,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         if (!checkWrapper.Check.SupportedRules.Contains(result.CheckRule))
         {
             checkContext.DispatchAsErrorFromText(null, null, null,
-                BuildEventFileInfo.Empty,
+                ElementLocation.Empty,
                 $"The check '{checkWrapper.Check.FriendlyName}' reported a result for a rule '{result.CheckRule.Id}' that it does not support.");
             return;
         }

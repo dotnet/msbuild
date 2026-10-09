@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
@@ -93,7 +94,7 @@ namespace Microsoft.Build.Internal
         /// <param name="excludeLocation">Location of Exclude element in file, used after drive enumeration detection.</param>
         /// <param name="importLocation">Location of Import element in file, used after drive enumeration detection.</param>
         /// <param name="buildEventContext">Context to log a warning, used after drive enumeration detection.</param>
-        /// <param name="buildEventFileInfoFullPath">Full path to project file to create BuildEventFileInfo,
+        /// <param name="projectFilePath">Full path to project file to create IElementLocation,
         /// used after drive enumeration detection.</param>
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
@@ -109,7 +110,7 @@ namespace Microsoft.Build.Internal
             IElementLocation? excludeLocation = null,
             IElementLocation? importLocation = null,
             BuildEventContext? buildEventContext = null,
-            string? buildEventFileInfoFullPath = null,
+            string? projectFilePath = null,
             bool disableExcludeDriveEnumerationWarning = false)
         {
             return GetFileList(
@@ -123,7 +124,7 @@ namespace Microsoft.Build.Internal
                 includeLocation: includeLocation,
                 excludeLocation: excludeLocation,
                 importLocation: importLocation,
-                buildEventFileInfoFullPath: buildEventFileInfoFullPath,
+                projectFilePath: projectFilePath,
                 buildEventContext: buildEventContext,
                 disableExcludeDriveEnumerationWarning: disableExcludeDriveEnumerationWarning);
         }
@@ -164,7 +165,7 @@ namespace Microsoft.Build.Internal
         /// <param name="excludeLocation">Location of Exclude element in file, used after drive enumeration detection.</param>
         /// <param name="importLocation">Location of Import element in file, used after drive enumeration detection.</param>
         /// <param name="buildEventContext">Context to log a warning, used after drive enumeration detection.</param>
-        /// <param name="buildEventFileInfoFullPath">Full path to project file to create BuildEventFileInfo,
+        /// <param name="projectFilePath">Full path to project file to create IElementLocation,
         /// used after drive enumeration detection.</param>
         /// <param name="disableExcludeDriveEnumerationWarning">Flag used to detect when to properly log a warning
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
@@ -181,7 +182,7 @@ namespace Microsoft.Build.Internal
             IElementLocation? excludeLocation = null,
             IElementLocation? importLocation = null,
             BuildEventContext? buildEventContext = null,
-            string? buildEventFileInfoFullPath = null,
+            string? projectFilePath = null,
             bool disableExcludeDriveEnumerationWarning = false)
         {
             Assumed.NotNullOrEmpty(filespecEscaped);
@@ -264,7 +265,7 @@ namespace Microsoft.Build.Internal
                                 loggingService,
                                 includeLocation,
                                 buildEventContext,
-                                buildEventFileInfoFullPath,
+                                projectFilePath,
                                 filespecUnescaped);
 
                             break;
@@ -425,14 +426,14 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        private static void LogDriveEnumerationWarningWithLoggingService(ILoggingService loggingService, IElementLocation? includeLocation, BuildEventContext? buildEventContext, string? buildEventFileInfoFullPath, string filespecUnescaped)
+        private static void LogDriveEnumerationWarningWithLoggingService(ILoggingService loggingService, IElementLocation? includeLocation, BuildEventContext? buildEventContext, string? projectFilePath, string filespecUnescaped)
         {
             if (buildEventContext != null && includeLocation != null)
             {
                 loggingService.LogWarning(
                     buildEventContext,
                     string.Empty,
-                    new BuildEventFileInfo(buildEventFileInfoFullPath),
+                    ElementLocation.Create(projectFilePath),
                     DriveEnumeratingWildcardMessageResourceName,
                     filespecUnescaped,
                     XMakeAttributes.include,
