@@ -148,6 +148,14 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly int NodeConnectionBufferSize = GetNodeConnectionBufferSize();
 
+        /// <summary>
+        /// Maximum combined size in bytes of outbound logging packets in one pipe write. Defaults to 64 KB;
+        /// zero disables batching. Values from zero through 1 MB are accepted, and invalid values use the default.
+        /// </summary>
+        internal const int DefaultLogPacketBatchSize = 64 * 1024;
+
+        public readonly int LogPacketBatchSize = GetLogPacketBatchSize();
+
         private static int GetNodeConnectionBufferSize()
         {
             int configured = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDNODECONNECTIONBUFFERSIZE", -1);
@@ -159,6 +167,12 @@ namespace Microsoft.Build.Framework
             const int DefaultBufferSize = 1024 * 1024;
             const int LegacyBufferSize = 128 * 1024;
             return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9) ? DefaultBufferSize : LegacyBufferSize;
+        }
+
+        private static int GetLogPacketBatchSize()
+        {
+            int configured = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDLOGPACKETBATCHSIZE", DefaultLogPacketBatchSize);
+            return configured is >= 0 and <= 1024 * 1024 ? configured : DefaultLogPacketBatchSize;
         }
 
         /// <summary>
