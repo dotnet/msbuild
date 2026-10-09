@@ -33,6 +33,12 @@ This newly-built MSBuild will be located at `artifacts\bin\bootstrap\net472\MSBu
 
 MSBuild can be run on Unix systems that support .NET Core. Set-up instructions can be viewed on the wiki: [Building Testing and Debugging on .Net Core MSBuild](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
 
+### Creating a bootstrap with the daily .NET SDK
+
+Use `.\build.cmd -bootstrapDaily` on Windows or `./build.sh --bootstrap-daily` on Unix to create the bootstrap with the latest published SDK from `dotnet/dotnet` main. The repository build SDK and the default bootstrap remain pinned.
+
+The daily channel is discovered automatically; use `-bootstrapSdkChannel <channel>` (Unix: `--bootstrap-sdk-channel <channel>`) with the daily switch to override it. See [Bootstrap MSBuild](documentation/wiki/Bootstrap.md#choosing-the-bootstrap-sdk) for caching, two-stage builds, and using the selected SDK.
+
 ## Localization
 
 You can turn on localized builds via the `/p:LocalizedBuild=true` command line argument. For more information on localized builds and how to make contributions to MSBuild's translations, see our [localization documentation](documentation/wiki/Localization.md)

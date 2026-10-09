@@ -19,6 +19,9 @@ Param(
   [switch][Alias('bl')] $binaryLog,
   [string][Alias('bln')] $binaryLogName,
   [switch][Alias('nobl')] $excludeCIBinarylog,
+  [switch][Alias('h')] $help,
+  [switch] $bootstrapDaily,
+  [string] $bootstrapSdkChannel,
   [switch] $stage2,
   [string[]] $stage2Argument = @(),
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
@@ -60,7 +63,7 @@ function Get-BuildCommandForDisplay([string[]] $arguments) {
 # always passed on because this script uses it for its own paths, only bound parameters are forwarded,
 # so parameters the caller didn't pass keep their Arcade defaults instead of being pinned to this
 # script's. Parameters listed here are handled by this script and must not be forwarded verbatim.
-$locallyHandledParameters = @('configuration', 'test', 'stage2', 'stage2Argument', 'binaryLogName', 'properties')
+$locallyHandledParameters = @('configuration', 'test', 'stage2', 'stage2Argument', 'binaryLogName', 'properties', 'help', 'bootstrapDaily', 'bootstrapSdkChannel')
 
 function Get-ForwardedArguments($boundParameters) {
   $forwarded = @()
@@ -102,7 +105,52 @@ if ($stage2Argument.Count -gt 0) {
   $stage2 = $true
 }
 
+$bootstrapArgs = @()
+if ($help)
+{
+  Write-Host 'Repository bootstrap options:'
+  Write-Host '  -bootstrapDaily                    Use the latest published dotnet/dotnet main SDK for the final bootstrap.'
+  Write-Host '  -bootstrapSdkChannel <channel>     Override the daily channel (requires -bootstrapDaily).'
+  Write-Host '                                     Repository builds and intermediate stage2 SDKs remain pinned.'
+  Write-Host ''
+  $commonBuildArgs += '-help'
+}
+else
+{
+  if ($PSBoundParameters.ContainsKey('bootstrapSdkChannel'))
+  {
+    if (-not $bootstrapDaily)
+    {
+      Write-Error '-bootstrapSdkChannel requires -bootstrapDaily.'
+      exit 1
+    }
+
+    if ($bootstrapSdkChannel -notmatch '^[0-9]+\.[0-9]+(\.[0-9]+xx)?(-[A-Za-z0-9]+([.-][A-Za-z0-9]+)*)?$')
+    {
+      Write-Error '-bootstrapSdkChannel requires a numeric daily channel such as 11.0.1xx.'
+      exit 1
+    }
+  }
+
+  if ($bootstrapDaily)
+  {
+    $bootstrapArgs += '/p:UseDailyBootstrapSdk=true'
+    if ($bootstrapSdkChannel)
+    {
+      $bootstrapArgs += "/p:BootstrapSdkChannel=$bootstrapSdkChannel"
+    }
+  }
+}
+
 $buildArgs = $commonBuildArgs
+if (-not $stage2)
+{
+  $buildArgs += $bootstrapArgs
+}
+elseif ($bootstrapDaily)
+{
+  $buildArgs += '/p:UseDailyBootstrapSdk=false'
+}
 
 if ($binaryLogName) {
   $buildArgs += '-binaryLogName'
@@ -126,7 +174,7 @@ Write-Host "Stage 1 build: $(Get-BuildCommandForDisplay $buildArgs)"
 
 & $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -Command $stage1Command
 
-if (-not $stage2) {
+if ($help -or -not $stage2) {
   exit $LASTEXITCODE
 }
 
@@ -208,7 +256,7 @@ $env:DOTNET_INSTALL_DIR = Join-Path $BootstrapRoot 'core'
 # until a stable version of MT is available in the images.
 $stage2Args = $stage2Argument
 
-$stage2BuildArgs = $commonBuildArgs
+$stage2BuildArgs = $commonBuildArgs + $bootstrapArgs
 
 # Give the stage 2 binary log a distinct name so it doesn't collide with the stage 1 binlog
 # (both otherwise default to Build.binlog) when CI publishes them to the same artifacts location.

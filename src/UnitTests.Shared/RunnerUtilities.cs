@@ -51,6 +51,13 @@ namespace Microsoft.Build.UnitTests.Shared
         internal static BootstrapLocationAttribute BootstrapLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
                                            ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 
+        private static readonly string[] s_archSpecificDotnetRootVars =
+        [
+            "DOTNET_ROOT_X86",
+            "DOTNET_ROOT_X64",
+            "DOTNET_ROOT_ARM64",
+        ];
+
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
 
@@ -60,15 +67,6 @@ namespace Microsoft.Build.UnitTests.Shared
         // earlier runtime than the SDK overlaid into .dotnet, so a task host resolving .dotnet would
         // fail to find its runtime. See eng/BootStrapMsBuild.targets.
         private static readonly string s_bootstrapDotnetHostPath = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
-
-        // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the .NET app host.
-        // X86/X64/ARM64 cover every CI agent architecture; these are cleared when launching the bootstrapped MSBuild.
-        private static readonly string[] s_archSpecificDotnetRootVars =
-        [
-            "DOTNET_ROOT_X86",
-            "DOTNET_ROOT_X64",
-            "DOTNET_ROOT_ARM64",
-        ];
 
         public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
         {
@@ -169,6 +167,11 @@ namespace Microsoft.Build.UnitTests.Shared
                 ["DOTNET_INSTALL_DIR"] = bootstrapRoot,
             };
 
+            if (BootstrapLocationAttribute.UsesNonPinnedSdk)
+            {
+                ApplyBootstrapSdkOverrides(environmentVariables, BootstrapLocationAttribute);
+            }
+
             // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the app host, so a
             // stale value leaked from the CI environment would silently override the bootstrap root. Remove them (null value).
             foreach (string archSpecificRootVar in s_archSpecificDotnetRootVars)
@@ -178,8 +181,35 @@ namespace Microsoft.Build.UnitTests.Shared
 
             return environmentVariables;
 #else
+            if (useBootstrapHost && BootstrapLocationAttribute.UsesNonPinnedSdk)
+            {
+                var environmentVariables = new Dictionary<string, string>();
+                ApplyBootstrapSdkOverrides(environmentVariables, BootstrapLocationAttribute);
+                return environmentVariables;
+            }
+
             return null;
 #endif
+        }
+
+        private static void ApplyBootstrapSdkOverrides(Dictionary<string, string> environmentVariables, BootstrapLocationAttribute bootstrapLocation)
+        {
+            string coreDirectory = Path.Combine(bootstrapLocation.BootstrapRoot, "core");
+            string sdkDirectory = Path.Combine(coreDirectory, "sdk", bootstrapLocation.BootstrapSdkVersion, "Sdks");
+
+            // The repo's global.json must remain pinned even when tests exercise a different bootstrap SDK.
+            environmentVariables["MSBuildSDKsPath"] = sdkDirectory;
+            environmentVariables["DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR"] = sdkDirectory;
+            environmentVariables["DOTNET_MSBUILD_SDK_RESOLVER_SDKS_VER"] = bootstrapLocation.BootstrapSdkVersion;
+            environmentVariables["DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR"] = coreDirectory;
+            environmentVariables[Constants.DotnetHostPathEnvVarName] = EnvironmentProvider.GetDotnetExePathFromFolder(coreDirectory);
+            environmentVariables["DOTNET_ROOT"] = coreDirectory;
+            environmentVariables["DOTNET_INSTALL_DIR"] = coreDirectory;
+
+            foreach (string archSpecificRootVar in s_archSpecificDotnetRootVars)
+            {
+                environmentVariables[archSpecificRootVar] = null;
+            }
         }
 
         /// <summary>
@@ -220,6 +250,8 @@ namespace Microsoft.Build.UnitTests.Shared
         /// seed <paramref name="environmentVariables"/> from <see cref="GetBootstrapMSBuildEnvironmentVariables"/> so
         /// the child resolves its SDK and runtime from the bootstrap under test rather than a leaked stage 1 / ambient
         /// dotnet; otherwise the launch can fail with MSB4216 / MSB4062 in the CI two-stage build.
+        /// Bootstrap dotnet CLI commands also need <paramref name="workingDirectory"/> set to the core bootstrap
+        /// directory so its global.json selects the same SDK as the bootstrap MSBuild entry point.
         /// </remarks>
         public static string RunProcessAndGetOutput(
             string process,
@@ -229,7 +261,8 @@ namespace Microsoft.Build.UnitTests.Shared
             ITestOutputHelper outputHelper = null,
             bool attachProcessId = true,
             int timeoutMilliseconds = 30_000,
-            Dictionary<string, string> environmentVariables = null)
+            Dictionary<string, string> environmentVariables = null,
+            string workingDirectory = null)
         {
             if (shellExecute)
             {
@@ -244,7 +277,8 @@ namespace Microsoft.Build.UnitTests.Shared
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                Arguments = parameters
+                Arguments = parameters,
+                WorkingDirectory = workingDirectory ?? string.Empty
             };
 
             if (environmentVariables != null)

@@ -850,7 +850,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 "build-server shutdown --msbuild",
                 out _,
                 outputHelper: _output,
-                environmentVariables: RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables());
+                environmentVariables: RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables(),
+                workingDirectory: Path.Combine(RunnerUtilities.BootstrapRootPath, "core"));
 
         [Theory]
         [InlineData(null)]
