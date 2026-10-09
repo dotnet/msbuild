@@ -234,6 +234,18 @@ namespace Microsoft.Build.Framework
         public bool FrameworkTelemetryOptOut = EnvironmentUtilities.IsValueOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
         public bool ExcludeTasksDetailsFromTelemetry = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
         public bool FlushNodesTelemetryIntoConsole = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
+        public bool TelemetryDiagnostics = EnvironmentUtilities.IsValueOneOrTrue("MSBUILD_TELEMETRY_DIAGNOSTICS");
+
+        /// <summary>
+        /// Milliseconds that MSBuild.exe waits on exit to save or upload telemetry. Negative or invalid values use the default.
+        /// </summary>
+        public readonly int TelemetryShutdownTimeoutMs = GetTelemetryShutdownTimeoutMs();
+
+        private static int GetTelemetryShutdownTimeoutMs()
+        {
+            int configured = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILD_TELEMETRY_SHUTDOWN_TIMEOUT_MS", 10_000);
+            return configured >= 0 ? configured : 10_000;
+        }
 
         public bool EnableTargetOutputLogging = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
 
