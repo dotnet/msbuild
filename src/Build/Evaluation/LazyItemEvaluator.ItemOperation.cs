@@ -126,7 +126,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                         foreach (var metadataElement in metadata)
                         {
-                            if (!EvaluateCondition(metadataElement.Condition, metadataElement, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
+                            if (!_lazyEvaluator.EvaluateCondition(metadataElement, _expander, metadataExpansionOptions, ParserOptions.AllowAll))
                             {
                                 continue;
                             }
@@ -157,14 +157,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     {
                         // Because of the checking above, it should be safe to expand metadata in conditions; the condition
                         // will be true for either all the items or none
-                        if (
-                            !EvaluateCondition(
-                                metadataElement.Condition,
-                                metadataElement,
-                                metadataExpansionOptions,
-                                ParserOptions.AllowAll,
-                                _expander,
-                                _lazyEvaluator))
+                        if (!_lazyEvaluator.EvaluateCondition(metadataElement, _expander, metadataExpansionOptions, ParserOptions.AllowAll))
                         {
                             continue;
                         }
