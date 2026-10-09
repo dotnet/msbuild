@@ -10,167 +10,151 @@ using Microsoft.Build.Framework;
 
 #nullable disable
 
-namespace Microsoft.Build.Evaluation
+namespace Microsoft.Build.Evaluation;
+
+internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    internal partial class LazyItemEvaluator<P, I, M, D>
+    private partial class UpdateOperation : LazyItemOperation
     {
-        private class UpdateOperation : LazyItemOperation
+        private readonly ImmutableArray<ProjectMetadataElement> _metadata;
+        private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
+        private ItemSpecMatchesItem _matchItemSpec = null;
+        private bool? _needToExpandMetadataForEachItem = null;
+
+        public UpdateOperation(OperationBuilderWithMetadata builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+            : base(builder, lazyEvaluator)
         {
-            private readonly ImmutableArray<ProjectMetadataElement> _metadata;
-            private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
-            private ItemSpecMatchesItem _matchItemSpec = null;
-            private bool? _needToExpandMetadataForEachItem = null;
-
-            public UpdateOperation(OperationBuilderWithMetadata builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
-                : base(builder, lazyEvaluator)
+            _metadata = builder.Metadata.ToImmutable();
+        }
+        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        {
+            if (!_conditionResult)
             {
-                _metadata = builder.Metadata.ToImmutable();
+                return;
             }
 
-            private readonly struct MatchResult
-            {
-                public bool IsMatch { get; }
-                public Dictionary<string, I> CapturedItemsFromReferencedItemTypes { get; }
+            SetMatchItemSpec();
+            _itemsToUpdate ??= ImmutableList.CreateBuilder<ItemBatchingContext>();
+            _itemsToUpdate.Clear();
 
-                public MatchResult(bool isMatch, Dictionary<string, I> capturedItemsFromReferencedItemTypes)
+            for (int i = 0; i < listBuilder.Count; i++)
+            {
+                var itemData = listBuilder[i];
+
+                var matchResult = _matchItemSpec(_itemSpec, itemData.Item);
+
+                if (matchResult.IsMatch)
                 {
-                    IsMatch = isMatch;
-                    CapturedItemsFromReferencedItemTypes = capturedItemsFromReferencedItemTypes;
+                    listBuilder[i] = UpdateItem(listBuilder[i], matchResult.CapturedItemsFromReferencedItemTypes);
                 }
             }
 
-            private delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I itemToMatch);
+            DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
+        }
 
-            protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        /// <summary>
+        /// Apply the Update operation to the item if it matches.
+        /// </summary>
+        /// <param name="item">The item to check for a match.</param>
+        /// <returns>The updated item.</returns>
+        internal ItemData UpdateItem(ItemData item)
+        {
+            if (_conditionResult)
             {
-                if (!_conditionResult)
-                {
-                    return;
-                }
-
                 SetMatchItemSpec();
                 _itemsToUpdate ??= ImmutableList.CreateBuilder<ItemBatchingContext>();
                 _itemsToUpdate.Clear();
-
-                for (int i = 0; i < listBuilder.Count; i++)
+                MatchResult matchResult = _matchItemSpec(_itemSpec, item.Item);
+                if (matchResult.IsMatch)
                 {
-                    var itemData = listBuilder[i];
-
-                    var matchResult = _matchItemSpec(_itemSpec, itemData.Item);
-
-                    if (matchResult.IsMatch)
-                    {
-                        listBuilder[i] = UpdateItem(listBuilder[i], matchResult.CapturedItemsFromReferencedItemTypes);
-                    }
+                    ItemData clonedData = UpdateItem(item, matchResult.CapturedItemsFromReferencedItemTypes);
+                    DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
+                    return clonedData;
                 }
-
-                DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
             }
+            return item;
+        }
 
-            /// <summary>
-            /// Apply the Update operation to the item if it matches.
-            /// </summary>
-            /// <param name="item">The item to check for a match.</param>
-            /// <returns>The updated item.</returns>
-            internal ItemData UpdateItem(ItemData item)
+        private ItemData UpdateItem(ItemData item, Dictionary<string, I> capturedItemsFromReferencedItemTypes)
+        {
+            // items should be deep immutable, so clone and replace items before mutating them
+            // otherwise, with GetItems caching enabled, the mutations would leak into the cache causing
+            // future operations to mutate the state of past operations
+            ItemData clonedData = item.Clone(_itemFactory, _itemElement);
+            _itemsToUpdate.Add(new ItemBatchingContext(clonedData.Item, capturedItemsFromReferencedItemTypes));
+            return clonedData;
+        }
+
+        /// <summary>
+        /// This sets the function used to determine whether an item matches an item spec.
+        /// </summary>
+        private void SetMatchItemSpec()
+        {
+            if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
             {
-                if (_conditionResult)
+                // Perf optimization: If the Update operation references itself (e.g. <I Update="@(I)"/>)
+                // then all items are updated and matching is not necessary
+                _matchItemSpec = (itemSpec, item) => new MatchResult(true, null);
+            }
+            else if (ItemSpecContainsItemReferences(_itemSpec)
+                     && QualifiedMetadataReferencesExist(_metadata, out _needToExpandMetadataForEachItem)
+                     && !Traits.Instance.EscapeHatches.DoNotExpandQualifiedMetadataInUpdateOperation)
+            {
+                var itemReferenceFragments = _itemSpec.Fragments.OfType<ItemSpec<P, I>.ItemExpressionFragment>().ToArray();
+                var nonItemReferenceFragments = _itemSpec.Fragments.Where(f => !(f is ItemSpec<P, I>.ItemExpressionFragment)).ToArray();
+
+                _matchItemSpec = (itemSpec, item) =>
                 {
-                    SetMatchItemSpec();
-                    _itemsToUpdate ??= ImmutableList.CreateBuilder<ItemBatchingContext>();
-                    _itemsToUpdate.Clear();
-                    MatchResult matchResult = _matchItemSpec(_itemSpec, item.Item);
-                    if (matchResult.IsMatch)
+                    var isMatch = nonItemReferenceFragments.Any(f => f.IsMatch(item.EvaluatedInclude));
+                    Dictionary<string, I> capturedItemsFromReferencedItemTypes = null;
+
+                    foreach (var itemReferenceFragment in itemReferenceFragments)
                     {
-                        ItemData clonedData = UpdateItem(item, matchResult.CapturedItemsFromReferencedItemTypes);
-                        DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
-                        return clonedData;
-                    }
-                }
-                return item;
-            }
-
-            private ItemData UpdateItem(ItemData item, Dictionary<string, I> capturedItemsFromReferencedItemTypes)
-            {
-                // items should be deep immutable, so clone and replace items before mutating them
-                // otherwise, with GetItems caching enabled, the mutations would leak into the cache causing
-                // future operations to mutate the state of past operations
-                ItemData clonedData = item.Clone(_itemFactory, _itemElement);
-                _itemsToUpdate.Add(new ItemBatchingContext(clonedData.Item, capturedItemsFromReferencedItemTypes));
-                return clonedData;
-            }
-
-            /// <summary>
-            /// This sets the function used to determine whether an item matches an item spec.
-            /// </summary>
-            private void SetMatchItemSpec()
-            {
-                if (ItemspecContainsASingleBareItemReference(_itemSpec, _itemElement.ItemType))
-                {
-                    // Perf optimization: If the Update operation references itself (e.g. <I Update="@(I)"/>)
-                    // then all items are updated and matching is not necessary
-                    _matchItemSpec = (itemSpec, item) => new MatchResult(true, null);
-                }
-                else if (ItemSpecContainsItemReferences(_itemSpec)
-                         && QualifiedMetadataReferencesExist(_metadata, out _needToExpandMetadataForEachItem)
-                         && !Traits.Instance.EscapeHatches.DoNotExpandQualifiedMetadataInUpdateOperation)
-                {
-                    var itemReferenceFragments = _itemSpec.Fragments.OfType<ItemSpec<P, I>.ItemExpressionFragment>().ToArray();
-                    var nonItemReferenceFragments = _itemSpec.Fragments.Where(f => !(f is ItemSpec<P, I>.ItemExpressionFragment)).ToArray();
-
-                    _matchItemSpec = (itemSpec, item) =>
-                    {
-                        var isMatch = nonItemReferenceFragments.Any(f => f.IsMatch(item.EvaluatedInclude));
-                        Dictionary<string, I> capturedItemsFromReferencedItemTypes = null;
-
-                        foreach (var itemReferenceFragment in itemReferenceFragments)
+                        foreach (var referencedItem in itemReferenceFragment.ReferencedItems)
                         {
-                            foreach (var referencedItem in itemReferenceFragment.ReferencedItems)
+                            if (referencedItem.ItemAsValueFragment.IsMatch(item.EvaluatedInclude))
                             {
-                                if (referencedItem.ItemAsValueFragment.IsMatch(item.EvaluatedInclude))
-                                {
-                                    isMatch = true;
+                                isMatch = true;
 
-                                    capturedItemsFromReferencedItemTypes ??= new Dictionary<string, I>(StringComparer.OrdinalIgnoreCase);
+                                capturedItemsFromReferencedItemTypes ??= new Dictionary<string, I>(StringComparer.OrdinalIgnoreCase);
 
-                                    capturedItemsFromReferencedItemTypes[referencedItem.Item.Key] = referencedItem.Item;
-                                }
+                                capturedItemsFromReferencedItemTypes[referencedItem.Item.Key] = referencedItem.Item;
                             }
                         }
-
-                        return new MatchResult(isMatch, capturedItemsFromReferencedItemTypes);
-                    };
-                }
-                else
-                {
-                    _matchItemSpec = (itemSpec, item) => new MatchResult(itemSpec.MatchesItem(item), null);
-                }
-            }
-
-            private bool QualifiedMetadataReferencesExist(ImmutableArray<ProjectMetadataElement> metadata, out bool? needToExpandMetadataForEachItem)
-            {
-                needToExpandMetadataForEachItem = NeedToExpandMetadataForEachItem(metadata, out var itemsAndMetadataFound);
-
-                if (itemsAndMetadataFound.Metadata == null)
-                {
-                    return false;
-                }
-
-                foreach (var metadataReference in itemsAndMetadataFound.Metadata)
-                {
-                    if (!string.IsNullOrWhiteSpace(metadataReference.Value.ItemName))
-                    {
-                        return true;
                     }
-                }
 
+                    return new MatchResult(isMatch, capturedItemsFromReferencedItemTypes);
+                };
+            }
+            else
+            {
+                _matchItemSpec = (itemSpec, item) => new MatchResult(itemSpec.MatchesItem(item), null);
+            }
+        }
+
+        private bool QualifiedMetadataReferencesExist(ImmutableArray<ProjectMetadataElement> metadata, out bool? needToExpandMetadataForEachItem)
+        {
+            needToExpandMetadataForEachItem = NeedToExpandMetadataForEachItem(metadata, out var itemsAndMetadataFound);
+
+            if (itemsAndMetadataFound.Metadata == null)
+            {
                 return false;
             }
 
-            private static bool ItemSpecContainsItemReferences(ItemSpec<P, I> itemSpec)
+            foreach (var metadataReference in itemsAndMetadataFound.Metadata)
             {
-                return itemSpec.Fragments.Any(f => f is ItemSpec<P, I>.ItemExpressionFragment);
+                if (!string.IsNullOrWhiteSpace(metadataReference.Value.ItemName))
+                {
+                    return true;
+                }
             }
+
+            return false;
+        }
+
+        private static bool ItemSpecContainsItemReferences(ItemSpec<P, I> itemSpec)
+        {
+            return itemSpec.Fragments.Any(f => f is ItemSpec<P, I>.ItemExpressionFragment);
         }
     }
 }
