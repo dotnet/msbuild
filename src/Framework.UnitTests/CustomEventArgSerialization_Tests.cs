@@ -701,6 +701,45 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that ParentProjectBuildEventContext.EvaluationId survives
+        /// WriteToStream/CreateFromStream round-trip serialization.
+        /// Regression test for https://github.com/dotnet/msbuild/issues/12953
+        /// </summary>
+        [Fact]
+        public void TestProjectStartedParentContextEvaluationIdSerialization()
+        {
+            // Create a parent context with a specific EvaluationId using the 7-arg constructor.
+            var parentContext = new BuildEventContext(
+                submissionId: 1,
+                nodeId: 2,
+                evaluationId: 42,
+                projectInstanceId: 3,
+                projectContextId: 4,
+                targetId: 5,
+                taskId: 6);
+
+            var genericEvent = new ProjectStartedEventArgs(8, "Message", "HelpKeyword", "ProjectFile", null, null, null, parentContext);
+            genericEvent.BuildEventContext = new BuildEventContext(1, 2, 42, 3, 10, -1, -1);
+
+            // Serialize
+            genericEvent.WriteToStream(_writer);
+            long streamWriteEndPosition = _stream.Position;
+
+            // Deserialize
+            _stream.Position = 0;
+            var newGenericEvent = new ProjectStartedEventArgs(-1, null, null, null, null, null, null, null);
+            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
+            _stream.Position.ShouldBe(streamWriteEndPosition, "Stream end positions should match");
+
+            // Verify the parent context's EvaluationId survived the round-trip.
+            newGenericEvent.ParentProjectBuildEventContext.ShouldNotBeNull();
+            newGenericEvent.ParentProjectBuildEventContext.EvaluationId.ShouldBe(42,
+                "ParentProjectBuildEventContext.EvaluationId should survive serialization round-trip.");
+            newGenericEvent.ParentProjectBuildEventContext.ShouldBe(genericEvent.ParentProjectBuildEventContext,
+                "ParentProjectBuildEventContext should fully match after round-trip.");
+        }
+
+        /// <summary>
         /// Compare two project started events
         /// </summary>
         private static void VerifyProjectStartedEvent(ProjectStartedEventArgs genericEvent, ProjectStartedEventArgs newGenericEvent)
