@@ -54,6 +54,9 @@ internal sealed class DirectoryListingCache
         return false;
     }
 
+    internal bool IsSnapshot(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries)
+        => _listings.TryGetValue((directory, kind), out Listing listing) && ReferenceEquals(listing.Entries, entries);
+
     private bool IsUpToDate(string directory, Listing listing)
     {
         if (TryReadDirectoryTimestamp(directory, out DateTime current)
@@ -82,7 +85,11 @@ internal sealed class DirectoryListingCache
         }
     }
 
-    internal void Clear() => _listings.Clear();
+    internal void Clear()
+    {
+        _listings.Clear();
+        GlobResultExperiment.Clear(this);
+    }
 
     // Files in folder and timestamp of last modified of this folder.
     private readonly record struct Listing(IReadOnlyList<string> Entries, DateTime LastWriteTimeUtc);
