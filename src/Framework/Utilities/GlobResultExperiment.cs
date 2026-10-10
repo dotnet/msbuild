@@ -13,7 +13,7 @@ namespace Microsoft.Build.Shared;
 
 internal sealed class GlobResultExperiment
 {
-    private static string? Mode = Environment.GetEnvironmentVariable("MSBUILDGLOBRESULTEXPERIMENT") ?? "validated";
+    private static string? Mode = Environment.GetEnvironmentVariable("MSBUILDGLOBRESULTEXPERIMENT") ?? "off";
     private static readonly ConditionalWeakTable<DirectoryListingCache, SharedState> SharedStates = new();
     private static long _lookups;
     private static long _hits;

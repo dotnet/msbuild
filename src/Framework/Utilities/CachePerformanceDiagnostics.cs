@@ -15,7 +15,7 @@ internal static class CachePerformanceDiagnostics
     private static readonly string? Mode = Environment.GetEnvironmentVariable("MSBUILDCACHEDIAGNOSTICS");
     private static readonly bool PerfStarBinlog = Environment.GetEnvironmentVariable("PERFSTAR_DIAG_COLLECT_BINLOG") == "1";
     internal static readonly bool Enabled = Mode is "1" or "profile" || PerfStarBinlog;
-    internal static readonly bool ProfileEvaluation = Mode == "profile" || PerfStarBinlog;
+    internal static readonly bool ProfileEvaluation = Mode == "profile";
     private static readonly AsyncLocal<Session?> CurrentSession = new();
     private static readonly int ProcessId = Enabled ? ReadProcessId() : 0;
     private static int s_nextCacheId;
@@ -60,6 +60,18 @@ internal static class CachePerformanceDiagnostics
         ListingStore,
         Filter,
         DirectoryExists,
+        FsExists,
+        FsExistsPhysical,
+        FsFileExists,
+        FsFileExistsPhysical,
+        FsDirectoryExists,
+        FsDirectoryExistsPhysical,
+        FsLastWriteTime,
+        FsLastWriteTimePhysical,
+        FsAttributes,
+        FsStreamOpen,
+        FsReadText,
+        FsReadBytes,
         InitialProperties,
         Properties,
         ItemDefinitions,
