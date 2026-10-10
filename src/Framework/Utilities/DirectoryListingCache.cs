@@ -18,10 +18,27 @@ internal sealed class DirectoryListingCache
     private readonly ConcurrentDictionary<(string Directory, FileMatcher.FileSystemEntity Kind), Listing> _listings = new();
 
 
-    internal void Store(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries, DateTime lastWriteTimeUtc)
+    internal IReadOnlyList<string> Store(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries, DateTime lastWriteTimeUtc)
     {
-        IReadOnlyList<string> snapshot = ImmutableArray.CreateRange(entries);
-        _listings[(directory, kind)] = new Listing(snapshot, lastWriteTimeUtc);
+        var key = (directory, kind);
+        IReadOnlyList<string>? snapshot = null;
+        while (true)
+        {
+            bool exists = _listings.TryGetValue(key, out Listing current);
+            if (exists && current.LastWriteTimeUtc == lastWriteTimeUtc)
+            {
+                return current.Entries;
+            }
+
+            snapshot ??= entries is ImmutableArray<string> ? entries : ImmutableArray.CreateRange(entries);
+            var replacement = new Listing(snapshot, lastWriteTimeUtc);
+            if (exists
+                ? _listings.TryUpdate(key, replacement, current)
+                : _listings.TryAdd(key, replacement))
+            {
+                return snapshot;
+            }
+        }
     }
 
     internal bool TryGet(string directory, FileMatcher.FileSystemEntity kind, [NotNullWhen(true)] out IReadOnlyList<string>? entries)

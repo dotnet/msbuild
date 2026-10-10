@@ -36,6 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.13
+- Experimental directory-listing reuse retains timestamp-validated raw listings across evaluations and builds. Evaluation-local caches reference the same immutable snapshots, including successful empty listings; failed enumeration results are not shared.
 - [ResolveAssemblyReference discovers redist and subset lists relative to the project directory when `TargetFrameworkDirectories` contains relative paths.](https://github.com/dotnet/msbuild/pull/15089)
 - [ClickOnce application manifest generation resolves relative sentinel assembly dependencies against the task project directory before reading their identities, preventing duplicate .NET Framework 3.0/3.5 prerequisite entries.](https://github.com/dotnet/msbuild/pull/15222)
 

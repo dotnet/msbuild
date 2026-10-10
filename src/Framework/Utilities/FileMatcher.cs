@@ -204,7 +204,11 @@ namespace Microsoft.Build.Shared
             implementation,
             allowDirectEnumeration: true,
             caseFolding,
-            directoryListingCache)
+            directoryListingCache,
+            directoryListingCache is not null
+                ? (FileSystemEntity entityType, string path, out bool succeeded) =>
+                    GetAccessibleFileSystemEntries(fileSystem, entityType, path, "*", null, false, out succeeded)
+                : null)
         {
         }
 
@@ -215,7 +219,8 @@ namespace Microsoft.Build.Shared
             FileMatcherImplementation implementation = FileMatcherImplementation.Auto,
             bool allowDirectEnumeration = false,
             FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto,
-            DirectoryListingCache directoryListingCache = null)
+            DirectoryListingCache directoryListingCache = null,
+            GetFileSystemEntriesWithStatus getFileSystemEntriesWithStatus = null)
         {
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -237,7 +242,8 @@ namespace Microsoft.Build.Shared
                 _getFileSystemEntries = CreateDirectoryListingEnumeration(
                     directoryListingCache,
                     getFileSystemEntries,
-                    getFileSystemDirectoryEntriesCache);
+                    getFileSystemDirectoryEntriesCache,
+                    getFileSystemEntriesWithStatus);
             }
             else if (getFileSystemDirectoryEntriesCache is not null)
             {
@@ -254,21 +260,25 @@ namespace Microsoft.Build.Shared
         private static GetFileSystemEntries CreateDirectoryListingEnumeration(
             DirectoryListingCache cache,
             GetFileSystemEntries enumerate,
-            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null)
+            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null,
+            GetFileSystemEntriesWithStatus enumerateWithStatus = null)
         {
             GetFileSystemEntries getEntries = (type, path, pattern, directory, stripProjectDirectory) =>
             {
                 if (!cache.TryGet(path, type, out var entries))
                 {
                     bool hasTimestamp = DirectoryListingCache.TryReadDirectoryTimestamp(path, out DateTime before);
-                    entries = enumerate(type, path, "*", directory, false);
+                    bool enumerationSucceeded = false;
+                    entries = enumerateWithStatus is not null
+                        ? enumerateWithStatus(type, path, out enumerationSucceeded)
+                        : enumerate(type, path, "*", directory, false);
                     if (hasTimestamp
-                        // Empty results can also mean enumeration was denied, not that the directory was empty.
-                        && entries.Count != 0
+                        // An empty result is reusable only when enumeration completed, not when access was denied.
+                        && (entries.Count != 0 || enumerationSucceeded)
                         && DirectoryListingCache.TryReadDirectoryTimestamp(path, out DateTime after)
                         && before == after)
                     {
-                        cache.Store(path, type, entries, before);
+                        entries = cache.Store(path, type, entries, before);
                     }
                 }
 
@@ -342,6 +352,8 @@ namespace Microsoft.Build.Shared
         /// <returns>An enumerable of filesystem entries.</returns>
         internal delegate IReadOnlyList<string> GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
 
+        internal delegate IReadOnlyList<string> GetFileSystemEntriesWithStatus(FileSystemEntity entityType, string path, out bool succeeded);
+
         internal static void ClearCaches()
         {
             if (s_cachedGlobExpansions.IsValueCreated)
@@ -407,13 +419,17 @@ namespace Microsoft.Build.Shared
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns></returns>
         private static IReadOnlyList<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+            => GetAccessibleFileSystemEntries(fileSystem, entityType, path, pattern, projectDirectory, stripProjectDirectory, out _);
+
+        private static IReadOnlyList<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory, out bool succeeded)
         {
+            succeeded = false;
             path = FileUtilities.FixFilePath(path);
             return entityType switch
             {
-                FileSystemEntity.Files => GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory),
-                FileSystemEntity.Directories => GetAccessibleDirectories(fileSystem, path, pattern),
-                FileSystemEntity.FilesAndDirectories => GetAccessibleFilesAndDirectories(fileSystem, path, pattern),
+                FileSystemEntity.Files => GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory, out succeeded),
+                FileSystemEntity.Directories => GetAccessibleDirectories(fileSystem, path, pattern, out succeeded),
+                FileSystemEntity.FilesAndDirectories => GetAccessibleFilesAndDirectories(fileSystem, path, pattern, out succeeded),
 
                 _ => Assumed.Unreachable<IReadOnlyList<string>>("Unexpected filesystem entity type."),
             };
@@ -426,18 +442,22 @@ namespace Microsoft.Build.Shared
         /// <param name="path"></param>
         /// <param name="pattern"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="succeeded">Whether enumeration completed rather than being skipped or denied.</param>
         /// <returns>An enumerable of matching file system entries (can be empty).</returns>
-        private static IReadOnlyList<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
+        private static IReadOnlyList<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern, out bool succeeded)
         {
+            succeeded = false;
             if (fileSystem.DirectoryExists(path))
             {
                 try
                 {
-                    return (ShouldEnforceMatching(pattern)
+                    var entries = (ShouldEnforceMatching(pattern)
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
                             .Where(o => IsFileNameMatch(o, pattern))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern))
                         .ToList();
+                    succeeded = true;
+                    return entries;
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -491,14 +511,17 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectory">The project directory</param>
         /// <param name="stripProjectDirectory"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="succeeded">Whether enumeration completed without a suppressed security failure.</param>
         /// <returns>Files that can be accessed.</returns>
         private static IReadOnlyList<string> GetAccessibleFiles(
             IFileSystem fileSystem,
             string path,
             string filespec,     // can be null
             string projectDirectory,
-            bool stripProjectDirectory)
+            bool stripProjectDirectory,
+            out bool succeeded)
         {
+            succeeded = false;
             try
             {
                 // look in current directory if no path specified
@@ -534,7 +557,9 @@ namespace Microsoft.Build.Shared
                     files = RemoveInitialDotSlash(files);
                 }
 
-                return files.ToList();
+                var entries = files.ToList();
+                succeeded = true;
+                return entries;
             }
             catch (System.Security.SecurityException)
             {
@@ -557,12 +582,15 @@ namespace Microsoft.Build.Shared
         /// <param name="path">The path.</param>
         /// <param name="pattern">Pattern to match</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
+        /// <param name="succeeded">Whether enumeration completed without a suppressed security failure.</param>
         /// <returns>Accessible directories.</returns>
         private static IReadOnlyList<string> GetAccessibleDirectories(
             IFileSystem fileSystem,
             string path,
-            string pattern)
+            string pattern,
+            out bool succeeded)
         {
+            succeeded = false;
             try
             {
                 IEnumerable<string> directories = null;
@@ -590,7 +618,9 @@ namespace Microsoft.Build.Shared
                     directories = RemoveInitialDotSlash(directories);
                 }
 
-                return directories.ToList();
+                var entries = directories.ToList();
+                succeeded = true;
+                return entries;
             }
             catch (System.Security.SecurityException)
             {
