@@ -27,6 +27,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public bool FileOrDirectoryExists(string path)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsExists);
             // A positive result from either specific cache implies existence, so we can avoid a redundant filesystem stat.
             if ((_fileExistenceCache.TryGetValue(path, out bool fileExists) && fileExists) ||
                 (_directoryExistenceCache.TryGetValue(path, out bool directoryExists) && directoryExists))
@@ -34,27 +35,47 @@ namespace Microsoft.Build.Shared.FileSystem
                 return true;
             }
 
-            return _fileOrDirectoryExistenceCache.GetOrAdd(path, p => _fileSystem.FileOrDirectoryExists(p));
+            return _fileOrDirectoryExistenceCache.GetOrAdd(path, p =>
+            {
+                using var physical = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsExistsPhysical);
+                return _fileSystem.FileOrDirectoryExists(p);
+            });
         }
 
         public FileAttributes GetAttributes(string path)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsAttributes);
             return _fileSystem.GetAttributes(path);
         }
 
         public DateTime GetLastWriteTimeUtc(string path)
         {
-            return _lastWriteTimeCache.GetOrAdd(path, p => _fileSystem.GetLastWriteTimeUtc(p));
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsLastWriteTime);
+            return _lastWriteTimeCache.GetOrAdd(path, p =>
+            {
+                using var physical = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsLastWriteTimePhysical);
+                return _fileSystem.GetLastWriteTimeUtc(p);
+            });
         }
 
         public bool DirectoryExists(string path)
         {
-            return _directoryExistenceCache.GetOrAdd(path, p => _fileSystem.DirectoryExists(p));
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsDirectoryExists);
+            return _directoryExistenceCache.GetOrAdd(path, p =>
+            {
+                using var physical = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsDirectoryExistsPhysical);
+                return _fileSystem.DirectoryExists(p);
+            });
         }
 
         public bool FileExists(string path)
         {
-            return _fileExistenceCache.GetOrAdd(path, p => _fileSystem.FileExists(p));
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsFileExists);
+            return _fileExistenceCache.GetOrAdd(path, p =>
+            {
+                using var physical = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsFileExistsPhysical);
+                return _fileSystem.FileExists(p);
+            });
         }
 
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
@@ -64,21 +85,25 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public TextReader ReadFile(string path)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsStreamOpen);
             return _fileSystem.ReadFile(path);
         }
 
         public Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsStreamOpen);
             return _fileSystem.GetFileStream(path, mode, access, share);
         }
 
         public string ReadFileAllText(string path)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsReadText);
             return _fileSystem.ReadFileAllText(path);
         }
 
         public byte[] ReadFileAllBytes(string path)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.FsReadBytes);
             return _fileSystem.ReadFileAllBytes(path);
         }
 
