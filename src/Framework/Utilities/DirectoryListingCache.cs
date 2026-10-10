@@ -16,22 +16,22 @@ namespace Microsoft.Build.Shared;
 internal sealed class DirectoryListingCache
 {
     private readonly ConcurrentDictionary<(string Directory, FileMatcher.FileSystemEntity Kind), Listing> _listings = new();
+    private readonly ValidationMode _validationMode = ReadValidationMode();
 
-
-    internal IReadOnlyList<string> Store(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries, DateTime lastWriteTimeUtc)
+    internal IReadOnlyList<string> Store(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries, DirectoryStamp stamp)
     {
         var key = (directory, kind);
         IReadOnlyList<string>? snapshot = null;
         while (true)
         {
             bool exists = _listings.TryGetValue(key, out Listing current);
-            if (exists && current.LastWriteTimeUtc == lastWriteTimeUtc)
+            if (exists && current.Stamp == stamp)
             {
                 return current.Entries;
             }
 
             snapshot ??= entries is ImmutableArray<string> ? entries : ImmutableArray.CreateRange(entries);
-            var replacement = new Listing(snapshot, lastWriteTimeUtc);
+            var replacement = new Listing(snapshot, stamp);
             if (exists
                 ? _listings.TryUpdate(key, replacement, current)
                 : _listings.TryAdd(key, replacement))
@@ -59,8 +59,8 @@ internal sealed class DirectoryListingCache
 
     private bool IsUpToDate(string directory, Listing listing)
     {
-        if (TryReadDirectoryTimestamp(directory, out DateTime current)
-            && listing.LastWriteTimeUtc == current)
+        if (TryReadDirectoryStamp(directory, out DirectoryStamp current)
+            && listing.Stamp == current)
         {
             return true;
         }
@@ -85,12 +85,48 @@ internal sealed class DirectoryListingCache
         }
     }
 
+    internal bool TryReadDirectoryStamp(string directory, out DirectoryStamp stamp)
+    {
+        if (_validationMode == ValidationMode.Strong)
+        {
+            return DirectoryMetadata.TryRead(directory, out stamp);
+        }
+        if (_validationMode == ValidationMode.Timestamp && TryReadDirectoryTimestamp(directory, out DateTime timestamp))
+        {
+            stamp = new DirectoryStamp(0, 0, 0, timestamp.Ticks, 0);
+            return true;
+        }
+        stamp = default;
+        return false;
+    }
+
+    private static ValidationMode ReadValidationMode()
+    {
+        string? mode = Environment.GetEnvironmentVariable("MSBUILDDIRECTORYCACHEVALIDATION");
+        if (string.IsNullOrEmpty(mode) || string.Equals(mode, "strong", StringComparison.OrdinalIgnoreCase))
+        {
+            return ValidationMode.Strong;
+        }
+        if (string.Equals(mode, "timestamp", StringComparison.OrdinalIgnoreCase))
+        {
+            return ValidationMode.Timestamp;
+        }
+        DebugTrace.WriteLine($"Unknown MSBUILDDIRECTORYCACHEVALIDATION value '{mode}'; shared directory reuse is disabled.", category: nameof(DirectoryListingCache));
+        return ValidationMode.Disabled;
+    }
+
     internal void Clear()
     {
         _listings.Clear();
         GlobResultExperiment.Clear(this);
     }
 
-    // Files in folder and timestamp of last modified of this folder.
-    private readonly record struct Listing(IReadOnlyList<string> Entries, DateTime LastWriteTimeUtc);
+    private enum ValidationMode
+    {
+        Strong,
+        Timestamp,
+        Disabled,
+    }
+
+    private readonly record struct Listing(IReadOnlyList<string> Entries, DirectoryStamp Stamp);
 }
