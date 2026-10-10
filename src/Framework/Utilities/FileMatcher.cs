@@ -234,7 +234,10 @@ namespace Microsoft.Build.Shared
             if (directoryListingCache is not null && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
             {
                 _usesFileSystemEntryCache = true;
-                _getFileSystemEntries = CreateDirectoryListingEnumeration(directoryListingCache, getFileSystemEntries);
+                _getFileSystemEntries = CreateDirectoryListingEnumeration(
+                    directoryListingCache,
+                    getFileSystemEntries,
+                    getFileSystemDirectoryEntriesCache);
             }
             else if (getFileSystemDirectoryEntriesCache is not null)
             {
@@ -250,9 +253,10 @@ namespace Microsoft.Build.Shared
 
         private static GetFileSystemEntries CreateDirectoryListingEnumeration(
             DirectoryListingCache cache,
-            GetFileSystemEntries enumerate)
+            GetFileSystemEntries enumerate,
+            ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null)
         {
-            return (type, path, pattern, directory, stripProjectDirectory) =>
+            GetFileSystemEntries getEntries = (type, path, pattern, directory, stripProjectDirectory) =>
             {
                 if (!cache.TryGet(path, type, out var entries))
                 {
@@ -268,8 +272,17 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
-                return FilterDirectoryEntries(entries, pattern, directory, stripProjectDirectory);
+                return entries;
             };
+
+            return fileEntryExpansionCache is not null
+                ? CreateFileEntryExpansionEnumeration(fileEntryExpansionCache, getEntries)
+                : (type, path, pattern, directory, stripProjectDirectory) =>
+                    FilterDirectoryEntries(
+                        getEntries(type, path, pattern, directory, stripProjectDirectory),
+                        pattern,
+                        directory,
+                        stripProjectDirectory);
         }
 
         private static GetFileSystemEntries CreateFileEntryExpansionEnumeration(
