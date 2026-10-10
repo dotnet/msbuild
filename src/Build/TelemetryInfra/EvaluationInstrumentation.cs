@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation;
 
@@ -14,7 +15,7 @@ internal static class EvaluationInstrumentation
     private const string OutsideBuildSubmission = "outside_build_submission";
 
     internal static long StartMeasurement()
-        => IsEnabled() ? Stopwatch.GetTimestamp() : 0;
+        => IsEnabled() || CachePerformanceDiagnostics.Enabled ? Stopwatch.GetTimestamp() : 0;
 
     internal static double EndPassMeasurement(long startTimestamp)
     {
@@ -23,7 +24,7 @@ internal static class EvaluationInstrumentation
             return double.NaN;
         }
 
-        return IsEnabled() ? GetElapsedSeconds(startTimestamp) : double.NaN;
+        return IsEnabled() || CachePerformanceDiagnostics.Enabled ? GetElapsedSeconds(startTimestamp) : double.NaN;
     }
 
     internal static void RecordPass(
@@ -39,6 +40,7 @@ internal static class EvaluationInstrumentation
             return;
         }
 
+        CachePerformanceDiagnostics.RecordPass(pass, durationSeconds);
         if (IsEnabled())
         {
             MSBuildEventSource.Log.ProjectEvaluationPassCompleted(

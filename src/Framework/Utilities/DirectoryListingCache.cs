@@ -17,9 +17,13 @@ internal sealed class DirectoryListingCache
 {
     private readonly ConcurrentDictionary<(string Directory, FileMatcher.FileSystemEntity Kind), Listing> _listings = new();
     private readonly ValidationMode _validationMode = ReadValidationMode();
+    internal int DiagnosticId { get; } = CachePerformanceDiagnostics.NextCacheId();
+    internal string DiagnosticValidationMode => _validationMode.ToString();
+    internal int DiagnosticListingCount => _listings.Count;
 
     internal IReadOnlyList<string> Store(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries, DirectoryStamp stamp)
     {
+        using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.ListingStore);
         var key = (directory, kind);
         IReadOnlyList<string>? snapshot = null;
         while (true)
@@ -43,14 +47,18 @@ internal sealed class DirectoryListingCache
 
     internal bool TryGet(string directory, FileMatcher.FileSystemEntity kind, [NotNullWhen(true)] out IReadOnlyList<string>? entries)
     {
+        CachePerformanceDiagnostics.UseCache(this);
+        using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.SharedListingLookup);
         if (_listings.TryGetValue((directory, kind), out Listing listing)
             && IsUpToDate(directory, listing))
         {
             entries = listing.Entries;
+            CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedListingHit);
             return true;
         }
 
         entries = null;
+        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedListingMiss);
         return false;
     }
 
@@ -68,6 +76,7 @@ internal sealed class DirectoryListingCache
         _listings.TryRemove((directory, FileMatcher.FileSystemEntity.Files), out _);
         _listings.TryRemove((directory, FileMatcher.FileSystemEntity.Directories), out _);
         _listings.TryRemove((directory, FileMatcher.FileSystemEntity.FilesAndDirectories), out _);
+        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedListingInvalidated);
         return false;
     }
 
@@ -86,6 +95,15 @@ internal sealed class DirectoryListingCache
     }
 
     internal bool TryReadDirectoryStamp(string directory, out DirectoryStamp stamp)
+    {
+        CachePerformanceDiagnostics.UseCache(this);
+        using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.Metadata);
+        bool succeeded = TryReadStamp(directory, out stamp);
+        if (!succeeded) { CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.MetadataUnavailable); }
+        return succeeded;
+    }
+
+    private bool TryReadStamp(string directory, out DirectoryStamp stamp)
     {
         if (_validationMode == ValidationMode.Strong)
         {

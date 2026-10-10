@@ -48,36 +48,56 @@ internal sealed class GlobResultExperiment
     internal void RecordListing(Collector? collector, string path, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries)
     {
         if (collector is null) { return; }
-        if (!_listings.IsSnapshot(path, kind, entries)) { collector.Reject(); return; }
+        if (!_listings.IsSnapshot(path, kind, entries))
+        {
+            CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobRejectedUnshareableListing);
+            collector.Reject();
+            return;
+        }
         collector.Record((path, (int)kind), new Dependency(path, (int)kind, entries, true));
     }
 
     internal bool TryGet(string key, FileMatcher.GetFileSystemEntries rawEntries, Func<string, bool> directoryExists, out string[] files)
     {
+        CachePerformanceDiagnostics.UseCache(_listings);
+        using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.SharedGlobLookup);
         Interlocked.Increment(ref _lookups);
         if (_shared.Results.TryGetValue(key, out Entry? entry))
         {
             if (Validate(entry.Dependencies, rawEntries, directoryExists))
             {
                 Interlocked.Increment(ref _hits);
+                CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedGlobHit);
                 files = entry.Files;
                 return true;
             }
             Interlocked.Increment(ref _invalidated);
+            CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedGlobInvalidated);
             ((ICollection<KeyValuePair<string, Entry>>)_shared.Results).Remove(new KeyValuePair<string, Entry>(key, entry));
         }
         files = [];
+        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedGlobMiss);
         return false;
     }
 
     private static bool Validate(ImmutableArray<Dependency> dependencies, FileMatcher.GetFileSystemEntries rawEntries, Func<string, bool> directoryExists)
     {
+        using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.GlobValidation);
         foreach (Dependency dependency in dependencies)
         {
             long started = Stopwatch.GetTimestamp();
-            bool valid = dependency.Kind < 0
-                ? directoryExists(dependency.Path) == dependency.Exists
-                : ReferenceEquals(rawEntries((FileMatcher.FileSystemEntity)dependency.Kind, dependency.Path, "*", null, false), dependency.Entries);
+            bool valid;
+            if (dependency.Kind < 0)
+            {
+                using var existenceMeasurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.DirectoryExists);
+                CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobExistenceDependency);
+                valid = directoryExists(dependency.Path) == dependency.Exists;
+            }
+            else
+            {
+                CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobListingDependency);
+                valid = ReferenceEquals(rawEntries((FileMatcher.FileSystemEntity)dependency.Kind, dependency.Path, "*", null, false), dependency.Entries);
+            }
             Interlocked.Increment(ref _probes);
             Interlocked.Add(ref _probeTicks, Stopwatch.GetTimestamp()-started);
             if (!valid) { return false; }
@@ -91,6 +111,7 @@ internal sealed class GlobResultExperiment
             or FileMatcher.SearchAction.RunSearch or FileMatcher.SearchAction.ReturnEmptyList)
             || !collector.Admissible)
         {
+            CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobRejectedResult);
             return;
         }
         var dependencies = ImmutableArray.CreateBuilder<Dependency>(collector.Dependencies.Count);
@@ -98,6 +119,7 @@ internal sealed class GlobResultExperiment
         if (dependencies.Count == 0) { return; }
         if (_shared.Results.TryAdd(key, new Entry(files, dependencies.MoveToImmutable())))
         {
+            CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedGlobStore);
             Interlocked.Increment(ref _stores);
             Interlocked.Add(ref _dependencies, collector.Dependencies.Count);
             Interlocked.Add(ref _resultEntries, files.Length);
@@ -109,11 +131,19 @@ internal sealed class GlobResultExperiment
         private int _rejected;
         internal readonly ConcurrentDictionary<(string Path, int Kind), Dependency> Dependencies = new();
         internal bool Admissible => Volatile.Read(ref _rejected) == 0;
-        internal void Reject() => Interlocked.Exchange(ref _rejected, 1);
+        internal void Reject()
+        {
+            CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobRejectedDependency);
+            Interlocked.Exchange(ref _rejected, 1);
+        }
         internal void Record((string Path, int Kind) key, Dependency dependency)
         {
             Dependency first = Dependencies.GetOrAdd(key, dependency);
-            if (first != dependency) { Reject(); }
+            if (first != dependency)
+            {
+                CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobRejectedConflictingDependency);
+                Reject();
+            }
         }
 
         internal void RecordExistence(string path, bool exists)

@@ -238,6 +238,46 @@ namespace Microsoft.Build.Shared
             _implementation = implementation;
             _caseFolding = caseFolding;
             _allowDirectEnumeration = allowDirectEnumeration;
+            if (CachePerformanceDiagnostics.Enabled)
+            {
+                GetFileSystemEntries original = getFileSystemEntries;
+                getFileSystemEntries = (kind, path, pattern, directory, strip) =>
+                {
+                    using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.Enumeration);
+                    bool completed = false;
+                    try
+                    {
+                        IReadOnlyList<string> entries = original(kind, path, pattern, directory, strip);
+                        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.EnumeratedEntries, entries.Count);
+                        completed = entries.Count != 0;
+                        return entries;
+                    }
+                    finally
+                    {
+                        if (!completed) { CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.EnumerationFailedOrUnknown); }
+                    }
+                };
+                if (getFileSystemEntriesWithStatus is not null)
+                {
+                    GetFileSystemEntriesWithStatus originalWithStatus = getFileSystemEntriesWithStatus;
+                    getFileSystemEntriesWithStatus = (FileSystemEntity kind, string path, out bool succeeded) =>
+                    {
+                        using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.Enumeration);
+                        bool completed = false;
+                        try
+                        {
+                            IReadOnlyList<string> entries = originalWithStatus(kind, path, out succeeded);
+                            CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.EnumeratedEntries, entries.Count);
+                            completed = succeeded;
+                            return entries;
+                        }
+                        finally
+                        {
+                            if (!completed) { CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.EnumerationFailedOrUnknown); }
+                        }
+                    };
+                }
+            }
             _globResultExperiment = directoryListingCache is not null && getFileSystemEntriesWithStatus is not null
                 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
                 ? GlobResultExperiment.Create(directoryListingCache)
@@ -298,7 +338,12 @@ namespace Microsoft.Build.Shared
                 : (type, path, pattern, directory, strip) =>
                 {
                     string key = GetDirectoryEntryCacheKey(type, path);
-                    if (fileEntryExpansionCache.TryGetValue(key, out var entries)) { return entries; }
+                    if (fileEntryExpansionCache.TryGetValue(key, out var entries))
+                    {
+                        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.RawLocalHit);
+                        return entries;
+                    }
+                    CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.RawLocalMiss);
                     return fileEntryExpansionCache.GetOrAdd(key, _ => getEntries(type, path, "*", directory, false));
                 };
             GetFileSystemEntries acquireRaw = rawEntries;
@@ -313,6 +358,12 @@ namespace Microsoft.Build.Shared
             return (type, path, pattern, directory, stripProjectDirectory) =>
             {
                 string cacheKey = GetDirectoryEntryCacheKey(type, path);
+                if (CachePerformanceDiagnostics.Enabled)
+                {
+                    CachePerformanceDiagnostics.Add(cache.ContainsKey(cacheKey)
+                        ? CachePerformanceDiagnostics.Operation.RawLocalHit
+                        : CachePerformanceDiagnostics.Operation.RawLocalMiss);
+                }
                 IReadOnlyList<string> entries = cache.GetOrAdd(
                     cacheKey,
                     _ => enumerate(type, path, "*", directory, false));
@@ -345,6 +396,7 @@ namespace Microsoft.Build.Shared
             string projectDirectory,
             bool stripProjectDirectory)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.Filter);
             IEnumerable<string> filteredEntries = pattern is not null && !IsAllFilesWildcard(pattern)
                 ? entries.Where(entry => IsFileNameMatch(entry, pattern))
                 : entries;
@@ -1075,7 +1127,11 @@ namespace Microsoft.Build.Shared
                 FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
                 if (linkTarget is not null && IsSubdirectoryOf(recursionState.BaseDirectory, linkTarget.FullName, FileUtilities.PathComparison))
                 {
-                    collector?.Reject();
+                    if (collector is not null)
+                    {
+                        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobRejectedSkippedLink);
+                        collector.Reject();
+                    }
                     return;
                 }
             }
@@ -2191,10 +2247,18 @@ namespace Microsoft.Build.Shared
                 return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), SearchAction.None, string.Empty, null);
             }
 
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.Glob);
+            if (_globResultExperiment is not null) { CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobSharingEnabled); }
             DriverSelection selection = SelectDriver(
                 projectDirectoryUnescaped,
                 filespecUnescaped,
                 excludeSpecsUnescaped);
+            CachePerformanceDiagnostics.Add(selection.Driver switch
+            {
+                FileMatcherDriver.Legacy => CachePerformanceDiagnostics.Operation.LegacyDriver,
+                FileMatcherDriver.OptimizedDirect => CachePerformanceDiagnostics.Operation.DirectDriver,
+                _ => CachePerformanceDiagnostics.Operation.CallbackDriver,
+            });
 
             if (Traits.Instance.LogExpandedWildcards)
             {
@@ -2257,7 +2321,15 @@ namespace Microsoft.Build.Shared
                                     return fileList;
                                 });
                     }
+                    else
+                    {
+                        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.LocalGlobHit);
+                    }
                 }
+            }
+            else
+            {
+                CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.LocalGlobHit);
             }
 
             // Copy the file enumerations to prevent outside modifications of the cache (e.g. sorting, escaping) and to maintain the original method contract that a new array is created on each call.
@@ -2269,6 +2341,7 @@ namespace Microsoft.Build.Shared
 
         private bool DirectoryExistsForGlob(string path, GlobResultExperiment.Collector collector)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.DirectoryExists);
             bool exists = _fileSystem.DirectoryExists(path);
             collector?.RecordExistence(path, exists);
             return exists;
@@ -2670,6 +2743,7 @@ namespace Microsoft.Build.Shared
             DriverSelection selection,
             GlobResultExperiment.Collector? collector = null)
         {
+            using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.GlobCompute);
             return selection.Driver switch
             {
                 FileMatcherDriver.Legacy => GetFilesImplementation(
@@ -3252,23 +3326,36 @@ namespace Microsoft.Build.Shared
             {
                 if (ShouldSkipRecursiveDirectory(state.BaseDirectory))
                 {
-                    collector?.Reject();
+                    if (collector is not null)
+                    {
+                        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobRejectedSkippedLink);
+                        collector.Reject();
+                    }
                     return ([], trackedAction, trackedExcludeFileSpec, null);
                 }
 
 #if NET || FEATURE_MSIOREDIST
                 if (useDirectEnumeration)
                 {
-                    using OptimizedFileSystemEnumerator enumerator = new(
-                        state.BaseDirectory,
-                        projectDirectoryUnescaped,
-                        stripProjectDirectory,
-                        includeMatcher,
-                        excludesToMatch);
-
-                    while (enumerator.MoveNext())
+                    using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.DirectEnumeration);
+                    bool completed = false;
+                    try
                     {
-                        files.Add(enumerator.Current);
+                        using OptimizedFileSystemEnumerator enumerator = new(
+                            state.BaseDirectory,
+                            projectDirectoryUnescaped,
+                            stripProjectDirectory,
+                            includeMatcher,
+                            excludesToMatch);
+                        while (enumerator.MoveNext())
+                        {
+                            files.Add(enumerator.Current);
+                        }
+                        completed = true;
+                    }
+                    finally
+                    {
+                        if (!completed) { CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.DirectEnumerationFailed); }
                     }
                 }
                 else
@@ -3300,7 +3387,11 @@ namespace Microsoft.Build.Shared
             {
                 if (ShouldSkipRecursiveDirectory(directory))
                 {
-                    collector?.Reject();
+                    if (collector is not null)
+                    {
+                        CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobRejectedSkippedLink);
+                        collector.Reject();
+                    }
                     return;
                 }
 
@@ -3666,6 +3757,7 @@ namespace Microsoft.Build.Shared
 
             protected override bool ShouldIncludeEntry(ref DirectFileSystemEntry entry)
             {
+                CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.DirectEntriesObserved);
                 if (entry.IsDirectory)
                 {
                     return false;
@@ -3741,6 +3833,7 @@ namespace Microsoft.Build.Shared
 
             protected override void OnDirectoryFinished(ReadOnlySpan<char> directory)
             {
+                CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.DirectDirectoriesCompleted);
                 _fileStateValid = false;
             }
 

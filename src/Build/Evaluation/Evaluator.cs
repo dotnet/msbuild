@@ -354,6 +354,7 @@ namespace Microsoft.Build.Evaluation
             string projectFile = root.ProjectFileLocation.File ?? string.Empty;
             MSBuildEventSource.Log.EvaluateStart(projectFile);
             long evaluationMeasurementStart = EvaluationInstrumentation.StartMeasurement();
+            using var cacheDiagnostics = CachePerformanceDiagnostics.BeginEvaluation();
             EvaluationLoggingContext evaluationLoggingContext = null;
             int evaluationId = BuildEventContext.InvalidEvaluationId;
             Evaluator<P, I, M, D> evaluator;
@@ -366,7 +367,8 @@ namespace Microsoft.Build.Evaluation
                     string.IsNullOrEmpty(projectFile) ? "(null)" : projectFile);
                 evaluationId = evaluationLoggingContext.BuildEventContext.EvaluationId;
 
-                var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
+                var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile
+                    || CachePerformanceDiagnostics.ProfileEvaluation;
                 evaluator = new Evaluator<P, I, M, D>(
                     data,
                     project,
@@ -421,6 +423,16 @@ namespace Microsoft.Build.Evaluation
                     succeeded,
                     projectFile,
                     evaluationId);
+
+                if (cacheDiagnostics is not null)
+                {
+                    bool restoring = string.Equals(
+                        evaluator._data.GlobalPropertiesDictionary.GetProperty("MSBuildIsRestoring")?.EvaluatedValue,
+                        "true",
+                        StringComparison.OrdinalIgnoreCase);
+                    evaluator._evaluationLoggingContext.LogCommentFromText(MessageImportance.Low,
+                        cacheDiagnostics.Complete(evaluationId, restoring, succeeded));
+                }
 
                 IEnumerable globalProperties = null;
                 IEnumerable properties = null;
