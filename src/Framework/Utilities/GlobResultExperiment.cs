@@ -61,17 +61,17 @@ internal sealed class GlobResultExperiment
     {
         CachePerformanceDiagnostics.UseCache(_listings);
         using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.SharedGlobLookup);
-        Interlocked.Increment(ref _lookups);
+        if (CachePerformanceDiagnostics.Enabled) { Interlocked.Increment(ref _lookups); }
         if (_shared.Results.TryGetValue(key, out Entry? entry))
         {
             if (Validate(entry.Dependencies, rawEntries, directoryExists))
             {
-                Interlocked.Increment(ref _hits);
+                if (CachePerformanceDiagnostics.Enabled) { Interlocked.Increment(ref _hits); }
                 CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedGlobHit);
                 files = entry.Files;
                 return true;
             }
-            Interlocked.Increment(ref _invalidated);
+            if (CachePerformanceDiagnostics.Enabled) { Interlocked.Increment(ref _invalidated); }
             CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedGlobInvalidated);
             ((ICollection<KeyValuePair<string, Entry>>)_shared.Results).Remove(new KeyValuePair<string, Entry>(key, entry));
         }
@@ -85,7 +85,7 @@ internal sealed class GlobResultExperiment
         using var measurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.GlobValidation);
         foreach (Dependency dependency in dependencies)
         {
-            long started = Stopwatch.GetTimestamp();
+            long started = CachePerformanceDiagnostics.Enabled ? Stopwatch.GetTimestamp() : 0;
             bool valid;
             if (dependency.Kind < 0)
             {
@@ -98,8 +98,11 @@ internal sealed class GlobResultExperiment
                 CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.GlobListingDependency);
                 valid = ReferenceEquals(rawEntries((FileMatcher.FileSystemEntity)dependency.Kind, dependency.Path, "*", null, false), dependency.Entries);
             }
-            Interlocked.Increment(ref _probes);
-            Interlocked.Add(ref _probeTicks, Stopwatch.GetTimestamp()-started);
+            if (CachePerformanceDiagnostics.Enabled)
+            {
+                Interlocked.Increment(ref _probes);
+                Interlocked.Add(ref _probeTicks, Stopwatch.GetTimestamp()-started);
+            }
             if (!valid) { return false; }
         }
         return true;
@@ -120,9 +123,12 @@ internal sealed class GlobResultExperiment
         if (_shared.Results.TryAdd(key, new Entry(files, dependencies.MoveToImmutable())))
         {
             CachePerformanceDiagnostics.Add(CachePerformanceDiagnostics.Operation.SharedGlobStore);
-            Interlocked.Increment(ref _stores);
-            Interlocked.Add(ref _dependencies, collector.Dependencies.Count);
-            Interlocked.Add(ref _resultEntries, files.Length);
+            if (CachePerformanceDiagnostics.Enabled)
+            {
+                Interlocked.Increment(ref _stores);
+                Interlocked.Add(ref _dependencies, collector.Dependencies.Count);
+                Interlocked.Add(ref _resultEntries, files.Length);
+            }
         }
     }
 
