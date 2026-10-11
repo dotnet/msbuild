@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -21,7 +21,6 @@ using DirectFileSystemEntry = System.IO.Enumeration.FileSystemEntry;
 #endif
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
@@ -40,7 +39,7 @@ namespace Microsoft.Build.Shared
         /// <summary>Use the optimized implementation when Wave 18.11 is enabled; otherwise use legacy.</summary>
         Auto,
 
-        /// <summary>Use legacy regex-backed wildcard enumeration.</summary>
+        /// <summary>Use legacy wildcard enumeration.</summary>
         Legacy,
 
         /// <summary>Prefer optimized matching and enumeration, falling back to legacy for unsupported requests.</summary>
@@ -148,38 +147,12 @@ namespace Microsoft.Build.Shared
         private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new(() => new ConcurrentDictionary<string, object>(StringComparer.Ordinal));
         private static readonly Lazy<ConcurrentDictionary<
             (string FileSpec, FileMatcherCaseFolding CaseFolding, string CultureName),
-            (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new();
+            (GlobPattern matcher, bool needsRecursion, bool isLegalFileSpec)>> s_globCache = new();
 
         private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new(() => new ConcurrentDictionary<string, object>(StringComparer.Ordinal));
 
-        public const RegexOptions DefaultRegexOptions = RegexOptions.IgnoreCase;
-
         private readonly GetFileSystemEntries _getFileSystemEntries;
-
-        private static class FileSpecRegexParts
-        {
-            internal const string BeginningOfLine = "^";
-            internal const string WildcardGroupStart = "(?<WILDCARDDIR>";
-            internal const string FilenameGroupStart = "(?<FILENAME>";
-            internal const string GroupEnd = ")";
-            internal const string EndOfLine = "$";
-
-            internal const string AnyNonSeparator = @"[^/\\]*";
-            internal const string AnySingleCharacterButDot = @"[^\.].";
-            internal const string AnythingButDot = @"[^\.]*";
-            internal const string DirSeparator = @"[/\\]+";
-            internal const string LeftDirs = @"((.*/)|(.*\\)|())";
-            internal const string MiddleDirs = @"((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/))";
-            internal const string SingleCharacter = ".";
-            internal const string UncSlashSlash = @"\\\\";
-        }
-
-        /*
-         * FileSpecRegexParts.BeginningOfLine.Length + FileSpecRegexParts.WildcardGroupStart.Length + FileSpecRegexParts.GroupEnd.Length
-            + FileSpecRegexParts.FilenameGroupStart.Length + FileSpecRegexParts.GroupEnd.Length + FileSpecRegexParts.EndOfLine.Length;
-         */
-        private const int FileSpecRegexMinLength = 31;
 
         /// <summary>
         /// The Default FileMatcher does not cache directory enumeration.
@@ -292,9 +265,9 @@ namespace Microsoft.Build.Shared
             {
                 s_cachedGlobExpansionsLock.Value.Clear();
             }
-            if (s_regexCache.IsValueCreated)
+            if (s_globCache.IsValueCreated)
             {
-                s_regexCache.Value.Clear();
+                s_globCache.Value.Clear();
             }
         }
 
@@ -678,7 +651,7 @@ namespace Microsoft.Build.Shared
              * Handle the special case in which filenamePart is '**'.
              * In this case, filenamePart becomes '*.*' and the '**' is appended
              * to the end of the wildcardDirectory part.
-             * This is so that later regular expression matching can accurately
+             * This is so that later glob matching can accurately
              * pull out the different parts (fixed, wildcard, filename) of given
              * file specs.
              */
@@ -865,14 +838,14 @@ namespace Microsoft.Build.Shared
             public FilesSearchData(
                 string filespec,                // can be null
                 string directoryPattern,        // can be null
-                Regex regexFileMatch,           // can be null
-                bool requiresLegacyRegexSemantics,
+                GlobPattern globFileMatch,      // can be null
+                bool requiresLegacySemantics,
                 bool needsRecursion)
             {
                 Filespec = filespec;
                 DirectoryPattern = directoryPattern;
-                RegexFileMatch = regexFileMatch;
-                RequiresLegacyRegexSemantics = requiresLegacyRegexSemantics;
+                GlobFileMatch = globFileMatch;
+                RequiresLegacySemantics = requiresLegacySemantics;
                 NeedsRecursion = needsRecursion;
             }
 
@@ -884,17 +857,17 @@ namespace Microsoft.Build.Shared
             /// Holds the directory pattern for globs like **/{pattern}/**, i.e. when we're looking for a matching directory name
             /// regardless of where on the path it is. This field is used only if the wildcard directory part has this shape. In
             /// other cases such as **/{pattern1}/**/{pattern2}/**, we don't use this optimization and instead rely on
-            /// <see cref="RegexFileMatch"/> to test if a file path matches the glob or not.
+            /// <see cref="GlobFileMatch"/> to test if a file path matches the glob or not.
             /// </summary>
             public string DirectoryPattern { get; }
             /// <summary>
             /// Wild-card matching.
             /// </summary>
-            public Regex RegexFileMatch { get; }
+            public GlobPattern GlobFileMatch { get; }
             /// <summary>
             /// Whether the specification requires regex-compatible matching.
             /// </summary>
-            public bool RequiresLegacyRegexSemantics { get; }
+            public bool RequiresLegacySemantics { get; }
             /// <summary>
             /// If true, then recursion is required.
             /// </summary>
@@ -927,7 +900,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Get all files that match either the file-spec or the regular expression.
+        /// Get all files that match either the filename pattern or the full-path glob.
         /// </summary>
         /// <param name="listOfFiles">List of files that gets populated.</param>
         /// <param name="recursionState">Information about the search</param>
@@ -969,12 +942,12 @@ namespace Microsoft.Build.Shared
 #endif
 
             Assumed.True(
-                (recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
-                "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
+                (recursionState.SearchData.Filespec == null) || (recursionState.SearchData.GlobFileMatch == null),
+                "Filename pattern overrides the full-path glob -- pass null for the filename pattern to use the glob.");
 
             Assumed.True(
-                (recursionState.SearchData.Filespec != null) || (recursionState.SearchData.RegexFileMatch != null),
-                "Need either a file-spec or a regular expression to match files.");
+                (recursionState.SearchData.Filespec != null) || (recursionState.SearchData.GlobFileMatch != null),
+                "Need either a filename pattern or a full-path glob to match files.");
 
             Assumed.NotNull(recursionState.RemainingWildcardDirectory, "Expected non-null remaning wildcard directory.");
 
@@ -996,7 +969,7 @@ namespace Microsoft.Build.Shared
                     if (
                         // We are not looking for a directory matching the pattern given in SearchData.DirectoryPattern
                         !searchToExclude.IsLookingForMatchingDirectory &&
-                        // We are matching files based on a filespec and not a regular expression
+                        // Match files using the filename pattern rather than the full-path glob.
                         searchToExclude.SearchData.Filespec != null &&
                         // The wildcard path portion of the excluded search matches the include search
                         searchToExclude.RemainingWildcardDirectory == recursionState.RemainingWildcardDirectory &&
@@ -1210,9 +1183,8 @@ namespace Microsoft.Build.Shared
                 return IsFileNameMatch(file, recursionState.SearchData.Filespec);
             }
 
-            // if no file-spec provided, match the file to the regular expression
-            // PERF NOTE: Regex.IsMatch() is an expensive operation, so we avoid it whenever possible
-            return recursionState.SearchData.RegexFileMatch.IsMatch(file);
+            // If no filename pattern is provided, match the full-path glob.
+            return recursionState.SearchData.GlobFileMatch.IsMatch(file);
         }
 
         private static RecursiveStepResult GetFilesRecursiveStep(
@@ -1294,46 +1266,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Given a split file spec consisting of a directory without wildcard characters,
-        /// a sub-directory containing wildcard characters,
-        /// and a filename which may contain wildcard characters,
-        /// create a regular expression that will match that file spec.
-        ///
-        /// PERF WARNING: this method is called in performance-critical
-        /// scenarios, so keep it fast and cheap
-        /// </summary>
-        /// <param name="fixedDirectoryPart">The fixed directory part.</param>
-        /// <param name="wildcardDirectoryPart">The wildcard directory part.</param>
-        /// <param name="filenamePart">The filename part.</param>
-        /// <returns>The regular expression string.</returns>
-        internal static string RegularExpressionFromFileSpec(
-            string fixedDirectoryPart,
-            string wildcardDirectoryPart,
-            string filenamePart)
-        {
-#if DEBUG
-            int actualLength = FileSpecRegexParts.BeginningOfLine.Length +
-                FileSpecRegexParts.WildcardGroupStart.Length +
-                FileSpecRegexParts.FilenameGroupStart.Length +
-                (FileSpecRegexParts.GroupEnd.Length * 2) +
-                FileSpecRegexParts.EndOfLine.Length;
-
-            Assumed.Equal(
-                actualLength,
-                FileSpecRegexMinLength,
-                "Checked-in length of known regex components differs from computed length. Update checked-in constant.");
-#endif
-            using (var matchFileExpression = new ReuseableStringBuilder(FileSpecRegexMinLength + NativeMethods.MAX_PATH))
-            {
-                AppendRegularExpressionFromFixedDirectory(matchFileExpression, fixedDirectoryPart);
-                AppendRegularExpressionFromWildcardDirectory(matchFileExpression, wildcardDirectoryPart);
-                AppendRegularExpressionFromFilename(matchFileExpression, filenamePart);
-
-                return matchFileExpression.ToString();
-            }
-        }
-
-        /// <summary>
         /// Determine if the filespec is legal according to the following conditions:
         ///
         /// (1) It is not legal for there to be a ".." after a wildcard.
@@ -1366,151 +1298,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Append the regex equivalents for character sequences in the fixed directory part of a filespec:
-        ///
-        /// (1) The leading \\ in UNC paths, so that the doubled slash isn't reduced in the last step
-        ///
-        /// (2) Common filespec characters
-        /// </summary>
-        private static void AppendRegularExpressionFromFixedDirectory(ReuseableStringBuilder regex, string fixedDir)
-        {
-            regex.Append(FileSpecRegexParts.BeginningOfLine);
-
-            bool isUncPath = NativeMethods.IsWindows && fixedDir.Length > 1
-                             && fixedDir[0] == '\\' && fixedDir[1] == '\\';
-            if (isUncPath)
-            {
-                regex.Append(FileSpecRegexParts.UncSlashSlash);
-            }
-            int startIndex = isUncPath ? LastIndexOfDirectorySequence(fixedDir, 0) + 1 : LastIndexOfDirectorySequence(fixedDir, 0);
-
-            for (int i = startIndex; i < fixedDir.Length; i = LastIndexOfDirectorySequence(fixedDir, i + 1))
-            {
-                AppendRegularExpressionFromChar(regex, fixedDir[i]);
-            }
-        }
-
-        /// <summary>
-        /// Append the regex equivalents for character sequences in the wildcard directory part of a filespec:
-        ///
-        /// (1) The leading **\ if existing
-        ///
-        /// (2) Each occurrence of recursive wildcard \**\
-        ///
-        /// (3) Common filespec characters
-        /// </summary>
-        private static void AppendRegularExpressionFromWildcardDirectory(ReuseableStringBuilder regex, string wildcardDir)
-        {
-            regex.Append(FileSpecRegexParts.WildcardGroupStart);
-
-            bool hasRecursiveOperatorAtStart = wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*';
-
-            if (hasRecursiveOperatorAtStart)
-            {
-                regex.Append(FileSpecRegexParts.LeftDirs);
-            }
-            int startIndex = LastIndexOfDirectoryOrRecursiveSequence(wildcardDir, 0);
-
-            for (int i = startIndex; i < wildcardDir.Length; i = LastIndexOfDirectoryOrRecursiveSequence(wildcardDir, i + 1))
-            {
-                char ch = wildcardDir[i];
-                bool isRecursiveOperator = i < wildcardDir.Length - 2 && wildcardDir[i + 1] == '*' && wildcardDir[i + 2] == '*';
-
-                if (isRecursiveOperator)
-                {
-                    regex.Append(FileSpecRegexParts.MiddleDirs);
-                }
-                else
-                {
-                    AppendRegularExpressionFromChar(regex, ch);
-                }
-            }
-
-            regex.Append(FileSpecRegexParts.GroupEnd);
-        }
-
-        /// <summary>
-        /// Append the regex equivalents for character sequences in the filename part of a filespec:
-        ///
-        /// (1) Trailing dots in file names have to be treated specially.
-        ///     We want:
-        ///
-        ///         *. to match foo
-        ///
-        ///     but 'foo' doesn't have a trailing '.' so we need to handle this while still being careful
-        ///     not to match 'foo.txt' by modifying the generated regex for wildcard characters * and ?
-        ///
-        /// (2) Common filespec characters
-        ///
-        /// (3) Ignore the .* portion of any *.* sequence when no trailing dot exists
-        /// </summary>
-        private static void AppendRegularExpressionFromFilename(ReuseableStringBuilder regex, string filename)
-        {
-            regex.Append(FileSpecRegexParts.FilenameGroupStart);
-
-            bool hasTrailingDot = filename.Length > 0 && filename[filename.Length - 1] == '.';
-            int partLength = hasTrailingDot ? filename.Length - 1 : filename.Length;
-
-            for (int i = 0; i < partLength; i++)
-            {
-                char ch = filename[i];
-
-                if (hasTrailingDot && ch == '*')
-                {
-                    regex.Append(FileSpecRegexParts.AnythingButDot);
-                }
-                else if (hasTrailingDot && ch == '?')
-                {
-                    regex.Append(FileSpecRegexParts.AnySingleCharacterButDot);
-                }
-                else
-                {
-                    AppendRegularExpressionFromChar(regex, ch);
-                }
-
-                if (!hasTrailingDot && i < partLength - 2 && ch == '*' && filename[i + 1] == '.' && filename[i + 2] == '*')
-                {
-                    i += 2;
-                }
-            }
-
-            regex.Append(FileSpecRegexParts.GroupEnd);
-            regex.Append(FileSpecRegexParts.EndOfLine);
-        }
-
-        /// <summary>
-        /// Append the regex equivalents for characters common to all filespec parts.
-        /// </summary>
-        private static void AppendRegularExpressionFromChar(ReuseableStringBuilder regex, char ch)
-        {
-            if (ch == '*')
-            {
-                regex.Append(FileSpecRegexParts.AnyNonSeparator);
-            }
-            else if (ch == '?')
-            {
-                regex.Append(FileSpecRegexParts.SingleCharacter);
-            }
-            else if (FileUtilities.IsAnySlash(ch))
-            {
-                regex.Append(FileSpecRegexParts.DirSeparator);
-            }
-            else if (IsSpecialRegexCharacter(ch))
-            {
-                regex.Append('\\');
-                regex.Append(ch);
-            }
-            else
-            {
-                regex.Append(ch);
-            }
-        }
-
-        private static bool IsSpecialRegexCharacter(char ch) =>
-            ch == '$' || ch == '(' || ch == ')' || ch == '+' || ch == '.'
-            || ch == '[' || ch == '^' || ch == '{' || ch == '|';
-
-        /// <summary>
         /// Given an index at a directory separator,
         /// iteratively skip to the end of two sequences:
         ///
@@ -1534,7 +1321,7 @@ namespace Microsoft.Build.Shared
         ///
         /// </summary>
         /// <returns>The last index of a directory sequence.</returns>
-        private static int LastIndexOfDirectorySequence(string str, int startIndex)
+        internal static int LastIndexOfDirectorySequence(string str, int startIndex)
         {
             if (startIndex >= str.Length || !FileUtilities.IsAnySlash(str[startIndex]))
             {
@@ -1580,7 +1367,7 @@ namespace Microsoft.Build.Shared
         /// If starting at a recursive operator, the last index of a recursive sequence.
         /// Otherwise, the last index of a directory sequence.
         /// </returns>
-        private static int LastIndexOfDirectoryOrRecursiveSequence(string str, int startIndex)
+        internal static int LastIndexOfDirectoryOrRecursiveSequence(string str, int startIndex)
         {
             bool isRecursiveSequence = startIndex < str.Length - 1
                                             && str[startIndex] == '*' && str[startIndex + 1] == '*';
@@ -1614,12 +1401,12 @@ namespace Microsoft.Build.Shared
         /// Given a filespec, get the information needed for file matching.
         /// </summary>
         /// <param name="filespec">The filespec.</param>
-        /// <param name="regexFileMatch">Receives the regular expression.</param>
+        /// <param name="globFileMatch">Receives the glob matcher.</param>
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
-        internal void GetFileSpecInfoWithRegexObjectCore(
+        private void GetFileSpecInfoWithGlobCore(
             string filespec,
-            out Regex regexFileMatch,
+            out GlobPattern globFileMatch,
             out bool needsRecursion,
             out bool isLegalFileSpec)
         {
@@ -1629,19 +1416,20 @@ namespace Microsoft.Build.Shared
 
             if (isLegalFileSpec)
             {
-                string matchFileExpression = RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
-                regexFileMatch = new Regex(matchFileExpression, CaseInsensitiveRegexOptions);
+                globFileMatch = new GlobPattern(
+                    fixedDirectoryPart, wildcardDirectoryPart, filenamePart,
+                    ResolvedCaseFolding == FileMatcherCaseFolding.InvariantCulture);
             }
             else
             {
-                regexFileMatch = null;
+                globFileMatch = null;
             }
         }
 
-        // PERF: Cache the Regex generation to avoid repeated allocations.
-        internal void GetFileSpecInfoWithRegexObject(
+        // PERF: Cache parsed globs to avoid repeated allocations.
+        internal void GetFileSpecInfoWithGlob(
            string filespec,
-           out Regex regexFileMatch,
+           out GlobPattern globFileMatch,
            out bool needsRecursion,
            out bool isLegalFileSpec)
         {
@@ -1649,12 +1437,12 @@ namespace Microsoft.Build.Shared
             string cultureName = caseFolding == FileMatcherCaseFolding.LegacyCurrentCulture
                 ? CultureInfo.CurrentCulture.Name
                 : string.Empty;
-            var result = s_regexCache.Value.GetOrAdd((filespec, caseFolding, cultureName), key =>
+            var result = s_globCache.Value.GetOrAdd((filespec, caseFolding, cultureName), key =>
             {
-                GetFileSpecInfoWithRegexObjectCore(key.FileSpec, out var regex, out var needsRec, out var isLegal);
-                return (regex, needsRec, isLegal);
+                GetFileSpecInfoWithGlobCore(key.FileSpec, out var matcher, out var needsRec, out var isLegal);
+                return (matcher, needsRec, isLegal);
             });
-            regexFileMatch = result.regex;
+            globFileMatch = result.matcher;
             needsRecursion = result.needsRecursion;
             isLegalFileSpec = result.isLegalFileSpec;
         }
@@ -1665,7 +1453,7 @@ namespace Microsoft.Build.Shared
             string filenamePart);
 
         /// <summary>
-        /// Given a filespec, parse it and construct the regular expression string.
+        /// Given a filespec, parse its directory and filename parts.
         /// </summary>
         /// <param name="filespec">The filespec.</param>
         /// <param name="fixedDirectoryPart">Receives the fixed directory part.</param>
@@ -1789,11 +1577,11 @@ namespace Microsoft.Build.Shared
         {
             // Use a span-based Path.GetFileName if it is available.
 #if FEATURE_MSIOREDIST
-            return IsMatch(Microsoft.IO.Path.GetFileName(path.AsSpan()), pattern);
+            return GlobPattern.MatchesName(Microsoft.IO.Path.GetFileName(path.AsSpan()), pattern);
 #elif NETSTANDARD2_0 || NETFRAMEWORK
-            return IsMatch(Path.GetFileName(path), pattern);
+            return GlobPattern.MatchesName(Path.GetFileName(path), pattern);
 #else
-            return IsMatch(Path.GetFileName(path.AsSpan()), pattern);
+            return GlobPattern.MatchesName(Path.GetFileName(path.AsSpan()), pattern);
 #endif
         }
 
@@ -1810,169 +1598,8 @@ namespace Microsoft.Build.Shared
             fileName,
             ignoreCase: true);
     #else
-            return IsMatch(fileName, pattern);
+            return GlobPattern.MatchesName(fileName, pattern);
     #endif
-        }
-
-        /// <summary>
-        /// A wildcard (* and ?) matching algorithm that tests whether the input string matches against the pattern.
-        /// </summary>
-        /// <param name="input">String which is matched against the pattern.</param>
-        /// <param name="pattern">Pattern against which string is matched.</param>
-        internal static bool IsMatch(string input, string pattern)
-        {
-            return IsMatch(input.AsSpan(), pattern);
-        }
-
-        /// <summary>
-        /// A wildcard (* and ?) matching algorithm that tests whether the input string matches against the pattern.
-        /// </summary>
-        /// <param name="input">String which is matched against the pattern.</param>
-        /// <param name="pattern">Pattern against which string is matched.</param>
-        internal static bool IsMatch(ReadOnlySpan<char> input, string pattern)
-        {
-            if (input == ReadOnlySpan<char>.Empty)
-            {
-                InternalError.Throw($"Unexpected empty '{nameof(input)}' provided.");
-            }
-
-            ArgumentNullException.ThrowIfNull(pattern);
-
-            // Parameter lengths
-            int patternLength = pattern.Length;
-            int inputLength = input.Length;
-
-            // Used to save the location when a * wildcard is found in the input string
-            int patternTmpIndex = -1;
-            int inputTmpIndex = -1;
-
-            // Current indexes
-            int patternIndex = 0;
-            int inputIndex = 0;
-
-            // Store the information whether the tail was checked when a pattern "*?" occurred
-            bool tailChecked = false;
-
-            // Function for comparing two characters, ignoring case
-            // PERF NOTE:
-            // Having a local function instead of a variable increases the speed by approx. 2 times.
-            // Passing inputChar and patternChar increases the speed by approx. 10%, when comparing
-            // to using the string indexer. The iIndex and pIndex parameters are only used
-            // when we have to compare two non ASCII characters. Using just string.Compare for
-            // character comparison, would reduce the speed by approx. 5 times.
-            bool CompareIgnoreCase(ref ReadOnlySpan<char> input, int iIndex, int pIndex)
-            {
-                char inputChar = input[iIndex];
-                char patternChar = pattern[pIndex];
-
-                // We will mostly be comparing ASCII characters, check English letters first.
-                char inputCharLower = (char)(inputChar | 0x20);
-                if (inputCharLower >= 'a' && inputCharLower <= 'z')
-                {
-                    // This test covers all combinations of lower/upper as both sides are converted to lower case.
-                    return inputCharLower == (patternChar | 0x20);
-                }
-                if (inputChar < 128 || patternChar < 128)
-                {
-                    // We don't need to compare, an ASCII character cannot have its lowercase/uppercase outside the ASCII table
-                    // and a non ASCII character cannot have its lowercase/uppercase inside the ASCII table
-                    return inputChar == patternChar;
-                }
-                return MemoryExtensions.Equals(input.Slice(iIndex, 1), pattern.AsSpan(pIndex, 1), StringComparison.OrdinalIgnoreCase);
-            }
-
-            while (inputIndex < inputLength)
-            {
-                if (patternIndex < patternLength)
-                {
-                    // Check if there is a * wildcard first as we can have it also in the input string
-                    if (pattern[patternIndex] == '*')
-                    {
-                        // Skip all * wildcards if there are more than one
-                        while (++patternIndex < patternLength && pattern[patternIndex] == '*') { }
-
-                        // Return if the last character is a * wildcard
-                        if (patternIndex >= patternLength)
-                        {
-                            return true;
-                        }
-
-                        // Mostly, we will be dealing with a file extension pattern e.g. "*.ext", so try to check the tail first
-                        if (!tailChecked)
-                        {
-                            // Iterate from the end of the pattern to the current pattern index
-                            // and hope that there is no * wildcard in order to return earlier
-                            int inputTailIndex = inputLength;
-                            int patternTailIndex = patternLength;
-                            while (patternIndex < patternTailIndex && inputTailIndex > inputIndex)
-                            {
-                                patternTailIndex--;
-                                inputTailIndex--;
-                                // If we encountered a * wildcard we are not sure if it matches as there can be zero or more than one characters
-                                // so we have to fallback to the standard procedure e.g. ("aaaabaaad", "*?b*d")
-                                if (pattern[patternTailIndex] == '*')
-                                {
-                                    break;
-                                }
-                                // If the tail doesn't match, we can safely return e.g. ("aaa", "*b")
-                                if (!CompareIgnoreCase(ref input, inputTailIndex, patternTailIndex) &&
-                                    pattern[patternTailIndex] != '?')
-                                {
-                                    return false;
-                                }
-                                if (patternIndex == patternTailIndex)
-                                {
-                                    return true;
-                                }
-                            }
-                            // Alter the lengths to the last valid match so that we don't need to match them again
-                            inputLength = inputTailIndex + 1;
-                            patternLength = patternTailIndex + 1;
-                            tailChecked = true; // Make sure that the tail is checked only once
-                        }
-
-                        // Skip to the first character that matches after the *, e.g. ("abcd", "*d")
-                        // The ? wildcard cannot be skipped as we will have a wrong result for e.g. ("aab" "*?b")
-                        if (pattern[patternIndex] != '?')
-                        {
-                            while (!CompareIgnoreCase(ref input, inputIndex, patternIndex))
-                            {
-                                // Return if there is no character that match e.g. ("aa", "*b")
-                                if (++inputIndex >= inputLength)
-                                {
-                                    return false;
-                                }
-                            }
-                        }
-                        patternTmpIndex = patternIndex;
-                        inputTmpIndex = inputIndex;
-                        continue;
-                    }
-
-                    // If we have a match, step to the next character
-                    if (CompareIgnoreCase(ref input, inputIndex, patternIndex) ||
-                        pattern[patternIndex] == '?')
-                    {
-                        patternIndex++;
-                        inputIndex++;
-                        continue;
-                    }
-                }
-                // No match found, if we didn't found a location of a * wildcard, return false e.g. ("ab", "?ab")
-                // otherwise set the location after the previous * wildcard and try again with the next character in the input
-                if (patternTmpIndex < 0)
-                {
-                    return false;
-                }
-                patternIndex = patternTmpIndex;
-                inputIndex = inputTmpIndex++;
-            }
-            // When we reach the end of the input we have to skip all * wildcards as they match also zero characters
-            while (patternIndex < patternLength && pattern[patternIndex] == '*')
-            {
-                patternIndex++;
-            }
-            return patternIndex >= patternLength;
         }
 
         /// <summary>
@@ -1990,44 +1617,23 @@ namespace Microsoft.Build.Shared
 
             fileToMatch = GetLongPathName(fileToMatch, _getFileSystemEntries);
 
-            Regex regexFileMatch;
-            GetFileSpecInfoWithRegexObject(
+            GlobPattern globFileMatch;
+            GetFileSpecInfoWithGlob(
                 filespec,
-                out regexFileMatch,
+                out globFileMatch,
                 out matchResult.isFileSpecRecursive,
                 out matchResult.isLegalFileSpec);
 
             if (matchResult.isLegalFileSpec)
             {
-                GetRegexMatchInfo(
+                globFileMatch.GetMatchInfo(
                     fileToMatch,
-                    regexFileMatch,
                     out matchResult.isMatch,
                     out matchResult.wildcardDirectoryPart,
                     out _);
             }
 
             return matchResult;
-        }
-
-        internal static void GetRegexMatchInfo(
-            string fileToMatch,
-            Regex fileSpecRegex,
-            out bool isMatch,
-            out string wildcardDirectoryPart,
-            out string filenamePart)
-        {
-            Match match = fileSpecRegex.Match(fileToMatch);
-
-            isMatch = match.Success;
-            wildcardDirectoryPart = string.Empty;
-            filenamePart = string.Empty;
-
-            if (isMatch)
-            {
-                wildcardDirectoryPart = match.Groups["WILDCARDDIR"].Value;
-                filenamePart = match.Groups["FILENAME"].Value;
-            }
         }
 
         private class TaskOptions
@@ -2211,7 +1817,7 @@ namespace Microsoft.Build.Shared
             string filespecUnescaped,
             out bool stripProjectDirectory,
             out RecursionState result,
-            bool createRegexFileMatch = true)
+            bool createGlobFileMatch = true)
         {
             stripProjectDirectory = false;
             result = new RecursionState();
@@ -2301,28 +1907,22 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            // determine if we need to use the regular expression to match the files
-            // PERF NOTE: Constructing a Regex object is expensive, so we avoid it whenever possible
-            bool matchWithRegex =
+            bool matchWithGlob =
                 // if we have a directory specification that uses wildcards, and
                 (wildcardDirectoryPart.Length > 0) &&
                 // the directory pattern is not a simple "**/{pattern}/**", and
                 directoryPattern == null &&
                 // the specification is not a simple "**"
                 !IsRecursiveDirectoryMatch(wildcardDirectoryPart);
-            // then we need to use the regular expression
-
             var searchData = new FilesSearchData(
-                // if using the regular expression, ignore the file pattern
-                matchWithRegex ? null : filenamePart,
+                matchWithGlob ? null : filenamePart,
                 directoryPattern,
-                // if using the file pattern, ignore the regular expression
-                matchWithRegex && createRegexFileMatch
-                    ? new Regex(
-                        RegularExpressionFromFileSpec(oldFixedDirectoryPart, wildcardDirectoryPart, filenamePart),
-                        CaseInsensitiveRegexOptions)
+                matchWithGlob && createGlobFileMatch
+                    ? new GlobPattern(
+                        oldFixedDirectoryPart, wildcardDirectoryPart, filenamePart,
+                        ResolvedCaseFolding == FileMatcherCaseFolding.InvariantCulture)
                     : null,
-                matchWithRegex,
+                matchWithGlob,
                 needsRecursion);
 
             result.SearchData = searchData;
@@ -3008,7 +2608,7 @@ namespace Microsoft.Build.Shared
                 filespecUnescaped,
                 out bool stripProjectDirectory,
                 out RecursionState state,
-                createRegexFileMatch: false);
+                createGlobFileMatch: false);
 
             if (action == SearchAction.ReturnEmptyList)
             {
@@ -3068,7 +2668,7 @@ namespace Microsoft.Build.Shared
                         excludeSpec,
                         out _,
                         out RecursionState excludeState,
-                        createRegexFileMatch: false);
+                        createGlobFileMatch: false);
 
                     if (excludeAction == SearchAction.ReturnFileSpec)
                     {
@@ -3342,12 +2942,12 @@ namespace Microsoft.Build.Shared
                     filesystemCaseSensitive: NativeMethods.IsLinux && !matchForExclusion && !useCachedCallback,
                     matchFileNameInternally: matchForExclusion
                         || useCachedCallback
-                        || searchState.SearchData.RequiresLegacyRegexSemantics
+                        || searchState.SearchData.RequiresLegacySemantics
                         || searchState.SearchData.DirectoryPattern is not null,
                     treatStarDotStarAsAllFiles: true,
-                    useTrailingDotRegex: !matchForExclusion
+                    useTrailingDotCompatibility: !matchForExclusion
                         && (!useCachedCallback
-                            || searchState.SearchData.RequiresLegacyRegexSemantics),
+                            || searchState.SearchData.RequiresLegacySemantics),
                     useWin32FileNameMatch: NativeMethods.IsWindows
                         && !matchForExclusion
                         && !useCachedCallback
@@ -3355,7 +2955,7 @@ namespace Microsoft.Build.Shared
                     useWin32DirectoryMatch: NativeMethods.IsWindows
                         && !matchForExclusion
                         && !useCachedCallback,
-                    preserveLegacyRegexSemantics: searchState.SearchData.RequiresLegacyRegexSemantics,
+                    preserveLegacySemantics: searchState.SearchData.RequiresLegacySemantics,
                     useInvariantCulture: ResolvedCaseFolding == FileMatcherCaseFolding.InvariantCulture);
             }
 
@@ -3412,10 +3012,6 @@ namespace Microsoft.Build.Shared
                 return true;
             }
         }
-
-        private RegexOptions CaseInsensitiveRegexOptions => ResolvedCaseFolding == FileMatcherCaseFolding.InvariantCulture
-            ? DefaultRegexOptions | RegexOptions.CultureInvariant
-            : DefaultRegexOptions;
 
     internal static string TranslateWin32Expression(string pattern)
     {
@@ -3908,13 +3504,12 @@ namespace Microsoft.Build.Shared
                             }
                             else
                             {
-                                // The wildcard part is non-empty and not "**\", so we will need to match it with a Regex.  Fortunately
-                                //  these conditions mean that it needs to be matched with a Regex anyway, so here we will update the
-                                //  BaseDirectory to be the same as the exclude BaseDirectory, and change the wildcard part to be "**\"
+                                // The wildcard part is non-empty and not "**\", so full-path glob matching is already required.
+                                // Update BaseDirectory to be the same as the exclude BaseDirectory, and change the wildcard part to be "**\"
                                 //  because we don't know where the different parts of the exclude wildcard part would be matched.
                                 //  Example: include="c:\git\msbuild\src\Framework\**\*.*" exclude="c:\git\msbuild\**\bin\**\*.*"
-                                Debug.Assert(excludeState.SearchData.RegexFileMatch != null || excludeState.SearchData.DirectoryPattern != null,
-                                    "Expected Regex or directory pattern to be used for exclude file matching");
+                                Debug.Assert(excludeState.SearchData.GlobFileMatch != null || excludeState.SearchData.DirectoryPattern != null,
+                                    "Expected full-path glob or directory pattern to be used for exclude file matching");
                                 excludeState.BaseDirectory = state.BaseDirectory;
                                 excludeState.RemainingWildcardDirectory = recursiveDirectoryMatch + s_directorySeparatorString;
                                 searchesToExclude.Add(excludeState);
@@ -4043,7 +3638,7 @@ namespace Microsoft.Build.Shared
         private static bool DirectoryEndsWithPattern(string directoryPath, string pattern)
         {
             int index = directoryPath.LastIndexOfAny(FileUtilities.Slashes);
-            return (index != -1 && IsMatch(directoryPath.AsSpan(index + 1), pattern));
+            return (index != -1 && GlobPattern.MatchesName(directoryPath.AsSpan(index + 1), pattern));
         }
 
         /// <summary>

@@ -155,6 +155,10 @@ dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 
 You can run a single unit test with `-- --filter-method "*{methodname}*"`, for example `dotnet test src/Framework.UnitTests/ -- --filter-method "*ExerciseBuildEventContext*"`.
 
+For local Unix runs, exclude `LogUnixWarningUponBuildingProjectWithDriveEnumeration` and
+`LogUnixWarningUponItemCreationWithDriveEnumeration` using `--filter-not-method`.
+These tests can hang while enumerating the filesystem root; do not run them unfiltered.
+
 ### Test Verification
 
 * **Individual Test Project**: ~10-60 seconds per project

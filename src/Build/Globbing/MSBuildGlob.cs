@@ -5,10 +5,10 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Globbing;
 using Microsoft.NET.StringTools;
 
 #nullable disable
@@ -33,9 +33,9 @@ namespace Microsoft.Build.Globbing
             public string WildcardDirectoryPart { get; }
             public string FilenamePart { get; }
             public bool NeedsRecursion { get; }
-            public Regex Regex { get; }
+            public GlobPattern Matcher { get; }
 
-            public GlobState(string globRoot, string fileSpec, bool isLegal, string fixedDirectoryPart, string wildcardDirectoryPart, string filenamePart, bool needsRecursion, Regex regex)
+            public GlobState(string globRoot, string fileSpec, bool isLegal, string fixedDirectoryPart, string wildcardDirectoryPart, string filenamePart, bool needsRecursion, GlobPattern matcher)
             {
                 GlobRoot = globRoot;
                 FileSpec = fileSpec;
@@ -44,19 +44,18 @@ namespace Microsoft.Build.Globbing
                 WildcardDirectoryPart = wildcardDirectoryPart;
                 FilenamePart = filenamePart;
                 NeedsRecursion = needsRecursion;
-                Regex = regex;
+                Matcher = matcher;
             }
         }
 
-        // Cache of Regex objects that we have created and are still alive.
-        private static readonly WeakValueDictionary<string, Regex> s_regexCache = new WeakValueDictionary<string, Regex>();
+        private static readonly WeakValueDictionary<string, GlobPattern> s_matcherCache = new();
 
         private readonly Lazy<GlobState> _state;
 
         internal string TestOnlyGlobRoot => _state.Value.GlobRoot;
         internal string TestOnlyFileSpec => _state.Value.FileSpec;
         internal bool TestOnlyNeedsRecursion => _state.Value.NeedsRecursion;
-        internal Regex TestOnlyRegex => _state.Value.Regex;
+        internal GlobPattern TestOnlyMatcher => _state.Value.Matcher;
 
         /// <summary>
         ///     The fixed directory part.
@@ -107,7 +106,7 @@ namespace Microsoft.Build.Globbing
 
             var normalizedString = NormalizeMatchInput(stringToMatch);
 
-            return _state.Value.Regex.IsMatch(normalizedString);
+            return _state.Value.Matcher.IsMatch(normalizedString);
         }
 
         /// <summary>
@@ -126,14 +125,13 @@ namespace Microsoft.Build.Globbing
 
             string normalizedInput = NormalizeMatchInput(stringToMatch);
 
-            FileMatcher.GetRegexMatchInfo(
+            _state.Value.Matcher.GetMatchInfo(
                 normalizedInput,
-                _state.Value.Regex,
                 out bool isMatch,
                 out string wildcardDirectoryPart,
                 out string filenamePart);
 
-            // We don't capture the fixed directory part in the regex but we can infer it from the other two.
+            // The fixed directory part can be inferred from the other two captures.
             int fixedDirectoryPartLength = normalizedInput.Length - wildcardDirectoryPart.Length - filenamePart.Length;
             string fixedDirectoryPart = normalizedInput.Substring(0, fixedDirectoryPartLength);
 
@@ -197,46 +195,35 @@ namespace Microsoft.Build.Globbing
                         return (normalizedFixedPart, wildcardDirPart, filePart);
                     });
 
-                Regex regex = null;
+                GlobPattern matcher = null;
                 if (isLegalFileSpec)
                 {
-                    string matchFileExpression = FileMatcher.RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
                     bool useInvariantCulture = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
                         && !Traits.Instance.UseLegacyCultureSensitiveFileGlobs;
-                    string regexCacheKey = useInvariantCulture
-                        ? $"i;{matchFileExpression}"
-                        : $"c:{CultureInfo.CurrentCulture.Name};{matchFileExpression}";
+                    string patternKey = $"{fixedDirectoryPart.Length}:{fixedDirectoryPart}{wildcardDirectoryPart.Length}:{wildcardDirectoryPart}{filenamePart}";
+                    string matcherCacheKey = useInvariantCulture
+                        ? $"i;{patternKey}"
+                        : $"c:{CultureInfo.CurrentCulture.Name};{patternKey}";
 
-                    lock (s_regexCache)
+                    lock (s_matcherCache)
                     {
-                        s_regexCache.TryGetValue(regexCacheKey, out regex);
+                        s_matcherCache.TryGetValue(matcherCacheKey, out matcher);
                     }
 
-                    if (regex == null)
+                    if (matcher is null)
                     {
-                        RegexOptions regexOptions = FileMatcher.DefaultRegexOptions;
-                        if (useInvariantCulture)
+                        GlobPattern newMatcher = new(fixedDirectoryPart, wildcardDirectoryPart, filenamePart, useInvariantCulture);
+                        lock (s_matcherCache)
                         {
-                            regexOptions |= RegexOptions.CultureInvariant;
-                        }
-                        // compile the regex since it's expected to be used multiple times
-                        // For the kind of regexes used here, compilation on .NET Framework tends to be expensive and not worth the small
-                        // run-time boost so it's enabled only on .NET Core.
-#if RUNTIME_TYPE_NETCORE
-                        regexOptions |= RegexOptions.Compiled;
-#endif
-                        Regex newRegex = new Regex(matchFileExpression, regexOptions);
-                        lock (s_regexCache)
-                        {
-                            if (!s_regexCache.TryGetValue(regexCacheKey, out regex))
+                            if (!s_matcherCache.TryGetValue(matcherCacheKey, out matcher))
                             {
-                                s_regexCache[regexCacheKey] = newRegex;
+                                s_matcherCache[matcherCacheKey] = newMatcher;
                             }
                         }
-                        regex ??= newRegex;
+                        matcher ??= newMatcher;
                     }
                 }
-                return new GlobState(globRoot, fileSpec, isLegalFileSpec, fixedDirectoryPart, wildcardDirectoryPart, filenamePart, needsRecursion, regex);
+                return new GlobState(globRoot, fileSpec, isLegalFileSpec, fixedDirectoryPart, wildcardDirectoryPart, filenamePart, needsRecursion, matcher);
             },
             true);
 
@@ -245,7 +232,7 @@ namespace Microsoft.Build.Globbing
 
         private static string NormalizeTheFixedDirectoryPartAgainstTheGlobRoot(string fixedDirPart, string globRoot)
         {
-            // todo: glob normalization is duplicated with EngineFileUtilities.CreateRegex
+            // todo: glob normalization is duplicated with FileSpecMatcherTester
             // concatenate the glob parent to the fixed dir part
             var parentedFixedPart = Path.Combine(globRoot, fixedDirPart);
             var normalizedFixedPart = FileUtilities.GetFullPathNoThrow(parentedFixedPart);
