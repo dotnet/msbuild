@@ -56,7 +56,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: "A method called from this task transitively uses an API that is unsafe in multithreaded task execution. Review the call chain and migrate the callee.",
-            customTags: WellKnownDiagnosticTags.CompilationEnd);
+            customTags: [WellKnownDiagnosticTags.CompilationEnd, WellKnownDiagnosticTags.CustomSeverityConfigurable]);
 
         public static readonly DiagnosticDescriptor PreferTypedPathParameter = new(
             id: DiagnosticIds.PreferTypedPathParameter,

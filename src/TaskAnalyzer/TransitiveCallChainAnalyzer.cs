@@ -28,6 +28,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class TransitiveCallChainAnalyzer : DiagnosticAnalyzer
     {
+        private static readonly DiagnosticDescriptor s_filteringDescriptor = CreateReportingDescriptor(null);
+        private static readonly DiagnosticDescriptor s_effectiveSeverityDescriptor = CreateReportingDescriptor(WellKnownDiagnosticTags.NotConfigurable);
+
         /// <summary>
         /// Maximum BFS depth. The visited set already prevents cycles, but this limits
         /// exploration of very deep non-cyclic call chains for performance.
@@ -35,7 +38,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         private const int MaxCallChainDepth = 20;
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-            ImmutableArray.Create(DiagnosticDescriptors.TransitiveUnsafeCall);
+            [DiagnosticDescriptors.TransitiveUnsafeCall];
 
         public override void Initialize(AnalysisContext context)
         {
@@ -512,6 +515,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// containing member — placed next to the reviewed call actually suppresses it. The task entry point
         /// is still named in the message and carried as an additional location.
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1005",
+            Justification = "The reporting descriptor retains the supported MSBuildTask0005 ID and preserves an inherited warnings-as-errors exemption.")]
         private static void ReportTransitiveViolation(
             CompilationAnalysisContext context,
             IMethodSymbol taskMethod,
@@ -526,19 +531,53 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var location = hasCallSite ? violation.Location : taskMethodLocation;
 
             DiagnosticDescriptor originatingDescriptor = GetDescriptor(violation.Category);
-            ReportDiagnostic severity = GetConfiguredSeverity(context, location, DiagnosticIds.TransitiveUnsafeCall);
-            if (severity == ReportDiagnostic.Default)
-            {
-                severity = GetConfiguredSeverity(context, location, originatingDescriptor.Id);
-                if (severity == ReportDiagnostic.Default)
-                {
-                    severity = originatingDescriptor.GetEffectiveSeverity(context.Compilation.Options);
-                }
-            }
-
-            if (severity == ReportDiagnostic.Suppress)
+            bool hasSeverityOverride = HasSeverityOverride(context, location);
+            Diagnostic? effectiveDiagnostic = GetEffectiveDiagnostic(
+                Diagnostic.Create(
+                    hasSeverityOverride ? s_filteringDescriptor : originatingDescriptor,
+                    location,
+                    originatingDescriptor.DefaultSeverity,
+                    additionalLocations: null,
+                    properties: null,
+                    violation.ApiDisplayName,
+                    violation.Message),
+                context.Compilation);
+            if (effectiveDiagnostic is null)
             {
                 return;
+            }
+
+            if (!hasSeverityOverride)
+            {
+                DiagnosticSeverity inheritedSeverity = effectiveDiagnostic.Severity;
+                if (TryGetBulkSeverity(context, location, originatingDescriptor, out ReportDiagnostic bulkSeverity))
+                {
+                    if (bulkSeverity == ReportDiagnostic.Suppress)
+                    {
+                        return;
+                    }
+
+                    inheritedSeverity = bulkSeverity switch
+                    {
+                        ReportDiagnostic.Error => DiagnosticSeverity.Error,
+                        ReportDiagnostic.Warn when context.Compilation.Options.GeneralDiagnosticOption == ReportDiagnostic.Error => DiagnosticSeverity.Error,
+                        ReportDiagnostic.Warn => DiagnosticSeverity.Warning,
+                        ReportDiagnostic.Info => DiagnosticSeverity.Info,
+                        ReportDiagnostic.Hidden => DiagnosticSeverity.Hidden,
+                        _ => inheritedSeverity,
+                    };
+                }
+
+                // Apply 0005 suppressions without promoting an inherited warning a second time.
+                effectiveDiagnostic = GetEffectiveDiagnostic(
+                    Diagnostic.Create(s_filteringDescriptor, location, inheritedSeverity,
+                        additionalLocations: null, properties: null),
+                    context.Compilation.WithOptions(
+                        context.Compilation.Options.WithGeneralDiagnosticOption(ReportDiagnostic.Default)));
+                if (effectiveDiagnostic is null)
+                {
+                    return;
+                }
             }
 
             // Deduplicate by the location the diagnostic is actually reported at, plus the target API. Keying
@@ -557,17 +596,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 ? ImmutableArray.Create(taskMethodLocation)
                 : ImmutableArray<Location>.Empty;
 
+            // Freeze only inherited exemptions that the compiler would otherwise promote under the 0005 ID.
+            bool preserveWarningExemption = !hasSeverityOverride &&
+                effectiveDiagnostic.Severity == DiagnosticSeverity.Warning &&
+                context.Compilation.Options.GeneralDiagnosticOption == ReportDiagnostic.Error &&
+                !context.Compilation.Options.SpecificDiagnosticOptions.ContainsKey(DiagnosticIds.TransitiveUnsafeCall);
             context.ReportDiagnostic(Diagnostic.Create(
-                DiagnosticDescriptors.TransitiveUnsafeCall,
+                preserveWarningExemption ? s_effectiveSeverityDescriptor : DiagnosticDescriptors.TransitiveUnsafeCall,
                 location,
-                severity switch
-                {
-                    ReportDiagnostic.Error => DiagnosticSeverity.Error,
-                    ReportDiagnostic.Warn => DiagnosticSeverity.Warning,
-                    ReportDiagnostic.Info => DiagnosticSeverity.Info,
-                    ReportDiagnostic.Hidden => DiagnosticSeverity.Hidden,
-                    _ => originatingDescriptor.DefaultSeverity,
-                },
+                effectiveDiagnostic.Severity,
                 additionalLocations,
                 properties: null,
                 FormatMethodFull(taskMethod),
@@ -575,29 +612,99 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 chainStr));
         }
 
-        private static ReportDiagnostic GetConfiguredSeverity(
+        private static bool HasSeverityOverride(
             CompilationAnalysisContext context,
-            Location location,
-            string diagnosticId)
+            Location location)
         {
+            const string diagnosticId = DiagnosticIds.TransitiveUnsafeCall;
+            if (context.Compilation.Options.SpecificDiagnosticOptions.TryGetValue(diagnosticId, out ReportDiagnostic severity) &&
+                severity != ReportDiagnostic.Default)
+            {
+                return true;
+            }
+
             SyntaxTreeOptionsProvider? optionsProvider = context.Compilation.Options.SyntaxTreeOptionsProvider;
             if (optionsProvider is not null)
             {
                 if (location.SourceTree is SyntaxTree tree &&
                     optionsProvider.TryGetDiagnosticValue(tree, diagnosticId, context.CancellationToken, out ReportDiagnostic treeSeverity))
                 {
-                    return treeSeverity;
+                    return treeSeverity != ReportDiagnostic.Default;
                 }
 
                 if (optionsProvider.TryGetGlobalDiagnosticValue(diagnosticId, context.CancellationToken, out ReportDiagnostic globalSeverity))
                 {
-                    return globalSeverity;
+                    return globalSeverity != ReportDiagnostic.Default;
                 }
             }
 
-            return context.Compilation.Options.SpecificDiagnosticOptions.TryGetValue(diagnosticId, out ReportDiagnostic severity)
-                ? severity
-                : ReportDiagnostic.Default;
+            return false;
+        }
+
+        private static Diagnostic? GetEffectiveDiagnostic(Diagnostic diagnostic, Compilation compilation)
+        {
+            foreach (Diagnostic effectiveDiagnostic in CompilationWithAnalyzers.GetEffectiveDiagnostics([diagnostic], compilation))
+            {
+                return effectiveDiagnostic.IsSuppressed ? null : effectiveDiagnostic;
+            }
+
+            return null;
+        }
+
+        private static bool TryGetBulkSeverity(
+            CompilationAnalysisContext context,
+            Location location,
+            DiagnosticDescriptor descriptor,
+            out ReportDiagnostic severity)
+        {
+            severity = ReportDiagnostic.Default;
+            SyntaxTreeOptionsProvider? treeOptions = context.Compilation.Options.SyntaxTreeOptionsProvider;
+            if (location.SourceTree is not SyntaxTree tree ||
+                context.Compilation.Options.SpecificDiagnosticOptions.ContainsKey(descriptor.Id) ||
+                treeOptions?.TryGetDiagnosticValue(tree, descriptor.Id, context.CancellationToken, out _) == true ||
+                treeOptions?.TryGetGlobalDiagnosticValue(descriptor.Id, context.CancellationToken, out _) == true)
+            {
+                return false;
+            }
+
+            // Roslyn applies bulk analyzer settings after compiler filtering, unless the ID is configured.
+            AnalyzerConfigOptions options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(tree);
+            return (options.TryGetValue("dotnet_analyzer_diagnostic.category-MSBuild.TaskAuthoring.severity", out string? value) &&
+                    TryParseSeverity(value, out severity)) ||
+                (options.TryGetValue("dotnet_analyzer_diagnostic.severity", out value) &&
+                    TryParseSeverity(value, out severity));
+        }
+
+        private static bool TryParseSeverity(string value, out ReportDiagnostic severity)
+        {
+            severity = value switch
+            {
+                var s when string.Equals(s, "error", StringComparison.OrdinalIgnoreCase) => ReportDiagnostic.Error,
+                var s when string.Equals(s, "warning", StringComparison.OrdinalIgnoreCase) => ReportDiagnostic.Warn,
+                var s when string.Equals(s, "suggestion", StringComparison.OrdinalIgnoreCase) => ReportDiagnostic.Info,
+                var s when string.Equals(s, "silent", StringComparison.OrdinalIgnoreCase) => ReportDiagnostic.Hidden,
+                var s when string.Equals(s, "refactoring", StringComparison.OrdinalIgnoreCase) => ReportDiagnostic.Hidden,
+                var s when string.Equals(s, "none", StringComparison.OrdinalIgnoreCase) => ReportDiagnostic.Suppress,
+                _ => ReportDiagnostic.Default,
+            };
+            return severity != ReportDiagnostic.Default || string.Equals(value, "default", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static DiagnosticDescriptor CreateReportingDescriptor(string? severityTag)
+        {
+            DiagnosticDescriptor descriptor = DiagnosticDescriptors.TransitiveUnsafeCall;
+            return new DiagnosticDescriptor(
+                descriptor.Id,
+                descriptor.Title,
+                descriptor.MessageFormat,
+                descriptor.Category,
+                descriptor.DefaultSeverity,
+                descriptor.IsEnabledByDefault,
+                descriptor.Description,
+                descriptor.HelpLinkUri,
+                severityTag is null
+                    ? [WellKnownDiagnosticTags.CompilationEnd]
+                    : [WellKnownDiagnosticTags.CompilationEnd, severityTag]);
         }
 
         /// <summary>

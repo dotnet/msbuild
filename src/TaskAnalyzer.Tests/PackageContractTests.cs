@@ -122,6 +122,7 @@ public sealed class PackageContractTests
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup>
                 <TargetFramework>net11.0</TargetFramework>
+                <EnableNETAnalyzers>false</EnableNETAnalyzers>
               </PropertyGroup>
               <ItemGroup>
                 <PackageReference Include="Microsoft.Build.TaskAuthoring.Analyzer"
@@ -196,6 +197,98 @@ public sealed class PackageContractTests
 
         output.ShouldContain("MSBuildTask0004");
         output.ShouldContain("MSBuildTask0005");
+
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.GetEnvironmentVariable(\"KEY\")", "", [], "warning", 0);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.GetEnvironmentVariable(\"KEY\")", "",
+            ["-p:TreatWarningsAsErrors=true", "-p:WarningsNotAsErrors=MSBuildTask0002"], "warning", 0);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = warning",
+            ["-p:NoWarn=MSBuildTask0001"], null, 0);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = warning",
+            ["-p:WarningsAsErrors=MSBuildTask0001"], "error", 1);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0005.severity = warning",
+            ["-p:NoWarn=MSBuildTask0001"], "warning", 0);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.GetEnvironmentVariable(\"KEY\")", "",
+            ["-p:NoWarn=MSBuildTask0005"], null, 0);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Reflection.Assembly.Load(\"Unsafe\")", "dotnet_analyzer_diagnostic.severity = warning",
+            [], "warning", 0);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Reflection.Assembly.Load(\"Unsafe\")",
+            """
+            dotnet_analyzer_diagnostic.severity = error
+            dotnet_analyzer_diagnostic.category-MSBuild.TaskAuthoring.severity = warning
+            """,
+            [], "warning", 0);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Reflection.Assembly.Load(\"Unsafe\")",
+            """
+            dotnet_analyzer_diagnostic.severity = warning
+            dotnet_diagnostic.MSBuildTask0004.severity = suggestion
+            """,
+            [], null, 0);
+
+        await File.WriteAllTextAsync(Path.Combine(consumerDirectory, ".globalconfig"), """
+            is_global = true
+            dotnet_diagnostic.MSBuildTask0001.severity = error
+            """);
+        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = default",
+            [], null, 0);
+    }
+
+    private async Task VerifyEffectiveSeverity(
+        string repositoryRoot,
+        string consumerDirectory,
+        string unsafeCall,
+        string configuration,
+        string[] compilerArguments,
+        string? expectedSeverity,
+        int expectedExitCode)
+    {
+        await File.WriteAllTextAsync(Path.Combine(consumerDirectory, "Task.cs"), $$"""
+            namespace Microsoft.Build.Framework
+            {
+                public interface ITask { bool Execute(); }
+                public interface IMultiThreadableTask : ITask { }
+            }
+            public class Task : Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public bool Execute()
+                {
+                    {{unsafeCall}};
+                    Helper.Run();
+                    return true;
+                }
+            }
+            public static class Helper
+            {
+                public static void Run() => {{unsafeCall}};
+            }
+            """);
+        await File.WriteAllTextAsync(Path.Combine(consumerDirectory, ".editorconfig"), $$"""
+            root = true
+
+            [*.cs]
+            {{configuration}}
+            """);
+        string output = await RunDotNet(repositoryRoot, consumerDirectory, expectedExitCode,
+            ["build", "Consumer.csproj", "--nologo", "--disable-build-servers", "--no-restore", "-t:Rebuild", .. compilerArguments]);
+
+        if (expectedSeverity is null)
+        {
+            output.ShouldNotContain("warning MSBuildTask0005");
+            output.ShouldNotContain("error MSBuildTask0005");
+        }
+        else
+        {
+            output.ShouldContain($"{expectedSeverity} MSBuildTask0005");
+        }
     }
 
     private async Task PackProject(
@@ -248,9 +341,15 @@ public sealed class PackageContractTests
         await RunDotNet(repositoryRoot, repositoryRoot, arguments);
     }
 
+    private Task<string> RunDotNet(
+        string repositoryRoot,
+        string workingDirectory,
+        params string[] arguments) => RunDotNet(repositoryRoot, workingDirectory, 0, arguments);
+
     private async Task<string> RunDotNet(
         string repositoryRoot,
         string workingDirectory,
+        int expectedExitCode,
         params string[] arguments)
     {
         string dotnetRoot = Path.Combine(repositoryRoot, ".dotnet");
@@ -311,7 +410,7 @@ public sealed class PackageContractTests
         _output.WriteLine(output);
         _output.WriteLine(error);
 
-        process.ExitCode.ShouldBe(0, $"dotnet {string.Join(' ', arguments)} failed.");
+        process.ExitCode.ShouldBe(expectedExitCode, $"dotnet {string.Join(' ', arguments)} returned an unexpected exit code.");
         return $"{output}{Environment.NewLine}{error}";
     }
 

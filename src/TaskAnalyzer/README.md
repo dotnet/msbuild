@@ -212,7 +212,11 @@ MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class 
 
 The call graph can pass through another task class. If an MT task reaches an MSBuildTask0002 or MSBuildTask0003 violation in a regular task class, MSBuildTask0005 reports the call chain. When direct analysis already reports that violation, MSBuildTask0005 does not report a duplicate.
 
-MSBuildTask0005 inherits the originating rule's severity: Info for MSBuildTask0001/0004 and Warning for MSBuildTask0002/0003. It also inherits the originating rule's configured severity or suppression at the unsafe call site. An explicit `dotnet_diagnostic.MSBuildTask0005.severity` setting takes precedence. Setting MSBuildTask0005 to `default` retains this inheritance. Existing MSBuildTask0005 pragmas and suppression attributes continue to apply.
+MSBuildTask0005 inherits the originating rule's effective severity at the unsafe call site. This includes `.editorconfig`, `.globalconfig`, command-line overrides, warnings-as-errors exemptions, and source suppressions. Without configuration, MSBuildTask0001/0004 findings are Info and MSBuildTask0002/0003 findings are Warning.
+
+An explicit MSBuildTask0005 severity setting takes precedence over inheritance. Setting `dotnet_diagnostic.MSBuildTask0005.severity` to `default` retains inheritance. Existing MSBuildTask0005 pragmas and suppression attributes continue to apply. An inherited Warning does not become Error when the originating rule is exempt from warnings-as-errors.
+
+Preserving an inherited warnings-as-errors exemption requires a frozen reporting descriptor. Third-party `DiagnosticSuppressor` plugins cannot suppress that specific report. Explicit severity settings, pragmas, and `SuppressMessage` remain effective because the analyzer applies them before reporting.
 
 The diagnostic is reported **at the unsafe call site** — inside the helper — and names the task entry point plus the full call chain in the message:
 

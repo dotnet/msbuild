@@ -21,6 +21,98 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 /// </summary>
 public class TransitiveCallChainAnalyzerTests
 {
+    [Theory]
+    [InlineData("", "#pragma warning disable MSBuildTask0001")]
+    [InlineData("[System.Diagnostics.CodeAnalysis.SuppressMessage(\"MSBuild.TaskAuthoring\", \"MSBuildTask0001\")]", "")]
+    public async Task TransitiveDiagnostic_InheritsOriginatingSourceSuppression(
+        string attribute,
+        string pragma)
+    {
+        var diagnostics = await GetAllDiagnosticsAsync($$"""
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            public static class Helper
+            {
+                {{attribute}}
+                public static void Run()
+                {
+                    {{pragma}}
+                    System.Environment.Exit(1);
+                }
+            }
+            """);
+
+        diagnostics.ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(ReportDiagnostic.Suppress, ReportDiagnostic.Default, DiagnosticSeverity.Warning)]
+    [InlineData(ReportDiagnostic.Error, ReportDiagnostic.Default, DiagnosticSeverity.Error)]
+    [InlineData(ReportDiagnostic.Default, ReportDiagnostic.Error, DiagnosticSeverity.Warning)]
+    public async Task TransitiveDiagnostic_InheritsCompilerPolicy(
+        ReportDiagnostic originatingOption,
+        ReportDiagnostic generalOption,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var compilation = CreateCompilation("""
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    System.Environment.GetEnvironmentVariable("KEY");
+                    Helper.Run();
+                    return true;
+                }
+            }
+            public static class Helper
+            {
+                public static void Run() => System.Environment.GetEnvironmentVariable("KEY");
+            }
+            """);
+        compilation = compilation.WithOptions(compilation.Options
+            .WithGeneralDiagnosticOption(generalOption)
+            .WithSpecificDiagnosticOptions(
+                ImmutableDictionary<string, ReportDiagnostic>.Empty.Add(
+                    DiagnosticIds.TaskEnvironmentRequired, originatingOption)));
+        var diagnostics = await compilation.WithAnalyzers(
+            [new MultiThreadableTaskAnalyzer(), new TransitiveCallChainAnalyzer()])
+            .GetAnalyzerDiagnosticsAsync();
+
+        if (originatingOption == ReportDiagnostic.Suppress)
+        {
+            diagnostics.ShouldBeEmpty();
+        }
+        else
+        {
+            diagnostics.Length.ShouldBe(2);
+            diagnostics.ShouldAllBe(d => d.Severity == expectedSeverity);
+        }
+    }
+
+    [Fact]
+    public async Task TransitiveDiagnostic_OriginatingDefault_ResetsGlobalSeverity()
+    {
+        var test = CreateTransitiveSeverityTest(
+            DiagnosticIds.CriticalError, "System.Environment.Exit(1)", "default", "");
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", """
+            is_global = true
+            dotnet_diagnostic.MSBuildTask0001.severity = error
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Info)
+                .WithLocation(0).WithLocation(1));
+
+        await test.RunAsync();
+    }
+
     [Fact]
     public async Task InfoDiagnostics_DoNotFailWarningsAsErrorsBuild()
     {
