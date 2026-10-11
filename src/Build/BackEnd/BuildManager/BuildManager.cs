@@ -638,7 +638,8 @@ namespace Microsoft.Build.Execution
 
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
-                _buildParameters.DirectoryListingCache = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+                _buildParameters.DirectoryListingCache = DirectoryListingCache.SharedReuseEnabled
+                    && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
                     ? _directoryListingCache ??= new DirectoryListingCache()
                     : null;
                 bool strictMode = _buildParameters.MultiThreaded

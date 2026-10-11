@@ -278,11 +278,13 @@ namespace Microsoft.Build.Shared
                     };
                 }
             }
-            _globResultExperiment = directoryListingCache is not null && getFileSystemEntriesWithStatus is not null
+            _globResultExperiment = DirectoryListingCache.SharedReuseEnabled
+                && directoryListingCache is not null && getFileSystemEntriesWithStatus is not null
                 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
                 ? GlobResultExperiment.Create(directoryListingCache)
                 : null;
-            if (directoryListingCache is not null && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            if (DirectoryListingCache.SharedReuseEnabled
+                && directoryListingCache is not null && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
             {
                 _usesFileSystemEntryCache = true;
                 _getFileSystemEntries = CreateDirectoryListingEnumeration(

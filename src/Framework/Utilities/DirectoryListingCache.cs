@@ -15,6 +15,7 @@ namespace Microsoft.Build.Shared;
 /// </summary>
 internal sealed class DirectoryListingCache
 {
+    internal static readonly bool SharedReuseEnabled = Environment.GetEnvironmentVariable("MSBUILDDISABLESHAREDDIRECTORYCACHE") != "1";
     private readonly ConcurrentDictionary<(string Directory, FileMatcher.FileSystemEntity Kind), Listing> _listings = new();
     private readonly ValidationMode _validationMode = ReadValidationMode();
     internal int DiagnosticId { get; } = CachePerformanceDiagnostics.NextCacheId();

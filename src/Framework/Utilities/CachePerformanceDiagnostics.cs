@@ -72,6 +72,9 @@ internal static class CachePerformanceDiagnostics
         FsStreamOpen,
         FsReadText,
         FsReadBytes,
+        XmlCacheGet,
+        XmlCacheLockWait,
+        XmlCacheLockHold,
         InitialProperties,
         Properties,
         ItemDefinitions,
@@ -153,12 +156,15 @@ internal static class CachePerformanceDiagnostics
         private readonly long[] _ticks = new long[(int)Operation.Count];
         private readonly long[] _previousCounts = new long[(int)Operation.InitialProperties];
         private readonly long[] _previousTicks = new long[(int)Operation.InitialProperties];
-        private readonly Dictionary<Operation, (long[] Counts, long[] Ticks)> _passes = new();
+        private readonly Dictionary<Operation, (long[] Counts, long[] Ticks, long GcPauseTimeSpanTicks, long AllocatedThreadBytes)> _passes = new();
         private readonly int _gc0 = GC.CollectionCount(0);
         private readonly int _gc1 = GC.CollectionCount(1);
         private readonly int _gc2 = GC.CollectionCount(2);
 #if NET
         private readonly long _allocated = GC.GetTotalAllocatedBytes(precise: false);
+        private readonly long _gcPauseTimeSpanTicks = GC.GetTotalPauseDuration().Ticks;
+        private long _previousGcPauseTimeSpanTicks = GC.GetTotalPauseDuration().Ticks;
+        private long _previousAllocatedThreadBytes = GC.GetAllocatedBytesForCurrentThread();
 #endif
         private DirectoryListingCache? _cache;
         private int _mixedCaches;
@@ -176,6 +182,17 @@ internal static class CachePerformanceDiagnostics
 
         internal void RecordPass(Operation pass, long ticks)
         {
+#if NET
+            long gcPauseTimeSpanTicks = GC.GetTotalPauseDuration().Ticks;
+            long allocatedThreadBytes = GC.GetAllocatedBytesForCurrentThread();
+            long pauseDelta = gcPauseTimeSpanTicks - _previousGcPauseTimeSpanTicks;
+            long allocationDelta = allocatedThreadBytes - _previousAllocatedThreadBytes;
+            _previousGcPauseTimeSpanTicks = gcPauseTimeSpanTicks;
+            _previousAllocatedThreadBytes = allocatedThreadBytes;
+#else
+            const long pauseDelta = -1;
+            const long allocationDelta = -1;
+#endif
             Record(pass, ticks);
             long[] counts = new long[(int)Operation.InitialProperties];
             long[] times = new long[(int)Operation.InitialProperties];
@@ -188,7 +205,7 @@ internal static class CachePerformanceDiagnostics
                 _previousCounts[index] = count;
                 _previousTicks[index] = time;
             }
-            _passes.Add(pass, (counts, times));
+            _passes.Add(pass, (counts, times, pauseDelta, allocationDelta));
         }
 
         internal void UseCache(DirectoryListingCache cache)
@@ -205,8 +222,12 @@ internal static class CachePerformanceDiagnostics
             int gc2 = GC.CollectionCount(2) - _gc2;
 #if NET
             long allocated = GC.GetTotalAllocatedBytes(precise: false) - _allocated;
+            long gcPauseTimeSpanTicks = GC.GetTotalPauseDuration().Ticks;
+            long gcPauseDelta = gcPauseTimeSpanTicks - _gcPauseTimeSpanTicks;
 #else
             const long allocated = -1;
+            const long gcPauseTimeSpanTicks = -1;
+            const long gcPauseDelta = -1;
 #endif
             StringBuilder message = new("MSBuildCacheDiagnostics v=1");
             Append("pid", ProcessId);
@@ -215,6 +236,7 @@ internal static class CachePerformanceDiagnostics
             Append("succeeded", succeeded ? 1 : 0);
             Append("cache", _cache?.DiagnosticId ?? 0);
             Append("mixedCaches", _mixedCaches);
+            Append("sharedDirectoryReuse", DirectoryListingCache.SharedReuseEnabled ? 1 : 0);
             message.Append(" strategy=").Append(_cache?.DiagnosticValidationMode ?? "none");
             Append("retainedListings", _cache?.DiagnosticListingCount ?? 0);
             Append("elapsedTicks", elapsed);
@@ -225,6 +247,8 @@ internal static class CachePerformanceDiagnostics
             Append("gc1ProcessDelta", gc1);
             Append("gc2ProcessDelta", gc2);
             Append("allocatedProcessDelta", allocated);
+            Append("gcPauseProcessTimeSpanTicks", gcPauseTimeSpanTicks);
+            Append("gcPauseProcessDeltaTimeSpanTicks", gcPauseDelta);
             using Process process = Process.GetCurrentProcess();
             Append("processCpuTicks", process.TotalProcessorTime.Ticks);
             Append("gcHeapBytes", GC.GetTotalMemory(forceFullCollection: false));
@@ -236,6 +260,8 @@ internal static class CachePerformanceDiagnostics
             }
             foreach (var pass in _passes)
             {
+                Append(pass.Key + "GcPauseProcessDeltaTimeSpanTicks", pass.Value.GcPauseTimeSpanTicks);
+                Append(pass.Key + "AllocatedCurrentThreadBytes", pass.Value.AllocatedThreadBytes);
                 for (int index = 0; index < pass.Value.Counts.Length; index++)
                 {
                     if (pass.Value.Counts[index] == 0 && pass.Value.Ticks[index] == 0) { continue; }

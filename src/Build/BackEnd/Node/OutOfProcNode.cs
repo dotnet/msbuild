@@ -776,7 +776,8 @@ namespace Microsoft.Build.Execution
 
             Traits.UpdateFromEnvironment();
             DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(_buildParameters.BuildProcessEnvironment);
-            _buildParameters.DirectoryListingCache = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
+            _buildParameters.DirectoryListingCache = DirectoryListingCache.SharedReuseEnabled
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13)
                 ? s_directoryListingCache ??= new DirectoryListingCache()
                 : null;
 

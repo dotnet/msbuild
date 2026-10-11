@@ -12,6 +12,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using CachePerformanceDiagnostics = Microsoft.Build.Shared.CachePerformanceDiagnostics;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
@@ -290,9 +291,13 @@ namespace Microsoft.Build.Evaluation
         private ProjectRootElement GetOrLoad(string projectFile, OpenProjectRootElement loadProjectRootElement, bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
+            using var lookup = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.XmlCacheGet);
             ProjectRootElement projectRootElement;
+            var lockWait = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.XmlCacheLockWait);
             lock (_locker)
             {
+                lockWait.Dispose();
+                using var lockHold = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.XmlCacheLockHold);
                 _weakCache.TryGetValue(projectFile, out projectRootElement);
 
                 if (projectRootElement != null)
