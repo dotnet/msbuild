@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Shared.Globbing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -633,9 +634,9 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2));
-                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1.ToUpperInvariant(), input.Item2));
-                    Assert.Equal(input.Item3, FileMatcher.IsMatch(input.Item1, input.Item2.ToUpperInvariant()));
+                    GlobPattern.MatchesName(input.Item1.AsSpan(), input.Item2).ShouldBe(input.Item3);
+                    GlobPattern.MatchesName(input.Item1.ToUpperInvariant().AsSpan(), input.Item2).ShouldBe(input.Item3);
+                    GlobPattern.MatchesName(input.Item1.AsSpan(), input.Item2.ToUpperInvariant()).ShouldBe(input.Item3);
                 }
                 catch (Exception)
                 {
@@ -2020,7 +2021,7 @@ namespace Microsoft.Build.UnitTests
                 out bool needsRecursion,
                 out bool isLegalFileSpec);
             string matchFileExpression = isLegalFileSpec
-                ? FileMatcher.RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart)
+                ? GlobbingRegex.RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart)
                 : string.Empty;
 
             fixedDirectoryPart.ShouldBe(expectedFixedDirectoryPart);
@@ -2632,12 +2633,12 @@ namespace Microsoft.Build.UnitTests
         private static void ValidateIllegal(
             string filespec)
         {
-            Regex regexFileMatch;
+            GlobPattern globFileMatch;
             bool needsRecursion;
             bool isLegalFileSpec;
-            loopBackFileMatcher.GetFileSpecInfoWithRegexObject(
+            loopBackFileMatcher.GetFileSpecInfoWithGlob(
                 filespec,
-                out regexFileMatch,
+                out globFileMatch,
                 out needsRecursion,
                 out isLegalFileSpec);
 
