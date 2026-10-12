@@ -34,12 +34,12 @@ internal readonly record struct DirectoryStamp(
 
 internal static partial class DirectoryMetadata
 {
-    internal static bool TryRead(string path, out DirectoryStamp stamp)
+    internal static bool TryRead(string path, out DirectoryStamp stamp, bool includeIdentity = true, bool includeLastWriteTime = true)
     {
 #if FEATURE_WINDOWSINTEROP
         if (NativeMethods.IsWindows)
         {
-            return TryReadWindows(path, out stamp);
+            return TryReadWindows(path, out stamp, includeIdentity, includeLastWriteTime);
         }
 #endif
 #if NET
@@ -47,7 +47,7 @@ internal static partial class DirectoryMetadata
         {
             try
             {
-                return TryReadLinux(path, out stamp);
+                return TryReadLinux(path, out stamp, includeIdentity, includeLastWriteTime);
             }
             catch (Exception ex) when (ex is DllNotFoundException or EntryPointNotFoundException)
             {
@@ -61,20 +61,23 @@ internal static partial class DirectoryMetadata
 
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]
-    private static unsafe bool TryReadWindows(string path, out DirectoryStamp stamp)
+    private static unsafe bool TryReadWindows(string path, out DirectoryStamp stamp, bool includeIdentity, bool includeLastWriteTime)
     {
         stamp = default;
         HANDLE handle;
-        fixed (char* pointer = path)
+        using (CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.MetadataOpen))
         {
-            handle = PInvoke.CreateFile(
-                new PCWSTR(pointer),
-                (uint)(FILE_ACCESS_RIGHTS.FILE_READ_ATTRIBUTES | FILE_ACCESS_RIGHTS.FILE_LIST_DIRECTORY),
-                FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE | FILE_SHARE_MODE.FILE_SHARE_DELETE,
-                null,
-                FILE_CREATION_DISPOSITION.OPEN_EXISTING,
-                FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_OPEN_REPARSE_POINT,
-                HANDLE.Null);
+            fixed (char* pointer = path)
+            {
+                handle = PInvoke.CreateFile(
+                    new PCWSTR(pointer),
+                    (uint)(FILE_ACCESS_RIGHTS.FILE_READ_ATTRIBUTES | FILE_ACCESS_RIGHTS.FILE_LIST_DIRECTORY),
+                    FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE | FILE_SHARE_MODE.FILE_SHARE_DELETE,
+                    null,
+                    FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                    FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_OPEN_REPARSE_POINT,
+                    HANDLE.Null);
+            }
         }
         if (handle == HANDLE.INVALID_HANDLE_VALUE)
         {
@@ -83,25 +86,40 @@ internal static partial class DirectoryMetadata
         }
         try
         {
-            FILE_ID_INFO identity;
+            FILE_ID_INFO identity = default;
             FILE_BASIC_INFO basic;
-            if (!PInvoke.GetFileInformationByHandleEx(handle, FILE_INFO_BY_HANDLE_CLASS.FileIdInfo, &identity, (uint)sizeof(FILE_ID_INFO))
-                || !PInvoke.GetFileInformationByHandleEx(handle, FILE_INFO_BY_HANDLE_CLASS.FileBasicInfo, &basic, (uint)sizeof(FILE_BASIC_INFO)))
+            if (includeIdentity)
             {
-                TraceFailure(path, Marshal.GetLastWin32Error());
-                return false;
+                using var identityMeasurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.MetadataIdentity);
+                if (!PInvoke.GetFileInformationByHandleEx(handle, FILE_INFO_BY_HANDLE_CLASS.FileIdInfo, &identity, (uint)sizeof(FILE_ID_INFO)))
+                {
+                    TraceFailure(path, Marshal.GetLastWin32Error());
+                    return false;
+                }
+            }
+            using (CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.MetadataBasic))
+            {
+                if (!PInvoke.GetFileInformationByHandleEx(handle, FILE_INFO_BY_HANDLE_CLASS.FileBasicInfo, &basic, (uint)sizeof(FILE_BASIC_INFO)))
+                {
+                    TraceFailure(path, Marshal.GetLastWin32Error());
+                    return false;
+                }
             }
             if ((basic.FileAttributes & (uint)(FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY | FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_REPARSE_POINT))
-                != (uint)FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY)
+                != (uint)FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY
+                || (!includeLastWriteTime && basic.ChangeTime == 0))
             {
                 return false;
             }
             ulong* identifier = (ulong*)&identity.FileId;
-            stamp = new DirectoryStamp(identity.VolumeSerialNumber, identifier[0], identifier[1], basic.LastWriteTime, basic.ChangeTime);
+            stamp = new DirectoryStamp(
+                identity.VolumeSerialNumber, identifier[0], identifier[1],
+                includeLastWriteTime ? basic.LastWriteTime : 0, basic.ChangeTime);
             return true;
         }
         finally
         {
+            using var closeMeasurement = CachePerformanceDiagnostics.Measure(CachePerformanceDiagnostics.Operation.MetadataClose);
             if (!PInvoke.CloseHandle(handle))
             {
                 TraceFailure(path, Marshal.GetLastWin32Error());
@@ -160,11 +178,13 @@ internal static partial class DirectoryMetadata
     [LibraryImport("libc", EntryPoint = "statx", SetLastError = true)]
     private static unsafe partial int Statx(int directoryDescriptor, byte* path, StatxFlags flags, StatxFields fields, StatxData* result);
 
-    private static unsafe bool TryReadLinux(string path, out DirectoryStamp stamp)
+    private static unsafe bool TryReadLinux(string path, out DirectoryStamp stamp, bool includeIdentity, bool includeLastWriteTime)
     {
         stamp = default;
         const int currentDirectory = -100; // AT_FDCWD
-        const StatxFields required = StatxFields.Type | StatxFields.LastWriteTime | StatxFields.ChangeTime | StatxFields.Identity;
+        StatxFields required = StatxFields.Type | StatxFields.ChangeTime;
+        if (includeIdentity) { required |= StatxFields.Identity; }
+        if (includeLastWriteTime) { required |= StatxFields.LastWriteTime; }
         int length = Encoding.UTF8.GetByteCount(path);
         using BufferScope<byte> buffer = new(stackalloc byte[512], checked(length + 1));
         Encoding.UTF8.GetBytes(path.AsSpan(), buffer.AsSpan());
@@ -180,18 +200,20 @@ internal static partial class DirectoryMetadata
             TraceFailure(path, Marshal.GetLastPInvokeError());
             return false;
         }
-        if ((data.Fields & required) != required || (data.FileType & UnixFileType.Mask) != UnixFileType.Directory)
+        if ((data.Fields & required) != required
+            || (data.FileType & UnixFileType.Mask) != UnixFileType.Directory
+            || (!includeLastWriteTime && data.ChangeNanoseconds >= 1_000_000_000))
         {
             DebugTrace.WriteLine($"Directory identity metadata is incomplete for '{path}'.", category: nameof(DirectoryMetadata));
             return false;
         }
         stamp = new DirectoryStamp(
-            ((ulong)data.DeviceMajor << 32) | data.DeviceMinor,
-            data.Identity,
+            includeIdentity ? ((ulong)data.DeviceMajor << 32) | data.DeviceMinor : 0,
+            includeIdentity ? data.Identity : 0,
             0,
-            data.LastWriteSeconds,
+            includeLastWriteTime ? data.LastWriteSeconds : 0,
             data.ChangeSeconds,
-            data.LastWriteNanoseconds,
+            includeLastWriteTime ? data.LastWriteNanoseconds : 0,
             data.ChangeNanoseconds);
         return true;
     }

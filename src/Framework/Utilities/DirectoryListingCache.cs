@@ -110,6 +110,13 @@ internal sealed class DirectoryListingCache
         {
             return DirectoryMetadata.TryRead(directory, out stamp);
         }
+        if (_validationMode is ValidationMode.ChangeTime or ValidationMode.IdentityChangeTime)
+        {
+            return DirectoryMetadata.TryRead(
+                directory, out stamp,
+                includeIdentity: _validationMode == ValidationMode.IdentityChangeTime,
+                includeLastWriteTime: false);
+        }
         if (_validationMode == ValidationMode.Timestamp && TryReadDirectoryTimestamp(directory, out DateTime timestamp))
         {
             stamp = new DirectoryStamp(0, 0, 0, timestamp.Ticks, 0);
@@ -130,6 +137,14 @@ internal sealed class DirectoryListingCache
         {
             return ValidationMode.Timestamp;
         }
+        if (string.Equals(mode, "ctime", StringComparison.OrdinalIgnoreCase))
+        {
+            return ValidationMode.ChangeTime;
+        }
+        if (string.Equals(mode, "ctime-identity", StringComparison.OrdinalIgnoreCase))
+        {
+            return ValidationMode.IdentityChangeTime;
+        }
         DebugTrace.WriteLine($"Unknown MSBUILDDIRECTORYCACHEVALIDATION value '{mode}'; shared directory reuse is disabled.", category: nameof(DirectoryListingCache));
         return ValidationMode.Disabled;
     }
@@ -144,6 +159,8 @@ internal sealed class DirectoryListingCache
     {
         Strong,
         Timestamp,
+        ChangeTime,
+        IdentityChangeTime,
         Disabled,
     }
 
