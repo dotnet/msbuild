@@ -136,7 +136,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (defaultToolsVersionKey != null)
                     {
-                        defaultToolsVersion = GetValue(defaultToolsVersionKey, ReservedPropertyNames.overrideTasksPath);
+                        defaultToolsVersion = GetValue(defaultToolsVersionKey, ReservedPropertyNames.OverrideTasksPath);
                     }
                 }
 
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (defaultOverrideToolsVersionKey != null)
                     {
-                        defaultOverrideToolsVersion = GetValue(defaultOverrideToolsVersionKey, ReservedPropertyNames.defaultOverrideToolsVersion);
+                        defaultOverrideToolsVersion = GetValue(defaultOverrideToolsVersionKey, ReservedPropertyNames.DefaultOverrideToolsVersion);
                     }
                 }
 
