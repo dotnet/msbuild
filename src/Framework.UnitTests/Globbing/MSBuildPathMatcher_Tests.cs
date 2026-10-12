@@ -542,8 +542,12 @@ public class MSBuildPathMatcher_Tests
     {
         string[] patterns = new string[96];
         string[] directories = new string[96];
-        Array.Fill(patterns, "a*");
-        Array.Fill(directories, "abc");
+        for (int i = 0; i < patterns.Length; i++)
+        {
+            patterns[i] = "a*";
+            directories[i] = "abc";
+        }
+
         string wildcard = string.Join("/", patterns) + "/";
         string directory = string.Join("/", directories) + "/";
         string path = directory + "file.cs";
