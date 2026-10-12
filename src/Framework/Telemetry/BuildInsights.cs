@@ -87,11 +87,12 @@ internal sealed class BuildInsights
     /// Information about build incrementality classification.
     /// </summary>
     /// <param name="Classification">The determined build type (Full, Incremental, or Unknown).</param>
-    /// <param name="TotalTargetsCount">Number of distinct target names loaded in the build.</param>
-    /// <param name="ExecutedTargetsCount">Number of distinct target names that ran in at least one project.</param>
-    /// <param name="SkippedTargetsCount">Number of distinct target names that never ran.</param>
-    /// <param name="SkippedDueToUpToDateCount">Number of distinct target names that never ran and were skipped because their outputs were up to date.</param>
-    /// <param name="SkippedDueToConditionCount">Number of distinct target names that never ran and were skipped because their condition was false.</param>
+    /// <param name="TotalTargetsCount">Total number of targets in the build.</param>
+    /// <param name="ExecutedTargetsCount">Number of targets that were actually executed.</param>
+    /// <param name="SkippedTargetsCount">Number of targets that were skipped.</param>
+    /// <param name="SkippedDueToUpToDateCount">Number of targets skipped because outputs were up-to-date.</param>
+    /// <param name="SkippedDueToConditionCount">Number of targets skipped due to false conditions.</param>
+    /// <param name="SkippedDueToPreviouslyBuiltCount">Number of targets skipped because they were previously built.</param>
     /// <param name="UpToDateInputOutputTargetsCount">Number of target instances with Inputs and Outputs that were skipped because their outputs were up to date.</param>
     /// <param name="ExecutedInputOutputTargetsCount">Number of target instances with Inputs and Outputs that ran.</param>
     /// <param name="IncrementalityRatio">Share of target instances with Inputs and Outputs that were up to date (0.0 to 1.0). Higher values indicate more incremental builds.</param>
@@ -102,6 +103,7 @@ internal sealed class BuildInsights
         int SkippedTargetsCount,
         int SkippedDueToUpToDateCount,
         int SkippedDueToConditionCount,
+        int SkippedDueToPreviouslyBuiltCount,
         int UpToDateInputOutputTargetsCount,
         int ExecutedInputOutputTargetsCount,
         double IncrementalityRatio);

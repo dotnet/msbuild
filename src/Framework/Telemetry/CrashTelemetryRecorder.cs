@@ -228,7 +228,6 @@ internal static class CrashTelemetryRecorder
         crashTelemetry.ExitType = exitType;
         crashTelemetry.IsCritical = isCritical;
         crashTelemetry.IsUnhandled = isUnhandled;
-        crashTelemetry.IsCI = BuildEnvironmentState.IsAutomatedEnvironment();
         return crashTelemetry;
     }
 

@@ -89,7 +89,7 @@ namespace Microsoft.Build.Framework.Telemetry
         internal record TargetDetailInfo(string Name, bool WasExecuted, bool IsCustom, bool IsNuget, bool IsMetaProj, TargetSkipReason SkipReason);
 
         /// <summary>
-        /// Converts details of the tasks that executed at least once to a list of custom objects for telemetry.
+        /// Converts tasks details to a list of custom objects for telemetry.
         /// </summary>
         internal static List<TaskDetailInfo> GetTasksDetails(
             Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksDetails)
@@ -375,6 +375,7 @@ namespace Microsoft.Build.Framework.Telemetry
             int skippedTargets = 0;
             int skippedDueToUpToDate = 0;
             int skippedDueToCondition = 0;
+            int skippedDueToPreviouslyBuilt = 0;
 
             foreach (var kv in telemetryData.TargetsExecutionData)
             {
@@ -389,6 +390,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     {
                         TargetSkipReason.OutputsUpToDate => skippedDueToUpToDate++,
                         TargetSkipReason.ConditionWasFalse => skippedDueToCondition++,
+                        TargetSkipReason.PreviouslyBuiltSuccessfully or TargetSkipReason.PreviouslyBuiltUnsuccessfully => skippedDueToPreviouslyBuilt++,
                         _ => 0
                     };
                 }
@@ -412,6 +414,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 SkippedTargetsCount: skippedTargets,
                 SkippedDueToUpToDateCount: skippedDueToUpToDate,
                 SkippedDueToConditionCount: skippedDueToCondition,
+                SkippedDueToPreviouslyBuiltCount: skippedDueToPreviouslyBuilt,
                 UpToDateInputOutputTargetsCount: upToDateInputOutputTargets,
                 ExecutedInputOutputTargetsCount: telemetryData.ExecutedInputOutputTargetsCount,
                 IncrementalityRatio: incrementalityRatio);

@@ -915,8 +915,7 @@ namespace Microsoft.Build.Execution
 #if NET
                     return GC.GetTotalAllocatedBytes(false);
 #else
-                    // .NET Framework only exposes the live heap size, which can't be attributed to a task.
-                    return 0;
+                    return GC.GetTotalMemory(false);
 #endif
                 }
 

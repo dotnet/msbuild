@@ -450,6 +450,7 @@ namespace Microsoft.Build.Engine.UnitTests
             incrementality.SkippedTargetsCount.ShouldBe(3);
             incrementality.SkippedDueToUpToDateCount.ShouldBe(2);
             incrementality.SkippedDueToConditionCount.ShouldBe(1);
+            incrementality.SkippedDueToPreviouslyBuiltCount.ShouldBe(0);
             incrementality.UpToDateInputOutputTargetsCount.ShouldBe(3);
             incrementality.ExecutedInputOutputTargetsCount.ShouldBe(1);
             incrementality.IncrementalityRatio.ShouldBe(0.75);

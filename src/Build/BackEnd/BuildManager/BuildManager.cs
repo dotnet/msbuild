@@ -1542,7 +1542,6 @@ namespace Microsoft.Build.Execution
                     telemetry.ThreadExceptionRecorded = _threadException is not null;
                     telemetry.UnmatchedProjectStartedCount = _projectStartedEvents.Count;
                     telemetry.BuildEngineHost = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
-                    telemetry.IsCI = BuildEnvironmentState.IsAutomatedEnvironment();
                     telemetry.IsShuttingDown = _shuttingDown;
                     telemetry.IsCancellationRequested = _executionCancellationTokenSource?.IsCancellationRequested ?? false;
                     telemetry.WorkQueueDepth = _workQueue?.InputCount;

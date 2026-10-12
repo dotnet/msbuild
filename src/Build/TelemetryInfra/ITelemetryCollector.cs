@@ -21,10 +21,6 @@ internal interface ITelemetryCollector
 
     void AddTarget(TaskOrTargetTelemetryKey key, bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None);
 
-    /// <summary>
-    /// Records one built instance of a target that declares both Inputs and Outputs.
-    /// </summary>
-    /// <param name="upToDate">True if the target was skipped because its outputs were up to date.</param>
     void AddInputOutputTarget(bool upToDate);
 
     void AddTask(
