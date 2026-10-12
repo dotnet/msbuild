@@ -712,6 +712,57 @@ namespace Microsoft.Build.UnitTests
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public async Task ProgramStatusInterleavesWithParallelBuildOutput(bool succeeded, bool supportsProgramStatusReporting)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 25)
+            {
+                SupportsProgramStatusReporting = supportsProgramStatusReporting
+            };
+            TerminalLogger logger = new(terminal)
+            {
+                _createStopwatch = () => new MockStopwatch()
+            };
+            MockBuildEventSink eventSource = new(0);
+            logger.Initialize(eventSource, 2);
+            BuildEventContext first = MakeBuildEventContext(evalId: 1, projectContextId: 1, nodeId: 1);
+            BuildEventContext second = MakeBuildEventContext(evalId: 2, projectContextId: 2, nodeId: 2);
+
+            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs("project.proj",
+                properties: [("TargetFramework", "net11.0")], buildEventContext: first));
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs("project2.proj", buildEventContext: second));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs("project.proj", buildEventContext: first));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs("project.proj", "Compile", first));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs("project2.proj", buildEventContext: second));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs("project2.proj", "Build", second));
+            logger.Refresh();
+
+            if (!succeeded)
+            {
+                eventSource.InvokeErrorRaised(new BuildErrorEventArgs(
+                    null, "AA0000", "project.proj", 1, 2, 0, 0, "Compilation failed.", null, null)
+                {
+                    BuildEventContext = first
+                });
+            }
+
+            eventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs("project.proj", "Compile", succeeded, first));
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs("project.proj", succeeded, first));
+            logger.Refresh();
+            eventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs("project2.proj", "Build", true, second));
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs("project2.proj", true, second));
+            eventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
+            logger.Shutdown();
+
+            await Verify(output.ToString().Replace("\x1b", "<ESC>"), _settings)
+                .UseParameters(succeeded, supportsProgramStatusReporting);
+        }
+
         [Fact]
         public Task PrintBuildSummary_SucceededWithWarnings()
         {

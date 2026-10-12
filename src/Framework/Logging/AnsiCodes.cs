@@ -1,6 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Text;
+#if NET
+using System.Buffers;
+#endif
+
 namespace Microsoft.Build.Framework.Logging;
 
 /// <summary>
@@ -8,6 +14,21 @@ namespace Microsoft.Build.Framework.Logging;
 /// </summary>
 internal static class AnsiCodes
 {
+#if NET
+    private static readonly SearchValues<char> s_programStatusIdentifierCharacters =
+        SearchValues.Create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+-");
+#endif
+
+    internal enum ProgramStatus
+    {
+        Idle,
+        Working,
+        Done,
+        Blocked,
+        Error,
+        Clear
+    }
+
     /// <summary>
     /// The control sequence introducer.
     /// </summary>
@@ -121,6 +142,122 @@ internal static class AnsiCodes
     /// <see href="https://iterm2.com/documentation-escape-codes.html">iTerm2 proprietary escape codes.</see>
     /// </remarks>
     public const string RemoveProgress = "\x1b]9;4;0;\x1b\\";
+
+    /// <summary>
+    /// Creates an OSC 7501 report. Each report replaces the record addressed by <paramref name="id"/>.
+    /// </summary>
+    /// <param name="status">The program status, or <see cref="ProgramStatus.Clear"/> to remove the record and its descendants.</param>
+    /// <param name="id">A hierarchical record ID, or null for the root record.</param>
+    /// <param name="app">A machine-readable application name, or null to inherit it from an ancestor.</param>
+    /// <param name="title">A human-readable title. Control characters are replaced and long titles are truncated to fit the protocol limit.</param>
+    public static string SetProgramStatus(ProgramStatus status, string? id = null, string? app = null, string? title = null)
+    {
+        string state = status switch
+        {
+            ProgramStatus.Idle => "idle",
+            ProgramStatus.Working => "working",
+            ProgramStatus.Done => "done",
+            ProgramStatus.Blocked => "blocked",
+            ProgramStatus.Error => "error",
+            ProgramStatus.Clear => "clear",
+            _ => throw new ArgumentOutOfRangeException(nameof(status))
+        };
+
+        if (id is not null)
+        {
+            ValidateProgramStatusIdentifier(id, nameof(id), allowHierarchy: true);
+        }
+        if (app is not null)
+        {
+            ValidateProgramStatusIdentifier(app, nameof(app), allowHierarchy: false);
+        }
+
+        StringBuilder builder = new();
+        builder.Append("\x1b]7501;state=").Append(state);
+        if (id is not null)
+        {
+            builder.Append(":id=").Append(id);
+        }
+        if (app is not null)
+        {
+            builder.Append(":app=").Append(app);
+        }
+        if (title is not null)
+        {
+            builder.Append(":title=").Append(EncodeProgramStatusTitle(title));
+        }
+        return builder.Append("\x1b\\").ToString();
+    }
+
+    private static void ValidateProgramStatusIdentifier(ReadOnlySpan<char> value, string parameterName, bool allowHierarchy)
+    {
+        if (value.Length == 0 || value.Length > (allowHierarchy ? 128 : 32))
+        {
+            throw new ArgumentException("Invalid OSC 7501 identifier length.", parameterName);
+        }
+
+        int depth = 1;
+        while (true)
+        {
+            int separator = allowHierarchy ? value.IndexOf('/') : -1;
+            ReadOnlySpan<char> segment = separator < 0 ? value : value.Slice(0, separator);
+            if (segment.IsEmpty)
+            {
+                throw new ArgumentException("Invalid OSC 7501 identifier hierarchy.", parameterName);
+            }
+            if (segment.Length > 32)
+            {
+                throw new ArgumentException("Invalid OSC 7501 identifier segment length.", parameterName);
+            }
+#if NET
+            if (segment.ContainsAnyExcept(s_programStatusIdentifierCharacters))
+            {
+                throw new ArgumentException("Invalid OSC 7501 identifier character.", parameterName);
+            }
+#else
+            foreach (char character in segment)
+            {
+                if (character is not (>= 'A' and <= 'Z' or >= 'a' and <= 'z' or >= '0' and <= '9' or '_' or '.' or '+' or '-'))
+                {
+                    throw new ArgumentException("Invalid OSC 7501 identifier character.", parameterName);
+                }
+            }
+#endif
+            if (separator < 0)
+            {
+                return;
+            }
+            if (++depth > 8)
+            {
+                throw new ArgumentException("Invalid OSC 7501 identifier hierarchy.", parameterName);
+            }
+            value = value.Slice(separator + 1);
+        }
+    }
+
+    private static string EncodeProgramStatusTitle(ReadOnlySpan<char> title)
+    {
+        // 64 UTF-16 code units require at most 192 UTF-8 bytes, the protocol's title limit.
+        int length = Math.Min(title.Length, 64);
+        if (length > 0 && char.IsHighSurrogate(title[length - 1]))
+        {
+            length--;
+        }
+
+        Span<char> sanitized = stackalloc char[64];
+        for (int i = 0; i < length; i++)
+        {
+            char character = title[i];
+            sanitized[i] = char.IsControl(character) ? ' ' : character;
+        }
+#if NET
+        Span<byte> utf8 = stackalloc byte[192];
+        int byteCount = Encoding.UTF8.GetBytes(sanitized.Slice(0, length), utf8);
+        return Convert.ToBase64String(utf8.Slice(0, byteCount));
+#else
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(sanitized.Slice(0, length).ToString()));
+#endif
+    }
 
     public static string Colorize(string? s, TerminalColor color)
     {

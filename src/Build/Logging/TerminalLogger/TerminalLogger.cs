@@ -576,7 +576,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void BuildStarted(object sender, BuildStartedEventArgs e)
     {
-        ReportProgramStatus("working");
+        ReportProgramStatus(AnsiCodes.ProgramStatus.Working);
 
         if (!_manualRefresh && _showNodesDisplay)
         {
@@ -683,9 +683,9 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             lock (_lock)
             {
-                Terminal.Write("\x1b]7501;state=clear:id=build\x1b\\");
+                Terminal.Write(AnsiCodes.SetProgramStatus(AnsiCodes.ProgramStatus.Clear, id: "build"));
                 _programStatusRecords.Clear();
-                ReportProgramStatus(e.Succeeded ? "done" : "error");
+                ReportProgramStatus(e.Succeeded ? AnsiCodes.ProgramStatus.Done : AnsiCodes.ProgramStatus.Error);
             }
         }
 
@@ -699,11 +699,11 @@ public sealed partial class TerminalLogger : INodeLogger
         _testEndTime = null;
     }
 
-    private void ReportProgramStatus(string state)
+    private void ReportProgramStatus(AnsiCodes.ProgramStatus status)
     {
         if (Terminal.SupportsProgramStatusReporting)
         {
-            Terminal.Write($"\x1b]7501;state={state}:app=msbuild\x1b\\");
+            Terminal.Write(AnsiCodes.SetProgramStatus(status, app: "msbuild"));
         }
     }
 
@@ -728,7 +728,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 return;
             }
 
-            Terminal.Write($"\x1b]7501;state=working:id={id}:title={EncodeProgramStatusTitle(title)}\x1b\\");
+            Terminal.Write(AnsiCodes.SetProgramStatus(AnsiCodes.ProgramStatus.Working, id: id, title: title ?? ""));
         }
     }
 
@@ -751,30 +751,9 @@ public sealed partial class TerminalLogger : INodeLogger
                     _programStatusRecords.RemoveWhere(record => record.StartsWith(prefix, StringComparison.Ordinal));
                 }
 
-                Terminal.Write($"\x1b]7501;state=clear:id={id}\x1b\\");
+                Terminal.Write(AnsiCodes.SetProgramStatus(AnsiCodes.ProgramStatus.Clear, id: id));
             }
         }
-    }
-
-    private static string EncodeProgramStatusTitle(string? title)
-    {
-        // 64 UTF-16 code units require at most 192 UTF-8 bytes, the protocol's title limit.
-        int length = Math.Min(title?.Length ?? 0, 64);
-        if (length > 0 && char.IsHighSurrogate(title![length - 1]))
-        {
-            length--;
-        }
-
-        StringBuilder builder = StringBuilderCache.Acquire(length);
-        for (int i = 0; i < length; i++)
-        {
-            char character = title![i];
-            builder.Append(char.IsControl(character) ? ' ' : character);
-        }
-
-        string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(builder.ToString()));
-        StringBuilderCache.Release(builder);
-        return encoded;
     }
 
     private void RenderBuildSummary()

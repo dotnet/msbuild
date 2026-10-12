@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
@@ -221,7 +222,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (SupportsProgramStatusReporting && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
             {
-                WriteHandler("\x1b]7501;state=working:app=msbuild\x1b\\");
+                WriteHandler(AnsiCodes.SetProgramStatus(AnsiCodes.ProgramStatus.Working, app: "msbuild"));
             }
 
             buildStarted = e.Timestamp;
@@ -362,9 +363,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (SupportsProgramStatusReporting && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
             {
-                WriteHandler(e.Succeeded
-                    ? "\x1b]7501;state=done:app=msbuild\x1b\\"
-                    : "\x1b]7501;state=error:app=msbuild\x1b\\");
+                WriteHandler(AnsiCodes.SetProgramStatus(
+                    e.Succeeded ? AnsiCodes.ProgramStatus.Done : AnsiCodes.ProgramStatus.Error, app: "msbuild"));
             }
         }
 
