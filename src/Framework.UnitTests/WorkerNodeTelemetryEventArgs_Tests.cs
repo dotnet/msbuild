@@ -19,7 +19,7 @@ namespace Microsoft.Build.Framework.UnitTests
                 new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>()
                 {
                         { (TaskOrTargetTelemetryKey)"task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5, 1234, "AssemblyTaskFactory", "CLR4") },
-                        { (TaskOrTargetTelemetryKey)"task2", new TaskExecutionStats(TimeSpan.Zero, 0, 0, null, null) },
+                        { (TaskOrTargetTelemetryKey)"task2", new TaskExecutionStats(TimeSpan.Zero, 0, null, null, null) },
                         { (TaskOrTargetTelemetryKey)"task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12, 987654321, "CodeTaskFactory", "NET") }
                 },
                 new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>()
@@ -29,7 +29,12 @@ namespace Microsoft.Build.Framework.UnitTests
                     { (TaskOrTargetTelemetryKey)"target3", TargetExecutionStats.Skipped(TargetSkipReason.ConditionWasFalse) },
                 },
                 upToDateInputOutputTargetsCount: 7,
-                executedInputOutputTargetsCount: 2);
+                executedInputOutputTargetsCount: 2,
+                executedTargetsCount: 11,
+                skippedTargetsCount: 5,
+                skippedDueToUpToDateCount: 2,
+                skippedDueToConditionCount: 1,
+                skippedDueToPreviouslyBuiltCount: 2);
 
             WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(td);
 
@@ -47,6 +52,12 @@ namespace Microsoft.Build.Framework.UnitTests
             argDeserialized.WorkerNodeTelemetryData.TasksExecutionData.ShouldBeEquivalentTo(td.TasksExecutionData);
             argDeserialized.WorkerNodeTelemetryData.UpToDateInputOutputTargetsCount.ShouldBe(7);
             argDeserialized.WorkerNodeTelemetryData.ExecutedInputOutputTargetsCount.ShouldBe(2);
+            argDeserialized.WorkerNodeTelemetryData.ExecutedTargetsCount.ShouldBe(11);
+            argDeserialized.WorkerNodeTelemetryData.SkippedTargetsCount.ShouldBe(5);
+            argDeserialized.WorkerNodeTelemetryData.SkippedDueToUpToDateCount.ShouldBe(2);
+            argDeserialized.WorkerNodeTelemetryData.SkippedDueToConditionCount.ShouldBe(1);
+            argDeserialized.WorkerNodeTelemetryData.SkippedDueToPreviouslyBuiltCount.ShouldBe(2);
+            argDeserialized.WorkerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"task2"].TotalMemoryBytes.ShouldBeNull();
         }
     }
 }

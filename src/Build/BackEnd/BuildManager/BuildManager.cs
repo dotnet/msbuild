@@ -1120,7 +1120,8 @@ namespace Microsoft.Build.Execution
                     _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
 
                     // With -restore, the Restore submission precedes the build; report the build's targets instead.
-                    if (_buildTelemetry.BuildTarget is null or MSBuildConstants.RestoreTargetName)
+                    if (_buildTelemetry.BuildTarget is null ||
+                        string.Equals(_buildTelemetry.BuildTarget, MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase))
                     {
                         _buildTelemetry.BuildTarget = string.Join(",", requestData.TargetNames);
                     }

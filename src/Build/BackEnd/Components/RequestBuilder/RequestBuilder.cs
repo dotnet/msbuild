@@ -1378,32 +1378,18 @@ namespace Microsoft.Build.BackEnd
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
-                bool wasExecuted =
+                bool hasMatchingResult =
                     unfilteredResult.ResultsByTarget.TryGetValue(projectTargetInstance.Key, out TargetResult targetResult) &&
                     // We need to match on location of target as well - as multiple targets with same name can be defined.
                     // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
                     projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
 
-                // Get skip reason from TargetResult - it's set when targets are skipped for various reasons:
-                // - ConditionWasFalse: target's condition evaluated to false
-                // - PreviouslyBuiltSuccessfully/Unsuccessfully: target was already built in this session
+                // Get the local skip reason recorded when the target result was produced.
                 TargetSkipReason skipReason = targetResult?.SkipReason ?? TargetSkipReason.None;
-
-                // A configuration's cached results are shared by all of its requests; only count results this request produced.
-                if (wasExecuted &&
-                    !string.IsNullOrEmpty(projectTargetInstance.Value.Inputs) &&
-                    !string.IsNullOrEmpty(projectTargetInstance.Value.Outputs) &&
-                    targetResult.OriginalBuildEventContext?.ProjectContextId == _projectLoggingContext.BuildEventContext.ProjectContextId)
-                {
-                    if (skipReason == TargetSkipReason.OutputsUpToDate)
-                    {
-                        telemetryCollector.AddInputOutputTarget(upToDate: true);
-                    }
-                    else if (targetResult.ResultCode != TargetResultCode.Skipped)
-                    {
-                        telemetryCollector.AddInputOutputTarget(upToDate: false);
-                    }
-                }
+                bool wasExecuted =
+                    hasMatchingResult &&
+                    skipReason == TargetSkipReason.None &&
+                    targetResult.ResultCode != TargetResultCode.Skipped;
 
                 bool isFromNuget, isMetaprojTarget, isCustom;
 

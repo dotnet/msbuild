@@ -526,6 +526,24 @@ namespace Microsoft.Build.BackEnd
                         if (_isTelemetryRequested)
                         {
                             targetResult.TargetLocation = currentTargetEntry.Target.Location;
+
+                            bool wasExecuted =
+                                targetResult.SkipReason == TargetSkipReason.None &&
+                                targetResult.ResultCode != TargetResultCode.Skipped;
+                            _projectLoggingContext.TelemetryCollector?.AddTargetResult(wasExecuted, targetResult.SkipReason);
+
+                            if (!string.IsNullOrEmpty(currentTargetEntry.Target.Inputs) &&
+                                !string.IsNullOrEmpty(currentTargetEntry.Target.Outputs))
+                            {
+                                if (targetResult.SkipReason == TargetSkipReason.OutputsUpToDate)
+                                {
+                                    _projectLoggingContext.TelemetryCollector?.AddInputOutputTarget(upToDate: true);
+                                }
+                                else if (wasExecuted)
+                                {
+                                    _projectLoggingContext.TelemetryCollector?.AddInputOutputTarget(upToDate: false);
+                                }
+                            }
                         }
 
                         // This target is no longer actively building.
@@ -582,6 +600,9 @@ namespace Microsoft.Build.BackEnd
                     // If we've already dealt with this target and it didn't skip, let's log appropriately
                     // Otherwise we don't want anything more to do with it.
                     bool success = targetResult.ResultCode == TargetResultCode.Success;
+                    TargetSkipReason skipReason = success
+                        ? TargetSkipReason.PreviouslyBuiltSuccessfully
+                        : TargetSkipReason.PreviouslyBuiltUnsuccessfully;
 
                     var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                     {
@@ -591,11 +612,12 @@ namespace Microsoft.Build.BackEnd
                         ParentTarget = currentTargetEntry.ParentEntry?.Target.Name,
                         BuildReason = currentTargetEntry.BuildReason,
                         OriginallySucceeded = success,
-                        SkipReason = success ? TargetSkipReason.PreviouslyBuiltSuccessfully : TargetSkipReason.PreviouslyBuiltUnsuccessfully,
+                        SkipReason = skipReason,
                         OriginalBuildEventContext = targetResult.OriginalBuildEventContext
                     };
 
                     _projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
+                    _projectLoggingContext.TelemetryCollector?.AddTargetResult(wasExecuted: false, skipReason);
 
                     if (currentTargetEntry.StopProcessingOnCompletion)
                     {

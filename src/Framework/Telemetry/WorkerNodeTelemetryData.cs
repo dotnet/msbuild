@@ -12,12 +12,22 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData,
         Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData,
         int upToDateInputOutputTargetsCount = 0,
-        int executedInputOutputTargetsCount = 0)
+        int executedInputOutputTargetsCount = 0,
+        int executedTargetsCount = 0,
+        int skippedTargetsCount = 0,
+        int skippedDueToUpToDateCount = 0,
+        int skippedDueToConditionCount = 0,
+        int skippedDueToPreviouslyBuiltCount = 0)
     {
         TasksExecutionData = tasksExecutionData;
         TargetsExecutionData = targetsExecutionData;
         UpToDateInputOutputTargetsCount = upToDateInputOutputTargetsCount;
         ExecutedInputOutputTargetsCount = executedInputOutputTargetsCount;
+        ExecutedTargetsCount = executedTargetsCount;
+        SkippedTargetsCount = skippedTargetsCount;
+        SkippedDueToUpToDateCount = skippedDueToUpToDateCount;
+        SkippedDueToConditionCount = skippedDueToConditionCount;
+        SkippedDueToPreviouslyBuiltCount = skippedDueToPreviouslyBuiltCount;
     }
 
     /// <summary>
@@ -37,12 +47,17 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 
         UpToDateInputOutputTargetsCount += other.UpToDateInputOutputTargetsCount;
         ExecutedInputOutputTargetsCount += other.ExecutedInputOutputTargetsCount;
+        ExecutedTargetsCount += other.ExecutedTargetsCount;
+        SkippedTargetsCount += other.SkippedTargetsCount;
+        SkippedDueToUpToDateCount += other.SkippedDueToUpToDateCount;
+        SkippedDueToConditionCount += other.SkippedDueToConditionCount;
+        SkippedDueToPreviouslyBuiltCount += other.SkippedDueToPreviouslyBuiltCount;
     }
 
     /// <summary>
     /// Adds or aggregates task execution data.
     /// </summary>
-    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption, string? factoryName, string? taskHostRuntime)
+    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExecutionTime, int executionsCount, long? totalMemoryConsumption, string? factoryName, string? taskHostRuntime)
     {
         if (!TasksExecutionData.TryGetValue(task, out TaskExecutionStats? taskExecutionStats))
         {
@@ -51,11 +66,24 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
         else
         {
+            bool existingHasExecutions = taskExecutionStats.ExecutionsCount > 0;
             taskExecutionStats.CumulativeExecutionTime += cumulativeExecutionTime;
             taskExecutionStats.ExecutionsCount += executionsCount;
-            taskExecutionStats.TotalMemoryBytes += totalMemoryConsumption;
-            taskExecutionStats.TaskFactoryName ??= factoryName;
-            taskExecutionStats.TaskHostRuntime ??= taskHostRuntime;
+            if (totalMemoryConsumption.HasValue)
+            {
+                taskExecutionStats.TotalMemoryBytes = (taskExecutionStats.TotalMemoryBytes ?? 0) + totalMemoryConsumption.Value;
+            }
+
+            if (!existingHasExecutions && executionsCount > 0)
+            {
+                taskExecutionStats.TaskFactoryName = factoryName ?? taskExecutionStats.TaskFactoryName;
+                taskExecutionStats.TaskHostRuntime = taskHostRuntime ?? taskExecutionStats.TaskHostRuntime;
+            }
+            else
+            {
+                taskExecutionStats.TaskFactoryName ??= factoryName;
+                taskExecutionStats.TaskHostRuntime ??= taskHostRuntime;
+            }
         }
     }
 
@@ -88,6 +116,30 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 
     public WorkerNodeTelemetryData() : this([], []) { }
 
+    public void AddTargetResult(bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None)
+    {
+        if (wasExecuted)
+        {
+            ExecutedTargetsCount++;
+            return;
+        }
+
+        SkippedTargetsCount++;
+        switch (skipReason)
+        {
+            case TargetSkipReason.OutputsUpToDate:
+                SkippedDueToUpToDateCount++;
+                break;
+            case TargetSkipReason.ConditionWasFalse:
+                SkippedDueToConditionCount++;
+                break;
+            case TargetSkipReason.PreviouslyBuiltSuccessfully:
+            case TargetSkipReason.PreviouslyBuiltUnsuccessfully:
+                SkippedDueToPreviouslyBuiltCount++;
+                break;
+        }
+    }
+
     public void AddInputOutputTarget(bool upToDate)
     {
         if (upToDate)
@@ -100,11 +152,27 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public bool IsEmpty => TasksExecutionData.Count == 0 && TargetsExecutionData.Count == 0;
+    public bool IsEmpty =>
+        TasksExecutionData.Count == 0 &&
+        TargetsExecutionData.Count == 0 &&
+        ExecutedTargetsCount == 0 &&
+        SkippedTargetsCount == 0 &&
+        UpToDateInputOutputTargetsCount == 0 &&
+        ExecutedInputOutputTargetsCount == 0;
 
     public Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
 
     public Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> TargetsExecutionData { get; }
+
+    public int ExecutedTargetsCount { get; private set; }
+
+    public int SkippedTargetsCount { get; private set; }
+
+    public int SkippedDueToUpToDateCount { get; private set; }
+
+    public int SkippedDueToConditionCount { get; private set; }
+
+    public int SkippedDueToPreviouslyBuiltCount { get; private set; }
 
     public int UpToDateInputOutputTargetsCount { get; private set; }
 

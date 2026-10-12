@@ -23,7 +23,7 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             WriteToStream(writer, entry.Key);
             writer.Write(entry.Value.CumulativeExecutionTime.Ticks);
             writer.Write(entry.Value.ExecutionsCount);
-            writer.Write(entry.Value.TotalMemoryBytes);
+            writer.Write(entry.Value.TotalMemoryBytes ?? -1);
             writer.Write(entry.Value.TaskFactoryName ?? string.Empty);
             writer.Write(entry.Value.TaskHostRuntime ?? string.Empty);
         }
@@ -38,6 +38,11 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
 
         writer.Write(WorkerNodeTelemetryData.UpToDateInputOutputTargetsCount);
         writer.Write(WorkerNodeTelemetryData.ExecutedInputOutputTargetsCount);
+        writer.Write(WorkerNodeTelemetryData.ExecutedTargetsCount);
+        writer.Write(WorkerNodeTelemetryData.SkippedTargetsCount);
+        writer.Write(WorkerNodeTelemetryData.SkippedDueToUpToDateCount);
+        writer.Write(WorkerNodeTelemetryData.SkippedDueToConditionCount);
+        writer.Write(WorkerNodeTelemetryData.SkippedDueToPreviouslyBuiltCount);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
@@ -49,7 +54,8 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             var key = ReadFromStream(reader);
             var cumulativeExecutionTime = TimeSpan.FromTicks(reader.ReadInt64());
             var executionsCount = reader.ReadInt32();
-            var totalMemoryBytes = reader.ReadInt64();
+            long serializedMemoryBytes = reader.ReadInt64();
+            long? totalMemoryBytes = serializedMemoryBytes >= 0 ? serializedMemoryBytes : null;
             var taskFactoryName = reader.ReadString();
             var taskHostRuntime = reader.ReadString();
 
@@ -73,7 +79,16 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             targetsExecutionData.Add(key, new TargetExecutionStats(wasExecuted, skipReason));
         }
 
-        WorkerNodeTelemetryData = new WorkerNodeTelemetryData(tasksExecutionData, targetsExecutionData, reader.ReadInt32(), reader.ReadInt32());
+        WorkerNodeTelemetryData = new WorkerNodeTelemetryData(
+            tasksExecutionData,
+            targetsExecutionData,
+            reader.ReadInt32(),
+            reader.ReadInt32(),
+            reader.ReadInt32(),
+            reader.ReadInt32(),
+            reader.ReadInt32(),
+            reader.ReadInt32(),
+            reader.ReadInt32());
     }
 
     private static void WriteToStream(BinaryWriter writer, TaskOrTargetTelemetryKey key)

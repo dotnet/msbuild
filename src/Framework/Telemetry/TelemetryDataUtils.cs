@@ -370,31 +370,9 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         private static BuildInsights.BuildIncrementalityInfo ComputeIncrementalityInfo(IWorkerNodeTelemetryData telemetryData)
         {
-            int totalTargets = telemetryData.TargetsExecutionData.Count;
-            int executedTargets = 0;
-            int skippedTargets = 0;
-            int skippedDueToUpToDate = 0;
-            int skippedDueToCondition = 0;
-            int skippedDueToPreviouslyBuilt = 0;
-
-            foreach (var kv in telemetryData.TargetsExecutionData)
-            {
-                if (kv.Value.WasExecuted)
-                {
-                    executedTargets++;
-                }
-                else
-                {
-                    skippedTargets++;
-                    _ = kv.Value.SkipReason switch
-                    {
-                        TargetSkipReason.OutputsUpToDate => skippedDueToUpToDate++,
-                        TargetSkipReason.ConditionWasFalse => skippedDueToCondition++,
-                        TargetSkipReason.PreviouslyBuiltSuccessfully or TargetSkipReason.PreviouslyBuiltUnsuccessfully => skippedDueToPreviouslyBuilt++,
-                        _ => 0
-                    };
-                }
-            }
+            int executedTargets = telemetryData.ExecutedTargetsCount;
+            int skippedTargets = telemetryData.SkippedTargetsCount;
+            int totalTargets = executedTargets + skippedTargets;
 
             int upToDateInputOutputTargets = telemetryData.UpToDateInputOutputTargetsCount;
             int inputOutputTargets = upToDateInputOutputTargets + telemetryData.ExecutedInputOutputTargetsCount;
@@ -412,12 +390,12 @@ namespace Microsoft.Build.Framework.Telemetry
                 TotalTargetsCount: totalTargets,
                 ExecutedTargetsCount: executedTargets,
                 SkippedTargetsCount: skippedTargets,
-                SkippedDueToUpToDateCount: skippedDueToUpToDate,
-                SkippedDueToConditionCount: skippedDueToCondition,
-                SkippedDueToPreviouslyBuiltCount: skippedDueToPreviouslyBuilt,
+                SkippedDueToUpToDateCount: telemetryData.SkippedDueToUpToDateCount,
+                SkippedDueToConditionCount: telemetryData.SkippedDueToConditionCount,
+                SkippedDueToPreviouslyBuiltCount: telemetryData.SkippedDueToPreviouslyBuiltCount,
+                IncrementalityRatio: incrementalityRatio,
                 UpToDateInputOutputTargetsCount: upToDateInputOutputTargets,
-                ExecutedInputOutputTargetsCount: telemetryData.ExecutedInputOutputTargetsCount,
-                IncrementalityRatio: incrementalityRatio);
+                ExecutedInputOutputTargetsCount: telemetryData.ExecutedInputOutputTargetsCount);
         }
 
         private sealed class NodeTelemetry(BuildInsights insights) : IActivityTelemetryDataHolder

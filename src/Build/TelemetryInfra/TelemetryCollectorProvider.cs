@@ -56,9 +56,14 @@ internal class TelemetryCollectorProvider : IBuildComponent
             _data.AddTarget(key, wasExecuted, skipReason);
         }
 
+        public void AddTargetResult(bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None)
+        {
+            _data.AddTargetResult(wasExecuted, skipReason);
+        }
+
         public void AddInputOutputTarget(bool upToDate) => _data.AddInputOutputTarget(upToDate);
 
-        public void AddTask(TaskOrTargetTelemetryKey key, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumed, string? taskFactoryName, string? taskHostRuntime)
+        public void AddTask(TaskOrTargetTelemetryKey key, TimeSpan cumulativeExecutionTime, int executionsCount, long? totalMemoryConsumed, string? taskFactoryName, string? taskHostRuntime)
         {
             _data.AddTask(key, cumulativeExecutionTime, executionsCount, totalMemoryConsumed, taskFactoryName, taskHostRuntime);
         }
@@ -87,9 +92,11 @@ internal class TelemetryCollectorProvider : IBuildComponent
 
         public void AddTarget(TaskOrTargetTelemetryKey key, bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None) { }
 
+        public void AddTargetResult(bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None) { }
+
         public void AddInputOutputTarget(bool upToDate) { }
 
-        public void AddTask(TaskOrTargetTelemetryKey key, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumed, string? taskFactoryName, string? taskHostRuntime) { }
+        public void AddTask(TaskOrTargetTelemetryKey key, TimeSpan cumulativeExecutionTime, int executionsCount, long? totalMemoryConsumed, string? taskFactoryName, string? taskHostRuntime) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }
     }

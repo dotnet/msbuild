@@ -122,9 +122,9 @@ Tracks which task factories are being used.
 
 ### Task Details and Summary (Activity Properties)
 
-- `Tasks` lists only tasks that ran at least once in the build, with their execution count, cumulative time, and memory.
-- `TotalMemoryBytes` is the memory allocated while the task ran. It is measured only on .NET and is null on .NET Framework.
-- The time of the intrinsic `MSBuild` and `CallTarget` tasks includes waiting for the projects and targets they build.
+- `Tasks` lists only tasks that ran at least once in the build, with their execution count, cumulative time, and memory when those measurements are available.
+- `TotalMemoryBytes` is measured only for non-intrinsic tasks on .NET. It is null for intrinsic tasks and on .NET Framework.
+- Intrinsic `MSBuild` and `CallTarget` tasks report their execution count directly. Their cumulative time is not measured and is reported as zero.
 
 ## 4. Build Incrementality Telemetry
 
@@ -135,17 +135,17 @@ Classifies builds as full or incremental based on how many targets with `Inputs`
 | Field | Type | Description |
 |-------|------|-------------|
 | `Classification` | enum | `Full`, `Incremental`, or `Unknown` |
-| `TotalTargetsCount` | int | Total number of targets |
-| `ExecutedTargetsCount` | int | Targets that ran |
-| `SkippedTargetsCount` | int | Targets that were skipped |
-| `SkippedDueToUpToDateCount` | int | Skipped because outputs were current |
-| `SkippedDueToConditionCount` | int | Skipped due to false condition |
-| `SkippedDueToPreviouslyBuiltCount` | int | Skipped because already built |
+| `TotalTargetsCount` | int | Total number of target outcomes observed |
+| `ExecutedTargetsCount` | int | Target instances that ran |
+| `SkippedTargetsCount` | int | Target instances that were skipped |
+| `SkippedDueToUpToDateCount` | int | Target instances skipped because outputs were current |
+| `SkippedDueToConditionCount` | int | Target instances skipped due to a false condition |
+| `SkippedDueToPreviouslyBuiltCount` | int | Target instances skipped because the target was already built |
 | `UpToDateInputOutputTargetsCount` | int | Target instances with `Inputs` and `Outputs` that were skipped because their outputs were up to date |
 | `ExecutedInputOutputTargetsCount` | int | Target instances with `Inputs` and `Outputs` that ran |
 | `IncrementalityRatio` | double | `UpToDateInputOutputTargetsCount` / (`UpToDateInputOutputTargetsCount` + `ExecutedInputOutputTargetsCount`), from 0.0 to 1.0 |
 
-Each target instance is counted once, in the project that built it, and results reused from the cache are not counted again. A build is classified as **Incremental** when `IncrementalityRatio` is at least 0.7, and as **Unknown** when no target with `Inputs` and `Outputs` was built.
+Each target outcome is counted where it occurs. A target that runs and is later requested again contributes once to `ExecutedTargetsCount` and once to `SkippedDueToPreviouslyBuiltCount`. Results reused from another request do not contribute to the Inputs/Outputs ratio. A build is classified as **Incremental** when `IncrementalityRatio` is at least 0.7, and as **Unknown** when no target with `Inputs` and `Outputs` was built.
 
 ---
 
