@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="Binlog_FilteredLog">
         <source>This binary log is filtered. Excluded event kinds: {0}.</source>
-        <target state="new">This binary log is filtered. Excluded event kinds: {0}.</target>
+        <target state="translated">Bu ikili günlük filtrelendi. Dışlanan olay türleri: {0}.</target>
         <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
