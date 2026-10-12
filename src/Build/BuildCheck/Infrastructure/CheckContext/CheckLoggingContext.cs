@@ -34,13 +34,13 @@ internal readonly struct CheckLoggingContext(ILoggingService loggingService, Bui
         => loggingService
             .LogCommentFromText(eventContext, importance, message);
 
-    public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+    public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, IElementLocation location, string message)
         => loggingService
-            .LogErrorFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+            .LogErrorFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, location, message);
 
-    public void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+    public void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, IElementLocation location, string message)
         => loggingService
-            .LogWarningFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+            .LogWarningFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, location, message);
 
     public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception)
     {

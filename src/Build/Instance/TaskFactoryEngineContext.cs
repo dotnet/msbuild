@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using System.Diagnostics;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 #if FEATURE_APPDOMAIN
@@ -388,7 +387,7 @@ namespace Microsoft.Build.BackEnd
                 e is not GeneratedFileUsedEventArgs)
 #pragma warning restore SYSLIB0050
             {
-                _loggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
+                _loggingContext.LogWarning(null, ElementLocation.Empty, "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;
             }
 

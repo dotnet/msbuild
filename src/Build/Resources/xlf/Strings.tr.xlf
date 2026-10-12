@@ -3079,11 +3079,6 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <target state="translated">Oluşturma başlatıldı.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="MSBuild.CannotRebaseOutputItemPath">
         <source>MSB3203: The output path "{0}" cannot be rebased. {1}</source>
         <target state="translated">MSB3203: "{0}" çıkış yolu için yeniden temellendirilemez. {1}</target>

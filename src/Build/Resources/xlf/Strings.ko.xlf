@@ -3079,11 +3079,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">빌드를 시작했습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0}({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="MSBuild.CannotRebaseOutputItemPath">
         <source>MSB3203: The output path "{0}" cannot be rebased. {1}</source>
         <target state="translated">MSB3203: 출력 경로 "{0}"의 기준 주소를 다시 지정할 수 없습니다. {1}</target>

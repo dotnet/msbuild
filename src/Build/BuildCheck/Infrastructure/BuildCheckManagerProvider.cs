@@ -7,14 +7,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -235,7 +234,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                                     null,
                                     null,
                                     null,
-                                    new BuildEventFileInfo(projectPath),
+                                    ElementLocation.Create(projectPath),
                                     e.Message);
                                 invalidChecksToRemove.Add(checkFactoryContext);
                             }
@@ -346,7 +345,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         null,
                         null,
                         null,
-                        new BuildEventFileInfo(projectFullPath),
+                        ElementLocation.Create(projectFullPath),
                         e.Message);
                     invalidChecksToRemove.Add(checkFactoryContext);
                 }
