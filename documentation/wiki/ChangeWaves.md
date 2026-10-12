@@ -65,7 +65,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.9
 - [GenerateResource: typed ResX data/metadata entries in Mark-of-the-Web files are now treated as untrusted and blocked with MSB3821; unblock the file (or set MSBUILDDISABLEFEATURESFROMVERSION=18.9) to restore prior behavior. ResXFileRef entries are always blocked regardless of this wave.](https://github.com/dotnet/msbuild/pull/14015)
-- [TaskHost named-pipe buffers default to 1 MB (was 128 KB), reducing send backpressure for large TaskHostConfiguration packets. Tunable via MSBUILDNODECONNECTIONBUFFERSIZE](https://github.com/dotnet/msbuild/pull/14094)
+- [Named-pipe buffers for worker nodes and TaskHosts default to 1 MB on .NET (was 128 KB), reducing send backpressure for large TaskHostConfiguration packets. .NET Framework retains the 128 KB default. Tunable via MSBUILDNODECONNECTIONBUFFERSIZE on both runtimes.](https://github.com/dotnet/msbuild/pull/14094)
 
 ### 18.8
 - [RAR task: across multiple input properties, resolve relative paths against the project directory (not the process current directory)](https://github.com/dotnet/msbuild/pull/13319)
