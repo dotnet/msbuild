@@ -2243,6 +2243,8 @@ namespace Microsoft.Build.Execution
 
                 private int _sourceColumnNumber;
 
+                private bool _hasSourceLocation;
+
                 /// <summary>
                 /// Constructor not taking an item type.
                 /// This indicates that the user of this factory should set the item type
@@ -2289,6 +2291,7 @@ namespace Microsoft.Build.Execution
                 {
                     set
                     {
+                        _hasSourceLocation = value is not null;
                         _sourceLineNumber = value?.Line ?? 0;
                         _sourceColumnNumber = value?.Column ?? 0;
                     }
@@ -2298,15 +2301,11 @@ namespace Microsoft.Build.Execution
                 /// Creates an instance-model item.
                 /// </summary>
                 /// <param name="include">The include.</param>
-                /// <param name="definingProject">The project that defined the item.</param>
+                /// <param name="definingProject">The unescaped path of the project that defined the item.</param>
                 /// <returns>A new instance item.</returns>
                 public ProjectItemInstance CreateItem(string include, string definingProject)
                 {
-                    Assumed.NotNullOrEmpty(ItemType);
-
-                    ProjectItemInstance item = new ProjectItemInstance(_project, ItemType, include, definingProject, _sourceLineNumber, _sourceColumnNumber);
-
-                    return item;
+                    return CreateItem(include, include, definingProject);
                 }
 
                 /// <summary>
@@ -2337,7 +2336,9 @@ namespace Microsoft.Build.Execution
                 {
                     Assumed.NotNullOrEmpty(ItemType);
 
-                    return new ProjectItemInstance(_project, ItemType, evaluatedInclude, evaluatedIncludeBeforeWildcardExpansion, definingProject, _sourceLineNumber, _sourceColumnNumber);
+                    return new ProjectItemInstance(
+                        _project, ItemType, evaluatedInclude, evaluatedIncludeBeforeWildcardExpansion,
+                        EscapingUtilities.Escape(definingProject), _sourceLineNumber, _sourceColumnNumber);
                 }
 
                 /// <summary>
@@ -2390,7 +2391,17 @@ namespace Microsoft.Build.Execution
                         itemDefinitionsClone.Add(sourceItemDefinition);
                     }
 
-                    return new ProjectItemInstance(_project, ItemType, includeEscaped, includeBeforeWildcardExpansionEscaped, source._taskItem.DirectMetadata, itemDefinitionsClone, definingProject, useItemDefinitionsWithoutModification: false, _sourceLineNumber, _sourceColumnNumber);
+                    // Without a new XML declaration, preserve the input's complete location during incremental analysis.
+                    string definingFileEscaped = _hasSourceLocation
+                        ? EscapingUtilities.Escape(definingProject)
+                        : source._taskItem._definingFileEscaped;
+
+                    return new ProjectItemInstance(
+                        _project, ItemType, includeEscaped, includeBeforeWildcardExpansionEscaped,
+                        source._taskItem.DirectMetadata, itemDefinitionsClone, definingFileEscaped,
+                        useItemDefinitionsWithoutModification: false,
+                        _hasSourceLocation ? _sourceLineNumber : source._taskItem._sourceLineNumber,
+                        _hasSourceLocation ? _sourceColumnNumber : source._taskItem._sourceColumnNumber);
                 }
             }
 

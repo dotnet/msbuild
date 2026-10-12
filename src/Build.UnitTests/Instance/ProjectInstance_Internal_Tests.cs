@@ -34,6 +34,73 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             _output = output;
         }
 
+        [Fact]
+        public void FactoryWithUnknownDeclarationLocationDoesNotInheritInputLocation()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ProjectItemInstance source = new(project, "Source", "source.txt", project.FullPath, sourceLineNumber: 12, sourceColumnNumber: 3);
+            var factory = new ProjectItemInstance.TaskItem.ProjectItemInstanceFactory(project, "Item")
+            {
+                SourceLocation = ElementLocation.Create(project.FullPath),
+            };
+
+            factory.CreateItem(source, project.FullPath).Location.ShouldBeNull();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ItemLocationsPreserveEscapedProjectFileNames(bool inferOutputs)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var testProject = env.CreateTestProjectWithFiles(
+                "app%3B.proj",
+                """
+                <Project>
+                  <ItemGroup>
+                    <Source Include="source.txt" />
+                    <EvaluatedCopy Include="@(Source)" />
+                  </ItemGroup>
+                  <Target Name="Build" Inputs="input.in" Outputs="input.out">
+                    <ItemGroup>
+                      <Literal Include="target.txt" />
+                      <TargetCopy Include="@(Source)" />
+                    </ItemGroup>
+                    <CreateItem Include="@(TargetCopy);task.txt">
+                      <Output TaskParameter="Include" ItemName="TaskOutput" />
+                    </CreateItem>
+                  </Target>
+                </Project>
+                """,
+                ["input.in", "input.out"]);
+            DateTime timestamp = DateTime.UtcNow.AddHours(-1);
+            File.SetLastWriteTimeUtc(Path.Combine(testProject.TestRoot, "input.in"), timestamp);
+            File.SetLastWriteTimeUtc(Path.Combine(testProject.TestRoot, "input.out"), timestamp.AddMinutes(inferOutputs ? 1 : -1));
+            using ProjectCollection projectCollection = new();
+            ProjectRootElement xml = ProjectRootElement.Open(testProject.ProjectFile, projectCollection);
+            ProjectInstance project = new(xml);
+            MockLogger logger = new(_output);
+
+            project.Build("Build", [logger]).ShouldBeTrue();
+            logger.TaskStartedEvents.Count.ShouldBe(inferOutputs ? 0 : 1);
+
+            ProjectTargetElement target = xml.Targets.Single();
+            foreach (ProjectItemElement element in xml.Items.Concat(target.ItemGroups.Single().Items))
+            {
+                ProjectItemInstance item = project.GetItems(element.ItemType).Single();
+                item.Location.ShouldBe(
+                    new TaskItemLocation(testProject.ProjectFile, element.Location.Line, element.Location.Column));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(testProject.ProjectFile);
+            }
+
+            ElementLocation outputLocation = target.Tasks.Single().Outputs.Single().Location;
+            project.GetItems("TaskOutput").Count.ShouldBe(2);
+            foreach (ProjectItemInstance item in project.GetItems("TaskOutput"))
+            {
+                item.Location.ShouldBe(new TaskItemLocation(testProject.ProjectFile, outputLocation.Line, outputLocation.Column));
+            }
+        }
+
         /// <summary>
         /// Read task registrations
         /// </summary>

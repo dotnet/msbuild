@@ -468,17 +468,10 @@ namespace Microsoft.Build.BackEnd
 
                     foreach (string includeSplitFile in includeSplitFiles)
                     {
-                        items.Add(new ProjectItemInstance(
-                            Project,
-                            originalItem.ItemType,
+                        items.Add(itemFactory.CreateItem(
                             includeSplitFile,
                             includeSplit /* before wildcard expansion */,
-                            null,
-                            null,
-                            originalItem.Location.File,
-                            useItemDefinitionsWithoutModification: false,
-                            originalItem.Location.Line,
-                            originalItem.Location.Column));
+                            originalItem.Location.File));
                     }
                 }
             }
