@@ -3428,11 +3428,33 @@ namespace Microsoft.Build.Shared
 #endif
     }
 
-    private static bool ShouldSkipRecursiveDirectory(string directory)
+    internal static bool ShouldSkipRecursiveDirectory(string directory)
     {
 #if FEATURE_SYMLINK_TARGET
         try
         {
+#if NET
+        if (NativeMethods.IsWindows
+            && !string.IsNullOrEmpty(directory)
+            && directory.Length >= 3
+            && directory[1] == Path.VolumeSeparatorChar
+            && Path.IsPathFullyQualified(directory)
+            && directory.AsSpan().IndexOfAny('*', '?') < 0)
+        {
+            try
+            {
+                // Query live attributes; an inconclusive probe still uses the original resolver.
+                if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) == 0)
+                {
+                    return false;
+                }
+            }
+            catch (IOException) { }
+            catch (ArgumentException) { }
+            catch (UnauthorizedAccessException) { }
+        }
+#endif
+
         FileSystemInfo? linkTarget = Directory.ResolveLinkTarget(directory, returnFinalTarget: true);
         return linkTarget is not null
             && IsSubdirectoryOf(directory, linkTarget.FullName, FileUtilities.PathComparison);
