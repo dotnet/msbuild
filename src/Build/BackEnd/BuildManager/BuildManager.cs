@@ -1362,6 +1362,7 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
                             _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
                             _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
+                            _buildTelemetry.TelemetrySchemaVersion = BuildTelemetry.CurrentSchemaVersion;
 
                             // Populate error categorization data from the logging service
                             if (!_overallBuildSuccess)

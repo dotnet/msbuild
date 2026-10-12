@@ -126,6 +126,20 @@ public class KnownTelemetry_Tests
     }
 
     [Fact]
+    public void BuildTelemetryIncludesSchemaVersionWhenSet()
+    {
+        BuildTelemetry buildTelemetry = new()
+        {
+            TelemetrySchemaVersion = BuildTelemetry.CurrentSchemaVersion,
+        };
+
+        buildTelemetry.GetProperties()[nameof(BuildTelemetry.TelemetrySchemaVersion)]
+            .ShouldBe(BuildTelemetry.CurrentSchemaVersion.ToString(CultureInfo.InvariantCulture));
+        buildTelemetry.GetActivityProperties()[nameof(BuildTelemetry.TelemetrySchemaVersion)]
+            .ShouldBe(BuildTelemetry.CurrentSchemaVersion);
+    }
+
+    [Fact]
     public void BuildTelemetryHandleNullsInRecordedTimes()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();

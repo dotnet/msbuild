@@ -11,6 +11,9 @@ namespace Microsoft.Build.Framework.Telemetry
 {
     internal static class TelemetryDataUtils
     {
+        internal const int CurrentBuildInsightsSchemaVersion = 2;
+        internal const string BuildInsightsSchemaVersionPropertyName = "BuildInsightsSchemaVersion";
+
         /// <summary>
         /// Known Microsoft task factory type names that should not be hashed.
         /// </summary>
@@ -402,8 +405,9 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             Dictionary<string, object> IActivityTelemetryDataHolder.GetActivityProperties()
             {
-                Dictionary<string, object> properties = new(5)
+                Dictionary<string, object> properties = new(6)
                 {
+                    [BuildInsightsSchemaVersionPropertyName] = CurrentBuildInsightsSchemaVersion,
                     [nameof(BuildInsights.TargetsSummary)] = insights.TargetsSummary,
                     [nameof(BuildInsights.TasksSummary)] = insights.TasksSummary,
                 };

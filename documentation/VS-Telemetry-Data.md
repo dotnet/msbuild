@@ -58,6 +58,7 @@ The primary telemetry event capturing overall build information.
 |----------|------|-------------|
 | `BuildDurationInMilliseconds` | double | Total build duration from start to finish |
 | `InnerBuildDurationInMilliseconds` | double | Duration from when BuildManager starts (excludes server connection time) |
+| `TelemetrySchemaVersion` | int | Version of the build telemetry contract. Missing on historical events means version 1; this contract is version 2 |
 | `BuildEngineHost` | string | Host environment: "VS", "VSCode", "Azure DevOps", "GitHub Action", "CLI", etc. |
 | `IsCI` | bool | Whether the build ran in an automated environment, independently of `BuildEngineHost` |
 | `BuildSuccess` | bool | Whether the build succeeded. A failed build also ends the event with the `UserFault` result instead of `Success` |
@@ -122,6 +123,7 @@ Tracks which task factories are being used.
 
 ### Task Details and Summary (Activity Properties)
 
+- `BuildInsightsSchemaVersion` identifies the task, target, and incrementality contract. Missing on historical events means version 1; this contract is version 2.
 - `Tasks` lists only tasks that ran at least once in the build, with their execution count, cumulative time, and memory when those measurements are available.
 - `TotalMemoryBytes` is measured only for non-intrinsic tasks on .NET. It is null for intrinsic tasks and on .NET Framework.
 - Intrinsic `MSBuild` and `CallTarget` tasks report their execution count directly. Their cumulative time is not measured and is reported as zero.
@@ -146,6 +148,8 @@ Classifies builds as full or incremental based on how many targets with `Inputs`
 | `IncrementalityRatio` | double | `UpToDateInputOutputTargetsCount` / (`UpToDateInputOutputTargetsCount` + `ExecutedInputOutputTargetsCount`), from 0.0 to 1.0 |
 
 Each target outcome is counted where it occurs. A target that runs and is later requested again contributes once to `ExecutedTargetsCount` and once to `SkippedDueToPreviouslyBuiltCount`. Results reused from another request do not contribute to the Inputs/Outputs ratio. A build is classified as **Incremental** when `IncrementalityRatio` is at least 0.7, and as **Unknown** when no target with `Inputs` and `Outputs` was built.
+
+Queries that combine historical and current data should partition on `BuildInsightsSchemaVersion`. Version 1 used unique target details and calculated `IncrementalityRatio` from all skipped targets; version 2 uses target outcomes and the Inputs/Outputs ratio described above.
 
 ---
 

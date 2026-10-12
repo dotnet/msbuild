@@ -59,5 +59,38 @@ namespace Microsoft.Build.Framework.UnitTests
             argDeserialized.WorkerNodeTelemetryData.SkippedDueToPreviouslyBuiltCount.ShouldBe(2);
             argDeserialized.WorkerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"task2"].TotalMemoryBytes.ShouldBeNull();
         }
+
+        [Fact]
+        public void DeserializesPayloadWithoutAggregateCounters()
+        {
+            WorkerNodeTelemetryData data = new(
+                new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+                {
+                    { (TaskOrTargetTelemetryKey)"task", new TaskExecutionStats(TimeSpan.FromSeconds(1), 1, 42, "AssemblyTaskFactory", null) },
+                },
+                new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>
+                {
+                    { (TaskOrTargetTelemetryKey)"target", TargetExecutionStats.Executed() },
+                });
+
+            using MemoryStream stream = new();
+            using BinaryWriter writer = new(stream);
+            new WorkerNodeTelemetryEventArgs(data).WriteToStream(writer);
+            writer.Flush();
+            stream.SetLength(stream.Length - (7 * sizeof(int)));
+            stream.Position = 0;
+
+            using BinaryReader reader = new(stream);
+            WorkerNodeTelemetryEventArgs deserialized = new();
+            int packetVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
+            deserialized.CreateFromStream(reader, packetVersion);
+
+            deserialized.WorkerNodeTelemetryData.TasksExecutionData.ShouldBeEquivalentTo(data.TasksExecutionData);
+            deserialized.WorkerNodeTelemetryData.TargetsExecutionData.ShouldBeEquivalentTo(data.TargetsExecutionData);
+            deserialized.WorkerNodeTelemetryData.ExecutedTargetsCount.ShouldBe(0);
+            deserialized.WorkerNodeTelemetryData.SkippedTargetsCount.ShouldBe(0);
+            deserialized.WorkerNodeTelemetryData.UpToDateInputOutputTargetsCount.ShouldBe(0);
+            deserialized.WorkerNodeTelemetryData.ExecutedInputOutputTargetsCount.ShouldBe(0);
+        }
     }
 }

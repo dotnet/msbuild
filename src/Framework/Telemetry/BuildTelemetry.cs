@@ -15,7 +15,14 @@ namespace Microsoft.Build.Framework.Telemetry
     /// </summary>
     internal class BuildTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     {
+        internal const int CurrentSchemaVersion = 2;
+
         public override string EventName => "build";
+
+        /// <summary>
+        /// Version of the telemetry contract used by this event.
+        /// </summary>
+        public int? TelemetrySchemaVersion { get; set; }
 
         /// <summary>
         /// Time at which build have started.
@@ -195,6 +202,7 @@ namespace Microsoft.Build.Framework.Telemetry
             }
 
             AddIfNotNull(BuildEngineHost);
+            AddIfNotNull(TelemetrySchemaVersion);
             AddIfNotNull(IsCI);
             AddIfNotNull(BuildSuccess);
             AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
@@ -226,6 +234,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildEngineDisplayVersion);
             AddIfNotNull(BuildEngineFrameworkName);
             AddIfNotNull(BuildEngineHost);
+            AddIfNotNull(TelemetrySchemaVersion?.ToString(CultureInfo.InvariantCulture), nameof(TelemetrySchemaVersion));
             AddIfNotNull(IsCI?.ToString(), nameof(IsCI));
             AddIfNotNull(InitialMSBuildServerState);
             AddIfNotNull(ProjectPath != null ? Path.GetFileName(ProjectPath) : null, nameof(ProjectPath));

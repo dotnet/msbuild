@@ -51,8 +51,9 @@ internal static class TasksDetailsTelemetry
             .Take(MaxTaskDetailsForTelemetryEvent)
             .ToList();
 
-        return new Dictionary<string, string>(3)
+        return new Dictionary<string, string>(4)
         {
+            [BuildInsightsSchemaVersionPropertyName] = CurrentBuildInsightsSchemaVersion.ToString(CultureInfo.InvariantCulture),
             ["TaskCount"] = topTasks.Count.ToString(CultureInfo.InvariantCulture),
             ["TotalTaskCount"] = allTasks.Count.ToString(CultureInfo.InvariantCulture),
             ["Tasks"] = JsonSerializer.Serialize(topTasks, TasksDetailsJsonContext.Default.ListTaskDetailInfo),

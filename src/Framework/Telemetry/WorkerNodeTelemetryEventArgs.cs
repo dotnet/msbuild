@@ -9,6 +9,8 @@ namespace Microsoft.Build.Framework.Telemetry;
 
 internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData workerNodeTelemetryData) : BuildEventArgs
 {
+    private const int AggregateCountersSize = 7 * sizeof(int);
+
     public WorkerNodeTelemetryEventArgs()
         : this(new WorkerNodeTelemetryData())
     { }
@@ -79,16 +81,40 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             targetsExecutionData.Add(key, new TargetExecutionStats(wasExecuted, skipReason));
         }
 
-        WorkerNodeTelemetryData = new WorkerNodeTelemetryData(
-            tasksExecutionData,
-            targetsExecutionData,
-            reader.ReadInt32(),
-            reader.ReadInt32(),
-            reader.ReadInt32(),
-            reader.ReadInt32(),
-            reader.ReadInt32(),
-            reader.ReadInt32(),
-            reader.ReadInt32());
+        WorkerNodeTelemetryData = HasAggregateCounters(reader)
+            ? new WorkerNodeTelemetryData(
+                tasksExecutionData,
+                targetsExecutionData,
+                reader.ReadInt32(),
+                reader.ReadInt32(),
+                reader.ReadInt32(),
+                reader.ReadInt32(),
+                reader.ReadInt32(),
+                reader.ReadInt32(),
+                reader.ReadInt32())
+            : new WorkerNodeTelemetryData(tasksExecutionData, targetsExecutionData);
+    }
+
+    private static bool HasAggregateCounters(BinaryReader reader)
+    {
+        Stream stream = reader.BaseStream;
+        if (!stream.CanSeek)
+        {
+            return true;
+        }
+
+        long remainingBytes = stream.Length - stream.Position;
+        if (remainingBytes == 0)
+        {
+            return false;
+        }
+
+        if (remainingBytes < AggregateCountersSize)
+        {
+            throw new InvalidDataException($"Worker telemetry payload has {remainingBytes} trailing bytes; expected {AggregateCountersSize}.");
+        }
+
+        return true;
     }
 
     private static void WriteToStream(BinaryWriter writer, TaskOrTargetTelemetryKey key)

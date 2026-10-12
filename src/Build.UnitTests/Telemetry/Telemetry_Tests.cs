@@ -348,6 +348,7 @@ namespace Microsoft.Build.Engine.UnitTests
             activityData.ShouldNotBeNull();
 
             var properties = activityData.GetActivityProperties();
+            properties[BuildInsightsSchemaVersionPropertyName].ShouldBe(CurrentBuildInsightsSchemaVersion);
             properties.ShouldContainKey("Tasks");
 
             var taskDetails = properties["Tasks"] as List<TaskDetailInfo>;
@@ -463,6 +464,8 @@ namespace Microsoft.Build.Engine.UnitTests
 
             tags.ShouldContainKey("VS.MSBuild.BuildTarget");
             tags["VS.MSBuild.BuildTarget"].ShouldBe("Build");
+            activity.TagObjects.First(t => t.Key == "VS.MSBuild.TelemetrySchemaVersion").Value.ShouldBe(BuildTelemetry.CurrentSchemaVersion);
+            activity.TagObjects.First(t => t.Key == $"VS.MSBuild.{BuildInsightsSchemaVersionPropertyName}").Value.ShouldBe(CurrentBuildInsightsSchemaVersion);
 
             // Verify task data
             var tasks = activity.TagObjects.FirstOrDefault(to => to.Key == "VS.MSBuild.Tasks");
@@ -718,6 +721,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             properties["TaskCount"].ShouldBe("3");
             properties["TotalTaskCount"].ShouldBe("3");
+            properties[BuildInsightsSchemaVersionPropertyName].ShouldBe(CurrentBuildInsightsSchemaVersion.ToString());
         }
 
         [Fact]
