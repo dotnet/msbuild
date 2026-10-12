@@ -617,50 +617,45 @@ internal partial class Expander<P, I>
         /// never been saved) then returns empty string.
         /// If the property name is not one of those properties, returns empty string.
         /// </summary>
-        private object ExpandMSBuildThisFileProperty(string propertyName)
+        private string ExpandMSBuildThisFileProperty(string propertyName)
         {
-            if (!ReservedPropertyNames.IsReservedProperty(propertyName))
+            if (!ReservedPropertyNames.TryGetKind(propertyName, out ReservedPropertyKind propertyKind))
             {
-                return String.Empty;
+                return string.Empty;
             }
 
-            if (_elementLocation.File.Length == 0)
+            string file = _elementLocation.File;
+
+            if (file.Length == 0)
             {
-                return String.Empty;
+                return string.Empty;
             }
 
-            string value = String.Empty;
+            switch (propertyKind)
+            {
+                case ReservedPropertyKind.ThisFile:
+                    return Path.GetFileName(file);
 
-            // Because String.Equals checks the length first, and these strings are almost
-            // all different lengths, this sequence is efficient.
-            if (String.Equals(propertyName, ReservedPropertyNames.ThisFile, StringComparison.OrdinalIgnoreCase))
-            {
-                value = Path.GetFileName(_elementLocation.File);
-            }
-            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileName, StringComparison.OrdinalIgnoreCase))
-            {
-                value = Path.GetFileNameWithoutExtension(_elementLocation.File);
-            }
-            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileFullPath, StringComparison.OrdinalIgnoreCase))
-            {
-                value = FileUtilities.NormalizePath(_elementLocation.File);
-            }
-            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileExtension, StringComparison.OrdinalIgnoreCase))
-            {
-                value = Path.GetExtension(_elementLocation.File);
-            }
-            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileDirectory, StringComparison.OrdinalIgnoreCase))
-            {
-                value = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(_elementLocation.File));
-            }
-            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileDirectoryNoRoot, StringComparison.OrdinalIgnoreCase))
-            {
-                string directory = Path.GetDirectoryName(_elementLocation.File);
-                int rootLength = Path.GetPathRoot(directory).Length;
-                value = FileUtilities.EnsureTrailingNoLeadingSlash(directory, rootLength);
-            }
+                case ReservedPropertyKind.ThisFileName:
+                    return Path.GetFileNameWithoutExtension(file);
 
-            return value;
+                case ReservedPropertyKind.ThisFileFullPath:
+                    return FileUtilities.NormalizePath(file);
+
+                case ReservedPropertyKind.ThisFileExtension:
+                    return Path.GetExtension(file);
+
+                case ReservedPropertyKind.ThisFileDirectory:
+                    return FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(file));
+
+                case ReservedPropertyKind.ThisFileDirectoryNoRoot:
+                    string directory = Path.GetDirectoryName(file);
+                    int rootLength = Path.GetPathRoot(directory).Length;
+                    return FileUtilities.EnsureTrailingNoLeadingSlash(directory, rootLength);
+
+                default:
+                    return string.Empty;
+            }
         }
 
         /// <summary>

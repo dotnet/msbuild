@@ -220,6 +220,7 @@
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
     <Compile Include="Logging\ReusableLogger.cs" />
+    <Compile Include="ReservedPropertyKind.cs" />
     <Compile Include="ReservedPropertyNames.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryCollector.cs" />
