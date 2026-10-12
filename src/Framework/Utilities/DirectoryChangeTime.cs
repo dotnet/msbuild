@@ -19,7 +19,12 @@ using Windows.Win32.Storage.FileSystem;
 
 namespace Microsoft.Build.Shared;
 
-internal readonly record struct DirectoryChangeStamp(long Value, uint Nanoseconds = 0);
+internal readonly record struct DirectoryChangeStamp(
+    ulong VolumeOrDevice,
+    ulong IdentityLow,
+    ulong IdentityHigh,
+    long Value,
+    uint Nanoseconds = 0);
 
 internal static partial class DirectoryChangeTime
 {
@@ -72,8 +77,10 @@ internal static partial class DirectoryChangeTime
         }
         try
         {
+            FILE_ID_INFO identity;
             FILE_BASIC_INFO basic;
-            if (!PInvoke.GetFileInformationByHandleEx(handle, FILE_INFO_BY_HANDLE_CLASS.FileBasicInfo, &basic, (uint)sizeof(FILE_BASIC_INFO)))
+            if (!PInvoke.GetFileInformationByHandleEx(handle, FILE_INFO_BY_HANDLE_CLASS.FileIdInfo, &identity, (uint)sizeof(FILE_ID_INFO))
+                || !PInvoke.GetFileInformationByHandleEx(handle, FILE_INFO_BY_HANDLE_CLASS.FileBasicInfo, &basic, (uint)sizeof(FILE_BASIC_INFO)))
             {
                 TraceFailure(path, Marshal.GetLastWin32Error());
                 return false;
@@ -84,7 +91,8 @@ internal static partial class DirectoryChangeTime
             {
                 return false;
             }
-            stamp = new DirectoryChangeStamp(basic.ChangeTime);
+            ulong* identifier = (ulong*)&identity.FileId;
+            stamp = new DirectoryChangeStamp(identity.VolumeSerialNumber, identifier[0], identifier[1], basic.ChangeTime);
             return true;
         }
         finally
@@ -103,6 +111,7 @@ internal static partial class DirectoryChangeTime
     {
         Type = 0x1,
         ChangeTime = 0x80,
+        Identity = 0x100,
     }
 
     [Flags]
@@ -118,7 +127,7 @@ internal static partial class DirectoryChangeTime
         Mask = 0xF000,
     }
 
-    // statx has a fixed 256-byte ABI; retain the complete buffer, requesting only type and ctime.
+    // statx has a fixed 256-byte ABI; request type, identity and ctime, not mtime.
     [StructLayout(LayoutKind.Explicit, Size = 256)]
     private struct StatxData
     {
@@ -126,10 +135,16 @@ internal static partial class DirectoryChangeTime
         internal StatxFields Fields;
         [FieldOffset(28)]
         internal UnixFileType FileType;
+        [FieldOffset(32)]
+        internal ulong Identity;
         [FieldOffset(96)]
         internal long ChangeSeconds;
         [FieldOffset(104)]
         internal uint ChangeNanoseconds;
+        [FieldOffset(136)]
+        internal uint DeviceMajor;
+        [FieldOffset(140)]
+        internal uint DeviceMinor;
     }
 
     [LibraryImport("libc", EntryPoint = "statx", SetLastError = true)]
@@ -139,7 +154,7 @@ internal static partial class DirectoryChangeTime
     {
         stamp = default;
         const int currentDirectory = -100; // AT_FDCWD
-        const StatxFields required = StatxFields.Type | StatxFields.ChangeTime;
+        const StatxFields required = StatxFields.Type | StatxFields.ChangeTime | StatxFields.Identity;
         int length = Encoding.UTF8.GetByteCount(path);
         using BufferScope<byte> buffer = new(stackalloc byte[512], checked(length + 1));
         Encoding.UTF8.GetBytes(path.AsSpan(), buffer.AsSpan());
@@ -162,7 +177,12 @@ internal static partial class DirectoryChangeTime
             DebugTrace.WriteLine($"Directory change-time metadata is incomplete for '{path}'.", category: nameof(DirectoryChangeTime));
             return false;
         }
-        stamp = new DirectoryChangeStamp(data.ChangeSeconds, data.ChangeNanoseconds);
+        stamp = new DirectoryChangeStamp(
+            ((ulong)data.DeviceMajor << 32) | data.DeviceMinor,
+            data.Identity,
+            0,
+            data.ChangeSeconds,
+            data.ChangeNanoseconds);
         return true;
     }
 #endif
