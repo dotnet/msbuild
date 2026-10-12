@@ -193,11 +193,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Fixes backslashes to forward slashes on Unix. This allows to recognise windows style paths on Unix. 
         /// However, this leads to incorrect path on Linux if backslash was part of the file/directory name.
-        /// </summary>  
-        internal static string FixFilePath(string path)
-        {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == WindowsDirectorySeparator ? path : path.Replace(WindowsDirectorySeparator, UnixDirectorySeparator);
-        }
+        /// </summary>
+        [return: NotNullIfNotNull(nameof(path))]
+        internal static string? FixFilePath(string? path)
+            => path.IsNullOrEmpty() || Path.DirectorySeparatorChar == WindowsDirectorySeparator
+                ? path
+                : path.Replace(WindowsDirectorySeparator, UnixDirectorySeparator);
 
         /// <summary>
         /// If the given path doesn't have a trailing slash then add one.

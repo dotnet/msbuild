@@ -170,7 +170,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     loggingContext.LogWarning(
                         null,
-                        new BuildEventFileInfo(taskInstance.Location),
+                        taskInstance.Location,
                         "HostObjectFailure",
                         _taskNode.Name,
                         ex.Message);
@@ -580,8 +580,8 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.NotNull(_taskNode); // taskNode should never be null when we're calling this method.
 
-            string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
-            string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);
+            string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.Empty);
+            string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.Empty);
 
             // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
             // a null set will be treated as equivalent to all parameters being "don't care".
@@ -881,7 +881,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         taskLoggingContext.LogFatalTaskError(
                             ex,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _targetChildInstance.Location,
                             _taskNode.Name);
 
                         throw new CriticalTaskException(ex);
@@ -989,7 +989,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             taskLoggingContext.LogTaskWarningFromException(
                                 exceptionToLog,
-                                new BuildEventFileInfo(_targetChildInstance.Location),
+                                _targetChildInstance.Location,
                                 _taskNode.Name);
 
                             // Log a message explaining why we converted the previous error into a warning.
@@ -999,7 +999,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             taskLoggingContext.LogFatalTaskError(
                                 exceptionToLog,
-                                new BuildEventFileInfo(_targetChildInstance.Location),
+                                _targetChildInstance.Location,
                                 _taskNode.Name);
                         }
                     }
@@ -1028,7 +1028,7 @@ namespace Microsoft.Build.BackEnd
                     else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
                         taskLoggingContext.LogWarning(null,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _targetChildInstance.Location,
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);
 
@@ -1036,7 +1036,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        taskLoggingContext.LogError(new BuildEventFileInfo(_targetChildInstance.Location),
+                        taskLoggingContext.LogError(_targetChildInstance.Location,
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);
                     }

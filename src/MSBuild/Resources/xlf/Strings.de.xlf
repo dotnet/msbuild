@@ -2082,11 +2082,6 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
         <target state="translated">Der Buildvorgang wurde gestartet.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
-      </trans-unit>
       <trans-unit id="AmbiguousProjectDirectoryError">
         <source>MSBUILD : error MSB1050: Specify which project or solution file to use because the folder "{0}" contains more than one project or solution file.</source>
         <target state="translated">MSBUILD : error MSB1050: Geben Sie die zu verwendende Projekt- oder Projektmappendatei an, da der Ordner "{0}" mehrere Projekt- oder Projektmappendateien enthält.</target>

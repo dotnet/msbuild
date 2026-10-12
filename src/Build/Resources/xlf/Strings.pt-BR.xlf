@@ -66,6 +66,11 @@
         <target state="translated">O filtro de evento de log binário gerou uma exceção para o registro {0} ({1}) na versão de formato de arquivo {2}. Contexto de build: [{3}]. Contexto de build original: [{4}]. Confira a exceção interna para obter mais detalhes.</target>
         <note>LOCALIZATION: {0} is the zero-based record number (including auxiliary records), {1} is the record kind, {2} is the binary log file format version, and {3} and {4} are build contexts (empty if unavailable).</note>
       </trans-unit>
+      <trans-unit id="Binlog_FilteredLog">
+        <source>This binary log is filtered. Excluded event kinds: {0}.</source>
+        <target state="new">This binary log is filtered. Excluded event kinds: {0}.</target>
+        <note>LOCALIZATION: {0} is a comma-separated list of binary log event kind names. Do not localize the event kind names.</note>
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">A leitura compatível com versões futuras não é suportada para a versão do formato de arquivo {0} (precisa de &gt;= 18).</target>
@@ -3073,11 +3078,6 @@ Utilização:          {0} Utilização Média: {1:###.0}</target>
         <source>Build started.</source>
         <target state="translated">Compilação iniciada.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
       </trans-unit>
       <trans-unit id="MSBuild.CannotRebaseOutputItemPath">
         <source>MSB3203: The output path "{0}" cannot be rebased. {1}</source>

@@ -143,6 +143,8 @@ namespace Microsoft.Build.Logging
         // skip them if they are not known to it. Example of change requiring the increment would be the introduction of strings deduplication)
         internal const int MinimumReaderVersion = 18;
 
+        private const string FilterNoticeHelpKeyword = "MSBuild.BinaryLogger.FilteredLog";
+
         // Parameter name constants
         private const string LogFileParameterPrefix = "LogFile=";
         private const string BinlogFileExtension = ".binlog";
@@ -567,6 +569,23 @@ namespace Microsoft.Build.Logging
                     LogInitialInfo();
                 }
 
+                if (_excludedEventKinds is not null)
+                {
+                    BinaryLogRecordKind[] excludedKinds = [.. _excludedEventKinds];
+                    Array.Sort(excludedKinds);
+
+                    // Keep the notice even with Exclude=Message or OmitInitialInfo.
+                    // The "BinaryLogger" sender would make Structured Log Viewer display a property instead of a message.
+                    eventArgsWriter.Write(new BuildMessageEventArgs(
+                        ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_FilteredLog", string.Join(", ", excludedKinds)),
+                        helpKeyword: FilterNoticeHelpKeyword,
+                        senderName: null,
+                        MessageImportance.Normal)
+                    {
+                        BuildEventContext = BuildEventContext.Invalid,
+                    });
+                }
+
                 eventSource.AnyEventRaised += EventSource_AnyEventRaised;
             }
         }
@@ -711,8 +730,11 @@ namespace Microsoft.Build.Logging
                     return;
                 }
 
+                // Keep prior filter notices so repeated filtering does not hide earlier exclusions.
                 if (_excludedEventKinds is not null
-                    && _excludedEventKinds.Contains(recordKind ?? BuildEventArgsWriter.GetRecordKind(e)))
+                    && _excludedEventKinds.Contains(recordKind ?? BuildEventArgsWriter.GetRecordKind(e))
+                    && !(e is BuildMessageEventArgs { HelpKeyword: FilterNoticeHelpKeyword }
+                        && BuildEventContext.Invalid.Equals(e.BuildEventContext)))
                 {
                     if (e is TaskParameterEventArgs taskParameter)
                     {

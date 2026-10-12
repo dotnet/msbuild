@@ -215,7 +215,7 @@ internal partial class Expander<P, I>
                     {
                         _loggingContext.LogComment(
                             MessageImportance.Low,
-                            new BuildEventFileInfo(_elementLocation),
+                            _elementLocation,
                             "ItemReferencingSelfInTarget",
                             itemMetadata.ItemType,
                             metadataName);

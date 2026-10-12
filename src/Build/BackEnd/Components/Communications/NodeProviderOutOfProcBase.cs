@@ -12,6 +12,7 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Eventing;
 
@@ -1207,8 +1208,19 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await _readStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
-                        if (!ProcessHeaderBytesRead(bytesRead))
+                        int totalBytesRead = 0;
+                        while (totalBytesRead < _headerByte.Length)
+                        {
+                            int bytesRead = await _readStream.ReadAsync(_headerByte.AsMemory(totalBytesRead, _headerByte.Length - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            if (bytesRead == 0)
+                            {
+                                break;
+                            }
+
+                            totalBytesRead += bytesRead;
+                        }
+
+                        if (!ProcessHeaderBytesRead(totalBytesRead))
                         {
                             return;
                         }
@@ -1563,7 +1575,7 @@ namespace Microsoft.Build.BackEnd
                 loggingService?.LogWarning(
                     BuildEventContext.Invalid,
                     null,
-                    BuildEventFileInfo.Empty,
+                    ElementLocation.Empty,
                     "KillingProcessWithPid",
                     _process.Id);
                 CommunicationsUtilities.Trace($"Killing node with pid = {_process.Id}");

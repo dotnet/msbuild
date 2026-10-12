@@ -602,7 +602,7 @@ namespace Microsoft.Build.BackEnd
         {
             ParameterConversionRequirement requirement = _parameterConversionRequirement.Value;
             _taskLoggingContext.LogError(
-                new BuildEventFileInfo(requirement.Location),
+                requirement.Location,
                 "UnsupportedTaskParameterTypeError",
                 requirement.ParameterType,
                 requirement.ParameterName,
@@ -709,7 +709,7 @@ namespace Microsoft.Build.BackEnd
                         string.Empty];
                 }
 
-                _taskLoggingContext.LogFatalError(taskHostTaskComplete.TaskException, new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);
+                _taskLoggingContext.LogFatalError(taskHostTaskComplete.TaskException, _taskLocation, taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);
             }
 
             // Set the output parameters for later
@@ -733,7 +733,7 @@ namespace Microsoft.Build.BackEnd
                 // nothing much else to say.
                 _taskExecutionSucceeded = false;
 
-                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostExitedPrematurely", (nodeShutdown.Exception == null) ? String.Empty : nodeShutdown.Exception.ToString());
+                _taskLoggingContext.LogError(_taskLocation, "TaskHostExitedPrematurely", (nodeShutdown.Exception == null) ? String.Empty : nodeShutdown.Exception.ToString());
             }
         }
 
@@ -912,12 +912,12 @@ namespace Microsoft.Build.BackEnd
 
             if (e == null)
             {
-                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostAcquireFailed", _taskType.Type.Name, runtime, architecture, msbuildLocation);
+                _taskLoggingContext.LogError(_taskLocation, "TaskHostAcquireFailed", _taskType.Type.Name, runtime, architecture, msbuildLocation);
             }
             else
             {
                 _taskLoggingContext.LogError(
-                    new BuildEventFileInfo(_taskLocation),
+                    _taskLocation,
                     "TaskHostNodeFailedToLaunch",
                     _taskType.Type.Name,
                     runtime,

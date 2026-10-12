@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
     Microsoft ResX Schema
@@ -1640,10 +1640,6 @@
   </data>
   <data name="BuildStarted" xml:space="preserve">
     <value>Build started.</value>
-  </data>
-  <data name="FileLocation" xml:space="preserve">
-    <value>{0} ({1},{2})</value>
-    <comment>A file location to be embedded in a string.</comment>
   </data>
   <data name="MissingWarnAsMessageParameterError" xml:space="preserve">
     <value>MSBUILD : error MSB1051: Specify one or more warning codes to treat as low importance messages when using the -warnAsMessage switch.</value>

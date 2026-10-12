@@ -796,14 +796,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             targetInstance.BeforeTargets.ShouldBe("beforeTargets");
             targetInstance.AfterTargets.ShouldBe("afterTargets");
             targetInstance.Location.ShouldBe(projectInstance.ProjectFileLocation);
-            targetInstance.ConditionLocation.ShouldBe(ElementLocation.EmptyLocation);
-            targetInstance.InputsLocation.ShouldBe(ElementLocation.EmptyLocation);
-            targetInstance.OutputsLocation.ShouldBe(ElementLocation.EmptyLocation);
-            targetInstance.ReturnsLocation.ShouldBe(ElementLocation.EmptyLocation);
-            targetInstance.KeepDuplicateOutputsLocation.ShouldBe(ElementLocation.EmptyLocation);
-            targetInstance.DependsOnTargetsLocation.ShouldBe(ElementLocation.EmptyLocation);
-            targetInstance.BeforeTargetsLocation.ShouldBe(ElementLocation.EmptyLocation);
-            targetInstance.AfterTargetsLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.ConditionLocation.ShouldBe(ElementLocation.Empty);
+            targetInstance.InputsLocation.ShouldBe(ElementLocation.Empty);
+            targetInstance.OutputsLocation.ShouldBe(ElementLocation.Empty);
+            targetInstance.ReturnsLocation.ShouldBe(ElementLocation.Empty);
+            targetInstance.KeepDuplicateOutputsLocation.ShouldBe(ElementLocation.Empty);
+            targetInstance.DependsOnTargetsLocation.ShouldBe(ElementLocation.Empty);
+            targetInstance.BeforeTargetsLocation.ShouldBe(ElementLocation.Empty);
+            targetInstance.AfterTargetsLocation.ShouldBe(ElementLocation.Empty);
             targetInstance.ParentProjectSupportsReturnsAttribute.ShouldBeTrue();
         }
 

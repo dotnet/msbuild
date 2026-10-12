@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Construction;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -251,7 +252,7 @@ public class BuildCheckCentralContext_Tests
             string? subcategoryResourceName,
             string? errorCode,
             string? helpKeyword,
-            BuildEventFileInfo file,
+            IElementLocation location,
             string message)
         { }
 
@@ -261,7 +262,7 @@ public class BuildCheckCentralContext_Tests
             string? subcategoryResourceName,
             string? errorCode,
             string? helpKeyword,
-            BuildEventFileInfo file,
+            IElementLocation location,
             string message)
         { }
 

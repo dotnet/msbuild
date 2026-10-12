@@ -964,7 +964,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _nodeLoggingContext.LogFatalBuildError(
                         e,
-                        new BuildEventFileInfo(Construction.ElementLocation.EmptyLocation));
+                        Construction.ElementLocation.Empty);
                     throw new BuildAbortedException(e.Message, e);
                 }
             }

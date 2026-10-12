@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -1197,7 +1198,7 @@ namespace Microsoft.Build.BackEnd
             }
             if (FileUtilities.IsVCProjFilename(data.ProjectFullPath))
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(data.ProjectFullPath), "ProjectUpgradeNeededToVcxProj", data.ProjectFullPath);
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.Create(data.ProjectFullPath), "ProjectUpgradeNeededToVcxProj", data.ProjectFullPath);
             }
 
             // We used to "sniff" the tools version from the project XML by opening it and reading the attribute.
