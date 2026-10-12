@@ -17,7 +17,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 internal sealed class WriteLinesToFileBuildCheck : Check
 {
     private const string RuleId = "BC0303";
-    private const string TaskName = "WriteLinesToFile";
+    private const string TaskName = "Microsoft.Build.Tasks.WriteLinesToFile";
     private const string OverwriteParameterName = "Overwrite";
 
     public static CheckRule SupportedRule = new(
@@ -25,7 +25,7 @@ internal sealed class WriteLinesToFileBuildCheck : Check
         "WriteLinesToFileOverwrite",
         ResourceUtilities.GetResourceString("BuildCheck_BC0303_Title")!,
         ResourceUtilities.GetResourceString("BuildCheck_BC0303_MessageFmt")!,
-        new CheckConfiguration() { RuleId = RuleId, Severity = CheckResultSeverity.Warning });
+        new CheckConfiguration() { RuleId = RuleId, Severity = CheckResultSeverity.None });
 
     public override string FriendlyName => "MSBuild.WriteLinesToFileBuildCheck";
 
@@ -45,7 +45,7 @@ internal sealed class WriteLinesToFileBuildCheck : Check
 
     private static void TaskInvocationAction(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
-        if (MSBuildNameIgnoreCaseComparer.Default.Equals(context.Data.TaskName, TaskName)
+        if (TypeLoader.IsPartialTypeNameMatch(context.Data.TaskName, TaskName)
             && !HasOverwriteParameter(context.Data.Parameters))
         {
             context.ReportResult(BuildCheckResult.CreateBuiltIn(

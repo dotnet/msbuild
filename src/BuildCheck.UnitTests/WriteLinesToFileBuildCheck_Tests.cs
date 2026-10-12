@@ -24,6 +24,10 @@ public sealed class WriteLinesToFileBuildCheck_Tests
     [Theory]
     [InlineData("WriteLinesToFile")]
     [InlineData("writelinestofile")]
+    [InlineData("Tasks.WriteLinesToFile")]
+    [InlineData("Build.Tasks.WriteLinesToFile")]
+    [InlineData("Microsoft.Build.Tasks.WriteLinesToFile")]
+    [InlineData("microsoft.build.tasks.writelinestofile")]
     public void WriteLinesToFileTask_WithoutOverwrite_ShouldShowWarning(string taskName)
     {
         _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData(taskName, []));
@@ -49,10 +53,14 @@ public sealed class WriteLinesToFileBuildCheck_Tests
         _registrationContext.Results.Count.ShouldBe(0);
     }
 
-    [Fact]
-    public void DifferentTask_WithoutOverwrite_ShouldNotShowWarning()
+    [Theory]
+    [InlineData("Message")]
+    [InlineData("Other.WriteLinesToFile")]
+    [InlineData("MyWriteLinesToFile")]
+    [InlineData("WriteLinesToFileExtra")]
+    public void DifferentTask_WithoutOverwrite_ShouldNotShowWarning(string taskName)
     {
-        _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Message", []));
+        _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData(taskName, []));
 
         _registrationContext.Results.Count.ShouldBe(0);
     }
