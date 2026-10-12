@@ -87,39 +87,55 @@ internal static class ReservedPropertyNames
     ///  intentionally excluded because tasks must be able to override them.
     /// </remarks>
     public static bool TryGetKind(string propertyName, out ReservedPropertyKind result)
+        => TryGetKind(propertyName, 0, propertyName.Length, out result);
+
+    /// <summary>
+    ///  Attempts to identify a reserved MSBuild property in a segment of a string.
+    /// </summary>
+    /// <param name="propertyName">The string containing the property name.</param>
+    /// <param name="startIndex">The zero-based start index of the property name.</param>
+    /// <param name="length">The length of the property name.</param>
+    /// <param name="result">The identified property, or <see cref="ReservedPropertyKind.None"/>.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the specified segment identifies a reserved property; otherwise,
+    ///  <see langword="false"/>.
+    /// </returns>
+    public static bool TryGetKind(string propertyName, int startIndex, int length, out ReservedPropertyKind result)
     {
         const int PrefixLength = 7; // MSBuild.Length
 
-        if (propertyName.Length < 14 || !MatchesAt(propertyName, MSBuild, 0))
+        int endIndex = startIndex + length;
+
+        if (length < 14 || !MatchesAt(propertyName, MSBuild, startIndex, endIndex))
         {
             result = ReservedPropertyKind.None;
             return false;
         }
 
-        char nextChar = propertyName[PrefixLength];
+        char nextChar = propertyName[startIndex + PrefixLength];
 
-        if (nextChar is 'P' or 'p' && MatchesAt(propertyName, "Project", PrefixLength))
+        if (nextChar is 'P' or 'p' && MatchesAt(propertyName, "Project", startIndex + PrefixLength, endIndex))
         {
-            result = GetProjectPropertyKind(propertyName);
+            result = GetProjectPropertyKind(propertyName, startIndex, length);
             return result is not ReservedPropertyKind.None;
         }
 
-        if (nextChar is 'T' or 't' && MatchesAt(propertyName, "ThisFile", PrefixLength))
+        if (nextChar is 'T' or 't' && MatchesAt(propertyName, "ThisFile", startIndex + PrefixLength, endIndex))
         {
-            result = GetThisFilePropertyKind(propertyName);
+            result = GetThisFilePropertyKind(propertyName, startIndex, length);
             return result is not ReservedPropertyKind.None;
         }
 
-        result = propertyName.Length switch
+        result = length switch
         {
             14 => nextChar switch
             {
                 // MSBuildBinPath
-                'B' or 'b' when MatchesAt(propertyName, "BinPath", PrefixLength)
+                'B' or 'b' when MatchesAt(propertyName, "BinPath", startIndex + PrefixLength, endIndex)
                     => ReservedPropertyKind.BinPath,
 
                 // MSBuildVersion
-                'V' or 'v' when MatchesAt(propertyName, "Version", PrefixLength)
+                'V' or 'v' when MatchesAt(propertyName, "Version", startIndex + PrefixLength, endIndex)
                     => ReservedPropertyKind.Version,
 
                 _ => ReservedPropertyKind.None,
@@ -128,11 +144,11 @@ internal static class ReservedPropertyNames
             16 => nextChar switch
             {
                 // MSBuildNodeCount
-                'N' or 'n' when MatchesAt(propertyName, "NodeCount", PrefixLength)
+                'N' or 'n' when MatchesAt(propertyName, "NodeCount", startIndex + PrefixLength, endIndex)
                     => ReservedPropertyKind.BuildNodeCount,
 
                 // MSBuildToolsPath
-                'T' or 't' when MatchesAt(propertyName, "ToolsPath", PrefixLength)
+                'T' or 't' when MatchesAt(propertyName, "ToolsPath", startIndex + PrefixLength, endIndex)
                     => ReservedPropertyKind.ToolsPath,
 
                 _ => ReservedPropertyKind.None,
@@ -141,43 +157,43 @@ internal static class ReservedPropertyNames
             18 => nextChar switch
             {
                 // MSBuildInteractive
-                'I' or 'i' when MatchesAt(propertyName, "Interactive", PrefixLength)
+                'I' or 'i' when MatchesAt(propertyName, "Interactive", startIndex + PrefixLength, endIndex)
                     => ReservedPropertyKind.Interactive,
 
                 // MSBuildRuntimeType
-                'R' or 'r' when MatchesAt(propertyName, "RuntimeType", PrefixLength)
+                'R' or 'r' when MatchesAt(propertyName, "RuntimeType", startIndex + PrefixLength, endIndex)
                     => ReservedPropertyKind.RuntimeType,
 
                 _ => ReservedPropertyKind.None,
             },
 
             // MSBuildToolsVersion
-            19 when MatchesAt(propertyName, "ToolsVersion", PrefixLength)
+            19 when MatchesAt(propertyName, "ToolsVersion", startIndex + PrefixLength, endIndex)
                 => ReservedPropertyKind.ToolsVersion,
 
             21 => nextChar switch
             {
                 // MSBuildLastTaskResult
-                'L' or 'l' when MatchesAt(propertyName, "LastTaskResult", PrefixLength)
+                'L' or 'l' when MatchesAt(propertyName, "LastTaskResult", startIndex + PrefixLength, endIndex)
                     => ReservedPropertyKind.LastTaskResult,
 
                 // MSBuildProgramFiles32
-                'P' or 'p' when MatchesAt(propertyName, "ProgramFiles32", PrefixLength)
+                'P' or 'p' when MatchesAt(propertyName, "ProgramFiles32", startIndex + PrefixLength, endIndex)
                     => ReservedPropertyKind.ProgramFiles32,
 
                 _ => ReservedPropertyKind.None,
             },
 
             // MSBuildAssemblyVersion
-            22 when MatchesAt(propertyName, "AssemblyVersion", PrefixLength)
+            22 when MatchesAt(propertyName, "AssemblyVersion", startIndex + PrefixLength, endIndex)
                 => ReservedPropertyKind.AssemblyVersion,
 
             // MSBuildStartupDirectory
-            23 when MatchesAt(propertyName, "StartupDirectory", PrefixLength)
+            23 when MatchesAt(propertyName, "StartupDirectory", startIndex + PrefixLength, endIndex)
                 => ReservedPropertyKind.StartupDirectory,
 
             // MSBuildDisableFeaturesFromVersion
-            33 when MatchesAt(propertyName, "DisableFeaturesFromVersion", PrefixLength)
+            33 when MatchesAt(propertyName, "DisableFeaturesFromVersion", startIndex + PrefixLength, endIndex)
                 => ReservedPropertyKind.DisableFeaturesFromVersion,
 
             _ => ReservedPropertyKind.None,
@@ -185,94 +201,100 @@ internal static class ReservedPropertyNames
 
         return result is not ReservedPropertyKind.None;
 
-        static ReservedPropertyKind GetProjectPropertyKind(string propertyName)
+        static ReservedPropertyKind GetProjectPropertyKind(string propertyName, int startIndex, int length)
         {
             const int ProjectPrefixLength = 14; // ProjectPrefix.Length
 
-            return propertyName.Length switch
+            int endIndex = startIndex + length;
+            int suffixStartIndex = startIndex + ProjectPrefixLength;
+
+            return length switch
             {
-                18 => propertyName[ProjectPrefixLength] switch
+                18 => propertyName[suffixStartIndex] switch
                 {
                     // MSBuildProjectFile
-                    'F' or 'f' when MatchesAt(propertyName, "File", ProjectPrefixLength)
+                    'F' or 'f' when MatchesAt(propertyName, "File", suffixStartIndex, endIndex)
                         => ReservedPropertyKind.ProjectFile,
 
                     // MSBuildProjectName
-                    'N' or 'n' when MatchesAt(propertyName, "Name", ProjectPrefixLength)
+                    'N' or 'n' when MatchesAt(propertyName, "Name", suffixStartIndex, endIndex)
                         => ReservedPropertyKind.ProjectName,
 
                     _ => ReservedPropertyKind.None,
                 },
 
                 // MSBuildProjectFullPath
-                22 when MatchesAt(propertyName, "FullPath", ProjectPrefixLength)
+                22 when MatchesAt(propertyName, "FullPath", suffixStartIndex, endIndex)
                     => ReservedPropertyKind.ProjectFullPath,
 
-                23 => propertyName[ProjectPrefixLength] switch
+                23 => propertyName[suffixStartIndex] switch
                 {
                     // MSBuildProjectDirectory
-                    'D' or 'd' when MatchesAt(propertyName, "Directory", ProjectPrefixLength)
+                    'D' or 'd' when MatchesAt(propertyName, "Directory", suffixStartIndex, endIndex)
                         => ReservedPropertyKind.ProjectDirectory,
 
                     // MSBuildProjectExtension
-                    'E' or 'e' when MatchesAt(propertyName, "Extension", ProjectPrefixLength)
+                    'E' or 'e' when MatchesAt(propertyName, "Extension", suffixStartIndex, endIndex)
                         => ReservedPropertyKind.ProjectExtension,
 
                     _ => ReservedPropertyKind.None,
                 },
 
                 // MSBuildProjectDefaultTargets
-                28 when MatchesAt(propertyName, "DefaultTargets", ProjectPrefixLength)
+                28 when MatchesAt(propertyName, "DefaultTargets", suffixStartIndex, endIndex)
                     => ReservedPropertyKind.ProjectDefaultTargets,
 
                 // MSBuildProjectDirectoryNoRoot
-                29 when MatchesAt(propertyName, "DirectoryNoRoot", ProjectPrefixLength)
+                29 when MatchesAt(propertyName, "DirectoryNoRoot", suffixStartIndex, endIndex)
                     => ReservedPropertyKind.ProjectDirectoryNoRoot,
 
                 _ => ReservedPropertyKind.None,
             };
         }
 
-        static ReservedPropertyKind GetThisFilePropertyKind(string propertyName)
+        static ReservedPropertyKind GetThisFilePropertyKind(string propertyName, int startIndex, int length)
         {
             const int ThisFilePrefixLength = 15; // ThisFilePrefix.Length
 
-            return propertyName.Length switch
+            int endIndex = startIndex + length;
+            int suffixStartIndex = startIndex + ThisFilePrefixLength;
+
+            return length switch
             {
                 // MSBuildThisFile
                 15 => ReservedPropertyKind.ThisFile,
 
                 // MSBuildThisFileName
-                19 when MatchesAt(propertyName, "Name", ThisFilePrefixLength)
+                19 when MatchesAt(propertyName, "Name", suffixStartIndex, endIndex)
                     => ReservedPropertyKind.ThisFileName,
 
                 // MSBuildThisFileFullPath
-                23 when MatchesAt(propertyName, "FullPath", ThisFilePrefixLength)
+                23 when MatchesAt(propertyName, "FullPath", suffixStartIndex, endIndex)
                     => ReservedPropertyKind.ThisFileFullPath,
 
-                24 => propertyName[ThisFilePrefixLength] switch
+                24 => propertyName[suffixStartIndex] switch
                 {
                     // MSBuildThisFileDirectory
-                    'D' or 'd' when MatchesAt(propertyName, "Directory", ThisFilePrefixLength)
+                    'D' or 'd' when MatchesAt(propertyName, "Directory", suffixStartIndex, endIndex)
                         => ReservedPropertyKind.ThisFileDirectory,
 
                     // MSBuildThisFileExtension
-                    'E' or 'e' when MatchesAt(propertyName, "Extension", ThisFilePrefixLength)
+                    'E' or 'e' when MatchesAt(propertyName, "Extension", suffixStartIndex, endIndex)
                         => ReservedPropertyKind.ThisFileExtension,
 
                     _ => ReservedPropertyKind.None,
                 },
 
                 // MSBuildThisFileDirectoryNoRoot
-                30 when MatchesAt(propertyName, "DirectoryNoRoot", ThisFilePrefixLength)
+                30 when MatchesAt(propertyName, "DirectoryNoRoot", suffixStartIndex, endIndex)
                     => ReservedPropertyKind.ThisFileDirectoryNoRoot,
 
                 _ => ReservedPropertyKind.None,
             };
         }
 
-        static bool MatchesAt(string propertyName, string expected, int startIndex)
-            => propertyName.Length >= startIndex + expected.Length
+        static bool MatchesAt(string propertyName, string expected, int startIndex, int endIndex)
+            => endIndex >= startIndex + expected.Length
                 && MSBuildNameIgnoreCaseComparer.Default.Equals(expected, propertyName, startIndex, expected.Length);
     }
 }
