@@ -18,20 +18,20 @@ internal sealed class DirectoryListingCache
     private readonly ConcurrentDictionary<(string Directory, FileMatcher.FileSystemEntity Kind), Listing> _listings = new();
 
 
-    internal IReadOnlyList<string> Store(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries, DateTime lastWriteTimeUtc)
+    internal IReadOnlyList<string> Store(string directory, FileMatcher.FileSystemEntity kind, IReadOnlyList<string> entries, DirectoryChangeStamp changeTime)
     {
         var key = (directory, kind);
         IReadOnlyList<string>? snapshot = null;
         while (true)
         {
             bool exists = _listings.TryGetValue(key, out Listing current);
-            if (exists && current.LastWriteTimeUtc == lastWriteTimeUtc)
+            if (exists && current.ChangeTime == changeTime)
             {
                 return current.Entries;
             }
 
             snapshot ??= entries is ImmutableArray<string> ? entries : ImmutableArray.CreateRange(entries);
-            var replacement = new Listing(snapshot, lastWriteTimeUtc);
+            var replacement = new Listing(snapshot, changeTime);
             if (exists
                 ? _listings.TryUpdate(key, replacement, current)
                 : _listings.TryAdd(key, replacement))
@@ -59,8 +59,8 @@ internal sealed class DirectoryListingCache
 
     private bool IsUpToDate(string directory, Listing listing)
     {
-        if (TryReadDirectoryTimestamp(directory, out DateTime current)
-            && listing.LastWriteTimeUtc == current)
+        if (TryReadDirectoryChangeTime(directory, out DirectoryChangeStamp current)
+            && listing.ChangeTime == current)
         {
             return true;
         }
@@ -71,16 +71,16 @@ internal sealed class DirectoryListingCache
         return false;
     }
 
-    internal static bool TryReadDirectoryTimestamp(string directory, out DateTime lastWriteTimeUtc)
+    internal static bool TryReadDirectoryChangeTime(string directory, out DirectoryChangeStamp changeTime)
     {
         try
         {
-            return NativeMethods.GetLastWriteDirectoryUtcTime(directory, out lastWriteTimeUtc, rejectReparsePoints: true);
+            return DirectoryChangeTime.TryRead(directory, out changeTime);
         }
         catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
         {
-            DebugTrace.WriteLine($"Could not read directory timestamp for '{directory}': {ex.Message}", category: nameof(DirectoryListingCache));
-            lastWriteTimeUtc = default;
+            DebugTrace.WriteLine($"Could not read directory change time for '{directory}': {ex.Message}", category: nameof(DirectoryListingCache));
+            changeTime = default;
             return false;
         }
     }
@@ -91,6 +91,5 @@ internal sealed class DirectoryListingCache
         GlobResultExperiment.Clear(this);
     }
 
-    // Files in folder and timestamp of last modified of this folder.
-    private readonly record struct Listing(IReadOnlyList<string> Entries, DateTime LastWriteTimeUtc);
+    private readonly record struct Listing(IReadOnlyList<string> Entries, DirectoryChangeStamp ChangeTime);
 }

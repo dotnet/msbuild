@@ -28,6 +28,7 @@ EnumResourceNames
 EOLE_AUTHENTICATION_CAPABILITIES
 FACILITY_CODE
 FILE_ACCESS_RIGHTS
+FILE_BASIC_INFO
 FILE_CREATION_DISPOSITION
 FILE_FLAGS_AND_ATTRIBUTES
 FILE_MAP
@@ -49,6 +50,7 @@ GetEnvironmentStringsW
 GetErrorInfo
 GetFileAttributes
 GetFileAttributesEx
+GetFileInformationByHandleEx
 GetFileTime
 GetFileType
 GetFileVersion
