@@ -25,6 +25,11 @@ namespace Microsoft.Build.Framework.Telemetry
         };
 
         /// <summary>
+        /// Namespace prefix of the types that are treated as Microsoft types, see <see cref="GetHashedUnlessMicrosoftType"/>.
+        /// </summary>
+        private const string MicrosoftNamespacePrefix = "Microsoft.";
+
+        /// <summary>
         /// Transforms collected telemetry data to format recognized by the telemetry infrastructure.
         /// </summary>
         /// <param name="telemetryData">Data about tasks and target forwarded from nodes.</param>
@@ -127,6 +132,28 @@ namespace Microsoft.Build.Framework.Telemetry
         /// Depending on the platform, hash the value using an available mechanism.
         /// </summary>
         internal static string GetHashed(object value) => Sha256Hasher.Hash(value?.ToString() ?? "");
+
+        /// <summary>
+        /// Gets the full name of a type for telemetry. The name of a type in a <c>Microsoft.</c> namespace is reported as is,
+        /// which identifies the Microsoft components that are in use. Any other name can reveal customer data, so it is hashed.
+        /// </summary>
+        /// <remarks>
+        /// The prefix marks Microsoft types only by convention, so a custom type that is declared in a <c>Microsoft.</c> namespace is reported as is.
+        /// The comparison is ordinal: <c>MicrosoftFoo.Bar</c> and <c>microsoft.foo.Bar</c> are hashed.
+        /// The name of a constructed generic type is always hashed, because it lists the assembly-qualified names of its type arguments, and those can be custom.
+        /// </remarks>
+        /// <param name="typeName">The full name of the type, as returned by <see cref="Type.FullName"/>.</param>
+        internal static string GetHashedUnlessMicrosoftType(string? typeName)
+        {
+            if (typeName is not null
+                && typeName.StartsWith(MicrosoftNamespacePrefix, StringComparison.Ordinal)
+                && typeName.IndexOf('[') < 0)
+            {
+                return typeName;
+            }
+
+            return GetHashed(typeName ?? string.Empty);
+        }
 
         // https://github.com/dotnet/sdk/blob/8bd19a2390a6bba4aa80d1ac3b6c5385527cc311/src/Cli/Microsoft.DotNet.Cli.Utils/Sha256Hasher.cs + workaround for netstandard2.0
         private static class Sha256Hasher
