@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework.Telemetry;
 using Shouldly;
 using Xunit;
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Framework.UnitTests
         }
 
         [Fact]
-        public void DeserializesPayloadWithoutAggregateCounters()
+        public void DeserializesLegacyPayloadFromNonSeekableStreamWithoutConsumingNextPacket()
         {
             WorkerNodeTelemetryData data = new(
                 new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
@@ -72,15 +73,17 @@ namespace Microsoft.Build.Framework.UnitTests
                 {
                     { (TaskOrTargetTelemetryKey)"target", TargetExecutionStats.Executed() },
                 });
+            const int nextPacketValue = 123456789;
 
             using MemoryStream stream = new();
             using BinaryWriter writer = new(stream);
-            new WorkerNodeTelemetryEventArgs(data).WriteToStream(writer);
+            WriteLegacyPayload(writer, data);
+            writer.Write(nextPacketValue);
             writer.Flush();
-            stream.SetLength(stream.Length - (7 * sizeof(int)));
             stream.Position = 0;
 
-            using BinaryReader reader = new(stream);
+            using BufferedReadStream nonSeekableStream = new(stream, bufferSize: 16);
+            using BinaryReader reader = new(nonSeekableStream);
             WorkerNodeTelemetryEventArgs deserialized = new();
             int packetVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
             deserialized.CreateFromStream(reader, packetVersion);
@@ -91,6 +94,37 @@ namespace Microsoft.Build.Framework.UnitTests
             deserialized.WorkerNodeTelemetryData.SkippedTargetsCount.ShouldBe(0);
             deserialized.WorkerNodeTelemetryData.UpToDateInputOutputTargetsCount.ShouldBe(0);
             deserialized.WorkerNodeTelemetryData.ExecutedInputOutputTargetsCount.ShouldBe(0);
+            reader.ReadInt32().ShouldBe(nextPacketValue);
+        }
+
+        private static void WriteLegacyPayload(BinaryWriter writer, WorkerNodeTelemetryData data)
+        {
+            writer.Write7BitEncodedInt(data.TasksExecutionData.Count);
+            foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> entry in data.TasksExecutionData)
+            {
+                WriteKey(writer, entry.Key);
+                writer.Write(entry.Value.CumulativeExecutionTime.Ticks);
+                writer.Write(entry.Value.ExecutionsCount);
+                writer.Write(entry.Value.TotalMemoryBytes ?? -1);
+                writer.Write(entry.Value.TaskFactoryName ?? string.Empty);
+                writer.Write(entry.Value.TaskHostRuntime ?? string.Empty);
+            }
+
+            writer.Write7BitEncodedInt(data.TargetsExecutionData.Count);
+            foreach (KeyValuePair<TaskOrTargetTelemetryKey, TargetExecutionStats> entry in data.TargetsExecutionData)
+            {
+                WriteKey(writer, entry.Key);
+                writer.Write(entry.Value.WasExecuted);
+                writer.Write((int)entry.Value.SkipReason);
+            }
+        }
+
+        private static void WriteKey(BinaryWriter writer, TaskOrTargetTelemetryKey key)
+        {
+            writer.Write(key.Name);
+            writer.Write(key.IsCustom);
+            writer.Write(key.IsNuget);
+            writer.Write(key.IsMetaProj);
         }
     }
 }

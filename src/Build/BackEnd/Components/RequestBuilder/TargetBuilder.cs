@@ -527,9 +527,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             targetResult.TargetLocation = currentTargetEntry.Target.Location;
 
-                            bool wasExecuted =
-                                targetResult.SkipReason == TargetSkipReason.None &&
-                                targetResult.ResultCode != TargetResultCode.Skipped;
+                            bool wasExecuted = currentTargetEntry.WasExecuted;
                             _projectLoggingContext.TelemetryCollector?.AddTargetResult(wasExecuted, targetResult.SkipReason);
 
                             if (!string.IsNullOrEmpty(currentTargetEntry.Target.Inputs) &&

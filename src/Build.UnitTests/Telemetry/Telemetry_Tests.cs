@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
@@ -116,6 +118,54 @@ namespace Microsoft.Build.Engine.UnitTests
             workerNodeTelemetryData.TargetsExecutionData[conditionalKey].SkipReason.ShouldBe(TargetSkipReason.ConditionWasFalse);
             workerNodeTelemetryData.TargetsExecutionData[upToDateKey].WasExecuted.ShouldBeFalse();
             workerNodeTelemetryData.TargetsExecutionData[upToDateKey].SkipReason.ShouldBe(TargetSkipReason.OutputsUpToDate);
+        }
+
+        [Fact]
+        public void WorkerNodeTelemetryCollection_QuestionModeDoesNotCountOutOfDateTargetAsExecuted()
+        {
+            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+            void CaptureTelemetry(WorkerNodeTelemetryData data) => workerNodeTelemetryData = data;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += CaptureTelemetry;
+
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create(_output);
+                var files = env.CreateTestProjectWithFiles(
+                    """
+                    <Project>
+                      <Target Name="Build" Inputs="input.txt" Outputs="output.txt">
+                        <Message Text="Should not run"/>
+                      </Target>
+                    </Project>
+                    """,
+                    ["input.txt", "output.txt"]);
+
+                var input = new FileInfo(files.CreatedFiles[0]);
+                var output = new FileInfo(files.CreatedFiles[1]);
+                DateTime now = DateTime.UtcNow;
+                input.LastWriteTimeUtc = now + TimeSpan.FromSeconds(10);
+                output.LastWriteTimeUtc = now;
+
+                using (var buildSession = new Helpers.BuildManagerSession(
+                    env,
+                    new BuildParameters
+                    {
+                        IsTelemetryEnabled = true,
+                        Question = true,
+                    }))
+                {
+                    buildSession.BuildProjectFile(files.ProjectFile, ["Build"]).OverallResult.ShouldBe(BuildResultCode.Failure);
+                }
+            }
+            finally
+            {
+                InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted -= CaptureTelemetry;
+            }
+
+            workerNodeTelemetryData.ShouldNotBeNull();
+            workerNodeTelemetryData!.ExecutedTargetsCount.ShouldBe(0);
+            workerNodeTelemetryData.ExecutedInputOutputTargetsCount.ShouldBe(0);
+            workerNodeTelemetryData.UpToDateInputOutputTargetsCount.ShouldBe(0);
         }
 
         [Fact]
@@ -370,6 +420,52 @@ namespace Microsoft.Build.Engine.UnitTests
             inlineTask.TaskHostRuntime.ShouldBe("CLR4");
         }
 
+        [Fact]
+        public void BuildTargetTelemetry_PreservesOrdinaryRestoreRequest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string projectFile = env.CreateFile(
+                "test.proj",
+                """
+                <Project>
+                  <Target Name="Restore"/>
+                  <Target Name="Pack"/>
+                </Project>
+                """).Path;
+            MockLogger logger = new(_output);
+
+            using (var buildManager = new BuildManager())
+            {
+                buildManager.BeginBuild(
+                    new BuildParameters
+                    {
+                        IsTelemetryEnabled = true,
+                        Loggers = [logger],
+                    });
+
+                buildManager.BuildRequest(
+                    new BuildRequestData(
+                        projectFile,
+                        new Dictionary<string, string?>(),
+                        null,
+                        ["Restore"],
+                        null)).OverallResult.ShouldBe(BuildResultCode.Success);
+
+                buildManager.BuildRequest(
+                    new BuildRequestData(
+                        projectFile,
+                        new Dictionary<string, string?>(),
+                        null,
+                        ["Pack"],
+                        null)).OverallResult.ShouldBe(BuildResultCode.Success);
+
+                buildManager.EndBuild();
+            }
+
+            TelemetryEventArgs telemetry = logger.TelemetryEvents.Where(e => e.EventName == "build").ShouldHaveSingleItem();
+            telemetry.Properties[nameof(BuildTelemetry.BuildTarget)].ShouldBe(MSBuildConstants.RestoreTargetName);
+        }
+
 #if NET
         // test in .net core with telemetry opted in to avoid sending it but enable listening to it
         [Fact]
@@ -433,7 +529,10 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Phase 2: Execute build requests
                 var buildRequestData1 = new BuildRequestData(
                     projectFile,
-                    new Dictionary<string, string?>(),
+                    new Dictionary<string, string?>
+                    {
+                        [MSBuildConstants.MSBuildIsRestoring] = bool.TrueString,
+                    },
                     null,
                     new[] { "restore" },
                     null);

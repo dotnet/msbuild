@@ -9,7 +9,8 @@ namespace Microsoft.Build.Framework.Telemetry;
 
 internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData workerNodeTelemetryData) : BuildEventArgs
 {
-    private const int AggregateCountersSize = 7 * sizeof(int);
+    private const int PayloadMarker = int.MaxValue;
+    private const int CurrentPayloadVersion = 2;
 
     public WorkerNodeTelemetryEventArgs()
         : this(new WorkerNodeTelemetryData())
@@ -19,6 +20,8 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
 
     internal override void WriteToStream(BinaryWriter writer)
     {
+        writer.Write7BitEncodedInt(PayloadMarker);
+        writer.Write7BitEncodedInt(CurrentPayloadVersion);
         writer.Write7BitEncodedInt(WorkerNodeTelemetryData.TasksExecutionData.Count);
         foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> entry in WorkerNodeTelemetryData.TasksExecutionData)
         {
@@ -49,7 +52,23 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
+        int payloadVersion;
         int count = reader.Read7BitEncodedInt();
+        if (count == PayloadMarker)
+        {
+            payloadVersion = reader.Read7BitEncodedInt();
+            if (payloadVersion != CurrentPayloadVersion)
+            {
+                throw new InvalidDataException($"Unsupported worker telemetry payload version {payloadVersion}.");
+            }
+
+            count = reader.Read7BitEncodedInt();
+        }
+        else
+        {
+            payloadVersion = 1;
+        }
+
         Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData = new();
         for (int i = 0; i < count; i++)
         {
@@ -81,7 +100,7 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             targetsExecutionData.Add(key, new TargetExecutionStats(wasExecuted, skipReason));
         }
 
-        WorkerNodeTelemetryData = HasAggregateCounters(reader)
+        WorkerNodeTelemetryData = payloadVersion >= 2
             ? new WorkerNodeTelemetryData(
                 tasksExecutionData,
                 targetsExecutionData,
@@ -93,28 +112,6 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
                 reader.ReadInt32(),
                 reader.ReadInt32())
             : new WorkerNodeTelemetryData(tasksExecutionData, targetsExecutionData);
-    }
-
-    private static bool HasAggregateCounters(BinaryReader reader)
-    {
-        Stream stream = reader.BaseStream;
-        if (!stream.CanSeek)
-        {
-            return true;
-        }
-
-        long remainingBytes = stream.Length - stream.Position;
-        if (remainingBytes == 0)
-        {
-            return false;
-        }
-
-        if (remainingBytes < AggregateCountersSize)
-        {
-            throw new InvalidDataException($"Worker telemetry payload has {remainingBytes} trailing bytes; expected {AggregateCountersSize}.");
-        }
-
-        return true;
     }
 
     private static void WriteToStream(BinaryWriter writer, TaskOrTargetTelemetryKey key)

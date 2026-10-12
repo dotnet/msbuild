@@ -149,6 +149,11 @@ namespace Microsoft.Build.BackEnd
         private bool _isExecuting;
 
         /// <summary>
+        /// Flag indicating whether at least one target bucket entered execution mode.
+        /// </summary>
+        private bool _wasExecuted;
+
+        /// <summary>
         /// The constructor.
         /// </summary>
         /// <param name="requestEntry">The build request entry for the target.</param>
@@ -248,6 +253,11 @@ namespace Microsoft.Build.BackEnd
                 return _targetResult;
             }
         }
+
+        /// <summary>
+        /// Gets whether this target entered execution mode.
+        /// </summary>
+        internal bool WasExecuted => _wasExecuted;
 
         /// <summary>
         /// Retrieves the Lookup this target was initialized with, including any modifications which have
@@ -526,6 +536,11 @@ namespace Microsoft.Build.BackEnd
                                     }
                                 }
 
+                                if (dependencyResult != DependencyAnalysisResult.SkipUpToDate)
+                                {
+                                    _wasExecuted = true;
+                                }
+
                                 // We either have some work to do or at least we need to infer outputs from inputs.
                                 WorkUnitResult bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution);
 
@@ -681,7 +696,9 @@ namespace Microsoft.Build.BackEnd
                     targetOutputItems,
                     aggregateResult,
                     targetLoggingContext?.BuildEventContext,
-                    anyBucketUpToDate && !anyBucketOutOfDate ? TargetSkipReason.OutputsUpToDate : TargetSkipReason.None);
+                    aggregateResult.ResultCode == WorkUnitResultCode.Success && anyBucketUpToDate && !anyBucketOutOfDate
+                        ? TargetSkipReason.OutputsUpToDate
+                        : TargetSkipReason.None);
 
                 if (aggregateResult.ResultCode == WorkUnitResultCode.Failed && aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                 {

@@ -261,6 +261,11 @@ namespace Microsoft.Build.Execution
         private BuildTelemetry? _buildTelemetry;
 
         /// <summary>
+        /// Whether the captured build target belongs to the synthetic restore submission created by -restore.
+        /// </summary>
+        private bool _buildTelemetryTargetIsRestorePrepass;
+
+        /// <summary>
         /// Logger, that if instantiated - will receive and expose telemetry data from worker nodes.
         /// </summary>
         private InternalTelemetryConsumingLogger? _telemetryConsumingLogger;
@@ -607,6 +612,7 @@ namespace Microsoft.Build.Execution
 
                 // Initiate build telemetry data
                 DateTime now = DateTime.UtcNow;
+                _buildTelemetryTargetIsRestorePrepass = false;
 
                 // Acquire it from static variable so we can apply data collected up to this moment
                 _buildTelemetry = KnownTelemetry.PartialBuildTelemetry;
@@ -1120,10 +1126,19 @@ namespace Microsoft.Build.Execution
                     _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
 
                     // With -restore, the Restore submission precedes the build; report the build's targets instead.
-                    if (_buildTelemetry.BuildTarget is null ||
-                        string.Equals(_buildTelemetry.BuildTarget, MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase))
+                    if (_buildTelemetry.BuildTarget is null)
                     {
                         _buildTelemetry.BuildTarget = string.Join(",", requestData.TargetNames);
+                        _buildTelemetryTargetIsRestorePrepass =
+                            requestData.TargetNames.Count == 1 &&
+                            string.Equals(requestData.TargetNames.First(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase) &&
+                            requestData.GlobalPropertiesLookup.TryGetValue(MSBuildConstants.MSBuildIsRestoring, out string? isRestoring) &&
+                            string.Equals(isRestoring, bool.TrueString, StringComparison.OrdinalIgnoreCase);
+                    }
+                    else if (_buildTelemetryTargetIsRestorePrepass)
+                    {
+                        _buildTelemetry.BuildTarget = string.Join(",", requestData.TargetNames);
+                        _buildTelemetryTargetIsRestorePrepass = false;
                     }
                 }
 
@@ -1405,6 +1420,7 @@ namespace Microsoft.Build.Execution
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
+                            _buildTelemetryTargetIsRestorePrepass = false;
                         }
                     }
 
