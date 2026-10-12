@@ -912,6 +912,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
+        [InlineData(0, true)]
+        [InlineData(1, false)]
         [InlineData(8, false)]
         [InlineData(9, true)]
         public void TaskBuildEventContext_IsVersioned(byte version, bool expectedToRoundTrip)

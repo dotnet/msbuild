@@ -622,12 +622,10 @@ namespace Microsoft.Build.BackEnd
 
             if (packet is LogMessagePacket logMessagePacket
                 && logMessagePacket.NodeBuildEvent is KeyValuePair<int, BuildEventArgs> nodeBuildEvent
-                && nodeBuildEvent.Value is TaskProgressStartedEventArgs or TaskProgressUpdatedEventArgs or TaskProgressFinishedEventArgs)
+                && nodeBuildEvent.Value is TaskProgressStartedEventArgs or TaskProgressUpdatedEventArgs or TaskProgressFinishedEventArgs
+                && nodeBuildEvent.Value.BuildEventContext is { TaskId: not BuildEventContext.InvalidTaskId } progressContext)
             {
-                BuildEventContext progressContext = nodeBuildEvent.Value.BuildEventContext;
-                if (progressContext is not null
-                    && progressContext.TaskId != BuildEventContext.InvalidTaskId
-                    && _nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> progressHandlerStack))
+                if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> progressHandlerStack))
                 {
                     lock (progressHandlerStack)
                     {
