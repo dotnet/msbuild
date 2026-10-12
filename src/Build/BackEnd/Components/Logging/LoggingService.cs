@@ -85,7 +85,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private const uint DefaultQueueCapacity = 200000;
 
         private const int LoggingEventNotificationBatchSize = 64;
-        private const int LoggingEventNotificationDelayMilliseconds = 16;
         private const int LoggingEventNotificationIdle = 0;
         private const int LoggingEventNotificationScheduled = 1;
         private const int LoggingEventNotificationActive = 2;
@@ -292,6 +291,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private int _loggingEventNotificationState;
 
+        private bool _isLoggingThreadWaitingForEvents;
+
         /// <summary>
         /// CTS for stopping logging event processing.
         /// </summary>
@@ -391,6 +392,20 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Coalescing delay, overridable per instance for deterministic tests.
+        /// </summary>
+        internal int LoggingEventNotificationDelay { get; set; } = 16;
+
+        /// <summary>
+        /// Whether the logging thread is idle with its notification counters reset.
+        /// </summary>
+        internal bool IsLoggingThreadWaitingForEvents => Volatile.Read(ref _isLoggingThreadWaitingForEvents);
+
+        internal Action BeforeLoggingQueueEmptyCheck { get; set; }
+
+        internal Action BeforeLoggingQueueSignalReset { get; set; }
 
         /// <summary>
         /// Router of the build engine runtime execution information.
@@ -950,11 +965,6 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
 
-                if (_logMode == LoggerMode.Asynchronous)
-                {
-                    WaitForLoggingToProcessEvents();
-                }
-
                 // Set the state to indicate we are starting the shutdown process.
                 _serviceState = LoggingServiceState.ShuttingDown;
 
@@ -965,7 +975,8 @@ namespace Microsoft.Build.BackEnd.Logging
                         // 1. Shutdown forwarding loggers so that any events they have left to forward can get into the queue
                         foreach (ILogger logger in _loggers)
                         {
-                            if (logger is IForwardingLogger)
+                            // The central forwarder has no buffer and must keep routing queued local events until the drain completes.
+                            if (logger is IForwardingLogger and not CentralForwardingLogger)
                             {
                                 ShutdownLogger(logger);
                             }
@@ -1445,10 +1456,24 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 RequestImmediateLoggingEventProcessing(enqueueEvent);
 
-                // Callbacks can enqueue more events, so wait for the entire queue and its last callback to finish.
-                while (loggingEventProcessingThread.IsAlive &&
-                       (!emptyQueueEvent.WaitOne(millisecondsTimeout: 50) || !eventQueue.IsEmpty))
+                // Observe the queue before the signal: a stale idle signal followed by the last dequeue
+                // could otherwise let the drain return while that event's callback is still running.
+                // The consumer resets the signal before dequeuing and sets it only after callbacks finish.
+                while (loggingEventProcessingThread.IsAlive)
                 {
+                    BeforeLoggingQueueEmptyCheck?.Invoke();
+                    if (eventQueue.IsEmpty)
+                    {
+                        if (emptyQueueEvent.WaitOne(millisecondsTimeout: 50))
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        // May return early on a stale signal; the loop re-checks the queue.
+                        emptyQueueEvent.WaitOne(millisecondsTimeout: 50);
+                    }
                 }
             }
             catch (ObjectDisposedException)
@@ -1589,7 +1614,9 @@ namespace Microsoft.Build.BackEnd.Logging
                             // Wait for next event, or finish.
                             if (!completeAdding.IsCancellationRequested && eventQueue.IsEmpty)
                             {
+                                Volatile.Write(ref _isLoggingThreadWaitingForEvents, true);
                                 WaitHandle.WaitAny(waitHandlesForNextEvent);
+                                Volatile.Write(ref _isLoggingThreadWaitingForEvents, false);
 
                                 if (!completeAdding.IsCancellationRequested &&
                                     Volatile.Read(ref _loggingEventNotificationState) ==
@@ -1597,7 +1624,7 @@ namespace Microsoft.Build.BackEnd.Logging
                                 {
                                     WaitHandle.WaitAny(
                                         waitHandlesForNextEvent,
-                                        LoggingEventNotificationDelayMilliseconds);
+                                        LoggingEventNotificationDelay);
                                 }
                             }
 
@@ -1609,6 +1636,7 @@ namespace Microsoft.Build.BackEnd.Logging
                                     LoggingEventNotificationActive);
                             }
 
+                            BeforeLoggingQueueSignalReset?.Invoke();
                             emptyQueueEvent.Reset();
                         }
                     } while (!eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);

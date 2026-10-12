@@ -137,6 +137,8 @@ In asynchronous mode, events enter the FIFO queue immediately, but consumer noti
 
 Explicit drain requests also bypass coalescing. They wait until the queue is empty and its last logger callback has completed, including any additional events logged by callbacks.
 
+Shutdown cancels the coalescing wait and drains the remaining events before terminating the logging thread.
+
 ## Notable Loggers
 
 * [Binary logger](Binary-Log.md)

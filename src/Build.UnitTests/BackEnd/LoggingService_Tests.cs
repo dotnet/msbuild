@@ -1164,6 +1164,185 @@ namespace Microsoft.Build.UnitTests.Logging
 
         #region Asynchronous Logging Tests
 
+        [Fact]
+        public void AsynchronousLoggingCoalescesUntilBatchThresholdOrDrain()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            using ManualResetEventSlim eventProcessed = new(false);
+            TimeSpan timeout = TimeSpan.FromSeconds(10);
+
+            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            loggingService.LoggingEventNotificationDelay = Timeout.Infinite;
+            loggingService.InitializeComponent(new MockHost());
+            MockLogger logger = new(_output);
+            logger.AdditionalHandlers.Add((_, _) => eventProcessed.Set());
+            loggingService.RegisterLogger(logger);
+            Exception loggingException = null;
+            loggingService.OnLoggingThreadException += ex =>
+                Interlocked.CompareExchange(ref loggingException, ex, null);
+
+            try
+            {
+                SpinWait.SpinUntil(() => loggingService.IsLoggingThreadWaitingForEvents, timeout).ShouldBeTrue();
+                for (int i = 0; i < 63; i++)
+                {
+                    loggingService.ProcessLoggingEvent(new BuildMessageEventArgs($"{i}", null, null, MessageImportance.High));
+                }
+
+                SpinWait.SpinUntil(() => !loggingService.IsLoggingThreadWaitingForEvents, timeout).ShouldBeTrue();
+                eventProcessed.IsSet.ShouldBeFalse();
+
+                loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("63", null, null, MessageImportance.High));
+                eventProcessed.Wait(timeout).ShouldBeTrue();
+                SpinWait.SpinUntil(() => loggingService.IsLoggingThreadWaitingForEvents, timeout).ShouldBeTrue();
+                logger.BuildMessageEvents.Select(e => e.Message).ShouldBe(Enumerable.Range(0, 64).Select(i => $"{i}"));
+
+                eventProcessed.Reset();
+                loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("after drain", null, null, MessageImportance.High));
+                SpinWait.SpinUntil(() => !loggingService.IsLoggingThreadWaitingForEvents, timeout).ShouldBeTrue();
+                eventProcessed.IsSet.ShouldBeFalse();
+
+                loggingService.WaitForLoggingToProcessEvents();
+                eventProcessed.IsSet.ShouldBeTrue();
+                logger.BuildMessageEvents.Count.ShouldBe(65);
+                logger.BuildMessageEvents[^1].Message.ShouldBe("after drain");
+            }
+            finally
+            {
+                loggingService.ShutdownComponent();
+            }
+
+            loggingException.ShouldBeNull();
+        }
+
+        [Fact]
+        public void AsynchronousLoggingShutdownDrainsCoalescedEvents()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            using ManualResetEventSlim eventProcessed = new(false);
+            TimeSpan timeout = TimeSpan.FromSeconds(10);
+
+            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            loggingService.LoggingEventNotificationDelay = Timeout.Infinite;
+            loggingService.InitializeComponent(new MockHost());
+            MockLogger logger = new(_output);
+            logger.AdditionalHandlers.Add((_, args) =>
+            {
+                eventProcessed.Set();
+                if (args.Message == "initial")
+                {
+                    loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("follow-up", null, null, MessageImportance.High));
+                }
+            });
+            loggingService.RegisterLogger(logger);
+            Exception loggingException = null;
+            loggingService.OnLoggingThreadException += ex =>
+                Interlocked.CompareExchange(ref loggingException, ex, null);
+
+            try
+            {
+                SpinWait.SpinUntil(() => loggingService.IsLoggingThreadWaitingForEvents, timeout).ShouldBeTrue();
+                loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("initial", null, null, MessageImportance.High));
+                SpinWait.SpinUntil(() => !loggingService.IsLoggingThreadWaitingForEvents, timeout).ShouldBeTrue();
+                eventProcessed.IsSet.ShouldBeFalse();
+            }
+            finally
+            {
+                loggingService.ShutdownComponent();
+            }
+
+            loggingService.ServiceState.ShouldBe(LoggingServiceState.Shutdown);
+            eventProcessed.IsSet.ShouldBeTrue();
+            logger.BuildMessageEvents.Select(e => e.Message).ShouldBe(["initial", "follow-up"]);
+            loggingException.ShouldBeNull();
+        }
+
+        [Fact]
+        public void WaitForLoggingToProcessEventsDoesNotTrustStaleIdleSignal()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            using ManualResetEventSlim beforeSignalReset = new(false);
+            using ManualResetEventSlim releaseDequeue = new(false);
+            using ManualResetEventSlim callbackEntered = new(false);
+            using ManualResetEventSlim releaseCallback = new(false);
+            using ManualResetEventSlim queueCheckReady = new(false);
+            TimeSpan timeout = TimeSpan.FromSeconds(10);
+
+            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            loggingService.LoggingEventNotificationDelay = Timeout.Infinite;
+            loggingService.InitializeComponent(new MockHost());
+            MockLogger logger = new(_output);
+            logger.AdditionalHandlers.Add((_, _) =>
+            {
+                callbackEntered.Set();
+                releaseCallback.Wait(timeout).ShouldBeTrue();
+            });
+            loggingService.RegisterLogger(logger);
+            Exception loggingException = null;
+            loggingService.OnLoggingThreadException += ex =>
+                Interlocked.CompareExchange(ref loggingException, ex, null);
+            Exception drainException = null;
+            Thread waiter = new(() =>
+            {
+                try
+                {
+                    loggingService.WaitForLoggingToProcessEvents();
+                }
+                catch (Exception ex)
+                {
+                    drainException = ex;
+                }
+            })
+            {
+                IsBackground = true
+            };
+
+            try
+            {
+                SpinWait.SpinUntil(() => loggingService.IsLoggingThreadWaitingForEvents, timeout).ShouldBeTrue();
+                loggingService.BeforeLoggingQueueSignalReset = () =>
+                {
+                    loggingService.BeforeLoggingQueueSignalReset = null;
+                    beforeSignalReset.Set();
+                    releaseDequeue.Wait();
+                };
+                loggingService.BeforeLoggingQueueEmptyCheck = () =>
+                {
+                    loggingService.BeforeLoggingQueueEmptyCheck = null;
+                    beforeSignalReset.Wait(timeout).ShouldBeTrue();
+                    releaseDequeue.Set();
+                    callbackEntered.Wait(timeout).ShouldBeTrue();
+                    queueCheckReady.Set();
+                };
+
+                loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("last event", null, null, MessageImportance.High));
+                waiter.Start();
+                queueCheckReady.Wait(timeout).ShouldBeTrue();
+                loggingService.EventQueueCount.ShouldBe(0);
+                waiter.Join(TimeSpan.FromMilliseconds(100)).ShouldBeFalse("Drain returned using a stale idle signal while the last callback was still running.");
+
+                releaseCallback.Set();
+                waiter.Join(timeout).ShouldBeTrue();
+                logger.BuildMessageEvents.ShouldHaveSingleItem().Message.ShouldBe("last event");
+            }
+            finally
+            {
+                loggingService.BeforeLoggingQueueEmptyCheck = null;
+                loggingService.BeforeLoggingQueueSignalReset = null;
+                releaseDequeue.Set();
+                releaseCallback.Set();
+                if (waiter.IsAlive)
+                {
+                    waiter.Join(timeout).ShouldBeTrue();
+                }
+
+                loggingService.ShutdownComponent();
+            }
+
+            drainException.ShouldBeNull();
+            loggingException.ShouldBeNull();
+        }
+
         [Theory]
         [InlineData(1)]
         [InlineData(3)]
@@ -1177,6 +1356,7 @@ namespace Microsoft.Build.UnitTests.Logging
             TimeSpan timeout = TimeSpan.FromSeconds(10);
 
             LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            loggingService.LoggingEventNotificationDelay = Timeout.Infinite;
             loggingService.InitializeComponent(new MockHost());
             MockLogger logger = new(_output);
             logger.AdditionalHandlers.Add((_, args) =>
@@ -1211,8 +1391,8 @@ namespace Microsoft.Build.UnitTests.Logging
 
             try
             {
+                SpinWait.SpinUntil(() => loggingService.IsLoggingThreadWaitingForEvents, timeout).ShouldBeTrue();
                 loggingService.ProcessLoggingEvent(new BuildMessageEventArgs("initial", null, null, MessageImportance.High));
-                initialEntered.Wait(timeout).ShouldBeTrue();
                 foreach (Thread waiter in waiters)
                 {
                     waiter.Start();
@@ -1222,6 +1402,7 @@ namespace Microsoft.Build.UnitTests.Logging
                         timeout).ShouldBeTrue();
                 }
 
+                initialEntered.Wait(timeout).ShouldBeTrue();
                 releaseInitial.Set();
                 nestedEntered.Wait(timeout).ShouldBeTrue();
                 foreach (Thread waiter in waiters)
