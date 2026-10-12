@@ -633,27 +633,27 @@ internal partial class Expander<P, I>
 
             // Because String.Equals checks the length first, and these strings are almost
             // all different lengths, this sequence is efficient.
-            if (String.Equals(propertyName, ReservedPropertyNames.thisFile, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(propertyName, ReservedPropertyNames.ThisFile, StringComparison.OrdinalIgnoreCase))
             {
                 value = Path.GetFileName(_elementLocation.File);
             }
-            else if (String.Equals(propertyName, ReservedPropertyNames.thisFileName, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileName, StringComparison.OrdinalIgnoreCase))
             {
                 value = Path.GetFileNameWithoutExtension(_elementLocation.File);
             }
-            else if (String.Equals(propertyName, ReservedPropertyNames.thisFileFullPath, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileFullPath, StringComparison.OrdinalIgnoreCase))
             {
                 value = FileUtilities.NormalizePath(_elementLocation.File);
             }
-            else if (String.Equals(propertyName, ReservedPropertyNames.thisFileExtension, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileExtension, StringComparison.OrdinalIgnoreCase))
             {
                 value = Path.GetExtension(_elementLocation.File);
             }
-            else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectory, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileDirectory, StringComparison.OrdinalIgnoreCase))
             {
                 value = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(_elementLocation.File));
             }
-            else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectoryNoRoot, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(propertyName, ReservedPropertyNames.ThisFileDirectoryNoRoot, StringComparison.OrdinalIgnoreCase))
             {
                 string directory = Path.GetDirectoryName(_elementLocation.File);
                 int rootLength = Path.GetPathRoot(directory).Length;

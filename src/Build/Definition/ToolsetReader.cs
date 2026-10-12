@@ -527,7 +527,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="expander">The expander used to expand the value of the properties.  Ref because if we are accumulating the properties, we need to re-create the expander to account for the new property value.</param>
         private void EvaluateAndSetProperty(ToolsetPropertyDefinition property, PropertyDictionary<ProjectPropertyInstance> properties, PropertyDictionary<ProjectPropertyInstance> globalProperties, PropertyDictionary<ProjectPropertyInstance> initialProperties, bool accumulateProperties, ref string toolsPath, ref string binPath, ref Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
-            if (String.Equals(property.Name, ReservedPropertyNames.toolsPath, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(property.Name, ReservedPropertyNames.ToolsPath, StringComparison.OrdinalIgnoreCase))
             {
                 toolsPath = ExpandPropertyUnescaped(property, expander);
                 toolsPath = ExpandRelativePathsRelativeToExeLocation(toolsPath);
@@ -535,12 +535,12 @@ namespace Microsoft.Build.Evaluation
                 if (accumulateProperties)
                 {
                     SetProperty(
-                        new ToolsetPropertyDefinition(ReservedPropertyNames.toolsPath, toolsPath, property.Source),
+                        new ToolsetPropertyDefinition(ReservedPropertyNames.ToolsPath, toolsPath, property.Source),
                         initialProperties,
                         globalProperties);
                 }
             }
-            else if (String.Equals(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
+            else if (String.Equals(property.Name, ReservedPropertyNames.BinPath, StringComparison.OrdinalIgnoreCase))
             {
                 binPath = ExpandPropertyUnescaped(property, expander);
                 binPath = ExpandRelativePathsRelativeToExeLocation(binPath);
@@ -548,7 +548,7 @@ namespace Microsoft.Build.Evaluation
                 if (accumulateProperties)
                 {
                     SetProperty(
-                        new ToolsetPropertyDefinition(ReservedPropertyNames.binPath, binPath, property.Source),
+                        new ToolsetPropertyDefinition(ReservedPropertyNames.BinPath, binPath, property.Source),
                         initialProperties,
                         globalProperties);
                 }

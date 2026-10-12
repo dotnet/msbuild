@@ -1810,14 +1810,14 @@ namespace Microsoft.Build.Execution
 
                         // If we have already named this instance when it was submitted previously during this build, use the same
                         // name so that we get the same configuration (and thus don't cause it to rebuild.)
-                        if (!_unnamedProjectInstanceToNames.TryGetValue(submission.BuildRequestData.ProjectInstance!, out var tempName))
+                        if (!_unnamedProjectInstanceToNames.TryGetValue(submission.BuildRequestData.ProjectInstance, out var tempName))
                         {
                             tempName = "Unnamed_" + _nextUnnamedProjectId++;
-                            _unnamedProjectInstanceToNames[submission.BuildRequestData.ProjectInstance!] = tempName;
+                            _unnamedProjectInstanceToNames[submission.BuildRequestData.ProjectInstance] = tempName;
                         }
 
                         submission.BuildRequestData.ProjectFullPath = Path.Combine(
-                            submission.BuildRequestData.ProjectInstance!.GetProperty(ReservedPropertyNames.projectDirectory)!.EvaluatedValue,
+                            submission.BuildRequestData.ProjectInstance.GetProperty(ReservedPropertyNames.ProjectDirectory)!.EvaluatedValue,
                             tempName);
                     }
 
