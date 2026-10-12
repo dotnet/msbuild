@@ -1558,8 +1558,7 @@ namespace Microsoft.Build.Execution
                                     if (executingRequest is not null)
                                     {
                                         string? projectFile = _configCache?[executingRequest.ConfigurationId]?.ProjectFullPath;
-                                        string projectName = projectFile is not null ? Path.GetFileName(projectFile) : "?";
-                                        nodeDetails.Add($"{nodeId}:{executingRequest.ConfigurationId}:{projectName}");
+                                        nodeDetails.Add(CrashTelemetry.FormatActiveNodeDetail(nodeId, executingRequest.ConfigurationId, projectFile));
                                     }
                                     else
                                     {
@@ -1591,7 +1590,7 @@ namespace Microsoft.Build.Execution
                         ICollection<string>? loggerTypes = loggingService.RegisteredLoggerTypeNames;
                         if (loggerTypes is { Count: > 0 })
                         {
-                            telemetry.RegisteredLoggerTypeNames = string.Join(";", loggerTypes);
+                            telemetry.RegisteredLoggerTypeNames = CrashTelemetry.FormatRegisteredLoggerTypeNames(loggerTypes);
                         }
                     }
                 }
