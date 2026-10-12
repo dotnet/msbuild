@@ -40,6 +40,10 @@ public class ReservedPropertyNames_Tests
         ReservedPropertyNames.TryGetKind(propertyName, out var actual).ShouldBeTrue();
         actual.ShouldBe(expected);
         ReservedPropertyNames.IsReservedProperty(propertyName).ShouldBeTrue();
+
+        string expression = $"$({propertyName})";
+        ReservedPropertyNames.TryGetKind(expression, 2, propertyName.Length, out actual).ShouldBeTrue();
+        actual.ShouldBe(expected);
     }
 
     [Fact]
@@ -71,5 +75,9 @@ public class ReservedPropertyNames_Tests
         ReservedPropertyNames.TryGetKind(propertyName, out var actual).ShouldBeFalse();
         actual.ShouldBe(ReservedPropertyKind.None);
         ReservedPropertyNames.IsReservedProperty(propertyName).ShouldBeFalse();
+
+        string expression = $"$({propertyName})";
+        ReservedPropertyNames.TryGetKind(expression, 2, propertyName.Length, out actual).ShouldBeFalse();
+        actual.ShouldBe(ReservedPropertyKind.None);
     }
 }
