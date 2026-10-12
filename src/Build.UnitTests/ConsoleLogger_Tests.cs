@@ -138,6 +138,58 @@ namespace Microsoft.Build.UnitTests
             _output = output;
         }
 
+        [Theory]
+        [InlineData(true, "done")]
+        [InlineData(false, "error")]
+        public void ReportsProgramStatus(bool succeeded, string state)
+        {
+            SimulatedConsole output = new();
+            ConsoleLogger logger = new(LoggerVerbosity.Quiet, output.Write, null, null,
+                supportsProgramStatusReporting: true);
+            EventSourceSink events = new();
+            logger.Initialize(events, 2);
+
+            events.Consume(new BuildStartedEventArgs("start", null));
+            events.Consume(new BuildFinishedEventArgs("finish", null, succeeded));
+
+            output.ToString().ShouldBe(
+                "\x1b]7501;state=working:app=msbuild\x1b\\" +
+                $"\x1b]7501;state={state}:app=msbuild\x1b\\");
+        }
+
+        [Fact]
+        public void CustomWriterDoesNotReceiveProgramStatus()
+        {
+            SimulatedConsole output = new();
+            ConsoleLogger logger = new(LoggerVerbosity.Quiet, output.Write, null, null);
+            logger.Initialize(null);
+            logger.BuildStartedHandler(null, new BuildStartedEventArgs("start", null));
+            logger.BuildFinishedHandler(null, new BuildFinishedEventArgs("finish", null, true));
+
+            output.ToString().ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void ProgramStatusIsDisabledByChangeWave()
+        {
+            using TestEnvironment environment = TestEnvironment.Create(_output);
+            environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_13.ToString());
+            ChangeWaves.ResetStateForTests();
+            environment.WithInvariant(new CustomConditionInvariant(() =>
+            {
+                ChangeWaves.ResetStateForTests();
+                return true;
+            }));
+            SimulatedConsole output = new();
+            ConsoleLogger logger = new(LoggerVerbosity.Quiet, output.Write, null, null,
+                supportsProgramStatusReporting: true);
+            logger.Initialize(null);
+            logger.BuildStartedHandler(null, new BuildStartedEventArgs("start", null));
+            logger.BuildFinishedHandler(null, new BuildFinishedEventArgs("finish", null, true));
+
+            output.ToString().ShouldBeEmpty();
+        }
+
         /// <summary>
         /// Verify when the project has not been named that we correctly get the same placeholder
         /// project name for project started event and the target started event.

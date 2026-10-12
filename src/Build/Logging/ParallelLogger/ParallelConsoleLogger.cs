@@ -219,6 +219,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void BuildStartedHandler(object sender, BuildStartedEventArgs e)
         {
+            if (SupportsProgramStatusReporting && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                WriteHandler("\x1b]7501;state=working:app=msbuild\x1b\\");
+            }
+
             buildStarted = e.Timestamp;
             _hasBuildStarted = true;
 
@@ -354,6 +359,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
             ResetConsoleLoggerState();
             CheckIfOutputSupportsAlignment();
+
+            if (SupportsProgramStatusReporting && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                WriteHandler(e.Succeeded
+                    ? "\x1b]7501;state=done:app=msbuild\x1b\\"
+                    : "\x1b]7501;state=error:app=msbuild\x1b\\");
+            }
         }
 
         /// <summary>

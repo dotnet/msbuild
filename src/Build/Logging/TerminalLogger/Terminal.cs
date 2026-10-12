@@ -121,10 +121,14 @@ internal sealed class Terminal : ITerminal
     /// </remarks>
     public bool SupportsProgressReporting { get; } = !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
+    /// <inheritdoc/>
+    public bool SupportsProgramStatusReporting { get; }
+
     public Terminal()
     {
         _originalOutputEncoding = Console.OutputEncoding;
         Console.OutputEncoding = Encoding.UTF8;
+        SupportsProgramStatusReporting = !Console.IsOutputRedirected;
 
         // Capture the TextWriter AFTER setting the encoding, because setting
         // the encoding creates a new TextWriter in the Console class, but it's
@@ -133,11 +137,11 @@ internal sealed class Terminal : ITerminal
         Output = Console.Out;
     }
 
-    internal Terminal(TextWriter output)
+    internal Terminal(TextWriter output, bool supportsProgramStatusReporting = false)
     {
         Output = output;
-
         _originalOutputEncoding = Encoding.UTF8;
+        SupportsProgramStatusReporting = supportsProgramStatusReporting;
     }
 
     /// <inheritdoc/>

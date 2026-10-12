@@ -35,6 +35,10 @@ public sealed partial class TerminalLogger : INodeLogger
     private const string FilePathPattern = " -> ";
     private const string MSBuildTaskName = "MSBuild";
 
+    // Leave room for the root record within the protocol's minimum capacity of 64 records.
+    private const int MaxProgramStatusRecords = 63;
+    private readonly HashSet<string> _programStatusRecords = [];
+
 #if NET
     private static readonly SearchValues<string> _authProviderMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
 #else
@@ -572,6 +576,8 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void BuildStarted(object sender, BuildStartedEventArgs e)
     {
+        ReportProgramStatus("working");
+
         if (!_manualRefresh && _showNodesDisplay)
         {
             _refresher = new Thread(ThreadProc);
@@ -673,6 +679,16 @@ public sealed partial class TerminalLogger : INodeLogger
             Terminal.EndUpdate();
         }
 
+        if (Terminal.SupportsProgramStatusReporting)
+        {
+            lock (_lock)
+            {
+                Terminal.Write("\x1b]7501;state=clear:id=build\x1b\\");
+                _programStatusRecords.Clear();
+                ReportProgramStatus(e.Succeeded ? "done" : "error");
+            }
+        }
+
         _projects.Clear();
         _testRunSummaries.Clear();
         _registeredLoggers.Clear();
@@ -681,6 +697,84 @@ public sealed partial class TerminalLogger : INodeLogger
         _restoreFailed = false;
         _testStartTime = null;
         _testEndTime = null;
+    }
+
+    private void ReportProgramStatus(string state)
+    {
+        if (Terminal.SupportsProgramStatusReporting)
+        {
+            Terminal.Write($"\x1b]7501;state={state}:app=msbuild\x1b\\");
+        }
+    }
+
+    private static string GetProgramStatusProjectId(BuildEventContext context) =>
+        FormattableString.Invariant($"build/s{context.SubmissionId}/n{context.NodeId}/p{context.ProjectContextId}");
+
+    private void ReportProgramScopeStarted(BuildEventContext context, string? title, bool isTarget)
+    {
+        if (!Terminal.SupportsProgramStatusReporting)
+        {
+            return;
+        }
+
+        string projectId = GetProgramStatusProjectId(context);
+        string id = isTarget ? FormattableString.Invariant($"{projectId}/t{context.TargetId}") : projectId;
+        lock (_lock)
+        {
+            if (_programStatusRecords.Count >= MaxProgramStatusRecords
+                || (isTarget && !_programStatusRecords.Contains(projectId))
+                || !_programStatusRecords.Add(id))
+            {
+                return;
+            }
+
+            Terminal.Write($"\x1b]7501;state=working:id={id}:title={EncodeProgramStatusTitle(title)}\x1b\\");
+        }
+    }
+
+    private void ReportProgramScopeFinished(BuildEventContext context, bool isTarget)
+    {
+        if (!Terminal.SupportsProgramStatusReporting)
+        {
+            return;
+        }
+
+        string projectId = GetProgramStatusProjectId(context);
+        string id = isTarget ? FormattableString.Invariant($"{projectId}/t{context.TargetId}") : projectId;
+        lock (_lock)
+        {
+            if (_programStatusRecords.Remove(id))
+            {
+                if (!isTarget)
+                {
+                    string prefix = id + "/";
+                    _programStatusRecords.RemoveWhere(record => record.StartsWith(prefix, StringComparison.Ordinal));
+                }
+
+                Terminal.Write($"\x1b]7501;state=clear:id={id}\x1b\\");
+            }
+        }
+    }
+
+    private static string EncodeProgramStatusTitle(string? title)
+    {
+        // 64 UTF-16 code units require at most 192 UTF-8 bytes, the protocol's title limit.
+        int length = Math.Min(title?.Length ?? 0, 64);
+        if (length > 0 && char.IsHighSurrogate(title![length - 1]))
+        {
+            length--;
+        }
+
+        StringBuilder builder = StringBuilderCache.Acquire(length);
+        for (int i = 0; i < length; i++)
+        {
+            char character = title![i];
+            builder.Append(char.IsControl(character) ? ' ' : character);
+        }
+
+        string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(builder.ToString()));
+        StringBuilderCache.Release(builder);
+        return encoded;
     }
 
     private void RenderBuildSummary()
@@ -740,6 +834,21 @@ public sealed partial class TerminalLogger : INodeLogger
 
         ProjectContext c = new(e.BuildEventContext);
 
+        if (Terminal.SupportsProgramStatusReporting)
+        {
+            _projectEvaluations.TryGetValue(new EvalContext(e.BuildEventContext), out EvalProjectInfo evaluation);
+            string? title = Path.GetFileName(e.ProjectFile);
+            if (!string.IsNullOrEmpty(evaluation.TargetFramework))
+            {
+                title += $" ({evaluation.TargetFramework})";
+            }
+            if (!string.IsNullOrEmpty(evaluation.RuntimeIdentifier))
+            {
+                title += $" ({evaluation.RuntimeIdentifier})";
+            }
+            ReportProgramScopeStarted(e.BuildEventContext, title, isTarget: false);
+        }
+
         if (_restoreContext is null)
         {
             EvalContext evalContext = new(e.BuildEventContext);
@@ -782,6 +891,8 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return;
         }
+
+        ReportProgramScopeFinished(buildEventContext, isTarget: false);
 
         // Mark node idle until something uses it again
         if (_restoreContext is null)
@@ -1061,6 +1172,11 @@ public sealed partial class TerminalLogger : INodeLogger
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null)
+        {
+            ReportProgramScopeStarted(buildEventContext, e.TargetName, isTarget: true);
+        }
+
         if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
             project.Stopwatch.Start();
@@ -1120,7 +1236,7 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// The <see cref="IEventSource.TargetFinished"/> callback. Unused.
+    /// The <see cref="IEventSource.TargetFinished"/> callback.
     /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
@@ -1128,6 +1244,11 @@ public sealed partial class TerminalLogger : INodeLogger
         // to the item spec corresponding to the GetTargetPath target upon completion.
         var buildEventContext = e.BuildEventContext;
         var targetOutputs = e.TargetOutputs;
+        if (buildEventContext is not null)
+        {
+            ReportProgramScopeFinished(buildEventContext, isTarget: true);
+        }
+
         if (_restoreContext is not null || buildEventContext is null)
         {
             return;
