@@ -16,6 +16,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -1330,12 +1331,12 @@ namespace Microsoft.Build.Execution
                                         if (initialized && containsArchOrRuntimeParam)
                                         {
                                             targetLoggingContext.LogWarning(
-                                                null,
-                                                    elementLocation,
-                                                    "TaskFactoryWillIgnoreTaskFactoryParameters",
-                                                    factory.FactoryName,
-                                                    XMakeAttributes.runtime,
-                                                    XMakeAttributes.architecture,
+                                                DiagnosticSubcategory.None,
+                                                elementLocation,
+                                                "TaskFactoryWillIgnoreTaskFactoryParameters",
+                                                factory.FactoryName,
+                                                XMakeAttributes.runtime,
+                                                XMakeAttributes.architecture,
                                                 RegisteredName);
                                         }
                                     }

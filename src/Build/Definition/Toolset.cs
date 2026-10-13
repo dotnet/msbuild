@@ -14,7 +14,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -596,7 +595,7 @@ namespace Microsoft.Build.Evaluation
                 if (defaultTasksFiles.Length == 0)
                 {
                     loggingContext.LogWarning(
-                        null,
+                        DiagnosticSubcategory.None,
                         ElementLocation.Empty,
                         taskFileWarning,
                         taskPattern,
@@ -607,7 +606,7 @@ namespace Microsoft.Build.Evaluation
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 loggingContext.LogWarning(
-                    null,
+                    DiagnosticSubcategory.None,
                     ElementLocation.Empty,
                     taskFileWarning,
                     taskPattern,
@@ -908,14 +907,14 @@ namespace Microsoft.Build.Evaluation
                                     if (!overrideDirectoryExists)
                                     {
                                         string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
-                                        loggingContext.LogWarning(null, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
+                                        loggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
                                     }
                                 }
                             }
                             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                             {
                                 string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
-                                loggingContext.LogWarning(null, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
+                                loggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "OverrideTasksFileFailure", rootedPathMessage);
                             }
 
                             if (overrideDirectoryExists)
@@ -955,7 +954,7 @@ namespace Microsoft.Build.Evaluation
             catch (XmlException e)
             {
                 // handle XML errors in the default tasks file
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.CreateFrom(currentTasksFile, e),
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.CreateFrom(currentTasksFile, e),
                     taskFileError, e.Message);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

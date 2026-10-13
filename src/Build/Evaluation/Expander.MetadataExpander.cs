@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
 

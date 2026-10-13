@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution;
@@ -165,7 +166,7 @@ internal sealed class MultiThreadedStrictModeScope
         {
             if (RecoverSentinelDirectory(taskLocation, e))
             {
-                taskLoggingContext.LogWarning(null, taskLocation,
+                taskLoggingContext.LogWarning(DiagnosticSubcategory.None, taskLocation,
                     "MultiThreadedStrictModeSentinelMissing", SentinelDirectory);
             }
 
@@ -179,7 +180,7 @@ internal sealed class MultiThreadedStrictModeScope
 
         if (convertErrorsToWarnings)
         {
-            taskLoggingContext.LogWarning(null, taskLocation,
+            taskLoggingContext.LogWarning(DiagnosticSubcategory.None, taskLocation,
                 "MultiThreadedStrictModeCurrentDirectoryChanged", taskName, unexpectedDirectory, SentinelDirectory);
             taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
         }

@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -157,7 +158,7 @@ internal class BuildCheckBuildEventHandler
                 acquisitionData.AssemblyPath);
 
             checkContext.DispatchAsErrorFromText(
-                null,
+                DiagnosticSubcategory.None,
                 errorCode,
                 helpKeyword,
                 ElementLocation.Create(acquisitionData.ProjectPath),

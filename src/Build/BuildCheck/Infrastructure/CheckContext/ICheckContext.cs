@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
@@ -30,7 +31,12 @@ internal interface ICheckContext
     /// <summary>
     /// Dispatch the instance of <see cref="BuildEventContext"/> as an error message.
     /// </summary>
-    void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, IElementLocation location, string message);
+    /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
+    /// <param name="errorCode">The error code, or <see langword="null"/>.</param>
+    /// <param name="helpKeyword">The help keyword, or <see langword="null"/>.</param>
+    /// <param name="location">The location associated with the error.</param>
+    /// <param name="message">The error message.</param>
+    void DispatchAsErrorFromText(DiagnosticSubcategory subcategory, string? errorCode, string? helpKeyword, IElementLocation location, string message);
 
     /// <summary>
     /// Dispatch the instance of <see cref="BuildEventContext"/> as a comment with provided text for the message.
@@ -40,7 +46,12 @@ internal interface ICheckContext
     /// <summary>
     /// Dispatch the instance of <see cref="BuildEventContext"/> as a warning message.
     /// </summary>
-    void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, IElementLocation location, string message);
+    /// <param name="subcategory">The diagnostic subcategory, or <see cref="DiagnosticSubcategory.None"/> for no subcategory.</param>
+    /// <param name="warningCode">The warning code, or <see langword="null"/>.</param>
+    /// <param name="helpKeyword">The help keyword, or <see langword="null"/>.</param>
+    /// <param name="location">The location associated with the warning.</param>
+    /// <param name="message">The warning message.</param>
+    void DispatchAsWarningFromText(DiagnosticSubcategory subcategory, string? warningCode, string? helpKeyword, IElementLocation location, string message);
 
     /// <summary>
     /// Dispatch the telemetry data for a failed acquisition.
