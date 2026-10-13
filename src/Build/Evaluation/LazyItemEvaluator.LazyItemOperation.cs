@@ -18,9 +18,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private abstract partial class LazyItemOperation
     {
-        private readonly string _itemType;
-        private readonly ImmutableDictionary<string, LazyItemList> _referencedItemLists;
-
         protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
         protected readonly ProjectItemElement _itemElement;
         protected readonly ItemSpec<P, I> _itemSpec;
@@ -36,14 +33,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         protected LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
             _itemElement = builder.ItemElement;
-            _itemType = builder.ItemType;
             _itemSpec = builder.ItemSpec;
-            _referencedItemLists = builder.ReferencedItemLists.ToImmutable();
             _conditionResult = builder.ConditionResult;
 
             _lazyEvaluator = lazyEvaluator;
 
-            _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, _referencedItemLists);
+            _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, builder.ReferencedItemLists.ToImmutable());
             _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
             _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.EvaluationContext, _lazyEvaluator._loggingContext);
 
@@ -62,26 +57,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
         }
 
-        protected virtual void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
-        {
-            var items = SelectItems(listBuilder, globsToIgnore);
-            MutateItems(items);
-            SaveItems(items, listBuilder);
-        }
-
-        /// <summary>
-        /// Produce the items to operate on. For example, create new ones or select existing ones
-        /// </summary>
-        protected virtual ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
-        {
-            return listBuilder.Select(itemData => itemData.Item)
-                              .ToImmutableArray();
-        }
-
-        // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/dotnet/msbuild/issues/2328
-        protected virtual void MutateItems(ImmutableArray<I> items) { }
-
-        protected virtual void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder) { }
+        protected abstract void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);
 
         protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
         {
@@ -147,7 +123,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 {
                     // Metadata expressions are allowed here.
                     // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                    EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType, capacity: metadata.Length);
+                    EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemElement.ItemType, capacity: metadata.Length);
                     _expander.Metadata = metadataTable;
 
                     // Also keep a list of everything so we can get the predecessor objects correct.
