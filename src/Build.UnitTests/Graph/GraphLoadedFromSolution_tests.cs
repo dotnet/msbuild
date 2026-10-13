@@ -251,7 +251,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             var graph = new ProjectGraph(solutionFile);
 
-            graph.ProjectNodes.ShouldBeEmpty();
+            graph.ProjectNodes.ShouldHaveSingleItem().ShouldBe(graph.EntryPointNodes.ShouldHaveSingleItem());
         }
 
         public static IEnumerable<object[]> SolutionOnlyDependenciesData
@@ -521,7 +521,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             exception.ShouldBeNull();
 
-            var graphFromSolutionEdges = graphFromSolution.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+            var graphFromSolutionEdges = GetNonSyntheticSolutionEdges(graphFromSolution);
 
             // These are global properties added by GraphBuilder when building a solution
             HashSet<string> propertiesToIgnore = new(StringComparer.OrdinalIgnoreCase)
@@ -593,7 +593,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             var graph = new ProjectGraph(_env.CreateFile("solution.sln", solutionContents).Path);
 
-            var edges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+            var edges = GetNonSyntheticSolutionEdges(graph);
 
             edges.Count.ShouldBe(1);
 
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             var graph = new ProjectGraph(_env.CreateFile("solution.sln", solutionContents).Path);
 
-            var edges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+            var edges = GetNonSyntheticSolutionEdges(graph);
             edges.Count.ShouldBe(10);
 
             var node1 = GetFirstNodeWithProjectNumber(graph, 1);
@@ -648,6 +648,13 @@ namespace Microsoft.Build.Graph.UnitTests
         private static bool IsSolutionItemReference(ProjectItemInstance edgeItem)
         {
             return edgeItem.ItemType == GraphBuilder.SolutionItemReference;
+        }
+
+        private static IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> GetNonSyntheticSolutionEdges(ProjectGraph graph)
+        {
+            return graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata()
+                .Where(edge => !edge.Key.Item1.GlobalProperties.Contains(SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty))
+                .ToDictionary(edge => edge.Key, edge => edge.Value);
         }
 
         private static bool EdgeCompliesWithSolutionDependency((ConfigurationMetadata, ConfigurationMetadata) edge, (int, int) solutionDependency)
@@ -687,15 +694,13 @@ namespace Microsoft.Build.Graph.UnitTests
             // Exactly 1 node per project
             graph.ProjectNodes.Count.ShouldBe(graph.ProjectNodes.Select(GetProjectPath).Distinct().Count());
 
-            // in the solution, all nodes are entry points
-            graphFromSolution.EntryPointNodes.Select(GetProjectPath)
-                .ShouldBeSetEquivalentTo(graph.ProjectNodes.Select(GetProjectPath));
+            graphFromSolution.EntryPointNodes.Count.ShouldBe(1);
+            graphFromSolution.EntryPointNodes.First().ProjectInstance.FullPath.ShouldBe(solutionPath);
+            graphFromSolution.GraphRoots.Count.ShouldBe(1);
+            graphFromSolution.GraphRoots.First().ProjectInstance.FullPath.ShouldBe(solutionPath);
 
             if (projectConfigurations == null || graphFromSolution.ProjectNodes.All(n => n.ProjectReferences.Count == 0))
             {
-                graphFromSolution.GraphRoots.Select(GetProjectPath)
-                    .ShouldBeSameIgnoringOrder(graph.GraphRoots.Select(GetProjectPath));
-
                 graphFromSolution.ProjectNodes.Select(GetProjectPath)
                     .ShouldBeSameIgnoringOrder(graph.ProjectNodes.Select(GetProjectPath));
             }
