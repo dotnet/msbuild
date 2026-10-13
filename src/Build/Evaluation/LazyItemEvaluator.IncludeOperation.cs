@@ -34,8 +34,18 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             _metadata = builder.Metadata.ToImmutable();
         }
 
+        protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        {
+            var items = SelectItems(listBuilder, laterRemoveGlobPatterns);
+            MutateItems(items);
+            SaveItems(items, listBuilder);
+        }
+
+        /// <summary>
+        ///  Creates the items contributed by this Include operation.
+        /// </summary>
         [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "_lazyEvaluator._evaluationProfiler has own dipose logic.")]
-        protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        private ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
         {
             ImmutableArray<I>.Builder? itemsToAdd = null;
 
@@ -191,12 +201,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             return anyExcludes ? excludePatterns.ToImmutableHashSet() : laterRemoveGlobPatterns;
         }
 
-        protected override void MutateItems(ImmutableArray<I> items)
+        private void MutateItems(ImmutableArray<I> items)
         {
             DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
         }
 
-        protected override void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)
+        private void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)
         {
             foreach (var item in items)
             {
