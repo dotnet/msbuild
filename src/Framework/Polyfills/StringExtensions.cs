@@ -16,6 +16,34 @@ internal static class StringExtensions
     public static bool IsNullOrWhiteSpace([NotNullWhen(false)] this string? value)
         => string.IsNullOrWhiteSpace(value);
 
+    /// <summary>
+    ///  Trims leading and trailing whitespace from the bounds of a string segment.
+    /// </summary>
+    /// <param name="value">The string containing the segment.</param>
+    /// <param name="startIndex">The zero-based start index, updated to exclude leading whitespace.</param>
+    /// <param name="length">The segment length, updated to exclude leading and trailing whitespace.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the segment bounds changed; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool TrimBounds(this string value, ref int startIndex, ref int length)
+    {
+        int originalLength = length;
+        int endIndex = startIndex + length;
+
+        while (startIndex < endIndex && char.IsWhiteSpace(value[startIndex]))
+        {
+            startIndex++;
+        }
+
+        while (endIndex > startIndex && char.IsWhiteSpace(value[endIndex - 1]))
+        {
+            endIndex--;
+        }
+
+        length = endIndex - startIndex;
+        return length != originalLength;
+    }
+
     extension(string)
     {
         /// <summary>
