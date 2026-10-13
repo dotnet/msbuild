@@ -215,8 +215,10 @@
     <Compile Include="Evaluation\LazyItemEvaluator.OperationBuilder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.OperationBuilderWithMetadata.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.OrderedItemDataCollection.Builder.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ReferencedItemListBuilder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperationBuilder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.MatchResult.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperationBuilder.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />

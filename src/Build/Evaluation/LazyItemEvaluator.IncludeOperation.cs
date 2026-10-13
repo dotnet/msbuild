@@ -17,21 +17,21 @@ namespace Microsoft.Build.Evaluation;
 
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    private class IncludeOperation : LazyItemOperation
+    private sealed class IncludeOperation : LazyItemOperation
     {
         private readonly int _elementOrder;
         private readonly string? _rootDirectory;
         private readonly ImmutableSegmentedList<string> _excludes;
         private readonly ImmutableArray<ProjectMetadataElement> _metadata;
 
-        public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
-            : base(builder, lazyEvaluator)
+        public IncludeOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator, IncludeOperationBuilder builder)
+            : base(lazyEvaluator, builder)
         {
             _elementOrder = builder.ElementOrder;
             _rootDirectory = builder.RootDirectory;
 
-            _excludes = builder.Excludes.ToImmutable();
-            _metadata = builder.Metadata.ToImmutable();
+            _excludes = builder.GetExcludes();
+            _metadata = builder.GetMetadata();
         }
 
         protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)

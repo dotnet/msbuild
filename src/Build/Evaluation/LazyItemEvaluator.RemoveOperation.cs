@@ -14,15 +14,15 @@ namespace Microsoft.Build.Evaluation;
 
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    private class RemoveOperation : LazyItemOperation
+    private sealed class RemoveOperation : LazyItemOperation
     {
         private readonly ImmutableList<string> _matchOnMetadata;
         private MetadataTrie<P, I> _metadataSet;
 
-        public RemoveOperation(RemoveOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
-            : base(builder, lazyEvaluator)
+        public RemoveOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator, RemoveOperationBuilder builder)
+            : base(lazyEvaluator, builder)
         {
-            _matchOnMetadata = builder.MatchOnMetadata.ToImmutable();
+            _matchOnMetadata = builder.GetMatchOnMetadata();
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(
                 _matchOnMetadata.IsEmpty || _itemSpec.Fragments.All(f => f is ItemSpec<P, I>.ItemExpressionFragment),
