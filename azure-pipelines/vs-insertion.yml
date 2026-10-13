@@ -46,6 +46,7 @@ parameters:
       - main
       - rel/insiders
       - rel/stable
+      - rel/d18.11-ltsc
   - name: DropRetentionDays
     default: 183
     type: number
