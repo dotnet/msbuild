@@ -18,6 +18,9 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class AssignTargetPath : TaskExtension, IMultiThreadableTask
     {
+        private static readonly string s_dotDirectorySeparator = $".{Path.DirectorySeparatorChar}";
+        private static readonly string s_dotAltDirectorySeparator = $".{Path.AltDirectorySeparatorChar}";
+
         #region Properties
 
         /// <summary>
@@ -114,7 +117,9 @@ namespace Microsoft.Build.Tasks
                         if (// if the file path is relative
                             !Path.IsPathRooted(Files[i].ItemSpec) &&
                             // if the file path doesn't contain any relative specifiers
-                            !Files[i].ItemSpec.Contains("." + Path.DirectorySeparatorChar) &&
+                            !Files[i].ItemSpec.Contains(s_dotDirectorySeparator) &&
+                            (Path.AltDirectorySeparatorChar == Path.DirectorySeparatorChar || !Files[i].ItemSpec.Contains(s_dotAltDirectorySeparator)) &&
+                            (Files[i].ItemSpec.Length == 0 || Files[i].ItemSpec[Files[i].ItemSpec.Length - 1] != '.') &&
                             // if the file path is already relative to the root folder
                             isRootFolderSameAsCurrentDirectory)
                         {
