@@ -326,7 +326,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         {
             if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemExpression)
             {
-                AddReferencedItemLists(builder, itemExpression.Capture);
+                // Captures holds the -> transform chain, not nested item vectors.
+                // Only the top-level capture has an ItemType to reference.
+                AddItemListBookmark(itemExpression.Capture.ItemType, builder.ItemListBookmarks);
             }
         }
     }
@@ -378,22 +380,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 elementLocation,
                 out ExpressionShredder.ItemExpressionCapture itemVector))
         {
-            AddReferencedItemLists(operationBuilder, itemVector);
-        }
-    }
-
-    private void AddReferencedItemLists(OperationBuilder operationBuilder, ExpressionShredder.ItemExpressionCapture match)
-    {
-        if (match.ItemType != null)
-        {
-            AddItemListBookmark(match.ItemType, operationBuilder.ItemListBookmarks);
-        }
-        if (match.Captures != null)
-        {
-            foreach (var subMatch in match.Captures)
-            {
-                AddReferencedItemLists(operationBuilder, subMatch);
-            }
+            // Captures holds the -> transform chain, not nested item vectors.
+            // Only the top-level capture has an ItemType to reference.
+            AddItemListBookmark(itemVector.ItemType, operationBuilder.ItemListBookmarks);
         }
     }
 }
