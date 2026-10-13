@@ -85,6 +85,13 @@ namespace Microsoft.Build.BackEnd.Logging
         private const uint DefaultQueueCapacity = 200000;
 
         /// <summary>
+        /// The memory assumed to be held by each queued event when deciding whether the queue may grow.
+        /// An event takes about 144 bytes plus 2 bytes per character of its message, so this covers an average
+        /// message of about 900 characters, five times what real builds measure.
+        /// </summary>
+        internal const long AssumedBytesPerQueuedEvent = 2048;
+
+        /// <summary>
         /// Lock for the nextProjectId
         /// </summary>
         private readonly object _lockObject = new Object();
@@ -292,7 +299,18 @@ namespace Microsoft.Build.BackEnd.Logging
         /// It should also be low enough that we do not accumulate enough messages to cause
         /// virtual memory exhaustion in extremely large builds.
         /// </summary>
-        private uint _queueCapacity = DefaultQueueCapacity;
+        private long _queueCapacity = DefaultQueueCapacity;
+
+        /// <summary>
+        /// Whether a producer that finds the queue full may double its capacity, if the process has the memory for it,
+        /// instead of waiting for the consumer.
+        /// </summary>
+        private readonly bool _adaptiveQueueCapacity;
+
+        /// <summary>
+        /// The <see cref="System.Diagnostics.Stopwatch"/> timestamp before which a refused growth is not evaluated again.
+        /// </summary>
+        private long _nextQueueGrowthCheck;
 
         /// <summary>
         /// By default our logMode is Asynchronous. We do this
@@ -336,6 +354,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 _queueCapacity = Math.Max(0, _queueCapacity);
+            }
+            else
+            {
+                _adaptiveQueueCapacity = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13);
             }
 
             if (_logMode == LoggerMode.Asynchronous)
@@ -1374,10 +1396,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 try
                 {
                     // Block until queue is not full.
-                    while (eventQueue.Count >= _queueCapacity)
+                    long capacity;
+                    while (eventQueue.Count >= (capacity = Volatile.Read(ref _queueCapacity)))
                     {
-                        // Block and wait for dequeue event.
-                        dequeueEvent.WaitOne();
+                        // A full queue grows if there is memory for it, otherwise block and wait for dequeue event.
+                        if (!TryGrowQueueCapacity(capacity))
+                        {
+                            dequeueEvent.WaitOne();
+                        }
                     }
 
                     eventQueue.Enqueue(buildEvent);
@@ -1397,6 +1423,79 @@ namespace Microsoft.Build.BackEnd.Logging
                     RouteBuildEvent(buildEvent);
                 }
             }
+        }
+
+        /// <summary>
+        /// Reports how many more bytes the process can use before the machine runs low on memory.
+        /// Replaceable so that tests do not depend on the memory of the machine they run on.
+        /// </summary>
+        internal Func<long> MemoryHeadroomProvider { get; set; } = GetMemoryHeadroom;
+
+        /// <summary>
+        /// The current capacity of the asynchronous logging event queue.
+        /// </summary>
+        internal long QueueCapacity
+        {
+            get => Volatile.Read(ref _queueCapacity);
+            set => Volatile.Write(ref _queueCapacity, value);
+        }
+
+        /// <summary>
+        /// Called by a producer that found the queue full at <paramref name="observedCapacity"/>. Doubles the capacity
+        /// if the process has memory for the added capacity, so that a slow logger does not stall the producers
+        /// while there is room to buffer.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> if the capacity is no longer <paramref name="observedCapacity"/> and the producer should
+        /// check the queue again; <see langword="false"/> if the queue stays full and the producer should wait.
+        /// </returns>
+        internal bool TryGrowQueueCapacity(long observedCapacity)
+        {
+            long capacity = Volatile.Read(ref _queueCapacity);
+            if (capacity != observedCapacity)
+            {
+                return true;
+            }
+
+            // No fixed ceiling: each doubling is priced against the headroom left, so growth stops where the machine does.
+            long grown = capacity * 2;
+            if (!_adaptiveQueueCapacity || grown <= capacity)
+            {
+                return false;
+            }
+
+            // Producers keep asking while the queue is full: look at the memory at most once per second.
+            long now = System.Diagnostics.Stopwatch.GetTimestamp();
+            if (now < Volatile.Read(ref _nextQueueGrowthCheck))
+            {
+                return false;
+            }
+
+            // The events already queued are part of the memory load: price only the capacity that is added.
+            if (MemoryHeadroomProvider() < (grown - capacity) * AssumedBytesPerQueuedEvent)
+            {
+                Volatile.Write(ref _nextQueueGrowthCheck, now + System.Diagnostics.Stopwatch.Frequency);
+                return false;
+            }
+
+            // Another producer winning the race also means that the capacity has grown.
+            if (Interlocked.CompareExchange(ref _queueCapacity, grown, capacity) == capacity)
+            {
+                Microsoft.Build.Internal.CommunicationsUtilities.Trace($"The logging queue grew from {capacity} to {grown} events.");
+            }
+
+            return true;
+        }
+
+        private static long GetMemoryHeadroom()
+        {
+#if NET
+            GCMemoryInfo info = GC.GetGCMemoryInfo();
+            return info.Index == 0 ? 0 : Math.Max(0, info.HighMemoryLoadThresholdBytes - info.MemoryLoadBytes);
+#else
+            // .NET Framework does not report the memory load: keep the fixed capacity.
+            return 0;
+#endif
         }
 
         /// <summary>

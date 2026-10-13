@@ -133,6 +133,10 @@ The logging mode is dictated by the `LoggerMode` that is injected into the `Logg
 
 Regardless of the mode used - sequential and isolated delivery of events is always guaranteed (single logger will not receive next event before returning from the previous, any logger will not receive an event while it's being processed by a different logger). The future versions might decide to deliver messages to separate loggers in independent mode - where a processing event by a single logger won't block other loggers.
 
+#### Queue capacity
+
+In asynchronous mode the producers of events block while the queue holds `MSBUILDLOGGINGQUEUECAPACITY` events (200,000 by default), which bounds the memory used by events a slow logger has not consumed yet. Blocked producers are a bottleneck in multithreaded builds, where many threads log concurrently. Starting with change wave 18.13, a producer that finds the queue full on .NET (not on .NET Framework) doubles its capacity instead of blocking, if the memory that the GC reports as still available could hold the added capacity at an assumed 2 KB per event. If it could not, producers wait as before and the memory is evaluated again after a second. Setting `MSBUILDLOGGINGQUEUECAPACITY` to any value keeps the capacity fixed.
+
 
 ## Notable Loggers
 
