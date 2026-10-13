@@ -319,7 +319,7 @@ internal partial class Expander<P, I>
             // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return string.Empty
             // Note that very few properties have this exact length, so this check should be fast.
             if (length == VstsDbDirectoryProperty.Length &&
-                string.Compare(expression, startIndex, VstsDbDirectoryProperty, 0, VstsDbDirectoryProperty.Length, StringComparison.OrdinalIgnoreCase) == 0)
+                string.Equals(expression, startIndex, VstsDbDirectoryProperty, StringComparison.OrdinalIgnoreCase))
             {
                 return string.Empty;
             }
@@ -337,14 +337,9 @@ internal partial class Expander<P, I>
             }
 
             if (tryExtractRegistryFunction &&
-                length >= RegistryPrefix.Length &&
-                string.Compare(expression, startIndex, RegistryPrefix, 0, RegistryPrefix.Length, StringComparison.OrdinalIgnoreCase) == 0)
+                TryExpandRegistryValue(expression, startIndex, length, out string registryValue))
             {
-                // If the property body starts with any of our special objects, then deal with them
-                // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
-                // Note: ExpandRegistryValue returns an empty string if not on Windows.
-                return ExpandRegistryValue(
-                    expression.Substring(startIndex, length));
+                return registryValue;
             }
 
             if (tryExtractPropertyFunction)
@@ -652,96 +647,126 @@ internal partial class Expander<P, I>
         }
 
         /// <summary>
-        /// Given a string like "Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation", return the value at that location
-        /// in the registry. If the value isn't found, returns String.Empty.
-        /// Properties may refer to a registry location by using the syntax for example
-        /// "$(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)", where "HKEY_LOCAL_MACHINE\Software\Vendor\Tools" is the key and
-        /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
-        /// the default value is desired.
+        ///  Attempts to expand a registry expression contained within a segment of a string.
         /// </summary>
-        private string ExpandRegistryValue(string registryExpression)
+        /// <param name="expression">The string containing the registry expression.</param>
+        /// <param name="startIndex">The zero-based start index of the registry expression.</param>
+        /// <param name="length">The length of the registry expression.</param>
+        /// <param name="result">The expanded registry value when the segment is a registry expression.</param>
+        /// <returns>
+        ///  <see langword="true"/> if the segment is a registry expression; otherwise,
+        ///  <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        ///  Registry expressions use syntax such as
+        ///  <c>Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation</c>. The value name
+        ///  and preceding <c>@</c> may be omitted to request the default value.
+        /// </remarks>
+        private bool TryExpandRegistryValue(string expression, int startIndex, int length, out string result)
         {
+            // False means that the segment is not a registry expression. Once the prefix is
+            // recognized, the method either returns true with a value or throws for invalid input.
+            if (length < RegistryPrefix.Length ||
+                !string.Equals(expression, startIndex, RegistryPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                result = null;
+                return false;
+            }
+
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
             // on non-Windows (no registry).
             if (!NativeMethodsShared.IsWindows)
             {
-                return string.Empty;
+                result = string.Empty;
+                return true;
             }
 #endif
 
-            // Remove "Registry:" prefix
-            string registryLocation = registryExpression.Substring(RegistryPrefix.Length);
+            // The text after "Registry:" contains a key and an optional value name separated by
+            // '@'. Omitting '@', or placing it last, requests the key's default value.
+            int keyNameStartIndex = startIndex + RegistryPrefix.Length;
+            int registryLength = length - RegistryPrefix.Length;
+            int firstAtSignIndex = expression.IndexOf('@', keyNameStartIndex, registryLength);
 
-            // Split off the value name -- the part after the "@" sign. If there's no "@" sign, then it's the default value name
-            // we want.
-            int firstAtSignOffset = registryLocation.IndexOf('@');
-            int lastAtSignOffset = registryLocation.LastIndexOf('@');
+            string keyName;
+            string valueName;
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject(firstAtSignOffset == lastAtSignOffset, _elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", String.Empty);
-
-            string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1
-                ? null : registryLocation.Substring(lastAtSignOffset + 1);
-
-            // If there's no '@', or '@' is first, then we'll use null or String.Empty for the location; otherwise
-            // the location is the part before the '@'
-            string registryKeyName = lastAtSignOffset != -1 ? registryLocation.Substring(0, lastAtSignOffset) : registryLocation;
-
-            string result = String.Empty;
-            if (registryKeyName != null)
+            if (firstAtSignIndex >= 0)
             {
-                // We rely on the '@' character to delimit the key and its value, but the registry
-                // allows this character to be used in the names of keys and the names of values.
-                // Hence we use our standard escaping mechanism to allow users to access such keys
-                // and values.
-                registryKeyName = EscapingUtilities.UnescapeAll(registryKeyName);
+                int keyNameLength = firstAtSignIndex - keyNameStartIndex;
+                int valueNameLength = registryLength - keyNameLength - 1;
 
-                if (valueName != null)
+                // A literal second '@' is ambiguous. Registry keys and value names containing '@'
+                // must use MSBuild escaping and are unescaped below.
+                if (valueNameLength > 0 && expression.IndexOf('@', firstAtSignIndex + 1, valueNameLength) >= 0)
                 {
-                    valueName = EscapingUtilities.UnescapeAll(valueName);
+                    ProjectErrorUtilities.ThrowInvalidProject(
+                        _elementLocation,
+                        "InvalidRegistryPropertyExpression",
+                        $"$({expression.Substring(startIndex, length)})",
+                        string.Empty);
                 }
 
-                try
-                {
-                    // Unless we are running under Windows, don't bother with anything but the user keys
-                    if (!NativeMethodsShared.IsWindows && !registryKeyName.StartsWith("HKEY_CURRENT_USER", StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Fake common requests to HKLM that we can resolve
-
-                        // This is the base path of the framework
-                        if (registryKeyName.StartsWith(
-                            @"HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework",
-                            StringComparison.OrdinalIgnoreCase) &&
-                            valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return NativeMethodsShared.FrameworkBasePath + Path.DirectorySeparatorChar;
-                        }
-
-                        return string.Empty;
-                    }
-
-                    object valueFromRegistry = Registry.GetValue(registryKeyName, valueName, null /* default if key or value name is not found */);
-
-                    if (valueFromRegistry != null)
-                    {
-                        // Convert the result to a string that is reasonable for MSBuild
-                        result = ConvertToString(valueFromRegistry);
-                    }
-                    else
-                    {
-                        // This means either the key or value was not found in the registry.  In this case,
-                        // we simply expand the property value to String.Empty to imitate the behavior of
-                        // normal properties.
-                        result = String.Empty;
-                    }
-                }
-                catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
-                {
-                    ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "InvalidRegistryPropertyExpression", $"$({registryExpression})", ex.Message);
-                }
+                // A trailing '@' has no value-name text and therefore selects the default value.
+                keyName = expression.Substring(keyNameStartIndex, keyNameLength);
+                valueName = valueNameLength > 0
+                    ? expression.Substring(firstAtSignIndex + 1, valueNameLength)
+                    : null;
+            }
+            else
+            {
+                // Without a delimiter, the entire remaining segment is the key name.
+                keyName = expression.Substring(keyNameStartIndex, registryLength);
+                valueName = null;
             }
 
-            return result;
+            // We rely on the '@' character to delimit the key and its value, but the registry
+            // allows this character to be used in the names of keys and the names of values.
+            // Hence we use our standard escaping mechanism to allow users to access such keys
+            // and values.
+            keyName = EscapingUtilities.UnescapeAll(keyName);
+
+            if (valueName != null)
+            {
+                valueName = EscapingUtilities.UnescapeAll(valueName);
+            }
+
+            try
+            {
+                // Full-framework MSBuild can run on non-Windows runtimes such as Mono. Avoid
+                // registry access there except for supported user keys and the compatibility case.
+                if (!NativeMethodsShared.IsWindows && !keyName.StartsWith("HKEY_CURRENT_USER", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Fake common requests to HKLM that we can resolve
+
+                    // This is the base path of the framework
+                    if (keyName.StartsWith(@"HKEY_LOCAL_MACHINE\Software\Microsoft\.NETFramework", StringComparison.OrdinalIgnoreCase) &&
+                        valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
+                    {
+                        result = NativeMethodsShared.FrameworkBasePath + Path.DirectorySeparatorChar;
+                        return true;
+                    }
+
+                    result = string.Empty;
+                    return true;
+                }
+
+                object value = Registry.GetValue(keyName, valueName, defaultValue: null);
+                result = ConvertToString(value);
+                return true;
+            }
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    _elementLocation,
+                    "InvalidRegistryPropertyExpression",
+                    $"$({expression.Substring(startIndex, length)})",
+                    ex.Message);
+            }
+
+            result = null;
+            return false;
         }
     }
 }
