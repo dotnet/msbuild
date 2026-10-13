@@ -134,24 +134,29 @@ namespace Microsoft.Build.Evaluation
         // Implements a pool of expression trees for each condition.
         // This is because an expression tree is a mutually exclusive resource (has non thread safe state while it evaluates).
         // During high demand when all expression trees are busy evaluating, a new expression tree is created and added to the pool.
-        // The pool is represented by the ConcurrentStack.
+        // The pool lock protects checkout and return, not evaluation.
+        private sealed class ExpressionTreePool : Stack<GenericExpressionNode>
+        {
+            public bool HasParsedExpression { get; set; }
+        }
+
         private struct ExpressionTreeForCurrentOptionsWithSize
         {
             // condition string -> pool of expression trees
-            private readonly ConcurrentDictionary<string, Stack<GenericExpressionNode>> _conditionPools;
+            private readonly ConcurrentDictionary<string, ExpressionTreePool> _conditionPools;
             private int _mOptimisticSize;
 
             public readonly int OptimisticSize => _mOptimisticSize;
 
-            public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, Stack<GenericExpressionNode>> conditionPools)
+            public ExpressionTreeForCurrentOptionsWithSize(ConcurrentDictionary<string, ExpressionTreePool> conditionPools)
             {
                 _conditionPools = conditionPools;
                 _mOptimisticSize = conditionPools.Count;
             }
 
-            public Stack<GenericExpressionNode> GetOrAdd(string condition, Func<string, Stack<GenericExpressionNode>> addFunc)
+            public ExpressionTreePool GetOrAdd(string condition, Func<string, ExpressionTreePool> addFunc)
             {
-                if (!_conditionPools.TryGetValue(condition, out Stack<GenericExpressionNode>? stack))
+                if (!_conditionPools.TryGetValue(condition, out ExpressionTreePool? stack))
                 {
                     // Count how many conditions there are in the cache.
                     // The condition evaluator will flush the cache when some threshold is exceeded.
@@ -240,69 +245,72 @@ namespace Microsoft.Build.Evaluation
             // Get the expression tree cache for the current parsing options.
             var cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.GetOrAdd(
                 (int)options,
-                _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)));
+                _ => new ExpressionTreeForCurrentOptionsWithSize(new ConcurrentDictionary<string, ExpressionTreePool>(StringComparer.Ordinal)));
 
             cachedExpressionTreesForCurrentOptions = FlushCacheIfLargerThanThreshold(options, cachedExpressionTreesForCurrentOptions);
 
             // Get the pool of expressions for this condition.
-            Stack<GenericExpressionNode> expressionPool = cachedExpressionTreesForCurrentOptions.GetOrAdd(condition, _ => new Stack<GenericExpressionNode>());
+            ExpressionTreePool expressionPool = cachedExpressionTreesForCurrentOptions.GetOrAdd(condition, _ => new ExpressionTreePool());
 
+            GenericExpressionNode parsedExpression;
             lock (expressionPool)
             {
                 // Try and see if there's an available expression tree in the pool.
                 // If not, parse a new expression tree and add it back to the pool.
-                GenericExpressionNode parsedExpression;
                 if (expressionPool.Count == 0)
                 {
                     var conditionParser = new Parser();
 
                     #region REMOVE_COMPAT_WARNING
-                    conditionParser.LoggingServices = loggingContext?.LoggingService;
+                    // Concurrent checkouts must not repeat a cached condition's parser warning.
+                    conditionParser.LoggingServices = expressionPool.HasParsedExpression && !s_disableExpressionCaching
+                        ? null
+                        : loggingContext?.LoggingService;
                     conditionParser.LogBuildEventContext = loggingContext?.BuildEventContext ?? BuildEventContext.Invalid;
                     #endregion
 
                     parsedExpression = conditionParser.Parse(condition, options, elementLocation);
+                    expressionPool.HasParsedExpression = true;
                 }
                 else
                 {
                     parsedExpression = expressionPool.Pop();
                 }
+            }
 
-                bool result;
+            bool result;
 
-                var state = new ConditionEvaluationState<P, I>(
-                    condition,
-                    expander,
-                    expanderOptions,
-                    conditionedPropertiesTable,
-                    evaluationDirectory,
-                    elementLocation,
-                    fileSystem,
-                    projectRootElementCache);
+            var state = new ConditionEvaluationState<P, I>(
+                condition,
+                expander,
+                expanderOptions,
+                conditionedPropertiesTable,
+                evaluationDirectory,
+                elementLocation,
+                fileSystem,
+                projectRootElementCache);
 
-                expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
-                // We are evaluating this expression now and it can cache some state for the duration,
-                // so we don't want multiple threads working on the same expression
-                lock (parsedExpression)
+            expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
+            // The checked-out tree belongs exclusively to this evaluation until reset and return.
+            try
+            {
+                result = parsedExpression.Evaluate(state);
+            }
+            finally
+            {
+                parsedExpression.ResetState();
+                if (!s_disableExpressionCaching)
                 {
-                    try
+                    // Finished using the expression tree. Add it back to the pool so other threads can use it.
+                    lock (expressionPool)
                     {
-                        result = parsedExpression.Evaluate(state);
-                    }
-                    finally
-                    {
-                        parsedExpression.ResetState();
-                        if (!s_disableExpressionCaching)
-                        {
-                            // Finished using the expression tree. Add it back to the pool so other threads can use it.
-                            expressionPool.Push(parsedExpression);
-                        }
-                        expander.PropertiesUseTracker.ResetPropertyReadContext();
+                        expressionPool.Push(parsedExpression);
                     }
                 }
-
-                return result;
+                expander.PropertiesUseTracker.ResetPropertyReadContext();
             }
+
+            return result;
         }
 
         private static ExpressionTreeForCurrentOptionsWithSize FlushCacheIfLargerThanThreshold(
@@ -324,14 +332,14 @@ namespace Microsoft.Build.Evaluation
                     (int)options,
                     _ =>
                         new ExpressionTreeForCurrentOptionsWithSize(
-                            new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal)),
+                            new ConcurrentDictionary<string, ExpressionTreePool>(StringComparer.Ordinal)),
                     (key, existing) =>
                     {
                         if (existing.OptimisticSize > 3000)
                         {
                             return
                                 new ExpressionTreeForCurrentOptionsWithSize(
-                                    new ConcurrentDictionary<string, Stack<GenericExpressionNode>>(StringComparer.Ordinal));
+                                    new ConcurrentDictionary<string, ExpressionTreePool>(StringComparer.Ordinal));
                         }
                         else
                         {
