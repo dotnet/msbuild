@@ -38,13 +38,8 @@ internal sealed class PropertiesUseTracker
     /// </summary>
     private Dictionary<string, IElementLocation>? _properties;
 
-    internal void TrackRead(string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, bool isUninitialized, bool isArtificial)
+    internal void TrackRead(string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, bool isUninitialized)
     {
-        if (isArtificial)
-        {
-            return;
-        }
-
         // LoggingContext can be null e.g. for initial toolset resolving and reading - we'll miss those expansions in our tracking
         LoggingContext?.ProcessPropertyRead(new PropertyReadInfo(propertyName, startIndex, endIndex,
             elementLocation, isUninitialized, GetPropertyReadContext(propertyName, startIndex, endIndex)));

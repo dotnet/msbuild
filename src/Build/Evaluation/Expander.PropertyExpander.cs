@@ -10,7 +10,6 @@ using System.IO;
 #if !NET
 using System.Linq;
 #endif
-using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -18,7 +17,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
 #if FEATURE_MSIOREDIST
 // File is intentionally NOT aliased — all typeof() comparisons use fully-qualified
@@ -559,74 +557,74 @@ internal partial class Expander<P, I>
         }
 
         /// <summary>
-        /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
+        ///  Looks up a simple property by name.
         /// </summary>
-        private object LookupProperty(string propertyName)
-        {
-            return LookupProperty(propertyName, 0, propertyName.Length - 1);
-        }
+        /// <param name="propertyName">The property name to look up.</param>
+        /// <returns>
+        ///  The escaped property value, or an empty string if the property is not defined.
+        /// </returns>
+        private string LookupProperty(string propertyName)
+            => LookupProperty(propertyName, 0, propertyName.Length - 1);
 
         /// <summary>
-        /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
+        ///  Looks up a simple property whose name is contained within a segment of a string.
         /// </summary>
-        private object LookupProperty(string propertyName, int startIndex, int endIndex)
+        /// <param name="propertyName">The string containing the property name.</param>
+        /// <param name="startIndex">The zero-based start index of the property name.</param>
+        /// <param name="endIndex">The inclusive end index of the property name.</param>
+        /// <returns>
+        ///  The escaped property value, or an empty string if the property is not defined.
+        /// </returns>
+        private string LookupProperty(string propertyName, int startIndex, int endIndex)
         {
             P property = _properties.GetProperty(propertyName, startIndex, endIndex);
 
-            object propertyValue;
-
-            bool isArtificial = property == null && ((endIndex - startIndex) >= 7) &&
-                               MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
-
-            _propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, _elementLocation, property == null, isArtificial);
-
-            if (isArtificial)
+            if (property is null)
             {
-                // It could be one of the MSBuildThisFileXXXX properties,
-                // whose values vary according to the file they are in.
-                if (startIndex != 0 || endIndex != propertyName.Length)
+                int length = endIndex - startIndex + 1;
+
+                // MSBuildThisFile* properties are synthesized from the current file rather than
+                // stored in the property collection. Other undefined MSBuild* names also remain
+                // synthetic and must not be tracked as uninitialized properties.
+                if (ReservedPropertyNames.StartsWithMSBuild(propertyName, startIndex, length))
                 {
-                    propertyValue = ExpandMSBuildThisFileProperty(propertyName.Substring(startIndex, endIndex - startIndex + 1));
-                }
-                else
-                {
-                    propertyValue = ExpandMSBuildThisFileProperty(propertyName);
-                }
-            }
-            else if (property == null)
-            {
-                propertyValue = String.Empty;
-            }
-            else
-            {
-                if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
-                {
-                    environmentDerivedProperty.loggingContext = _propertiesUseTracker.LoggingContext;
+                    return ExpandMSBuildThisFileProperty(propertyName, startIndex, length, _elementLocation.File);
                 }
 
-                propertyValue = property.GetEvaluatedValueEscaped(_elementLocation);
-            }
-
-            return propertyValue;
-        }
-
-        /// <summary>
-        /// If the property name provided is one of the special
-        /// per file properties named "MSBuildThisFileXXXX" then returns the value of that property.
-        /// If the location provided does not have a path (eg., if it comes from a file that has
-        /// never been saved) then returns empty string.
-        /// If the property name is not one of those properties, returns empty string.
-        /// </summary>
-        private string ExpandMSBuildThisFileProperty(string propertyName)
-        {
-            if (!ReservedPropertyNames.TryGetKind(propertyName, out ReservedPropertyKind propertyKind))
-            {
+                // An ordinary undefined property expands to an empty string and is tracked so a
+                // later assignment can report that the property was read before initialization.
+                _propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, _elementLocation, isUninitialized: true);
                 return string.Empty;
             }
 
-            string file = _elementLocation.File;
+            // Resolved properties are tracked as initialized reads.
+            _propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, _elementLocation, isUninitialized: false);
 
-            if (file.Length == 0)
+            if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
+            {
+                // Environment-derived properties defer logging until their value is requested.
+                environmentDerivedProperty.loggingContext = _propertiesUseTracker.LoggingContext;
+            }
+
+            return property.GetEvaluatedValueEscaped(_elementLocation);
+        }
+
+        /// <summary>
+        ///  Expands an <c>MSBuildThisFile*</c> property whose name is contained within a segment
+        ///  of a string.
+        /// </summary>
+        /// <param name="propertyName">The string containing the property name.</param>
+        /// <param name="startIndex">The zero-based start index of the property name.</param>
+        /// <param name="length">The length of the property name.</param>
+        /// <param name="file">The path of the project or imported file being evaluated.</param>
+        /// <returns>
+        ///  The expanded property value, or an empty string if the segment does not identify an
+        ///  <c>MSBuildThisFile*</c> property or <paramref name="file"/> is empty.
+        /// </returns>
+        private static string ExpandMSBuildThisFileProperty(string propertyName, int startIndex, int length, string file)
+        {
+            if (file.Length == 0 ||
+                !ReservedPropertyNames.TryGetKind(propertyName, startIndex, length, out ReservedPropertyKind propertyKind))
             {
                 return string.Empty;
             }
