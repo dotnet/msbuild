@@ -191,7 +191,6 @@ internal partial class Expander<P, I>
                 }
 
                 // Expand the property body between the "$(" marker and its matching closing parenthesis.
-                int endIndex = closingParenIndex - 1;
                 int length = closingParenIndex - startIndex;
 
                 object propertyValue;
@@ -203,14 +202,14 @@ internal partial class Expander<P, I>
                 }
                 else if (!isPotentialPropertyFunction && !isPotentialRegistryFunction)
                 {
-                    propertyValue = LookupProperty(expression, startIndex, endIndex);
+                    propertyValue = LookupProperty(expression, startIndex, length);
                 }
                 else
                 {
                     propertyValue = ExpandProperty(
                         expression,
                         startIndex,
-                        endIndex,
+                        length,
                         isPotentialRegistryFunction,
                         isPotentialPropertyFunction);
                 }
@@ -314,13 +313,10 @@ internal partial class Expander<P, I>
         private object ExpandProperty(
             string expression,
             int startIndex,
-            int endIndex,
+            int length,
             bool tryExtractRegistryFunction,
             bool tryExtractPropertyFunction)
         {
-            // startIndex and endIndex inclusively delimit the property body.
-            int length = endIndex - startIndex + 1;
-
             // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return string.Empty
             // Note that very few properties have this exact length, so this check should be fast.
             if (length == VstsDbDirectoryProperty.Length &&
@@ -359,7 +355,7 @@ internal partial class Expander<P, I>
             }
 
             // This is a regular property
-            return LookupProperty(expression, startIndex, endIndex);
+            return LookupProperty(expression, startIndex, length);
         }
 
         /// <summary>
@@ -438,7 +434,7 @@ internal partial class Expander<P, I>
                     }
                     else
                     {
-                        propertyValue = LookupProperty(propertyBody, 0, indexerStart - 1);
+                        propertyValue = LookupProperty(propertyBody, startIndex: 0, length: indexerStart);
                         propertyBody = propertyBody.Substring(indexerStart);
 
                         // recurse so that the function representing the indexer can be executed on the property value
@@ -564,25 +560,23 @@ internal partial class Expander<P, I>
         ///  The escaped property value, or an empty string if the property is not defined.
         /// </returns>
         private string LookupProperty(string propertyName)
-            => LookupProperty(propertyName, 0, propertyName.Length - 1);
+            => LookupProperty(propertyName, 0, propertyName.Length);
 
         /// <summary>
         ///  Looks up a simple property whose name is contained within a segment of a string.
         /// </summary>
         /// <param name="propertyName">The string containing the property name.</param>
         /// <param name="startIndex">The zero-based start index of the property name.</param>
-        /// <param name="endIndex">The inclusive end index of the property name.</param>
+        /// <param name="length">The length of the property name.</param>
         /// <returns>
         ///  The escaped property value, or an empty string if the property is not defined.
         /// </returns>
-        private string LookupProperty(string propertyName, int startIndex, int endIndex)
+        private string LookupProperty(string propertyName, int startIndex, int length)
         {
-            P property = _properties.GetProperty(propertyName, startIndex, endIndex);
+            P property = _properties.GetProperty(propertyName, startIndex, endIndex: startIndex + length - 1);
 
             if (property is null)
             {
-                int length = endIndex - startIndex + 1;
-
                 // MSBuildThisFile* properties are synthesized from the current file rather than
                 // stored in the property collection. Other undefined MSBuild* names also remain
                 // synthetic and must not be tracked as uninitialized properties.
@@ -593,12 +587,12 @@ internal partial class Expander<P, I>
 
                 // An ordinary undefined property expands to an empty string and is tracked so a
                 // later assignment can report that the property was read before initialization.
-                _propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, _elementLocation, isUninitialized: true);
+                _propertiesUseTracker.TrackRead(propertyName, startIndex, length, _elementLocation, isUninitialized: true);
                 return string.Empty;
             }
 
             // Resolved properties are tracked as initialized reads.
-            _propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, _elementLocation, isUninitialized: false);
+            _propertiesUseTracker.TrackRead(propertyName, startIndex, length, _elementLocation, isUninitialized: false);
 
             if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
             {
