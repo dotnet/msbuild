@@ -63,6 +63,30 @@ internal static class ReservedPropertyNames
     internal const string UserExtensionsPathSuffix = $@"Microsoft\{MSBuild}";
 
     /// <summary>
+    ///  Determines whether a property name starts with <c>MSBuild</c>, ignoring case.
+    /// </summary>
+    /// <param name="propertyName">The property name to examine.</param>
+    /// <returns>
+    ///  <see langword="true"/> if <paramref name="propertyName"/> starts with <c>MSBuild</c>
+    ///  and contains at least one additional character; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool StartsWithMSBuild(string propertyName)
+        => StartsWithMSBuild(propertyName, startIndex: 0, propertyName.Length);
+
+    /// <summary>
+    ///  Determines whether a segment of a string starts with <c>MSBuild</c>, ignoring case.
+    /// </summary>
+    /// <param name="propertyName">The string containing the property name.</param>
+    /// <param name="startIndex">The zero-based start index of the property name.</param>
+    /// <param name="length">The length of the property name.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the specified segment starts with <c>MSBuild</c> and contains
+    ///  at least one additional character; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool StartsWithMSBuild(string propertyName, int startIndex, int length)
+        => length > MSBuild.Length && MSBuildNameIgnoreCaseComparer.Default.Equals(MSBuild, propertyName, startIndex, MSBuild.Length);
+
+    /// <summary>
     ///  Determines whether a property may be set only by MSBuild.
     /// </summary>
     /// <param name="property">The property name to examine.</param>
