@@ -175,6 +175,7 @@ public sealed class PackageContractTests
             $"-p:RestorePackagesPath={Path.Combine(packageOutput, "packages")}");
 
         output.ShouldNotContain("warning MSBuildTask");
+        output.ShouldNotContain("error MSBuildTask");
         await File.WriteAllTextAsync(
             Path.Combine(consumerDirectory, ".editorconfig"),
             """
@@ -193,56 +194,86 @@ public sealed class PackageContractTests
             "--nologo",
             "--disable-build-servers",
             "--no-restore",
+            "-t:Rebuild",
+            "-p:TreatWarningsAsErrors=true");
+
+        output.ShouldNotContain("warning MSBuildTask");
+        output.ShouldNotContain("error MSBuildTask");
+
+        await File.AppendAllTextAsync(
+            Path.Combine(consumerDirectory, ".editorconfig"),
+            "\nmsbuild_task_analyzer.run_mt_analyzers_on_all_tasks = true\n");
+
+        output = await RunDotNet(
+            repositoryRoot,
+            consumerDirectory,
+            "build",
+            "Consumer.csproj",
+            "--nologo",
+            "--disable-build-servers",
+            "--no-restore",
             "-t:Rebuild");
 
-        output.ShouldContain("MSBuildTask0004");
-        output.ShouldContain("MSBuildTask0005");
+        output.ShouldContain("warning MSBuildTask0004");
+        output.ShouldContain("warning MSBuildTask0005");
 
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
             "System.Environment.GetEnvironmentVariable(\"KEY\")", "", [], "warning", 0);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Reflection.Assembly.Load(\"Unsafe\")", "", [], "warning", 0);
+        output = await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Reflection.Assembly.Load(\"Unsafe\")", "dotnet_diagnostic.MSBuildTask0004.severity = error",
+            [], "warning", 1);
+        output.ShouldContain("error MSBuildTask0004");
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
             "System.Environment.GetEnvironmentVariable(\"KEY\")", "",
-            ["-p:TreatWarningsAsErrors=true", "-p:WarningsNotAsErrors=MSBuildTask0002"], "warning", 0);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+            ["-p:TreatWarningsAsErrors=true", "-p:WarningsNotAsErrors=MSBuildTask0002"], "error", 1);
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.GetEnvironmentVariable(\"KEY\")", "dotnet_diagnostic.MSBuildTask0002.severity = none",
+            ["-p:TreatWarningsAsErrors=true", "-p:WarningsNotAsErrors=MSBuildTask0005"], "warning", 0);
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
             "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = warning",
-            ["-p:NoWarn=MSBuildTask0001"], null, 0);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
-            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = warning",
-            ["-p:WarningsAsErrors=MSBuildTask0001"], "error", 1);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
-            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0005.severity = warning",
             ["-p:NoWarn=MSBuildTask0001"], "warning", 0);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = warning",
+            ["-p:WarningsAsErrors=MSBuildTask0001"], "warning", 1);
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
             "System.Environment.GetEnvironmentVariable(\"KEY\")", "",
             ["-p:NoWarn=MSBuildTask0005"], null, 0);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0005.severity = none",
+            [], null, 0);
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0005.severity = error",
+            [], "error", 1);
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
             "System.Reflection.Assembly.Load(\"Unsafe\")", "dotnet_analyzer_diagnostic.severity = warning",
             [], "warning", 0);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
             "System.Reflection.Assembly.Load(\"Unsafe\")",
             """
             dotnet_analyzer_diagnostic.severity = error
             dotnet_analyzer_diagnostic.category-MSBuild.TaskAuthoring.severity = warning
             """,
             [], "warning", 0);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
             "System.Reflection.Assembly.Load(\"Unsafe\")",
             """
             dotnet_analyzer_diagnostic.severity = warning
             dotnet_diagnostic.MSBuildTask0004.severity = suggestion
             """,
-            [], null, 0);
+            [], "warning", 0);
 
         await File.WriteAllTextAsync(Path.Combine(consumerDirectory, ".globalconfig"), """
             is_global = true
-            dotnet_diagnostic.MSBuildTask0001.severity = error
+            dotnet_diagnostic.MSBuildTask0005.severity = error
             """);
-        await VerifyEffectiveSeverity(repositoryRoot, consumerDirectory,
-            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0001.severity = default",
-            [], null, 0);
+        await VerifyTransitiveSeverity(repositoryRoot, consumerDirectory,
+            "System.Environment.Exit(1)", "dotnet_diagnostic.MSBuildTask0005.severity = default",
+            [], "warning", 0);
     }
 
-    private async Task VerifyEffectiveSeverity(
+    private async Task<string> VerifyTransitiveSeverity(
         string repositoryRoot,
         string consumerDirectory,
         string unsafeCall,
@@ -289,6 +320,8 @@ public sealed class PackageContractTests
         {
             output.ShouldContain($"{expectedSeverity} MSBuildTask0005");
         }
+
+        return output;
     }
 
     private async Task PackProject(
