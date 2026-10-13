@@ -12,7 +12,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     /// <summary>
     ///  Collects captured item lists, allocating mutable storage only when a list is added.
     /// </summary>
-    private sealed class ReferencedItemListBuilder
+    private struct ReferencedItemListBuilder
     {
         // WORKAROUND: Unnecessary boxed allocation: https://github.com/dotnet/corefx/issues/24563
         private static readonly ImmutableDictionary<string, LazyItemList> s_emptyIgnoreCase =
@@ -44,6 +44,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <returns>
         ///  The captured item lists, or the shared empty dictionary with the selected comparer.
         /// </returns>
-        public ImmutableDictionary<string, LazyItemList> ToImmutable() => _builder?.ToImmutable() ?? Empty;
+        public ImmutableDictionary<string, LazyItemList> ToImmutable()
+            => _builder?.ToImmutable() ?? Empty;
     }
 }
