@@ -1,37 +1,34 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Immutable;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Framework;
-
-#nullable disable
 
 namespace Microsoft.Build.Evaluation;
 
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    private class OperationBuilder
+    private abstract class OperationBuilder(ProjectItemElement itemElement, bool conditionResult)
     {
-        // WORKAROUND: Unnecessary boxed allocation: https://github.com/dotnet/corefx/issues/24563
-        private static readonly ImmutableDictionary<string, LazyItemList> s_emptyIgnoreCase = ImmutableDictionary.Create<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
+        private ReferencedItemListBuilder? _referencedItemListBuilder;
 
-        public ProjectItemElement ItemElement { get; set; }
-        public string ItemType { get; set; }
-        public ItemSpec<P, I> ItemSpec { get; set; }
+        public ProjectItemElement ItemElement { get; } = itemElement;
+        public bool ConditionResult { get; } = conditionResult;
 
-        public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
-            ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
-            s_emptyIgnoreCase.ToBuilder();
+        public ItemSpec<P, I>? ItemSpec { get; set; }
 
-        public bool ConditionResult { get; set; }
+        /// <summary>
+        ///  Gets an immutable snapshot without creating a builder when no item lists were captured.
+        /// </summary>
+        public ImmutableDictionary<string, LazyItemList> GetReferencedItemLists()
+            => _referencedItemListBuilder?.ToImmutable() ?? ReferencedItemListBuilder.Empty;
 
-        public OperationBuilder(ProjectItemElement itemElement, bool conditionResult)
-        {
-            ItemElement = itemElement;
-            ItemType = itemElement.ItemType;
-            ConditionResult = conditionResult;
-        }
+        /// <summary>
+        ///  Adds or replaces a captured item list, creating the builder on the first addition.
+        /// </summary>
+        /// <param name="itemType">The referenced item type.</param>
+        /// <param name="itemList">The item list visible when the reference was captured.</param>
+        public void AddReferencedItemList(string itemType, LazyItemList itemList)
+            => (_referencedItemListBuilder ??= new()).Add(itemType, itemList);
     }
 }

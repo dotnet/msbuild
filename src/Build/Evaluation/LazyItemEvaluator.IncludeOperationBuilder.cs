@@ -8,15 +8,21 @@ namespace Microsoft.Build.Evaluation;
 
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    private class IncludeOperationBuilder : OperationBuilderWithMetadata
+    private class IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult)
+        : OperationBuilderWithMetadata(itemElement, conditionResult)
     {
-        public int ElementOrder { get; set; }
-        public string? RootDirectory { get; set; }
+        private ImmutableSegmentedList<string>.Builder? _excludes;
 
-        public ImmutableSegmentedList<string>.Builder Excludes { get; } = ImmutableSegmentedList.CreateBuilder<string>();
+        public int ElementOrder { get; init; }
+        public string? RootDirectory { get; init; }
 
-        public IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
+        public ImmutableSegmentedList<string> GetExcludes()
+            => _excludes?.ToImmutable() ?? [];
+
+        public void AddExclude(string exclude)
         {
+            _excludes ??= ImmutableSegmentedList.CreateBuilder<string>();
+            _excludes.Add(exclude);
         }
     }
 }

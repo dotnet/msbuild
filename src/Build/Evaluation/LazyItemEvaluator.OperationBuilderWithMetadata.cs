@@ -4,18 +4,22 @@
 using System.Collections.Immutable;
 using Microsoft.Build.Construction;
 
-#nullable disable
-
 namespace Microsoft.Build.Evaluation;
 
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    private class OperationBuilderWithMetadata : OperationBuilder
+    private abstract class OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult)
+        : OperationBuilder(itemElement, conditionResult)
     {
-        public readonly ImmutableArray<ProjectMetadataElement>.Builder Metadata = ImmutableArray.CreateBuilder<ProjectMetadataElement>();
+        private ImmutableArray<ProjectMetadataElement>.Builder? _metadata;
 
-        public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
+        public ImmutableArray<ProjectMetadataElement> GetMetadata()
+            => _metadata?.ToImmutable() ?? [];
+
+        public void AddMetadata(ProjectMetadataElement metadataElement)
         {
+            _metadata ??= ImmutableArray.CreateBuilder<ProjectMetadataElement>();
+            _metadata.Add(metadataElement);
         }
     }
 }

@@ -30,7 +30,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         protected readonly IItemFactory<I, I> _itemFactory;
         internal ItemSpec<P, I> Spec => _itemSpec;
 
-        protected LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+        protected LazyItemOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator, OperationBuilder builder)
         {
             _itemElement = builder.ItemElement;
             _itemSpec = builder.ItemSpec;
@@ -38,7 +38,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             _lazyEvaluator = lazyEvaluator;
 
-            _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, builder.ReferencedItemLists.ToImmutable());
+            _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, builder.GetReferencedItemLists());
             _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
             _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.EvaluationContext, _lazyEvaluator._loggingContext);
 
