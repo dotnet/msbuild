@@ -344,7 +344,6 @@ public class MSBuildPathMatcher_Tests
     [InlineData("[a]+(b).cs", "[A]+(B).CS", true)]
     [InlineData("*", "", true)]
     [InlineData("?", "", false)]
-    [InlineData("K.cs", "\u212A.cs", true)]
     [InlineData("S.cs", "\u017F.cs", false)]
     [InlineData("?.cs", "\n.cs", false)]
     [InlineData("?.cs", "a.cs\n", true)]
@@ -368,7 +367,6 @@ public class MSBuildPathMatcher_Tests
     [InlineData("*a*b?", "aaabbbc", true)]
     [InlineData("*a*b?", "aaac", false)]
     [InlineData("[a]+(b)", "[A]+(B)", true)]
-    [InlineData("K", "\u212A", true)]
     [InlineData("?", "\n", false)]
     [InlineData("?", "a\n", true)]
     [InlineData("a*b", "a\nb", true)]
@@ -381,6 +379,30 @@ public class MSBuildPathMatcher_Tests
             useInvariantCulture: true);
 
         matcher.MatchesFilesInDirectory(name).ShouldBe(expected);
+    }
+
+    [Theory]
+    [InlineData("K.cs", "\u212A.cs")]
+    [InlineData("K", "\u212A")]
+    public void InvariantKelvinSignMatchingAgreesWithRegex(string pattern, string name)
+    {
+        Regex regex = new(
+            GlobbingRegex.RegularExpressionFromFileSpec(string.Empty, string.Empty, pattern),
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        bool expected = regex.IsMatch(name);
+        MSBuildPathMatcher fileMatcher = new(
+            "**",
+            pattern,
+            preserveLegacySemantics: true,
+            useInvariantCulture: true);
+        MSBuildPathMatcher directoryMatcher = new(
+            ToPlatformPath($"**/{pattern}"),
+            "*.cs",
+            preserveLegacySemantics: true,
+            useInvariantCulture: true);
+
+        fileMatcher.MatchesFileName(name.AsSpan()).ShouldBe(expected);
+        directoryMatcher.MatchesFilesInDirectory(name).ShouldBe(expected);
     }
 
     [Fact]
