@@ -17,6 +17,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.Engine.UnitTests.Evaluation;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
@@ -2491,6 +2492,42 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string result = expander.ExpandIntoStringLeaveEscaped("$([MSBuild]::__GetListTest())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal("A;B;C;D", result);
+        }
+
+        /// <summary>
+        ///  Verifies conversion of property-function results across scalar, collection, and nested collection values.
+        /// </summary>
+        /// <param name="scenario">The property-value conversion scenario to exercise.</param>
+        /// <param name="expected">The expected escaped string representation.</param>
+        [Theory]
+        [InlineData("Null", "")]
+        [InlineData("EmptyString", "")]
+        [InlineData("String", "a%3bb")]
+        [InlineData("Scalar", "42")]
+        [InlineData("EmptyDictionary", "")]
+        [InlineData("EmptyArray", "")]
+        [InlineData("EmptyEnumerable", "")]
+        [InlineData("Dictionary", "a%3bb=c%25d")]
+        [InlineData("EnumerableWithEmptyElements", "a;;b%3bc")]
+        [InlineData("NonzeroLowerBoundArray", "a;b")]
+        [InlineData("MultidimensionalArray", "a;b;c;d")]
+        [InlineData("NestedEnumerable", "a%25253bb%253bc")]
+        [InlineData("NestedDictionary", "key=a%253bb%3bc")]
+        public void PropertyFunctionConvertsComplexValues(string scenario, string expected)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
+
+            PropertyDictionary<ProjectPropertyInstance> properties = new();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(properties, FileSystems.Default);
+            string typeName = typeof(PropertyValueConversionTestData).AssemblyQualifiedName;
+
+            string result = expander.ExpandIntoStringLeaveEscaped(
+                $"$([{typeName}]::GetValue(`{scenario}`))",
+                ExpanderOptions.ExpandProperties,
+                MockElementLocation.Instance);
+
+            result.ShouldBe(expected);
         }
 
         /// <summary>
