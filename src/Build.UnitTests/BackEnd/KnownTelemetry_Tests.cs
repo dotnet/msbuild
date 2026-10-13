@@ -55,6 +55,7 @@ public class KnownTelemetry_Tests
         buildTelemetry.MultiThreadedModeEnabled.ShouldBeNull();
         buildTelemetry.TaskHostConsoleOutputForwarded.ShouldBeNull();
         buildTelemetry.SACEnabled.ShouldBeNull();
+        buildTelemetry.ResponseFileUsed.ShouldBeNull();
 
         buildTelemetry.GetProperties().ShouldBeEmpty();
     }
@@ -76,6 +77,25 @@ public class KnownTelemetry_Tests
         var activityProperty = buildTelemetry.GetActivityProperties().ShouldHaveSingleItem();
         activityProperty.Key.ShouldBe(nameof(BuildTelemetry.TaskHostConsoleOutputForwarded));
         activityProperty.Value.ShouldBe(forwarded);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BuildTelemetryIncludesResponseFileUsed(bool responseFileUsed)
+    {
+        BuildTelemetry buildTelemetry = new()
+        {
+            ResponseFileUsed = responseFileUsed,
+        };
+
+        var property = buildTelemetry.GetProperties().ShouldHaveSingleItem();
+        property.Key.ShouldBe(nameof(BuildTelemetry.ResponseFileUsed));
+        property.Value.ShouldBe(responseFileUsed.ToString());
+
+        var activityProperty = buildTelemetry.GetActivityProperties().ShouldHaveSingleItem();
+        activityProperty.Key.ShouldBe(nameof(BuildTelemetry.ResponseFileUsed));
+        activityProperty.Value.ShouldBe(responseFileUsed);
     }
 
     [Fact]

@@ -48,6 +48,11 @@ namespace Microsoft.Build.Framework.Telemetry
         public bool? IsStandaloneExecution { get; set; }
 
         /// <summary>
+        /// True if at least one response file was used for the command-line build.
+        /// </summary>
+        public bool? ResponseFileUsed { get; set; }
+
+        /// <summary>
         /// Time at which build have finished.
         /// </summary>
         public DateTime? FinishedAt { get; set; }
@@ -213,6 +218,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(SACEnabled);
             AddIfNotNull(CoordinatorWaitDurationMs);
             AddIfNotNull(IsStandaloneExecution);
+            AddIfNotNull(ResponseFileUsed);
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts);
 
@@ -249,6 +255,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
             AddIfNotNull(CoordinatorWaitDurationMs?.ToString(CultureInfo.InvariantCulture), nameof(CoordinatorWaitDurationMs));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
+            AddIfNotNull(ResponseFileUsed?.ToString(), nameof(ResponseFileUsed));
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts?.ToString(), nameof(ErrorCounts));
 

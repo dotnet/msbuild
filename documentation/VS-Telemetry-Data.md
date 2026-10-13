@@ -71,6 +71,7 @@ The primary telemetry event capturing overall build information.
 | `TaskHostConsoleOutputForwarded` | bool | Whether the parent received and forwarded non-empty stdout or stderr from an eligible primary `-mt` task host during this build |
 | `SACEnabled` | bool | Whether Smart Application Control was enabled |
 | `IsStandaloneExecution` | bool | True if MSBuild runs from command line |
+| `ResponseFileUsed` | bool | Whether the command-line build used any response file, including explicit `@file.rsp`, `MSBuild.rsp`, or `Directory.Build.rsp` files |
 | `InitialMSBuildServerState` | string | Server state before build: "cold", "hot", or null |
 | `ServerFallbackReason` | string | If server was bypassed: "ServerBusy", "ConnectionError", or null |
 | `ProjectPath` | string | Path to the project file being built |
