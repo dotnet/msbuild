@@ -449,18 +449,36 @@ internal partial class Expander<P, I>
     }
 
     /// <summary>
-    /// Returns true if the supplied string contains a valid property name.
+    ///  Determines whether a string is a valid MSBuild property name.
     /// </summary>
+    /// <param name="propertyName">The property name to validate.</param>
+    /// <returns>
+    ///  <see langword="true"/> if <paramref name="propertyName"/> is valid; otherwise,
+    ///  <see langword="false"/>.
+    /// </returns>
     private static bool IsValidPropertyName(string propertyName)
+        => IsValidPropertyName(propertyName, 0, propertyName.Length);
+
+    /// <summary>
+    ///  Determines whether a segment of a string is a valid MSBuild property name.
+    /// </summary>
+    /// <param name="propertyName">The string containing the property name.</param>
+    /// <param name="startIndex">The zero-based start index of the property name.</param>
+    /// <param name="length">The length of the property name.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the specified segment is valid; otherwise,
+    ///  <see langword="false"/>.
+    /// </returns>
+    private static bool IsValidPropertyName(string propertyName, int startIndex, int length)
     {
-        if (propertyName.Length == 0 || !XmlUtilities.IsValidInitialElementNameCharacter(propertyName[0]))
+        if (length == 0 || !XmlUtilities.IsValidInitialElementNameCharacter(propertyName[startIndex]))
         {
             return false;
         }
 
-        for (int n = 1; n < propertyName.Length; n++)
+        for (int offset = 1; offset < length; offset++)
         {
-            if (!XmlUtilities.IsValidSubsequentElementNameCharacter(propertyName[n]))
+            if (!XmlUtilities.IsValidSubsequentElementNameCharacter(propertyName[startIndex + offset]))
             {
                 return false;
             }
