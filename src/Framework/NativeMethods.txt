@@ -22,6 +22,9 @@ DEBUG_PROC_DESC_NO_PATHS
 DEBUG_PROC_DESC_NO_SERVICES
 DEBUG_PROC_DESC_NO_SESSION_ID
 DEBUG_PROC_DESC_NO_USER_NAME
+DRIVE_FIXED
+DRIVE_RAMDISK
+DRIVE_REMOVABLE
 DefineDosDevice
 EndUpdateResource
 EnumResourceNames
@@ -33,11 +36,15 @@ FILE_CREATION_DISPOSITION
 FILE_FLAGS_AND_ATTRIBUTES
 FILE_ID_INFO
 FILE_MAP
+FILE_NOTIFY_CHANGE
 FILE_SHARE_MODE
 FILETIME
 FindClose
+FindCloseChangeNotification
+FindFirstChangeNotification
 FindFirstFile
 FindNextFile
+FindNextChangeNotification
 FindResource
 FreeEnvironmentStrings
 FreeEnvironmentStringsW
@@ -46,6 +53,7 @@ GET_FILEEX_INFO_LEVELS
 GetConsoleMode
 GetConsoleScreenBufferInfo
 GetCurrentProcessId
+GetDriveType
 GetEnvironmentStrings
 GetEnvironmentStringsW
 GetErrorInfo
@@ -154,6 +162,8 @@ UpdateResource
 VARENUM
 VARIANT
 VariantClear
+WaitForSingleObject
+WAIT_EVENT
 WIN32_ERROR
 WIN32_FILE_ATTRIBUTE_DATA
 WIN32_FIND_DATAW

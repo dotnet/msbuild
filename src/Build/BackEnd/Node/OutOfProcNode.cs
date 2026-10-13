@@ -573,6 +573,7 @@ namespace Microsoft.Build.Execution
         {
             if (_shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
             {
+                s_directoryListingCache?.Clear();
                 s_directoryListingCache = null;
             }
             if (_buildParameters is not null)

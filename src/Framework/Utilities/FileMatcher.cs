@@ -275,7 +275,7 @@ namespace Microsoft.Build.Shared
             {
                 if (!cache.TryGet(path, type, out var entries))
                 {
-                    bool hasChangeTime = DirectoryListingCache.TryReadDirectoryChangeTime(path, out DirectoryChangeStamp before);
+                    bool hasChangeTime = cache.TryReadDirectoryChangeTime(path, out DirectoryChangeStamp before);
                     bool enumerationSucceeded = false;
                     entries = enumerateWithStatus is not null
                         ? enumerateWithStatus(type, path, out enumerationSucceeded)
@@ -283,7 +283,7 @@ namespace Microsoft.Build.Shared
                     if (hasChangeTime
                         // An empty result is reusable only when enumeration completed, not when access was denied.
                         && (entries.Count != 0 || enumerationSucceeded)
-                        && DirectoryListingCache.TryReadDirectoryChangeTime(path, out DirectoryChangeStamp after)
+                        && cache.TryReadDirectoryChangeTime(path, out DirectoryChangeStamp after)
                         && before == after)
                     {
                         entries = cache.Store(path, type, entries, before);
