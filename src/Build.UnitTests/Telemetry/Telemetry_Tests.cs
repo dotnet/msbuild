@@ -121,6 +121,55 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void WorkerNodeTelemetryCollection_TracksRequestHandledFromCache()
+        {
+            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+            void CaptureTelemetry(WorkerNodeTelemetryData data) => workerNodeTelemetryData = data;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += CaptureTelemetry;
+
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create(_output);
+                string projectFile = env.CreateFile(
+                    "test.proj",
+                    """
+                    <Project>
+                      <Target Name="Build"/>
+                    </Project>
+                    """).Path;
+                MockLogger logger = new(_output);
+                var request = new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string?>(),
+                    null,
+                    ["Build"],
+                    null);
+
+                using var buildManager = new BuildManager();
+                buildManager.BeginBuild(
+                    new BuildParameters
+                    {
+                        IsTelemetryEnabled = true,
+                        Loggers = [logger],
+                        MaxNodeCount = 1,
+                    });
+
+                buildManager.BuildRequest(request).OverallResult.ShouldBe(BuildResultCode.Success);
+                buildManager.BuildRequest(request).OverallResult.ShouldBe(BuildResultCode.Success);
+                buildManager.EndBuild();
+
+                workerNodeTelemetryData.ShouldNotBeNull();
+                workerNodeTelemetryData!.ExecutedTargetsCount.ShouldBe(1);
+                workerNodeTelemetryData.SkippedTargetsCount.ShouldBe(1);
+                workerNodeTelemetryData.SkippedDueToPreviouslyBuiltCount.ShouldBe(1);
+            }
+            finally
+            {
+                InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted -= CaptureTelemetry;
+            }
+        }
+
+        [Fact]
         public void WorkerNodeTelemetryCollection_QuestionModeDoesNotCountOutOfDateTargetAsExecuted()
         {
             WorkerNodeTelemetryData? workerNodeTelemetryData = null;

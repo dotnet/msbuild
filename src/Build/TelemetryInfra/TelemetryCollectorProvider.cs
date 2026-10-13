@@ -10,16 +10,15 @@ using Microsoft.Build.Framework.Telemetry;
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// Build component that creates per-BuildRequestEngine <see cref="ITelemetryCollector"/> instances.
-/// Registered as a singleton, but holds no mutable state — each BuildRequestEngine gets its own
-/// collector via <see cref="CreateCollector"/>.
+/// Build component that creates isolated <see cref="ITelemetryCollector"/> instances.
+/// Registered as a singleton, but holds no mutable collection state.
 /// </summary>
 internal class TelemetryCollectorProvider : IBuildComponent
 {
     private bool _telemetryEnabled;
 
     /// <summary>
-    /// Creates a new <see cref="ITelemetryCollector"/> scoped to one <see cref="BuildRequestEngine"/>'s build lifetime.
+    /// Creates a new isolated <see cref="ITelemetryCollector"/>.
     /// Returns a no-op collector when telemetry is disabled.
     /// </summary>
     internal ITelemetryCollector CreateCollector()
@@ -42,8 +41,7 @@ internal class TelemetryCollectorProvider : IBuildComponent
     }
 
     /// <summary>
-    /// Collects task/target telemetry for one BuildRequestEngine. Not thread-safe —
-    /// only one RequestBuilder is active at a time per BuildRequestEngine.
+    /// Collects task/target telemetry for one processing scope. Not thread-safe.
     /// </summary>
     internal class TelemetryCollector : ITelemetryCollector
     {
