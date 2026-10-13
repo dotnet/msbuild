@@ -24,14 +24,26 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private readonly ImmutableSegmentedList<string> _excludes;
         private readonly ImmutableArray<ProjectMetadataElement> _metadata;
 
-        public IncludeOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator, IncludeOperationBuilder builder)
-            : base(lazyEvaluator, builder)
+        public IncludeOperation(
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator,
+            ProjectItemElement itemElement,
+            ItemSpec<P, I> itemSpec,
+            bool conditionResult,
+            ImmutableDictionary<string, LazyItemList> referencedItemList,
+            int elementOrder,
+            string? rootDirectory,
+            ImmutableSegmentedList<string> excludes,
+            ImmutableArray<ProjectMetadataElement> metadata)
+            : base(lazyEvaluator,
+                  itemElement,
+                  itemSpec,
+                  conditionResult,
+                  referencedItemList)
         {
-            _elementOrder = builder.ElementOrder;
-            _rootDirectory = builder.RootDirectory;
-
-            _excludes = builder.GetExcludes();
-            _metadata = builder.GetMetadata();
+            _elementOrder = elementOrder;
+            _rootDirectory = rootDirectory;
+            _excludes = excludes;
+            _metadata = metadata;
         }
 
         protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)

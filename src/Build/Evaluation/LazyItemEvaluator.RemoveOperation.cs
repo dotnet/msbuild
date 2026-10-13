@@ -19,10 +19,17 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private readonly ImmutableList<string> _matchOnMetadata;
         private MetadataTrie<P, I> _metadataSet;
 
-        public RemoveOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator, RemoveOperationBuilder builder)
-            : base(lazyEvaluator, builder)
+        public RemoveOperation(
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator,
+            ProjectItemElement itemElement,
+            ItemSpec<P, I> itemSpec,
+            bool conditionResult,
+            ImmutableDictionary<string, LazyItemList> referencedItemList,
+            ImmutableList<string> matchOnMetadata,
+            MatchOnMetadataOptions matchOnMetadataOptions)
+            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, referencedItemList)
         {
-            _matchOnMetadata = builder.GetMatchOnMetadata();
+            _matchOnMetadata = matchOnMetadata;
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(
                 _matchOnMetadata.IsEmpty || _itemSpec.Fragments.All(f => f is ItemSpec<P, I>.ItemExpressionFragment),
@@ -31,7 +38,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             if (!_matchOnMetadata.IsEmpty)
             {
-                _metadataSet = new MetadataTrie<P, I>(builder.MatchOnMetadataOptions, _matchOnMetadata, _itemSpec);
+                _metadataSet = new MetadataTrie<P, I>(matchOnMetadataOptions, _matchOnMetadata, _itemSpec);
             }
         }
 

@@ -21,10 +21,16 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         private ItemSpecMatchesItem _matchItemSpec = null;
         private bool? _needToExpandMetadataForEachItem = null;
 
-        public UpdateOperation(LazyItemEvaluator<P, I, M, D> lazyEvaluator, UpdateOperationBuilder builder)
-            : base(lazyEvaluator, builder)
+        public UpdateOperation(
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator,
+            ProjectItemElement itemElement,
+            ItemSpec<P, I> itemSpec,
+            bool conditionResult,
+            ImmutableDictionary<string, LazyItemList> referencedItemList,
+            ImmutableArray<ProjectMetadataElement> metadata)
+            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, referencedItemList)
         {
-            _metadata = builder.GetMetadata();
+            _metadata = metadata;
         }
 
         protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
