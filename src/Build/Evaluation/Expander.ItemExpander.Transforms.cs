@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.Build.Expansion;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -829,7 +830,7 @@ internal partial class Expander<P, I>
 
                     object result = function.Execute(item.Value, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
 
-                    string include = PropertyExpander.ConvertToString(result);
+                    string include = PropertyValueConverter.ToString(result);
 
                     // We pass in the existing item so we can copy over its metadata
                     if (include.Length > 0)

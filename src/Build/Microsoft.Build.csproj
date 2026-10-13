@@ -209,6 +209,7 @@
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />
+    <Compile Include="Expansion\PropertyValueConverter.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />

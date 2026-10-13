@@ -17,6 +17,23 @@ internal static class StringExtensions
         => string.IsNullOrWhiteSpace(value);
 
     /// <summary>
+    ///  Gets the bounds of a string after excluding leading and trailing whitespace.
+    /// </summary>
+    /// <param name="value">The string whose bounds are trimmed.</param>
+    /// <param name="startIndex">The zero-based start index after excluding leading whitespace.</param>
+    /// <param name="length">The length after excluding leading and trailing whitespace.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the bounds exclude any whitespace; otherwise,
+    ///  <see langword="false"/>.
+    /// </returns>
+    public static bool GetTrimBounds(this string value, out int startIndex, out int length)
+    {
+        startIndex = 0;
+        length = value.Length;
+        return value.TrimBounds(ref startIndex, ref length);
+    }
+
+    /// <summary>
     ///  Trims leading and trailing whitespace from the bounds of a string segment.
     /// </summary>
     /// <param name="value">The string containing the segment.</param>
