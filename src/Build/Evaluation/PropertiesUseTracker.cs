@@ -9,6 +9,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable enable
@@ -140,7 +141,7 @@ internal sealed class PropertiesUseTracker
             {
                 // Once we are going to warn for a property once, remove it from the list so we do not add it again.
                 RemoveProperty(propertyElement.Name);
-                loggingContext.LogWarning(null, propertyElement.Location, "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty?.LocationString);
+                loggingContext.LogWarning(DiagnosticSubcategory.None, propertyElement.Location, "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty?.LocationString);
             }
         }
 

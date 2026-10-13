@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Shared;
@@ -32,7 +33,7 @@ internal static class EventsCreatorHelper
 
     public static BuildErrorEventArgs CreateErrorEventFromText(
         BuildEventContext buildEventContext,
-        string? subcategoryResourceName,
+        DiagnosticSubcategory subcategory,
         string? errorCode,
         string? helpKeyword,
         IElementLocation location,
@@ -42,15 +43,8 @@ internal static class EventsCreatorHelper
         Assumed.NotNull(location);
         Assumed.NotNull(message);
 
-        string? subcategory = null;
-
-        if (subcategoryResourceName != null)
-        {
-            subcategory = AssemblyResources.GetString(subcategoryResourceName);
-        }
-
-        return new BuildErrorEventArgs(
-            subcategory,
+        return new(
+            subcategory.GetDisplayString(),
             errorCode,
             location.File,
             location.Line,
@@ -67,8 +61,8 @@ internal static class EventsCreatorHelper
 
     public static BuildWarningEventArgs CreateWarningEventFromText(
         BuildEventContext buildEventContext,
-        string? subcategoryResourceName,
-        string? errorCode,
+        DiagnosticSubcategory subcategory,
+        string? warningCode,
         string? helpKeyword,
         IElementLocation location,
         string message)
@@ -77,16 +71,9 @@ internal static class EventsCreatorHelper
         Assumed.NotNull(location);
         Assumed.NotNull(message);
 
-        string? subcategory = null;
-
-        if (subcategoryResourceName != null)
-        {
-            subcategory = AssemblyResources.GetString(subcategoryResourceName);
-        }
-
-        return new BuildWarningEventArgs(
-            subcategory,
-            errorCode,
+        return new(
+            subcategory.GetDisplayString(),
+            warningCode,
             location.File,
             location.Line,
             location.Column,
