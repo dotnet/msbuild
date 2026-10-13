@@ -14,18 +14,25 @@ namespace Microsoft.Build.Evaluation;
 
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
-    private partial class UpdateOperation : ItemOperation
+    private sealed partial class UpdateOperation : ItemOperation
     {
         private readonly ImmutableArray<ProjectMetadataElement> _metadata;
         private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
         private ItemSpecMatchesItem _matchItemSpec = null;
         private bool? _needToExpandMetadataForEachItem = null;
 
-        public UpdateOperation(OperationBuilderWithMetadata builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
-            : base(builder, lazyEvaluator)
+        public UpdateOperation(
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator,
+            ProjectItemElement itemElement,
+            ItemSpec<P, I> itemSpec,
+            bool conditionResult,
+            ImmutableDictionary<string, LazyItemList> referencedItemList,
+            ImmutableArray<ProjectMetadataElement> metadata)
+            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, referencedItemList)
         {
-            _metadata = builder.Metadata.ToImmutable();
+            _metadata = metadata;
         }
+
         protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
         {
             if (!_conditionResult)
