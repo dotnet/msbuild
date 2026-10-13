@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.Build.Construction;
 using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -302,9 +303,9 @@ internal sealed class BuildCheckCentralContext
             catch (Exception e)
             {
                 checkContext.DispatchAsWarningFromText(
-                    null,
-                    null,
-                    null,
+                    DiagnosticSubcategory.None,
+                    warningCode: null,
+                    helpKeyword: null,
                     ElementLocation.Create(projectFullPath),
                     $"The check '{checkCallback.Item1.Check.FriendlyName}' threw an exception while executing a registered action with message: {e.Message}");
 

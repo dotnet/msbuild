@@ -24,8 +24,8 @@ namespace Microsoft.Build.UnitTests
         private readonly TaskFinishedEventArgs _taskFinished = new TaskFinishedEventArgs("message", "help", "projectFile", "taskFile", "taskName", true);
         private readonly TaskCommandLineEventArgs _commandLine = new TaskCommandLineEventArgs("commandLine", "taskName", MessageImportance.Low);
         private readonly TaskParameterEventArgs _taskParameter = new TaskParameterEventArgs(TaskParameterMessageKind.TaskInput, "ItemName", null, true, DateTime.MinValue);
-        private readonly BuildWarningEventArgs _warning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
-        private readonly BuildErrorEventArgs _error = new BuildErrorEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+        private readonly BuildWarningEventArgs _warning = new BuildWarningEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
+        private readonly BuildErrorEventArgs _error = new BuildErrorEventArgs("subcategory", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender");
         private readonly TargetStartedEventArgs _targetStarted = new TargetStartedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile");
         private readonly TargetFinishedEventArgs _targetFinished = new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true);
         private readonly ProjectStartedEventArgs _projectStarted = new ProjectStartedEventArgs(-1, "message", "help", "ProjectFile", "targetNames", null, null, null);

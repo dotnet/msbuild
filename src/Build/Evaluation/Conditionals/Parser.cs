@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Internal;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable
@@ -142,7 +142,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Log a warning regarding the fact the expression may have been evaluated
                 // incorrectly in earlier version of MSBuild
-                LoggingServices.LogWarning(_logBuildEventContext, null, _elementLocation, "ConditionMaybeEvaluatedIncorrectly", expression);
+                LoggingServices.LogWarning(_logBuildEventContext, DiagnosticSubcategory.None, _elementLocation, "ConditionMaybeEvaluatedIncorrectly", expression);
             }
             #endregion
 

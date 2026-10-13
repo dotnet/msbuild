@@ -16,6 +16,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -23,7 +24,6 @@ using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
-
 #endif
 
 #nullable disable
@@ -1163,7 +1163,7 @@ namespace Microsoft.Build.BackEnd
             if (!e.GetType().IsSerializable && e is not IExtendedBuildEventArgs)
 #pragma warning restore SYSLIB0050
             {
-                _taskLoggingContext.LogWarning(null, ElementLocation.Empty, "ExpectedEventToBeSerializable", e.GetType().Name);
+                _taskLoggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;
             }
 
@@ -1293,7 +1293,7 @@ namespace Microsoft.Build.BackEnd
                         if (!string.IsNullOrEmpty(results[i].SchedulerInducedError))
                         {
                             LoggingContext.LogErrorFromText(
-                                subcategoryResourceName: null,
+                                subcategory: DiagnosticSubcategory.None,
                                 errorCode: null,
                                 helpKeyword: null,
                                 location: ElementLocation.Create(ProjectFileOfTaskNode, LineNumberOfTaskNode, ColumnNumberOfTaskNode),
