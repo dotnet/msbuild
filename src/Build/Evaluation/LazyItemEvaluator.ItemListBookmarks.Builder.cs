@@ -22,7 +22,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             /// </summary>
             /// <param name="itemType">The referenced item type.</param>
             /// <param name="itemList">The position visible when the bookmark was created.</param>
-            public void Add(string itemType, LazyItemList itemList)
+            public void Add(string itemType, ItemListBookmark itemList)
                 => _references.Add(new(itemType, itemList));
 
             /// <summary>
