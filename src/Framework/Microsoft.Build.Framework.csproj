@@ -95,6 +95,9 @@
           Pack="true"
           PackagePath="buildTransitive\net10.0\Microsoft.Build.Framework.targets" />
 
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj"
+                      PrivateAssets="all" />
+
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
 
     <!-- Display files included by the Microsoft.CodeAnalysis.Contracts source package in a 'SourcePackages\Contracts' folder -->

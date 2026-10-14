@@ -380,7 +380,7 @@ namespace Microsoft.Build.Server
                 // Start packet pump
                 using MSBuildClientPacketPump packetPump = _packetPump;
 
-                packetPump.RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, packetPump);
+                packetPump.RegisterPacketHandler(NodePacketType.ConsoleWrite, ConsoleWritePacket.FactoryForDeserialization, packetPump);
                 packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization, packetPump);
                 packetPump.Start();
 
@@ -653,7 +653,8 @@ namespace Microsoft.Build.Server
                     startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
                     initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState,
                     serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason,
-                    serverEnableReason: KnownTelemetry.PartialBuildTelemetry.ServerEnableReason);
+                    serverEnableReason: KnownTelemetry.PartialBuildTelemetry.ServerEnableReason,
+                    responseFileUsed: KnownTelemetry.PartialBuildTelemetry.ResponseFileUsed.GetValueOrDefault());
 
             return new ServerNodeBuildCommand(
                         _commandLine,
@@ -723,9 +724,9 @@ namespace Microsoft.Build.Server
         {
             switch (packet.Type)
             {
-                case NodePacketType.ServerNodeConsoleWrite:
-                    ServerNodeConsoleWrite writePacket = (packet as ServerNodeConsoleWrite)!;
-                    HandleServerNodeConsoleWrite(writePacket);
+                case NodePacketType.ConsoleWrite:
+                    ConsoleWritePacket writePacket = (packet as ConsoleWritePacket)!;
+                    HandleConsoleWrite(writePacket);
                     _numConsoleWritePackets++;
                     _sizeOfConsoleWritePackets += writePacket.Text.Length;
                     break;
@@ -737,7 +738,7 @@ namespace Microsoft.Build.Server
             }
         }
 
-        private void HandleServerNodeConsoleWrite(ServerNodeConsoleWrite consoleWrite)
+        private void HandleConsoleWrite(ConsoleWritePacket consoleWrite)
         {
             switch (consoleWrite.OutputType)
             {

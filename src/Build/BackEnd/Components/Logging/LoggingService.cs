@@ -666,6 +666,11 @@ namespace Microsoft.Build.BackEnd.Logging
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
         }
 
+        /// <inheritdoc />
+        public bool ShouldTreatWarningAsError(BuildEventContext buildEventContext, string warningCode)
+            => !ShouldTreatWarningAsMessage(buildEventContext, warningCode)
+                && ShouldPromoteWarningToError(buildEventContext, warningCode);
+
         /// <summary>
         /// Populates build telemetry with error categorization data.
         /// </summary>
@@ -1659,7 +1664,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)
             {
-                if (ShouldTreatWarningAsMessage(warningEvent))
+                if (ShouldTreatWarningAsMessage(warningEvent.BuildEventContext, warningEvent.Code))
                 {
                     if (buildEventArgs is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
@@ -1694,7 +1699,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             warningEvent.ColumnNumber,
                             warningEvent.EndLineNumber,
                             warningEvent.EndColumnNumber,
-                            warningEvent.Message,
+                            EventArgsFormatting.GetLocalizedMessage(warningEvent),
                             warningEvent.HelpKeyword,
                             warningEvent.SenderName,
                             MessageImportance.Low,
@@ -1705,7 +1710,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         };
                     }
                 }
-                else if (ShouldTreatWarningAsError(warningEvent))
+                else if (ShouldPromoteWarningToError(warningEvent.BuildEventContext, warningEvent.Code))
                 {
                     if (warningEvent is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
@@ -1739,7 +1744,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             warningEvent.ColumnNumber,
                             warningEvent.EndLineNumber,
                             warningEvent.EndColumnNumber,
-                            warningEvent.Message,
+                            EventArgsFormatting.GetLocalizedMessage(warningEvent),
                             warningEvent.HelpKeyword,
                             warningEvent.SenderName,
                             warningEvent.Timestamp)
@@ -2048,47 +2053,49 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Determines if the specified warning should be treated as a low importance message.
         /// </summary>
-        /// <param name="warningEvent">A <see cref="BuildWarningEventArgs"/> that specifies the warning.</param>
+        /// <param name="buildEventContext">The context in which the warning is logged.</param>
+        /// <param name="warningCode">The warning code.</param>
         /// <returns><code>true</code> if the warning should be treated as a low importance message, otherwise <code>false</code>.</returns>
-        private bool ShouldTreatWarningAsMessage(BuildWarningEventArgs warningEvent)
+        private bool ShouldTreatWarningAsMessage(BuildEventContext buildEventContext, string warningCode)
         {
             // This only applies if the user specified /nowarn at the command-line or added the warning code through the object model
-            if (WarningsAsMessages?.Contains(warningEvent.Code) == true)
+            if (WarningsAsMessages?.Contains(warningCode) == true)
             {
                 return true;
             }
 
             // This only applies if the user specified <MSBuildWarningsAsMessages /> and there is a valid ProjectInstanceId
-            if (_warningsAsMessagesByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+            if (_warningsAsMessagesByProject != null && buildEventContext != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsConfigKey(warningEvent), out ISet<string> codesByProject))
+                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsConfigKey(buildEventContext), out ISet<string> codesByProject))
                 {
-                    return codesByProject?.Contains(warningEvent.Code) == true;
+                    return codesByProject?.Contains(warningCode) == true;
                 }
             }
 
             return false;
         }
 
-        private bool WarningAsErrorNotOverriden(BuildWarningEventArgs warningEvent)
+        private bool WarningAsErrorNotOverriden(BuildEventContext buildEventContext, string warningCode)
         {
-            WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
+            WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
 
-            return WarningsNotAsErrors?.Contains(warningEvent.Code) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningEvent.Code));
+            return WarningsNotAsErrors?.Contains(warningCode) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningCode));
         }
 
         /// <summary>
-        /// Determines if the specified warning should be treated as an error.
+        /// Determines if an unsuppressed warning should be treated as an error.
         /// </summary>
-        /// <param name="warningEvent">A <see cref="BuildWarningEventArgs"/> that specifies the warning.</param>
+        /// <param name="buildEventContext">The context in which the warning is logged.</param>
+        /// <param name="warningCode">The warning code.</param>
         /// <returns><code>true</code> if the warning should be treated as an error, otherwise <code>false</code>.</returns>
-        private bool ShouldTreatWarningAsError(BuildWarningEventArgs warningEvent)
+        private bool ShouldPromoteWarningToError(BuildEventContext buildEventContext, string warningCode)
         {
             // This only applies if the user specified /warnaserror from the command-line or added an empty set through the object model
             if (WarningsAsErrors != null)
             {
                 // Global warnings as errors apply to all projects.  If the list is empty or contains the code, the warning should be treated as an error
-                if ((WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningEvent)) || WarningsAsErrors.Contains(warningEvent.Code))
+                if ((WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(buildEventContext, warningCode)) || WarningsAsErrors.Contains(warningCode))
                 {
                     return true;
                 }
@@ -2096,10 +2103,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // This only applies if the user specified <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors or <MSBuildWarningsAsErrors />
             // and there is a valid ProjectInstanceId for the warning.
-            if (_warningsAsErrorsByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
+            if (_warningsAsErrorsByProject != null && buildEventContext != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 // Attempt to get the list of warnings to treat as errors for the current project
-                WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
+                WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
                 if (_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> codesByProject))
                 {
                     // We create an empty set if all warnings should be treated as errors so that should be checked first.
@@ -2107,8 +2114,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     ISet<string> codesToIgnoreByProject = null;
                     _warningsNotAsErrorsByProject?.TryGetValue(key, out codesToIgnoreByProject);
                     return codesByProject != null &&
-                        ((codesByProject.Count == 0 && (codesToIgnoreByProject is null || !codesToIgnoreByProject.Contains(warningEvent.Code)))
-                        || codesByProject.Contains(warningEvent.Code));
+                        ((codesByProject.Count == 0 && (codesToIgnoreByProject is null || !codesToIgnoreByProject.Contains(warningCode)))
+                        || codesByProject.Contains(warningCode));
                 }
             }
 

@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Seed the queue with the trailing console write and the build result, then signal both the
             // received event and the (sticky) completion event, mirroring the server's teardown ordering.
-            pump.ReceivedPacketsQueue.Enqueue(new ServerNodeConsoleWrite("Build succeeded." + Environment.NewLine, ConsoleOutput.Standard));
+            pump.ReceivedPacketsQueue.Enqueue(new ConsoleWritePacket("Build succeeded." + Environment.NewLine, ConsoleOutput.Standard));
             pump.ReceivedPacketsQueue.Enqueue(new ServerNodeBuildResult(0, "Success"));
             pump.PacketReceivedEvent.Set();
             pump.PacketPumpCompleted.Set();

@@ -2,6 +2,8 @@
 
 A Roslyn analyzer that detects unsafe API usage in MSBuild task implementations. It guides task authors toward thread-safe patterns required for MSBuild's multithreaded task execution mode, where multiple tasks may run concurrently in the same process.
 
+`Microsoft.Build.TaskAuthoring.Analyzer` ships independently from `Microsoft.Build.Framework`. Install the analyzer package explicitly. A Framework package reference does not activate the analyzer.
+
 The package also includes a Roslyn diagnostic suppressor for nullable warning `CS8618` on task properties marked with `Microsoft.Build.Framework.RequiredAttribute`, since MSBuild guarantees those inputs are initialized before task execution.
 
 ## Background
@@ -139,14 +141,16 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Environment.ExpandEnvironmentVariables()` | Use `TaskEnvironment.GetEnvironmentVariable()` per variable |
 | `Environment.GetFolderPath()` | Use `TaskEnvironment.GetEnvironmentVariable()` |
 | `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath()` |
-| `Path.GetTempPath()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
+| `Path.GetTempPath()` | `TaskEnvironment.GetTempPath()` |
 | `Path.GetTempFileName()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
 | `Directory.CreateTempSubdirectory()` (with or without a prefix) | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
 | `new TempFileCollection()` | Pass an explicit task-resolved temporary directory, or suppress with a justification. |
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 
-The temp helpers above depend on process-wide temporary-directory environment variables. Until a `TaskEnvironment` alternative is available, suppress `MSBuildTask0002` (or `MSBuildTask0005` for a call through a helper) with a justification. `Path.GetRandomFileName()` only generates a name and does not resolve a temporary directory, so it is not banned.
+In multithreaded mode, `TaskEnvironment.GetTempPath()` resolves the temporary folder from the isolated task environment. In multi-process mode, it matches `Path.GetTempPath()`.
+
+The other temp helpers above depend on process-wide temporary-directory environment variables. Until a `TaskEnvironment` alternative is available, suppress `MSBuildTask0002` (or `MSBuildTask0005` for a call through a helper) with a justification. `Path.GetRandomFileName()` only generates a name and does not resolve a temporary directory, so it is not banned.
 
 `TempFileCollection` constructors accepting `tempDir` are not banned because they can use an explicit task-resolved directory. Passing null or empty still falls back to the global temporary directory; this conditional usage is not currently detected.
 
@@ -607,13 +611,13 @@ Reference the analyzer project directly:
 </ItemGroup>
 ```
 
-### NuGet Package (future)
+### NuGet Package
 
-When packaged as a NuGet analyzer, add it as a package reference:
+Add the analyzer package as a private package reference:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Microsoft.Build.TaskAuthoring.Analyzer" Version="1.0.0"
+  <PackageReference Include="Microsoft.Build.TaskAuthoring.Analyzer" Version="18.13.0"
                     PrivateAssets="all" />
 </ItemGroup>
 ```
@@ -660,7 +664,7 @@ public class CopyFiles : Task, IMultiThreadableTask
     public override bool Execute()
     {
         Log.LogMessage("Copying files...");              // ✅ Use build logging
-        var tmp = TaskEnvironment.GetEnvironmentVariable("TMP"); // ✅ Per-task env
+        var tmp = TaskEnvironment.GetTempPath();                  // ✅ Per-task temp path
         var envVar = TaskEnvironment.GetEnvironmentVariable("MY_VAR"); // ✅ Per-task env
         File.Copy(                                       // ✅ Absolute paths
             TaskEnvironment.GetAbsolutePath(Source),
@@ -705,6 +709,6 @@ Unit tests for all rules, safe patterns, edge cases, code fixes, and compiler di
 
 - [Multithreaded Task Execution Spec](https://github.com/dotnet/msbuild/pull/12583)
 - [Analyzer Implementation PR](https://github.com/dotnet/msbuild/pull/12143)
-- [IMultiThreadableTask Interface](../Framework/IMultiThreadableTask.cs)
-- [TaskEnvironment Class](../Framework/TaskEnvironment.cs)
-- [Migration Skill Guide](../../.github/skills/multithreaded-task-migration/SKILL.md)
+- [IMultiThreadableTask Interface](https://github.com/dotnet/msbuild/blob/main/src/Framework/IMultiThreadableTask.cs)
+- [TaskEnvironment Class](https://github.com/dotnet/msbuild/blob/main/src/Framework/TaskEnvironment.cs)
+- [Migration Skill Guide](https://github.com/dotnet/msbuild/blob/main/.github/skills/multithreaded-task-migration/SKILL.md)

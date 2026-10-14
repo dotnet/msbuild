@@ -232,7 +232,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void NodeConnectionBufferSizeIsLargeWhenWaveEnabled()
+        public void NodeConnectionBufferSizeDefaultsForRuntimeWhenWaveEnabled()
         {
             // NOTE: these tests cover the value produced by Traits.NodeConnectionBufferSize only.
             // The single delegation that wires it into the pipe
@@ -241,14 +241,18 @@ namespace Microsoft.Build.Engine.UnitTests
             // inspecting the kernel pipe buffer. It is a trivial, verified-by-inspection delegation.
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                // No MSBUILDDISABLEFEATURESFROMVERSION => all waves enabled => 1 MB buffer.
+                // No MSBUILDDISABLEFEATURESFROMVERSION => all waves enabled => runtime-specific default.
                 // In unit tests BuildEnvironmentState.s_runningTests is true, so Traits.Instance
                 // returns a fresh instance each access and reflects the current environment.
                 env.SetEnvironmentVariable("MSBUILDNODECONNECTIONBUFFERSIZE", null);
                 SetChangeWave(string.Empty, env);
 
                 ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9).ShouldBeTrue();
+#if NETFRAMEWORK
+                Traits.Instance.NodeConnectionBufferSize.ShouldBe(128 * 1024);
+#else
                 Traits.Instance.NodeConnectionBufferSize.ShouldBe(1024 * 1024);
+#endif
             }
         }
 

@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -112,6 +114,56 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, engine.Warnings);
             Assert.Equal(0, engine.Errors);
             _ = Assert.Single(rar.ResolvedFiles);
+        }
+
+        [Fact]
+        public void DispatchesStructuredConflictEvents()
+        {
+            MockEngine engine = new(output);
+            ResolveAssemblyReference rar = new()
+            {
+                BuildEngine = engine,
+            };
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0",
+                "/libs/v1/D.dll",
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: ["D"],
+                dependees: []);
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0",
+                "/libs/v2/D.dll",
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                primarySourceItemSpecs: [],
+                dependees: [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+            var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
+                victor,
+                victim,
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+            var warningEvent = new AssemblyConflictWarningEventArgs(
+                "D",
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                "MSB3277",
+                "project.proj",
+                1,
+                2,
+                "MSBuild.ResolveAssemblyReference.FoundConflicts",
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
+
+            OutOfProcRarClient.DispatchBuildEvent(rar, detailsEvent);
+            OutOfProcRarClient.DispatchBuildEvent(rar, warningEvent);
+
+            engine.MessageEvents.ShouldHaveSingleItem().ShouldBeOfType<AssemblyConflictDependencyDetailsMessageEventArgs>();
+            engine.WarningEvents.ShouldHaveSingleItem().ShouldBeOfType<AssemblyConflictWarningEventArgs>();
         }
     }
 }

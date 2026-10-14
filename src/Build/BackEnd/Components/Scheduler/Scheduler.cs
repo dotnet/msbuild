@@ -17,6 +17,7 @@ using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.TelemetryInfra;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -2236,7 +2237,10 @@ namespace Microsoft.Build.BackEnd
             BuildRequestConfiguration configuration = _configCache[request.ConfigurationId];
             int nodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
             NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, nodeId, true);
+            var telemetryProvider = (TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector);
+            nodeContext.TelemetryCollector = telemetryProvider.CreateCollector();
             nodeContext.LogRequestHandledFromCache(request, configuration, result);
+            nodeContext.TelemetryCollector.FinalizeProcessing(nodeContext);
 
             TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) with targets ({string.Join(";", request.Targets)}) satisfied from cache");
         }

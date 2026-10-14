@@ -34,6 +34,7 @@ checkout:
   ref: ${{ github.event.pull_request.base.sha }}
 
 timeout-minutes: 60
+max-ai-credits: 2000
 
 # ###############################################################
 # Select a PAT from the pool and override COPILOT_GITHUB_TOKEN.

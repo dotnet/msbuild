@@ -53,9 +53,49 @@ public class KnownTelemetry_Tests
         buildTelemetry.BuildEngineVersion.ShouldBeNull();
         buildTelemetry.BuildCheckEnabled.ShouldBeNull();
         buildTelemetry.MultiThreadedModeEnabled.ShouldBeNull();
+        buildTelemetry.TaskHostConsoleOutputForwarded.ShouldBeNull();
         buildTelemetry.SACEnabled.ShouldBeNull();
+        buildTelemetry.ResponseFileUsed.ShouldBeNull();
 
         buildTelemetry.GetProperties().ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BuildTelemetryIncludesTaskHostConsoleOutputForwarded(bool forwarded)
+    {
+        BuildTelemetry buildTelemetry = new()
+        {
+            TaskHostConsoleOutputForwarded = forwarded,
+        };
+
+        var property = buildTelemetry.GetProperties().ShouldHaveSingleItem();
+        property.Key.ShouldBe(nameof(BuildTelemetry.TaskHostConsoleOutputForwarded));
+        property.Value.ShouldBe(forwarded.ToString());
+
+        var activityProperty = buildTelemetry.GetActivityProperties().ShouldHaveSingleItem();
+        activityProperty.Key.ShouldBe(nameof(BuildTelemetry.TaskHostConsoleOutputForwarded));
+        activityProperty.Value.ShouldBe(forwarded);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BuildTelemetryIncludesResponseFileUsed(bool responseFileUsed)
+    {
+        BuildTelemetry buildTelemetry = new()
+        {
+            ResponseFileUsed = responseFileUsed,
+        };
+
+        var property = buildTelemetry.GetProperties().ShouldHaveSingleItem();
+        property.Key.ShouldBe(nameof(BuildTelemetry.ResponseFileUsed));
+        property.Value.ShouldBe(responseFileUsed.ToString());
+
+        var activityProperty = buildTelemetry.GetActivityProperties().ShouldHaveSingleItem();
+        activityProperty.Key.ShouldBe(nameof(BuildTelemetry.ResponseFileUsed));
+        activityProperty.Value.ShouldBe(responseFileUsed);
     }
 
     [Fact]
@@ -103,6 +143,20 @@ public class KnownTelemetry_Tests
         // verify computed
         properties["BuildDurationInMilliseconds"] = (finishedAt - startAt).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
         properties["InnerBuildDurationInMilliseconds"] = (finishedAt - innerStartAt).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+    }
+
+    [Fact]
+    public void BuildTelemetryIncludesSchemaVersionWhenSet()
+    {
+        BuildTelemetry buildTelemetry = new()
+        {
+            TelemetrySchemaVersion = BuildTelemetry.CurrentSchemaVersion,
+        };
+
+        buildTelemetry.GetProperties()[nameof(BuildTelemetry.TelemetrySchemaVersion)]
+            .ShouldBe(BuildTelemetry.CurrentSchemaVersion.ToString(CultureInfo.InvariantCulture));
+        buildTelemetry.GetActivityProperties()[nameof(BuildTelemetry.TelemetrySchemaVersion)]
+            .ShouldBe(BuildTelemetry.CurrentSchemaVersion);
     }
 
     [Fact]
@@ -240,7 +294,8 @@ public class KnownTelemetry_Tests
     [Fact]
     public void BuildTelemetryBuildTargetPreservesKnownTargets()
     {
-        string[] knownTargets = { "Build", "Clean", "Rebuild", "Restore", "Pack", "Publish", "Test" };
+        // An empty target list means the project's default targets.
+        string[] knownTargets = { "", "Build", "Clean", "Rebuild", "Restore", "Pack", "Publish", "Test" };
 
         foreach (string target in knownTargets)
         {

@@ -98,11 +98,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
+            ClearPerBuildState();
+
             _outOfProcTaskHostNodeProvider = null;
             _componentHost = null;
             _componentShutdown = true;
-
-            ClearPerBuildState();
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ClearPerBuildState()
         {
-            // do nothing
+            (_outOfProcTaskHostNodeProvider as NodeProviderOutOfProcTaskHost)?.ClearPerBuildState();
         }
 
         #endregion

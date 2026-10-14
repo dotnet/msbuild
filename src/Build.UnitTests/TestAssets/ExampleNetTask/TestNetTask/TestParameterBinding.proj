@@ -1,0 +1,34 @@
+<Project>
+  <PropertyGroup>
+    <ExampleTaskPath>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', '..', '..', '..', '..', '$(LatestDotNetCoreForMSBuild)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ExampleTask" AssemblyFile="$(ExampleTaskPath)" TaskFactory="TaskHostFactory" Runtime="NET" />
+
+  <Target Name="TestParameterBinding">
+    <ItemGroup>
+      <Input Include="basic.item">
+        <Kind>input</Kind>
+      </Input>
+    </ItemGroup>
+    <ExampleTask
+      Flag="true"
+      Text="hello%3Bworld"
+      Item="@(Input)"
+      Mode="Deep"
+      Modes="Shallow;Deep"
+      DestinationFile="folder%3Bname\file.txt"
+      DestinationFiles="first.txt;second%3Bpart.txt"
+      DestinationDirectory="directory with space">
+      <Output TaskParameter="OutputDate" PropertyName="OutputDate" />
+      <Output TaskParameter="OutputDates" ItemName="OutputDates" />
+      <Output TaskParameter="DestinationFile" PropertyName="OutputFile" />
+      <Output TaskParameter="DestinationFiles" ItemName="OutputFiles" />
+      <Output TaskParameter="DestinationDirectory" PropertyName="OutputDirectory" />
+      <Output TaskParameter="TypedItem" ItemName="TypedItem" />
+      <Output TaskParameter="TypedItems" ItemName="TypedItems" />
+      <Output TaskParameter="NullTypedItem" ItemName="NullTypedItem" />
+    </ExampleTask>
+    <Message Text="PARAMETER_OUTPUTS_OK Date=$(OutputDate) Dates=@(OutputDates,'|') File=$(OutputFile) Files=@(OutputFiles,'|') Directory=$(OutputDirectory) Typed=@(TypedItem->'%(Identity):%(Kind)') TypedItems=@(TypedItems->'%(Identity):%(Kind)','|') Null=@(NullTypedItem)" Importance="High" />
+  </Target>
+</Project>

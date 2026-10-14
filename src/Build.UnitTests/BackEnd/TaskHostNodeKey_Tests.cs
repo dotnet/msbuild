@@ -16,8 +16,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void TaskHostNodeKey_Equality_SameValues_AreEqual()
         {
-            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
-            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
+            TaskHostLaunchIdentity launchIdentity = new("msbuild", "arguments", "dotnet");
+            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, LaunchIdentity: launchIdentity);
+            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, LaunchIdentity: launchIdentity);
 
             key1.ShouldBe(key2);
             (key1 == key2).ShouldBeTrue();
@@ -45,10 +46,64 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
+        public void TaskHostNodeKey_Equality_DifferentConsoleForwarding_AreNotEqual()
+        {
+            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, ForwardConsoleOutput: false);
+            var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, ForwardConsoleOutput: true);
+
+            key1.ShouldNotBe(key2);
+            (key1 != key2).ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("other-msbuild", "arguments", "dotnet")]
+        [InlineData("msbuild", "other-arguments", "dotnet")]
+        [InlineData("msbuild", "arguments", "other-dotnet")]
+        public void TaskHostNodeKey_Equality_DifferentLaunchIdentityComponents_AreNotEqual(
+            string executablePath,
+            string commandLineArgs,
+            string dotnetHostPath)
+        {
+            var key1 = new TaskHostNodeKey(
+                HandshakeOptions.TaskHost | HandshakeOptions.NET,
+                1,
+                LaunchIdentity: new TaskHostLaunchIdentity("msbuild", "arguments", "dotnet"));
+            var key2 = new TaskHostNodeKey(
+                HandshakeOptions.TaskHost | HandshakeOptions.NET,
+                1,
+                LaunchIdentity: new TaskHostLaunchIdentity(executablePath, commandLineArgs, dotnetHostPath));
+
+            key1.ShouldNotBe(key2);
+            (key1 != key2).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void TaskHostNodeKey_Equality_NullAndPopulatedLaunchIdentity_AreNotEqual()
+        {
+            var keyWithoutIdentity = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
+            var keyWithIdentity = new TaskHostNodeKey(
+                HandshakeOptions.TaskHost | HandshakeOptions.NET,
+                1,
+                LaunchIdentity: new TaskHostLaunchIdentity(string.Empty, string.Empty, string.Empty));
+
+            keyWithoutIdentity.ShouldNotBe(keyWithIdentity);
+        }
+
+        [Theory]
+        [InlineData(0, false)]
+        [InlineData(7, false)]
+        [InlineData(8, true)]
+        public void ParameterConversionSupportComesFromNegotiatedPacketVersion(byte version, bool expected)
+        {
+            TaskHostTask.CanConvertTaskParameters(version).ShouldBe(expected);
+        }
+
+        [Fact]
         public void TaskHostNodeKey_CanBeUsedAsDictionaryKey()
         {
             var dict = new System.Collections.Generic.Dictionary<TaskHostNodeKey, string>();
-            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
+            TaskHostLaunchIdentity launchIdentity = new("msbuild", "arguments", "dotnet");
+            var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, LaunchIdentity: launchIdentity);
             var key2 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.X64, 2);
 
             dict[key1] = "value1";
@@ -58,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             dict[key2].ShouldBe("value2");
 
             // Create a new key with same values as key1
-            var key1Copy = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
+            var key1Copy = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1, LaunchIdentity: launchIdentity);
             dict[key1Copy].ShouldBe("value1");
         }
 

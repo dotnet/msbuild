@@ -22,9 +22,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// server's self-teardown - survive serialization for both values of the flag.
         /// </summary>
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void RoundTripSerializationPreservesFields(bool shutdownAfterBuild)
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void RoundTripSerializationPreservesFields(bool shutdownAfterBuild, bool responseFileUsed)
         {
             string[] commandLine = ["msbuild.exe", "project.proj", "-mt", "-nr:false"];
             string startupDirectory = "C:\\some\\startup\\dir";
@@ -36,6 +36,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             CultureInfo culture = new("en-US");
             CultureInfo uiCulture = new("en-GB");
             TargetConsoleConfiguration consoleConfiguration = new(bufferWidth: 80, acceptAnsiColorCodes: true, outputIsScreen: false, backgroundColor: ConsoleColor.Black);
+            DateTime startedAt = new(2026, 10, 13, 8, 0, 0, DateTimeKind.Utc);
+            PartialBuildTelemetry partialBuildTelemetry = new(
+                startedAt,
+                initialServerState: "hot",
+                serverFallbackReason: null,
+                serverEnableReason: "EnvVar",
+                responseFileUsed: responseFileUsed);
 
             ServerNodeBuildCommand command = new(
                 commandLine,
@@ -44,7 +51,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 culture,
                 uiCulture,
                 consoleConfiguration,
-                partialBuildTelemetry: null,
+                partialBuildTelemetry,
                 shutdownAfterBuild);
 
             ((INodePacket)command).Translate(TranslationHelpers.GetWriteTranslator());
@@ -58,6 +65,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserialized.BuildProcessEnvironment.ShouldBe(buildProcessEnvironment);
             deserialized.Culture.ShouldBe(culture);
             deserialized.UICulture.ShouldBe(uiCulture);
+            deserialized.PartialBuildTelemetry.ShouldNotBeNull();
+            deserialized.PartialBuildTelemetry!.StartedAt.ShouldBe(startedAt);
+            deserialized.PartialBuildTelemetry.InitialServerState.ShouldBe("hot");
+            deserialized.PartialBuildTelemetry.ServerEnableReason.ShouldBe("EnvVar");
+            deserialized.PartialBuildTelemetry.ResponseFileUsed.ShouldBe(responseFileUsed);
         }
     }
 }

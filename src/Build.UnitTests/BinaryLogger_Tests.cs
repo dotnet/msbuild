@@ -6,6 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
+#if NETFRAMEWORK
+using System.Runtime.Serialization.Formatters.Binary;
+#endif
 using System.Text;
 using System.Threading;
 using FakeItEasy;
@@ -434,24 +438,113 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
+        [Theory]
+        [InlineData("Embed", false)]
+        [InlineData("Embed", true)]
+        [InlineData("ZipFile", false)]
+        [InlineData("ZipFile", true)]
+        [InlineData("None", false)]
+        [InlineData("None", true)]
+        public void BinaryLoggerShouldPreserveEvaluatedEmbeddedFiles(string imports, bool excludeEvaluation)
+        {
+            // ProjectStarted must not duplicate the items and mask missing evaluation collection.
+            _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+            TransientTestFolder projectFolder = _env.CreateFolder();
+            _env.CreateFile(projectFolder, "embedded.txt", "explicit evaluated content");
+            _env.CreateFile(projectFolder, "unrelated.txt", "do not embed");
+            TransientTestFile projectFile = _env.CreateFile(projectFolder, "evaluated.proj", """
+                <Project>
+                    <ItemGroup>
+                        <EmbedInBinlog Include="embedded.txt" />
+                        <None Include="unrelated.txt" />
+                    </ItemGroup>
+                    <Target Name="Build" />
+                </Project>
+                """);
+            string exclusions = excludeEvaluation ? ";Exclude=ProjectEvaluationStarted,ProjectEvaluationFinished" : "";
+            string diagnostic = RunnerUtilities.ExecMSBuild(
+                $"\"{projectFile.Path}\" -noAutoResponse -nologo -nr:false -bl:\"{_logFile};ProjectImports={imports}{exclusions}\"",
+                out bool succeeded);
+            succeeded.ShouldBeTrue(diagnostic);
+
+            List<ArchiveFile> files = [];
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(_logFile);
+            reader.ArchiveFileEncountered += args => files.Add(args.ArchiveData.ToArchiveFile());
+            bool hasEvaluationStarted = false;
+            bool hasEvaluationFinished = false;
+            while (reader.Read() is { } e)
+            {
+                hasEvaluationStarted |= e is ProjectEvaluationStartedEventArgs;
+                hasEvaluationFinished |= e is ProjectEvaluationFinishedEventArgs;
+                if (e is ProjectStartedEventArgs started)
+                {
+                    Internal.Utilities.EnumerateItemsOfType(started.Items, "EmbedInBinlog").ShouldBeEmpty();
+                }
+            }
+            hasEvaluationStarted.ShouldBe(!excludeEvaluation);
+            hasEvaluationFinished.ShouldBe(!excludeEvaluation);
+
+            string zipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
+            if (imports == "ZipFile")
+            {
+                files.ShouldBeEmpty();
+                using var fileStream = new FileStream(zipPath, FileMode.Open);
+                using var archive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    using var content = new StreamReader(entry.Open());
+                    files.Add(new ArchiveFile(entry.FullName, content.ReadToEnd()));
+                }
+            }
+            else
+            {
+                File.Exists(zipPath).ShouldBeFalse();
+            }
+
+            if (imports == "None")
+            {
+                files.ShouldBeEmpty();
+            }
+            else
+            {
+                files.Where(file => file.FullPath.EndsWith("embedded.txt", StringComparison.Ordinal))
+                    .ShouldHaveSingleItem().Content.ShouldBe("explicit evaluated content");
+                files.ShouldNotContain(file => file.FullPath.EndsWith("unrelated.txt", StringComparison.Ordinal));
+            }
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void BinaryLoggerShouldEmbedFilesAddedInTargets(bool useTaskOutput, bool excludeTaskParameters)
         {
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
             {
-                Parameters = $"LogFile={_logFile}",
+                Parameters = $"LogFile={_logFile}" + (excludeTaskParameters ? ";Exclude=TaskParameter" : ""),
                 CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
             };
-            var testProject = @"
-<Project>
-    <Target Name=""Build"">
-        <WriteLinesToFile File=""testtaskoutputfile.txt"" Lines=""abc;def;ghi""/>
-        <CreateItem Include=""testtaskoutputfile.txt"">
-            <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
-        </CreateItem>
-    </Target>
-</Project>";
+            string embedItems = useTaskOutput
+                ? """
+                  <CreateItem Include="testtaskoutputfile.txt">
+                      <Output TaskParameter="Include" ItemName="EmbedInBinlog" />
+                  </CreateItem>
+                  """
+                : """
+                  <ItemGroup>
+                      <EmbedInBinlog Include="testtaskoutputfile.txt" />
+                  </ItemGroup>
+                  """;
+            string testProject = $"""
+                <Project>
+                    <Target Name="Build">
+                        <WriteLinesToFile File="testtaskoutputfile.txt" Lines="abc;def;ghi" Overwrite="true" />
+                        {embedItems}
+                    </Target>
+                </Project>
+                """;
             ObjectModelHelpers.BuildProjectExpectSuccess(testProject, binaryLogger);
             var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
@@ -461,10 +554,20 @@ namespace Microsoft.Build.UnitTests
             // thus producing garbled fully qualified paths in the actual .ProjectImports.zip entries
             zipArchive.Entries.ShouldContain(zE => zE.Name.EndsWith("testtaskoutputfile.txt"),
                 $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(_logFile);
+            bool hasTaskParameters = false;
+            while (reader.Read() is { } e)
+            {
+                hasTaskParameters |= e is TaskParameterEventArgs;
+            }
+            hasTaskParameters.ShouldBe(!excludeTaskParameters);
         }
 
-        [Fact]
-        public void BinaryLoggerShouldEmbedFilesWithRelativePathFromChildProjects()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BinaryLoggerShouldEmbedFilesWithRelativePathFromChildProjects(bool excludeTaskParameters)
         {
             // Repro for https://github.com/dotnet/msbuild/issues/13789: EmbedInBinlog items with a
             // relative Include path emitted by child projects must still be embedded. The binary
@@ -508,7 +611,7 @@ namespace Microsoft.Build.UnitTests
             File.WriteAllText(parentProjectPath, parentProjectContents);
 
             RunnerUtilities.ExecMSBuild(
-                $"\"{parentProjectPath}\" -m:2 -bl:\"{_logFile};ProjectImports=ZipFile\"",
+                $"\"{parentProjectPath}\" -m:2 -bl:\"{_logFile};ProjectImports=ZipFile{(excludeTaskParameters ? ";Exclude=TaskParameter" : "")}\"",
                 out bool success);
             success.ShouldBeTrue();
 
@@ -1130,6 +1233,679 @@ namespace Microsoft.Build.UnitTests
             replayEventSource.FormatVersionMismatchWarning.ShouldContain(BinaryLogger.FileFormatVersion.ToString());
 
             CreateExpectedLogFile();
+        }
+
+        #endregion
+
+        #region Event Filter Replay Tests
+
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        [InlineData(null, true)]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        public void Replay_EventFilter_UnknownOpaqueRecordsRecover(bool? acceptEvent, bool includeFollowingEvent)
+        {
+            CreateExpectedLogFile();
+            var metadataSeen = new List<BinaryLogEventMetadata>();
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                AllowForwardCompatibility = true,
+                EventFilter = acceptEvent.HasValue ? metadata =>
+                {
+                    metadataSeen.Add(metadata);
+                    return acceptEvent.Value;
+                } : null
+            };
+            var replayed = new List<BuildEventArgs>();
+            var errors = new List<BinaryLogReaderErrorEventArgs>();
+            var errorMessages = new List<string>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+            replayEventSource.RecoverableReadError += error =>
+            {
+                errors.Add(error);
+                errorMessages.Add(error.GetFormattedMessage());
+            };
+
+            using var stream = CreateUnknownEventFilterTestStream(BinaryLogger.FileFormatVersion + 1, includeFollowingEvent);
+            using var reader = new BinaryReader(stream);
+            replayEventSource.Replay(reader, CancellationToken.None);
+
+            BinaryLogReaderErrorEventArgs error = errors.ShouldHaveSingleItem();
+            error.ErrorType.ShouldBe(ReaderErrorType.UnknownEventType);
+            error.RecordKind.ShouldBe((BinaryLogRecordKind)127);
+            errorMessages.ShouldHaveSingleItem().ShouldBe(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderUnknownType", 0, 10, (BinaryLogRecordKind)127)
+                + " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord"));
+            if (includeFollowingEvent && acceptEvent.HasValue)
+            {
+                BinaryLogEventMetadata metadata = metadataSeen.ShouldHaveSingleItem();
+                metadata.RecordKind.ShouldBe(BinaryLogRecordKind.Message);
+                metadata.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+            }
+            else
+            {
+                metadataSeen.ShouldBeEmpty();
+            }
+
+            if (includeFollowingEvent && acceptEvent != false)
+            {
+                BuildMessageEventArgs message = replayed.ShouldHaveSingleItem().ShouldBeOfType<BuildMessageEventArgs>();
+                message.Message.ShouldBe("message after unknown record");
+                message.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+            }
+            else
+            {
+                replayed.ShouldBeEmpty();
+            }
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Replay_EventFilter_UnknownOpaqueRecordsStillFailInStrictMode(bool? acceptEvent)
+        {
+            CreateExpectedLogFile();
+            int filterCalls = 0;
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                AllowForwardCompatibility = false,
+                EventFilter = acceptEvent.HasValue ? _ =>
+                {
+                    filterCalls++;
+                    return acceptEvent.Value;
+                } : null
+            };
+            var replayed = new List<BuildEventArgs>();
+            var errors = new List<BinaryLogReaderErrorEventArgs>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+            replayEventSource.RecoverableReadError += errors.Add;
+
+            // Use a supported header so strict replay reaches the unknown-record error path.
+            using var stream = CreateUnknownEventFilterTestStream(BinaryLogger.FileFormatVersion, includeFollowingEvent: true);
+            using var reader = new BinaryReader(stream);
+            Should.Throw<InvalidDataException>(() => replayEventSource.Replay(reader, CancellationToken.None))
+                .Message.ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "Binlog_ReaderUnknownType", 0, 10, (BinaryLogRecordKind)127));
+
+            filterCalls.ShouldBe(0);
+            errors.ShouldBeEmpty();
+            replayed.ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Replay_EventFilter_MalformedKnownCommonFieldsAreNotSuppressed(bool acceptEvent)
+        {
+            CreateExpectedLogFile();
+            int filterCalls = 0;
+            int recoverableErrors = 0;
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                AllowForwardCompatibility = true,
+                EventFilter = _ =>
+                {
+                    filterCalls++;
+                    return acceptEvent;
+                }
+            };
+            replayEventSource.AnyEventRaised += (_, _) => { };
+            replayEventSource.RecoverableReadError += _ => recoverableErrors++;
+
+            using var stream = CreateUnknownEventFilterTestStream(BinaryLogger.FileFormatVersion + 1, includeFollowingEvent: false);
+            stream.Position = 2 * sizeof(int);
+            stream.WriteByte((byte)BinaryLogRecordKind.BuildStarted);
+            stream.Position = 0;
+            using var reader = new BinaryReader(stream);
+            Should.Throw<ArgumentOutOfRangeException>(() => replayEventSource.Replay(reader, CancellationToken.None));
+            filterCalls.ShouldBe(0);
+            recoverableErrors.ShouldBe(0);
+        }
+
+        private static Stream CreateUnknownEventFilterTestStream(int fileFormatVersion, bool includeFollowingEvent)
+        {
+            var stream = new MemoryStream();
+            using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                writer.Write(fileFormatVersion);
+                writer.Write(BinaryLogger.ForwardCompatibilityMinimalVersion);
+                // Opaque bytes that would be an invalid timestamp if read as current common fields.
+                byte[] opaqueRecord = [127, 10, 32, 255, 255, 255, 255, 255, 255, 255, 127, 0];
+                writer.Write(opaqueRecord);
+                if (includeFollowingEvent)
+                {
+                    new BuildEventArgsWriter(writer).Write(
+                        new BuildMessageEventArgs("message after unknown record", null, "Sender", MessageImportance.Normal)
+                        {
+                            BuildEventContext = new BuildEventContext(1, 2, SelectedProjectContextId, 4)
+                        });
+                }
+
+                writer.Write((byte)BinaryLogRecordKind.EndOfFile);
+            }
+
+            stream.Position = 0;
+            return stream;
+        }
+
+        [Fact]
+        public void Replay_EventFilter_SkipsRejectedEventsWithoutDeserializingThem()
+        {
+            var metadataSeen = new List<BinaryLogEventMetadata>();
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = metadata =>
+                {
+                    metadataSeen.Add(metadata);
+                    return metadata.BuildEventContext?.ProjectContextId != ExcludedProjectContextId;
+                }
+            };
+
+            var replayed = new List<BuildEventArgs>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+
+            using var stream = CreateEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            replayEventSource.Replay(binaryReader, CancellationToken.None);
+
+            metadataSeen.ShouldContain(metadata =>
+                metadata.RecordKind == BinaryLogRecordKind.Warning &&
+                metadata.BuildEventContext != null &&
+                metadata.BuildEventContext.ProjectContextId == ExcludedProjectContextId);
+
+            replayed.ShouldNotContain(e => e is BuildWarningEventArgs);
+            BuildMessageEventArgs message = replayed
+                .Where(e => e.GetType() == typeof(BuildMessageEventArgs))
+                .Cast<BuildMessageEventArgs>()
+                .ShouldHaveSingleItem();
+            message.Message.ShouldBe("selected message");
+            message.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void Replay_EventFilter_AppliesToTargetSkippedAfterDeserialization()
+        {
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = metadata =>
+                    metadata.RecordKind != BinaryLogRecordKind.TargetSkipped ||
+                    metadata.OriginalBuildEventContext?.ProjectContextId == SelectedProjectContextId
+            };
+
+            var replayed = new List<BuildEventArgs>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+
+            using var stream = CreateEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            replayEventSource.Replay(binaryReader, CancellationToken.None);
+
+            TargetSkippedEventArgs targetSkipped = replayed.OfType<TargetSkippedEventArgs>().ShouldHaveSingleItem();
+            targetSkipped.OriginalBuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+            replayed.ShouldContain(e => e is BuildWarningEventArgs);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void Replay_EventFilter_AppliesAfterDeserializationForLegacyBinlogs()
+        {
+            var metadataSeen = new List<BinaryLogEventMetadata>();
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = metadata =>
+                {
+                    metadataSeen.Add(metadata);
+                    return metadata.BuildEventContext?.ProjectContextId == SelectedProjectContextId;
+                }
+            };
+
+            var replayed = new List<BuildEventArgs>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+
+            using var stream = CreateLegacyEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            replayEventSource.Replay(binaryReader, CancellationToken.None);
+
+            metadataSeen.Select(metadata => metadata.BuildEventContext?.ProjectContextId)
+                .ShouldBe([ExcludedProjectContextId, SelectedProjectContextId]);
+            BuildMessageEventArgs message = replayed.OfType<BuildMessageEventArgs>().ShouldHaveSingleItem();
+            message.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void Replay_EventFilter_ProducesReplayableCompactBinlog()
+        {
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = metadata =>
+                    metadata.BuildEventContext == null ||
+                    metadata.BuildEventContext.ProjectContextId != ExcludedProjectContextId
+            };
+
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = $"LogFile={_logFile};OmitInitialInfo",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.None,
+            };
+
+            binaryLogger.Initialize(replayEventSource);
+            using (var stream = CreateEventFilterTestStream())
+            using (var binaryReader = new BinaryReader(stream))
+            {
+                replayEventSource.Replay(binaryReader, CancellationToken.None);
+            }
+
+            binaryLogger.Shutdown();
+
+            var replayed = new List<BuildEventArgs>();
+            var verifyingSource = new BinaryLogReplayEventSource();
+            verifyingSource.AnyEventRaised += (_, e) => replayed.Add(e);
+            verifyingSource.Replay(_logFile);
+
+            replayed.ShouldContain(e => e is BuildStartedEventArgs);
+            replayed.ShouldContain(e => e is BuildFinishedEventArgs);
+            replayed
+                .Where(e => e.GetType() == typeof(BuildMessageEventArgs))
+                .Cast<BuildMessageEventArgs>()
+                .ShouldHaveSingleItem()
+                .Message.ShouldBe("selected message");
+            replayed.ShouldNotContain(e => e is BuildWarningEventArgs);
+        }
+
+        [Theory]
+        [InlineData(BinaryLogRecordKind.BuildStarted)]
+        [InlineData(BinaryLogRecordKind.Message)]
+        [InlineData(BinaryLogRecordKind.TargetSkipped)]
+        public void Replay_EventFilter_WrapsExceptionsThrownByTheFilter(BinaryLogRecordKind recordKind)
+        {
+            var expected = new InvalidDataException("filter failed", new InvalidOperationException("root cause"));
+            BinaryLogEventMetadata failedMetadata = default;
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                AllowForwardCompatibility = true,
+                EventFilter = metadata =>
+                {
+                    if (metadata.RecordKind != recordKind)
+                    {
+                        return false;
+                    }
+
+                    failedMetadata = metadata;
+                    throw expected;
+                }
+            };
+            int dispatchedEvents = 0;
+            int recoverableErrors = 0;
+            replayEventSource.AnyEventRaised += (_, _) => dispatchedEvents++;
+            replayEventSource.RecoverableReadError += _ => recoverableErrors++;
+
+            using var stream = CreateEventFilterTestStream();
+            int fileFormatVersion = BinaryLogger.FileFormatVersion + 1;
+            using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                writer.Write(fileFormatVersion);
+            }
+
+            stream.Position = 0;
+            using var binaryReader = new BinaryReader(stream);
+
+            // Count serialized records independently, including auxiliary records not offered to the filter.
+            binaryReader.ReadInt32();
+            binaryReader.ReadInt32();
+            long recordNumber = 0;
+            while ((BinaryLogRecordKind)binaryReader.Read7BitEncodedInt() != recordKind)
+            {
+                int length = binaryReader.Read7BitEncodedInt();
+                binaryReader.ReadBytes(length).Length.ShouldBe(length);
+                recordNumber++;
+            }
+
+            stream.Position = 0;
+            BinaryLogEventFilterException exception = Should.Throw<BinaryLogEventFilterException>(
+                () => replayEventSource.Replay(binaryReader, CancellationToken.None));
+
+            exception.InnerException.ShouldBeSameAs(expected);
+            exception.RecordKind.ShouldBe(recordKind);
+            exception.BuildEventContext.ShouldBeSameAs(failedMetadata.BuildEventContext);
+            exception.OriginalBuildEventContext.ShouldBeSameAs(failedMetadata.OriginalBuildEventContext);
+            exception.RecordNumber.ShouldBe(recordNumber);
+            exception.FileFormatVersion.ShouldBe(fileFormatVersion);
+            exception.Message.ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                "Binlog_EventFilterThrewWithContext", recordNumber, recordKind, fileFormatVersion,
+                failedMetadata.BuildEventContext, failedMetadata.OriginalBuildEventContext));
+            exception.ToString().ShouldContain(expected.ToString());
+            expected.StackTrace.ShouldNotBeNullOrEmpty();
+            recoverableErrors.ShouldBe(0);
+            dispatchedEvents.ShouldBe(0);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void Replay_EventFilter_LegacyFailureIncludesRecordInformation()
+        {
+            var expected = new FormatException("legacy filter failed");
+            BinaryLogEventMetadata failedMetadata = default;
+            using var stream = CreateLegacyEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(binaryReader, closeInput: false);
+
+            BinaryLogEventFilterException exception = Should.Throw<BinaryLogEventFilterException>(
+                () => reader.Read(metadata =>
+                {
+                    if (metadata.BuildEventContext?.ProjectContextId != SelectedProjectContextId)
+                    {
+                        return false;
+                    }
+
+                    failedMetadata = metadata;
+                    throw expected;
+                }));
+
+            exception.InnerException.ShouldBeSameAs(expected);
+            exception.RecordKind.ShouldBe(BinaryLogRecordKind.Message);
+            exception.BuildEventContext.ShouldBeSameAs(failedMetadata.BuildEventContext);
+            exception.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+            exception.OriginalBuildEventContext.ShouldBeNull();
+            exception.RecordNumber.ShouldBe(1);
+            exception.FileFormatVersion.ShouldBe(BinaryLogger.ForwardCompatibilityMinimalVersion - 1);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void Replay_EventFilter_ExceptionWithoutRecordInformation()
+        {
+            var expected = new InvalidOperationException("filter failed");
+            var exception = new BinaryLogEventFilterException(expected);
+
+            exception.InnerException.ShouldBeSameAs(expected);
+            exception.Message.ShouldBe(ResourceUtilities.GetResourceString("Binlog_EventFilterThrew"));
+            exception.RecordKind.ShouldBeNull();
+            exception.BuildEventContext.ShouldBeNull();
+            exception.OriginalBuildEventContext.ShouldBeNull();
+            exception.RecordNumber.ShouldBeNull();
+            exception.FileFormatVersion.ShouldBeNull();
+
+            CreateExpectedLogFile();
+        }
+
+#if !NETFRAMEWORK
+        [Fact]
+        public void Replay_EventFilter_ExceptionDoesNotDeclareLegacySerialization()
+        {
+            Type exceptionType = typeof(BinaryLogEventFilterException);
+            exceptionType.IsDefined(typeof(SerializableAttribute), inherit: false).ShouldBeFalse();
+            exceptionType.GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic).ShouldBeEmpty();
+            exceptionType.GetMethod("GetObjectData", BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .ShouldBeNull();
+
+            CreateExpectedLogFile();
+        }
+#else
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Replay_EventFilter_ExceptionSerializationPreservesDiagnosticInformation(bool includeRecordInformation)
+        {
+            var innerException = Should.Throw<InvalidOperationException>(
+                () => throw new InvalidOperationException("filter failed", new FormatException("root cause")));
+            var metadata = new BinaryLogEventMetadata(
+                BinaryLogRecordKind.TargetSkipped,
+                new BuildEventContext(1, 2, 3, 4, 5, 6, 7),
+                new BuildEventContext(8, 9, 10, 11, 12, 13, 14));
+            var exception = includeRecordInformation
+                ? new BinaryLogEventFilterException(metadata, (long)int.MaxValue + 1, 17, innerException)
+                : new BinaryLogEventFilterException(innerException);
+
+            using var stream = new MemoryStream();
+            var formatter = new BinaryFormatter();
+            formatter.Serialize(stream, exception);
+            stream.Position = 0;
+            var roundTripped = (BinaryLogEventFilterException)formatter.Deserialize(stream);
+
+            roundTripped.Message.ShouldBe(exception.Message);
+            roundTripped.RecordKind.ShouldBe(exception.RecordKind);
+            (roundTripped.BuildEventContext?.ToString()).ShouldBe(exception.BuildEventContext?.ToString());
+            (roundTripped.OriginalBuildEventContext?.ToString()).ShouldBe(exception.OriginalBuildEventContext?.ToString());
+            roundTripped.RecordNumber.ShouldBe(exception.RecordNumber);
+            roundTripped.FileFormatVersion.ShouldBe(exception.FileFormatVersion);
+            roundTripped.InnerException.ShouldBeOfType<InvalidOperationException>();
+            roundTripped.InnerException.Message.ShouldBe(innerException.Message);
+            roundTripped.InnerException.StackTrace.ShouldBe(innerException.StackTrace);
+            roundTripped.InnerException.InnerException.ShouldBeOfType<FormatException>();
+            roundTripped.InnerException.InnerException.Message.ShouldBe("root cause");
+
+            CreateExpectedLogFile();
+        }
+#endif
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void Replay_EventFilter_ObservesCancellationWithinBatch(bool acceptEvents, bool legacy)
+        {
+            using var cancellationSource = new CancellationTokenSource();
+            int filterCalls = 0;
+            int dispatchedEvents = 0;
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = _ =>
+                {
+                    filterCalls++;
+                    if (filterCalls == 1)
+                    {
+                        cancellationSource.Cancel();
+                    }
+                    return acceptEvents;
+                }
+            };
+            replayEventSource.AnyEventRaised += (_, _) => dispatchedEvents++;
+
+            using var stream = CreateCancellationTestStream(BuildEventArgsReader.CancellationCheckInterval * 3, legacy);
+            using var binaryReader = new BinaryReader(stream);
+            replayEventSource.Replay(binaryReader, cancellationSource.Token);
+
+            filterCalls.ShouldBe(BuildEventArgsReader.CancellationCheckInterval);
+            dispatchedEvents.ShouldBe(acceptEvents ? filterCalls : 0);
+            stream.Position.ShouldBeLessThan(stream.Length);
+
+            CreateExpectedLogFile();
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void Replay_CancellationPollingResetsWhenResuming(bool rawReplay, bool cancelBeforeReplay)
+        {
+            using var cancellationSource = new CancellationTokenSource();
+            if (cancelBeforeReplay)
+            {
+                cancellationSource.Cancel();
+            }
+
+            int recordsRead = 0;
+            var replayEventSource = new BinaryLogReplayEventSource();
+            if (rawReplay)
+            {
+                ((IBinaryLogReplaySource)replayEventSource).RawLogRecordReceived += (_, stream) =>
+                {
+                    stream.CopyTo(Stream.Null);
+                    OnRecord();
+                };
+            }
+            else
+            {
+                replayEventSource.AnyEventRaised += (_, _) => OnRecord();
+            }
+
+            int totalEvents = BuildEventArgsReader.CancellationCheckInterval * 3;
+            using var stream = CreateCancellationTestStream(totalEvents, legacy: false);
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(binaryReader, closeInput: false);
+            replayEventSource.Replay(reader, cancellationSource.Token);
+            int expectedRecords = cancelBeforeReplay ? 0 : BuildEventArgsReader.CancellationCheckInterval;
+            recordsRead.ShouldBe(expectedRecords);
+
+            long position = stream.Position;
+            replayEventSource.Replay(reader, cancellationSource.Token);
+            recordsRead.ShouldBe(expectedRecords);
+            stream.Position.ShouldBe(position);
+
+            replayEventSource.Replay(reader, CancellationToken.None);
+            recordsRead.ShouldBe(totalEvents);
+
+            CreateExpectedLogFile();
+
+            void OnRecord()
+            {
+                recordsRead++;
+                if (recordsRead == 1)
+                {
+                    cancellationSource.Cancel();
+                }
+            }
+        }
+
+        private static Stream CreateCancellationTestStream(int eventCount, bool legacy)
+        {
+            using var records = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(records, Encoding.UTF8, leaveOpen: true))
+            {
+                var writer = new BuildEventArgsWriter(binaryWriter);
+                var message = new BuildMessageEventArgs(null, null, null, MessageImportance.Normal);
+                for (int i = 0; i < eventCount; i++)
+                {
+                    writer.Write(message);
+                }
+                binaryWriter.Flush();
+            }
+            records.Position = 0;
+
+            var stream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                binaryWriter.Write(legacy ? BinaryLogger.ForwardCompatibilityMinimalVersion - 1 : BinaryLogger.FileFormatVersion);
+                if (legacy)
+                {
+                    using var binaryReader = new BinaryReader(records, Encoding.UTF8, leaveOpen: true);
+                    while (records.Position < records.Length)
+                    {
+                        int kind = binaryReader.Read7BitEncodedInt();
+                        int length = binaryReader.Read7BitEncodedInt();
+                        binaryWriter.Write7BitEncodedInt(kind);
+                        binaryWriter.Write(binaryReader.ReadBytes(length));
+                    }
+                }
+                else
+                {
+                    binaryWriter.Write(BinaryLogger.MinimumReaderVersion);
+                    records.CopyTo(stream);
+                }
+                binaryWriter.Write((byte)BinaryLogRecordKind.EndOfFile);
+                binaryWriter.Flush();
+            }
+            stream.Position = 0;
+            return stream;
+        }
+
+        private const int SelectedProjectContextId = 101;
+        private const int ExcludedProjectContextId = 202;
+
+        // Uncompressed, length-framed events with distinct project and original target contexts.
+        private static Stream CreateEventFilterTestStream()
+        {
+            var selectedContext = new BuildEventContext(1, 1, 1, 1, SelectedProjectContextId, 11, 111);
+            var excludedContext = new BuildEventContext(1, 1, 2, 2, ExcludedProjectContextId, 22, 222);
+            var skippedContext = new BuildEventContext(1, 1, 3, 3, 303, 33, 333);
+
+            var stream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                binaryWriter.Write(BinaryLogger.FileFormatVersion);
+                binaryWriter.Write(BinaryLogger.FileFormatVersion);
+
+                var writer = new BuildEventArgsWriter(binaryWriter);
+                writer.Write(new BuildStartedEventArgs("Build started", helpKeyword: null));
+                writer.Write(new BuildMessageEventArgs("selected message", "Help", "Sender", MessageImportance.Normal)
+                {
+                    BuildEventContext = selectedContext,
+                });
+                writer.Write(new BuildWarningEventArgs(
+                    "Subcategory", "WARN", "File.cs", 1, 2, 3, 4, "excluded warning", "Help", "Sender")
+                {
+                    BuildEventContext = excludedContext,
+                });
+                writer.Write(new TargetSkippedEventArgs("target skipped")
+                {
+                    BuildEventContext = skippedContext,
+                    OriginalBuildEventContext = selectedContext,
+                    TargetName = "SkippedTarget",
+                    TargetFile = "Targets.targets",
+                    ProjectFile = "Project.csproj",
+                    BuildReason = TargetBuiltReason.DependsOn,
+                    SkipReason = TargetSkipReason.PreviouslyBuiltSuccessfully,
+                    OriginallySucceeded = true,
+                });
+                writer.Write(new BuildFinishedEventArgs("Build finished", helpKeyword: null, succeeded: true));
+                binaryWriter.Flush();
+            }
+
+            stream.WriteByte((byte)BinaryLogRecordKind.EndOfFile);
+            stream.Position = 0;
+            return stream;
+        }
+
+        private static Stream CreateLegacyEventFilterTestStream()
+        {
+            using var framedStream = new MemoryStream();
+            using (var framedWriter = new BinaryWriter(framedStream, Encoding.UTF8, leaveOpen: true))
+            {
+                var writer = new BuildEventArgsWriter(framedWriter);
+                writer.Write(new BuildMessageEventArgs(null, null, null, MessageImportance.Normal)
+                {
+                    BuildEventContext = new BuildEventContext(1, 1, 1, 1, ExcludedProjectContextId, 11, 111),
+                });
+                writer.Write(new BuildMessageEventArgs(null, null, null, MessageImportance.Normal)
+                {
+                    BuildEventContext = new BuildEventContext(1, 1, 2, 2, SelectedProjectContextId, 22, 222),
+                });
+                framedWriter.Flush();
+            }
+
+            framedStream.Position = 0;
+            var legacyStream = new MemoryStream();
+            using (var framedReader = new BinaryReader(framedStream, Encoding.UTF8, leaveOpen: true))
+            using (var legacyWriter = new BinaryWriter(legacyStream, Encoding.UTF8, leaveOpen: true))
+            {
+                legacyWriter.Write(BinaryLogger.ForwardCompatibilityMinimalVersion - 1);
+
+                while (framedStream.Position < framedStream.Length)
+                {
+                    int recordKind = framedReader.Read7BitEncodedInt();
+                    int recordLength = framedReader.Read7BitEncodedInt();
+                    legacyWriter.Write7BitEncodedInt(recordKind);
+                    legacyWriter.Write(framedReader.ReadBytes(recordLength));
+                }
+
+                legacyWriter.Write7BitEncodedInt((int)BinaryLogRecordKind.EndOfFile);
+                legacyWriter.Flush();
+            }
+
+            legacyStream.Position = 0;
+            return legacyStream;
         }
 
         #endregion

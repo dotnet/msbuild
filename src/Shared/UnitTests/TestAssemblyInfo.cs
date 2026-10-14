@@ -235,6 +235,9 @@ namespace Microsoft.Build.UnitTests
             // https://github.com/dotnet/msbuild/pull/6274
             _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", null);
 
+            // Tests and the MSBuild.exe processes they launch must never send VS telemetry.
+            _testEnvironment.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", "1");
+
             // The `dotnet` muxer always injects MSBuildSDKsPath / MSBuildExtensionsPath (pointing at the SDK it
             // resolved) into the environment of the MSBuild process it launches. In the bootstrapped CI build the
             // test hosts are spawned by the stage 1 bootstrap `dotnet`, so these leak in pointing at the stage 1
@@ -247,6 +250,19 @@ namespace Microsoft.Build.UnitTests
             _testEnvironment.SetEnvironmentVariable("MSBuildExtensionsPath", null);
             _testEnvironment.SetEnvironmentVariable("MSBuildExtensionsPath32", null);
             _testEnvironment.SetEnvironmentVariable("MSBuildExtensionsPath64", null);
+
+            // Use a process-specific debug path, nested under the ambient one (Arcade sets it build-wide)
+            //  This is so multiple test projects can be run in parallel without sharing the same debug directory
+            string ambientDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
+            if (!string.IsNullOrEmpty(ambientDebugPath))
+            {
+                _testEnvironment.SetEnvironmentVariable(
+                    "MSBUILDDEBUGPATH",
+                    Path.Combine(ambientDebugPath, $"test_{EnvironmentUtilities.CurrentProcessId}"));
+
+                // Let's re-resolve FrameworkDebugUtils.DebugPath, which is cached, so it picks up new MSBUILDDEBUGPATH
+                FrameworkDebugUtils.SetDebugPath();
+            }
 
             // Use a project-specific temporary path
             //  This is so multiple test projects can be run in parallel without sharing the same temp directory

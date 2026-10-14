@@ -3495,6 +3495,19 @@ namespace Microsoft.Build.Shared
                     for (int index = 0; index < excludes.Count; index++)
                     {
                         OptimizedFileSearch exclude = excludes[index];
+                        if (!string.Equals(directory, _enumerationRoot, StringComparison.Ordinal)
+                            && TryGetRelativeDirectory(
+                                directory,
+                                exclude.BaseDirectory.AsSpan(),
+                                StringComparison.OrdinalIgnoreCase,
+                                out ReadOnlySpan<char> relativeDirectory))
+                        {
+                            // Rebase only the shared include root, preserving the exclude's lexical suffix.
+                            exclude = new OptimizedFileSearch(
+                                Path.Combine(_enumerationRoot, relativeDirectory.ToString()),
+                                exclude.Matcher);
+                        }
+
                         _excludes[index] = exclude;
                     }
                 }

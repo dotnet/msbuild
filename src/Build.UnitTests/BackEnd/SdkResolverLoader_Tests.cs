@@ -135,7 +135,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                sdkResolverLoader.LoadAllResolvers(ElementLocation.EmptyLocation);
+                sdkResolverLoader.LoadAllResolvers(ElementLocation.Empty);
             });
 
             exception.Message.ShouldBe($"The SDK resolver type \"{nameof(MockSdkResolverThatDoesNotLoad)}\" failed to load. A8BB8B3131D3475D881ACD3AF8D75BD6");
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                sdkResolverLoader.LoadAllResolvers(ElementLocation.EmptyLocation);
+                sdkResolverLoader.LoadAllResolvers(ElementLocation.Empty);
             });
 
             exception.Message.ShouldStartWith($"The SDK resolver type \"{nameof(MockSdkResolverNoPublicConstructor)}\" failed to load.");
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
             {
-                sdkResolverLoader.LoadAllResolvers(ElementLocation.EmptyLocation);
+                sdkResolverLoader.LoadAllResolvers(ElementLocation.Empty);
             });
 
             exception.Message.ShouldBe($"The SDK resolver assembly \"{assemblyPath}\" could not be loaded. {expectedMessage}");

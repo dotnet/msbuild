@@ -18,12 +18,12 @@ Thread-safe capability is declared by a single mechanism: the `[MSBuildMultiThre
 | Declaration | Effect | Read by |
 | --- | --- | --- |
 | `[MSBuildMultiThreadableTask]` | Runs in-process instead of an out-of-proc TaskHost | `TaskRouter.NeedsTaskHostInMultiThreadedMode` |
-| `IMultiThreadableTask` | Receives a `TaskEnvironment` | `TaskExecutionHost` |
+| `IMultiThreadableTask` | Receives a `TaskEnvironment` | `TaskExecutionHost`, `OutOfProcTaskAppDomainWrapperBase` |
 
 Declaring one without the other is legal, and each half fails quietly:
 
 - **Attribute only** — a complete, properly migrated state for a task that does not resolve relative paths or read environment variables. The task runs in-process without `TaskEnvironment`. If the task *does* declare a `TaskEnvironment` property, MSBuild never assigns it: the property silently retains whatever the task itself initialized it to — commonly `TaskEnvironment.Fallback`, or `null` when there is no initializer — so paths resolve against the shared process working directory. The task-authoring analyzer reports `MSBuildTask0012` for this shape.
-- **Interface only** — a useful intermediate state. The task resolves paths correctly but still pays for a TaskHost. Note that the engine does not assign the property in that TaskHost: the out-of-proc host supplies `TaskEnvironment.Fallback` to a `TaskEnvironment` constructor if the task declares one, and otherwise leaves the property at the task's own default. That is correct there, because `Fallback` is backed by `MultiProcessTaskEnvironmentDriver` and the host process is dedicated to a single task. `MSBuildTask0013` reports this shape, disabled by default.
+- **Interface only** — a useful intermediate state. The task resolves paths correctly but still pays for a TaskHost. The out-of-proc host assigns `TaskEnvironment.Fallback` to the property before setting task parameters and executing the task. It also supplies the same environment to a `TaskEnvironment` constructor if the task declares one. `Fallback` is backed by `MultiProcessTaskEnvironmentDriver`, so it uses the host's process environment and working directory. `MSBuildTask0013` reports this shape, disabled by default.
 
 Tasks that use `TaskEnvironment` cannot load in older MSBuild versions that do not support multithreading features, requiring authors to drop support for older MSBuild versions. To address this challenge, MSBuild provides a compatibility bridge that allows certain tasks targeting older MSBuild versions to participate in multithreaded builds: the attribute is detected by name, so a task can apply it without referencing a new MSBuild assembly, and correct absolute path resolution can be and should be achieved without accessing `TaskEnvironment`. Tasks using that bridge must still avoid relying on environment variables or modifying global process state.
 
@@ -44,7 +44,7 @@ public interface IMultiThreadableTask : ITask
 }
 ```
 
-Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`) or run in the out-of-proc task host. The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
+Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`). Both the engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) and the out-of-proc task host assign the appropriate environment before setting task parameters and calling `Execute()`, so hosted tasks do not need to provide their own default.
 
 #### Constructor Injection of `TaskEnvironment`
 
@@ -108,6 +108,17 @@ For tasks to be eligible for multithreaded execution using this approach, they m
 public class MyTask : Task {...}
 ```
 
+### Inline task classes
+
+`RoslynCodeTaskFactory` tasks declared with `<Code Type="Class">` can opt into
+in-process multithreaded execution by applying `[MSBuildMultiThreadableTask]` to
+the concrete task class. Unannotated classes and generated `Fragment`/`Method`
+tasks remain isolated.
+
+For `TaskEnvironment` access, also implement `IMultiThreadableTask` and initialize
+the property to `TaskEnvironment.Fallback`. A public parameterless constructor is
+still required; the engine injects the environment after construction.
+
 ### Registered task objects
 
 In multithreaded builds, in-process tasks share the `IBuildEngine4` registered-task-object cache across thread nodes. Tasks in worker or TaskHost processes use separate caches.
@@ -118,6 +129,37 @@ Using the API is safe when the task accounts for this sharing. Before adding `[M
 * keys cannot collide with unrelated tasks;
 * if multiple tasks race to register equal keys, only one object is retained and the task disposes any unretained object that needs cleanup; and
 * correctness does not require two task invocations to use the same cache so the task is functional both in multithreaded and multiprocess modes.
+
+## Validate a task migration
+
+Run a representative build with an MSBuild version that supports
+[strict mode](multithreaded-msbuild.md#strict-mode), and capture a binary log:
+
+```powershell
+dotnet build .\MyProject.csproj -m -mt -nr:false -bl:migration-strict.binlog "-warnAsError:MSB4286;MSB4287;MSB4288"
+```
+
+Ensure [change wave 18.12](../../wiki/ChangeWaves.md#1812) is enabled so the default strict checks are active.
+`MSB4287` and successful sentinel recovery (`MSB4288`) are warnings by default; the command
+promotes them to errors for migration sign-off. Do not suppress `MSB4286`, `MSB4287`, or `MSB4288`
+through `-nowarn` or `MSBuildWarningsAsMessages`.
+Clean the relevant outputs or invoke the required targets so the migrated task actually
+runs. In the binlog, confirm that the expected task assembly was used and the task ran
+in-process, rather than being skipped or using a legacy copy in a TaskHost.
+
+Search the binlog for **`MT-sentinel-CWD`**. The strict-mode enable message
+contains this path by design; use it to confirm the mode was active. Treat every other
+occurrence as a migration violation to investigate before sign-off. In
+particular, a sentinel path in task inputs or outputs, evaluated file paths, tool command
+lines, or file-access errors shows that process-relative state has leaked into the build.
+
+Trace each leak back to the task, its helpers, or the project expression that produced it.
+Fix the path resolution and repeat the build and search. **A successful build alone is
+not enough:** a swallowed exception or an output containing a wrong absolute path can
+leave the build green without MSB4286/MSB4287. CWD is checked after each task, but sentinel
+contents are scanned at project/build completion: a relative file written and deleted by
+different tasks before that scan can escape detection. A clean search only covers the code paths
+and logged values exercised by that build; retain the migration's unit tests and call-chain audit.
 
 ## TaskEnvironment API
 
@@ -134,8 +176,11 @@ public class TaskEnvironment
 { 
     public AbsolutePath ProjectDirectory { get; internal set; }
 
-    // This function resolves paths relative to ProjectDirectory.
+    // These functions resolve relative paths against ProjectDirectory.
     public AbsolutePath GetAbsolutePath(string path);
+
+    // This function uses task-local environment variables in multithreaded mode.
+    public AbsolutePath GetTempPath();
     
     public string? GetEnvironmentVariable(string name);
     public IReadOnlyDictionary<string, string> GetEnvironmentVariables();

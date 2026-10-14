@@ -18,11 +18,11 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using static Microsoft.Build.Execution.ProjectPropertyInstance;
@@ -172,6 +172,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly int _submissionId;
 
+        private readonly string _evaluationMeasurementProjectFile;
+
+        private readonly int _evaluationMeasurementId;
+
         /// <summary>
         /// The evaluation context to use.
         /// </summary>
@@ -240,20 +244,17 @@ namespace Microsoft.Build.Evaluation
             EvaluationContext evaluationContext,
             bool profileEvaluation,
             bool interactive,
-            ILoggingService loggingService,
-            BuildEventContext buildEventContext,
+            EvaluationLoggingContext evaluationLoggingContext,
+            string evaluationMeasurementProjectFile,
+            int evaluationMeasurementId,
             ProjectEvaluationStage evaluationStage)
         {
             Assumed.NotNull(data);
             Assumed.NotNull(projectRootElementCache);
             Assumed.NotNull(evaluationContext);
-            Assumed.NotNull(loggingService);
-            Assumed.NotNull(buildEventContext);
+            Assumed.NotNull(evaluationLoggingContext);
 
-            _evaluationLoggingContext = new EvaluationLoggingContext(
-                loggingService,
-                buildEventContext,
-                string.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File);
+            _evaluationLoggingContext = evaluationLoggingContext;
 
             // Wrap the IEvaluatorData<> object passed in.
             data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
@@ -290,6 +291,8 @@ namespace Microsoft.Build.Evaluation
             _projectRootElementCache = projectRootElementCache;
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
+            _evaluationMeasurementProjectFile = evaluationMeasurementProjectFile;
+            _evaluationMeasurementId = evaluationMeasurementId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
             _isRunningInVisualStudio = string.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("BuildingInsideVisualStudio")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
 
@@ -348,40 +351,81 @@ namespace Microsoft.Build.Evaluation
             bool interactive = false,
             ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
-            MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
-            var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
-            var evaluator = new Evaluator<P, I, M, D>(
-                data,
-                project,
-                root,
-                loadSettings,
-                maxNodeCount,
-                environmentProperties,
-                propertiesFromCommandLine,
-                itemFactory,
-                toolsetProvider,
-                directoryCacheFactory,
-                projectRootElementCache,
-                sdkResolverService,
-                submissionId,
-                evaluationContext,
-                profileEvaluation,
-                interactive,
-                loggingService,
-                buildEventContext,
-                evaluationStage);
+            string projectFile = root.ProjectFileLocation.File ?? string.Empty;
+            MSBuildEventSource.Log.EvaluateStart(projectFile);
+            long evaluationMeasurementStart = EvaluationInstrumentation.StartMeasurement();
+            EvaluationLoggingContext evaluationLoggingContext = null;
+            int evaluationId = BuildEventContext.InvalidEvaluationId;
+            Evaluator<P, I, M, D> evaluator;
 
             try
             {
+                evaluationLoggingContext = new EvaluationLoggingContext(
+                    loggingService,
+                    buildEventContext,
+                    string.IsNullOrEmpty(projectFile) ? "(null)" : projectFile);
+                evaluationId = evaluationLoggingContext.BuildEventContext.EvaluationId;
+
+                var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
+                evaluator = new Evaluator<P, I, M, D>(
+                    data,
+                    project,
+                    root,
+                    loadSettings,
+                    maxNodeCount,
+                    environmentProperties,
+                    propertiesFromCommandLine,
+                    itemFactory,
+                    toolsetProvider,
+                    directoryCacheFactory,
+                    projectRootElementCache,
+                    sdkResolverService,
+                    submissionId,
+                    evaluationContext,
+                    profileEvaluation,
+                    interactive,
+                    evaluationLoggingContext,
+                    projectFile,
+                    evaluationId,
+                    evaluationStage);
+            }
+            catch
+            {
+                EvaluationInstrumentation.RecordEvaluation(
+                    evaluationMeasurementStart,
+                    evaluationStage,
+                    submissionId,
+                    succeeded: false,
+                    projectFile,
+                    evaluationId);
+                throw;
+            }
+
+            bool succeeded = false;
+            try
+            {
                 evaluator.Evaluate();
+                succeeded = true;
             }
             catch (PathTooLongException ex)
             {
-                evaluator._evaluationLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(root.ProjectFileLocation.File),
+                evaluator._evaluationLoggingContext.LogErrorFromText(
+                    DiagnosticSubcategory.None,
+                    errorCode: null,
+                    helpKeyword: null,
+                    ElementLocation.Create(root.ProjectFileLocation.File),
                     ex.Message);
             }
             finally
             {
+                EvaluationInstrumentation.RecordEvaluation(
+                    evaluationMeasurementStart,
+                    evaluationStage,
+                    submissionId,
+                    succeeded,
+                    projectFile,
+                    evaluationId);
+
                 IEnumerable globalProperties = null;
                 IEnumerable properties = null;
                 IEnumerable items = null;
@@ -402,14 +446,14 @@ namespace Microsoft.Build.Evaluation
                 evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
             }
 
-            MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
+            MSBuildEventSource.Log.EvaluateStop(projectFile);
         }
 
         /// <summary>
         /// Helper that creates a list of ProjectItem's given an unevaluated Include and a ProjectRootElement.
         /// Used by both Evaluator.EvaluateItemElement and by Project.AddItem.
         /// </summary>
-        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
+        internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string projectFilePath, BuildEventContext buildEventContext)
         {
             ArgumentException.ThrowIfNullOrEmpty(unevaluatedIncludeEscaped);
 
@@ -449,7 +493,7 @@ namespace Microsoft.Build.Evaluation
                             fileMatcher: expander.EvaluationContext?.FileMatcher,
                             loggingMechanism: loggingService,
                             includeLocation: itemElement.IncludeLocation,
-                            buildEventFileInfoFullPath: buildEventFileInfoFullPath,
+                            projectFilePath: projectFilePath,
                             buildEventContext: buildEventContext);
 
                         if (includeSplitFilesEscaped.Length > 0)
@@ -683,11 +727,13 @@ namespace Microsoft.Build.Evaluation
 
                 int globalPropertiesCount;
 
+                long pass0MeasurementStart = 0;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.InitialProperties))
                 {
                     // Pass0: load initial properties
                     // Follow the order of precedence so that Global properties overwrite Environment properties
                     MSBuildEventSource.Log.EvaluatePass0Start(_projectRootElement.ProjectFileLocation.File);
+                    pass0MeasurementStart = EvaluationInstrumentation.StartMeasurement();
                     AddBuiltInProperties();
                     AddEnvironmentProperties();
                     AddToolsetProperties();
@@ -700,11 +746,13 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 Assumed.NotEqual(_data.EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
-
+                double pass0DurationSeconds = EvaluationInstrumentation.EndPassMeasurement(pass0MeasurementStart);
                 MSBuildEventSource.Log.EvaluatePass0Stop(projectFile);
+                RecordEvaluationPass(pass0DurationSeconds, "initial_properties");
 
                 // Pass1: evaluate properties, load imports, and gather everything else
                 MSBuildEventSource.Log.EvaluatePass1Start(projectFile);
+                long pass1MeasurementStart = EvaluationInstrumentation.StartMeasurement();
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
@@ -719,7 +767,9 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
+                double pass1DurationSeconds = EvaluationInstrumentation.EndPassMeasurement(pass1MeasurementStart);
                 MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
+                RecordEvaluationPass(pass1DurationSeconds, "properties");
 
                 if (_evaluationStage <= ProjectEvaluationStage.Properties)
                 {
@@ -730,6 +780,7 @@ namespace Microsoft.Build.Evaluation
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 MSBuildEventSource.Log.EvaluatePass2Start(projectFile);
+                long pass2MeasurementStart = EvaluationInstrumentation.StartMeasurement();
                 using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefinitionGroups))
                 {
                     foreach (var itemDefinitionGroupElement in _itemDefinitionGroupElements)
@@ -740,7 +791,9 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
+                double pass2DurationSeconds = EvaluationInstrumentation.EndPassMeasurement(pass2MeasurementStart);
                 MSBuildEventSource.Log.EvaluatePass2Stop(projectFile);
+                RecordEvaluationPass(pass2DurationSeconds, "item_definitions");
 
                 if (_evaluationStage <= ProjectEvaluationStage.ItemDefinitions)
                 {
@@ -749,6 +802,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
+                long pass3MeasurementStart = 0;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
                     // comment next line to turn off lazy Evaluation
@@ -756,6 +810,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Pass3: evaluate project items
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
+                    pass3MeasurementStart = EvaluationInstrumentation.StartMeasurement();
 
                     SynthesizeImportedProjectItems();
 
@@ -797,7 +852,9 @@ namespace Microsoft.Build.Evaluation
 
                 SynthesizeItemGlobItems();
 
+                double pass3DurationSeconds = EvaluationInstrumentation.EndPassMeasurement(pass3MeasurementStart);
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
+                RecordEvaluationPass(pass3DurationSeconds, "items");
 
                 if (_evaluationStage <= ProjectEvaluationStage.Items)
                 {
@@ -807,6 +864,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Pass4: evaluate using-tasks
                 MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
+                long pass4MeasurementStart = EvaluationInstrumentation.StartMeasurement();
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
                     // Evaluate the usingtask and add the result into the data passed in
@@ -819,7 +877,9 @@ namespace Microsoft.Build.Evaluation
                         _evaluationContext.FileSystem);
                 }
 
+                double pass4DurationSeconds = EvaluationInstrumentation.EndPassMeasurement(pass4MeasurementStart);
                 MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
+                RecordEvaluationPass(pass4DurationSeconds, "using_tasks");
 
                 if (_evaluationStage <= ProjectEvaluationStage.UsingTasks)
                 {
@@ -850,6 +910,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Pass5: read targets (but don't evaluate them: that happens during build)
                     MSBuildEventSource.Log.EvaluatePass5Start(projectFile);
+                    long pass5MeasurementStart = EvaluationInstrumentation.StartMeasurement();
                     for (var i = 0; i < targetElementsCount; i++)
                     {
                         var element = _targetElements[i];
@@ -903,12 +964,23 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     _data.FinishEvaluation();
+                    double pass5DurationSeconds = EvaluationInstrumentation.EndPassMeasurement(pass5MeasurementStart);
                     MSBuildEventSource.Log.EvaluatePass5Stop(projectFile);
+                    RecordEvaluationPass(pass5DurationSeconds, "targets");
                 }
             }
 
             Assumed.True(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
         }
+
+        private void RecordEvaluationPass(double durationSeconds, string pass)
+            => EvaluationInstrumentation.RecordPass(
+                durationSeconds,
+                _evaluationStage,
+                pass,
+                _submissionId,
+                _evaluationMeasurementProjectFile,
+                _evaluationMeasurementId);
 
         private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
         {
@@ -1199,10 +1271,10 @@ namespace Microsoft.Build.Evaluation
             switch (ChangeWaves.ConversionState)
             {
                 case ChangeWaveConversionState.InvalidFormat:
-                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
+                    _evaluationLoggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
                     break;
                 case ChangeWaveConversionState.OutOfRotation:
-                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
+                    _evaluationLoggingContext.LogWarning(DiagnosticSubcategory.None, ElementLocation.Empty, "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
                     break;
             }
         }
@@ -2209,7 +2281,7 @@ namespace Microsoft.Build.Evaluation
                     // and issue a warning to that effect.
                     if (string.Equals(_projectRootElement.FullPath, importFileUnescaped, StringComparison.OrdinalIgnoreCase) /* We are trying to import ourselves */)
                     {
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "SelfImport", importFileUnescaped);
+                        _evaluationLoggingContext.LogWarning(DiagnosticSubcategory.None, importLocationInProject, "SelfImport", importFileUnescaped);
                         atleastOneImportIgnored = true;
 
                         continue;
@@ -2226,7 +2298,7 @@ namespace Microsoft.Build.Evaluation
                             // Get the full path of the MSBuild file that has this import.
                             string importedBy = importElement.ContainingProject.FullPath ?? string.Empty;
 
-                            _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "ImportIntroducesCircularity", importFileUnescaped, importedBy);
+                            _evaluationLoggingContext.LogWarning(DiagnosticSubcategory.None, importLocationInProject, "ImportIntroducesCircularity", importFileUnescaped, importedBy);
 
                             // Throw exception if the project load settings requires us to stop the evaluation of a project when circular imports are detected.
                             if ((_loadSettings & ProjectLoadSettings.RejectCircularImports) != 0)
@@ -2253,7 +2325,7 @@ namespace Microsoft.Build.Evaluation
                             parenthesizedProjectLocation = $"[{_projectRootElement.FullPath}]";
                         }
                         // TODO: Detect if the duplicate import came from an SDK attribute
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
+                        _evaluationLoggingContext.LogWarning(DiagnosticSubcategory.None, importLocationInProject, "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
                         duplicateImport = true;
                     }
 

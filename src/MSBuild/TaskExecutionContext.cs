@@ -44,6 +44,9 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public TaskExecutionState State { get; set; }
 
+        /// <summary>Whether this task may fail without logging an error.</summary>
+        public bool AllowFailureWithoutError { get; set; }
+
         /// <summary>
         /// Saved current directory when task blocks on a BuildProjectFile callback.
         /// </summary>

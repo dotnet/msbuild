@@ -205,16 +205,16 @@ namespace Microsoft.Build.ProjectCache
             CancellationToken cancellationToken)
         {
             BuildEventContext buildEventContext = BuildEventContext.Invalid;
-            BuildEventFileInfo buildEventFileInfo = BuildEventFileInfo.Empty;
+            IElementLocation elementLocation = ElementLocation.Empty;
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             IProjectCachePluginBase? pluginInstance = null;
             string pluginTypeName;
@@ -586,15 +586,15 @@ namespace Microsoft.Build.ProjectCache
         {
             Assumed.NotNull(buildRequest.ProjectInstance);
 
-            var buildEventFileInfo = new BuildEventFileInfo(buildRequest.ProjectFullPath);
+            ElementLocation elementLocation = ElementLocation.Create(buildRequest.ProjectFullPath);
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
             var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             string? targetNames = buildRequest.TargetNames != null && buildRequest.TargetNames.Count > 0
                 ? string.Join(", ", buildRequest.TargetNames)
@@ -872,16 +872,16 @@ namespace Microsoft.Build.ProjectCache
             Experimental.ProjectCache.FileAccessContext experimentalFileAccessContext = new(requestConfiguration.ProjectFullPath, globalProperties, targets);
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            var buildEventFileInfo = new BuildEventFileInfo(requestConfiguration.ProjectFullPath);
+            ElementLocation elementLocation = ElementLocation.Create(requestConfiguration.ProjectFullPath);
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             Task[] tasks = new Task[projectCacheDescriptors.Count];
             int idx = 0;
@@ -953,16 +953,16 @@ namespace Microsoft.Build.ProjectCache
             }
 
             BuildEventContext buildEventContext = BuildEventContext.Invalid;
-            BuildEventFileInfo buildEventFileInfo = BuildEventFileInfo.Empty;
+            IElementLocation elementLocation = ElementLocation.Empty;
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
-                buildEventFileInfo);
+                elementLocation);
 
             _loggingService.LogComment(buildEventContext, MessageImportance.Low, "ProjectCacheEndBuild");
 
@@ -1049,18 +1049,18 @@ namespace Microsoft.Build.ProjectCache
 
             private readonly BuildEventContext _buildEventContext;
 
-            private readonly BuildEventFileInfo _buildEventFileInfo;
+            private readonly IElementLocation _elementLocation;
 
             public override bool HasLoggedErrors { get; protected set; }
 
             public LoggingServiceToPluginLoggerAdapter(
                 ILoggingService loggingService,
                 BuildEventContext buildEventContext,
-                BuildEventFileInfo buildEventFileInfo)
+                IElementLocation elementLocation)
             {
                 _loggingService = loggingService;
                 _buildEventContext = buildEventContext;
-                _buildEventFileInfo = buildEventFileInfo;
+                _elementLocation = elementLocation;
             }
 
             public override void LogMessage(string message, MessageImportance? messageImportance = null)
@@ -1075,10 +1075,10 @@ namespace Microsoft.Build.ProjectCache
             {
                 _loggingService.LogWarningFromText(
                     _buildEventContext,
-                    subcategoryResourceName: null,
+                    DiagnosticSubcategory.None,
                     warningCode: null,
                     helpKeyword: null,
-                    _buildEventFileInfo,
+                    _elementLocation,
                     warning);
             }
 
@@ -1088,10 +1088,10 @@ namespace Microsoft.Build.ProjectCache
 
                 _loggingService.LogErrorFromText(
                     _buildEventContext,
-                    subcategoryResourceName: null,
+                    DiagnosticSubcategory.None,
                     errorCode: null,
                     helpKeyword: null,
-                    _buildEventFileInfo,
+                    _elementLocation,
                     error);
             }
         }
@@ -1104,18 +1104,18 @@ namespace Microsoft.Build.ProjectCache
 
             private readonly BuildEventContext _buildEventContext;
 
-            private readonly BuildEventFileInfo _buildEventFileInfo;
+            private readonly IElementLocation _elementLocation;
 
             public override bool HasLoggedErrors { get; protected set; }
 
             public LoggingServiceToExperimentalPluginLoggerAdapter(
                 ILoggingService loggingService,
                 BuildEventContext buildEventContext,
-                BuildEventFileInfo buildEventFileInfo)
+                IElementLocation elementLocation)
             {
                 _loggingService = loggingService;
                 _buildEventContext = buildEventContext;
-                _buildEventFileInfo = buildEventFileInfo;
+                _elementLocation = elementLocation;
             }
 
             public override void LogMessage(string message, MessageImportance? messageImportance = null)
@@ -1130,10 +1130,10 @@ namespace Microsoft.Build.ProjectCache
             {
                 _loggingService.LogWarningFromText(
                     _buildEventContext,
-                    subcategoryResourceName: null,
+                    DiagnosticSubcategory.None,
                     warningCode: null,
                     helpKeyword: null,
-                    _buildEventFileInfo,
+                    _elementLocation,
                     warning);
             }
 
@@ -1143,10 +1143,10 @@ namespace Microsoft.Build.ProjectCache
 
                 _loggingService.LogErrorFromText(
                     _buildEventContext,
-                    subcategoryResourceName: null,
+                    DiagnosticSubcategory.None,
                     errorCode: null,
                     helpKeyword: null,
-                    _buildEventFileInfo,
+                    _elementLocation,
                     error);
             }
         }

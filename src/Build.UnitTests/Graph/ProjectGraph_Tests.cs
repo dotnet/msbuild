@@ -174,16 +174,24 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
-        public void FirstEdgeWinsWhenMultipleEdgesPointToSameReference()
+        [Theory]
+        [InlineData("Ref1", ItemTypeNames.ProjectReference)]
+        [InlineData(ItemTypeNames.ProjectReference, ItemTypeNames.ProjectReference)]
+        public void FirstEdgeItemMetadataWinsWhenMultipleEdgesWithDifferentTargetsPointToSameReference(
+            string firstItemType,
+            string secondItemType)
         {
             using (var env = TestEnvironment.Create())
             {
                 var projectInstance = new Project().CreateProjectInstance();
                 var node = new ProjectGraphNode(projectInstance);
                 var reference1 = new ProjectGraphNode(projectInstance);
-                var referenceItem1 = new ProjectItemInstance(projectInstance, "Ref1", "path1", "file1");
-                var referenceItem2 = new ProjectItemInstance(projectInstance, "Ref2", "path1", "file1");
+                var referenceItem1 = new ProjectItemInstance(projectInstance, firstItemType, "path1", "file1");
+                referenceItem1.SetMetadata("Winner", "First");
+                referenceItem1.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, "FirstTarget");
+                var referenceItem2 = new ProjectItemInstance(projectInstance, secondItemType, "path1", "file1");
+                referenceItem2.SetMetadata("Winner", "Second");
+                referenceItem2.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, "SecondTarget");
 
                 var edges = new GraphBuilder.GraphEdges();
 
@@ -194,8 +202,57 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 edges.Count.ShouldBe(1);
 
-                edges[(node, reference1)].ShouldBe(referenceItem1);
+                ProjectItemInstance mergedItem = edges[(node, reference1)];
+                mergedItem.ShouldNotBeSameAs(referenceItem1);
+                mergedItem.ItemType.ShouldBe(firstItemType);
+                mergedItem.GetMetadataValue("Winner").ShouldBe("First");
+                mergedItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName).ShouldBe("FirstTarget;SecondTarget");
+                referenceItem1.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName).ShouldBe("FirstTarget");
+                referenceItem2.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName).ShouldBe("SecondTarget");
             }
+        }
+
+        [Theory]
+        [InlineData(null, null, "")]
+        [InlineData("LeafTarget", "leaftarget", "leaftarget")]
+        [InlineData("TransitiveTarget", "DirectTarget", "TransitiveTarget;DirectTarget")]
+        public void DirectEdgeItemMetadataWinsOverSyntheticTransitiveEdge(
+            string transitiveTargets,
+            string directTargets,
+            string expectedTargets)
+        {
+            var projectInstance = new Project().CreateProjectInstance();
+            var node = new ProjectGraphNode(projectInstance);
+            var reference = new ProjectGraphNode(projectInstance);
+            var transitiveItem = new ProjectItemInstance(
+                projectInstance,
+                ProjectInterpretation.TransitiveReferenceItemName,
+                "path1",
+                "file1");
+            var directItem = new ProjectItemInstance(projectInstance, ItemTypeNames.ProjectReference, "path1", "file1");
+            directItem.SetMetadata("DirectMetadata", "DirectValue");
+
+            if (transitiveTargets is not null)
+            {
+                transitiveItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, transitiveTargets);
+            }
+
+            if (directTargets is not null)
+            {
+                directItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, directTargets);
+            }
+
+            var edges = new GraphBuilder.GraphEdges();
+
+            node.AddProjectReference(reference, transitiveItem, edges);
+            node.AddProjectReference(reference, directItem, edges);
+
+            ProjectItemInstance edge = edges[(node, reference)];
+            edge.ItemType.ShouldBe(ItemTypeNames.ProjectReference);
+            edge.GetMetadataValue("DirectMetadata").ShouldBe("DirectValue");
+            edge.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName).ShouldBe(expectedTargets);
+            transitiveItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName).ShouldBe(transitiveTargets ?? string.Empty);
+            directItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName).ShouldBe(directTargets ?? string.Empty);
         }
 
         [Fact]
@@ -1971,6 +2028,255 @@ $@"
                 graph.TestOnly_Edges[(outerBuildReferencingNode, innerBuild)].ShouldBe(edgeToOuterBuild);
                 edgeToOuterBuild.GetMetadataValue("Foo").ShouldBe("Bar");
             }
+        }
+
+        [Theory]
+        [InlineData(null, null, false, false)]
+        [InlineData("OuterTarget", null, false, false)]
+        [InlineData(null, "ExplicitTarget", false, false)]
+        [InlineData("OuterTarget", "ExplicitTarget", false, false)]
+        [InlineData(null, null, true, false)]
+        [InlineData(null, null, true, true)]
+        [InlineData("OuterTarget", null, true, false)]
+        [InlineData("OuterTarget", null, true, true)]
+        [InlineData(null, "ExplicitTarget", true, false)]
+        [InlineData(null, "ExplicitTarget", true, true)]
+        [InlineData("OuterTarget", "ExplicitTarget", true, false)]
+        [InlineData("OuterTarget", "ExplicitTarget", true, true)]
+        [InlineData("OuterTarget", "OuterTarget", true, false)]
+        [InlineData("OuterTarget", "OuterTarget", true, true)]
+        public void DirectInnerBuildReferenceIsPreservedWhenOuterBuildGeneratesTheSameEdge(
+            string outerTargets,
+            string explicitTargets,
+            bool addTransitiveProjectReferences,
+            bool explicitReferenceFirst)
+        {
+            string outerTargetsMetadata = outerTargets is null ? string.Empty : $" Targets=\"{outerTargets}\"";
+            string explicitTargetsMetadata = explicitTargets is null ? string.Empty : $" Targets=\"{explicitTargets}\"";
+            string expectedOuterTarget = outerTargets ?? "ChildDefault";
+            string expectedExplicitTarget = explicitTargets ?? "ChildDefault";
+
+            string[] expectedNet8Targets = [.. new[] { expectedExplicitTarget, expectedOuterTarget }.Distinct(StringComparer.OrdinalIgnoreCase)];
+            string expectedMergedTargets = string.Equals(explicitTargets, outerTargets, StringComparison.OrdinalIgnoreCase)
+                ? explicitTargets ?? string.Empty
+                : $"{expectedExplicitTarget};{expectedOuterTarget}";
+
+            TransientTestFile child = _env.CreateFile("child.proj", """
+                <Project DefaultTargets="ChildDefault">
+                  <PropertyGroup>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+                  </PropertyGroup>
+                  <Target Name="ChildDefault" />
+                  <Target Name="OuterTarget" />
+                  <Target Name="ExplicitTarget" />
+                </Project>
+                """);
+
+            // Graph-layer test only; duplicate references may fail for other reasons in a full build.
+            string outerReference = $"""<ProjectReference Include="{child.Path}"{outerTargetsMetadata} />""";
+            string explicitReference = $"""
+                <ProjectReference Include="{child.Path}"
+                                  SetTargetFramework="TargetFramework=net8.0"{explicitTargetsMetadata} />
+                """;
+            string projectReferences = explicitReferenceFirst
+                ? $"{explicitReference}{Environment.NewLine}{outerReference}"
+                : $"{outerReference}{Environment.NewLine}{explicitReference}";
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>{addTransitiveProjectReferences}</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    {projectReferences}
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}"
+                                             OuterBuild="true" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            var graph = new ProjectGraph(root.Path);
+
+            ProjectGraphNode rootNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode outerBuild = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        !node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            ProjectGraphNode net8Build = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        node.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out string targetFramework) &&
+                        targetFramework == "net8.0");
+            ProjectGraphNode net9Build = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        node.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out string targetFramework) &&
+                        targetFramework == "net9.0");
+
+            graph.ProjectNodes.Count.ShouldBe(4);
+            rootNode.ProjectReferences.Count.ShouldBe(3);
+            outerBuild.ProjectReferences.ShouldBe([net8Build, net9Build], ignoreOrder: true);
+
+            ProjectItemInstance edgeToOuterBuild = graph.TestOnly_Edges[(rootNode, outerBuild)];
+            ProjectItemInstance edgeToNet8Build = graph.TestOnly_Edges[(rootNode, net8Build)];
+            ProjectItemInstance edgeToNet9Build = graph.TestOnly_Edges[(rootNode, net9Build)];
+
+            edgeToNet8Build.ItemType.ShouldBe(ItemTypeNames.ProjectReference);
+            edgeToNet8Build.GetMetadataValue("SetTargetFramework").ShouldBe("TargetFramework=net8.0");
+            edgeToNet8Build.GetMetadataValue("Targets").ShouldBe(expectedMergedTargets);
+            edgeToNet9Build.ShouldBeSameAs(edgeToOuterBuild);
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Build"]);
+            targetLists[rootNode].ShouldBe(["Build"]);
+            targetLists[outerBuild].ShouldBe([expectedOuterTarget]);
+            targetLists[net8Build].ShouldBe(expectedNet8Targets);
+            targetLists[net9Build].ShouldBe([expectedOuterTarget]);
+        }
+
+        [Fact]
+        public void TransitiveOuterReferenceExpandsInnerBuildsAndKeepsTheirDescendants()
+        {
+            TransientTestFile grandchild = _env.CreateFile("grandchild.proj", """
+                <Project DefaultTargets="Build">
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            TransientTestFile child = _env.CreateFile("child.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{grandchild.Path}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            TransientTestFile middle = _env.CreateFile("middle.proj", $"""
+                <Project DefaultTargets="Build">
+                  <ItemGroup>
+                    <ProjectReference Include="{child.Path}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{middle.Path}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            var graph = new ProjectGraph(root.Path);
+
+            ProjectGraphNode rootNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode middleNode = graph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == middle.Path);
+            ProjectGraphNode outerBuild = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        !node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            ProjectGraphNode grandchildNode = graph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == grandchild.Path);
+            ProjectGraphNode[] innerBuilds = graph.ProjectNodes
+                .Where(node => node.ProjectInstance.FullPath == child.Path &&
+                               node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"))
+                .ToArray();
+
+            innerBuilds.Length.ShouldBe(2);
+            rootNode.ProjectReferences.ShouldBe(
+                [middleNode, outerBuild, innerBuilds[0], innerBuilds[1], grandchildNode],
+                ignoreOrder: true);
+            innerBuilds[0].ProjectReferences.ShouldContain(grandchildNode);
+            innerBuilds[1].ProjectReferences.ShouldContain(grandchildNode);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void DirectReferenceTargetsAreMergedWithTransitiveReferenceToTheSameNode(bool directReferenceFirst)
+        {
+            TransientTestFile leaf = _env.CreateFile("leaf.proj", """
+                <Project DefaultTargets="LeafDefault">
+                  <Target Name="LeafDefault" />
+                  <Target Name="LeafExplicit" />
+                </Project>
+                """);
+
+            TransientTestFile middle = _env.CreateFile("middle.proj", $"""
+                <Project DefaultTargets="MiddleDefault">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{leaf.Path}" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="MiddleDefault" />
+                </Project>
+                """);
+
+            string middleReference = $"""<ProjectReference Include="{middle.Path}" />""";
+            string leafReference = $"""
+                <ProjectReference Include="{leaf.Path}"
+                                  Targets="LeafExplicit"
+                                  DirectMetadata="DirectValue" />
+                """;
+            string projectReferences = directReferenceFirst
+                ? $"{leafReference}{Environment.NewLine}{middleReference}"
+                : $"{middleReference}{Environment.NewLine}{leafReference}";
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    {projectReferences}
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            var graph = new ProjectGraph(root.Path);
+
+            ProjectGraphNode rootNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode leafNode = graph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == leaf.Path);
+            ProjectItemInstance directReferenceItem = rootNode.ProjectInstance
+                .GetItems(ItemTypeNames.ProjectReference)
+                .Single(item => item.EvaluatedInclude == leaf.Path);
+
+            // The direct reference wins the collision with the synthetic transitive reference, so its item type
+            // and non-Targets metadata survive, but target ordering follows the order in which the edges were encountered.
+            ProjectItemInstance edge = graph.TestOnly_Edges[(rootNode, leafNode)];
+            edge.ShouldNotBeSameAs(directReferenceItem);
+            edge.ItemType.ShouldBe(ItemTypeNames.ProjectReference);
+            edge.GetMetadataValue("DirectMetadata").ShouldBe("DirectValue");
+            edge.GetMetadataValue("Targets").ShouldBe(
+                directReferenceFirst
+                    ? "LeafExplicit;LeafDefault"
+                    : "LeafDefault;LeafExplicit");
+            directReferenceItem.GetMetadataValue("DirectMetadata").ShouldBe("DirectValue");
+            directReferenceItem.GetMetadataValue("Targets").ShouldBe("LeafExplicit");
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Build"]);
+            targetLists[leafNode].ShouldBe(
+                directReferenceFirst
+                    ? ["LeafExplicit", "LeafDefault"]
+                    : ["LeafDefault", "LeafExplicit"]);
         }
 
         [Fact]

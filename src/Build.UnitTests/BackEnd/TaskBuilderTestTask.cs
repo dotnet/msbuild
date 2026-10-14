@@ -722,6 +722,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        public TestTaskEnum[] EnumArrayParam
+        {
+            set
+            {
+                _testTaskHost?.ParameterSet("EnumArrayParam", value);
+            }
+        }
+
         /// <summary>
         /// An AbsolutePath array parameter.
         /// </summary>
@@ -1406,6 +1414,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _testTaskHost?.OutputRead("ItemArrayOutput", _itemArrayOutput);
                 return _itemArrayOutput;
+            }
+        }
+
+        /// <summary>
+        /// A task item array output with a null entry.
+        /// </summary>
+        [Output]
+        public ITaskItem[] ItemArrayWithNullOutput
+        {
+            get
+            {
+                ITaskItem[] output = [_itemArrayOutput[0], null, _itemArrayOutput[1]];
+                _testTaskHost?.OutputRead("ItemArrayWithNullOutput", output);
+                return output;
             }
         }
 
