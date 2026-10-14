@@ -41,14 +41,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Gets the condition-true items produced by a prefix of this sequence.
         /// </summary>
         /// <param name="operationCount">The number of operations in the requested prefix.</param>
-        /// <param name="globsToIgnore">The later removed globs that may prune this computation.</param>
         /// <returns>
         ///  The matching items in evaluation order.
         /// </returns>
-        public ImmutableList<I> GetMatchedItems(int operationCount, ImmutableHashSet<string> globsToIgnore)
+        public ImmutableList<I> GetMatchedItems(int operationCount)
         {
             ImmutableList<I>.Builder items = ImmutableList.CreateBuilder<I>();
-            foreach (ItemData data in GetItemData(operationCount, globsToIgnore))
+            foreach (ItemData data in GetItemData(operationCount))
             {
                 if (data.ConditionResult)
                 {
@@ -60,14 +59,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         }
 
         /// <summary>
-        ///  Gets the items produced by a prefix, reusing results cached for the same glob-exclusion context.
+        ///  Gets the items produced by a prefix, reusing the result cached at its stopping position.
         /// </summary>
         /// <param name="operationCount">The number of operations in the requested prefix.</param>
-        /// <param name="globsToIgnore">The later removed globs that may prune this computation.</param>
         /// <returns>
         ///  A builder over the requested item result.
         /// </returns>
-        public OrderedItemDataCollection.Builder GetItemData(int operationCount, ImmutableHashSet<string> globsToIgnore)
+        public OrderedItemDataCollection.Builder GetItemData(int operationCount)
         {
             if (operationCount == 0)
             {
@@ -75,26 +73,25 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
 
             // Captured references announce their demand before evaluation; eager condition reads announce it here.
-            // The prefix is stable as operations are appended, but its result also depends on globsToIgnore.
+            // Direct requests start without later exclusions; backward planning can add them for earlier positions.
             MemoizedOperation operation = _operations[operationCount - 1];
-            if (operation.TryGetFromCache(globsToIgnore, out OrderedItemDataCollection items))
+            if (operation.TryGetFromCache(ImmutableHashSet<string>.Empty, out OrderedItemDataCollection items))
             {
                 return items.ToBuilder();
             }
 
             operation.MarkAsReferenced();
-            return ComputeItems(operationCount, globsToIgnore);
+            return ComputeItems(operationCount);
         }
 
         /// <summary>
         ///  Applies uncached operations in order, looking ahead for Remove globs and batching eligible literal Updates.
         /// </summary>
         /// <param name="operationCount">The number of operations in the requested prefix.</param>
-        /// <param name="globsToIgnore">The later removed globs that may prune this computation.</param>
         /// <returns>
         ///  The item result after applying the requested prefix.
         /// </returns>
-        private OrderedItemDataCollection.Builder ComputeItems(int operationCount, ImmutableHashSet<string> globsToIgnore)
+        private OrderedItemDataCollection.Builder ComputeItems(int operationCount)
         {
             OrderedItemDataCollection.Builder? items = null;
             int firstUncachedIndex = operationCount;
@@ -107,7 +104,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             for (int index = operationCount - 1; index >= 0; index--)
             {
                 MemoizedOperation operation = _operations[index];
-                var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? globsToIgnore;
+                var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? ImmutableHashSet<string>.Empty;
 
                 if (operation.TryGetFromCache(globsToIgnoreFromFutureOperations, out OrderedItemDataCollection itemsFromCache))
                 {
@@ -141,7 +138,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             items ??= OrderedItemDataCollection.CreateBuilder();
 
             // The first operation to replay sees all Remove globs accumulated while planning backward.
-            ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack is null ? globsToIgnore : globsToIgnoreStack.Peek();
+            ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack?.Peek() ?? ImmutableHashSet<string>.Empty;
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
             Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
@@ -208,7 +205,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 {
                     Assumed.NotNull(globsToIgnoreStack);
                     globsToIgnoreStack.Pop();
-                    currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? globsToIgnore : globsToIgnoreStack.Peek();
+                    currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? ImmutableHashSet<string>.Empty : globsToIgnoreStack.Peek();
                 }
 
                 // Non-batched operations use the memoized path, which saves the complete prefix result
