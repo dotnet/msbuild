@@ -80,6 +80,8 @@ internal partial class Expander<P, I>
     /// </summary>
     internal EvaluationContext EvaluationContext { get; }
 
+    internal EvaluationInstrumentation.GlobbingMeasurement GlobbingMeasurement { get; init; }
+
     private Expander(IPropertyProvider<P> properties, LoggingContext loggingContext)
     {
         _properties = properties;
@@ -185,7 +187,10 @@ internal partial class Expander<P, I>
     /// <returns></returns>
     internal Expander<P, I> WithLoggingContext(LoggingContext loggingContext)
     {
-        return new Expander<P, I>(_properties, _items, _metadata, _fileSystem, EvaluationContext, loggingContext);
+        return new Expander<P, I>(_properties, _items, _metadata, _fileSystem, EvaluationContext, loggingContext)
+        {
+            GlobbingMeasurement = GlobbingMeasurement,
+        };
     }
 
     /// <summary>

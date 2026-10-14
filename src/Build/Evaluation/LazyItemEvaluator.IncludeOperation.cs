@@ -127,7 +127,8 @@ namespace Microsoft.Build.Evaluation
                                     fileMatcher: FileMatcher,
                                     loggingMechanism: _lazyEvaluator?._loggingContext,
                                     includeLocation: _itemElement.IncludeLocation,
-                                    excludeLocation: _itemElement.ExcludeLocation);
+                                    excludeLocation: _itemElement.ExcludeLocation,
+                                    globbingMeasurement: _lazyEvaluator?._globbingMeasurement);
                             }
 
                             if (MSBuildEventSource.Log.IsEnabled())

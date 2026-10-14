@@ -176,6 +176,8 @@ namespace Microsoft.Build.Evaluation
 
         private readonly int _evaluationMeasurementId;
 
+        private readonly EvaluationInstrumentation.GlobbingMeasurement _globbingMeasurement;
+
         /// <summary>
         /// The evaluation context to use.
         /// </summary>
@@ -247,7 +249,8 @@ namespace Microsoft.Build.Evaluation
             EvaluationLoggingContext evaluationLoggingContext,
             string evaluationMeasurementProjectFile,
             int evaluationMeasurementId,
-            ProjectEvaluationStage evaluationStage)
+            ProjectEvaluationStage evaluationStage,
+            EvaluationInstrumentation.GlobbingMeasurement globbingMeasurement)
         {
             Assumed.NotNull(data);
             Assumed.NotNull(projectRootElementCache);
@@ -271,7 +274,10 @@ namespace Microsoft.Build.Evaluation
             // Create containers for the evaluation results
             data.InitializeForEvaluation(toolsetProvider, _evaluationContext, _evaluationLoggingContext);
 
-            _expander = new Expander<P, I>(data, data, _evaluationContext, _evaluationLoggingContext);
+            _expander = new Expander<P, I>(data, data, _evaluationContext, _evaluationLoggingContext)
+            {
+                GlobbingMeasurement = globbingMeasurement,
+            };
 
             _data = data;
             _itemGroupElements = new List<ProjectItemGroupElement>();
@@ -293,6 +299,7 @@ namespace Microsoft.Build.Evaluation
             _submissionId = submissionId;
             _evaluationMeasurementProjectFile = evaluationMeasurementProjectFile;
             _evaluationMeasurementId = evaluationMeasurementId;
+            _globbingMeasurement = globbingMeasurement;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
             _isRunningInVisualStudio = string.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("BuildingInsideVisualStudio")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
 
@@ -354,6 +361,7 @@ namespace Microsoft.Build.Evaluation
             string projectFile = root.ProjectFileLocation.File ?? string.Empty;
             MSBuildEventSource.Log.EvaluateStart(projectFile);
             long evaluationMeasurementStart = EvaluationInstrumentation.StartMeasurement();
+            EvaluationInstrumentation.GlobbingMeasurement globbingMeasurement = evaluationMeasurementStart == 0 ? null : new();
             EvaluationLoggingContext evaluationLoggingContext = null;
             int evaluationId = BuildEventContext.InvalidEvaluationId;
             Evaluator<P, I, M, D> evaluator;
@@ -387,7 +395,8 @@ namespace Microsoft.Build.Evaluation
                     evaluationLoggingContext,
                     projectFile,
                     evaluationId,
-                    evaluationStage);
+                    evaluationStage,
+                    globbingMeasurement);
             }
             catch
             {
@@ -397,7 +406,8 @@ namespace Microsoft.Build.Evaluation
                     submissionId,
                     succeeded: false,
                     projectFile,
-                    evaluationId);
+                    evaluationId,
+                    globbingMeasurement);
                 throw;
             }
 
@@ -420,7 +430,8 @@ namespace Microsoft.Build.Evaluation
                     submissionId,
                     succeeded,
                     projectFile,
-                    evaluationId);
+                    evaluationId,
+                    globbingMeasurement);
 
                 IEnumerable globalProperties = null;
                 IEnumerable properties = null;
@@ -802,7 +813,7 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
                     // comment next line to turn off lazy Evaluation
-                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext);
+                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext, _globbingMeasurement);
 
                     // Pass3: evaluate project items
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
@@ -2221,7 +2232,8 @@ namespace Microsoft.Build.Evaluation
                         forceEvaluate: true,
                         fileMatcher: _evaluationContext.FileMatcher,
                         loggingMechanism: _evaluationLoggingContext,
-                        importLocation: importLocationInProject);
+                        importLocation: importLocationInProject,
+                        globbingMeasurement: _globbingMeasurement);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
