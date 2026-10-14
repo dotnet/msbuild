@@ -55,15 +55,23 @@ public sealed class LoggingQueueCapacity_Tests(ITestOutputHelper output)
         using TestEnvironment env = CreateEnvironment();
         using ManualResetEventSlim entered = new(false);
         using ManualResetEventSlim release = new(false);
+        using ManualResetEventSlim growthAttempted = new(false);
         LoggingService service = CreateService(LoggerMode.Asynchronous);
         MockLogger logger = RegisterLoggerBlockedOnFirstEvent(service, entered, release);
         service.QueueCapacity = 2;
-        service.MemoryHeadroomProvider = () => 0;
+        service.MemoryHeadroomProvider = () =>
+        {
+            growthAttempted.Set();
+            return 0;
+        };
         try
         {
             FillQueue(service, entered);
 
             Task producer = Task.Run(() => service.ProcessLoggingEvent(Message("last")));
+
+            // Only a producer that has reached the full queue can be blocked by it.
+            growthAttempted.Wait(Timeout).ShouldBeTrue();
             producer.Wait(TimeSpan.FromMilliseconds(200)).ShouldBeFalse();
             service.QueueCapacity.ShouldBe(2);
 
@@ -76,6 +84,84 @@ public sealed class LoggingQueueCapacity_Tests(ITestOutputHelper output)
         }
 
         logger.BuildMessageEvents.Select(e => e.Message).ShouldBe(["first", "second", "third", "last"]);
+    }
+
+    [Fact]
+    public void ProducersWaitingForMemoryNoticeWhenItRecoversWhileTheLoggerIsStuck()
+    {
+        using TestEnvironment env = CreateEnvironment();
+        using ManualResetEventSlim entered = new(false);
+        using ManualResetEventSlim release = new(false);
+        LoggingService service = CreateService(LoggerMode.Asynchronous);
+        MockLogger logger = RegisterLoggerBlockedOnFirstEvent(service, entered, release);
+        service.QueueCapacity = 2;
+        service.QueueGrowthRetryInterval = TimeSpan.FromMilliseconds(50);
+        int evaluations = 0;
+        long headroom = 0;
+        service.MemoryHeadroomProvider = () =>
+        {
+            Interlocked.Increment(ref evaluations);
+            return Volatile.Read(ref headroom);
+        };
+        try
+        {
+            FillQueue(service, entered);
+
+            Task fourth = Task.Run(() => service.ProcessLoggingEvent(Message("fourth")));
+            Task fifth = Task.Run(() => service.ProcessLoggingEvent(Message("fifth")));
+
+            // The logger is stuck and nothing is dequeued, so only the producers that wait can look at the memory again.
+            SpinWait.SpinUntil(() => Volatile.Read(ref evaluations) >= 3, Timeout).ShouldBeTrue();
+            fourth.IsCompleted.ShouldBeFalse();
+            fifth.IsCompleted.ShouldBeFalse();
+
+            Volatile.Write(ref headroom, long.MaxValue);
+
+            Task.WaitAll([fourth, fifth], Timeout).ShouldBeTrue("waiting producers must notice that there is memory for the queue to grow");
+            service.QueueCapacity.ShouldBe(4);
+        }
+        finally
+        {
+            ReleaseAndShutDown(service, release);
+        }
+
+        logger.BuildMessageEvents.Select(e => e.Message).ShouldBe(["first", "second", "third", "fourth", "fifth"], ignoreOrder: true);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ProducersThatFindTheQueueFullTogetherShareOneMemoryEvaluation(bool memoryAvailable)
+    {
+        using TestEnvironment env = CreateEnvironment();
+        LoggingService service = CreateService(LoggerMode.Synchronous);
+        service.QueueGrowthRetryInterval = TimeSpan.FromHours(1);
+        int evaluations = 0;
+        service.MemoryHeadroomProvider = () =>
+        {
+            Interlocked.Increment(ref evaluations);
+
+            // Gives the other producers time to arrive while this one decides.
+            Thread.Sleep(100);
+            return memoryAvailable ? long.MaxValue : 0;
+        };
+        long capacity = service.QueueCapacity;
+        using Barrier start = new(3);
+
+        Task<bool>[] producers = Enumerable.Range(0, 3)
+            .Select(_ => Task.Factory.StartNew(
+                () =>
+                {
+                    start.SignalAndWait(Timeout).ShouldBeTrue();
+                    return service.TryGrowQueueCapacity(capacity);
+                },
+                TaskCreationOptions.LongRunning))
+            .ToArray();
+
+        Task.WaitAll(producers, Timeout).ShouldBeTrue();
+        producers.Select(producer => producer.Result).ShouldAllBe(grew => grew == memoryAvailable);
+        service.QueueCapacity.ShouldBe(memoryAvailable ? capacity * 2 : capacity);
+        evaluations.ShouldBe(1);
     }
 
     [Fact]
@@ -161,6 +247,7 @@ public sealed class LoggingQueueCapacity_Tests(ITestOutputHelper output)
         service.QueueCapacity.ShouldBe(capacity);
     }
 
+#if NET
     [Fact]
     public void DefaultMemoryHeadroomIsNeverNegative()
     {
@@ -170,6 +257,31 @@ public sealed class LoggingQueueCapacity_Tests(ITestOutputHelper output)
         GC.Collect();
 
         service.MemoryHeadroomProvider().ShouldBeGreaterThanOrEqualTo(0);
+    }
+#else
+    [Fact]
+    public void DotNetFrameworkCannotMeasureMemoryAndKeepsTheCapacityFixed()
+    {
+        using TestEnvironment env = CreateEnvironment();
+        LoggingService service = CreateService(LoggerMode.Synchronous);
+        long capacity = service.QueueCapacity;
+
+        service.MemoryHeadroomProvider.ShouldBeNull();
+        service.TryGrowQueueCapacity(capacity).ShouldBeFalse();
+        service.QueueCapacity.ShouldBe(capacity);
+    }
+#endif
+
+    [Fact]
+    public void QueueDoesNotGrowWithoutAMemoryProvider()
+    {
+        using TestEnvironment env = CreateEnvironment();
+        LoggingService service = CreateService(LoggerMode.Synchronous);
+        service.MemoryHeadroomProvider = null;
+        long capacity = service.QueueCapacity;
+
+        service.TryGrowQueueCapacity(capacity).ShouldBeFalse();
+        service.QueueCapacity.ShouldBe(capacity);
     }
 
     private TestEnvironment CreateEnvironment()

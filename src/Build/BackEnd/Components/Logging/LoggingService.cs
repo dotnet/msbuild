@@ -313,6 +313,12 @@ namespace Microsoft.Build.BackEnd.Logging
         private long _nextQueueGrowthCheck;
 
         /// <summary>
+        /// Serializes the decision to grow the queue, so that when several producers find it full together, one of them
+        /// looks at the memory and the others see what it decided.
+        /// </summary>
+        private readonly LockType _queueGrowthLock = new();
+
+        /// <summary>
         /// By default our logMode is Asynchronous. We do this
         /// because we are hoping it will make the system
         /// more responsive when there are a large number of logging messages
@@ -1400,9 +1406,11 @@ namespace Microsoft.Build.BackEnd.Logging
                     while (eventQueue.Count >= (capacity = Volatile.Read(ref _queueCapacity)))
                     {
                         // A full queue grows if there is memory for it, otherwise block and wait for dequeue event.
+                        // With a growing queue the wait is limited: nothing is dequeued while the logger is stuck, and
+                        // meanwhile the memory may recover or another producer may have grown the queue.
                         if (!TryGrowQueueCapacity(capacity))
                         {
-                            dequeueEvent.WaitOne();
+                            dequeueEvent.WaitOne(CanGrowQueue ? QueueGrowthRetryInterval : Timeout.InfiniteTimeSpan);
                         }
                     }
 
@@ -1428,8 +1436,25 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Reports how many more bytes the process can use before the machine runs low on memory.
         /// Replaceable so that tests do not depend on the memory of the machine they run on.
+        /// .NET Framework does not report the memory load, so there the capacity stays fixed unless a test provides the headroom.
         /// </summary>
+#if NET
         internal Func<long> MemoryHeadroomProvider { get; set; } = GetMemoryHeadroom;
+#else
+        internal Func<long> MemoryHeadroomProvider { get; set; }
+#endif
+
+        /// <summary>
+        /// Whether a producer that finds the queue full may grow it: its capacity is not configured, the change wave is enabled
+        /// and the memory can be measured.
+        /// </summary>
+        private bool CanGrowQueue => _adaptiveQueueCapacity && MemoryHeadroomProvider is not null;
+
+        /// <summary>
+        /// How long a refused growth is remembered, and how long a producer that waits for the consumer sleeps before it
+        /// looks at the capacity and the memory again.
+        /// </summary>
+        internal TimeSpan QueueGrowthRetryInterval { get; set; } = TimeSpan.FromSeconds(1);
 
         /// <summary>
         /// The current capacity of the asynchronous logging event queue.
@@ -1459,44 +1484,52 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // No fixed ceiling: each doubling is priced against the headroom left, so growth stops where the machine does.
             long grown = capacity * 2;
-            if (!_adaptiveQueueCapacity || grown <= capacity)
+            if (!CanGrowQueue || grown <= capacity)
             {
                 return false;
             }
 
-            // Producers keep asking while the queue is full: look at the memory at most once per second.
-            long now = System.Diagnostics.Stopwatch.GetTimestamp();
-            if (now < Volatile.Read(ref _nextQueueGrowthCheck))
+            // Producers keep asking while the queue is full: a refusal is remembered for the retry interval.
+            if (System.Diagnostics.Stopwatch.GetTimestamp() < Volatile.Read(ref _nextQueueGrowthCheck))
             {
                 return false;
             }
 
-            // The events already queued are part of the memory load: price only the capacity that is added.
-            if (MemoryHeadroomProvider() < (grown - capacity) * AssumedBytesPerQueuedEvent)
+            lock (_queueGrowthLock)
             {
-                Volatile.Write(ref _nextQueueGrowthCheck, now + System.Diagnostics.Stopwatch.Frequency);
-                return false;
+                // The producers that waited for the lock find what the one that held it decided.
+                if (Volatile.Read(ref _queueCapacity) != capacity)
+                {
+                    return true;
+                }
+
+                long now = System.Diagnostics.Stopwatch.GetTimestamp();
+                if (now < _nextQueueGrowthCheck)
+                {
+                    return false;
+                }
+
+                // The events already queued are part of the memory load: price only the capacity that is added.
+                if (MemoryHeadroomProvider() < (grown - capacity) * AssumedBytesPerQueuedEvent)
+                {
+                    Volatile.Write(ref _nextQueueGrowthCheck, now + (long)(QueueGrowthRetryInterval.TotalSeconds * System.Diagnostics.Stopwatch.Frequency));
+                    return false;
+                }
+
+                Volatile.Write(ref _queueCapacity, grown);
             }
 
-            // Another producer winning the race also means that the capacity has grown.
-            if (Interlocked.CompareExchange(ref _queueCapacity, grown, capacity) == capacity)
-            {
-                Microsoft.Build.Internal.CommunicationsUtilities.Trace($"The logging queue grew from {capacity} to {grown} events.");
-            }
-
+            Microsoft.Build.Internal.CommunicationsUtilities.Trace($"The logging queue grew from {capacity} to {grown} events.");
             return true;
         }
 
+#if NET
         private static long GetMemoryHeadroom()
         {
-#if NET
             GCMemoryInfo info = GC.GetGCMemoryInfo();
             return info.Index == 0 ? 0 : Math.Max(0, info.HighMemoryLoadThresholdBytes - info.MemoryLoadBytes);
-#else
-            // .NET Framework does not report the memory load: keep the fixed capacity.
-            return 0;
-#endif
         }
+#endif
 
         /// <summary>
         /// Wait for the logging messages in the logging queue to be completely processed.
