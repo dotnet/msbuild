@@ -1434,7 +1434,8 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Reports how many more bytes the process can use before the machine runs low on memory.
+        /// Reports how many more bytes the process can use before the machine runs low on memory or the GC heap reaches its
+        /// hard limit, as the GC measured it when it last ran.
         /// Replaceable so that tests do not depend on the memory of the machine they run on.
         /// .NET Framework does not report the memory load, so there the capacity stays fixed unless a test provides the headroom.
         /// </summary>
@@ -1509,7 +1510,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     return false;
                 }
 
-                // The events already queued are part of the memory load: price only the capacity that is added.
+                // The events queued when the GC last ran are part of what it measured: price only the capacity that is added.
                 if (MemoryHeadroomProvider() < (grown - capacity) * AssumedBytesPerQueuedEvent)
                 {
                     Volatile.Write(ref _nextQueueGrowthCheck, now + (long)(QueueGrowthRetryInterval.TotalSeconds * System.Diagnostics.Stopwatch.Frequency));
@@ -1527,9 +1528,20 @@ namespace Microsoft.Build.BackEnd.Logging
         private static long GetMemoryHeadroom()
         {
             GCMemoryInfo info = GC.GetGCMemoryInfo();
-            return info.Index == 0 ? 0 : Math.Max(0, info.HighMemoryLoadThresholdBytes - info.MemoryLoadBytes);
+            return info.Index == 0
+                ? 0
+                : ComputeMemoryHeadroom(info.HighMemoryLoadThresholdBytes, info.MemoryLoadBytes, info.TotalAvailableMemoryBytes, info.TotalCommittedBytes);
         }
 #endif
+
+        /// <summary>
+        /// The threshold and the load that the GC reports for the machine do not account for a GC heap hard limit, which a container
+        /// gets by default and <c>DOTNET_GCHeapHardLimit</c> sets, so the room left below that limit bounds the headroom as well.
+        /// </summary>
+        internal static long ComputeMemoryHeadroom(long highMemoryLoadThresholdBytes, long memoryLoadBytes, long totalAvailableMemoryBytes, long totalCommittedBytes)
+        {
+            return Math.Max(0, Math.Min(highMemoryLoadThresholdBytes - memoryLoadBytes, totalAvailableMemoryBytes - totalCommittedBytes));
+        }
 
         /// <summary>
         /// Wait for the logging messages in the logging queue to be completely processed.

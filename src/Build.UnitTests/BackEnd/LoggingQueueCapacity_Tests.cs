@@ -17,6 +17,9 @@ namespace Microsoft.Build.UnitTests.Logging;
 
 public sealed class LoggingQueueCapacity_Tests(ITestOutputHelper output)
 {
+    private const long MiB = 1024 * 1024;
+    private const long GiB = 1024 * MiB;
+
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
 
     // The logger outlasts the waits of the test, so that a regression fails the test instead of the logging thread.
@@ -245,6 +248,16 @@ public sealed class LoggingQueueCapacity_Tests(ITestOutputHelper output)
 
         service.TryGrowQueueCapacity(capacity).ShouldBeFalse();
         service.QueueCapacity.ShouldBe(capacity);
+    }
+
+    [Theory]
+    [InlineData(57 * GiB, 27 * GiB, 64 * GiB, 7 * MiB, 30 * GiB)]
+    [InlineData(57 * GiB, 27 * GiB, 1 * GiB, 7 * MiB, (1 * GiB) - (7 * MiB))]
+    [InlineData(57 * GiB, 27 * GiB, 1 * GiB, 2 * GiB, 0L)]
+    [InlineData(57 * GiB, 60 * GiB, 64 * GiB, 7 * MiB, 0L)]
+    public void MemoryHeadroomIsBoundedByTheMachineAndByTheGcHeapHardLimit(long threshold, long load, long available, long committed, long expected)
+    {
+        LoggingService.ComputeMemoryHeadroom(threshold, load, available, committed).ShouldBe(expected);
     }
 
 #if NET
