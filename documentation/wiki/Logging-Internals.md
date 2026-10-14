@@ -133,6 +133,12 @@ The logging mode is dictated by the `LoggerMode` that is injected into the `Logg
 
 Regardless of the mode used - sequential and isolated delivery of events is always guaranteed (single logger will not receive next event before returning from the previous, any logger will not receive an event while it's being processed by a different logger). The future versions might decide to deliver messages to separate loggers in independent mode - where a processing event by a single logger won't block other loggers.
 
+In asynchronous mode, events enter the FIFO queue immediately, but consumer notifications are coalesced (currently at 64 events or a 16 ms coalescing wait). All event types use the same notification policy.
+
+Explicit drain requests also bypass coalescing. They wait until the queue is empty and its last logger callback has completed, including any additional events logged by callbacks.
+
+Shutdown cancels the coalescing wait and drains the remaining events before terminating the logging thread.
+
 #### Queue capacity
 
 In asynchronous mode the producers of events block while the queue holds `MSBUILDLOGGINGQUEUECAPACITY` events (200,000 by default), which bounds the memory used by events a slow logger has not consumed yet. Blocked producers are a bottleneck in multithreaded builds, where many threads log concurrently. Starting with change wave 18.13, a producer that finds the queue full on .NET (not on .NET Framework) doubles its capacity instead of blocking, if the memory that the GC reports as still available, on the machine and below the GC heap hard limit, could hold the added capacity at an assumed 2 KB per event. The GC reports the memory as it was when it last ran. If it could not, producers wait for the logger as before, but wake up every second to look at the capacity and the memory again (one producer at a time, at most once a second), so that the queue grows once the GC reports that memory is available. Setting `MSBUILDLOGGINGQUEUECAPACITY` to any value keeps the capacity fixed. Where the queue cannot grow, with a fixed capacity and on .NET Framework, producers wait for the logger without a time limit.
@@ -144,4 +150,3 @@ In asynchronous mode the producers of events block while the queue holds `MSBUIL
 * [Terminal logger](../terminallogger/)
 * Console logger ([parameters](https://github.com/dotnet/msbuild/blob/66e0371a64e08160e63000fc2ced8cb8bbc6739e/src/MSBuild/Resources/Strings.resx#L353-L388))
 * File logger ([parameters](https://github.com/dotnet/msbuild/blob/66e0371a64e08160e63000fc2ced8cb8bbc6739e/src/MSBuild/Resources/Strings.resx#L593-L620))
-
