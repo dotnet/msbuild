@@ -378,6 +378,172 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         }
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CapturedPrefixesPreserveMetadataAcrossLaterUpdatesAndRemoves(bool eagerReads)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a;b">
+                        <M>original</M>
+                    </Source>
+                </ItemGroup>
+                <ItemGroup>
+                    <Before Include="@(Source)" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Update="*">
+                        <M>updated</M>
+                    </Source>
+                </ItemGroup>
+                <ItemGroup>
+                    <Updated Include="@(Source)" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Remove="b" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Removed Include="@(Source)" />
+                </ItemGroup>
+                <ItemGroup>
+                    <Source Include="c">
+                        <M>new</M>
+                    </Source>
+                </ItemGroup>
+                <ItemGroup>
+                    <Final Include="@(Source)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        if (eagerReads)
+        {
+            bool firstGroup = true;
+            foreach (ProjectItemGroupElement group in project.Xml.ItemGroups)
+            {
+                if (!firstGroup)
+                {
+                    group.Condition = "'@(Source->Count())' >= '0'";
+                }
+
+                firstGroup = false;
+            }
+        }
+
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        string[] expected =
+        [
+            "Source:a:updated",
+            "Before:a:original",
+            "Before:b:original",
+            "Updated:a:updated",
+            "Updated:b:updated",
+            "Removed:a:updated",
+            "Source:c:new",
+            "Final:a:updated",
+            "Final:c:new",
+        ];
+
+        for (int read = 0; read < 2; read++)
+        {
+            List<string> actual = [];
+            foreach (ProjectItem data in CollectItems(evaluator))
+            {
+                actual.Add($"{data.ItemType}:{data.EvaluatedInclude}:{data.GetMetadataValue("M")}");
+            }
+
+            actual.ShouldBe(expected);
+        }
+    }
+
+    [Fact]
+    public void CapturedPositionsSurviveGrowthAcrossSegments()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject("<Project />", collection);
+        project.Xml.AddItemGroup().AddItem("Source", "first");
+        project.Xml.AddItemGroup().AddItem("Before", "@(Source)");
+        ProjectItemGroupElement operations = project.Xml.AddItemGroup();
+
+        const int emptyOperationCount = 10000;
+        for (int i = 0; i < emptyOperationCount; i++)
+        {
+            operations.AddItem("Source", "@(Missing)");
+            if (i == emptyOperationCount / 2)
+            {
+                operations.AddItem("Source", "middle");
+                project.Xml.AddItemGroup().AddItem("Middle", "@(Source)");
+                operations = project.Xml.AddItemGroup();
+            }
+        }
+
+        operations.AddItem("Source", "last");
+        project.Xml.AddItemGroup().AddItem("After", "@(Source)");
+
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        List<string> actual = [];
+        foreach (ProjectItem data in CollectItems(evaluator))
+        {
+            actual.Add($"{data.ItemType}:{data.EvaluatedInclude}");
+        }
+
+        string[] expected =
+        [
+            "Source:first",
+            "Before:first",
+            "Source:middle",
+            "Middle:first",
+            "Middle:middle",
+            "Source:last",
+            "After:first",
+            "After:middle",
+            "After:last",
+        ];
+        actual.ShouldBe(expected);
+    }
+
+    [Fact]
+    public void CapturedGlobReferenceDoesNotInheritLaterRemoveExclusions()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        var folder = env.CreateFolder();
+        env.CreateFile(folder, "a.cs", contents: string.Empty);
+        env.CreateFile(folder, "b.tmp", contents: string.Empty);
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="*" />
+                    <Captured Include="@(Source)" />
+                    <Source Remove="*.tmp" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        project.Xml.FullPath = Path.Combine(folder.Path, "test.proj");
+
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        List<string> actual = [];
+        foreach (ProjectItem data in CollectItems(evaluator))
+        {
+            actual.Add($"{data.ItemType}:{data.EvaluatedInclude}");
+        }
+
+        string[] expected = ["Source:a.cs", "Captured:a.cs", "Captured:b.tmp"];
+        actual.ShouldBe(expected);
+    }
+
     private static ImmutableArray<ProjectItem> CollectItems(
         LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition> evaluator,
         bool ignoreConditions = true)

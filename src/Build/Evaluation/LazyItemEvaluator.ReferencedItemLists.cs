@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 
@@ -24,7 +23,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="ItemType">The referenced item type.</param>
         /// <param name="ItemList">The captured item list.</param>
-        private readonly record struct Entry(string ItemType, LazyItemList ItemList);
+        private readonly record struct Entry(string ItemType, ItemListReference ItemList);
 
         /// <summary>
         ///  Gets the shared empty mapping.
@@ -42,7 +41,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         /// <inheritdoc />
         ICollection<I> IItemProvider<I>.GetItems(string itemType)
-            => TryGetValue(itemType, out LazyItemList? items)
+            => TryGetValue(itemType, out ItemListReference items)
                 ? items.GetMatchedItems(ImmutableHashSet<string>.Empty)
                 : Array.Empty<I>();
 
@@ -71,7 +70,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             using RefArrayBuilder<Entry> entries = default;
             entries.Add(references[0]);
-            Dictionary<string, LazyItemList>? dictionary = null;
+            Dictionary<string, ItemListReference>? dictionary = null;
 
             for (int i = 1; i < references.Length; i++)
             {
@@ -103,7 +102,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 }
                 else
                 {
-                    dictionary = new Dictionary<string, LazyItemList>(SmallMapLimit + 1, comparer);
+                    dictionary = new Dictionary<string, ItemListReference>(SmallMapLimit + 1, comparer);
                     for (int j = 0; j < entries.Count; j++)
                     {
                         dictionary.Add(entries[j].ItemType, entries[j].ItemList);
@@ -127,25 +126,25 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Looks up the captured list for an item type.
         /// </summary>
         /// <param name="itemType">The referenced item type.</param>
-        /// <param name="itemList">The captured list, or <see langword="null"/> when the item type is absent.</param>
+        /// <param name="itemList">The captured reference, or the default value when the item type is absent.</param>
         /// <returns>
         ///  <see langword="true"/> when the item type is present; otherwise, <see langword="false"/>.
         /// </returns>
-        public bool TryGetValue(string itemType, [NotNullWhen(true)] out LazyItemList? itemList)
+        public bool TryGetValue(string itemType, out ItemListReference itemList)
         {
             ArgumentNullException.ThrowIfNull(itemType);
             return TryGetValueCore(itemType, out itemList);
         }
 
-        protected abstract bool TryGetValueCore(string itemType, [NotNullWhen(true)] out LazyItemList? itemList);
+        protected abstract bool TryGetValueCore(string itemType, out ItemListReference itemList);
 
         private sealed class EmptyItemLists : ReferencedItemLists
         {
             public override int Count => 0;
 
-            protected override bool TryGetValueCore(string itemType, [NotNullWhen(true)] out LazyItemList? itemList)
+            protected override bool TryGetValueCore(string itemType, out ItemListReference itemList)
             {
-                itemList = null;
+                itemList = default;
                 return false;
             }
         }
@@ -154,7 +153,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         {
             public override int Count => 1;
 
-            protected override bool TryGetValueCore(string itemType, [NotNullWhen(true)] out LazyItemList? itemList)
+            protected override bool TryGetValueCore(string itemType, out ItemListReference itemList)
             {
                 if (comparer.Equals(entry.ItemType, itemType))
                 {
@@ -162,7 +161,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     return true;
                 }
 
-                itemList = null;
+                itemList = default;
                 return false;
             }
         }
@@ -171,7 +170,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         {
             public override int Count => entries.Length;
 
-            protected override bool TryGetValueCore(string itemType, [NotNullWhen(true)] out LazyItemList? itemList)
+            protected override bool TryGetValueCore(string itemType, out ItemListReference itemList)
             {
                 foreach (Entry entry in entries)
                 {
@@ -182,16 +181,16 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     }
                 }
 
-                itemList = null;
+                itemList = default;
                 return false;
             }
         }
 
-        private sealed class DictionaryItemLists(Dictionary<string, LazyItemList> entries) : ReferencedItemLists
+        private sealed class DictionaryItemLists(Dictionary<string, ItemListReference> entries) : ReferencedItemLists
         {
             public override int Count => entries.Count;
 
-            protected override bool TryGetValueCore(string itemType, [NotNullWhen(true)] out LazyItemList? itemList)
+            protected override bool TryGetValueCore(string itemType, out ItemListReference itemList)
                 => entries.TryGetValue(itemType, out itemList);
         }
     }

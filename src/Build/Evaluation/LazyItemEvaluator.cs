@@ -40,9 +40,9 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     private int _nextElementOrder = 0;
 
-    private Dictionary<string, LazyItemList> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
-        new Dictionary<string, LazyItemList>() :
-        new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, ItemOperationSequence> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames
+        ? []
+        : [with(StringComparer.OrdinalIgnoreCase)];
 
     protected EvaluationContext EvaluationContext { get; }
 
@@ -71,8 +71,8 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     /// <inheritdoc />
     ICollection<I> IItemProvider<I>.GetItems(string itemType)
-        => _itemLists.TryGetValue(itemType, out LazyItemList items)
-            ? items.GetMatchedItems(ImmutableHashSet<string>.Empty)
+        => _itemLists.TryGetValue(itemType, out ItemOperationSequence sequence)
+            ? sequence.CaptureCurrent().GetMatchedItems(ImmutableHashSet<string>.Empty)
             : Array.Empty<I>();
 
     /// <summary>
@@ -176,8 +176,9 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     private void AddReferencedItemList(string itemType, ref ReferencedItemLists.Builder builder)
     {
-        if (_itemLists.TryGetValue(itemType, out LazyItemList itemList))
+        if (_itemLists.TryGetValue(itemType, out ItemOperationSequence sequence))
         {
+            ItemListReference itemList = sequence.CaptureCurrent();
             itemList.MarkAsReferenced();
             builder.Add(itemType, itemList);
         }
@@ -212,7 +213,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     private IEnumerable<ItemData> GetAllItemsDeferred()
     {
-        return _itemLists.Values.SelectMany(itemList => itemList.GetItemData(ImmutableHashSet<string>.Empty))
+        return _itemLists.Values.SelectMany(sequence => sequence.CaptureCurrent().GetItemData(ImmutableHashSet<string>.Empty))
                                 .OrderBy(itemData => itemData.ElementOrder);
     }
 
@@ -220,9 +221,13 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     {
         LazyItemOperation operation = CreateOperation(itemElement, conditionResult, rootDirectory);
 
-        _itemLists.TryGetValue(itemElement.ItemType, out LazyItemList previousItemList);
-        LazyItemList newList = new(previousItemList, operation);
-        _itemLists[itemElement.ItemType] = newList;
+        if (!_itemLists.TryGetValue(itemElement.ItemType, out ItemOperationSequence sequence))
+        {
+            sequence = new ItemOperationSequence();
+        }
+
+        sequence.Add(operation);
+        _itemLists[itemElement.ItemType] = sequence;
     }
 
     private LazyItemOperation CreateOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
