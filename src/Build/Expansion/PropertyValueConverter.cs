@@ -4,194 +4,188 @@
 using System;
 using System.Collections;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 
 namespace Microsoft.Build.Expansion;
 
-internal ref struct PropertyValueConverter
+internal static class PropertyValueConverter
 {
     private const int InitialCapacity = 256;
 
-    private readonly object? _value;
-    private ValueStringBuilder _builder;
-    private int _escapeDepth;
-
-    private PropertyValueConverter(object? value)
-    {
-        _value = value;
-        _builder = default;
-        _escapeDepth = 0;
-    }
-
     public static string ToString(object? value)
-    {
-        PropertyValueConverter converter = new(value);
-
-        try
+        => value switch
         {
-            return converter.ConvertCore();
-        }
-        finally
-        {
-            converter._builder.Dispose();
-        }
-    }
+            null => string.Empty,
+            string s => s,
+            _ => ConvertNonString(value),
+        };
 
-    private string ConvertCore() => _value switch
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static string ConvertNonString(object value) => value switch
     {
-        null => string.Empty,
-        string s => s,
-        IDictionary d => ConvertDictionary(d),
-        Array a => ConvertArray(a),
+        IDictionary d => d.Count > 0
+            ? ConvertDictionary(d)
+            : string.Empty,
+
+        Array a => a.Length > 0
+            ? ConvertArray(a)
+            : string.Empty,
+
         IEnumerable e => ConvertEnumerable(e),
 
         // The fall back is always to just convert to a string directly.
         // Issue: https://github.com/dotnet/msbuild/issues/9757
-        _ => Convert.ToString(_value, CultureInfo.InvariantCulture) ?? string.Empty,
+        _ => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty,
     };
 
-    private string ConvertDictionary(IDictionary dictionary)
+    private static string ConvertDictionary(IDictionary dictionary)
     {
-        if (dictionary.Count > 0)
-        {
-            _builder = new ValueStringBuilder(InitialCapacity);
-            AppendDictionary(dictionary);
-            return Strings.WeakIntern(_builder.AsSpan());
-        }
+        using Writer writer = new(InitialCapacity);
+        writer.AppendDictionary(dictionary);
 
-        return string.Empty;
+        return writer.ToString();
     }
 
-    private string ConvertArray(Array array)
+    private static string ConvertArray(Array array)
     {
-        if (array.Length == 0)
-        {
-            return string.Empty;
-        }
+        using Writer writer = new(InitialCapacity);
+        writer.AppendArray(array);
 
-        _builder = new ValueStringBuilder(InitialCapacity);
-        AppendArray(array);
-        return Strings.WeakIntern(_builder.AsSpan());
+        return writer.ToString();
     }
 
-    private string ConvertEnumerable(IEnumerable enumerable)
+    private static string ConvertEnumerable(IEnumerable enumerable)
     {
-        _builder = new ValueStringBuilder(InitialCapacity);
-        AppendEnumerable(enumerable);
-        return Strings.WeakIntern(_builder.AsSpan());
+        using Writer writer = new(InitialCapacity);
+        writer.AppendEnumerable(enumerable);
+
+        return writer.ToString();
     }
 
-    private void AppendDictionary(IDictionary dictionary)
+    private ref struct Writer(int initialCapacity)
     {
-        int startLength = _builder.Length;
+        private ValueStringBuilder _builder = new(initialCapacity);
+        private int _escapeDepth;
 
-        // If the return type is an IDictionary, then we convert this to
-        // a semi-colon delimited set of A=B pairs.
-        // Key and Value are converted to string and escaped
-        foreach (DictionaryEntry entry in dictionary)
+        public void Dispose()
+            => _builder.Dispose();
+
+        public override readonly string ToString()
+            => Strings.WeakIntern(_builder.AsSpan());
+
+        public void AppendDictionary(IDictionary dictionary)
         {
-            if (_builder.Length > startLength)
-            {
-                AppendSeparator();
-            }
+            int startLength = _builder.Length;
 
-            // convert and escape each key and value in the dictionary entry
-            AppendChild(entry.Key);
-            _builder.Append("=");
-            AppendChild(entry.Value);
-        }
-    }
-
-    private void AppendArray(Array array)
-    {
-        int startLength = _builder.Length;
-
-        if (array.Rank == 1)
-        {
-            int lowerBound = array.GetLowerBound(0);
-            for (int i = 0; i < array.Length; i++)
+            // If the return type is an IDictionary, then we convert this to
+            // a semi-colon delimited set of A=B pairs.
+            // Key and Value are converted to string and escaped
+            foreach (DictionaryEntry entry in dictionary)
             {
                 if (_builder.Length > startLength)
                 {
                     AppendSeparator();
                 }
 
-                AppendChild(array.GetValue(lowerBound + i));
+                // convert and escape each key and value in the dictionary entry
+                AppendElement(entry.Key);
+                _builder.Append("=");
+                AppendElement(entry.Value);
             }
-
-            return;
         }
 
-        foreach (object element in array)
+        public void AppendArray(Array array)
         {
-            if (_builder.Length > startLength)
+            int startLength = _builder.Length;
+
+            if (array.Rank == 1)
             {
-                AppendSeparator();
+                int lowerBound = array.GetLowerBound(0);
+                for (int i = 0; i < array.Length; i++)
+                {
+                    if (_builder.Length > startLength)
+                    {
+                        AppendSeparator();
+                    }
+
+                    AppendElement(array.GetValue(lowerBound + i));
+                }
+
+                return;
             }
 
-            AppendChild(element);
-        }
-    }
-
-    private void AppendEnumerable(IEnumerable enumerable)
-    {
-        int startLength = _builder.Length;
-
-        // If the return is enumerable, then we'll convert to semi-colon delimited elements
-        // each of which must be converted, so we'll recurse for each element
-        foreach (object element in enumerable)
-        {
-            if (_builder.Length > startLength)
+            foreach (object element in array)
             {
-                AppendSeparator();
+                if (_builder.Length > startLength)
+                {
+                    AppendSeparator();
+                }
+
+                AppendElement(element);
             }
-
-            // we need to convert and escape each element of the array
-            AppendChild(element);
         }
-    }
 
-    private void AppendChild(object? value)
-    {
-        _escapeDepth++;
-        Append(value);
-        _escapeDepth--;
-    }
-
-    private void Append(object? value)
-    {
-        switch (value)
+        public void AppendEnumerable(IEnumerable enumerable)
         {
-            case null:
-                break;
+            int startLength = _builder.Length;
 
-            case string s:
-                AppendEscaped(s);
-                break;
+            // If the return is enumerable, then we'll convert to semi-colon delimited elements
+            // each of which must be converted, so we'll recurse for each element
+            foreach (object element in enumerable)
+            {
+                if (_builder.Length > startLength)
+                {
+                    AppendSeparator();
+                }
 
-            case IDictionary d:
-                AppendDictionary(d);
-                break;
-
-            case Array a:
-                AppendArray(a);
-                break;
-
-            case IEnumerable e:
-                AppendEnumerable(e);
-                break;
-
-            default:
-                AppendEscaped(Convert.ToString(value, CultureInfo.InvariantCulture));
-                break;
+                // we need to convert and escape each element of the array
+                AppendElement(element);
+            }
         }
+
+        private void AppendElement(object? value)
+        {
+            _escapeDepth++;
+            Append(value);
+            _escapeDepth--;
+        }
+
+        private void Append(object? value)
+        {
+            switch (value)
+            {
+                case null:
+                    break;
+
+                case string s:
+                    AppendEscaped(s);
+                    break;
+
+                case IDictionary d:
+                    AppendDictionary(d);
+                    break;
+
+                case Array a:
+                    AppendArray(a);
+                    break;
+
+                case IEnumerable e:
+                    AppendEnumerable(e);
+                    break;
+
+                default:
+                    AppendEscaped(Convert.ToString(value, CultureInfo.InvariantCulture));
+                    break;
+            }
+        }
+
+        private void AppendEscaped(string? value)
+            => _builder.AppendEscaped(value, _escapeDepth);
+
+        private void AppendSeparator()
+            => _builder.AppendEscaped(';', _escapeDepth);
     }
-
-    private void AppendEscaped(string? value)
-        => _builder.AppendEscaped(value, _escapeDepth);
-
-    private void AppendSeparator()
-        => _builder.AppendEscaped(';', _escapeDepth);
 }
