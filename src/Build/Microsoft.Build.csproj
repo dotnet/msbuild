@@ -619,7 +619,6 @@
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>SharedUtilities\ResourceUtilities.cs</Link>
     </Compile>
-    <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />

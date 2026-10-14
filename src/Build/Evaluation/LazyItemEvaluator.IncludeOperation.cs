@@ -83,7 +83,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
                     var itemsFromExpression = _expander.ExpandExpressionCaptureIntoItems(
                         itemReferenceFragment.Capture,
-                        _evaluatorData,
+                        _itemListBookmarks,
                         _itemFactory,
                         ExpanderOptions.ExpandItems,
                         includeNullEntries: false,
