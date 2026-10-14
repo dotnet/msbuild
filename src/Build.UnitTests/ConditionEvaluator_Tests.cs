@@ -218,6 +218,84 @@ public class ConditionEvaluator_Tests
         secondError.ColumnNumber.ShouldBe(second.Column);
     }
 
+    [Theory]
+    [InlineData("'' == ''", 0)]
+    [InlineData("'fixed' == 'fixed'", 0)]
+    [InlineData("'$(Value)' == 'value'", 1)]
+    [InlineData("'fixed' != '$(Value)' And '$(Other)' == 'other'", 2)]
+    [InlineData("'%61' == 'a'", 1)]
+    [InlineData("'$(Value)' == '%76alue'", 2)]
+    public void StringStateSlotsOnlyIncludeExpandableNodes(string condition, int expectedSlots)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        ParsedCondition parsed = new Parser().ParseForEvaluation(
+            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+        parsed.StateLayout.StringSlotCount.ShouldBe(expectedSlots);
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state = new(
+            condition, CreateExpander(FileSystems.Default, ("Value", "value"), ("Other", "other")),
+            ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
+            ElementLocation.EmptyLocation, FileSystems.Default);
+
+        parsed.Evaluate(state).ShouldBeTrue();
+    }
+
+    [Theory]
+    [InlineData("", false, false, false)]
+    [InlineData("true", true, false, false)]
+    [InlineData("17.0", false, true, true)]
+    [InlineData("Current", false, false, false)]
+    [InlineData("literal", false, false, false)]
+    public void LiteralNodeEvaluationDoesNotAccessState(
+        string value, bool convertsToBool, bool convertsToNumber, bool convertsToVersion)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string condition = $"'{value}'";
+        ParsedCondition parsed = new Parser().ParseForEvaluation(
+            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+        StringExpressionNode node = parsed.Root.ShouldBeOfType<StringExpressionNode>();
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state = new(
+            condition, CreateExpander(FileSystems.Default), ExpanderOptions.ExpandProperties,
+            null, env.DefaultTestDirectory.Path, ElementLocation.EmptyLocation, FileSystems.Default);
+
+        node.StateSlot.ShouldBe(-1);
+        node.GetExpandedValue(state).ShouldBe(value);
+        node.EvaluatesToEmpty(state).ShouldBe(value.Length == 0);
+        node.TryBoolEvaluate(state, out _).ShouldBe(convertsToBool);
+        node.TryNumericEvaluate(state, out _).ShouldBe(convertsToNumber);
+        node.TryVersionEvaluate(state, out _).ShouldBe(convertsToVersion);
+    }
+
+    [Fact]
+    public void NodeStateAccessorsValidateSlotsAndClearReusedBuffers()
+    {
+        NodeStateStore state = new();
+        Should.Throw<InvalidOperationException>(() => state.GetString(0));
+        Should.Throw<InvalidOperationException>(() => state.GetComparison(0));
+        state.Initialize(new NodeStateLayout(1, 1));
+        try
+        {
+            Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(-1));
+            Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(1));
+            Should.Throw<ArgumentOutOfRangeException>(() => state.GetComparison(-1));
+            Should.Throw<ArgumentOutOfRangeException>(() => state.GetComparison(1));
+            state.GetString(0).ExpandedValue = "first";
+            state.GetComparison(0).ConditionedPropertiesUpdated = true;
+            state.GetString(0).ExpandedValue.ShouldBe("first");
+            state.GetComparison(0).ConditionedPropertiesUpdated.ShouldBeTrue();
+            state.Release();
+            Should.Throw<InvalidOperationException>(() => state.GetString(0));
+            Should.Throw<InvalidOperationException>(() => state.GetComparison(0));
+
+            state.Initialize(new NodeStateLayout(1, 1));
+            state.GetString(0).ExpandedValue.ShouldBeNull();
+            state.GetComparison(0).ConditionedPropertiesUpdated.ShouldBeFalse();
+        }
+        finally
+        {
+            state.Release();
+        }
+    }
+
     private static Task<bool> StartEvaluation(
         string condition,
         IFileSystem fileSystem,

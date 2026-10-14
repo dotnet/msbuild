@@ -79,47 +79,45 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state)
         {
+            if (!_expandable)
+            {
+                return _value.Length == 0;
+            }
+
             ref EvaluationState nodeState = ref state.NodeStates.GetString(StateSlot);
             if (nodeState.ExpandedValue is null)
             {
-                if (_expandable)
+                switch (_value.Length)
                 {
-                    switch (_value.Length)
-                    {
-                        case 0:
-                            nodeState.ExpandedValue = String.Empty;
-                            return true;
-                        // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
-                        case 1:
-                        case 2:
-                            nodeState.ExpandedValue = _value;
-                            return false;
-                        default:
-                            if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
-                            {
-                                // This isn't just a property, item, or metadata value, and it isn't empty.
-                                return false;
-                            }
-                            break;
-                    }
-
-                    string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
-
-                    if (expandBreakEarly is null)
-                    {
-                        // It broke early: we can't store the value, we just
-                        // know it's non empty
+                    case 0:
+                        nodeState.ExpandedValue = String.Empty;
+                        return true;
+                    // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
+                    case 1:
+                    case 2:
+                        nodeState.ExpandedValue = _value;
                         return false;
-                    }
+                    default:
+                        if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
+                        {
+                            // This isn't just a property, item, or metadata value, and it isn't empty.
+                            return false;
+                        }
+                        break;
+                }
 
-                    // It didn't break early, the result is accurate,
-                    // so store it so the work isn't done again.
-                    nodeState.ExpandedValue = expandBreakEarly;
-                }
-                else
+                string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
+
+                if (expandBreakEarly is null)
                 {
-                    nodeState.ExpandedValue = _value;
+                    // It broke early: we can't store the value, we just
+                    // know it's non empty
+                    return false;
                 }
+
+                // It didn't break early, the result is accurate,
+                // so store it so the work isn't done again.
+                nodeState.ExpandedValue = expandBreakEarly;
             }
 
             return nodeState.ExpandedValue.Length == 0;
@@ -145,17 +143,15 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
         {
+            if (!_expandable)
+            {
+                return _value;
+            }
+
             ref EvaluationState nodeState = ref state.NodeStates.GetString(StateSlot);
             if (nodeState.ExpandedValue is null)
             {
-                if (_expandable)
-                {
-                    nodeState.ExpandedValue = state.ExpandIntoString(_value);
-                }
-                else
-                {
-                    nodeState.ExpandedValue = _value;
-                }
+                nodeState.ExpandedValue = state.ExpandIntoString(_value);
             }
 
             return nodeState.ExpandedValue;
@@ -173,6 +169,11 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
         {
+            if (!_expandable)
+            {
+                return false;
+            }
+
             ref EvaluationState nodeState = ref state.NodeStates.GetString(StateSlot);
             if (!nodeState.ShouldBeTreatedAsVisualStudioVersion.HasValue)
             {

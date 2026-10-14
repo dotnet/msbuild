@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Runtime.CompilerServices;
 
 #nullable enable
 
@@ -30,18 +31,20 @@ internal struct NodeStateStore
         _initialized = true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref StringExpressionNode.EvaluationState GetString(int slot)
     {
         VerifySlot(slot, _layout.StringSlotCount);
-        _stringStates ??= ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(_layout.StringSlotCount);
-        return ref _stringStates[slot];
+        StringExpressionNode.EvaluationState[] states = _stringStates ?? AcquireStringStates();
+        return ref states[slot];
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref MultipleComparisonNode.EvaluationState GetComparison(int slot)
     {
         VerifySlot(slot, _layout.ComparisonSlotCount);
-        _comparisonStates ??= ThreadLocalNodeStateBuffer<MultipleComparisonNode.EvaluationState>.Acquire(_layout.ComparisonSlotCount);
-        return ref _comparisonStates[slot];
+        MultipleComparisonNode.EvaluationState[] states = _comparisonStates ?? AcquireComparisonStates();
+        return ref states[slot];
     }
 
     internal void Release()
@@ -62,16 +65,31 @@ internal struct NodeStateStore
         }
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private StringExpressionNode.EvaluationState[] AcquireStringStates() =>
+        _stringStates = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(_layout.StringSlotCount);
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private MultipleComparisonNode.EvaluationState[] AcquireComparisonStates() =>
+        _comparisonStates = ThreadLocalNodeStateBuffer<MultipleComparisonNode.EvaluationState>.Acquire(_layout.ComparisonSlotCount);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private readonly void VerifySlot(int slot, int count)
+    {
+        if (!_initialized || (uint)slot >= (uint)count)
+        {
+            ThrowInvalidSlot(slot);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private readonly void ThrowInvalidSlot(int slot)
     {
         if (!_initialized)
         {
             throw new InvalidOperationException("Condition node state storage is not initialized.");
         }
 
-        if ((uint)slot >= (uint)count)
-        {
-            throw new ArgumentOutOfRangeException(nameof(slot));
-        }
+        throw new ArgumentOutOfRangeException(nameof(slot));
     }
 }
