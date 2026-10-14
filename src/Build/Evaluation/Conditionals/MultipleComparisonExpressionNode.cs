@@ -14,7 +14,17 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class MultipleComparisonNode : OperatorExpressionNode
     {
-        private bool _conditionedPropertiesUpdated = false;
+        internal struct EvaluationState
+        {
+            public bool ConditionedPropertiesUpdated { get; set; }
+        }
+
+        internal int StateSlot { get; }
+
+        protected MultipleComparisonNode(int stateSlot)
+        {
+            StateSlot = stateSlot;
+        }
 
         /// <summary>
         /// Compare numbers
@@ -101,42 +111,41 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Reset temporary state
-        /// </summary>
-        internal override void ResetState()
-        {
-            base.ResetState();
-            _conditionedPropertiesUpdated = false;
-        }
-
-        /// <summary>
         /// Updates the conditioned properties table if it hasn't already been done.
         /// </summary>
         private void UpdateConditionedProperties(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!_conditionedPropertiesUpdated && state.ConditionedPropertiesInProject != null)
+            if (state.ConditionedPropertiesInProject is null)
             {
-                string leftUnexpandedValue = LeftChild.GetUnexpandedValue(state);
-                string rightUnexpandedValue = RightChild.GetUnexpandedValue(state);
-
-                if (leftUnexpandedValue != null)
-                {
-                    ConditionEvaluator.UpdateConditionedPropertiesTable(
-                        state.ConditionedPropertiesInProject,
-                         leftUnexpandedValue,
-                         RightChild.GetExpandedValue(state));
-                }
-
-                if (rightUnexpandedValue != null)
-                {
-                    ConditionEvaluator.UpdateConditionedPropertiesTable(
-                        state.ConditionedPropertiesInProject,
-                         rightUnexpandedValue,
-                         LeftChild.GetExpandedValue(state));
-                }
-
-                _conditionedPropertiesUpdated = true;
+                return;
             }
+
+            ref EvaluationState nodeState = ref state.NodeStates.GetComparison(StateSlot);
+            if (nodeState.ConditionedPropertiesUpdated)
+            {
+                return;
+            }
+
+            string leftUnexpandedValue = LeftChild.GetUnexpandedValue(state);
+            string rightUnexpandedValue = RightChild.GetUnexpandedValue(state);
+
+            if (leftUnexpandedValue is not null)
+            {
+                ConditionEvaluator.UpdateConditionedPropertiesTable(
+                    state.ConditionedPropertiesInProject,
+                     leftUnexpandedValue,
+                     RightChild.GetExpandedValue(state));
+            }
+
+            if (rightUnexpandedValue is not null)
+            {
+                ConditionEvaluator.UpdateConditionedPropertiesTable(
+                    state.ConditionedPropertiesInProject,
+                     rightUnexpandedValue,
+                     LeftChild.GetExpandedValue(state));
+            }
+
+            nodeState.ConditionedPropertiesUpdated = true;
         }
     }
 }

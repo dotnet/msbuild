@@ -432,7 +432,7 @@ namespace Microsoft.Build.UnitTests
         public void EvaluateAVarietyOfTrueExpressions(string expression)
         {
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            ParsedCondition tree = p.ParseForEvaluation(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
             ConditionEvaluator.IConditionEvaluationState state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
@@ -456,7 +456,7 @@ namespace Microsoft.Build.UnitTests
         public void EvaluateAVarietyOfFalseExpressions(string expression)
         {
             Parser p = new Parser();
-            GenericExpressionNode tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+            ParsedCondition tree = p.ParseForEvaluation(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
             ConditionEvaluator.IConditionEvaluationState state =
                 new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(
                     expression,
@@ -487,7 +487,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Parser p = new Parser();
-                var tree = p.Parse(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
+                ParsedCondition tree = p.ParseForEvaluation(expression, ParserOptions.AllowAll, ElementLocation.EmptyLocation);
 
                 ConditionEvaluator.IConditionEvaluationState state =
                     new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>(

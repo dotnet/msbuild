@@ -47,6 +47,11 @@ namespace Microsoft.Build.Evaluation
         private ElementLocation _elementLocation;
         internal int errorPosition = 0; // useful for unit tests
 
+        // Slots are local to a parsed condition and its node-state type.
+        internal int StringNodeStateCount { get; private set; }
+
+        internal int ComparisonNodeStateCount { get; private set; }
+
         #region REMOVE_COMPAT_WARNING
 
         private bool _warnedForExpression = false;
@@ -90,6 +95,17 @@ namespace Microsoft.Build.Evaluation
             // nothing to see here, move along.
         }
 
+        internal ParsedCondition ParseForEvaluation(
+            string expression,
+            ParserOptions optionSettings,
+            ElementLocation elementLocation)
+        {
+            GenericExpressionNode root = Parse(expression, optionSettings, elementLocation);
+            return new ParsedCondition(
+                root,
+                new NodeStateLayout(StringNodeStateCount, ComparisonNodeStateCount));
+        }
+
         //
         // Main entry point for parser.
         // You pass in the expression you want to parse, and you get an
@@ -103,6 +119,8 @@ namespace Microsoft.Build.Evaluation
 
             _options = optionSettings;
             _elementLocation = elementLocation;
+            StringNodeStateCount = 0;
+            ComparisonNodeStateCount = 0;
 
             _lexer = new Scanner(expression, _options);
             if (!_lexer.Advance())
@@ -258,11 +276,11 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.EqualTo))
             {
-                node = new EqualExpressionNode();
+                node = new EqualExpressionNode(ComparisonNodeStateCount++);
             }
             else if (Same(expression, Token.TokenType.NotEqualTo))
             {
-                node = new NotEqualExpressionNode();
+                node = new NotEqualExpressionNode(ComparisonNodeStateCount++);
             }
             return node;
         }
@@ -354,7 +372,7 @@ namespace Microsoft.Build.Evaluation
             Token current = _lexer.CurrentToken;
             if (Same(expression, Token.TokenType.String))
             {
-                return new StringExpressionNode(current.String, current.Expandable);
+                return new StringExpressionNode(current.String, current.Expandable, StringNodeStateCount++);
             }
             else if (Same(expression, Token.TokenType.Numeric))
             {
@@ -362,15 +380,15 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.Property))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return new StringExpressionNode(current.String, true /* requires expansion */, StringNodeStateCount++);
             }
             else if (Same(expression, Token.TokenType.ItemMetadata))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return new StringExpressionNode(current.String, true /* requires expansion */, StringNodeStateCount++);
             }
             else if (Same(expression, Token.TokenType.ItemList))
             {
-                return new StringExpressionNode(current.String, true /* requires expansion */);
+                return new StringExpressionNode(current.String, true /* requires expansion */, StringNodeStateCount++);
             }
             else
             {

@@ -33,7 +33,7 @@ public class ConditionEvaluator_Tests
         _output = output;
     }
 
-    [WindowsOnlyFact]
+    [Fact]
     public async Task SameConditionEvaluatesConcurrentlyWithoutRepeatingParserWarnings()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
@@ -103,7 +103,7 @@ public class ConditionEvaluator_Tests
     }
 
     [Fact]
-    public void CachedExpressionIsResetAfterEvaluationThrows()
+    public void EvaluationStateDoesNotLeakAfterEvaluationThrows()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         string identity = Guid.NewGuid().ToString("N");
@@ -121,7 +121,7 @@ public class ConditionEvaluator_Tests
     }
 
     [Fact]
-    public async Task CheckedOutExpressionCanReturnAfterCacheEviction()
+    public async Task SharedExpressionCanFinishAfterCacheEviction()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
         using ManualResetEventSlim firstEntered = new();
@@ -161,6 +161,63 @@ public class ConditionEvaluator_Tests
             ("File", "file")).ShouldBeFalse();
     }
 
+    [Fact]
+    public void NestedEvaluationKeepsOuterStatePrivate()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        string outerPath = Path.Combine(env.DefaultTestDirectory.Path, "outer.file");
+        string innerPath = Path.Combine(env.DefaultTestDirectory.Path, "inner.file");
+        string condition = "'$(Value)' != 'none' And Exists('$(File)')";
+        ParsedCondition parsed = new Parser().ParseForEvaluation(
+            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+        MSBuildFileSystemBase fileSystem = A.Fake<MSBuildFileSystemBase>();
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> outerState = new(
+            condition, CreateExpander(fileSystem, ("Value", "outer"), ("File", outerPath)),
+            ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
+            ElementLocation.EmptyLocation, fileSystem);
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> innerState = new(
+            condition, CreateExpander(fileSystem, ("Value", "inner"), ("File", innerPath)),
+            ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
+            ElementLocation.EmptyLocation, fileSystem);
+
+        A.CallTo(() => fileSystem.FileOrDirectoryExists(innerPath)).Returns(true);
+        A.CallTo(() => fileSystem.FileOrDirectoryExists(outerPath)).ReturnsLazily(() =>
+        {
+            ref StringExpressionNode.EvaluationState outer = ref outerState.NodeStates.GetString(0);
+            outer.ExpandedValue.ShouldBe("outer");
+            parsed.Evaluate(innerState).ShouldBeTrue();
+            outer.ExpandedValue.ShouldBe("outer");
+            return true;
+        });
+
+        parsed.Evaluate(outerState).ShouldBeTrue();
+        parsed.Evaluate(outerState).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void FailedParsingUsesTheCurrentCallersLocation()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        CachedCondition cached = new();
+        ElementLocation first = ElementLocation.Create(
+            Path.Combine(env.DefaultTestDirectory.Path, "first.proj"), 7, 2);
+        ElementLocation second = ElementLocation.Create(
+            Path.Combine(env.DefaultTestDirectory.Path, "second.proj"), 19, 4);
+        const string condition = "true And (";
+
+        InvalidProjectFileException firstError = Should.Throw<InvalidProjectFileException>(() =>
+            cached.GetOrParse(condition, ParserOptions.AllowProperties, first, null));
+        firstError.ProjectFile.ShouldBe(first.File);
+        firstError.LineNumber.ShouldBe(first.Line);
+        firstError.ColumnNumber.ShouldBe(first.Column);
+
+        InvalidProjectFileException secondError = Should.Throw<InvalidProjectFileException>(() =>
+            cached.GetOrParse(condition, ParserOptions.AllowProperties, second, null));
+        secondError.ProjectFile.ShouldBe(second.File);
+        secondError.LineNumber.ShouldBe(second.Line);
+        secondError.ColumnNumber.ShouldBe(second.Column);
+    }
+
     private static Task<bool> StartEvaluation(
         string condition,
         IFileSystem fileSystem,
@@ -176,6 +233,13 @@ public class ConditionEvaluator_Tests
         IFileSystem fileSystem,
         string directory,
         LoggingContext? loggingContext,
+        params (string Name, string Value)[] properties) =>
+        ConditionEvaluator.EvaluateCondition(
+            condition, ParserOptions.AllowProperties, CreateExpander(fileSystem, properties),
+            ExpanderOptions.ExpandProperties, directory, ElementLocation.EmptyLocation, fileSystem, loggingContext);
+
+    private static Expander<ProjectPropertyInstance, ProjectItemInstance> CreateExpander(
+        IFileSystem fileSystem,
         params (string Name, string Value)[] properties)
     {
         PropertyDictionary<ProjectPropertyInstance> propertyBag = new();
@@ -184,9 +248,6 @@ public class ConditionEvaluator_Tests
             propertyBag.Set(ProjectPropertyInstance.Create(name, value));
         }
 
-        Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new(propertyBag, fileSystem);
-        return ConditionEvaluator.EvaluateCondition(
-            condition, ParserOptions.AllowProperties, expander, ExpanderOptions.ExpandProperties,
-            directory, ElementLocation.EmptyLocation, fileSystem, loggingContext);
+        return new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, fileSystem);
     }
 }

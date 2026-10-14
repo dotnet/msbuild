@@ -12,6 +12,10 @@ namespace Microsoft.Build.Evaluation
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class NotEqualExpressionNode : MultipleComparisonNode
     {
+        internal NotEqualExpressionNode(int stateSlot) : base(stateSlot)
+        {
+        }
+
         /// <summary>
         /// Compare numbers
         /// </summary>

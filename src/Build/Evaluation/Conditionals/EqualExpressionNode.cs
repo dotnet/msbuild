@@ -12,6 +12,10 @@ namespace Microsoft.Build.Evaluation
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class EqualExpressionNode : MultipleComparisonNode
     {
+        internal EqualExpressionNode(int stateSlot) : base(stateSlot)
+        {
+        }
+
         /// <summary>
         /// Compare numbers
         /// </summary>

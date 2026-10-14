@@ -15,19 +15,28 @@ namespace Microsoft.Build.Evaluation
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class StringExpressionNode : OperandExpressionNode
     {
-        private string _value;
-        private string _cachedExpandedValue;
+        internal struct EvaluationState
+        {
+            public string ExpandedValue { get; set; }
+
+            public bool? ShouldBeTreatedAsVisualStudioVersion { get; set; }
+        }
+
+        internal int StateSlot { get; }
+
+        private readonly string _value;
 
         /// <summary>
         /// Whether the string potentially has expandable content,
         /// such as a property expression or escaped character.
         /// </summary>
-        private bool _expandable;
+        private readonly bool _expandable;
 
-        internal StringExpressionNode(string value, bool expandable)
+        internal StringExpressionNode(string value, bool expandable, int stateSlot)
         {
             _value = value;
             _expandable = expandable;
+            StateSlot = stateSlot;
         }
 
         internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
@@ -70,19 +79,20 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override bool EvaluatesToEmpty(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (_cachedExpandedValue == null)
+            ref EvaluationState nodeState = ref state.NodeStates.GetString(StateSlot);
+            if (nodeState.ExpandedValue is null)
             {
                 if (_expandable)
                 {
                     switch (_value.Length)
                     {
                         case 0:
-                            _cachedExpandedValue = String.Empty;
+                            nodeState.ExpandedValue = String.Empty;
                             return true;
                         // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
                         case 1:
                         case 2:
-                            _cachedExpandedValue = _value;
+                            nodeState.ExpandedValue = _value;
                             return false;
                         default:
                             if (_value[1] != '(' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@') || _value[_value.Length - 1] != ')')
@@ -95,7 +105,7 @@ namespace Microsoft.Build.Evaluation
 
                     string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
 
-                    if (expandBreakEarly == null)
+                    if (expandBreakEarly is null)
                     {
                         // It broke early: we can't store the value, we just
                         // know it's non empty
@@ -104,15 +114,15 @@ namespace Microsoft.Build.Evaluation
 
                     // It didn't break early, the result is accurate,
                     // so store it so the work isn't done again.
-                    _cachedExpandedValue = expandBreakEarly;
+                    nodeState.ExpandedValue = expandBreakEarly;
                 }
                 else
                 {
-                    _cachedExpandedValue = _value;
+                    nodeState.ExpandedValue = _value;
                 }
             }
 
-            return _cachedExpandedValue.Length == 0;
+            return nodeState.ExpandedValue.Length == 0;
         }
 
 
@@ -135,32 +145,21 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (_cachedExpandedValue == null)
+            ref EvaluationState nodeState = ref state.NodeStates.GetString(StateSlot);
+            if (nodeState.ExpandedValue is null)
             {
                 if (_expandable)
                 {
-                    _cachedExpandedValue = state.ExpandIntoString(_value);
+                    nodeState.ExpandedValue = state.ExpandIntoString(_value);
                 }
                 else
                 {
-                    _cachedExpandedValue = _value;
+                    nodeState.ExpandedValue = _value;
                 }
             }
 
-            return _cachedExpandedValue;
+            return nodeState.ExpandedValue;
         }
-
-        /// <summary>
-        /// If any expression nodes cache any state for the duration of evaluation,
-        /// now's the time to clean it up
-        /// </summary>
-        internal override void ResetState()
-        {
-            _cachedExpandedValue = null;
-            _shouldBeTreatedAsVisualStudioVersion = null;
-        }
-
-        private bool? _shouldBeTreatedAsVisualStudioVersion = null;
 
         /// <summary>
         /// Should this node be treated as an expansion of VisualStudioVersion, rather than
@@ -174,7 +173,8 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!_shouldBeTreatedAsVisualStudioVersion.HasValue)
+            ref EvaluationState nodeState = ref state.NodeStates.GetString(StateSlot);
+            if (!nodeState.ShouldBeTreatedAsVisualStudioVersion.HasValue)
             {
                 // Treat specially if the node would expand to "Current".
 
@@ -183,15 +183,15 @@ namespace Microsoft.Build.Evaluation
                 if (string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
                 {
                     // and it is just an expansion of MSBuildToolsVersion
-                    _shouldBeTreatedAsVisualStudioVersion = string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
+                    nodeState.ShouldBeTreatedAsVisualStudioVersion = string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
                 }
                 else
                 {
-                    _shouldBeTreatedAsVisualStudioVersion = false;
+                    nodeState.ShouldBeTreatedAsVisualStudioVersion = false;
                 }
             }
 
-            return _shouldBeTreatedAsVisualStudioVersion.Value;
+            return nodeState.ShouldBeTreatedAsVisualStudioVersion.Value;
         }
 
         internal override string DebuggerDisplay => $"\"{_value}\"";
