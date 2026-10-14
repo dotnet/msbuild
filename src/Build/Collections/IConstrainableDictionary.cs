@@ -15,17 +15,14 @@ namespace Microsoft.Build.Collections
     internal interface IConstrainableDictionary<TValue> : IDictionary<string, TValue>
     {
         /// <summary>
-        /// Get the value with the specified key or null if it is not present.
-        /// The key used for lookup is the substring of <paramref name="keyString"/>
-        /// starting at <paramref name="startIndex"/> and ending at <paramref name="endIndex"/>
-        /// (e.g. if the key is just the first character in <paramref name="keyString"/>, then
-        /// the value for <paramref name="startIndex"/> should be 0 and the value for
-        /// <paramref name="endIndex"/> should also be 0.)
+        ///  Gets the value whose key is the specified segment of a string.
         /// </summary>
         /// <param name="keyString">A string that contains the key of the item to retrieve.</param>
-        /// <param name="startIndex">The start index of the substring of <paramref name="keyString"/> that contains the key.</param>
-        /// <param name="endIndex">The end index of the substring of <paramref name="keyString"/> that contains the key.</param>
-        /// <returns>If it's found, the item whose key matches the calculated substring. Null otherwise.</returns>
-        TValue? Get(string keyString, int startIndex, int endIndex);
+        /// <param name="startIndex">The zero-based index of the first character of the key.</param>
+        /// <param name="length">The number of characters in the key.</param>
+        /// <returns>
+        ///  The value, or <see langword="null"/> if the dictionary does not contain the specified key.
+        /// </returns>
+        TValue? Get(string keyString, int startIndex, int length);
     }
 }

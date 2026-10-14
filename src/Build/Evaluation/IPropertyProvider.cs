@@ -24,9 +24,9 @@ internal interface IPropertyProvider<out T>
     /// </summary>
     /// <param name="name">The string containing the property name.</param>
     /// <param name="startIndex">The zero-based index of the first character of the property name.</param>
-    /// <param name="endIndex">The zero-based index of the last character of the property name.</param>
+    /// <param name="length">The number of characters in the property name.</param>
     /// <returns>
     ///  The property, or <see langword="null"/> if no property has the specified name.
     /// </returns>
-    T? GetProperty(string name, int startIndex, int endIndex);
+    T? GetProperty(string name, int startIndex, int length);
 }

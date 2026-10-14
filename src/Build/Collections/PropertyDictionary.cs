@@ -319,23 +319,18 @@ namespace Microsoft.Build.Collections
             return this[name];
         }
 
-        /// <summary>
-        /// Get the property with the specified name or null if it is not present.
-        /// Name is the segment of the provided string with the provided start and end indexes.
-        /// </summary>
-        public T GetProperty(string name, int startIndex, int endIndex)
+        /// <inheritdoc />
+        public T GetProperty(string name, int startIndex, int length)
         {
             using (_lock.EnterDisposableReadLock())
             {
-                return _properties.Get(name, startIndex, endIndex - startIndex + 1);
+                return _properties.Get(name, startIndex, length);
             }
         }
 
         /// <inheritdoc />
-        public T Get(string keyString, int startIndex, int endIndex)
-        {
-            return GetProperty(keyString, startIndex, endIndex);
-        }
+        public T Get(string keyString, int startIndex, int length)
+            => GetProperty(keyString, startIndex, length);
 
         /// <summary>
         /// Gets the unescaped value of a particular property.

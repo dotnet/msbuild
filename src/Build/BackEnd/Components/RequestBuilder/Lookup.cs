@@ -408,11 +408,11 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Gets the effective property for the current scope.
-        /// taking the name from the provided string within the specified start and end indexes.
+        /// taking the name from the provided string with the specified start index and length.
         /// If no match is found, returns null.
         /// Caller must not modify the property returned.
         /// </summary>
-        public ProjectPropertyInstance GetProperty(string name, int startIndex, int endIndex)
+        public ProjectPropertyInstance GetProperty(string name, int startIndex, int length)
         {
             // Walk down the tables and stop when the first
             // property with this name is found
@@ -421,7 +421,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (scope.PropertySets != null)
                 {
-                    ProjectPropertyInstance property = scope.PropertySets.GetProperty(name, startIndex, endIndex);
+                    ProjectPropertyInstance property = scope.PropertySets.GetProperty(name, startIndex, length);
                     if (property != null)
                     {
                         return property;
@@ -430,7 +430,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (scope.Properties != null)
                 {
-                    ProjectPropertyInstance property = scope.Properties.GetProperty(name, startIndex, endIndex);
+                    ProjectPropertyInstance property = scope.Properties.GetProperty(name, startIndex, length);
                     if (property != null)
                     {
                         return property;
@@ -452,7 +452,7 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.NotNullOrEmpty(name);
 
-            return GetProperty(name, 0, name.Length - 1);
+            return GetProperty(name, 0, name.Length);
         }
 
         /// <summary>

@@ -71,14 +71,14 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Returns a property with the specified name, or null if it was not found.
-        /// Name is the segment of the provided string with the provided start and end indexes.
+        /// Name is the segment of the provided string with the provided start index and length.
         /// </summary>
-        public P? GetProperty(string name, int startIndex, int endIndex)
+        public P? GetProperty(string name, int startIndex, int length)
         {
-            P? prop = _wrapped.GetProperty(name, startIndex, endIndex);
+            P? prop = _wrapped.GetProperty(name, startIndex, length);
             if (IsPropertyReadTrackingRequested)
             {
-                this.TrackPropertyRead(name.Substring(startIndex, endIndex - startIndex + 1), prop);
+                this.TrackPropertyRead(name.Substring(startIndex, length), prop);
             }
 
             return prop;
