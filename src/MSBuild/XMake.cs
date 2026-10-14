@@ -472,6 +472,8 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
 
+                UpdateResponseFileTelemetry();
+
                 // From here the switches are fully gathered (including any project Directory.Build.rsp), so the
                 // in-proc build path can safely reuse them - and the gather's response-file bookkeeping
                 // (commandLineParser.IncludedResponseFiles) stays intact - even if a validation step below throws.
@@ -1056,6 +1058,7 @@ namespace Microsoft.Build.CommandLine
                                             string.Join(" ", commandLine),
                                             switchesAlreadyGathered);
 
+                UpdateResponseFileTelemetry();
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
                 if (buildCanBeInvoked)
@@ -1594,6 +1597,14 @@ namespace Microsoft.Build.CommandLine
                 }
                 // Restoring priority can fail due to platform permissions; priority changes are best effort.
                 catch (Win32Exception) { }
+            }
+        }
+
+        private static void UpdateResponseFileTelemetry()
+        {
+            if (KnownTelemetry.PartialBuildTelemetry is not null)
+            {
+                KnownTelemetry.PartialBuildTelemetry.ResponseFileUsed = commandLineParser.IncludedResponseFiles.Count > 0;
             }
         }
 

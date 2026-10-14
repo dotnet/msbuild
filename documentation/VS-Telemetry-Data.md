@@ -58,9 +58,11 @@ The primary telemetry event capturing overall build information.
 |----------|------|-------------|
 | `BuildDurationInMilliseconds` | double | Total build duration from start to finish |
 | `InnerBuildDurationInMilliseconds` | double | Duration from when BuildManager starts (excludes server connection time) |
+| `TelemetrySchemaVersion` | int | Version of the build telemetry contract. Missing on historical events means version 1; this contract is version 2 |
 | `BuildEngineHost` | string | Host environment: "VS", "VSCode", "Azure DevOps", "GitHub Action", "CLI", etc. |
-| `BuildSuccess` | bool | Whether the build succeeded |
-| `BuildTarget` | string | The target(s) being built |
+| `IsCI` | bool | Whether the build ran in an automated environment, independently of `BuildEngineHost` |
+| `BuildSuccess` | bool | Whether the build succeeded. On .NET Framework, failed Visual Studio telemetry uses the `UserFault` result; on modern .NET, the diagnostic activity uses `ActivityStatusCode.Error` |
+| `BuildTarget` | string | The target(s) of the first build request. With `-restore`, the targets built after restore. Empty when the project's default targets are built. Custom target names are hashed |
 | `BuildEngineVersion` | Version | MSBuild engine version |
 | `BuildEngineDisplayVersion` | string | Display-friendly engine version |
 | `BuildEngineFrameworkName` | string | Runtime framework name |
@@ -69,6 +71,7 @@ The primary telemetry event capturing overall build information.
 | `TaskHostConsoleOutputForwarded` | bool | Whether the parent received and forwarded non-empty stdout or stderr from an eligible primary `-mt` task host during this build |
 | `SACEnabled` | bool | Whether Smart Application Control was enabled |
 | `IsStandaloneExecution` | bool | True if MSBuild runs from command line |
+| `ResponseFileUsed` | bool | Whether the command-line build used any response file, including explicit `@file.rsp`, `MSBuild.rsp`, or `Directory.Build.rsp` files |
 | `InitialMSBuildServerState` | string | Server state before build: "cold", "hot", or null |
 | `ServerFallbackReason` | string | If server was bypassed: "ServerBusy", "ConnectionError", or null |
 | `ProjectPath` | string | Path to the project file being built |
@@ -119,24 +122,35 @@ Tracks which task factories are being used.
 | `XamlTaskFactoryTasksExecutedCount` | int | Tasks created via XamlTaskFactory |
 | `CustomTaskFactoryTasksExecutedCount` | int | Tasks from custom task factories |
 
+### Task Details and Summary (Activity Properties)
+
+- `BuildInsightsSchemaVersion` identifies the task, target, and incrementality contract. Missing on historical events means version 1; this contract is version 2.
+- `Tasks` lists only tasks that ran at least once in the build, with their execution count, cumulative time, and memory when those measurements are available.
+- `TotalMemoryBytes` is measured only for non-intrinsic tasks on .NET. When unavailable for intrinsic tasks or on .NET Framework, it is null in object/activity data and omitted from task-details JSON.
+- Intrinsic `MSBuild` and `CallTarget` tasks report their execution count directly. Their cumulative time is not measured and is reported as zero.
+
 ## 4. Build Incrementality Telemetry
 
-Classifies builds as full or incremental based on target execution patterns.
+Classifies builds as full or incremental based on how many targets with `Inputs` and `Outputs` were up to date.
 
 ### Incrementality Info (Activity Property)
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `Classification` | enum | `Full`, `Incremental`, or `Unknown` |
-| `TotalTargetsCount` | int | Total number of targets |
-| `ExecutedTargetsCount` | int | Targets that ran |
-| `SkippedTargetsCount` | int | Targets that were skipped |
-| `SkippedDueToUpToDateCount` | int | Skipped because outputs were current |
-| `SkippedDueToConditionCount` | int | Skipped due to false condition |
-| `SkippedDueToPreviouslyBuiltCount` | int | Skipped because already built |
-| `IncrementalityRatio` | double | Ratio of skipped to total (0.0-1.0) |
+| `TotalTargetsCount` | int | Total number of target outcomes observed |
+| `ExecutedTargetsCount` | int | Target instances that ran |
+| `SkippedTargetsCount` | int | Target instances that were skipped |
+| `SkippedDueToUpToDateCount` | int | Target instances skipped because outputs were current |
+| `SkippedDueToConditionCount` | int | Target instances skipped due to a false condition |
+| `SkippedDueToPreviouslyBuiltCount` | int | Target instances skipped because the target was already built |
+| `UpToDateInputOutputTargetsCount` | int | Target instances with `Inputs` and `Outputs` that were skipped because their outputs were up to date |
+| `ExecutedInputOutputTargetsCount` | int | Target instances with `Inputs` and `Outputs` that ran |
+| `IncrementalityRatio` | double | `UpToDateInputOutputTargetsCount` / (`UpToDateInputOutputTargetsCount` + `ExecutedInputOutputTargetsCount`), from 0.0 to 1.0 |
 
-A build is classified as **Incremental** when more than 70% of targets are skipped.
+Each target outcome is counted where it occurs. A target that runs and is later requested again contributes once to `ExecutedTargetsCount` and once to `SkippedDueToPreviouslyBuiltCount`. Results reused from another request do not contribute to the Inputs/Outputs ratio. A build is classified as **Incremental** when `IncrementalityRatio` is at least 0.7, and as **Unknown** when no target with `Inputs` and `Outputs` was either executed or skipped as up to date.
+
+Queries that combine historical and current data should partition on `BuildInsightsSchemaVersion`. Version 1 used unique target details and calculated `IncrementalityRatio` from all skipped targets; version 2 uses target outcomes and the Inputs/Outputs ratio described above.
 
 ---
 
@@ -232,7 +246,7 @@ A session saves its events to the local Visual Studio telemetry store, `%LOCALAP
 5. `VSCode` when `VSCODE_CWD` is set or `TERM_PROGRAM` is `vscode`.
 6. Otherwise no host is reported.
 
-Other CI systems are detected for upload on exit, but they are not reported as a host.
+Other CI systems are detected for upload on exit and set `IsCI`, but they are not reported as a host.
 
 ### Deployment requirements
 

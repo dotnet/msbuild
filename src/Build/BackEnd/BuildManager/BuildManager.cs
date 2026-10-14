@@ -261,6 +261,11 @@ namespace Microsoft.Build.Execution
         private BuildTelemetry? _buildTelemetry;
 
         /// <summary>
+        /// Whether the captured build target belongs to the synthetic restore submission created by -restore.
+        /// </summary>
+        private bool _buildTelemetryTargetIsRestorePrepass;
+
+        /// <summary>
         /// Logger, that if instantiated - will receive and expose telemetry data from worker nodes.
         /// </summary>
         private InternalTelemetryConsumingLogger? _telemetryConsumingLogger;
@@ -607,6 +612,7 @@ namespace Microsoft.Build.Execution
 
                 // Initiate build telemetry data
                 DateTime now = DateTime.UtcNow;
+                _buildTelemetryTargetIsRestorePrepass = false;
 
                 // Acquire it from static variable so we can apply data collected up to this moment
                 _buildTelemetry = KnownTelemetry.PartialBuildTelemetry;
@@ -1118,7 +1124,22 @@ namespace Microsoft.Build.Execution
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
                     _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
-                    _buildTelemetry.BuildTarget ??= string.Join(",", requestData.TargetNames);
+
+                    // With -restore, the Restore submission precedes the build; report the build's targets instead.
+                    if (_buildTelemetry.BuildTarget is null)
+                    {
+                        _buildTelemetry.BuildTarget = string.Join(",", requestData.TargetNames);
+                        _buildTelemetryTargetIsRestorePrepass =
+                            requestData.TargetNames.Count == 1 &&
+                            string.Equals(requestData.TargetNames.First(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase) &&
+                            requestData.GlobalPropertiesLookup.TryGetValue(MSBuildConstants.MSBuildIsRestoring, out string? isRestoring) &&
+                            string.Equals(isRestoring, bool.TrueString, StringComparison.OrdinalIgnoreCase);
+                    }
+                    else if (_buildTelemetryTargetIsRestorePrepass)
+                    {
+                        _buildTelemetry.BuildTarget = string.Join(",", requestData.TargetNames);
+                        _buildTelemetryTargetIsRestorePrepass = false;
+                    }
                 }
 
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -1356,6 +1377,7 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
                             _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
                             _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
+                            _buildTelemetry.TelemetrySchemaVersion = BuildTelemetry.CurrentSchemaVersion;
 
                             // Populate error categorization data from the logging service
                             if (!_overallBuildSuccess)
@@ -1366,6 +1388,7 @@ namespace Microsoft.Build.Execution
                             string? host = BuildEnvironmentState.GetHostName();
 
                             _buildTelemetry.BuildEngineHost = host;
+                            _buildTelemetry.IsCI = BuildEnvironmentState.IsAutomatedEnvironment();
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
                             _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
@@ -1397,6 +1420,7 @@ namespace Microsoft.Build.Execution
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
+                            _buildTelemetryTargetIsRestorePrepass = false;
                         }
                     }
 
@@ -1458,6 +1482,11 @@ namespace Microsoft.Build.Execution
                 .SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                     includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                     includeTargetDetails: false));
+
+            if (_buildTelemetry?.BuildSuccess == false)
+            {
+                activity?.SetUserFault();
+            }
         }
 
         /// <summary>
