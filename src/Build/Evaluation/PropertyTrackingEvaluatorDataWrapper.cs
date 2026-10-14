@@ -58,9 +58,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="name">The property name.</param>
         /// <returns>The property.</returns>
-        public P GetProperty(string name)
+        public P? GetProperty(string name)
         {
-            P prop = _wrapped.GetProperty(name);
+            P? prop = _wrapped.GetProperty(name);
             if (IsPropertyReadTrackingRequested)
             {
                 this.TrackPropertyRead(name, prop);
@@ -73,9 +73,9 @@ namespace Microsoft.Build.Evaluation
         /// Returns a property with the specified name, or null if it was not found.
         /// Name is the segment of the provided string with the provided start and end indexes.
         /// </summary>
-        public P GetProperty(string name, int startIndex, int endIndex)
+        public P? GetProperty(string name, int startIndex, int endIndex)
         {
-            P prop = _wrapped.GetProperty(name, startIndex, endIndex);
+            P? prop = _wrapped.GetProperty(name, startIndex, endIndex);
             if (IsPropertyReadTrackingRequested)
             {
                 this.TrackPropertyRead(name.Substring(startIndex, endIndex - startIndex + 1), prop);
@@ -196,8 +196,8 @@ namespace Microsoft.Build.Evaluation
         /// Logic containing what to do when a property is read.
         /// </summary>
         /// <param name="name">The name of the property.</param>
-        /// <param name="property">The value of the property that was read (null if there is no value).</param>
-        private void TrackPropertyRead(string name, P property)
+        /// <param name="property">The property that was read, or <see langword="null"/> if it was not found.</param>
+        private void TrackPropertyRead(string name, P? property)
         {
             // MSBuild looks up a property called "InnerBuildProperty". If that isn't present,
             // an empty string is returned and it then attempts to look up the value for that property
