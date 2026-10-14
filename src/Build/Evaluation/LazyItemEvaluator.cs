@@ -72,7 +72,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     /// <inheritdoc />
     ICollection<I> IItemProvider<I>.GetItems(string itemType)
         => _itemLists.TryGetValue(itemType, out ItemOperationSequence sequence)
-            ? sequence.BookmarkCurrent().GetFilteredItems(ImmutableHashSet<string>.Empty)
+            ? sequence.BookmarkCurrent().GetFilteredItems()
             : Array.Empty<I>();
 
     /// <summary>
@@ -213,7 +213,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
 
     private IEnumerable<ItemData> GetAllItemsDeferred()
     {
-        return _itemLists.Values.SelectMany(sequence => sequence.BookmarkCurrent().GetItemData(ImmutableHashSet<string>.Empty))
+        return _itemLists.Values.SelectMany(sequence => sequence.BookmarkCurrent().GetItemData())
                                 .OrderBy(itemData => itemData.ElementOrder);
     }
 

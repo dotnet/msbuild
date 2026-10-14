@@ -17,22 +17,20 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <summary>
         ///  Gets the items at the bookmark, filtered by originating Include conditions.
         /// </summary>
-        /// <param name="laterRemoveGlobPatterns">The later removed globs that may prune this computation.</param>
         /// <returns>
         ///  The filtered items in evaluation order.
         /// </returns>
-        public ImmutableList<I> GetFilteredItems(ImmutableHashSet<string> laterRemoveGlobPatterns)
-            => sequence.GetFilteredItems(operationCount, laterRemoveGlobPatterns);
+        public ImmutableList<I> GetFilteredItems()
+            => sequence.GetFilteredItems(operationCount);
 
         /// <summary>
         ///  Gets all items visible at the bookmarked position.
         /// </summary>
-        /// <param name="laterRemoveGlobPatterns">The later removed globs that may prune this computation.</param>
         /// <returns>
         ///  A builder over the captured item result.
         /// </returns>
-        public OrderedItemDataCollection.Builder GetItemData(ImmutableHashSet<string> laterRemoveGlobPatterns)
-            => sequence.GetItemData(operationCount, laterRemoveGlobPatterns);
+        public OrderedItemDataCollection.Builder GetItemData()
+            => sequence.GetItemData(operationCount);
 
         /// <summary>
         ///  Announces that this position's result will be needed by another operation.

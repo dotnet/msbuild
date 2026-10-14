@@ -41,14 +41,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Gets the items through the requested position, filtered by originating Include conditions.
         /// </summary>
         /// <param name="operationCount">The number of operations through the requested position.</param>
-        /// <param name="laterRemoveGlobPatterns">The later removed globs that may prune this computation.</param>
         /// <returns>
         ///  The filtered items in evaluation order.
         /// </returns>
-        public ImmutableList<I> GetFilteredItems(int operationCount, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        public ImmutableList<I> GetFilteredItems(int operationCount)
         {
             ImmutableList<I>.Builder items = ImmutableList.CreateBuilder<I>();
-            foreach (ItemData data in GetItemData(operationCount, laterRemoveGlobPatterns))
+            foreach (ItemData data in GetItemData(operationCount))
             {
                 if (data.ConditionResult)
                 {
@@ -60,14 +59,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         }
 
         /// <summary>
-        ///  Gets the items produced by an item state, reusing results cached for the same glob-later Remove glob patterns.
+        ///  Gets the snapshot after the requested number of operations, reusing a cached result when possible.
         /// </summary>
         /// <param name="operationCount">The number of operations through the requested position.</param>
-        /// <param name="laterRemoveGlobPatterns">The later removed globs that may prune this computation.</param>
         /// <returns>
         ///  A builder over the requested item result.
         /// </returns>
-        public OrderedItemDataCollection.Builder GetItemData(int operationCount, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        public OrderedItemDataCollection.Builder GetItemData(int operationCount)
         {
             if (operationCount == 0)
             {
@@ -75,26 +73,25 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
 
             // Captured references announce their demand before evaluation; eager condition reads announce it here.
-            // The item state is stable as operations are appended, but its result also depends on laterRemoveGlobPatterns.
+            // Direct requests start without later exclusions; backward planning can add them for earlier positions.
             MemoizedOperation operation = _operations[operationCount - 1];
-            if (operation.TryGetFromCache(laterRemoveGlobPatterns, out OrderedItemDataCollection items))
+            if (operation.TryGetFromCache(ImmutableHashSet<string>.Empty, out OrderedItemDataCollection items))
             {
                 return items.ToBuilder();
             }
 
             operation.MarkAsNeeded();
-            return ComputeItems(operationCount, laterRemoveGlobPatterns);
+            return ComputeItems(operationCount);
         }
 
         /// <summary>
         ///  Applies uncached operations in order, looking ahead for Remove globs and batching eligible literal Updates.
         /// </summary>
         /// <param name="operationCount">The number of operations through the requested position.</param>
-        /// <param name="laterRemoveGlobPatterns">The later removed globs that may prune this computation.</param>
         /// <returns>
         ///  The item result after applying the requested item state.
         /// </returns>
-        private OrderedItemDataCollection.Builder ComputeItems(int operationCount, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        private OrderedItemDataCollection.Builder ComputeItems(int operationCount)
         {
             OrderedItemDataCollection.Builder? items = null;
             int firstUncachedIndex = operationCount;
@@ -107,7 +104,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             for (int index = operationCount - 1; index >= 0; index--)
             {
                 MemoizedOperation operation = _operations[index];
-                var patternsFromLaterOperations = laterRemoveGlobPatternStack?.Peek() ?? laterRemoveGlobPatterns;
+                var patternsFromLaterOperations = laterRemoveGlobPatternStack?.Peek() ?? ImmutableHashSet<string>.Empty;
 
                 if (operation.TryGetFromCache(patternsFromLaterOperations, out OrderedItemDataCollection itemsFromCache))
                 {
@@ -141,7 +138,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             items ??= OrderedItemDataCollection.CreateBuilder();
 
             // The first operation to evaluation sees all Remove globs accumulated while planning backward.
-            ImmutableHashSet<string> currentRemoveGlobPatterns = laterRemoveGlobPatternStack is null ? laterRemoveGlobPatterns : laterRemoveGlobPatternStack.Peek();
+            ImmutableHashSet<string> currentRemoveGlobPatterns = laterRemoveGlobPatternStack?.Peek() ?? ImmutableHashSet<string>.Empty;
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
             Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
@@ -208,7 +205,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 {
                     Assumed.NotNull(laterRemoveGlobPatternStack);
                     laterRemoveGlobPatternStack.Pop();
-                    currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count == 0 ? laterRemoveGlobPatterns : laterRemoveGlobPatternStack.Peek();
+                    currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count == 0 ? ImmutableHashSet<string>.Empty : laterRemoveGlobPatternStack.Peek();
                 }
 
                 // Non-batched operations use the memoized path, which saves the complete snapshot
