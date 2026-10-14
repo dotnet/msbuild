@@ -61,20 +61,6 @@
               ]
             },
             {
-              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.IO.Redist.dll",
-              "testCases": [
-                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
-                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
-              ]
-            },
-            {
-              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.IO.Redist.dll",
-              "testCases": [
-                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
-                "VSPE.OptProfTests.vs_perf_designtime_solution_build_vb_australiangovernment"
-              ]
-            },
-            {
               "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.NET.StringTools.dll",
               "testCases": [
                 "VSPE.OptProfTests.vs_perf_designtime_solution_build_vc_auto7",
@@ -116,20 +102,6 @@
             },
             {
               "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Utilities.Core.dll",
-              "testCases": [
-                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
-                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
-              ]
-            },
-            {
-              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.IO.Redist.dll",
-              "testCases": [
-                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
-                "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
-              ]
-            },
-            {
-              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.IO.Redist.dll",
               "testCases": [
                 "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild",
                 "MSBuild.Managed.vs_perf_designtime_commandline_msbuild_cs_mstv_fullbuild_4proc"
@@ -217,18 +189,6 @@
               ]
             },
             {
-              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.IO.Redist.dll",
-              "testCases": [
-                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
-              ]
-            },
-            {
-              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.IO.Redist.dll",
-              "testCases": [
-                "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
-              ]
-            },
-            {
               "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.NET.StringTools.dll",
               "testCases": [
                 "ManagedLangs.OptProfTests.DDRIT_RPS_ManagedLangs"
@@ -289,18 +249,6 @@
             },
             {
               "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.Build.Utilities.Core.dll",
-              "testCases": [
-                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
-              ]
-            },
-            {
-              "fileName": "/Contents/MSBuild/Current/Bin/Microsoft.IO.Redist.dll",
-              "testCases": [
-                "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
-              ]
-            },
-            {
-              "fileName": "/Contents/MSBuild/Current/Bin/amd64/Microsoft.IO.Redist.dll",
               "testCases": [
                 "Microsoft.VisualStudio.ProjectSystem.DDRIT.OptProfOpenCloseTest.OpenAndCloseProjectTestSolution"
               ]
