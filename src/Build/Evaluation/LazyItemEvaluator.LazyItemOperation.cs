@@ -21,7 +21,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
         protected readonly ProjectItemElement _itemElement;
         protected readonly ItemSpec<P, I> _itemSpec;
-        protected readonly EvaluatorData _evaluatorData;
+        protected readonly ReferencedItemLists _referencedItemLists;
         protected readonly Expander<P, I> _expander;
         protected readonly bool _conditionResult;
 
@@ -41,9 +41,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             _itemSpec = itemSpec;
             _conditionResult = conditionResult;
             _lazyEvaluator = lazyEvaluator;
-            _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, referencedItemLists);
+            _referencedItemLists = referencedItemLists;
             _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.EvaluationContext, _lazyEvaluator._loggingContext);
+            _expander = new Expander<P, I>(
+                _lazyEvaluator._data,
+                _referencedItemLists,
+                _lazyEvaluator.EvaluationContext,
+                _lazyEvaluator._loggingContext);
             _itemSpec.Expander = _expander;
         }
 
