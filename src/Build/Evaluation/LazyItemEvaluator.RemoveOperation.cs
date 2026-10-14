@@ -24,10 +24,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ProjectItemElement itemElement,
             ItemSpec<P, I> itemSpec,
             bool conditionResult,
-            ImmutableDictionary<string, LazyItemList> referencedItemList,
+            ItemListBookmarks itemListBookmarks,
             ImmutableList<string> matchOnMetadata,
             MatchOnMetadataOptions matchOnMetadataOptions)
-            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, referencedItemList)
+            : base(lazyEvaluator, itemElement, itemSpec, conditionResult, itemListBookmarks)
         {
             _matchOnMetadata = matchOnMetadata;
 

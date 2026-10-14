@@ -29,7 +29,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ProjectItemElement itemElement,
             ItemSpec<P, I> itemSpec,
             bool conditionResult,
-            ImmutableDictionary<string, LazyItemList> referencedItemList,
+            ItemListBookmarks itemListBookmarks,
             int elementOrder,
             string? rootDirectory,
             ImmutableSegmentedList<string> excludes,
@@ -38,7 +38,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                   itemElement,
                   itemSpec,
                   conditionResult,
-                  referencedItemList)
+                  itemListBookmarks)
         {
             _elementOrder = elementOrder;
             _rootDirectory = rootDirectory;

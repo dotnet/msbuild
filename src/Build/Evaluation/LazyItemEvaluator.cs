@@ -170,7 +170,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ? element.ContainingProject.DirectoryPath
             : _outerEvaluatorData.Directory;
 
-    private void AddItemListBookmark(string itemType, ref ReferencedItemListBuilder builder)
+    private void AddItemListBookmark(string itemType, ref ItemListBookmarks.Builder builder)
     {
         if (_itemLists.TryGetValue(itemType, out LazyItemList itemList))
         {
@@ -233,10 +233,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     private IncludeOperation CreateIncludeOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
     {
         int elementOrder = _nextElementOrder++;
-        ReferencedItemListBuilder builder = default;
+        using ItemListBookmarks.Builder builder = default;
 
         // Process include
-        var itemSpec = ProcessItemSpec(itemElement.Include, itemElement.IncludeLocation, rootDirectory, ref builder);
+        var itemSpec = ProcessItemSpec(itemElement.Include, itemElement.IncludeLocation, rootDirectory, ref builder.AsRef());
 
         ImmutableSegmentedList<string>.Builder excludes = null;
 
@@ -257,13 +257,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                     excludes ??= ImmutableSegmentedList.CreateBuilder<string>();
                     excludes.Add(excludeSplit);
 
-                    AddItemReferences(excludeSplit, itemElement.ExcludeLocation, ref builder);
+                    AddItemReferences(excludeSplit, itemElement.ExcludeLocation, ref builder.AsRef());
                 }
             }
         }
 
         // Process Metadata (STEP 5: Evaluate each metadata XML and apply them to each item we have so far)
-        var metadata = ProcessMetadataElements(itemElement, ref builder);
+        var metadata = ProcessMetadataElements(itemElement, ref builder.AsRef());
 
         return new(
             this,
@@ -279,8 +279,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
     private RemoveOperation CreateRemoveOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
     {
-        ReferencedItemListBuilder builder = default;
-        var itemSpec = ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, rootDirectory, ref builder);
+        using ItemListBookmarks.Builder builder = default;
+        var itemSpec = ProcessItemSpec(itemElement.Remove, itemElement.RemoveLocation, rootDirectory, ref builder.AsRef());
 
         ImmutableList<string>.Builder matchOnMetadata = null;
 
@@ -296,7 +296,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             {
                 foreach (string matchOnMetadataSplit in ExpressionShredder.SplitSemiColonSeparatedList(evaluatedmatchOnMetadata))
                 {
-                    AddItemReferences(matchOnMetadataSplit, itemElement.MatchOnMetadataLocation, ref builder);
+                    AddItemReferences(matchOnMetadataSplit, itemElement.MatchOnMetadataLocation, ref builder.AsRef());
 
                     string metadataExpanded = _expander.ExpandIntoStringLeaveEscaped(
                         matchOnMetadataSplit,
@@ -330,9 +330,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
     private UpdateOperation CreateUpdateOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
     {
-        ReferencedItemListBuilder builder = default;
-        var itemSpec = ProcessItemSpec(itemElement.Update, itemElement.UpdateLocation, rootDirectory, ref builder);
-        var metadata = ProcessMetadataElements(itemElement, ref builder);
+        using ItemListBookmarks.Builder builder = default;
+        var itemSpec = ProcessItemSpec(itemElement.Update, itemElement.UpdateLocation, rootDirectory, ref builder.AsRef());
+        var metadata = ProcessMetadataElements(itemElement, ref builder.AsRef());
 
         return new(
             this,
@@ -343,7 +343,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             metadata);
     }
 
-    private ItemSpec<P, I> ProcessItemSpec(string itemSpec, IElementLocation location, string rootDirectory, ref ReferencedItemListBuilder builder)
+    private ItemSpec<P, I> ProcessItemSpec(
+        string itemSpec,
+        IElementLocation location,
+        string rootDirectory,
+        ref ItemListBookmarks.Builder builder)
     {
         ItemSpec<P, I> result = new(itemSpec, _outerExpander, location, rootDirectory);
 
@@ -360,7 +364,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         return result;
     }
 
-    private ImmutableArray<ProjectMetadataElement> ProcessMetadataElements(ProjectItemElement itemElement, ref ReferencedItemListBuilder builder)
+    private ImmutableArray<ProjectMetadataElement> ProcessMetadataElements(ProjectItemElement itemElement, ref ItemListBookmarks.Builder builder)
     {
         if (!itemElement.HasMetadata)
         {
@@ -406,7 +410,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         return metadata.ToImmutable();
     }
 
-    private void AddItemReferences(string expression, IElementLocation location, ref ReferencedItemListBuilder builder)
+    private void AddItemReferences(string expression, IElementLocation location, ref ItemListBookmarks.Builder builder)
     {
         if (Expander<P, I>.TryExpandSingleItemVectorExpression(
                 expression,

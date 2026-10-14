@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
@@ -16,8 +17,10 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.Evaluation;
 
-public sealed class LazyItemEvaluator_Tests
+public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
 {
+    private readonly ITestOutputHelper _output = output;
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -298,6 +301,81 @@ public sealed class LazyItemEvaluator_Tests
 
         ImmutableArray<ProjectItem> items = CollectItems(evaluator);
         AssertIncludes(items, ["first.cs"]);
+    }
+
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(0, true)]
+    [InlineData(1, false)]
+    [InlineData(1, true)]
+    [InlineData(2, false)]
+    [InlineData(2, true)]
+    [InlineData(4, false)]
+    [InlineData(4, true)]
+    [InlineData(5, false)]
+    [InlineData(5, true)]
+    public void BookmarksPreserveEarlierItemsAcrossLookupSizes(int referencedItemTypeCount, bool caseSensitive)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDUSECASESENSITIVEITEMNAMES", caseSensitive ? "1" : null);
+        using ProjectCollection collection = new();
+        Project project = CreateProject("<Project />", collection);
+        ProjectItemGroupElement sources = project.Xml.AddItemGroup();
+        StringBuilder include = new("@(Missing);marker");
+        List<string> expectedIncludes = ["marker"];
+
+        for (int i = 0; i < referencedItemTypeCount; i++)
+        {
+            sources.AddItem($"Source{i}", $"before{i}");
+            include.Append($";@(Source{i});@(Source{i})");
+            expectedIncludes.Add($"before{i}");
+            expectedIncludes.Add($"before{i}");
+        }
+
+        ProjectItemElement captured = project.Xml.AddItemGroup().AddItem("Captured", include.ToString());
+        for (int i = 0; i < referencedItemTypeCount; i++)
+        {
+            // Shredding deduplicates these names, so the uppercase lookup must use the bookmark mapping's comparer.
+            captured.AddMetadata($"M{i}", $"@(Source{i})|@(SOURCE{i})");
+        }
+
+        ProjectItemGroupElement changes = project.Xml.AddItemGroup();
+        for (int i = 0; i < referencedItemTypeCount; i++)
+        {
+            ProjectItemElement remove = project.Xml.CreateItemElement($"Source{i}");
+            remove.Remove = $"before{i}";
+            changes.AppendChild(remove);
+            changes.AddItem($"Source{i}", $"after{i}");
+        }
+
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        List<string> capturedIncludes = [];
+        List<string> sourceIncludes = [];
+        foreach (ProjectItem itemData in CollectItems(evaluator))
+        {
+            if (itemData.ItemType == "Captured")
+            {
+                capturedIncludes.Add(itemData.EvaluatedInclude);
+                for (int i = 0; i < referencedItemTypeCount; i++)
+                {
+                    string expectedUppercaseValue = caseSensitive ? string.Empty : $"before{i}";
+                    itemData.GetMetadataValue($"M{i}").ShouldBe($"before{i}|{expectedUppercaseValue}");
+                }
+            }
+            else
+            {
+                sourceIncludes.Add(itemData.EvaluatedInclude);
+            }
+        }
+
+        capturedIncludes.ShouldBe(expectedIncludes);
+        sourceIncludes.Count.ShouldBe(referencedItemTypeCount);
+        for (int i = 0; i < referencedItemTypeCount; i++)
+        {
+            sourceIncludes[i].ShouldBe($"after{i}");
+        }
     }
 
     private static ImmutableArray<ProjectItem> CollectItems(
