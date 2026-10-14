@@ -159,7 +159,6 @@ You can run a single unit test with `-- --filter-method "*{methodname}*"`, for e
 
 * **Individual Test Project**: ~10-60 seconds per project
 * **Full Test Suite**: ~9 minutes
-* Opt-in repository build quality-of-life features should not add routine CI test overhead. Prefer local smoke validation over new process-launching tests or broad test matrices, while preserving existing regression coverage.
 
 ## Project Layout and Architecture
 
