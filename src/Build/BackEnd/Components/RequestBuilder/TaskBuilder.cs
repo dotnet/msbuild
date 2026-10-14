@@ -17,6 +17,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -169,7 +170,7 @@ namespace Microsoft.Build.BackEnd
                 catch (HostObjectException ex)
                 {
                     loggingContext.LogWarning(
-                        null,
+                        DiagnosticSubcategory.None,
                         taskInstance.Location,
                         "HostObjectFailure",
                         _taskNode.Name,
@@ -1027,7 +1028,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else if (_continueOnError == ContinueOnError.WarnAndContinue)
                     {
-                        taskLoggingContext.LogWarning(null,
+                        taskLoggingContext.LogWarning(DiagnosticSubcategory.None,
                             _targetChildInstance.Location,
                             "TaskReturnedFalseButDidNotLogError",
                             _taskNode.Name);

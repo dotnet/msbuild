@@ -3492,14 +3492,6 @@ Utilizzo:          {0} Utilizzo medio: {1:###.0}</target>
         <target state="translated">MSB5015: non è stato possibile leggere le proprietà dalla sezione WebsiteProperties del progetto "{0}".</target>
         <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
-      <trans-unit id="SubCategoryForSolutionParsingErrors">
-        <source>Solution file</source>
-        <target state="translated">File di soluzione</target>
-        <note>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
-      "MSBUILD : Solution file error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.</note>
-      </trans-unit>
       <trans-unit id="UnrecognizedSolutionComment">
         <source>Unrecognized solution version "{0}", attempting to continue.</source>
         <target state="translated">Versione di soluzione "{0}" non riconosciuta. Tentativo di continuare in corso.</target>

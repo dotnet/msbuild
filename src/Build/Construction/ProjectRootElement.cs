@@ -2054,7 +2054,7 @@ namespace Microsoft.Build.Construction
             {
                 if (FileUtilities.IsVCProjFilename(projectFile))
                 {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.Create(projectFile), "ProjectUpgradeNeededToVcxProj", projectFile);
+                    ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(projectFile), "ProjectUpgradeNeededToVcxProj", projectFile);
                 }
 
                 // OK it's a regular project file, load it normally.
@@ -2066,7 +2066,7 @@ namespace Microsoft.Build.Construction
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(ElementLocation.Create(projectFile), ex, "InvalidProjectFile", ex.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(projectFile), ex, "InvalidProjectFile", ex.Message);
                 throw; // Without this there's a spurious CS0161 because csc 1.2.0.60317 can't see that the above is an unconditional throw.
             }
         }
@@ -2121,7 +2121,7 @@ namespace Microsoft.Build.Construction
                     ? ElementLocation.CreateFrom(fullPath, xmlException)
                     : ElementLocation.Create(fullPath);
 
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(location, ex, "InvalidProjectFile", ex.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(location, ex, "InvalidProjectFile", ex.Message);
             }
             MSBuildEventSource.Log.LoadDocumentStop(fullPath);
 
@@ -2145,7 +2145,7 @@ namespace Microsoft.Build.Construction
             {
                 ElementLocation location = ElementLocation.CreateFrom(ex);
 
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(location, "InvalidProjectFile", ex.Message);
+                ProjectErrorUtilities.ThrowInvalidProject(location, "InvalidProjectFile", ex.Message);
             }
 
             return document;
