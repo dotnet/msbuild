@@ -35,6 +35,9 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.13
+- [Expose `DefiningProjectLineNumber` and `DefiningProjectColumnNumber` as built-in item metadata for the XML element that produced an item.](https://github.com/dotnet/msbuild/pull/14731) Together with `DefiningProjectFullPath`, these identify the source declaration without requiring a new task-item interface. Coordinates are invariant decimal strings, or empty when no XML location is available. True copies retain the location; new declarations and task outputs identify their producing element, not a full provenance chain. Coordinate strings are computed on demand. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.13` to disable the new metadata and its reserved names, preserving projects that previously used those names as custom metadata.
+
 ### 18.12
 - [Multi-threaded builds use an empty sentinel current directory, check CWD after tasks, and detect unresolved relative-path writes at project/build completion.](https://github.com/dotnet/msbuild/pull/14917)
 - [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)

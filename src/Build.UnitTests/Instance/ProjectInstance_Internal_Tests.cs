@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
@@ -44,7 +45,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 SourceLocation = ElementLocation.Create(project.FullPath),
             };
 
-            factory.CreateItem(source, project.FullPath).Location.ShouldBeNull();
+            factory.CreateItem(source, project.FullPath).GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeEmpty();
         }
 
         [Theory]
@@ -88,8 +89,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             foreach (ProjectItemElement element in xml.Items.Concat(target.ItemGroups.Single().Items))
             {
                 ProjectItemInstance item = project.GetItems(element.ItemType).Single();
-                item.Location.ShouldBe(
-                    new TaskItemLocation(testProject.ProjectFile, element.Location.Line, element.Location.Column));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(element.Location.Line.ToString(CultureInfo.InvariantCulture));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(element.Location.Column.ToString(CultureInfo.InvariantCulture));
                 item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(testProject.ProjectFile);
             }
 
@@ -97,7 +98,42 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             project.GetItems("TaskOutput").Count.ShouldBe(2);
             foreach (ProjectItemInstance item in project.GetItems("TaskOutput"))
             {
-                item.Location.ShouldBe(new TaskItemLocation(testProject.ProjectFile, outputLocation.Line, outputLocation.Column));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(testProject.ProjectFile);
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(outputLocation.Line.ToString(CultureInfo.InvariantCulture));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(outputLocation.Column.ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SourceLocationMetadataCanBeOptedOut(bool optOut)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", optOut ? ChangeWaves.Wave18_13.ToString() : null);
+            ChangeWaves.ResetStateForTests();
+            using ProjectRootElementFromString xml = new(
+                """
+                <Project>
+                  <ItemGroup>
+                    <Source Include="source.txt" />
+                  </ItemGroup>
+                </Project>
+                """);
+            ProjectInstance project = new(xml.Project);
+            ProjectItemInstance item = project.GetItems("Source").Single();
+            item.MetadataCount.ShouldBe(optOut ? 15 : 17);
+            item.MetadataNames.Cast<string>().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(!optOut);
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(optOut ? "" : xml.Project.Items.Single().Location.Line.ToString(CultureInfo.InvariantCulture));
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(optOut ? "" : xml.Project.Items.Single().Location.Column.ToString(CultureInfo.InvariantCulture));
+            if (optOut)
+            {
+                item.SetMetadata(ItemSpecModifiers.DefiningProjectLineNumber, "custom");
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("custom");
+            }
+            else
+            {
+                Should.Throw<ArgumentException>(() => item.SetMetadata(ItemSpecModifiers.DefiningProjectLineNumber, "custom"));
             }
         }
 

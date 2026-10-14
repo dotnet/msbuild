@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
@@ -24,7 +26,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// The number of built-in metadata for items.
         /// </summary>
-        public const int BuiltInMetadataCount = 15;
+        public static int BuiltInMetadataCount => ItemSpecModifiers.All.Length;
         private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
 
@@ -95,19 +97,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectItemElement itemElement = xml.Items.Single();
             ProjectItemInstance item = new ProjectInstance(xml).GetItems("i").Single();
 
-            TaskItemLocation? itemLocation = item.Location;
-            Assert.True(itemLocation.HasValue);
-            TaskItemLocation location = itemLocation.Value;
-            Assert.Equal(itemElement.Location.File, location.File);
-            Assert.Equal(itemElement.Location.Line, location.Line);
-            Assert.Equal(itemElement.Location.Column, location.Column);
-            Assert.Equal(location, ((ITaskItem3)item).Location.Value);
-
-            var copiedItem = new Utilities.TaskItem(item);
-            TaskItemLocation copiedLocation = copiedItem.Location.Value;
-            Assert.Equal(location.File, copiedLocation.File);
-            Assert.Equal(location.Line, copiedLocation.Line);
-            Assert.Equal(location.Column, copiedLocation.Column);
+            ITaskItem[] items = [item, new Utilities.TaskItem(item), new TaskItem<string>(item)];
+            foreach (ITaskItem taskItem in items)
+            {
+                taskItem.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(itemElement.Location.File);
+                taskItem.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(itemElement.Location.Line.ToString(CultureInfo.InvariantCulture));
+                taskItem.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(itemElement.Location.Column.ToString(CultureInfo.InvariantCulture));
+                taskItem.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeFalse();
+            }
         }
 
         /// <summary>

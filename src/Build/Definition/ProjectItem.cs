@@ -850,7 +850,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private string GetBuiltInMetadataEscaped(string name)
             => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
-                ? BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, Xml.ContainingProject.FullPath, modifierKind, ref _cachedModifiers)
+                ? BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, Xml.ContainingProject.EscapedFullPath, modifierKind, ref _cachedModifiers, Xml.Location.Line, Xml.Location.Column)
                 : null;
 
         /// <summary>

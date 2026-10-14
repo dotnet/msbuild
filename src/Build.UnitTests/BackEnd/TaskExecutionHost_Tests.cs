@@ -1714,7 +1714,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 items[i].EvaluatedInclude.ShouldBe(outputs[i].ItemSpec);
                 items[i].GetMetadataValue("Custom").ShouldBe(source.GetMetadataValue("Custom"));
                 items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(parameterLocation.File);
-                items[i].Location.ShouldBe(new TaskItemLocation(parameterLocation.File, parameterLocation.Line, parameterLocation.Column));
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("17");
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("9");
             }
         }
 
@@ -1738,7 +1739,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 items[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
                 items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(parameterLocation.File);
-                items[i].Location.ShouldBe(new TaskItemLocation(parameterLocation.File, parameterLocation.Line, parameterLocation.Column));
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("17");
+                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("9");
             }
         }
 

@@ -196,8 +196,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 filesToAnalyze, itemsByName, inputs, outputs, out var changedInputs, out var upToDateInputs);
 
             result.ShouldBe(DependencyAnalysisResult.IncrementalBuild);
-            changedInputs["Items"].Single().Location.ShouldBe(items[1].Location);
-            upToDateInputs["Items"].Single().Location.ShouldBe(items[0].Location);
+            changedInputs["Items"].Single().GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("15");
+            upToDateInputs["Items"].Single().GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
+            foreach (ProjectItemInstance item in changedInputs["Items"].Concat(upToDateInputs["Items"]))
+            {
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(EscapingUtilities.UnescapeAll(definingProjectEscaped));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("3");
+            }
         }
 
         /// <summary>

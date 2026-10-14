@@ -34,7 +34,7 @@ namespace Microsoft.Build.Execution
     [DebuggerDisplay("{ItemType}={EvaluatedInclude} #DirectMetadata={DirectMetadataCount})")]
     public class ProjectItemInstance :
         IItem<ProjectMetadataInstance>,
-        ITaskItem3,
+        ITaskItem2,
         IMetadataTable,
         ITranslatable,
         IMetadataContainer,
@@ -171,11 +171,6 @@ namespace Microsoft.Build.Execution
         {
             get { return _project; }
         }
-
-        /// <summary>
-        /// Gets the source location of the XML element that produced this item.
-        /// </summary>
-        public TaskItemLocation? Location => _taskItem.Location;
 
         /// <summary>
         /// Item type, for example "Compile"
@@ -792,7 +787,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif
-            ITaskItem3,
+            ITaskItem2,
             IItem<ProjectMetadataInstance>,
             ITranslatable,
             IEquatable<TaskItem>,
@@ -932,11 +927,6 @@ namespace Microsoft.Build.Execution
             {
                 this.TranslateWithInterning(translator, interner);
             }
-
-            /// <inheritdoc/>
-            public TaskItemLocation? Location => _sourceLineNumber == 0
-                ? null
-                : new TaskItemLocation(EscapingUtilities.UnescapeAll(_definingFileEscaped), _sourceLineNumber, _sourceColumnNumber);
 
             /// <summary>
             /// Gets or sets the unescaped include, or "name", for the item.
@@ -2051,7 +2041,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                if (!ItemSpecModifiers.IsDerivableItemSpecModifier(name))
+                if (!ItemSpecModifiers.IsDerivableItemSpecModifier(name) && !ItemSpecModifiers.IsSourceLocationModifier(name))
                 {
                     ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers(name);
                     _directMetadata = DirectMetadata.SetItem(name, evaluatedValueEscaped ?? string.Empty);
@@ -2064,7 +2054,7 @@ namespace Microsoft.Build.Execution
                 _directMetadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
 
                 var metadata = items
-                    .Where(item => !ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key));
+                    .Where(item => !ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key) && !ItemSpecModifiers.IsSourceLocationModifier(item.Key));
 
                 _directMetadata = DirectMetadata.SetItems(metadata, ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers);
             }
@@ -2086,6 +2076,12 @@ namespace Microsoft.Build.Execution
                 // Performing this separately from SetItems as we most likely have an empty dictionary and can no-op.
                 foreach (KeyValuePair<string, string> item in items)
                 {
+                    if (ItemSpecModifiers.IsSourceLocationModifier(item.Key))
+                    {
+                        items = items.Remove(item.Key);
+                        continue;
+                    }
+
                     ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers(item.Key);
                 }
 
@@ -2121,7 +2117,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
                 => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
-                    ? BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, modifierKind, ref _cachedModifiers)
+                    ? BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, modifierKind, ref _cachedModifiers, _sourceLineNumber, _sourceColumnNumber)
                     : string.Empty;
 
             /// <summary>

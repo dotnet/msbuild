@@ -41,7 +41,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             "DefiningProjectFullPath",
             "DefiningProjectDirectory",
             "DefiningProjectName",
-            "DefiningProjectExtension"
+            "DefiningProjectExtension",
+            "DefiningProjectLineNumber",
+            "DefiningProjectColumnNumber"
         };
 
         /// <summary>
@@ -61,7 +63,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal(item.MetadataCount, deserializedItem.MetadataCount);
             Assert.Equal(item.GetMetadata("a"), deserializedItem.GetMetadata("a"));
             Assert.Equal(item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath), deserializedItem.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
-            Assert.Equal(item.Location, deserializedItem.Location);
+            deserializedItem.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
+            deserializedItem.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("34");
         }
 
         /// <summary>
