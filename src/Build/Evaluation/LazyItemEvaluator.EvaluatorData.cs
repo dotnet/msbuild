@@ -21,14 +21,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     private class EvaluatorData : IEvaluatorData<P, I, M, D>
     {
         private readonly IEvaluatorData<P, I, M, D> _wrappedData;
-        private readonly IReadOnlyDictionary<string, LazyItemList> _currentItemLists;
         private readonly ReferencedItemLists _referencedItemLists;
-
-        public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, IReadOnlyDictionary<string, LazyItemList> currentItemLists)
-        {
-            _wrappedData = wrappedData;
-            _currentItemLists = currentItemLists;
-        }
 
         public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, ReferencedItemLists referencedItemLists)
         {
@@ -42,12 +35,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         public ICollection<I> GetItems(string itemType)
         {
-            // Conditions see the live lists; operations see only the lists captured at their declaration.
-            bool found = _referencedItemLists is not null
-                ? _referencedItemLists.TryGetValue(itemType, out LazyItemList items)
-                : _currentItemLists.TryGetValue(itemType, out items);
-
-            return found
+            return _referencedItemLists.TryGetValue(itemType, out LazyItemList items)
                 ? items.GetMatchedItems(globsToIgnore: ImmutableHashSet<string>.Empty)
                 : Array.Empty<I>();
         }

@@ -19,7 +19,7 @@ using Microsoft.CodeAnalysis.Collections;
 
 namespace Microsoft.Build.Evaluation;
 
-internal partial class LazyItemEvaluator<P, I, M, D>
+internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     where P : class, IProperty, IEquatable<P>, IValued
     where I : class, IItem<M>, IMetadataTable
     where M : class, IMetadatum
@@ -27,7 +27,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private readonly IEvaluatorData<P, I, M, D> _outerEvaluatorData;
     private readonly Expander<P, I> _outerExpander;
-    private readonly IEvaluatorData<P, I, M, D> _evaluatorData;
     private readonly Expander<P, I> _expander;
     private readonly IItemFactory<I, I> _itemFactory;
     private readonly LoggingContext _loggingContext;
@@ -61,8 +60,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     {
         _outerEvaluatorData = data;
         _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext, loggingContext);
-        _evaluatorData = new EvaluatorData(_outerEvaluatorData, _itemLists);
-        _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext, loggingContext);
+        _expander = new Expander<P, I>(_outerEvaluatorData, this, evaluationContext, loggingContext);
         _itemFactory = itemFactory;
         _loggingContext = loggingContext;
         _evaluationProfiler = evaluationProfiler;
@@ -70,6 +68,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         EvaluationContext = evaluationContext;
     }
+
+    /// <inheritdoc />
+    ICollection<I> IItemProvider<I>.GetItems(string itemType)
+        => _itemLists.TryGetValue(itemType, out LazyItemList items)
+            ? items.GetMatchedItems(ImmutableHashSet<string>.Empty)
+            : Array.Empty<I>();
 
     /// <summary>
     ///  Processes item groups in order and collects their applicable item operations.
