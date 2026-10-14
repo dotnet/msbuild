@@ -36,7 +36,7 @@ namespace Microsoft.Build.Collections
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class PropertyDictionary<T> : IEnumerable<T>, ICollection<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>
+    internal sealed class PropertyDictionary<T> : IEnumerable<T>, ICollection<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>
         where T : class, IKeyed, IValued, IEquatable<T>
     {
         /// <summary>
@@ -328,7 +328,15 @@ namespace Microsoft.Build.Collections
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        ///  Gets the property whose name is the specified segment of a string.
+        /// </summary>
+        /// <param name="keyString">The string containing the property name.</param>
+        /// <param name="startIndex">The zero-based index of the first character of the property name.</param>
+        /// <param name="length">The number of characters in the property name.</param>
+        /// <returns>
+        ///  The property, or <see langword="null"/> if no property has the specified name.
+        /// </returns>
         public T Get(string keyString, int startIndex, int length)
             => GetProperty(keyString, startIndex, length);
 
