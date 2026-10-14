@@ -25,7 +25,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     where M : class, IMetadatum
     where D : class, IItemDefinition<M>
 {
-    private readonly IEvaluatorData<P, I, M, D> _outerEvaluatorData;
+    private readonly IEvaluatorData<P, I, M, D> _data;
     private readonly Expander<P, I> _outerExpander;
     private readonly Expander<P, I> _expander;
     private readonly IItemFactory<I, I> _itemFactory;
@@ -58,9 +58,9 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
         EvaluationContext evaluationContext,
         EvaluatedItemElementRecorder evaluatedItemElementRecorder)
     {
-        _outerEvaluatorData = data;
-        _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext, loggingContext);
-        _expander = new Expander<P, I>(_outerEvaluatorData, this, evaluationContext, loggingContext);
+        _data = data;
+        _outerExpander = new Expander<P, I>(_data, _data, evaluationContext, loggingContext);
+        _expander = new Expander<P, I>(_data, this, evaluationContext, loggingContext);
         _itemFactory = itemFactory;
         _loggingContext = loggingContext;
         _evaluationProfiler = evaluationProfiler;
@@ -103,7 +103,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
             ExpanderOptions.ExpandPropertiesAndItems,
             ParserOptions.AllowPropertiesAndItemLists);
 
-        bool keepEvaluating = _outerEvaluatorData.ShouldEvaluateForDesignTime && _outerEvaluatorData.CanEvaluateElementsWithFalseConditions;
+        bool keepEvaluating = _data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions;
 
         if (groupCondition || keepEvaluating)
         {
@@ -172,7 +172,7 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     private string GetCurrentDirectoryForConditionEvaluation(ProjectElement element)
         => element is ProjectPropertyGroupElement or ProjectImportElement or ProjectImportGroupElement
             ? element.ContainingProject.DirectoryPath
-            : _outerEvaluatorData.Directory;
+            : _data.Directory;
 
     private void AddReferencedItemList(string itemType, ref ReferencedItemLists.Builder builder)
     {

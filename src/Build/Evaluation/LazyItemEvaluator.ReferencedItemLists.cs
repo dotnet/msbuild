@@ -15,7 +15,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     /// <summary>
     ///  Provides read-only lookup of the item lists captured by an operation.
     /// </summary>
-    private abstract partial class ReferencedItemLists
+    private abstract partial class ReferencedItemLists : IItemProvider<I>
     {
         private const int SmallMapLimit = 4;
 
@@ -39,6 +39,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Gets the number of distinct referenced item types.
         /// </summary>
         public abstract int Count { get; }
+
+        /// <inheritdoc />
+        ICollection<I> IItemProvider<I>.GetItems(string itemType)
+            => TryGetValue(itemType, out LazyItemList? items)
+                ? items.GetMatchedItems(ImmutableHashSet<string>.Empty)
+                : Array.Empty<I>();
 
         /// <summary>
         ///  Creates an independently owned mapping, replacing earlier references to the same item type.
