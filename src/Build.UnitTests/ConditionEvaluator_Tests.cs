@@ -33,7 +33,7 @@ public class ConditionEvaluator_Tests
         _output = output;
     }
 
-    [Fact]
+    [WindowsOnlyFact]
     public async Task SameConditionEvaluatesConcurrentlyWithoutRepeatingParserWarnings()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
