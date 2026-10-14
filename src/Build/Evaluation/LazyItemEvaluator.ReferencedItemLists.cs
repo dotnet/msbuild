@@ -42,7 +42,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <inheritdoc />
         ICollection<I> IItemProvider<I>.GetItems(string itemType)
             => TryGetValue(itemType, out ItemListReference items)
-                ? items.GetMatchedItems(ImmutableHashSet<string>.Empty)
+                ? items.GetMatchedItems()
                 : Array.Empty<I>();
 
         /// <summary>
