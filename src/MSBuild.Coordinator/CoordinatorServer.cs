@@ -129,12 +129,18 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// </returns>
     private async Task<NamedPipeServerStream?> WaitForClientAsync(CancellationToken token)
     {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         NamedPipeServerStream pipeStream = new(
             _pipeName,
             PipeDirection.InOut,
             NamedPipeServerStream.MaxAllowedServerInstances,
             PipeTransmissionMode.Byte,
-            PipeOptions.Asynchronous);
+            PipeOptions.Asynchronous
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+            | PipeOptions.CurrentUserOnly
+#endif
+            );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
         try
         {

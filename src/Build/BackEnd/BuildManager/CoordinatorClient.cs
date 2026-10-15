@@ -115,7 +115,17 @@ internal sealed partial class CoordinatorClient : IDisposable
         NamedPipeClientStream? pipeStream = null;
         try
         {
-            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            pipeStream = new NamedPipeClientStream(
+                ".",
+                settings.PipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                | PipeOptions.CurrentUserOnly
+#endif
+            );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
             output.WriteLine($"CoordinatorClient: Connecting to pipe '{settings.PipeName}'");
 
@@ -232,7 +242,17 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
 
         // Wait for the coordinator to be ready by connecting to its pipe.
-        NamedPipeClientStream? pipeStream = new(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        NamedPipeClientStream? pipeStream = new(
+            ".",
+            settings.PipeName,
+            PipeDirection.InOut,
+            PipeOptions.Asynchronous
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+            | PipeOptions.CurrentUserOnly
+#endif
+        );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
         try
         {
