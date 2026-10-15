@@ -289,68 +289,71 @@
             Normal should not be localized.
             Low should not be localized.</comment>
   </data>
-  <data name="AssemblyResolutionSearchTrace_SearchPath">
+  <data name="AssemblyResolutionSearchTrace_SearchPath" xml:space="preserve">
     <value>For SearchPath "{0}".</value>
   </data>
-  <data name="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly">
+  <data name="AssemblyResolutionSearchTrace_SearchPathAddedByParentAssembly" xml:space="preserve">
     <value>For SearchPath "{0}" (added by referencing assembly "{1}").</value>
     <comment> {1} is the name of the parent assembly for which SearchPath was used.</comment>
   </data>
-  <data name="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx">
+  <data name="AssemblyResolutionSearchTrace_SearchedAssemblyFoldersEx" xml:space="preserve">
     <value>Considered AssemblyFoldersEx locations.</value>
   </data>
-  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch">
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseFusionNamesDidntMatch" xml:space="preserve">
     <value>Considered "{0}",
 			but its name "{1}"
 			didn't match the expected name "{2}".</value>
   </data>
-  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile">
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNoFile" xml:space="preserve">
     <value>Considered "{0}", but it didn't exist.</value>
   </data>
-  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk">
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotAFileNameOnDisk" xml:space="preserve">
     <value>Considered treating "{0}" as a file name, but it didn't exist.</value>
   </data>
-  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac">
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseNotInGac" xml:space="preserve">
     <value>Considered "{0}", which was not found in the GAC.</value>
   </data>
-  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
+  <data name="AssemblyResolutionSearchTrace_ConsideredAndRejectedBecauseTargetDidntHaveFusionName" xml:space="preserve">
     <value>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</value>
   </data>
-  <data name="AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch">
+  <data name="AssemblyResolutionSearchTrace_TargetedProcessorArchitectureDoesNotMatch" xml:space="preserve">
     <value>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</value>
   </data>
-  <data name="AssemblyConflict_ConflictFound">
+  <data name="AssemblyConflict_ConflictFound" xml:space="preserve">
     <value>There was a conflict between "{0}" and "{1}".</value>
   </data>
-  <data name="AssemblyConflict_ConflictHigherVersionChosen">
+  <data name="AssemblyConflict_ConflictHigherVersionChosen" xml:space="preserve">
     <value>"{0}" was chosen because it had a higher version.</value>
   </data>
-  <data name="AssemblyConflict_ConflictPrimaryChosen">
+  <data name="AssemblyConflict_ConflictPrimaryChosen" xml:space="preserve">
     <value>"{0}" was chosen because it was primary and "{1}" was not.</value>
   </data>
-  <data name="AssemblyConflict_ConflictUnsolvable">
+  <data name="AssemblyConflict_ConflictUnsolvable" xml:space="preserve">
     <value>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</value>
     <comment>{StrBegin="MSB3243: "}</comment>
   </data>
-  <data name="AssemblyConflict_FoundConflicts">
+  <data name="AssemblyConflict_FoundConflicts" xml:space="preserve">
     <value>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
 {1}</value>
     <comment>{StrBegin="MSB3277: "}</comment>
   </data>
-  <data name="AssemblyConflict_ReferenceDependsOn">
+  <data name="AssemblyConflict_ReferenceDependsOn" xml:space="preserve">
     <value>References which depend on "{0}" [{1}].</value>
     <comment> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
   </data>
-  <data name="AssemblyConflict_UnifiedReferenceDependsOn">
+  <data name="AssemblyConflict_UnifiedReferenceDependsOn" xml:space="preserve">
     <value>References which depend on or have been unified to "{0}" [{1}].</value>
     <comment> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
   </data>
-  <data name="AssemblyConflict_UnResolvedPrimaryItemSpec">
+  <data name="AssemblyConflict_UnResolvedPrimaryItemSpec" xml:space="preserve">
     <value>Unresolved primary reference with an item include of "{0}".</value>
     <comment> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</comment>
   </data>
-  <data name="AssemblyConflict_PrimarySourceItemsForReference">
+  <data name="AssemblyConflict_PrimarySourceItemsForReference" xml:space="preserve">
     <value>Project file item includes which caused reference "{0}".</value>
     <comment> This will look like, Project file item includes which caused reference "a.dll".</comment>
+  </data>
+  <data name="_0_is_empty" xml:space="preserve">
+    <value>'{0}' is empty.</value>
   </data>
 </root>

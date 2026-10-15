@@ -352,6 +352,11 @@
         <target state="translated">Элемент файла проекта содержит, что вызвало ссылку "{0}".</target>
         <note> This will look like, Project file item includes which caused reference "a.dll".</note>
       </trans-unit>
+      <trans-unit id="_0_is_empty">
+        <source>'{0}' is empty.</source>
+        <target state="new">'{0}' is empty.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
