@@ -35,19 +35,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             _output = output;
         }
 
-        [Fact]
-        public void FactoryWithUnknownDeclarationLocationDoesNotInheritInputLocation()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            ProjectItemInstance source = new(project, "Source", "source.txt", project.FullPath, sourceLineNumber: 12, sourceColumnNumber: 3);
-            var factory = new ProjectItemInstance.TaskItem.ProjectItemInstanceFactory(project, "Item")
-            {
-                SourceLocation = ElementLocation.Create(project.FullPath),
-            };
-
-            factory.CreateItem(source, project.FullPath).GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeEmpty();
-        }
-
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -120,12 +107,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                   </ItemGroup>
                 </Project>
                 """);
+            xml.Project.AddItem("UnknownLocation", "@(Source)");
             ProjectInstance project = new(xml.Project);
             ProjectItemInstance item = project.GetItems("Source").Single();
+            project.GetItems("UnknownLocation").Single().GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeEmpty();
             item.MetadataCount.ShouldBe(optOut ? 15 : 17);
             item.MetadataNames.Cast<string>().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(!optOut);
-            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(optOut ? "" : xml.Project.Items.Single().Location.Line.ToString(CultureInfo.InvariantCulture));
-            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(optOut ? "" : xml.Project.Items.Single().Location.Column.ToString(CultureInfo.InvariantCulture));
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(optOut ? "" : xml.Project.Items.First().Location.Line.ToString(CultureInfo.InvariantCulture));
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(optOut ? "" : xml.Project.Items.First().Location.Column.ToString(CultureInfo.InvariantCulture));
             if (optOut)
             {
                 item.SetMetadata(ItemSpecModifiers.DefiningProjectLineNumber, "custom");

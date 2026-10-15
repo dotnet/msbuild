@@ -3591,6 +3591,10 @@ namespace Microsoft.Build.Execution
                 out string evaluatedIncludeEscaped,
                 out string evaluatedIncludeBeforeWildcardExpansionEscaped);
 
+            // Persisted project-system items may not expose their source XML location.
+            int.TryParse(item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber), NumberStyles.None, CultureInfo.InvariantCulture, out int sourceLineNumber);
+            int.TryParse(item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber), NumberStyles.None, CultureInfo.InvariantCulture, out int sourceColumnNumber);
+
             ProjectItemInstance instance = new ProjectItemInstance(
                 projectInstance,
                 item.ItemType,
@@ -3600,8 +3604,8 @@ namespace Microsoft.Build.Execution
                 inheritedItemDefinitions,
                 item.Xml.ContainingProject.EscapedFullPath,
                 useItemDefinitionsWithoutModification: true,
-                item.Xml.Location.Line,
-                item.Xml.Location.Column);
+                sourceLineNumber,
+                sourceColumnNumber);
             return instance;
         }
 

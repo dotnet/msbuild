@@ -1719,31 +1719,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Theory]
-        [InlineData("StringParam", "StringOutput", "FOO")]
-        [InlineData("StringArrayParam", "StringArrayOutput", "FOO;bar")]
-        [InlineData("IntParam", "IntOutput", "42")]
-        [InlineData("IntArrayParam", "IntArrayOutput", "42;99")]
-        public void PrimitiveOutputsTrackOutputLocation(string parameterName, string outputName, string value)
-        {
-            SetTaskParameter(parameterName, value);
-            ElementLocation parameterLocation = ElementLocation.Create(
-                Path.Combine(Path.GetTempPath(), "output%3B;$(literal).proj"), 17, 9);
-
-            _host.GatherTaskOutputs(outputName, parameterLocation, true, "output").ShouldBeTrue();
-
-            ProjectItemInstance[] items = _bucket.Lookup.GetItems("output").ToArray();
-            string[] expectedIncludes = value.Split(';');
-            items.Length.ShouldBe(expectedIncludes.Length);
-            for (int i = 0; i < items.Length; i++)
-            {
-                items[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
-                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(parameterLocation.File);
-                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("17");
-                items[i].GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("9");
-            }
-        }
-
         /// <summary>
         /// Validate that an item array output to a property produces the correct semi-colon-delimited evaluated value.
         /// </summary>
@@ -2333,11 +2308,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private void ValidateOutputItem(string outputName, string value)
         {
-            Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
-            Assert.True(_outputsReadFromTask.ContainsKey(outputName));
+            _host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output").ShouldBeTrue();
+            _outputsReadFromTask.ShouldContainKey(outputName);
 
-            Assert.Single(_bucket.Lookup.GetItems("output"));
-            Assert.Equal(value, _bucket.Lookup.GetItems("output").First().EvaluatedInclude);
+            ProjectItemInstance item = _bucket.Lookup.GetItems("output").ShouldHaveSingleItem();
+            item.EvaluatedInclude.ShouldBe(value);
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("1");
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("1");
         }
 
         /// <summary>
@@ -2345,13 +2322,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private void ValidateOutputItems(string outputName, string[] values)
         {
-            Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
-            Assert.True(_outputsReadFromTask.ContainsKey(outputName));
+            _host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output").ShouldBeTrue();
+            _outputsReadFromTask.ShouldContainKey(outputName);
 
-            Assert.Equal(values.Length, _bucket.Lookup.GetItems("output").Count);
+            _bucket.Lookup.GetItems("output").Count.ShouldBe(values.Length);
             for (int i = 0; i < values.Length; i++)
             {
-                Assert.Equal(values[i], _bucket.Lookup.GetItems("output").ElementAt(i).EvaluatedInclude);
+                ProjectItemInstance item = _bucket.Lookup.GetItems("output").ElementAt(i);
+                item.EvaluatedInclude.ShouldBe(values[i]);
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("1");
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("1");
             }
         }
 

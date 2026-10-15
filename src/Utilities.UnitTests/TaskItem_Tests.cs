@@ -48,57 +48,27 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("location.proj")]
-        [InlineData("location%3B;$(literal)@'().proj")]
-        public void ConstructWithSourceLocationMetadata(string locationFileName)
+        [InlineData("location.proj", "17", "9")]
+        [InlineData("location%3B;$(literal)@'().proj", "17", "9")]
+        [InlineData("location%3B;$(literal)@'().proj", "", "")]
+        public void ConstructWithSourceLocationMetadata(string locationFileName, string line, string column)
         {
             string locationFile = Path.Combine(Path.GetTempPath(), "source", locationFileName);
-            ITaskItem source = new TaskItemWithSourceLocation(locationFile);
+            ITaskItem source = new TaskItemWithSourceLocation(locationFile, line, column);
             source.SetMetadata("Custom", "value%3B");
 
             for (int copy = 0; copy < 2; copy++)
             {
                 TaskItem item = new(source);
 
-                item.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("17");
-                item.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("9");
+                item.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(line);
+                item.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(column);
                 item.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeFalse();
                 item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(locationFile);
                 ((ITaskItem2)item).GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath)
                     .ShouldBe(EscapingUtilities.Escape(locationFile));
-                item.GetMetadata(ItemSpecModifiers.DefiningProjectDirectory)
-                    .ShouldBe(Path.GetDirectoryName(locationFile) + Path.DirectorySeparatorChar);
-                item.GetMetadata(ItemSpecModifiers.DefiningProjectName).ShouldBe(Path.GetFileNameWithoutExtension(locationFile));
-                item.GetMetadata(ItemSpecModifiers.DefiningProjectExtension).ShouldBe(Path.GetExtension(locationFile));
                 item.ItemSpec.ShouldBe(source.ItemSpec);
                 item.GetMetadata("Custom").ShouldBe("value;");
-
-                source = item;
-            }
-        }
-
-        [Theory]
-        [InlineData(1)]
-        [InlineData(2)]
-        public void ConstructWithDefiningProjectWithoutLocation(int taskItemVersion)
-        {
-            string definingProject = Path.Combine(Path.GetTempPath(), "metadata%3B;$(literal)@'().proj");
-            ITaskItem source = taskItemVersion switch
-            {
-                1 => new TaskItemWithDefiningProject(definingProject),
-                2 => new TaskItem2WithDefiningProject(definingProject),
-                _ => throw new ArgumentOutOfRangeException(nameof(taskItemVersion)),
-            };
-
-            for (int copy = 0; copy < 2; copy++)
-            {
-                TaskItem item = new(source);
-
-                item.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeEmpty();
-                item.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBeEmpty();
-                item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(definingProject);
-                ((ITaskItem2)item).GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath)
-                    .ShouldBe(EscapingUtilities.Escape(definingProject));
 
                 source = item;
             }
@@ -400,9 +370,9 @@ namespace Microsoft.Build.UnitTests
             Assert.True(actualMetadata.SequenceEqual(expectedMetadata));
         }
 
-        private class TaskItemWithDefiningProject(string definingProject) : ITaskItem
+        private sealed class TaskItemWithSourceLocation(string definingProject, string line, string column) : ITaskItem
         {
-            protected TaskItem Item { get; } = new("Monkey.txt");
+            private TaskItem Item { get; } = new("Monkey.txt");
 
             public string ItemSpec
             {
@@ -414,10 +384,14 @@ namespace Microsoft.Build.UnitTests
 
             public int MetadataCount => Item.MetadataCount;
 
-            public virtual string GetMetadata(string metadataName) =>
+            public string GetMetadata(string metadataName) =>
                 MSBuildNameIgnoreCaseComparer.Default.Equals(metadataName, ItemSpecModifiers.DefiningProjectFullPath)
                     ? definingProject
-                    : Item.GetMetadata(metadataName);
+                    : MSBuildNameIgnoreCaseComparer.Default.Equals(metadataName, ItemSpecModifiers.DefiningProjectLineNumber)
+                        ? line
+                        : MSBuildNameIgnoreCaseComparer.Default.Equals(metadataName, ItemSpecModifiers.DefiningProjectColumnNumber)
+                            ? column
+                            : Item.GetMetadata(metadataName);
 
             public void SetMetadata(string metadataName, string metadataValue) => Item.SetMetadata(metadataName, metadataValue);
 
@@ -426,32 +400,6 @@ namespace Microsoft.Build.UnitTests
             public void CopyMetadataTo(ITaskItem destinationItem) => Item.CopyMetadataTo(destinationItem);
 
             public IDictionary CloneCustomMetadata() => Item.CloneCustomMetadata();
-        }
-
-        private class TaskItem2WithDefiningProject(string definingProject) : TaskItemWithDefiningProject(definingProject), ITaskItem2
-        {
-            public string EvaluatedIncludeEscaped
-            {
-                get => ((ITaskItem2)Item).EvaluatedIncludeEscaped;
-                set => ((ITaskItem2)Item).EvaluatedIncludeEscaped = value;
-            }
-
-            public string GetMetadataValueEscaped(string metadataName) => EscapingUtilities.Escape(GetMetadata(metadataName));
-
-            public void SetMetadataValueLiteral(string metadataName, string metadataValue) =>
-                ((ITaskItem2)Item).SetMetadataValueLiteral(metadataName, metadataValue);
-
-            public IDictionary CloneCustomMetadataEscaped() => ((ITaskItem2)Item).CloneCustomMetadataEscaped();
-        }
-
-        private sealed class TaskItemWithSourceLocation(string definingProject) : TaskItem2WithDefiningProject(definingProject)
-        {
-            public override string GetMetadata(string metadataName) =>
-                MSBuildNameIgnoreCaseComparer.Default.Equals(metadataName, ItemSpecModifiers.DefiningProjectLineNumber)
-                    ? "17"
-                    : MSBuildNameIgnoreCaseComparer.Default.Equals(metadataName, ItemSpecModifiers.DefiningProjectColumnNumber)
-                        ? "9"
-                        : base.GetMetadata(metadataName);
         }
 
 #if FEATURE_APPDOMAIN

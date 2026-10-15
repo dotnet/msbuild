@@ -928,19 +928,6 @@ namespace Microsoft.Build.UnitTests
             return (ITaskItem)TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator()).WrappedParameter;
         }
 
-        [Fact]
-        public void SourceLocationSurvivesTaskParameterSerialization()
-        {
-            ProjectItemInstanceTaskItem item = new("foo.txt", "import%253B.targets", sourceLineNumber: 12, sourceColumnNumber: 0);
-            ITaskItem roundTripped = RoundTrip(item);
-            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
-            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
-            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("0");
-            roundTripped.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeFalse();
-            Microsoft.Build.Utilities.TaskItem copy = new(roundTripped);
-            copy.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
-        }
-
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/13140
         /// RecursiveDir (built-in, non-derivable metadata) must survive TaskParameter
@@ -963,7 +950,9 @@ namespace Microsoft.Build.UnitTests
                 itemDefinitions: null,
                 projectDirectory: Directory.GetCurrentDirectory(),
                 immutable: false,
-                definingFileEscaped: "test.proj");
+                definingFileEscaped: "import%253B.targets",
+                sourceLineNumber: 12,
+                sourceColumnNumber: 0);
 
             item.GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
             ((ITaskItem2)item).CloneCustomMetadataEscaped().Contains("RecursiveDir").ShouldBeFalse();
@@ -977,6 +966,12 @@ namespace Microsoft.Build.UnitTests
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             (t2.WrappedParameter as ITaskItem).GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+            ITaskItem roundTripped = (ITaskItem)t2.WrappedParameter;
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
+            roundTripped.GetMetadata(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe("0");
+            roundTripped.CloneCustomMetadata().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeFalse();
+            new Microsoft.Build.Utilities.TaskItem(roundTripped).GetMetadata(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("12");
         }
 
         /// <summary>
