@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -17,6 +18,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
@@ -43,17 +45,17 @@ public class ConditionEvaluator_Tests
         string secondPath = Path.Combine(env.DefaultTestDirectory.Path, "second.file");
         string identity = Guid.NewGuid().ToString("N");
         string condition = $"Exists('$(File)') And '$(Value)' == '{identity}' Or '{identity}' == 'never'";
+        string? observedSecondPath = null;
         MSBuildFileSystemBase fileSystem = A.Fake<MSBuildFileSystemBase>();
         A.CallTo(() => fileSystem.FileOrDirectoryExists(A<string>._)).ReturnsLazily((string path) =>
         {
             if (path == firstPath)
             {
                 firstEntered.Set();
-                releaseFirst.Wait(TimeSpan.FromSeconds(30)).ShouldBeTrue();
-                return true;
+                return releaseFirst.Wait(TimeSpan.FromSeconds(30));
             }
 
-            path.ShouldBe(secondPath);
+            observedSecondPath = path;
             return false;
         });
 
@@ -83,18 +85,23 @@ public class ConditionEvaluator_Tests
 
             (await Task.WhenAny(second, Task.Delay(TimeSpan.FromSeconds(10)))).ShouldBeSameAs(second);
             (await second).ShouldBeFalse();
+            observedSecondPath.ShouldBe(secondPath);
             first.IsCompleted.ShouldBeFalse();
         }
         finally
         {
             releaseFirst.Set();
-            (await first).ShouldBeTrue();
             if (second is not null)
             {
-                await second;
+                await Task.WhenAll(first, second);
+            }
+            else
+            {
+                await first;
             }
         }
 
+        (await first).ShouldBeTrue();
         warnings.ShouldBe(1);
         Evaluate(
             condition, fileSystem, env.DefaultTestDirectory.Path, loggingContext,
@@ -116,18 +123,19 @@ public class ConditionEvaluator_Tests
         string secondPath = Path.Combine(env.DefaultTestDirectory.Path, "second.file");
         MSBuildFileSystemBase fileSystem = A.Fake<MSBuildFileSystemBase>();
         int firstThreadId = 0;
+        int secondThreadId = 0;
+        string? observedSecondPath = null;
         A.CallTo(() => fileSystem.FileOrDirectoryExists(A<string>._)).ReturnsLazily((string path) =>
         {
             if (path == firstPath)
             {
                 firstThreadId = Environment.CurrentManagedThreadId;
                 firstEntered.Set();
-                releaseFirst.Wait(TimeSpan.FromSeconds(30)).ShouldBeTrue();
-                return true;
+                return releaseFirst.Wait(TimeSpan.FromSeconds(30));
             }
 
-            path.ShouldBe(secondPath);
-            Environment.CurrentManagedThreadId.ShouldNotBe(firstThreadId);
+            observedSecondPath = path;
+            secondThreadId = Environment.CurrentManagedThreadId;
             return true;
         });
         ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> firstState = new(
@@ -156,6 +164,8 @@ public class ConditionEvaluator_Tests
 
             (await Task.WhenAny(second, Task.Delay(TimeSpan.FromSeconds(10)))).ShouldBeSameAs(second);
             (await second).ShouldBeFalse();
+            observedSecondPath.ShouldBe(secondPath);
+            secondThreadId.ShouldNotBe(firstThreadId);
             first.IsCompleted.ShouldBeFalse();
         }
         finally
@@ -291,6 +301,86 @@ public class ConditionEvaluator_Tests
     }
 
     [Theory]
+    [InlineData("'$(MSBuildToolsVersion)' > '1.0'")]
+    [InlineData("$(msbuildtoolsversion) > '1.0'")]
+    [InlineData("'$(MSBuildToolsVersion)' == '$(VisualStudioVersion)'")]
+    public void ToolsVersionCompatibilityUsesEachEvaluationsExpandedValue(string condition)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        ParsedCondition parsed = new Parser().ParseForEvaluation(
+            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+        (string Value, bool Expected)[] cases =
+        [
+            (MSBuildConstants.CurrentToolsVersion, true),
+            ("0.5", false),
+            (MSBuildConstants.CurrentToolsVersion, true)
+        ];
+        foreach ((string value, bool expected) in cases)
+        {
+            ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> state = new(
+                condition, CreateExpander(FileSystems.Default,
+                    ("MSBuildToolsVersion", value),
+                    ("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion)),
+                ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
+                ElementLocation.EmptyLocation, FileSystems.Default);
+
+            parsed.Evaluate(state).ShouldBe(expected);
+        }
+    }
+
+    [Theory]
+    [InlineData("'Current' > '1.0'", "Current")]
+    [InlineData("'$(Other)' > '1.0'", "Current")]
+    [InlineData("'%24(MSBuildToolsVersion)' > '1.0'", "Current")]
+    [InlineData("'$(MSBuildToolsVersion)' > '1.0'", "current")]
+    public void ToolsVersionCompatibilityDoesNotApplyToOtherSyntaxOrCasing(
+        string condition, string toolsVersion)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        Should.Throw<InvalidProjectFileException>(() =>
+            Evaluate(condition, FileSystems.Default, env.DefaultTestDirectory.Path, null,
+                ("MSBuildToolsVersion", toolsVersion), ("Other", "Current")));
+    }
+
+    [Fact]
+    public void SharedConditionUpdatesEachConditionedPropertiesTable()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        const string condition = "'$(Configuration)' == '$(ExpectedConfiguration)' And '$(Platform)' != '$(OtherPlatform)'";
+        ParsedCondition parsed = new Parser().ParseForEvaluation(
+            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation);
+        Dictionary<string, List<string>> firstTable = new();
+        Dictionary<string, List<string>> secondTable = new();
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> first = CreateState(
+            "Debug", "AnyCPU", firstTable);
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> second = CreateState(
+            "Release", "x64", secondTable);
+
+        parsed.Evaluate(first).ShouldBeTrue();
+        parsed.Evaluate(second).ShouldBeTrue();
+        parsed.Evaluate(first).ShouldBeTrue();
+
+        firstTable.Count.ShouldBe(4);
+        firstTable["Configuration"].ShouldBe(["Debug"]);
+        firstTable["ExpectedConfiguration"].ShouldBe(["Debug"]);
+        firstTable["Platform"].ShouldBe(["never"]);
+        firstTable["OtherPlatform"].ShouldBe(["AnyCPU"]);
+        secondTable.Count.ShouldBe(4);
+        secondTable["Configuration"].ShouldBe(["Release"]);
+        secondTable["ExpectedConfiguration"].ShouldBe(["Release"]);
+        secondTable["Platform"].ShouldBe(["never"]);
+        secondTable["OtherPlatform"].ShouldBe(["x64"]);
+
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> CreateState(
+            string configuration, string platform, Dictionary<string, List<string>> table) =>
+            new(condition, CreateExpander(FileSystems.Default,
+                    ("Configuration", configuration), ("ExpectedConfiguration", configuration),
+                    ("Platform", platform), ("OtherPlatform", "never")),
+                ExpanderOptions.ExpandProperties, table, env.DefaultTestDirectory.Path,
+                ElementLocation.EmptyLocation, FileSystems.Default);
+    }
+
+    [Theory]
     [InlineData("'' == ''", 0)]
     [InlineData("'fixed' == 'fixed'", 0)]
     [InlineData("'$(Value)' == 'value'", 1)]
@@ -338,29 +428,22 @@ public class ConditionEvaluator_Tests
     }
 
     [Fact]
-    public void NodeStateAccessorsValidateSlotsAndClearReusedBuffers()
+    public void NodeStateAccessorValidatesSlotsAndClearsReusedBuffers()
     {
         NodeStateStore state = new();
         Should.Throw<InvalidOperationException>(() => state.GetString(0));
-        Should.Throw<InvalidOperationException>(() => state.GetComparison(0));
-        state.Initialize(new NodeStateLayout(1, 1));
+        state.Initialize(new NodeStateLayout(1));
         try
         {
             Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(-1));
             Should.Throw<ArgumentOutOfRangeException>(() => state.GetString(1));
-            Should.Throw<ArgumentOutOfRangeException>(() => state.GetComparison(-1));
-            Should.Throw<ArgumentOutOfRangeException>(() => state.GetComparison(1));
             state.GetString(0).ExpandedValue = "first";
-            state.GetComparison(0).ConditionedPropertiesUpdated = true;
             state.GetString(0).ExpandedValue.ShouldBe("first");
-            state.GetComparison(0).ConditionedPropertiesUpdated.ShouldBeTrue();
             state.Release();
             Should.Throw<InvalidOperationException>(() => state.GetString(0));
-            Should.Throw<InvalidOperationException>(() => state.GetComparison(0));
 
-            state.Initialize(new NodeStateLayout(1, 1));
+            state.Initialize(new NodeStateLayout(1));
             state.GetString(0).ExpandedValue.ShouldBeNull();
-            state.GetComparison(0).ConditionedPropertiesUpdated.ShouldBeFalse();
         }
         finally
         {
@@ -395,7 +478,7 @@ public class ConditionEvaluator_Tests
         PropertyDictionary<ProjectPropertyInstance> propertyBag = new();
         foreach ((string name, string value) in properties)
         {
-            propertyBag.Set(ProjectPropertyInstance.Create(name, value));
+            propertyBag.Set(ProjectPropertyInstance.Create(name, value, mayBeReserved: true));
         }
 
         return new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, fileSystem);

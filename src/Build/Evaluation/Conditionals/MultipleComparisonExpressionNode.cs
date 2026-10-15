@@ -14,18 +14,6 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class MultipleComparisonNode : OperatorExpressionNode
     {
-        internal struct EvaluationState
-        {
-            public bool ConditionedPropertiesUpdated { get; set; }
-        }
-
-        internal int StateSlot { get; }
-
-        protected MultipleComparisonNode(int stateSlot)
-        {
-            StateSlot = stateSlot;
-        }
-
         /// <summary>
         /// Compare numbers
         /// </summary>
@@ -111,17 +99,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Updates the conditioned properties table if it hasn't already been done.
+        /// Updates the conditioned properties table for this comparison.
         /// </summary>
         private void UpdateConditionedProperties(ConditionEvaluator.IConditionEvaluationState state)
         {
             if (state.ConditionedPropertiesInProject is null)
-            {
-                return;
-            }
-
-            ref EvaluationState nodeState = ref state.NodeStates.GetComparison(StateSlot);
-            if (nodeState.ConditionedPropertiesUpdated)
             {
                 return;
             }
@@ -144,8 +126,6 @@ namespace Microsoft.Build.Evaluation
                      rightUnexpandedValue,
                      LeftChild.GetExpandedValue(state));
             }
-
-            nodeState.ConditionedPropertiesUpdated = true;
         }
     }
 }

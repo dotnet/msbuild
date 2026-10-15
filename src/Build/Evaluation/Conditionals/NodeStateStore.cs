@@ -12,7 +12,6 @@ internal struct NodeStateStore
 {
     private NodeStateLayout _layout;
     private StringExpressionNode.EvaluationState[]? _stringStates;
-    private MultipleComparisonNode.EvaluationState[]? _comparisonStates;
     private bool _initialized;
 
     internal void Initialize(NodeStateLayout layout)
@@ -22,7 +21,7 @@ internal struct NodeStateStore
             throw new InvalidOperationException("Condition node state storage is already in use.");
         }
 
-        if (layout.StringSlotCount < 0 || layout.ComparisonSlotCount < 0)
+        if (layout.StringSlotCount < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(layout));
         }
@@ -39,18 +38,9 @@ internal struct NodeStateStore
         return ref states[slot];
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ref MultipleComparisonNode.EvaluationState GetComparison(int slot)
-    {
-        VerifySlot(slot, _layout.ComparisonSlotCount);
-        MultipleComparisonNode.EvaluationState[] states = _comparisonStates ?? AcquireComparisonStates();
-        return ref states[slot];
-    }
-
     internal void Release()
     {
         StringExpressionNode.EvaluationState[]? stringStates = _stringStates;
-        MultipleComparisonNode.EvaluationState[]? comparisonStates = _comparisonStates;
         NodeStateLayout layout = _layout;
         this = default;
 
@@ -58,20 +48,11 @@ internal struct NodeStateStore
         {
             ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Release(stringStates, layout.StringSlotCount);
         }
-
-        if (comparisonStates is not null)
-        {
-            ThreadLocalNodeStateBuffer<MultipleComparisonNode.EvaluationState>.Release(comparisonStates, layout.ComparisonSlotCount);
-        }
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private StringExpressionNode.EvaluationState[] AcquireStringStates() =>
         _stringStates = ThreadLocalNodeStateBuffer<StringExpressionNode.EvaluationState>.Acquire(_layout.StringSlotCount);
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private MultipleComparisonNode.EvaluationState[] AcquireComparisonStates() =>
-        _comparisonStates = ThreadLocalNodeStateBuffer<MultipleComparisonNode.EvaluationState>.Acquire(_layout.ComparisonSlotCount);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private readonly void VerifySlot(int slot, int count)

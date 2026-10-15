@@ -9,7 +9,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Evaluation;
 
-internal readonly record struct NodeStateLayout(int StringSlotCount, int ComparisonSlotCount);
+internal readonly record struct NodeStateLayout(int StringSlotCount);
 
 internal readonly record struct ParsedCondition(GenericExpressionNode Root, NodeStateLayout StateLayout)
 {

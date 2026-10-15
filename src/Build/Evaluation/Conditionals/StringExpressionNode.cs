@@ -18,8 +18,6 @@ namespace Microsoft.Build.Evaluation
         internal struct EvaluationState
         {
             public string ExpandedValue { get; set; }
-
-            public bool? ShouldBeTreatedAsVisualStudioVersion { get; set; }
         }
 
         internal int StateSlot { get; }
@@ -31,11 +29,14 @@ namespace Microsoft.Build.Evaluation
         /// such as a property expression or escaped character.
         /// </summary>
         private readonly bool _expandable;
+        private readonly bool _isMSBuildToolsVersionExpansion;
 
         internal StringExpressionNode(string value, bool expandable, int stateSlot)
         {
             _value = value;
             _expandable = expandable;
+            _isMSBuildToolsVersionExpansion = expandable &&
+                string.Equals(value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
             StateSlot = stateSlot;
         }
 
@@ -167,33 +168,9 @@ namespace Microsoft.Build.Evaluation
         /// but now cause the project to throw InvalidProjectException when
         /// ToolsVersion is "Current". https://github.com/dotnet/msbuild/issues/4150
         /// </remarks>
-        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state)
-        {
-            if (!_expandable)
-            {
-                return false;
-            }
-
-            ref EvaluationState nodeState = ref state.NodeStates.GetString(StateSlot);
-            if (!nodeState.ShouldBeTreatedAsVisualStudioVersion.HasValue)
-            {
-                // Treat specially if the node would expand to "Current".
-
-                // Do this check first, because if it's not (common) we can early-out and the next
-                // expansion will be cheap because this will populate the cached expanded value.
-                if (string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal))
-                {
-                    // and it is just an expansion of MSBuildToolsVersion
-                    nodeState.ShouldBeTreatedAsVisualStudioVersion = string.Equals(_value, "$(MSBuildToolsVersion)", StringComparison.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    nodeState.ShouldBeTreatedAsVisualStudioVersion = false;
-                }
-            }
-
-            return nodeState.ShouldBeTreatedAsVisualStudioVersion.Value;
-        }
+        private bool ShouldBeTreatedAsVisualStudioVersion(ConditionEvaluator.IConditionEvaluationState state) =>
+            _isMSBuildToolsVersionExpansion &&
+            string.Equals(GetExpandedValue(state), MSBuildConstants.CurrentToolsVersion, StringComparison.Ordinal);
 
         internal override string DebuggerDisplay => $"\"{_value}\"";
     }

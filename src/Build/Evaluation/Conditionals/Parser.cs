@@ -47,10 +47,8 @@ namespace Microsoft.Build.Evaluation
         private ElementLocation _elementLocation;
         internal int errorPosition = 0; // useful for unit tests
 
-        // Slots are local to a parsed condition and its node-state type.
+        // Slots are local to a parsed condition.
         internal int StringNodeStateCount { get; private set; }
-
-        internal int ComparisonNodeStateCount { get; private set; }
 
         #region REMOVE_COMPAT_WARNING
 
@@ -103,7 +101,7 @@ namespace Microsoft.Build.Evaluation
             GenericExpressionNode root = Parse(expression, optionSettings, elementLocation);
             return new ParsedCondition(
                 root,
-                new NodeStateLayout(StringNodeStateCount, ComparisonNodeStateCount));
+                new NodeStateLayout(StringNodeStateCount));
         }
 
         //
@@ -120,7 +118,6 @@ namespace Microsoft.Build.Evaluation
             _options = optionSettings;
             _elementLocation = elementLocation;
             StringNodeStateCount = 0;
-            ComparisonNodeStateCount = 0;
 
             _lexer = new Scanner(expression, _options);
             if (!_lexer.Advance())
@@ -276,11 +273,11 @@ namespace Microsoft.Build.Evaluation
             }
             else if (Same(expression, Token.TokenType.EqualTo))
             {
-                node = new EqualExpressionNode(ComparisonNodeStateCount++);
+                node = new EqualExpressionNode();
             }
             else if (Same(expression, Token.TokenType.NotEqualTo))
             {
-                node = new NotEqualExpressionNode(ComparisonNodeStateCount++);
+                node = new NotEqualExpressionNode();
             }
             return node;
         }
