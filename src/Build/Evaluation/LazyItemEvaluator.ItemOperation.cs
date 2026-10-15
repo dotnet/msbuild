@@ -59,6 +59,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
         /// <summary>
+        ///  Gets whether this operation's snapshot is needed by a caller.
+        /// </summary>
+        public bool IsReferenced => _isNeeded;
+
+        /// <summary>
         ///  Marks this operation's snapshot for caching when it is computed.
         /// </summary>
         public void MarkAsNeeded() => _isNeeded = true;
@@ -83,6 +88,16 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
 
             // Snapshot creation remains outside the operation's profiling and event scope.
+            CacheResultIfReferenced(listBuilder, laterRemoveGlobPatterns);
+        }
+
+        /// <summary>
+        ///  Saves a completed snapshot when this operation has been marked as referenced.
+        /// </summary>
+        /// <param name="listBuilder">The computed items through this operation, under the supplied later Remove glob patterns.</param>
+        /// <param name="laterRemoveGlobPatterns">The later Remove glob patterns used for this computation.</param>
+        public void CacheResultIfReferenced(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
+        {
             if (_isNeeded)
             {
                 _lazyEvaluator.CacheItems(this, laterRemoveGlobPatterns, listBuilder.ToImmutable());

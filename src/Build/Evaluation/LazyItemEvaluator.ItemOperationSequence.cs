@@ -99,14 +99,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             int firstUncachedIndex = operationCount;
 
             // Save cumulative later Remove glob pattern sets at Remove boundaries so forward evaluation can restore them.
-            Stack<ImmutableHashSet<string>>? laterRemoveGlobPatternStack = null;
+            Stack<ImmutableHashSet<string>> laterRemoveGlobPatternStack = new();
 
             // Plan backward within the requested item state only. Later Removes determine both which cached
             // item states are compatible and which files earlier Includes can skip during enumeration.
             for (int index = operationCount - 1; index >= 0; index--)
             {
                 ItemOperation operation = _operations[index];
-                var patternsFromLaterOperations = laterRemoveGlobPatternStack?.Peek() ?? s_emptyRemoveGlobPatterns;
+                var patternsFromLaterOperations = laterRemoveGlobPatternStack.Count > 0 ? laterRemoveGlobPatternStack.Peek() : s_emptyRemoveGlobPatterns;
 
                 if (_lazyEvaluator.TryGetCachedItems(
                     operation,
@@ -124,8 +124,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 // the Remove's own cached result is keyed by later exclusions, not by its own patterns.
                 if (operation is RemoveOperation removeOperation)
                 {
-                    laterRemoveGlobPatternStack ??= new Stack<ImmutableHashSet<string>>();
-
                     var earlierRemoveGlobPatterns = removeOperation.GetRemoveGlobPatterns();
                     foreach (var globToRemove in patternsFromLaterOperations)
                     {
@@ -143,7 +141,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             items ??= OrderedItemDataCollection.CreateBuilder();
 
             // The first operation to evaluation sees all Remove globs accumulated while planning backward.
-            ImmutableHashSet<string> currentRemoveGlobPatterns = laterRemoveGlobPatternStack?.Peek() ?? s_emptyRemoveGlobPatterns;
+            ImmutableHashSet<string> currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count > 0 ? laterRemoveGlobPatternStack.Peek() : s_emptyRemoveGlobPatterns;
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
             Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
@@ -181,18 +179,31 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                             itemsWithNoWildcards.Add(fullPath, op);
                         }
                     }
+
                     if (!addToBatch)
                     {
-                        // We found a wildcard. Remove any fragments associated with the current operation and process them later.
+                        // A nonliteral fragment or overlapping path rejected this Update. Remove only its tentative
+                        // entries, using the same normalized keys as insertion, before flushing earlier Updates.
                         for (int j = 0; j < i; j++)
                         {
-                            itemsWithNoWildcards.Remove(operation.Spec.Fragments[j].TextFragment);
+                            ItemSpecFragment fragment = op.Spec.Fragments[j];
+                            string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory);
+                            itemsWithNoWildcards.Remove(fullPath);
                         }
                     }
                     else
                     {
                         // Defer this Update until the batch is flushed.
                         addedToBatch = true;
+                        if (op.IsReferenced)
+                        {
+                            // A bookmark ends at this Update. Complete and cache its snapshot before any later
+                            // Updates join the batch, without applying this Update a second time through Apply.
+                            ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
+                            addedToBatch = false;
+                            op.CacheResultIfReferenced(items, currentRemoveGlobPatterns);
+                        }
+
                         continue;
                     }
                 }
@@ -208,9 +219,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 // before applying it, so its result uses the same cache key checked during backward planning.
                 if (operation is RemoveOperation)
                 {
-                    Assumed.NotNull(laterRemoveGlobPatternStack);
                     laterRemoveGlobPatternStack.Pop();
-                    currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count == 0 ? s_emptyRemoveGlobPatterns : laterRemoveGlobPatternStack.Peek();
+                    currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count > 0 ? laterRemoveGlobPatternStack.Peek() : s_emptyRemoveGlobPatterns;
                 }
 
                 // Apply saves the complete snapshot when this position has been marked as referenced.
