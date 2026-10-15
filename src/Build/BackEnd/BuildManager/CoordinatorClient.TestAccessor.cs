@@ -28,21 +28,11 @@ internal sealed partial class CoordinatorClient
 
             try
             {
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                pipeStream = new NamedPipeClientStream(
-                    ".",
-                    settings.PipeName,
-                    PipeDirection.InOut,
-                    PipeOptions.Asynchronous
-#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                    | PipeOptions.CurrentUserOnly
-#endif
-                );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                pipeStream = CreatePipe(settings.PipeName);
 
                 output.WriteLine($"CoordinatorClient: Connecting to test pipe '{settings.PipeName}'");
 
-                if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
+                if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs, output))
                 {
                     output.WriteLine("CoordinatorClient: Test connection timed out");
                     return null;
