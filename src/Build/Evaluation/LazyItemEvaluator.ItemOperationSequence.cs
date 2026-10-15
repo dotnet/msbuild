@@ -14,10 +14,12 @@ namespace Microsoft.Build.Evaluation;
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
     /// <summary>
-    ///  Stores one item type's append-only operations and evaluates requested prefixes using per-operation caches.
+    ///  Stores one item type's append-only operations and evaluates prefixes using the evaluator's shared cache.
     /// </summary>
-    private sealed class ItemOperationSequence
+    /// <param name="lazyEvaluator">The evaluator that owns the cached prefix results.</param>
+    private sealed class ItemOperationSequence(LazyItemEvaluator<P, I, M, D> lazyEvaluator)
     {
+        private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator = lazyEvaluator;
         private readonly SegmentedList<MemoizedOperation> _operations = [];
 
         /// <summary>
@@ -75,7 +77,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // Captured references announce their demand before evaluation; eager condition reads announce it here.
             // Direct requests start without later exclusions; backward planning can add them for earlier positions.
             MemoizedOperation operation = _operations[operationCount - 1];
-            if (operation.TryGetFromCache(ImmutableHashSet<string>.Empty, out OrderedItemDataCollection items))
+            if (operation.TryGetFromCache(_lazyEvaluator, globsToIgnore: s_emptyGlobsToIgnore, out OrderedItemDataCollection items))
             {
                 return items.ToBuilder();
             }
@@ -104,11 +106,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             for (int index = operationCount - 1; index >= 0; index--)
             {
                 MemoizedOperation operation = _operations[index];
-                var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? ImmutableHashSet<string>.Empty;
+                var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? s_emptyGlobsToIgnore;
 
-                if (operation.TryGetFromCache(globsToIgnoreFromFutureOperations, out OrderedItemDataCollection itemsFromCache))
+                if (operation.TryGetFromCache(
+                    _lazyEvaluator,
+                    globsToIgnoreFromFutureOperations,
+                    out OrderedItemDataCollection itemsFromCache))
                 {
-                    // This cache contains the complete result through this operation, not just its changes.
+                    // The shared cache contains the complete result through this operation, not just its changes.
                     // Since we search backward, this is the closest compatible cached prefix to the requested end.
                     // firstUncachedIndex is index + 1: we replay the suffix after this cached operation.
                     items = itemsFromCache.ToBuilder();
@@ -138,7 +143,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             items ??= OrderedItemDataCollection.CreateBuilder();
 
             // The first operation to replay sees all Remove globs accumulated while planning backward.
-            ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack?.Peek() ?? ImmutableHashSet<string>.Empty;
+            ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack?.Peek() ?? s_emptyGlobsToIgnore;
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
             Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
@@ -205,12 +210,12 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 {
                     Assumed.NotNull(globsToIgnoreStack);
                     globsToIgnoreStack.Pop();
-                    currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? ImmutableHashSet<string>.Empty : globsToIgnoreStack.Peek();
+                    currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? s_emptyGlobsToIgnore : globsToIgnoreStack.Peek();
                 }
 
                 // Non-batched operations use the memoized path, which saves the complete prefix result
                 // when this position has been marked as referenced.
-                operation.Apply(items, currentGlobsToIgnore);
+                operation.Apply(_lazyEvaluator, items, currentGlobsToIgnore);
             }
 
             // The requested prefix may end with a deferred Update batch.

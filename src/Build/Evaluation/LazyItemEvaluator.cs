@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -25,6 +26,12 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     where M : class, IMetadatum
     where D : class, IItemDefinition<M>
 {
+    /// <summary>
+    ///  Provides the shared starting exclusion context using the filesystem's path-comparison policy.
+    /// </summary>
+    private static readonly ImmutableHashSet<string> s_emptyGlobsToIgnore =
+        ImmutableHashSet.Create<string>(FileUtilities.PathComparer);
+
     private readonly IEvaluatorData<P, I, M, D> _data;
     private readonly Expander<P, I> _outerExpander;
     private readonly Expander<P, I> _expander;
@@ -38,11 +45,16 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
     /// </summary>
     private readonly EvaluatedItemElementRecorder _evaluatedItemElementRecorder;
 
-    private int _nextElementOrder = 0;
-
     private readonly Dictionary<string, ItemOperationSequence> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames
         ? []
         : [with(StringComparer.OrdinalIgnoreCase)];
+
+    private int _nextElementOrder = 0;
+
+    /// <summary>
+    ///  Stores admitted prefix results for this evaluation.
+    /// </summary>
+    private readonly Dictionary<ItemCacheKey, OrderedItemDataCollection> _itemCache = [];
 
     protected EvaluationContext EvaluationContext { get; }
 
@@ -217,13 +229,22 @@ internal partial class LazyItemEvaluator<P, I, M, D> : IItemProvider<I>
                                 .OrderBy(itemData => itemData.ElementOrder);
     }
 
+    private bool TryGetCachedItems(
+        LazyItemOperation operation,
+        ImmutableHashSet<string> globsToIgnore,
+        [NotNullWhen(true)] out OrderedItemDataCollection items)
+        => _itemCache.TryGetValue(new ItemCacheKey(operation, globsToIgnore), out items);
+
+    private void CacheItems(LazyItemOperation operation, ImmutableHashSet<string> globsToIgnore, OrderedItemDataCollection items)
+        => _itemCache[new ItemCacheKey(operation, globsToIgnore)] = items;
+
     private void AddItemOperation(ProjectItemElement itemElement, bool conditionResult, string rootDirectory)
     {
         LazyItemOperation operation = CreateOperation(itemElement, conditionResult, rootDirectory);
 
         if (!_itemLists.TryGetValue(itemElement.ItemType, out ItemOperationSequence sequence))
         {
-            sequence = new ItemOperationSequence();
+            sequence = new ItemOperationSequence(this);
         }
 
         sequence.Add(operation);
