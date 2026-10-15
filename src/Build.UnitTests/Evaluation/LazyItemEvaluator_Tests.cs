@@ -547,6 +547,146 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Theory]
+    [InlineData("a.cs;*.cs", false, "initial-update")]
+    [InlineData("a.cs;*.cs", true, "initial-pending-update")]
+    [InlineData("a.cs;a.cs", false, "initial")]
+    [InlineData("a.cs;a.cs", true, "initial-pending")]
+    [InlineData("a.cs;./a.cs", false, "initial")]
+    [InlineData("a.cs;b.cs;*.cs", false, "initial-update")]
+    [InlineData("a.cs;b.cs", true, "initial-pending-update")]
+    public void RejectedUpdateBatchDoesNotLeaveTentativeEntries(string updateSpec, bool queueEarlierUpdate, string expectedBTrace)
+    {
+        using ProjectCollection collection = new();
+        string pendingUpdate = queueEarlierUpdate
+            ? """
+              <Compile Update="b.cs">
+                  <Trace>%(Trace)-pending</Trace>
+              </Compile>
+              """
+            : string.Empty;
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Compile Include="a.cs;b.cs">
+                        <Trace>initial</Trace>
+                    </Compile>
+                    {pendingUpdate}
+                    <Compile Update="{updateSpec}">
+                        <Trace>%(Trace)-update</Trace>
+                    </Compile>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+
+        ImmutableArray<ProjectItem> items = CollectItems(evaluator);
+        AssertIncludes(items, ["a.cs", "b.cs"]);
+        items[0].GetMetadataValue("Trace").ShouldBe("initial-update");
+        items[1].GetMetadataValue("Trace").ShouldBe(expectedBTrace);
+    }
+
+    [Theory]
+    [InlineData("missing.cs", "true")]
+    [InlineData("a.cs", "false")]
+    public void LiteralUpdatesWithoutEffectsStillCacheTheRequestedPrefix(string updateSpec, string condition)
+    {
+        const string itemType = "UnchangedBatchCacheSource";
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <UnchangedBatchCacheSource Include="a.cs">
+                        <Trace>initial</Trace>
+                    </UnchangedBatchCacheSource>
+                    <UnchangedBatchCacheSource Update="{updateSpec}" Condition="{condition}">
+                        <Trace>updated</Trace>
+                    </UnchangedBatchCacheSource>
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+        using EventSourceTestHelper listener = new();
+
+        for (int read = 0; read < 2; read++)
+        {
+            ProjectItem[] items = [.. provider.GetItems(itemType)];
+            items.Length.ShouldBe(1);
+            items[0].EvaluatedInclude.ShouldBe("a.cs");
+            items[0].GetMetadataValue("Trace").ShouldBe("initial");
+            CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType).ShouldBe(read == 0 ? 1 : 0);
+        }
+    }
+
+    [Fact]
+    public void LiteralUpdateBatchesCacheExactBookmarkedStatesWithoutRepeatingMetadataEvaluation()
+    {
+        const string updateCondition = "'LiteralUpdateBatchCache' == 'LiteralUpdateBatchCache'";
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <BatchCacheSource Include="a.cs;b.cs;c.cs">
+                        <Trace>initial</Trace>
+                    </BatchCacheSource>
+                    <BatchCacheSource Update="a.cs">
+                        <Trace Condition="{updateCondition}">%(Trace)-a</Trace>
+                    </BatchCacheSource>
+                    <BatchCacheSource Update="b.cs">
+                        <Trace Condition="{updateCondition}">%(Trace)-b</Trace>
+                    </BatchCacheSource>
+                    <BatchCacheBefore Include="@(BatchCacheSource)" />
+                    <BatchCacheSource Update="c.cs">
+                        <Trace Condition="{updateCondition}">%(Trace)-c</Trace>
+                    </BatchCacheSource>
+                    <BatchCacheAfter Include="@(BatchCacheSource)" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+        using EventSourceTestHelper listener = new();
+
+        for (int read = 0; read < 2; read++)
+        {
+            ProjectItem[] currentItems = [.. provider.GetItems("BatchCacheSource")];
+            currentItems.Length.ShouldBe(3);
+            currentItems[0].EvaluatedInclude.ShouldBe("a.cs");
+            currentItems[0].GetMetadataValue("Trace").ShouldBe("initial-a");
+            currentItems[1].EvaluatedInclude.ShouldBe("b.cs");
+            currentItems[1].GetMetadataValue("Trace").ShouldBe("initial-b");
+            currentItems[2].EvaluatedInclude.ShouldBe("c.cs");
+            currentItems[2].GetMetadataValue("Trace").ShouldBe("initial-c");
+            CountEvents(listener, nameof(MSBuildEventSource.EvaluateConditionStart), updateCondition).ShouldBe(read == 0 ? 3 : 0);
+
+            // This bookmark ends at the b.cs Update, even though final Source evaluation has already updated c.cs.
+            ProjectItem[] earlierItems = [.. provider.GetItems("BatchCacheBefore")];
+            earlierItems.Length.ShouldBe(3);
+            earlierItems[0].GetMetadataValue("Trace").ShouldBe("initial-a");
+            earlierItems[1].GetMetadataValue("Trace").ShouldBe("initial-b");
+            earlierItems[2].GetMetadataValue("Trace").ShouldBe("initial");
+            CountEvents(listener, nameof(MSBuildEventSource.EvaluateConditionStart), updateCondition).ShouldBe(0);
+
+            ProjectItem[] laterItems = [.. provider.GetItems("BatchCacheAfter")];
+            laterItems.Length.ShouldBe(3);
+            laterItems[0].GetMetadataValue("Trace").ShouldBe("initial-a");
+            laterItems[1].GetMetadataValue("Trace").ShouldBe("initial-b");
+            laterItems[2].GetMetadataValue("Trace").ShouldBe("initial-c");
+            CountEvents(listener, nameof(MSBuildEventSource.EvaluateConditionStart), updateCondition).ShouldBe(0);
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public void EquivalentExclusionsReuseCachedPrefixesWithoutReapplyingOperations(bool varyPatternCase)
@@ -591,7 +731,7 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
 
             string[] expectedIncludes = phase < 2 ? ["a.cs"] : [];
             includes.ShouldBe(expectedIncludes);
-            CountOperationApplications(listener, itemType).ShouldBe(expectedApplications[phase]);
+            CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType).ShouldBe(expectedApplications[phase]);
         }
 
         // The earlier reference needs the unpruned Include, not either nonempty exclusion context.
@@ -603,17 +743,17 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
 
         string[] expectedCopies = ["a.cs", "b.tmp"];
         copiedIncludes.ShouldBe(expectedCopies);
-        CountOperationApplications(listener, itemType).ShouldBe(1);
+        CountEvents(listener, nameof(MSBuildEventSource.ApplyLazyItemOperationsStart), itemType).ShouldBe(1);
     }
 
-    private static int CountOperationApplications(EventSourceTestHelper listener, string itemType)
+    private static int CountEvents(EventSourceTestHelper listener, string eventName, string firstPayload)
     {
         int count = 0;
         foreach (var eventData in listener.GetEvents())
         {
-            if (eventData.EventName == nameof(MSBuildEventSource.ApplyLazyItemOperationsStart)
-                && eventData.Payload is [string appliedItemType, ..]
-                && appliedItemType == itemType)
+            if (eventData.EventName == eventName
+                && eventData.Payload is [string payload, ..]
+                && payload == firstPayload)
             {
                 count++;
             }

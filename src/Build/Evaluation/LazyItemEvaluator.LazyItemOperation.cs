@@ -59,6 +59,11 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
         /// <summary>
+        ///  Gets whether this operation's prefix result is needed by a caller.
+        /// </summary>
+        public bool IsReferenced => _isReferenced;
+
+        /// <summary>
         ///  Marks this operation's prefix result for caching when it is computed.
         /// </summary>
         public void MarkAsReferenced() => _isReferenced = true;
@@ -83,6 +88,16 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
 
             // Snapshot creation remains outside the operation's profiling and event scope.
+            CacheResultIfReferenced(listBuilder, globsToIgnore);
+        }
+
+        /// <summary>
+        ///  Saves a completed prefix result when this operation has been marked as referenced.
+        /// </summary>
+        /// <param name="listBuilder">The items produced through this operation, excluding later operations.</param>
+        /// <param name="globsToIgnore">The exclusion context used for this computation.</param>
+        public void CacheResultIfReferenced(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        {
             if (_isReferenced)
             {
                 _lazyEvaluator.CacheItems(this, globsToIgnore, listBuilder.ToImmutable());
