@@ -60,13 +60,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="operationCount">The number of operations through the requested position.</param>
         /// <returns>
-        ///  A builder over the requested item result.
+        ///  An immutable snapshot through the requested position.
         /// </returns>
-        public OrderedItemDataCollection.Builder GetItemData(int operationCount)
+        public OrderedItemDataCollection GetItemData(int operationCount)
         {
             if (operationCount == 0)
             {
-                return OrderedItemDataCollection.CreateBuilder();
+                return OrderedItemDataCollection.Empty;
             }
 
             // Captured references announce their demand before evaluation; eager condition reads announce it here.
@@ -74,7 +74,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ItemOperation operation = _operations[operationCount - 1];
             if (_lazyEvaluator.TryGetCachedItems(operation, s_emptyRemoveGlobPatterns, out OrderedItemDataCollection? items))
             {
-                return items.ToBuilder();
+                return items;
             }
 
             operation.MarkAsNeeded();
@@ -86,9 +86,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="operationCount">The number of operations through the requested position.</param>
         /// <returns>
-        ///  The item result after applying the requested item state.
+        ///  The snapshot after applying operations through the requested position.
         /// </returns>
-        private OrderedItemDataCollection.Builder ComputeItems(int operationCount)
+        private OrderedItemDataCollection ComputeItems(int operationCount)
         {
             OrderedItemDataCollection.Builder? items = null;
             int firstUncachedIndex = operationCount;
@@ -177,7 +177,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // The requested position may end with a pending Update batch.
             updateBatch.ApplyTo(items);
 
-            return items;
+            return items.ToImmutable();
         }
 
         /// <summary>

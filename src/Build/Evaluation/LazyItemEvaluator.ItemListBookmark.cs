@@ -27,9 +27,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Gets all items visible at the bookmarked position.
         /// </summary>
         /// <returns>
-        ///  A builder over the captured item result.
+        ///  An immutable snapshot of the captured item result.
         /// </returns>
-        public OrderedItemDataCollection.Builder GetItemData()
+        public OrderedItemDataCollection GetItemData()
             => sequence.GetItemData(operationCount);
 
         /// <summary>

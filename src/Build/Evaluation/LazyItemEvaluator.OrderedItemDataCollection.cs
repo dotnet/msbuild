@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 #nullable disable
@@ -13,12 +14,17 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     /// A collection of ItemData that maintains insertion order and internally optimizes some access patterns, e.g. bulk removal
     /// based on normalized item values.
     /// </summary>
-    private sealed partial class OrderedItemDataCollection
+    private sealed partial class OrderedItemDataCollection : IEnumerable<ItemData>
     {
         /// <summary>
         /// The list of items in the collection. Defines the enumeration order.
         /// </summary>
-        private ImmutableList<ItemData> _list;
+        private readonly ImmutableList<ItemData> _list;
+
+        /// <summary>
+        ///  Gets the shared empty item collection.
+        /// </summary>
+        public static OrderedItemDataCollection Empty { get; } = new([]);
 
         private OrderedItemDataCollection(ImmutableList<ItemData> list)
         {
@@ -29,16 +35,24 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// Creates a new mutable collection.
         /// </summary>
         public static Builder CreateBuilder()
-        {
-            return new Builder(ImmutableList.CreateBuilder<ItemData>());
-        }
+            => new(ImmutableList.CreateBuilder<ItemData>());
 
         /// <summary>
         /// Creates a mutable view of this collection. Changes made to the returned builder are not reflected in this collection.
         /// </summary>
         public Builder ToBuilder()
-        {
-            return new Builder(_list.ToBuilder());
-        }
+            => new(_list.ToBuilder());
+
+        /// <summary>
+        ///  Gets an enumerator over the items in insertion order.
+        /// </summary>
+        /// <returns>
+        ///  An enumerator over this snapshot.
+        /// </returns>
+        public ImmutableList<ItemData>.Enumerator GetEnumerator() => _list.GetEnumerator();
+
+        IEnumerator<ItemData> IEnumerable<ItemData>.GetEnumerator() => GetEnumerator();
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
