@@ -501,6 +501,7 @@
     <Compile Include="Errors\InternalLoggerException.cs" />
     <Compile Include="Errors\InvalidProjectFileException.cs" />
     <Compile Include="Errors\InvalidToolsetDefinitionException.cs" />
+    <Compile Include="Errors\ProjectErrorUtilities.cs" />
     <Compile Include="Errors\RegistryException.cs" />
     <!-- #### EVALUATION ### -->
     <Compile Include="Evaluation\ConditionEvaluator.cs" />
@@ -651,20 +652,11 @@
     <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.cs" />
     <Compile Include="Xml\XmlReaderExtension.cs" />
-    <Compile Include="..\Shared\BuildEventFileInfo.cs">
-      <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectErrorUtilities.cs">
-      <Link>Errors\ProjectErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectFileErrorUtilities.cs">
-      <Link>Errors\ProjectFileErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>SharedUtilities\ResourceUtilities.cs</Link>

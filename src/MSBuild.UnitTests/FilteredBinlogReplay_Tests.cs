@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.CommandLine;
@@ -25,6 +26,7 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
     private const string SourceMessage = "replay-filter source message";
     private const string SourceWarning = "replay-filter source warning";
     private const string SourceError = "replay-filter source error";
+    private const string FilterNoticeHelpKeyword = "MSBuild.BinaryLogger.FilteredLog";
     private const string ImportedContent = "<Project><PropertyGroup><FromArchive>original</FromArchive></PropertyGroup></Project>";
     private readonly TestEnvironment _env;
 
@@ -95,7 +97,10 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         BuildEventArgs[] expected = ReadEvents(input)
             .Where(e => e.GetType() != typeof(BuildMessageEventArgs) && e is not BuildWarningEventArgs)
             .ToArray();
-        BuildEventArgs[] rewritten = ReadEvents(output);
+        BuildEventArgs[] events = ReadEvents(output);
+        BuildMessageEventArgs notice = AssertFilterNotice(events, "Warning, Message");
+        events[0].ShouldBeSameAs(notice);
+        BuildEventArgs[] rewritten = events.Skip(1).ToArray();
         rewritten.Select(e => e.GetType()).ShouldBe(expected.Select(e => e.GetType()));
         rewritten.Select(e => e.Message).ShouldBe(expected.Select(e => e.Message));
         rewritten.Select(e => e.BuildEventContext?.ProjectContextId).ShouldBe(expected.Select(e => e.BuildEventContext?.ProjectContextId));
@@ -294,7 +299,12 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         succeeded.ShouldBe(!fail, diagnostic);
 
         BuildEventArgs[] events = ReadEvents(filtered);
-        events.ShouldNotContain(e => e.GetType() == typeof(BuildMessageEventArgs) || e is BuildWarningEventArgs || e is BuildErrorEventArgs);
+        BuildMessageEventArgs notice = AssertFilterNotice(events, "Error, Warning, Message");
+        events.Where(e => e != notice).ShouldNotContain(e => e.GetType() == typeof(BuildMessageEventArgs) || e is BuildWarningEventArgs || e is BuildErrorEventArgs);
+        string noticeText = notice.Message.ShouldNotBeNull();
+        diagnostic.ShouldNotContain(noticeText);
+        File.ReadAllText(text).ShouldNotContain(noticeText);
+        ReadEvents(full).ShouldNotContain(e => e.Message == notice.Message);
         events.OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem().Succeeded.ShouldBe(!fail);
         events.OfType<ProjectStartedEventArgs>().ShouldHaveSingleItem();
         events.OfType<ProjectFinishedEventArgs>().ShouldHaveSingleItem();
@@ -351,12 +361,135 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         }
 
         BuildEventArgs[] expected = original.Where(e => e.GetType() != typeof(BuildMessageEventArgs) && e is not BuildWarningEventArgs).ToArray();
-        ReadEvents(output).Select(e => e.GetType()).ShouldBe(expected.Select(e => e.GetType()));
-        ReadEvents(output).Select(e => e.Message).ShouldBe(expected.Select(e => e.Message));
+        BuildEventArgs[] events = ReadEvents(output);
+        events[0].ShouldBeSameAs(AssertFilterNotice(events, "Warning, Message"));
+        events.Skip(1).Select(e => e.GetType()).ShouldBe(expected.Select(e => e.GetType()));
+        events.Skip(1).Select(e => e.Message).ShouldBe(expected.Select(e => e.Message));
         if (otherSubscriber)
         {
             other.Events.Select(e => e.Message).ShouldBe(original.Select(e => e.Message));
         }
+    }
+
+    [Theory]
+    [InlineData("", false, null)]
+    [InlineData("", true, null)]
+    [InlineData("Exclude=Warning", false, "Warning")]
+    [InlineData("Exclude=Warning", true, "Warning")]
+    [InlineData("Exclude=message,WARNING,Message", false, "Warning, Message")]
+    [InlineData("Exclude=message,WARNING,Message", true, "Warning, Message")]
+    public void BinaryLoggerFilter_NoticeIsIndependentOfInitialInfo(string expression, bool omitInitialInfo, string? excludedKinds)
+    {
+        string output = OutputPath();
+        var source = new EventArgsDispatcher();
+        var logger = CreateLogger(output, expression, ";ProjectImports=None" + (omitInitialInfo ? ";OmitInitialInfo" : ""));
+        try
+        {
+            logger.Initialize(source);
+            source.Dispatch(new BuildStartedEventArgs("source build started", string.Empty));
+            source.Dispatch(new BuildFinishedEventArgs("source build finished", string.Empty, succeeded: true));
+        }
+        finally
+        {
+            logger.Shutdown();
+        }
+
+        BuildEventArgs[] events = ReadEvents(output);
+        if (excludedKinds is not null)
+        {
+            BuildMessageEventArgs notice = AssertFilterNotice(events, excludedKinds);
+            Array.IndexOf(events, notice).ShouldBeLessThan(Array.FindIndex(events, e => e is BuildStartedEventArgs));
+        }
+
+        bool hasInitialInfo = !omitInitialInfo && !BinaryLogger.ParseParameters(expression).ExcludedEventKinds.Contains(BinaryLogRecordKind.Message);
+        events.Count(e => e is BuildMessageEventArgs).ShouldBe((hasInitialInfo ? 2 : 0) + (excludedKinds is null ? 0 : 1));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BinaryLoggerFilter_UnfilteredRewritePreservesNotice(bool structuredReplay)
+    {
+        string input = CreateInput();
+        string filtered = OutputPath();
+        CreateOperation(input, filtered)
+            .Replay([CreateLogger(filtered, parameters: ";OmitInitialInfo")], 1, CancellationToken.None).ShouldBeTrue();
+        string output = OutputPath("rewritten.binlog");
+        var source = new BinaryLogReplayEventSource();
+        if (structuredReplay)
+        {
+            source.BuildFinished += (_, _) => { };
+        }
+
+        var logger = CreateLogger(output, "", ";OmitInitialInfo");
+        try
+        {
+            logger.Initialize(source);
+            source.Replay(filtered);
+        }
+        finally
+        {
+            logger.Shutdown();
+        }
+
+        AssertFilterNotice(ReadEvents(output), "Message");
+        ReadEvents(output).Select(e => e.Message).ShouldBe(ReadEvents(filtered).Select(e => e.Message));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void BinaryLoggerFilter_RepeatedFilteredRewritePreservesNotices(bool omitInitialInfo)
+    {
+        string input = CreateInput(succeeded: false, includeError: true);
+        string parameters = omitInitialInfo ? ";OmitInitialInfo" : "";
+        string[] exclusions = ["Warning", "Message", "Error, Message"];
+        for (int pass = 0; pass < exclusions.Length; pass++)
+        {
+            string output = OutputPath($"filtered-{pass}.binlog");
+            string expression = $"Exclude={exclusions[pass]}";
+            CreateOperation(input, output, expression, parameters)
+                .Replay([CreateLogger(output, expression, parameters)], 1, CancellationToken.None).ShouldBeTrue();
+
+            BuildEventArgs[] events = ReadEvents(output);
+            foreach (string excludedKinds in exclusions.Take(pass + 1))
+            {
+                AssertFilterNotice(events, excludedKinds);
+            }
+
+            input = output;
+        }
+
+        BuildEventArgs[] rewritten = ReadEvents(input);
+        rewritten.ShouldNotContain(e => e.Message == SourceMessage || e.Message == SourceWarning || e.Message == SourceError);
+        rewritten.OfType<BuildFinishedEventArgs>().ShouldHaveSingleItem().Succeeded.ShouldBeFalse();
+        AssertNoStagingFiles();
+    }
+
+    [Theory]
+    [InlineData(FilterNoticeHelpKeyword, true, true)]
+    [InlineData(null, true, false)]
+    [InlineData("AnotherMessage", true, false)]
+    [InlineData(FilterNoticeHelpKeyword, false, false)]
+    public void BinaryLoggerFilter_PreservesNoticesByMetadata(string? helpKeyword, bool buildLevel, bool expectPreserved)
+    {
+        const string priorNoticeText = "Prior filter notice with different localized wording";
+        string input = OutputPath("input.binlog");
+        WriteEvents(input,
+        [
+            new BuildMessageEventArgs(priorNoticeText, helpKeyword, null, MessageImportance.Normal)
+            {
+                BuildEventContext = buildLevel ? BuildEventContext.Invalid : new BuildEventContext(1, 2, 3, 4),
+            },
+        ]);
+        string output = OutputPath();
+        CreateOperation(input, output, parameters: ";OmitInitialInfo")
+            .Replay([CreateLogger(output, parameters: ";OmitInitialInfo")], 1, CancellationToken.None).ShouldBeTrue();
+
+        BuildEventArgs[] events = ReadEvents(output);
+        AssertFilterNotice(events, "Message");
+        events.Any(e => e.Message == priorNoticeText).ShouldBe(expectPreserved);
+        events.Length.ShouldBe(expectPreserved ? 2 : 1);
     }
 
     [Fact]
@@ -389,7 +522,8 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
             logger.Shutdown();
         }
 
-        ReadEvents(output).ShouldBeEmpty();
+        BuildEventArgs[] events = ReadEvents(output);
+        events.ShouldHaveSingleItem().ShouldBeSameAs(AssertFilterNotice(events, "Message"));
     }
 
     [Theory]
@@ -417,6 +551,17 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         ReadEvents(second).ShouldNotContain(e => e.Message == SourceWarning);
         ReadEvents(full).ShouldContain(e => e.Message == SourceMessage);
         ReadEvents(full).ShouldContain(e => e.Message == SourceWarning);
+        BuildMessageEventArgs firstNotice = AssertFilterNotice(ReadEvents(first), "Message");
+        BuildMessageEventArgs secondNotice = AssertFilterNotice(ReadEvents(second), "Warning");
+        ReadEvents(first).ShouldNotContain(e => e.Message == secondNotice.Message);
+        ReadEvents(second).ShouldNotContain(e => e.Message == firstNotice.Message);
+        ReadEvents(full).ShouldNotContain(e => e.Message == firstNotice.Message || e.Message == secondNotice.Message);
+        string firstNoticeText = firstNotice.Message.ShouldNotBeNull();
+        string secondNoticeText = secondNotice.Message.ShouldNotBeNull();
+        diagnostic.ShouldNotContain(firstNoticeText);
+        diagnostic.ShouldNotContain(secondNoticeText);
+        File.ReadAllText(text).ShouldNotContain(firstNoticeText);
+        File.ReadAllText(text).ShouldNotContain(secondNoticeText);
         diagnostic.ShouldContain(SourceMessage);
         diagnostic.ShouldContain(SourceWarning);
         File.ReadAllText(text).ShouldContain(SourceMessage);
@@ -831,14 +976,21 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
             using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(path);
             if (expectedPresent)
             {
-                reader.Read(metadata =>
-                {
-                    metadata.RecordKind.ShouldBe(recordedKind);
-                    return true;
-                }).ShouldNotBeNull().Message.ShouldBe(SourceMessage);
+                ReadDiagnostic().ShouldNotBeNull().Message.ShouldBe(SourceMessage);
             }
 
-            reader.Read().ShouldBeNull();
+            ReadDiagnostic().ShouldBeNull();
+
+            BuildEventArgs? ReadDiagnostic() => reader.Read(metadata =>
+            {
+                if (metadata.RecordKind == BinaryLogRecordKind.Message && BuildEventContext.Invalid.Equals(metadata.BuildEventContext))
+                {
+                    return false;
+                }
+
+                metadata.RecordKind.ShouldBe(recordedKind);
+                return true;
+            });
         }
     }
 
@@ -938,7 +1090,9 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         CreateOperation(input, output, "Exclude=Warning", ";OmitInitialInfo")
             .Replay([CreateLogger(output, "Exclude=Warning", ";OmitInitialInfo")], 1, CancellationToken.None).ShouldBeTrue();
 
-        BuildMessageEventArgs message = ReadEvents(output).OfType<BuildMessageEventArgs>().ShouldHaveSingleItem();
+        BuildEventArgs[] events = ReadEvents(output);
+        BuildMessageEventArgs notice = AssertFilterNotice(events, "Warning");
+        BuildMessageEventArgs message = events.Where(e => e != notice).OfType<BuildMessageEventArgs>().ShouldHaveSingleItem();
         message.BuildEventContext!.ProjectContextId.ShouldBe(3);
         AssertNoStagingFiles();
     }
@@ -1268,6 +1422,18 @@ public sealed class FilteredBinlogReplay_Tests : IDisposable
         source.AnyEventRaised += (_, e) => events.Add(e);
         source.Replay(path);
         return events.ToArray();
+    }
+
+    private static BuildMessageEventArgs AssertFilterNotice(BuildEventArgs[] events, string excludedKinds)
+    {
+        var resources = new ResourceManager("Microsoft.Build.Strings", typeof(BinaryLogger).Assembly);
+        string expected = string.Format(CultureInfo.CurrentCulture, resources.GetString("Binlog_FilteredLog")!, excludedKinds);
+        var notice = events.Where(e => e.Message == expected).ShouldHaveSingleItem().ShouldBeOfType<BuildMessageEventArgs>();
+        notice.BuildEventContext.ShouldBe(BuildEventContext.Invalid);
+        notice.HelpKeyword.ShouldBe(FilterNoticeHelpKeyword);
+        notice.SenderName.ShouldBeNull();
+        notice.Importance.ShouldBe(MessageImportance.Normal);
+        return notice;
     }
 
     private static void WriteCompressedLog(string path, Action<BinaryWriter> write)

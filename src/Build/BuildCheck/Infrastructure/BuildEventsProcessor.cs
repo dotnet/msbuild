@@ -8,6 +8,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -249,8 +250,11 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     {
         if (!checkWrapper.Check.SupportedRules.Contains(result.CheckRule))
         {
-            checkContext.DispatchAsErrorFromText(null, null, null,
-                BuildEventFileInfo.Empty,
+            checkContext.DispatchAsErrorFromText(
+                DiagnosticSubcategory.None,
+                errorCode: null,
+                helpKeyword: null,
+                ElementLocation.Empty,
                 $"The check '{checkWrapper.Check.FriendlyName}' reported a result for a rule '{result.CheckRule.Id}' that it does not support.");
             return;
         }

@@ -261,6 +261,11 @@ namespace Microsoft.Build.Execution
         private BuildTelemetry? _buildTelemetry;
 
         /// <summary>
+        /// Whether the captured build target belongs to the synthetic restore submission created by -restore.
+        /// </summary>
+        private bool _buildTelemetryTargetIsRestorePrepass;
+
+        /// <summary>
         /// Logger, that if instantiated - will receive and expose telemetry data from worker nodes.
         /// </summary>
         private InternalTelemetryConsumingLogger? _telemetryConsumingLogger;
@@ -607,6 +612,7 @@ namespace Microsoft.Build.Execution
 
                 // Initiate build telemetry data
                 DateTime now = DateTime.UtcNow;
+                _buildTelemetryTargetIsRestorePrepass = false;
 
                 // Acquire it from static variable so we can apply data collected up to this moment
                 _buildTelemetry = KnownTelemetry.PartialBuildTelemetry;
@@ -1118,7 +1124,22 @@ namespace Microsoft.Build.Execution
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
                     _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
-                    _buildTelemetry.BuildTarget ??= string.Join(",", requestData.TargetNames);
+
+                    // With -restore, the Restore submission precedes the build; report the build's targets instead.
+                    if (_buildTelemetry.BuildTarget is null)
+                    {
+                        _buildTelemetry.BuildTarget = string.Join(",", requestData.TargetNames);
+                        _buildTelemetryTargetIsRestorePrepass =
+                            requestData.TargetNames.Count == 1 &&
+                            string.Equals(requestData.TargetNames.First(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase) &&
+                            requestData.GlobalPropertiesLookup.TryGetValue(MSBuildConstants.MSBuildIsRestoring, out string? isRestoring) &&
+                            string.Equals(isRestoring, bool.TrueString, StringComparison.OrdinalIgnoreCase);
+                    }
+                    else if (_buildTelemetryTargetIsRestorePrepass)
+                    {
+                        _buildTelemetry.BuildTarget = string.Join(",", requestData.TargetNames);
+                        _buildTelemetryTargetIsRestorePrepass = false;
+                    }
                 }
 
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -1220,7 +1241,7 @@ namespace Microsoft.Build.Execution
                     bool recovered;
                     try
                     {
-                        entries = _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.EmptyLocation, out recovered);
+                        entries = _multiThreadedStrictModeScope.VerifyUnresolvedPathWrites(ElementLocation.Empty, out recovered);
                     }
                     catch (InvalidProjectFileException e)
                     {
@@ -1242,7 +1263,7 @@ namespace Microsoft.Build.Execution
                                 "MultiThreadedStrictModeUnresolvedPathWrite", entries, _multiThreadedStrictModeScope.SentinelDirectory);
                         Assumed.NotNull(warningCode, "The strict-mode warning must have a diagnostic code.");
                         loggingService.LogWarningFromText(
-                            BuildEventContext.Invalid, null, warningCode, helpKeyword, BuildEventFileInfo.Empty, message);
+                            BuildEventContext.Invalid, DiagnosticSubcategory.None, warningCode, helpKeyword, ElementLocation.Empty, message);
                         WaitForAllLoggingServiceEventsToBeProcessed();
 
                         if (loggingService.ShouldTreatWarningAsError(BuildEventContext.Invalid, warningCode))
@@ -1356,6 +1377,7 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
                             _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
                             _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
+                            _buildTelemetry.TelemetrySchemaVersion = BuildTelemetry.CurrentSchemaVersion;
 
                             // Populate error categorization data from the logging service
                             if (!_overallBuildSuccess)
@@ -1366,6 +1388,7 @@ namespace Microsoft.Build.Execution
                             string? host = BuildEnvironmentState.GetHostName();
 
                             _buildTelemetry.BuildEngineHost = host;
+                            _buildTelemetry.IsCI = BuildEnvironmentState.IsAutomatedEnvironment();
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
                             _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
@@ -1397,6 +1420,7 @@ namespace Microsoft.Build.Execution
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
+                            _buildTelemetryTargetIsRestorePrepass = false;
                         }
                     }
 
@@ -1458,6 +1482,11 @@ namespace Microsoft.Build.Execution
                 .SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                     includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                     includeTargetDetails: false));
+
+            if (_buildTelemetry?.BuildSuccess == false)
+            {
+                activity?.SetUserFault();
+            }
         }
 
         /// <summary>
@@ -1558,8 +1587,7 @@ namespace Microsoft.Build.Execution
                                     if (executingRequest is not null)
                                     {
                                         string? projectFile = _configCache?[executingRequest.ConfigurationId]?.ProjectFullPath;
-                                        string projectName = projectFile is not null ? Path.GetFileName(projectFile) : "?";
-                                        nodeDetails.Add($"{nodeId}:{executingRequest.ConfigurationId}:{projectName}");
+                                        nodeDetails.Add(CrashTelemetry.FormatActiveNodeDetail(nodeId, executingRequest.ConfigurationId, projectFile));
                                     }
                                     else
                                     {
@@ -1591,7 +1619,7 @@ namespace Microsoft.Build.Execution
                         ICollection<string>? loggerTypes = loggingService.RegisteredLoggerTypeNames;
                         if (loggerTypes is { Count: > 0 })
                         {
-                            telemetry.RegisteredLoggerTypeNames = string.Join(";", loggerTypes);
+                            telemetry.RegisteredLoggerTypeNames = CrashTelemetry.FormatRegisteredLoggerTypeNames(loggerTypes);
                         }
                     }
                 }
@@ -2382,7 +2410,10 @@ namespace Microsoft.Build.Execution
                         if (ex is not InvalidProjectFileException)
                         {
                             var buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                            ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
+                            ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(
+                                buildEventContext,
+                                ex,
+                                ElementLocation.Create(submission.BuildRequestData.ProjectFullPath));
                         }
                     }
 
@@ -3016,7 +3047,13 @@ namespace Microsoft.Build.Execution
                     {
                         BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                         string exception = DebugUtils.ReadAnyExceptionFromFile(_instantiationTimeUtc);
-                        loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, DebugUtils.DebugDumpPath, exception);
+                        loggingService?.LogError(
+                            buildEventContext,
+                            ElementLocation.Empty,  // no project file
+                            "ChildExitedPrematurely",
+                            node,
+                            DebugUtils.DebugDumpPath,
+                            exception);
                     }
                 }
                 else if (shutdownPacket.Reason == NodeShutdownReason.Error && _buildSubmissions.Values.Count == 0)
@@ -3025,7 +3062,13 @@ namespace Microsoft.Build.Execution
                     if (shutdownPacket.Exception != null)
                     {
                         ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent<ILoggingService>(BuildComponentType.LoggingService);
-                        loggingService?.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, DebugUtils.DebugDumpPath, shutdownPacket.Exception.ToString());
+                        loggingService?.LogError(
+                            BuildEventContext.Invalid,
+                            ElementLocation.Empty, // no project file
+                            "ChildExitedPrematurely",
+                            node,
+                            DebugUtils.DebugDumpPath,
+                            shutdownPacket.Exception.ToString());
                         OnThreadException(shutdownPacket.Exception);
                     }
                 }
@@ -3171,7 +3214,11 @@ namespace Microsoft.Build.Execution
                         if (newNodes?.Count != response.NumberOfNodesToCreate || newNodes.Any(n => n == null))
                         {
                             BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                            ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
+                            ((IBuildComponentHost)this).LoggingService.LogError(
+                                buildEventContext,
+                                ElementLocation.Empty,
+                                "UnableToCreateNode",
+                                response.RequiredNodeType.ToString("G"));
 
                             throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
                         }
@@ -3624,10 +3671,10 @@ namespace Microsoft.Build.Execution
                 {
                     loggingService.LogWarningFromText(
                         BuildEventContext.Invalid,
-                        subcategoryResourceName: null,
+                        DiagnosticSubcategory.None,
                         warningCode: message.Code,
                         helpKeyword: null,
-                        file: BuildEventFileInfo.Empty,
+                        location: ElementLocation.Empty,
                         message: message.Text);
                 }
                 else if (message.BuildEvent is not null)
@@ -3812,10 +3859,10 @@ namespace Microsoft.Build.Execution
 
             loggingService?.LogErrorFromText(
                 BuildEventContext.Invalid,
-                null,
-                null,
-                null,
-                BuildEventFileInfo.Empty,
+                DiagnosticSubcategory.None,
+                errorCode: null,
+                helpKeyword: null,
+                ElementLocation.Empty,
                 message);
 
             CancelAndMarkAsFailure();

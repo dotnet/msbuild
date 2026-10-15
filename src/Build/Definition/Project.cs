@@ -20,6 +20,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Framework.Constants;
@@ -3211,7 +3212,10 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!IsBuildEnabled)
                 {
-                    LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
+                    LoggingService.LogError(
+                        s_buildEventContext,
+                        ElementLocation.Create(FullPath),
+                        "SecurityProjectBuildDisabled");
                     if (LoggingService is LoggingService defaultLoggingService)
                     {
                         defaultLoggingService.WaitForLoggingToProcessEvents();

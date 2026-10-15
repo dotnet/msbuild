@@ -530,7 +530,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 importingElement.SdkReference.Name.ShouldBe(SdkName);
                 importingElement.SdkReference.Version.ShouldBe(expectedVersion);
                 importingElement.SdkReference.MinimumVersion.ShouldBe(expectedMinimumVersion);
-                importingElement.SdkLocation.ShouldBe(ElementLocation.EmptyLocation);
+                importingElement.SdkLocation.ShouldBe(ElementLocation.Empty);
                 importingElement.OriginalElement.ShouldBeOfType(expectedOriginalElementType);
 
                 var implicitLocation = i == 0

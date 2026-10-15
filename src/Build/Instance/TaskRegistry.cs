@@ -16,6 +16,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -511,7 +512,7 @@ namespace Microsoft.Build.Execution
                     {
                         if (rec.RegisteredName.Equals(taskIdentity.Name, StringComparison.OrdinalIgnoreCase))
                         {
-                            loggingContext.LogError(new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", info.TaskName);
+                            loggingContext.LogError(projectUsingTaskInXml.OverrideLocation, "DuplicateOverrideUsingTaskElement", info.TaskName);
                             break;
                         }
                     }
@@ -891,15 +892,20 @@ namespace Microsoft.Build.Execution
             internal class Stats()
             {
                 public short ExecutedCount { get; private set; } = 0;
-                public long TotalMemoryConsumption { get; private set; } = 0;
+                public long? TotalMemoryConsumption { get; private set; }
                 private readonly Stopwatch _executedSw = new Stopwatch();
+#if NET
                 private long _memoryConsumptionOnStart;
+#endif
 
                 public TimeSpan ExecutedTime => _executedSw.Elapsed;
 
                 public void ExecutionStarted()
                 {
+#if NET
                     _memoryConsumptionOnStart = GetMemoryAllocated();
+                    TotalMemoryConsumption ??= 0;
+#endif
                     _executedSw.Start();
                     ExecutedCount++;
                 }
@@ -907,23 +913,23 @@ namespace Microsoft.Build.Execution
                 public void ExecutionStopped()
                 {
                     _executedSw.Stop();
-                    TotalMemoryConsumption += GetMemoryAllocated() - _memoryConsumptionOnStart;
-                }
-
-                private static long GetMemoryAllocated()
-                {
 #if NET
-                    return GC.GetTotalAllocatedBytes(false);
-#else
-                    return GC.GetTotalMemory(false);
+                    TotalMemoryConsumption += GetMemoryAllocated() - _memoryConsumptionOnStart;
 #endif
                 }
+
+#if NET
+                private static long GetMemoryAllocated()
+                {
+                    return GC.GetTotalAllocatedBytes(false);
+                }
+#endif
 
                 public void Reset()
                 {
                     ExecutedCount = 0;
                     _executedSw.Reset();
-                    TotalMemoryConsumption = 0;
+                    TotalMemoryConsumption = null;
                 }
             }
 
@@ -1272,7 +1278,12 @@ namespace Microsoft.Build.Execution
                                 {
                                     if (exception != null)
                                     {
-                                        targetLoggingContext.LogError(new BuildEventFileInfo(taskProjectFile), "TaskFactoryLoadFailure", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation, exception.Message);
+                                        targetLoggingContext.LogError(
+                                            ElementLocation.Create(taskProjectFile),
+                                            "TaskFactoryLoadFailure",
+                                            TaskFactoryAttributeName,
+                                            taskFactoryLoadInfo.AssemblyLocation,
+                                            exception.Message);
                                     }
                                 }
 
@@ -1325,12 +1336,12 @@ namespace Microsoft.Build.Execution
                                         if (initialized && containsArchOrRuntimeParam)
                                         {
                                             targetLoggingContext.LogWarning(
-                                                null,
-                                                    new BuildEventFileInfo(elementLocation),
-                                                    "TaskFactoryWillIgnoreTaskFactoryParameters",
-                                                    factory.FactoryName,
-                                                    XMakeAttributes.runtime,
-                                                    XMakeAttributes.architecture,
+                                                DiagnosticSubcategory.None,
+                                                elementLocation,
+                                                "TaskFactoryWillIgnoreTaskFactoryParameters",
+                                                factory.FactoryName,
+                                                XMakeAttributes.runtime,
+                                                XMakeAttributes.architecture,
                                                 RegisteredName);
                                         }
                                     }
@@ -1364,7 +1375,7 @@ namespace Microsoft.Build.Execution
 
                                 // Could get an invalid cast when Creating Instance and UnWrap due to the framework assembly not being the same.
                                 targetLoggingContext.LogError(
-                                    new BuildEventFileInfo(elementLocation.File, elementLocation.Line, elementLocation.Column),
+                                    elementLocation,
                                     "TaskFactoryInstantiationFailureErrorInvalidCast",
                                     TaskFactoryAttributeName,
                                     taskFactoryLoadInfo.AssemblyLocation,

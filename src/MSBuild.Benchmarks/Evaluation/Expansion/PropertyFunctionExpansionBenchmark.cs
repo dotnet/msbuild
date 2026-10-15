@@ -100,5 +100,5 @@ public class PropertyFunctionExpansionBenchmark
         => _fixture.Expander.ExpandIntoStringLeaveEscaped(
             expression,
             ExpanderOptions.ExpandProperties,
-            ElementLocation.EmptyLocation);
+            ElementLocation.Empty);
 }

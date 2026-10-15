@@ -2052,7 +2052,7 @@ namespace Microsoft.Build.Execution
             else
             {
                 _loggingContext?.ProcessPropertyRead(
-                    new PropertyReadInfo(name, ElementLocation.EmptyLocation, false, PropertyReadContext.Other));
+                    new PropertyReadInfo(name, ElementLocation.Empty, false, PropertyReadContext.Other));
             }
 
             return unescapedValue;
@@ -2073,7 +2073,7 @@ namespace Microsoft.Build.Execution
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValue, false /* may not be reserved */, _isImmutable);
             _properties.Set(property);
 
-            _loggingContext?.ProcessPropertyWrite(new PropertyWriteInfo(name, false, ElementLocation.EmptyLocation));
+            _loggingContext?.ProcessPropertyWrite(new PropertyWriteInfo(name, false, ElementLocation.Empty));
 
             return property;
         }
@@ -2993,14 +2993,14 @@ namespace Microsoft.Build.Execution
                 beforeTargets ?? String.Empty,
                 afterTargets ?? String.Empty,
                 _projectFileLocation,
-                String.IsNullOrEmpty(condition) ? null : ElementLocation.EmptyLocation,
-                String.IsNullOrEmpty(inputs) ? null : ElementLocation.EmptyLocation,
-                String.IsNullOrEmpty(outputs) ? null : ElementLocation.EmptyLocation,
-                String.IsNullOrEmpty(returns) ? null : ElementLocation.EmptyLocation,
-                String.IsNullOrEmpty(keepDuplicateOutputs) ? null : ElementLocation.EmptyLocation,
-                String.IsNullOrEmpty(dependsOnTargets) ? null : ElementLocation.EmptyLocation,
-                String.IsNullOrEmpty(beforeTargets) ? null : ElementLocation.EmptyLocation,
-                String.IsNullOrEmpty(afterTargets) ? null : ElementLocation.EmptyLocation,
+                String.IsNullOrEmpty(condition) ? null : ElementLocation.Empty,
+                String.IsNullOrEmpty(inputs) ? null : ElementLocation.Empty,
+                String.IsNullOrEmpty(outputs) ? null : ElementLocation.Empty,
+                String.IsNullOrEmpty(returns) ? null : ElementLocation.Empty,
+                String.IsNullOrEmpty(keepDuplicateOutputs) ? null : ElementLocation.Empty,
+                String.IsNullOrEmpty(dependsOnTargets) ? null : ElementLocation.Empty,
+                String.IsNullOrEmpty(beforeTargets) ? null : ElementLocation.Empty,
+                String.IsNullOrEmpty(afterTargets) ? null : ElementLocation.Empty,
                 new ObjectModel.ReadOnlyCollection<ProjectTargetInstanceChild>(new List<ProjectTargetInstanceChild>()),
                 new ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance>(new List<ProjectOnErrorInstance>()),
                 parentProjectSupportsReturnsAttribute);
@@ -3260,7 +3260,7 @@ namespace Microsoft.Build.Execution
             ArgumentNullException.ThrowIfNull(buildParameters);
 
             _directory = xml.DirectoryPath;
-            _projectFileLocation = xml.ProjectFileLocation ?? ElementLocation.EmptyLocation;
+            _projectFileLocation = xml.ProjectFileLocation ?? ElementLocation.Empty;
             _properties = new PropertyDictionary<ProjectPropertyInstance>();
             _items = new ItemDictionary<ProjectItemInstance>();
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
