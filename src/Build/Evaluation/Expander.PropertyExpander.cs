@@ -42,8 +42,7 @@ internal partial class Expander<P, I>
     private readonly ref struct PropertyExpander
     {
         private const string RegistryPrefix = "Registry:";
-        private const string SolutionsVsVersionProperty = "Solutions.VSVersion";
-        private const string SolutionsVsVersionExpression = "$(" + SolutionsVsVersionProperty + ")";
+        private const string SolutionsVsVersionExpression = "$(Solutions.VSVersion)";
         private const string VstsDbDirectoryProperty = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory";
 
         private readonly IPropertyProvider<P> _properties;
@@ -329,7 +328,9 @@ internal partial class Expander<P, I>
             //       Condition=" '$(Solutions.VSVersion)' == '8.0'"
             // These would have been '' in prior versions of msbuild but would be treated as a possible string function in current versions.
             // Be compatible by returning an empty string here.
-            if (length == SolutionsVsVersionProperty.Length &&
+            // The property body starts at index 2 only when the "$(" marker starts at index 0.
+            if (startIndex == 2 &&
+                expression.Length == SolutionsVsVersionExpression.Length &&
                 string.Equals(expression, SolutionsVsVersionExpression, StringComparison.Ordinal))
             {
                 return string.Empty;
