@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -14,6 +15,7 @@ using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -39,6 +41,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public TaskBuilder_Tests(ITestOutputHelper output)
         {
             _testOutput = output;
+        }
+
+        [Theory]
+        [InlineData(LoggerVerbosity.Normal, false)]
+        [InlineData(LoggerVerbosity.Detailed, true)]
+        [InlineData(LoggerVerbosity.Diagnostic, true)]
+        public void FalseTaskConditionDetailsFollowLoggerVerbosity(LoggerVerbosity verbosity, bool shouldLogCondition)
+        {
+            const string conditionMarker = "TASK_FALSE_CONDITION_MARKER";
+            StringBuilder log = new();
+            ConsoleLogger logger = new(verbosity, message => log.Append(message), colorSet: null, colorReset: null);
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(
+                $"""
+                <Project>
+                  <Target Name="Build">
+                    <Message Text="Should not be logged" Condition="'{conditionMarker}' == 'true'" />
+                  </Target>
+                </Project>
+                """,
+                logger);
+
+            if (shouldLogCondition)
+            {
+                log.ToString().ShouldContain(conditionMarker);
+            }
+            else
+            {
+                log.ToString().ShouldNotContain(conditionMarker);
+            }
         }
 
         /*********************************************************************************

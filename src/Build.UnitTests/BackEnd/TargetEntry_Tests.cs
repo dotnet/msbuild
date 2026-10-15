@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -15,7 +16,8 @@ using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Logging;
+using Shouldly;
 using Xunit;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
@@ -67,6 +69,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _nodeRequestId = 1;
             _host = new MockHost();
             _host.OnLoggingThreadException += this.LoggingException;
+        }
+
+        [Theory]
+        [InlineData(LoggerVerbosity.Normal, false)]
+        [InlineData(LoggerVerbosity.Detailed, true)]
+        [InlineData(LoggerVerbosity.Diagnostic, true)]
+        public void FalseTargetConditionDetailsFollowLoggerVerbosity(LoggerVerbosity verbosity, bool shouldLogCondition)
+        {
+            const string conditionMarker = "TARGET_FALSE_CONDITION_MARKER";
+            StringBuilder log = new();
+            ConsoleLogger logger = new(verbosity, message => log.Append(message), colorSet: null, colorReset: null);
+
+            ObjectModelHelpers.BuildProjectExpectSuccess(
+                $"""
+                <Project>
+                  <Target Name="Build" Condition="'{conditionMarker}' == 'true'" />
+                </Project>
+                """,
+                logger);
+
+            if (shouldLogCondition)
+            {
+                log.ToString().ShouldContain(conditionMarker);
+            }
+            else
+            {
+                log.ToString().ShouldNotContain(conditionMarker);
+            }
         }
 
         /// <summary>
