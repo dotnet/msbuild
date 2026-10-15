@@ -206,6 +206,7 @@
     <Compile Include="Evaluation\ExpanderOptions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\IntrinsicFunctionOverload.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.ItemCacheKey.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemData.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemListReference.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ItemOperationSequence.cs" />

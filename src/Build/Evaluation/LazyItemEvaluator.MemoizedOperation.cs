@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 #if DEBUG
 using System.Diagnostics;
@@ -22,22 +21,27 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     private class MemoizedOperation
     {
         public LazyItemOperation Operation { get; }
-        private Dictionary<ISet<string>, OrderedItemDataCollection> _cache;
-
         private bool _isReferenced;
-#if DEBUG
-        private int _applyCalls;
-#endif
 
         public MemoizedOperation(LazyItemOperation operation)
         {
             Operation = operation;
         }
 
-        public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+        /// <summary>
+        ///  Applies the operation and admits its prefix result to the shared cache when referenced.
+        /// </summary>
+        /// <param name="lazyEvaluator">The evaluator that owns the cached prefix results.</param>
+        /// <param name="listBuilder">The items produced by preceding operations.</param>
+        /// <param name="globsToIgnore">The exclusion context used for this computation.</param>
+        public void Apply(
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator,
+            OrderedItemDataCollection.Builder listBuilder,
+            ImmutableHashSet<string> globsToIgnore)
         {
 #if DEBUG
-            CheckInvariant();
+            Debug.Assert(!lazyEvaluator.TryGetCachedItems(Operation, globsToIgnore, out _),
+                "Apply should only be called for an uncached operation and exclusion context");
 #endif
 
             Operation.Apply(listBuilder, globsToIgnore);
@@ -45,41 +49,28 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // cache results if somebody is referencing this operation
             if (_isReferenced)
             {
-                AddItemsToCache(globsToIgnore, listBuilder.ToImmutable());
+                lazyEvaluator.CacheItems(Operation, globsToIgnore, listBuilder.ToImmutable());
             }
 #if DEBUG
-            _applyCalls++;
-            CheckInvariant();
+            Debug.Assert(lazyEvaluator.TryGetCachedItems(Operation, globsToIgnore, out _) == _isReferenced,
+                "Only referenced operation results should be cached");
 #endif
         }
 
-#if DEBUG
-        private void CheckInvariant()
-        {
-            if (_isReferenced)
-            {
-                var cacheCount = _cache?.Count ?? 0;
-                Debug.Assert(_applyCalls == cacheCount, "Apply should only be called once per globsToIgnore. Otherwise caching is not working");
-            }
-            else
-            {
-                // non referenced operations should not be cached
-                // non referenced operations should have as many apply calls as the number of cache keys of the immediate dominator with _isReferenced == true
-                Debug.Assert(_cache == null);
-            }
-        }
-#endif
-
-        public bool TryGetFromCache(ISet<string> globsToIgnore, out OrderedItemDataCollection items)
-        {
-            if (_cache != null)
-            {
-                return _cache.TryGetValue(globsToIgnore, out items);
-            }
-
-            items = null;
-            return false;
-        }
+        /// <summary>
+        ///  Looks up this operation's prefix result in the evaluator's shared cache.
+        /// </summary>
+        /// <param name="lazyEvaluator">The evaluator that owns the cached prefix results.</param>
+        /// <param name="globsToIgnore">The exclusion context required by the caller.</param>
+        /// <param name="items">The cached result when a matching entry exists.</param>
+        /// <returns>
+        ///  Whether a result exists for this operation and exclusion context.
+        /// </returns>
+        public bool TryGetFromCache(
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator,
+            ImmutableHashSet<string> globsToIgnore,
+            out OrderedItemDataCollection items)
+            => lazyEvaluator.TryGetCachedItems(Operation, globsToIgnore, out items);
 
         /// <summary>
         /// Somebody is referencing this operation
@@ -87,16 +78,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         public void MarkAsReferenced()
         {
             _isReferenced = true;
-        }
-
-        private void AddItemsToCache(ImmutableHashSet<string> globsToIgnore, OrderedItemDataCollection items)
-        {
-            if (_cache == null)
-            {
-                _cache = new Dictionary<ISet<string>, OrderedItemDataCollection>();
-            }
-
-            _cache[globsToIgnore] = items;
         }
     }
 }
