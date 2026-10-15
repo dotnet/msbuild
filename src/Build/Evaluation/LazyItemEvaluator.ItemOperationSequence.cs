@@ -1,13 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.CodeAnalysis.Collections;
 
 namespace Microsoft.Build.Evaluation;
@@ -145,76 +140,28 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack.PeekOrDefault(s_emptyGlobsToIgnore);
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
-            Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
-            bool addedToBatch = false;
+            UpdateBatch updateBatch = default;
 
             // Replay the uncached range directly, never visiting operations beyond the captured position.
             for (int index = firstUncachedIndex; index < operationCount; index++)
             {
                 LazyItemOperation operation = _operations[index];
 
-                if (operation is UpdateOperation op)
+                if (operation is UpdateOperation op && updateBatch.TryAdd(op))
                 {
-                    bool addToBatch = true;
-                    int i;
-                    // The TextFragments are things like abc.def or x*y.*z.
-                    for (i = 0; i < op.Spec.Fragments.Count; i++)
+                    if (op.IsReferenced)
                     {
-                        ItemSpecFragment frag = op.Spec.Fragments[i];
-                        if (MSBuildConstants.CharactersForExpansion.Any(frag.TextFragment.Contains))
-                        {
-                            // Fragment contains wild cards, items, or properties. Cannot batch over it using a dictionary.
-                            addToBatch = false;
-                            break;
-                        }
-
-                        string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(frag.TextFragment, frag.ProjectDirectory);
-                        if (itemsWithNoWildcards.ContainsKey(fullPath))
-                        {
-                            // Another update will already happen on this path. Make that happen before evaluating this one.
-                            addToBatch = false;
-                            break;
-                        }
-                        else
-                        {
-                            itemsWithNoWildcards.Add(fullPath, op);
-                        }
+                        // A bookmark ends at this Update. Complete and cache its prefix before any later
+                        // Updates join the batch, without applying this Update a second time through Apply.
+                        updateBatch.ApplyTo(items);
+                        op.CacheResultIfReferenced(items, currentGlobsToIgnore);
                     }
 
-                    if (!addToBatch)
-                    {
-                        // A nonliteral fragment or overlapping path rejected this Update. Remove only its tentative
-                        // entries, using the same normalized keys as insertion, before flushing earlier Updates.
-                        for (int j = 0; j < i; j++)
-                        {
-                            ItemSpecFragment fragment = op.Spec.Fragments[j];
-                            string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory);
-                            itemsWithNoWildcards.Remove(fullPath);
-                        }
-                    }
-                    else
-                    {
-                        // Defer this Update until the batch is flushed.
-                        addedToBatch = true;
-                        if (op.IsReferenced)
-                        {
-                            // A bookmark ends at this Update. Complete and cache its prefix before any later
-                            // Updates join the batch, without applying this Update a second time through Apply.
-                            ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
-                            addedToBatch = false;
-                            op.CacheResultIfReferenced(items, currentGlobsToIgnore);
-                        }
-
-                        continue;
-                    }
+                    continue;
                 }
 
-                if (addedToBatch)
-                {
-                    // Finish earlier Updates before an Include, Remove, or non-batchable Update changes the state.
-                    addedToBatch = false;
-                    ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
-                }
+                // Finish earlier Updates before an Include, Remove, or non-batchable Update changes the state.
+                updateBatch.ApplyTo(items);
 
                 // This Remove is no longer in the future. Restore the context containing only later Removes
                 // before applying it, so its result uses the same cache key checked during backward planning.
@@ -229,25 +176,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             }
 
             // The requested prefix may end with a deferred Update batch.
-            ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
+            updateBatch.ApplyTo(items);
 
             return items;
-        }
-
-        private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, OrderedItemDataCollection.Builder items)
-        {
-            if (itemsWithNoWildcards.Count > 0)
-            {
-                for (int i = 0; i < items.Count; i++)
-                {
-                    string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory);
-                    if (itemsWithNoWildcards.TryGetValue(fullPath, out UpdateOperation? op))
-                    {
-                        items[i] = op.UpdateItem(items[i]);
-                    }
-                }
-                itemsWithNoWildcards.Clear();
-            }
         }
 
         /// <summary>
