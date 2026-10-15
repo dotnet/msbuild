@@ -8,8 +8,10 @@ using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Shouldly;
@@ -542,6 +544,82 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
 
         string[] expected = ["Source:a.cs", "Captured:a.cs", "Captured:b.tmp"];
         actual.ShouldBe(expected);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void EquivalentRemoveGlobPatternsReuseCachedSnapshotsWithoutReapplyingOperations(bool varyPatternCase)
+    {
+        const string itemType = "CacheEqualitySource";
+        string repeatedExclusions = varyPatternCase ? "*.G.CS;*.TMP" : "*.g.cs;*.tmp";
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <CacheEqualitySource Include="a.cs;b.tmp" />
+                    <CacheEqualityCopy Include="@(CacheEqualitySource)" />
+                    <CacheEqualitySource Remove="*.tmp;*.g.cs" />
+                </ItemGroup>
+                <ItemGroup>
+                    <CacheEqualitySource Remove="{repeatedExclusions}" />
+                </ItemGroup>
+                <ItemGroup>
+                    <CacheEqualitySource Remove="*.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        IItemProvider<ProjectItem> provider = evaluator;
+        ProjectItemGroupElement[] groups = [.. project.Xml.ItemGroups];
+        using EventSourceTestHelper listener = new();
+
+        // Reordered exclusions reuse the cached Include; casing also follows the filesystem's policy.
+        // Distinct contexts require the Include to execute again before the Removes.
+        int repeatedApplications = !varyPatternCase || FileUtilities.PathComparer.Equals("*.tmp", "*.TMP") ? 2 : 3;
+        int[] expectedApplications = [2, repeatedApplications, 4];
+        for (int phase = 0; phase < groups.Length; phase++)
+        {
+            evaluator.ProcessItemGroups([groups[phase]], project.Xml.DirectoryPath);
+            List<string> includes = [];
+            foreach (ProjectItem item in provider.GetItems(itemType))
+            {
+                includes.Add(item.EvaluatedInclude);
+            }
+
+            string[] expectedIncludes = phase < 2 ? ["a.cs"] : [];
+            includes.ShouldBe(expectedIncludes);
+            CountOperationApplications(listener, itemType).ShouldBe(expectedApplications[phase]);
+        }
+
+        // The earlier reference needs the unpruned Include, not either nonempty later Remove glob patterns.
+        List<string> copiedIncludes = [];
+        foreach (ProjectItem item in provider.GetItems("CacheEqualityCopy"))
+        {
+            copiedIncludes.Add(item.EvaluatedInclude);
+        }
+
+        string[] expectedCopies = ["a.cs", "b.tmp"];
+        copiedIncludes.ShouldBe(expectedCopies);
+        CountOperationApplications(listener, itemType).ShouldBe(1);
+    }
+
+    private static int CountOperationApplications(EventSourceTestHelper listener, string itemType)
+    {
+        int count = 0;
+        foreach (var eventData in listener.GetEvents())
+        {
+            if (eventData.EventName == nameof(MSBuildEventSource.ApplyLazyItemOperationsStart)
+                && eventData.Payload is [string appliedItemType, ..]
+                && appliedItemType == itemType)
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     private static ImmutableArray<ProjectItem> CollectItems(

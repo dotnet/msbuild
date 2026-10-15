@@ -14,11 +14,13 @@ namespace Microsoft.Build.Evaluation;
 internal partial class LazyItemEvaluator<P, I, M, D>
 {
     /// <summary>
-    ///  Stores one item type's append-only operations and evaluates requested item states using per-operation caches.
+    ///  Collects one item type's operation sequence and evaluates item states using the shared snapshot cache.
     /// </summary>
-    private sealed class ItemOperationSequence
+    /// <param name="lazyEvaluator">The evaluator that owns the cached snapshots.</param>
+    private sealed class ItemOperationSequence(LazyItemEvaluator<P, I, M, D> lazyEvaluator)
     {
-        private readonly SegmentedList<MemoizedOperation> _operations = [];
+        private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator = lazyEvaluator;
+        private readonly SegmentedList<ItemOperation> _operations = [];
 
         /// <summary>
         ///  Appends an operation without changing the positions identified by earlier references.
@@ -26,7 +28,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <param name="operation">The operation to append.</param>
         public void Add(ItemOperation operation)
         {
-            _operations.Add(new MemoizedOperation(operation));
+            _operations.Add(operation);
         }
 
         /// <summary>
@@ -74,8 +76,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             // Captured references announce their demand before evaluation; eager condition reads announce it here.
             // Direct requests start without later exclusions; backward planning can add them for earlier positions.
-            MemoizedOperation operation = _operations[operationCount - 1];
-            if (operation.TryGetFromCache(ImmutableHashSet<string>.Empty, out OrderedItemDataCollection items))
+            ItemOperation operation = _operations[operationCount - 1];
+            if (_lazyEvaluator.TryGetCachedItems(operation, s_emptyRemoveGlobPatterns, out OrderedItemDataCollection? items))
             {
                 return items.ToBuilder();
             }
@@ -103,12 +105,15 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // item states are compatible and which files earlier Includes can skip during enumeration.
             for (int index = operationCount - 1; index >= 0; index--)
             {
-                MemoizedOperation operation = _operations[index];
-                var patternsFromLaterOperations = laterRemoveGlobPatternStack?.Peek() ?? ImmutableHashSet<string>.Empty;
+                ItemOperation operation = _operations[index];
+                var patternsFromLaterOperations = laterRemoveGlobPatternStack?.Peek() ?? s_emptyRemoveGlobPatterns;
 
-                if (operation.TryGetFromCache(patternsFromLaterOperations, out OrderedItemDataCollection itemsFromCache))
+                if (_lazyEvaluator.TryGetCachedItems(
+                    operation,
+                    patternsFromLaterOperations,
+                    out OrderedItemDataCollection? itemsFromCache))
                 {
-                    // This cache contains the complete result through this operation, not just its changes.
+                    // The cached snapshot contains computed items through this operation under these later Remove patterns.
                     // The backward search finds the nearest compatible cached snapshot before the requested end.
                     // firstUncachedIndex is index + 1: only operations after this cached snapshot remain to apply.
                     items = itemsFromCache.ToBuilder();
@@ -117,7 +122,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 // This Remove can prune earlier Includes. Extend the context only after checking its cache:
                 // the Remove's own cached result is keyed by later exclusions, not by its own patterns.
-                if (operation.Operation is RemoveOperation removeOperation)
+                if (operation is RemoveOperation removeOperation)
                 {
                     laterRemoveGlobPatternStack ??= new Stack<ImmutableHashSet<string>>();
 
@@ -138,7 +143,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             items ??= OrderedItemDataCollection.CreateBuilder();
 
             // The first operation to evaluation sees all Remove globs accumulated while planning backward.
-            ImmutableHashSet<string> currentRemoveGlobPatterns = laterRemoveGlobPatternStack?.Peek() ?? ImmutableHashSet<string>.Empty;
+            ImmutableHashSet<string> currentRemoveGlobPatterns = laterRemoveGlobPatternStack?.Peek() ?? s_emptyRemoveGlobPatterns;
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
             Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
@@ -147,9 +152,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // Apply the uncached operations without visiting positions beyond the requested count.
             for (int index = firstUncachedIndex; index < operationCount; index++)
             {
-                MemoizedOperation operation = _operations[index];
+                ItemOperation operation = _operations[index];
 
-                if (operation.Operation is UpdateOperation op)
+                if (operation is UpdateOperation op)
                 {
                     bool addToBatch = true;
                     int i;
@@ -181,7 +186,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                         // We found a wildcard. Remove any fragments associated with the current operation and process them later.
                         for (int j = 0; j < i; j++)
                         {
-                            itemsWithNoWildcards.Remove(operation.Operation.Spec.Fragments[j].TextFragment);
+                            itemsWithNoWildcards.Remove(operation.Spec.Fragments[j].TextFragment);
                         }
                     }
                     else
@@ -201,15 +206,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 // Before applying this Remove, keep only the glob patterns from subsequent Removes
                 // before applying it, so its result uses the same cache key checked during backward planning.
-                if (operation.Operation is RemoveOperation)
+                if (operation is RemoveOperation)
                 {
                     Assumed.NotNull(laterRemoveGlobPatternStack);
                     laterRemoveGlobPatternStack.Pop();
-                    currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count == 0 ? ImmutableHashSet<string>.Empty : laterRemoveGlobPatternStack.Peek();
+                    currentRemoveGlobPatterns = laterRemoveGlobPatternStack.Count == 0 ? s_emptyRemoveGlobPatterns : laterRemoveGlobPatternStack.Peek();
                 }
 
-                // Non-batched operations use the memoized path, which saves the complete snapshot
-                // when this position has been marked as referenced.
+                // Apply saves the complete snapshot when this position has been marked as referenced.
                 operation.Apply(items, currentRemoveGlobPatterns);
             }
 

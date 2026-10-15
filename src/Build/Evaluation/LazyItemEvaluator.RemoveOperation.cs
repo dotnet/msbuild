@@ -101,7 +101,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         public ImmutableHashSet<string>.Builder GetRemoveGlobPatterns()
         {
-            var builder = ImmutableHashSet.CreateBuilder<string>();
+            var builder = s_emptyRemoveGlobPatterns.ToBuilder();
 
             if (!_conditionResult)
             {

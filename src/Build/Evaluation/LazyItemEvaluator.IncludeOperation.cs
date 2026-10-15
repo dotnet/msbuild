@@ -207,10 +207,10 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             if (anyGlobsToIgnore && anyExcludes)
             {
-                return excludePatterns.Concat(laterRemoveGlobPatterns).ToImmutableHashSet();
+                return excludePatterns.Concat(laterRemoveGlobPatterns).ToImmutableHashSet(FileUtilities.PathComparer);
             }
 
-            return anyExcludes ? excludePatterns.ToImmutableHashSet() : laterRemoveGlobPatterns;
+            return anyExcludes ? excludePatterns.ToImmutableHashSet(FileUtilities.PathComparer) : laterRemoveGlobPatterns;
         }
 
         private void MutateItems(ImmutableArray<I> items)

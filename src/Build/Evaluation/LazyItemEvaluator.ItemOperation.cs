@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
@@ -18,6 +21,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private abstract partial class ItemOperation
     {
+        private bool _isNeeded;
+
         protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
         protected readonly ProjectItemElement _itemElement;
         protected readonly ItemSpec<P, I> _itemSpec;
@@ -53,14 +58,40 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
+        /// <summary>
+        ///  Marks this operation's snapshot for caching when it is computed.
+        /// </summary>
+        public void MarkAsNeeded() => _isNeeded = true;
+
+        /// <summary>
+        ///  Applies the operation and admits its snapshot to the shared cache when referenced.
+        /// </summary>
+        /// <param name="listBuilder">The items produced by preceding operations.</param>
+        /// <param name="laterRemoveGlobPatterns">The later Remove glob patterns used for this computation.</param>
         public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns)
         {
+#if DEBUG
+            Debug.Assert(!_lazyEvaluator.TryGetCachedItems(this, laterRemoveGlobPatterns, out _),
+                "Apply requires an uncached operation and later Remove glob pattern set");
+#endif
+
             MSBuildEventSource.Log.ApplyLazyItemOperationsStart(_itemElement.ItemType);
             using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
             {
                 ApplyImpl(listBuilder, laterRemoveGlobPatterns);
             }
             MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
+
+            // Snapshot creation remains outside the operation's profiling and event scope.
+            if (_isNeeded)
+            {
+                _lazyEvaluator.CacheItems(this, laterRemoveGlobPatterns, listBuilder.ToImmutable());
+            }
+
+#if DEBUG
+            Debug.Assert(_lazyEvaluator.TryGetCachedItems(this, laterRemoveGlobPatterns, out _) == _isNeeded,
+                "Only referenced operation results should be cached");
+#endif
         }
 
         protected abstract void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> laterRemoveGlobPatterns);
