@@ -742,21 +742,21 @@ namespace Microsoft.Build.UnitTests.Logging
             });
         }
         /// <summary>
-        /// Verify when a logging packet is received the build event is
-        /// properly passed to ProcessLoggingEvent
-        /// An invalid operation should be thrown
+        /// Verify when a logging packet is received the build event is routed to its registered sink.
         /// </summary>
         [Fact]
-        public void LoggingPacketReceived()
+        public void LoggingPacketReceivedRoutesToRegisteredSink()
         {
-            LoggingServicesLogMethod_Tests.ProcessBuildEventHelper loggingService = (LoggingServicesLogMethod_Tests.ProcessBuildEventHelper)LoggingServicesLogMethod_Tests.ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            BuildMessageEventArgs messageEvent = new BuildMessageEventArgs("MyMessage", "HelpKeyword", "Sender", MessageImportance.High);
-            LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(1, messageEvent));
-            loggingService.PacketReceived(1, packet);
+            MockLogger logger = new MockLogger();
+            _initializedService.RegisterLogger(logger).ShouldBeTrue();
 
-            BuildMessageEventArgs messageEventFromPacket = loggingService.ProcessedBuildEvent as BuildMessageEventArgs;
-            Assert.NotNull(messageEventFromPacket);
-            Assert.Equal(messageEventFromPacket, messageEvent); // "Expected messages to match"
+            int sinkId = _initializedService.LoggerDescriptions.ShouldHaveSingleItem().LoggerId;
+            BuildMessageEventArgs messageEvent = new BuildMessageEventArgs("MyMessage", "HelpKeyword", "Sender", MessageImportance.High);
+            LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(sinkId, messageEvent));
+
+            _initializedService.PacketReceived(1, packet);
+
+            logger.BuildMessageEvents.ShouldHaveSingleItem().ShouldBeSameAs(messageEvent);
         }
 
         #endregion

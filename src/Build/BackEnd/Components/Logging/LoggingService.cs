@@ -266,7 +266,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Queue for asynchronous event processing.
         /// </summary>
-        private ConcurrentQueue<object> _eventQueue;
+        private ConcurrentQueue<LoggingEvent> _eventQueue;
 
         /// <summary>
         /// Event set when message is consumed from queue.
@@ -326,7 +326,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private LoggerMode _logMode = LoggerMode.Asynchronous;
 
         #endregion
-
         #endregion
 
         #region Constructors
@@ -1041,7 +1040,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
             Assumed.NotEqual(loggingPacket.EventType, LoggingEventType.CustomEvent, "Custom event types are no longer supported. Does the sending node have a different version?");
 
-            ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
+            KeyValuePair<int, BuildEventArgs>? nodeBuildEvent = loggingPacket.NodeBuildEvent;
+            Assumed.True(nodeBuildEvent.HasValue, "Logging packet did not contain a build event.");
+            ProcessLoggingEvent(new(nodeBuildEvent.Value.Value, nodeBuildEvent.Value.Key));
         }
 
         /// <summary>
@@ -1367,13 +1368,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// This method will be called from multiple threads in asynchronous mode.
         ///
-        /// Determine where to send the buildevent either to the filters or to a specific sink.
-        /// When in Asynchronous mode the event should to into the logging queue (as long as we are initialized).
-        /// In Synchronous mode the event should be routed to the correct sink or logger right away
+        /// Determine where to send the build event either to the filters or to a specific sink.
+        /// When in asynchronous mode the event should go into the logging queue as long as the service is initialized.
+        /// In synchronous mode the event should be routed to the correct sink or logger immediately.
         /// </summary>
-        /// <param name="buildEvent">BuildEventArgs to process</param>
-        /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        protected internal virtual void ProcessLoggingEvent(object buildEvent)
+        /// <param name="loggingEvent">The logging event to process.</param>
+        protected internal virtual void ProcessLoggingEvent(LoggingEvent loggingEvent)
         {
             // Avoid processing events after shutdown has cleaned up resources.
             // External code (e.g., plugin adapters) may hold references to LoggingService
@@ -1383,12 +1383,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 return;
             }
 
-            Assumed.NotNull(buildEvent, "buildEvent is null");
+            Assumed.NotNull(loggingEvent.BuildEvent, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
                 // Capture local references to prevent race with CleanLoggingEventProcessing
                 // which sets these fields to null during shutdown.
-                ConcurrentQueue<object> eventQueue = _eventQueue;
+                ConcurrentQueue<LoggingEvent> eventQueue = _eventQueue;
                 AutoResetEvent dequeueEvent = _dequeueEvent;
                 AutoResetEvent enqueueEvent = _enqueueEvent;
 
@@ -1414,7 +1414,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         }
                     }
 
-                    eventQueue.Enqueue(buildEvent);
+                    eventQueue.Enqueue(loggingEvent);
                     enqueueEvent.Set();
                 }
                 catch (ObjectDisposedException)
@@ -1428,7 +1428,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 lock (_lockObject)
                 {
-                    RouteBuildEvent(buildEvent);
+                    RouteBuildEvent(loggingEvent);
                 }
             }
         }
@@ -1620,7 +1620,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void StartLoggingEventProcessing()
         {
-            _eventQueue = new ConcurrentQueue<object>();
+            _eventQueue = new ConcurrentQueue<LoggingEvent>();
             _dequeueEvent = new AutoResetEvent(false);
             _emptyQueueEvent = new ManualResetEvent(false);
             _enqueueEvent = new AutoResetEvent(false);
@@ -1646,7 +1646,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                     do
                     {
-                        if (eventQueue.TryDequeue(out object ev))
+                        if (eventQueue.TryDequeue(out LoggingEvent ev))
                         {
                             LoggingEventProcessor(ev);
                             dequeueEvent?.Set();
@@ -1749,7 +1749,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// on either a filter event source or a sink depending on where the message is supposed to go.
         /// </summary>
         /// <exception cref="InternalErrorException">WaitHandle returns something other than 0 or 1</exception>
-        private void LoggingEventProcessor(object loggingEvent)
+        private void LoggingEventProcessor(LoggingEvent loggingEvent)
         {
             // Save the culture so at the end of the threadproc if something else reuses this thread then it will not have a culture which it was not expecting.
             CultureInfo originalCultureInfo = null;
@@ -1798,13 +1798,11 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Route the event to the correct location, this is mostly used by the logging thread since it may have a buildevent or a tuple.
+        /// Route the event to the correct location.
         /// </summary>
-        private void RouteBuildEvent(object loggingEvent)
+        private void RouteBuildEvent(LoggingEvent loggingEvent)
         {
-            BuildEventArgs buildEventArgs = loggingEvent as BuildEventArgs ?? (loggingEvent as KeyValuePair<int, BuildEventArgs>?)?.Value;
-
-            Assumed.NotNull(buildEventArgs, $"Unknown logging item in queue: {loggingEvent.GetType().FullName}");
+            BuildEventArgs buildEventArgs = loggingEvent.BuildEvent;
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)
             {
@@ -1933,38 +1931,32 @@ namespace Microsoft.Build.BackEnd.Logging
                 _warningsAsMessagesByProject?.Remove(key);
             }
 
-            if (loggingEvent is BuildEventArgs)
+            if (loggingEvent.HasSinkId)
+            {
+                RouteBuildEvent(loggingEvent.SinkId, buildEventArgs);
+            }
+            else
             {
                 RouteBuildEvent(buildEventArgs);
-            }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
-            {
-                if (loggingEventKeyValuePair.Value != buildEventArgs)
-                {
-                    // buildEventArgs has been altered, lets use that new one
-                    loggingEventKeyValuePair = new KeyValuePair<int, BuildEventArgs>(loggingEventKeyValuePair.Key, buildEventArgs);
-                }
-
-                RouteBuildEvent(loggingEventKeyValuePair);
             }
         }
 
         /// <summary>
         /// Route the build event to the correct filter or sink depending on what the sinId is in the build event.
         /// </summary>
-        private void RouteBuildEvent(KeyValuePair<int, BuildEventArgs> nodeEvent)
+        private void RouteBuildEvent(int sinkId, BuildEventArgs nodeEvent)
         {
-            TryRaiseProjectStartedEvent(nodeEvent.Value);
+            TryRaiseProjectStartedEvent(nodeEvent);
 
             // Get the sink which will handle the build event, then send the event to that sink
-            bool gotSink = _eventSinkDictionary.TryGetValue(nodeEvent.Key, out IBuildEventSink sink);
+            bool gotSink = _eventSinkDictionary.TryGetValue(sinkId, out IBuildEventSink sink);
             if (gotSink && sink != null)
             {
                 // Sinks in the eventSinkDictionary are expected to not be null.
-                sink.Consume(nodeEvent.Value, nodeEvent.Key);
+                sink.Consume(nodeEvent, sinkId);
             }
 
-            TryRaiseProjectFinishedEvent(nodeEvent.Value);
+            TryRaiseProjectFinishedEvent(nodeEvent);
         }
 
         /// <summary>

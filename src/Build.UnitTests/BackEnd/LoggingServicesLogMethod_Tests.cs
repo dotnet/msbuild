@@ -1924,22 +1924,11 @@ namespace Microsoft.Build.UnitTests.Logging
             /// <summary>
             /// Override the method to log which event was processed so it can be verified in a test
             /// </summary>
-            /// <param name="buildEvent">Build event which was asked to be processed</param>
-            protected internal override void ProcessLoggingEvent(object buildEvent)
+            /// <param name="loggingEvent">Logging event which was asked to be processed</param>
+            protected internal override void ProcessLoggingEvent(LoggingEvent loggingEvent)
             {
-                if (buildEvent is BuildEventArgs buildEventArgs)
-                {
-                    _processedBuildEvent = buildEventArgs;
-                    AllProcessedBuildEvents.Add(buildEventArgs);
-                }
-                else if (buildEvent is KeyValuePair<int, BuildEventArgs> kvp)
-                {
-                    _processedBuildEvent = kvp.Value;
-                }
-                else
-                {
-                    _processedBuildEvent = null;
-                }
+                _processedBuildEvent = loggingEvent.BuildEvent;
+                AllProcessedBuildEvents.Add(loggingEvent.BuildEvent);
             }
 
             /// <summary>
