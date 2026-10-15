@@ -212,7 +212,6 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ItemOperationSequence.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.ItemBatchingContext.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.LazyItemOperation.ItemOperationMetadataTable.cs" />
-    <Compile Include="Evaluation\LazyItemEvaluator.MemoizedOperation.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.OrderedItemDataCollection.Builder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ReferencedItemLists.Builder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ReferencedItemLists.cs" />
