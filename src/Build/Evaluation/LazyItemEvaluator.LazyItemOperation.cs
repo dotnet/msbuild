@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
@@ -18,6 +21,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 {
     private abstract partial class LazyItemOperation
     {
+        private bool _isReferenced;
+
         protected readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator;
         protected readonly ProjectItemElement _itemElement;
         protected readonly ItemSpec<P, I> _itemSpec;
@@ -53,14 +58,40 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
         protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
+        /// <summary>
+        ///  Marks this operation's prefix result for caching when it is computed.
+        /// </summary>
+        public void MarkAsReferenced() => _isReferenced = true;
+
+        /// <summary>
+        ///  Applies the operation and admits its prefix result to the shared cache when referenced.
+        /// </summary>
+        /// <param name="listBuilder">The items produced by preceding operations.</param>
+        /// <param name="globsToIgnore">The exclusion context used for this computation.</param>
         public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
         {
+#if DEBUG
+            Debug.Assert(!_lazyEvaluator.TryGetCachedItems(this, globsToIgnore, out _),
+                "Apply should only be called for an uncached operation and exclusion context");
+#endif
+
             MSBuildEventSource.Log.ApplyLazyItemOperationsStart(_itemElement.ItemType);
             using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
             {
                 ApplyImpl(listBuilder, globsToIgnore);
             }
             MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
+
+            // Snapshot creation remains outside the operation's profiling and event scope.
+            if (_isReferenced)
+            {
+                _lazyEvaluator.CacheItems(this, globsToIgnore, listBuilder.ToImmutable());
+            }
+
+#if DEBUG
+            Debug.Assert(_lazyEvaluator.TryGetCachedItems(this, globsToIgnore, out _) == _isReferenced,
+                "Only referenced operation results should be cached");
+#endif
         }
 
         protected abstract void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore);

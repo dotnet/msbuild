@@ -20,7 +20,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
     private sealed class ItemOperationSequence(LazyItemEvaluator<P, I, M, D> lazyEvaluator)
     {
         private readonly LazyItemEvaluator<P, I, M, D> _lazyEvaluator = lazyEvaluator;
-        private readonly SegmentedList<MemoizedOperation> _operations = [];
+        private readonly SegmentedList<LazyItemOperation> _operations = [];
 
         /// <summary>
         ///  Appends an operation without changing the positions identified by earlier references.
@@ -28,7 +28,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// <param name="operation">The operation to append.</param>
         public void Add(LazyItemOperation operation)
         {
-            _operations.Add(new MemoizedOperation(operation));
+            _operations.Add(operation);
         }
 
         /// <summary>
@@ -76,8 +76,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
             // Captured references announce their demand before evaluation; eager condition reads announce it here.
             // Direct requests start without later exclusions; backward planning can add them for earlier positions.
-            MemoizedOperation operation = _operations[operationCount - 1];
-            if (operation.TryGetFromCache(_lazyEvaluator, globsToIgnore: s_emptyGlobsToIgnore, out OrderedItemDataCollection items))
+            LazyItemOperation operation = _operations[operationCount - 1];
+            if (_lazyEvaluator.TryGetCachedItems(operation, s_emptyGlobsToIgnore, out OrderedItemDataCollection? items))
             {
                 return items.ToBuilder();
             }
@@ -105,13 +105,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // prefixes are compatible and which files earlier Includes can skip during enumeration.
             for (int index = operationCount - 1; index >= 0; index--)
             {
-                MemoizedOperation operation = _operations[index];
+                LazyItemOperation operation = _operations[index];
                 var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? s_emptyGlobsToIgnore;
 
-                if (operation.TryGetFromCache(
-                    _lazyEvaluator,
+                if (_lazyEvaluator.TryGetCachedItems(
+                    operation,
                     globsToIgnoreFromFutureOperations,
-                    out OrderedItemDataCollection itemsFromCache))
+                    out OrderedItemDataCollection? itemsFromCache))
                 {
                     // The shared cache contains the complete result through this operation, not just its changes.
                     // Since we search backward, this is the closest compatible cached prefix to the requested end.
@@ -122,7 +122,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 // This Remove can prune earlier Includes. Extend the context only after checking its cache:
                 // the Remove's own cached result is keyed by later exclusions, not by its own patterns.
-                if (operation.Operation is RemoveOperation removeOperation)
+                if (operation is RemoveOperation removeOperation)
                 {
                     globsToIgnoreStack ??= new Stack<ImmutableHashSet<string>>();
 
@@ -152,9 +152,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // Replay the uncached range directly, never visiting operations beyond the captured position.
             for (int index = firstUncachedIndex; index < operationCount; index++)
             {
-                MemoizedOperation operation = _operations[index];
+                LazyItemOperation operation = _operations[index];
 
-                if (operation.Operation is UpdateOperation op)
+                if (operation is UpdateOperation op)
                 {
                     bool addToBatch = true;
                     int i;
@@ -186,7 +186,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                         // We found a wildcard. Remove any fragments associated with the current operation and process them later.
                         for (int j = 0; j < i; j++)
                         {
-                            itemsWithNoWildcards.Remove(operation.Operation.Spec.Fragments[j].TextFragment);
+                            itemsWithNoWildcards.Remove(operation.Spec.Fragments[j].TextFragment);
                         }
                     }
                     else
@@ -206,16 +206,15 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 // This Remove is no longer in the future. Restore the context containing only later Removes
                 // before applying it, so its result uses the same cache key checked during backward planning.
-                if (operation.Operation is RemoveOperation)
+                if (operation is RemoveOperation)
                 {
                     Assumed.NotNull(globsToIgnoreStack);
                     globsToIgnoreStack.Pop();
                     currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? s_emptyGlobsToIgnore : globsToIgnoreStack.Peek();
                 }
 
-                // Non-batched operations use the memoized path, which saves the complete prefix result
-                // when this position has been marked as referenced.
-                operation.Apply(_lazyEvaluator, items, currentGlobsToIgnore);
+                // Apply saves the complete prefix result when this position has been marked as referenced.
+                operation.Apply(items, currentGlobsToIgnore);
             }
 
             // The requested prefix may end with a deferred Update batch.
