@@ -215,6 +215,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.OrderedItemDataCollection.Builder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ReferencedItemLists.Builder.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.ReferencedItemLists.cs" />
+    <Compile Include="Evaluation\LazyItemEvaluator.UpdateBatch.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.UpdateOperation.MatchResult.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
