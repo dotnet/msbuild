@@ -58,12 +58,7 @@ Fill in these values before starting. Version increments are irregular — they 
 
 ### DARC configuration PR verification
 
-Apply this procedure to **every** maestro-configuration PR, including post-GA corrections:
-
-1. Review the actual PR diff against the intended changes. Check subscription IDs, channels, target branches, and unchanged settings; successful DARC command output alone is not verification.
-2. Check the PR's auto-complete setting. DARC can enable it when creating a PR. If the PR must remain review-only, disable auto-complete with `az repos pr update --id <pr-id> --organization https://dev.azure.com/dnceng --auto-complete false` and verify the setting before handing it off.
-3. After review and merge, confirm the [Ingestion pipeline (definition 1567)](https://dev.azure.com/dnceng/internal/_build?definitionId=1567) run for the **merge commit** succeeded. Record the PR and ingestion-run links in the tracking issue. A merged PR with failed or pending ingestion is not an applied configuration change.
-4. Re-run the relevant `darc get-default-channels` and `darc get-subscriptions` queries and compare the live results with the intended map. Do not start dependent release steps until ingestion and live verification succeed.
+Review the PR diff before merging. Before dependent release steps, confirm [ingestion](https://dev.azure.com/dnceng/internal/_build?definitionId=1567) succeeded for the merge commit and verify the live configuration with `darc get-default-channels` / `darc get-subscriptions`.
 
 ---
 

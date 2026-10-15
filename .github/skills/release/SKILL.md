@@ -98,8 +98,8 @@ DARC write commands push to the [maestro-configuration](https://dev.azure.com/dn
 1. Choose a branch name like `release/msbuild-{{THIS_RELEASE_VERSION}}`
 2. Add `--configuration-branch <name> --no-pr` to every write command except the last
 3. Last command: use `--configuration-branch <name>` without `--no-pr` to create the PR
-4. Review the actual PR diff and check auto-complete. If the PR must remain review-only, explicitly disable auto-complete and verify that it is off; DARC can enable it when creating the PR.
-5. Get the PR reviewed and merged, confirm successful ingestion for its merge commit, and verify the live map before starting dependent steps. Follow [DARC configuration PR verification](../../../documentation/release-checklist.md#darc-configuration-pr-verification).
+4. Review the diff before merging; disable auto-complete if the PR must remain review-only.
+5. After merging, complete [DARC configuration PR verification](../../../documentation/release-checklist.md#darc-configuration-pr-verification) before dependent release steps.
 
 Check existing channels and mappings before writing: the previous release normally pre-created the current release's mapping. Skip satisfied writes rather than constructing a redundant batch.
 
