@@ -61,13 +61,13 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="operationCount">The number of operations in the requested prefix.</param>
         /// <returns>
-        ///  A builder over the requested item result.
+        ///  An immutable snapshot of the requested item result.
         /// </returns>
-        public OrderedItemDataCollection.Builder GetItemData(int operationCount)
+        public OrderedItemDataCollection GetItemData(int operationCount)
         {
             if (operationCount == 0)
             {
-                return OrderedItemDataCollection.CreateBuilder();
+                return OrderedItemDataCollection.Empty;
             }
 
             // Captured references announce their demand before evaluation; eager condition reads announce it here.
@@ -75,7 +75,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             LazyItemOperation operation = _operations[operationCount - 1];
             if (_lazyEvaluator.TryGetCachedItems(operation, s_emptyGlobsToIgnore, out OrderedItemDataCollection? items))
             {
-                return items.ToBuilder();
+                return items;
             }
 
             operation.MarkAsReferenced();
@@ -87,9 +87,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="operationCount">The number of operations in the requested prefix.</param>
         /// <returns>
-        ///  The item result after applying the requested prefix.
+        ///  An immutable snapshot of the item result after applying the requested prefix.
         /// </returns>
-        private OrderedItemDataCollection.Builder ComputeItems(int operationCount)
+        private OrderedItemDataCollection ComputeItems(int operationCount)
         {
             OrderedItemDataCollection.Builder? items = null;
             int firstUncachedIndex = operationCount;
@@ -178,7 +178,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             // The requested prefix may end with a deferred Update batch.
             updateBatch.ApplyTo(items);
 
-            return items;
+            return items.ToImmutable();
         }
 
         /// <summary>
