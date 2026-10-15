@@ -17,6 +17,7 @@ using Microsoft.Build.CommandLine;
 using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -85,6 +86,29 @@ namespace Microsoft.Build.UnitTests
         private static string TestAssetsRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(XMakeAppTests).Assembly.Location) ?? AppContext.BaseDirectory), "TestAssets");
 
         private const string AutoResponseFileName = "MSBuild.rsp";
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTelemetryTracksResponseFileUsage(bool useResponseFile)
+        {
+            string responseFile = _env.CreateFile("telemetry.rsp", "/help").Path;
+            string[] commandLine = useResponseFile
+                ? [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, "-noAutoResponse", $"@\"{responseFile}\""]
+                : [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, "-noAutoResponse", "/help"];
+
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry();
+            try
+            {
+                MSBuildApp.Execute(commandLine).ShouldBe(MSBuildApp.ExitType.Success);
+                KnownTelemetry.PartialBuildTelemetry.ShouldNotBeNull();
+                KnownTelemetry.PartialBuildTelemetry!.ResponseFileUsed.ShouldBe(useResponseFile);
+            }
+            finally
+            {
+                KnownTelemetry.PartialBuildTelemetry = null;
+            }
+        }
 
         [Fact]
         public void GatherCommandLineSwitchesTwoProperties()

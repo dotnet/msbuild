@@ -15,7 +15,14 @@ namespace Microsoft.Build.Framework.Telemetry
     /// </summary>
     internal class BuildTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     {
+        internal const int CurrentSchemaVersion = 2;
+
         public override string EventName => "build";
+
+        /// <summary>
+        /// Version of the telemetry contract used by this event.
+        /// </summary>
+        public int? TelemetrySchemaVersion { get; set; }
 
         /// <summary>
         /// Time at which build have started.
@@ -39,6 +46,11 @@ namespace Microsoft.Build.Framework.Telemetry
         /// True if MSBuild runs from command line.
         /// </summary>
         public bool? IsStandaloneExecution { get; set; }
+
+        /// <summary>
+        /// True if at least one response file was used for the command-line build.
+        /// </summary>
+        public bool? ResponseFileUsed { get; set; }
 
         /// <summary>
         /// Time at which build have finished.
@@ -125,6 +137,11 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? BuildEngineHost { get; set; }
 
         /// <summary>
+        /// True if the build ran in an automated environment such as CI, regardless of <see cref="BuildEngineHost"/>.
+        /// </summary>
+        public bool? IsCI { get; set; }
+
+        /// <summary>
         /// True if buildcheck was used.
         /// </summary>
         public bool? BuildCheckEnabled { get; set; }
@@ -190,6 +207,8 @@ namespace Microsoft.Build.Framework.Telemetry
             }
 
             AddIfNotNull(BuildEngineHost);
+            AddIfNotNull(TelemetrySchemaVersion);
+            AddIfNotNull(IsCI);
             AddIfNotNull(BuildSuccess);
             AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
             AddIfNotNull(BuildEngineVersion);
@@ -199,6 +218,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(SACEnabled);
             AddIfNotNull(CoordinatorWaitDurationMs);
             AddIfNotNull(IsStandaloneExecution);
+            AddIfNotNull(ResponseFileUsed);
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts);
 
@@ -220,6 +240,8 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildEngineDisplayVersion);
             AddIfNotNull(BuildEngineFrameworkName);
             AddIfNotNull(BuildEngineHost);
+            AddIfNotNull(TelemetrySchemaVersion?.ToString(CultureInfo.InvariantCulture), nameof(TelemetrySchemaVersion));
+            AddIfNotNull(IsCI?.ToString(), nameof(IsCI));
             AddIfNotNull(InitialMSBuildServerState);
             AddIfNotNull(ProjectPath != null ? Path.GetFileName(ProjectPath) : null, nameof(ProjectPath));
             AddIfNotNull(ServerFallbackReason);
@@ -233,6 +255,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
             AddIfNotNull(CoordinatorWaitDurationMs?.ToString(CultureInfo.InvariantCulture), nameof(CoordinatorWaitDurationMs));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
+            AddIfNotNull(ResponseFileUsed?.ToString(), nameof(ResponseFileUsed));
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts?.ToString(), nameof(ErrorCounts));
 
@@ -280,7 +303,7 @@ namespace Microsoft.Build.Framework.Telemetry
             for (int i = 0; i < targets.Length; i++)
             {
                 string target = targets[i].Trim();
-                targets[i] = KnownTargetNames.Contains(target)
+                targets[i] = target.Length == 0 || KnownTargetNames.Contains(target)
                     ? target
                     : TelemetryDataUtils.GetHashed(target);
             }
