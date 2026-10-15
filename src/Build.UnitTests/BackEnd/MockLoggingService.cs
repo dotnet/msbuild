@@ -273,6 +273,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             get => MessageImportance.Low;
         }
 
+        public bool IsMessageEnabled(MessageImportance importance)
+            => !OnlyLogCriticalEvents && importance <= MinimumRequiredMessageImportance;
+
         public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();

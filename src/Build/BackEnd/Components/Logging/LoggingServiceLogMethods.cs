@@ -38,7 +38,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">MessageResourceName is null</exception>
         public void LogComment(BuildEventContext buildEventContext, MessageImportance importance, string messageResourceName, params object[] messageArgs)
         {
-            if (!OnlyLogCriticalEvents)
+            if (IsMessageEnabled(importance))
             {
                 Assumed.NotNullOrEmpty(messageResourceName, "Need resource string for comment message.");
 
@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">Message is null</exception>
         public void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object[] messageArgs)
         {
-            if (!OnlyLogCriticalEvents)
+            if (IsMessageEnabled(importance))
             {
                 BuildMessageEventArgs buildEvent = EventsCreatorHelper.CreateMessageEventFromText(buildEventContext, importance, message, messageArgs);
 
@@ -417,7 +417,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     parameters: actualLogger.Parameters));
             }
 
-            if (listOfLoggers.Count != 0)
+            if (listOfLoggers.Count != 0 && IsMessageEnabled(MessageImportance.Low))
             {
                 var msgEvent = new BuildMessageEventArgs(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", listOfLoggers)),

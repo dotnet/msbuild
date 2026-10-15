@@ -1156,7 +1156,22 @@ namespace Microsoft.Build.UnitTests.Logging
             _initializedService.RegisterLogger(new MockLogger() { Verbosity = LoggerVerbosity.Normal });
             _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Normal));
             _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
+            _initializedService.IsMessageEnabled(MessageImportance.Low).ShouldBeTrue();
         }
+
+        [Fact]
+        public void IsMessageEnabledReflectsMinimumRequiredImportance()
+        {
+            _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal));
+
+            _initializedService.IsMessageEnabled(MessageImportance.High).ShouldBeTrue();
+            _initializedService.IsMessageEnabled(MessageImportance.Normal).ShouldBeTrue();
+            _initializedService.IsMessageEnabled(MessageImportance.Low).ShouldBeFalse();
+
+            _initializedService.OnlyLogCriticalEvents = true;
+            _initializedService.IsMessageEnabled(MessageImportance.High).ShouldBeFalse();
+        }
+
         #endregion
 
         #region ProcessLoggingEvent After Shutdown Tests

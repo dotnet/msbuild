@@ -89,6 +89,48 @@ namespace Microsoft.Build.UnitTests.Logging
             LogandVerifyBuildEvent(externalStartedEvent, loggingService);
         }
 
+        [Fact]
+        public void LogBuildEventFiltersMessagesNoLoggerConsumes()
+        {
+            ProcessBuildEventHelper loggingService =
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+            loggingService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal)).ShouldBeTrue();
+
+            BuildMessageEventArgs lowImportanceMessage = new BuildMessageEventArgs("Low", null, null, MessageImportance.Low);
+            loggingService.LogBuildEvent(lowImportanceMessage);
+            loggingService.ProcessedBuildEvent.ShouldBeNull();
+
+            BuildMessageEventArgs normalImportanceMessage = new BuildMessageEventArgs("Normal", null, null, MessageImportance.Normal);
+            loggingService.LogBuildEvent(normalImportanceMessage);
+            loggingService.ProcessedBuildEvent.ShouldBeSameAs(normalImportanceMessage);
+
+            loggingService.ResetProcessedBuildEvent();
+            TaskParameterEventArgs structuredMessage = new(
+                TaskParameterMessageKind.TaskInput,
+                itemType: "Items",
+                items: null,
+                logItemMetadata: true,
+                eventTimestamp: DateTime.MinValue);
+            loggingService.LogBuildEvent(structuredMessage);
+            loggingService.ProcessedBuildEvent.ShouldBeSameAs(structuredMessage);
+
+            loggingService.ResetProcessedBuildEvent();
+            loggingService.OnlyLogCriticalEvents = true;
+            CriticalBuildMessageEventArgs criticalMessage = new CriticalBuildMessageEventArgs(
+                subcategory: null,
+                code: null,
+                file: null,
+                lineNumber: 0,
+                columnNumber: 0,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message: "Critical",
+                helpKeyword: null,
+                senderName: "MSBuild");
+            loggingService.LogBuildEvent(criticalMessage);
+            loggingService.ProcessedBuildEvent.ShouldBeSameAs(criticalMessage);
+        }
+
         #endregion
 
         #region TestErrors
@@ -736,6 +778,20 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Null(service.ProcessedBuildEvent);
         }
 
+        [Fact]
+        public void LogCommentFiltersMessagesNoLoggerConsumes()
+        {
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal)).ShouldBeTrue();
+
+            service.LogComment(s_buildEventContext, MessageImportance.Low, "BuildFinishedSuccess");
+            service.ProcessedBuildEvent.ShouldBeNull();
+
+            service.LogComment(s_buildEventContext, MessageImportance.Normal, "BuildFinishedSuccess");
+            service.ProcessedBuildEvent.ShouldBeOfType<BuildMessageEventArgs>().Importance.ShouldBe(MessageImportance.Normal);
+        }
+
         #endregion
 
         #region LogCommentFromTextTests
@@ -794,6 +850,21 @@ namespace Microsoft.Build.UnitTests.Logging
             service.LogCommentFromText(s_buildEventContext, MessageImportance.Normal, ResourceUtilities.GetResourceString("BuildFinishedSuccess"));
             Assert.Null(service.ProcessedBuildEvent);
         }
+
+        [Fact]
+        public void LogCommentFromTextFiltersMessagesNoLoggerConsumes()
+        {
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal)).ShouldBeTrue();
+
+            service.LogCommentFromText(s_buildEventContext, MessageImportance.Low, "Low");
+            service.ProcessedBuildEvent.ShouldBeNull();
+
+            service.LogCommentFromText(s_buildEventContext, MessageImportance.Normal, "Normal");
+            service.ProcessedBuildEvent.ShouldBeOfType<BuildMessageEventArgs>().Importance.ShouldBe(MessageImportance.Normal);
+        }
+
         #endregion
 
         #region LogStatusMessages
@@ -1070,7 +1141,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void LogBuildStartedLogsLoggerNames()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            ConsoleLogger consoleLogger = new ConsoleLogger();
+            ConsoleLogger consoleLogger = new ConsoleLogger(LoggerVerbosity.Diagnostic);
             service.RegisterLogger(consoleLogger);
 
             service.LogBuildStarted();

@@ -891,6 +891,10 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
+        /// <inheritdoc />
+        public bool IsMessageEnabled(MessageImportance importance)
+            => !OnlyLogCriticalEvents && importance <= MinimumRequiredMessageImportance;
+
         #endregion
 
         #region Members
@@ -1326,7 +1330,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
             BuildWarningEventArgs warningEvent = null;
             BuildErrorEventArgs errorEvent = null;
-            BuildMessageEventArgs messageEvent = null;
+            BuildMessageEventArgs messageEvent = buildEvent as BuildMessageEventArgs;
+
+            if (buildEvent.GetType() == typeof(BuildMessageEventArgs)
+                && !IsMessageEnabled(((BuildMessageEventArgs)buildEvent).Importance))
+            {
+                return;
+            }
 
             if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
@@ -1336,7 +1346,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent, false);
             }
-            else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            else if (messageEvent != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
                 // The AssemblyLoadBuildEventArgs are logged asynchronously, and build doesn't wait for those,
                 //  so it can happen that ProjectFinishedEventArgs occured first - removing the id->file mapping from map,

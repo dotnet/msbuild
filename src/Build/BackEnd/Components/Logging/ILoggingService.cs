@@ -268,6 +268,16 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         /// <summary>
+        ///  Determines whether a non-critical message with the specified importance must be processed
+        ///  because a registered logger may consume it.
+        /// </summary>
+        /// <param name="importance">The importance of the message.</param>
+        /// <returns>
+        ///  <see langword="true"/> when the message should be logged; otherwise, <see langword="false"/>.
+        /// </returns>
+        bool IsMessageEnabled(MessageImportance importance);
+
+        /// <summary>
         /// Adds a set of warning codes to treat as low importance messages for the specified project instance ID.
         /// </summary>
         /// <param name="buildEventContext">A <see cref="BuildEventContext"/> to associate with the list of warning codes.</param>

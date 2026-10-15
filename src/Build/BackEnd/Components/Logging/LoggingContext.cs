@@ -141,6 +141,11 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             CheckValidity();
 
+            if (!_loggingService.IsMessageEnabled(importance))
+            {
+                return;
+            }
+
             _loggingService.LogBuildEvent(new BuildMessageEventArgs(
                 null,
                 null,

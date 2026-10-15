@@ -393,7 +393,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     sdkResult = result;
                     return true;
                 }
-                else if (loggingContext.LoggingService.MinimumRequiredMessageImportance >= MessageImportance.Low)
+                else if (loggingContext.LoggingService.IsMessageEnabled(MessageImportance.Low))
                 {
                     string resultWarnings = result.Warnings?.Any() == true ? string.Join(Environment.NewLine, result.Warnings) : "null";
                     string resultErrors = result.Errors?.Any() == true ? string.Join(Environment.NewLine, result.Errors) : "null";
