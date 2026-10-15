@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.CodeAnalysis.Collections;
@@ -99,14 +100,14 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             int firstUncachedIndex = operationCount;
 
             // Save cumulative exclusion contexts at Remove boundaries so forward replay can restore them.
-            Stack<ImmutableHashSet<string>>? globsToIgnoreStack = null;
+            using RefStack<ImmutableHashSet<string>> globsToIgnoreStack = default;
 
             // Plan backward within the requested prefix only. Later Removes determine both which cached
             // prefixes are compatible and which files earlier Includes can skip during enumeration.
             for (int index = operationCount - 1; index >= 0; index--)
             {
                 LazyItemOperation operation = _operations[index];
-                var globsToIgnoreFromFutureOperations = globsToIgnoreStack?.Peek() ?? s_emptyGlobsToIgnore;
+                var globsToIgnoreFromFutureOperations = globsToIgnoreStack.PeekOrDefault(s_emptyGlobsToIgnore);
 
                 if (_lazyEvaluator.TryGetCachedItems(
                     operation,
@@ -124,8 +125,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 // the Remove's own cached result is keyed by later exclusions, not by its own patterns.
                 if (operation is RemoveOperation removeOperation)
                 {
-                    globsToIgnoreStack ??= new Stack<ImmutableHashSet<string>>();
-
                     var globsToIgnoreForPreviousOperations = removeOperation.GetRemovedGlobs();
                     foreach (var globToRemove in globsToIgnoreFromFutureOperations)
                     {
@@ -143,7 +142,7 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             items ??= OrderedItemDataCollection.CreateBuilder();
 
             // The first operation to replay sees all Remove globs accumulated while planning backward.
-            ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack?.Peek() ?? s_emptyGlobsToIgnore;
+            ImmutableHashSet<string> currentGlobsToIgnore = globsToIgnoreStack.PeekOrDefault(s_emptyGlobsToIgnore);
 
             // Disjoint literal Updates can be applied together with one scan of the current items.
             Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
@@ -181,18 +180,31 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                             itemsWithNoWildcards.Add(fullPath, op);
                         }
                     }
+
                     if (!addToBatch)
                     {
-                        // We found a wildcard. Remove any fragments associated with the current operation and process them later.
+                        // A nonliteral fragment or overlapping path rejected this Update. Remove only its tentative
+                        // entries, using the same normalized keys as insertion, before flushing earlier Updates.
                         for (int j = 0; j < i; j++)
                         {
-                            itemsWithNoWildcards.Remove(operation.Spec.Fragments[j].TextFragment);
+                            ItemSpecFragment fragment = op.Spec.Fragments[j];
+                            string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(fragment.TextFragment, fragment.ProjectDirectory);
+                            itemsWithNoWildcards.Remove(fullPath);
                         }
                     }
                     else
                     {
                         // Defer this Update until the batch is flushed.
                         addedToBatch = true;
+                        if (op.IsReferenced)
+                        {
+                            // A bookmark ends at this Update. Complete and cache its prefix before any later
+                            // Updates join the batch, without applying this Update a second time through Apply.
+                            ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
+                            addedToBatch = false;
+                            op.CacheResultIfReferenced(items, currentGlobsToIgnore);
+                        }
+
                         continue;
                     }
                 }
@@ -208,9 +220,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
                 // before applying it, so its result uses the same cache key checked during backward planning.
                 if (operation is RemoveOperation)
                 {
-                    Assumed.NotNull(globsToIgnoreStack);
                     globsToIgnoreStack.Pop();
-                    currentGlobsToIgnore = globsToIgnoreStack.Count == 0 ? s_emptyGlobsToIgnore : globsToIgnoreStack.Peek();
+                    currentGlobsToIgnore = globsToIgnoreStack.PeekOrDefault(s_emptyGlobsToIgnore);
                 }
 
                 // Apply saves the complete prefix result when this position has been marked as referenced.
