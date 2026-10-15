@@ -103,6 +103,78 @@ public class ConditionEvaluator_Tests
     }
 
     [Fact]
+    public async Task SameParsedConditionDoesNotBlockConcurrentEvaluations()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        using ManualResetEventSlim firstEntered = new();
+        using ManualResetEventSlim releaseFirst = new();
+        const string condition = "Exists('$(File)') And '$(Value)' == 'expected'";
+        CachedCondition cached = new();
+        ParsedCondition parsed = cached.GetOrParse(
+            condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation, null);
+        string firstPath = Path.Combine(env.DefaultTestDirectory.Path, "first.file");
+        string secondPath = Path.Combine(env.DefaultTestDirectory.Path, "second.file");
+        MSBuildFileSystemBase fileSystem = A.Fake<MSBuildFileSystemBase>();
+        int firstThreadId = 0;
+        A.CallTo(() => fileSystem.FileOrDirectoryExists(A<string>._)).ReturnsLazily((string path) =>
+        {
+            if (path == firstPath)
+            {
+                firstThreadId = Environment.CurrentManagedThreadId;
+                firstEntered.Set();
+                releaseFirst.Wait(TimeSpan.FromSeconds(30)).ShouldBeTrue();
+                return true;
+            }
+
+            path.ShouldBe(secondPath);
+            Environment.CurrentManagedThreadId.ShouldNotBe(firstThreadId);
+            return true;
+        });
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> firstState = new(
+            condition, CreateExpander(fileSystem, ("File", firstPath), ("Value", "expected")),
+            ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
+            ElementLocation.EmptyLocation, fileSystem);
+        ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance> secondState = new(
+            condition, CreateExpander(fileSystem, ("File", secondPath), ("Value", "different")),
+            ExpanderOptions.ExpandProperties, null, env.DefaultTestDirectory.Path,
+            ElementLocation.EmptyLocation, fileSystem);
+        Task<bool> first = Task.Factory.StartNew(
+            () => parsed.Evaluate(firstState),
+            CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        Task<bool>? second = null;
+
+        try
+        {
+            firstEntered.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            second = Task.Factory.StartNew(() =>
+            {
+                ParsedCondition sameCondition = cached.GetOrParse(
+                    condition, ParserOptions.AllowProperties, ElementLocation.EmptyLocation, null);
+                sameCondition.Root.ShouldBeSameAs(parsed.Root);
+                return sameCondition.Evaluate(secondState);
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+            (await Task.WhenAny(second, Task.Delay(TimeSpan.FromSeconds(10)))).ShouldBeSameAs(second);
+            (await second).ShouldBeFalse();
+            first.IsCompleted.ShouldBeFalse();
+        }
+        finally
+        {
+            releaseFirst.Set();
+            if (second is not null)
+            {
+                await Task.WhenAll(first, second);
+            }
+            else
+            {
+                await first;
+            }
+        }
+
+        (await first).ShouldBeTrue();
+    }
+
+    [Fact]
     public void EvaluationStateDoesNotLeakAfterEvaluationThrows()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);
