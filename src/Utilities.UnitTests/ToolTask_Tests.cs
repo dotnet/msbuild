@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Resources;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -290,6 +291,124 @@ namespace Microsoft.Build.UnitTests
             string pattern = $"{commandLine}{Environment.NewLine}\\s*{displayMessage}";
             Regex regex = new Regex(pattern);
             regex.Matches(log).Count.ShouldBe(1, $"{log} doesn't contain the log matching the pattern: {pattern}");
+        }
+
+        /// <summary>
+        /// By default a ToolTask reads the tool's stdout/stderr using the current system OEM code page. This is the
+        /// long-standing behavior and is preserved so that tools relying on the OEM code page are not broken.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void StandardEncodingNamesDefaultToOem()
+        {
+            using MyTool t = new MyTool();
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.WebName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.WebName);
+
+            t.StandardOutputEncodingName = t.StandardOutputEncodingName;
+            t.StandardErrorEncodingName = t.StandardErrorEncodingName;
+
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.WebName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.WebName);
+        }
+
+        /// <summary>
+        /// Setting StandardOutputEncodingName/StandardErrorEncodingName to the special value "ansi" (case-insensitive) selects the
+        /// current system ANSI code page (GetACP), e.g. for native tools like link.exe/cl.exe.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData("ansi")]
+        [InlineData("ANSI")]
+        [InlineData("Ansi")]
+        public void StandardEncodingNamesSelectAnsiCodePage(string ansiValue)
+        {
+            using MyTool t = new MyTool();
+            t.StandardOutputEncodingName = ansiValue;
+            t.StandardErrorEncodingName = ansiValue;
+
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.WebName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.WebName);
+
+            t.StandardOutputEncodingName = t.StandardOutputEncodingName;
+            t.StandardErrorEncodingName = t.StandardErrorEncodingName;
+
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.WebName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.WebName);
+        }
+
+        /// <summary>
+        /// An explicitly-set StandardOutputEncodingName/StandardErrorEncodingName value takes precedence over the OEM default and can be
+        /// set to any named encoding, not just the "ansi" special value.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void StandardEncodingNamesHonorExplicitNamedEncoding()
+        {
+            using MyTool t = new MyTool();
+            t.StandardOutputEncodingName = "utf-8";
+            t.StandardErrorEncodingName = "utf-8";
+
+            t.StandardOutputEncodingName.ShouldBe(Encoding.UTF8.WebName);
+            t.StandardErrorEncodingName.ShouldBe(Encoding.UTF8.WebName);
+        }
+
+        /// <summary>
+        /// Verifies that the selected ANSI encoding is used to decode bytes from both redirected streams.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void StandardEncodingNamesDecodeAnsiBytes(bool redirectToStandardError)
+        {
+            Encoding ansiEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
+            Encoding oemEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            byte[] differentlyDecodedBytes = FindDifferentlyDecodedBytes(ansiEncoding, oemEncoding);
+
+            if (differentlyDecodedBytes is null)
+            {
+                Assert.Skip($"ANSI code page {ansiEncoding.CodePage} and OEM code page {oemEncoding.CodePage} have no distinct single-byte decoding to exercise.");
+            }
+
+            string expected = $"ansi-output:{ansiEncoding.GetString(differentlyDecodedBytes)}:decoded";
+            byte[] outputBytes =
+            [
+                .. Encoding.ASCII.GetBytes("ansi-output:"),
+                .. differentlyDecodedBytes,
+                .. Encoding.ASCII.GetBytes($":decoded{Environment.NewLine}"),
+            ];
+
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            TransientTestFile output = testEnvironment.CreateFile(".txt");
+            File.WriteAllBytes(output.Path, outputBytes);
+
+            using MyTool t = new MyTool();
+            MockEngine engine = new MockEngine(_output);
+            t.BuildEngine = engine;
+            t.UseCommandProcessor = true;
+            t.EchoOff = true;
+            t.StandardOutputEncodingName = EncodingUtilities.UseAnsiEncoding;
+            t.StandardErrorEncodingName = EncodingUtilities.UseAnsiEncoding;
+            t.MockCommandLineCommands = $"type \"{output.Path}\"{(redirectToStandardError ? " 1>&2" : string.Empty)}";
+
+            t.Execute().ShouldBeTrue();
+            Assert.Contains(expected, engine.Log, StringComparison.Ordinal);
+        }
+
+        private static byte[] FindDifferentlyDecodedBytes(Encoding first, Encoding second)
+        {
+            for (int value = 0x80; value <= byte.MaxValue; value++)
+            {
+                byte[] candidate = [(byte)value];
+                string firstValue = first.GetString(candidate);
+                string secondValue = second.GetString(candidate);
+
+                if (!string.Equals(firstValue, secondValue, StringComparison.OrdinalIgnoreCase)
+                    && firstValue.IndexOf('\uFFFD') < 0
+                    && secondValue.IndexOf('\uFFFD') < 0)
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
