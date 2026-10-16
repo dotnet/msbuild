@@ -40,12 +40,18 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         /// </summary>
         /// <param name="operationCount">The number of operations in the requested prefix.</param>
         /// <returns>
-        ///  The matching items in evaluation order.
+        ///  A non-default array of matching items in evaluation order.
         /// </returns>
-        public ImmutableList<I> GetMatchedItems(int operationCount)
+        public ImmutableArray<I> GetMatchedItems(int operationCount)
         {
-            ImmutableList<I>.Builder items = ImmutableList.CreateBuilder<I>();
-            foreach (ItemData data in GetItemData(operationCount))
+            OrderedItemDataCollection itemData = GetItemData(operationCount);
+            if (itemData.Count == 0)
+            {
+                return [];
+            }
+
+            using RefArrayBuilder<I> items = new(itemData.Count);
+            foreach (ItemData data in itemData)
             {
                 if (data.ConditionResult)
                 {
