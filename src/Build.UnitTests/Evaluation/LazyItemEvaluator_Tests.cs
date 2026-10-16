@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -333,10 +334,14 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
     }
 
     [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void CapturedPrefixesPreserveMetadataAcrossLaterUpdatesAndRemoves(bool eagerReads)
+    [InlineData(false, 0)]
+    [InlineData(false, int.MaxValue)]
+    [InlineData(true, 0)]
+    [InlineData(true, int.MaxValue)]
+    public void CapturedPrefixesPreserveMetadataAcrossLaterUpdatesAndRemoves(bool eagerReads, int removeThreshold)
     {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", removeThreshold.ToString(CultureInfo.InvariantCulture));
         using ProjectCollection collection = new();
         Project project = CreateProject(
             """
@@ -414,6 +419,157 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
 
             actual.ShouldBe(expected);
         }
+    }
+
+    [Theory]
+    [InlineData("target.cs;./target.cs;missing.cs", "first.txt;second.txt;other.cs;last.txt")]
+    [InlineData("TARGET.CS", "first.txt;second.txt;other.cs;last.txt")]
+    [InlineData("*.cs;target.cs", "first.txt;second.txt;last.txt")]
+    [InlineData("@(ToRemove)", "first.txt;second.txt;other.cs;last.txt")]
+    [InlineData("missing.cs", "first.txt;target.cs;./target.cs;TARGET.CS;second.txt;other.cs;last.txt")]
+    public void IndexedRemovesMatchNormalizedPathsAndPreserveSnapshots(string removeSpec, string expectedIncludes)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+        using ProjectCollection collection = new();
+        const string initialIncludes = "first.txt;target.cs;./target.cs;TARGET.CS;second.txt;other.cs;last.txt";
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Source Include="{initialIncludes}" />
+                    <ToRemove Include="target.cs;target.cs" />
+                    <Before Include="@(Source)" />
+                    <Source Remove="{removeSpec}" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        for (int read = 0; read < 2; read++)
+        {
+            List<string> actual = [];
+            foreach (ProjectItem item in provider.GetItems("Source"))
+            {
+                actual.Add(item.EvaluatedInclude);
+            }
+
+            actual.ShouldBe(expectedIncludes.Split(';'));
+
+            List<string> before = [];
+            foreach (ProjectItem item in provider.GetItems("Before"))
+            {
+                before.Add(item.EvaluatedInclude);
+            }
+
+            before.ShouldBe(initialIncludes.Split(';'));
+        }
+    }
+
+    [Fact]
+    public void IndexedRemovesTrackUpdatesAddsAndClears()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;./a.cs;keep.txt">
+                        <Trace>initial</Trace>
+                    </Source>
+                    <Source Remove="missing.cs" />
+                    <Source Update="a.cs">
+                        <Trace>updated</Trace>
+                    </Source>
+                    <BeforeRemove Include="@(Source)" />
+                    <Source Include="b.cs;b.cs">
+                        <Trace>added</Trace>
+                    </Source>
+                    <Source Remove="a.cs" />
+                    <Source Remove="b.cs" />
+                    <AfterRemove Include="@(Source)" />
+                    <Source Remove="@(Source)" />
+                    <Source Include="a.cs;./a.cs;c.cs">
+                        <Trace>fresh</Trace>
+                    </Source>
+                    <Source Remove="c.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        string[] expected =
+        [
+            "BeforeRemove:a.cs:updated",
+            "BeforeRemove:./a.cs:updated",
+            "BeforeRemove:keep.txt:initial",
+            "AfterRemove:keep.txt:initial",
+            "Source:a.cs:fresh",
+            "Source:./a.cs:fresh",
+        ];
+
+        for (int read = 0; read < 2; read++)
+        {
+            List<string> actual = [];
+            foreach (var data in evaluator.GetAllItemsDeferred())
+            {
+                actual.Add($"{data.Item.ItemType}:{data.Item.EvaluatedInclude}:{data.Item.GetMetadataValue("Trace")}");
+            }
+
+            actual.ShouldBe(expected);
+        }
+    }
+
+    [Fact]
+    public void NormalizedPathIndexTracksReplacementsAndItemRemovals()
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            """
+            <Project>
+                <ItemGroup>
+                    <Source Include="a.cs;./a.cs;b.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.ItemData[] items =
+            [.. evaluator.GetAllItemsDeferred()];
+        var builder =
+            LazyItemEvaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.OrderedItemDataCollection.CreateBuilder();
+        foreach (var item in items)
+        {
+            builder.Add(item);
+        }
+
+        var snapshot = builder.ToImmutable();
+        builder.NormalizedItemPaths.Count.ShouldBe(2);
+
+        builder[0] = items[2];
+        builder.NormalizedItemPaths.Count.ShouldBe(2);
+        builder.NormalizedItemPaths.Contains(items[1].NormalizedItemValue).ShouldBeTrue();
+        builder.NormalizedItemPaths.Contains(items[2].NormalizedItemValue).ShouldBeTrue();
+
+        builder[1] = items[2];
+        builder.NormalizedItemPaths.ShouldBe([items[2].NormalizedItemValue]);
+
+        ProjectItem[] itemsToRemove = [items[2].Item];
+        builder.RemoveAll(itemsToRemove);
+        builder.NormalizedItemPaths.ShouldBeEmpty();
+        builder.Add(items[0]);
+        builder.NormalizedItemPaths.ShouldBe([items[0].NormalizedItemValue]);
+        builder.Clear();
+        builder.NormalizedItemPaths.ShouldBeEmpty();
+
+        AssertIncludes([.. snapshot], ["a.cs", "./a.cs", "b.cs"]);
     }
 
     [Fact]
