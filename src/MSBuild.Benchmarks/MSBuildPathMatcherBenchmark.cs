@@ -3,6 +3,7 @@
 
 using BenchmarkDotNet.Attributes;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Shared.Globbing;
 using System.Text.RegularExpressions;
 
@@ -22,6 +23,7 @@ public class MSBuildPathMatcherBenchmark
     private Candidate[] _candidates = null!;
     private string _fileSpec = null!;
     private MSBuildPathMatcher _matcher = null!;
+    private GlobPattern _glob = null!;
     private Regex _legacyRegex = null!;
 
     [ParamsAllValues]
@@ -44,25 +46,27 @@ public class MSBuildPathMatcherBenchmark
         _matcher = new MSBuildPathMatcher(
             wildcardDirectory,
             filePattern,
-            preserveLegacyRegexSemantics: Scenario is PatternScenario.RepeatedAnchor or PatternScenario.MultipleGlobstars,
+            preserveLegacySemantics: Scenario is PatternScenario.RepeatedAnchor or PatternScenario.MultipleGlobstars,
             useInvariantCulture: true);
         _candidates = CreateCandidates();
 
-        FileMatcher.Default.GetFileSpecInfoWithRegexObject(
-            _fileSpec,
-            out _legacyRegex,
-            out _,
+        FileMatcher.Default.GetFileSpecInfo(
+            _fileSpec, out string fixedDirectory, out string wildcardPart, out string filenamePart, out _,
             out bool isLegalFileSpec);
         if (!isLegalFileSpec)
         {
             throw new InvalidOperationException($"Illegal benchmark file specification '{_fileSpec}'.");
         }
+        _legacyRegex = new Regex(
+            GlobbingRegex.RegularExpressionFromFileSpec(fixedDirectory, wildcardPart, filenamePart),
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        _glob = new(fixedDirectory, wildcardPart, filenamePart, useInvariantCulture: true);
 
         foreach (Candidate candidate in _candidates)
         {
             bool legacy = _legacyRegex.IsMatch(candidate.FullPath);
             bool optimized = _matcher.MatchesFile(candidate.Directory, candidate.FileName);
-            if (legacy != optimized)
+            if (legacy != optimized || legacy != _glob.IsMatch(candidate.FullPath))
             {
                 throw new InvalidOperationException(
                     $"Matcher benchmark mismatch for '{_fileSpec}' and '{candidate.FullPath}'.");
@@ -92,6 +96,21 @@ public class MSBuildPathMatcherBenchmark
         foreach (Candidate candidate in _candidates)
         {
             if (_matcher.MatchesFile(candidate.Directory, candidate.FileName))
+            {
+                matches++;
+            }
+        }
+
+        return matches;
+    }
+
+    [Benchmark]
+    public int GlobMatching()
+    {
+        int matches = 0;
+        foreach (Candidate candidate in _candidates)
+        {
+            if (_glob.IsMatch(candidate.FullPath))
             {
                 matches++;
             }
