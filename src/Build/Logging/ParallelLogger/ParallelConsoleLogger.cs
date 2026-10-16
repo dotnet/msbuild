@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
@@ -219,6 +220,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void BuildStartedHandler(object sender, BuildStartedEventArgs e)
         {
+            if (SupportsProgramStatusReporting && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                WriteHandler(AnsiCodes.SetProgramStatus(AnsiCodes.ProgramStatus.Working, app: "msbuild"));
+            }
+
             buildStarted = e.Timestamp;
             _hasBuildStarted = true;
 
@@ -354,6 +360,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
             ResetConsoleLoggerState();
             CheckIfOutputSupportsAlignment();
+
+            if (SupportsProgramStatusReporting && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_13))
+            {
+                WriteHandler(AnsiCodes.SetProgramStatus(
+                    e.Succeeded ? AnsiCodes.ProgramStatus.Done : AnsiCodes.ProgramStatus.Error, app: "msbuild"));
+            }
         }
 
         /// <summary>

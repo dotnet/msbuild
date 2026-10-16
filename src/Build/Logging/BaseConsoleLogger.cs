@@ -69,6 +69,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         protected internal WriteHandler WriteHandler { get; set; }
 
+        internal bool SupportsProgramStatusReporting { get; set; }
+
         #endregion
 
         /// <summary>

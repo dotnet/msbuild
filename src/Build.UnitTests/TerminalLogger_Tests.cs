@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
@@ -155,6 +156,8 @@ namespace Microsoft.Build.UnitTests
             }
 
             public bool SupportsProgressReporting => false;
+
+            public bool SupportsProgramStatusReporting { get; set; }
 
             public void BeginUpdate() => _terminal.BeginUpdate();
             public void EndUpdate() => _terminal.EndUpdate();
@@ -454,6 +457,172 @@ namespace Microsoft.Build.UnitTests
 
         #region Build summary tests
 
+        [Theory]
+        [InlineData(true, "done")]
+        [InlineData(false, "error")]
+        public void ReportsProgramStatusForBuildResult(bool succeeded, string expectedState)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, 80, 25) { SupportsProgramStatusReporting = true };
+            TerminalLogger logger = new(terminal) { Verbosity = LoggerVerbosity.Quiet };
+            MockBuildEventSink eventSource = new(0);
+            logger.Initialize(eventSource, 1);
+
+            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            eventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
+
+            output.ToString().ShouldBe(
+                "\x1b]7501;state=working:app=msbuild\x1b\\" +
+                "\x1b]7501;state=clear:id=build\x1b\\" +
+                $"\x1b]7501;state={expectedState}:app=msbuild\x1b\\");
+        }
+
+        [Fact]
+        public void DoesNotReportProgramStatusWhenOutputIsNotInteractive()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, 80, 25);
+            TerminalLogger logger = new(terminal) { Verbosity = LoggerVerbosity.Quiet };
+            MockBuildEventSink eventSource = new(0);
+            logger.Initialize(eventSource, 1);
+
+            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
+            eventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "Build", true));
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true));
+            eventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded: true));
+
+            output.ToString().ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ReportsProgramStatusForParallelProjectsAndTargets(bool succeeded)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, 80, 25) { SupportsProgramStatusReporting = true };
+            TerminalLogger logger = new(terminal) { Verbosity = LoggerVerbosity.Quiet };
+            MockBuildEventSink eventSource = new(0);
+            logger.Initialize(eventSource, 2);
+            BuildEventContext first = MakeBuildEventContext(evalId: 1, projectContextId: 1, nodeId: 1);
+            BuildEventContext second = MakeBuildEventContext(evalId: 2, projectContextId: 2, nodeId: 2);
+
+            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile,
+                properties: [("TargetFramework", "net11.0"), ("RuntimeIdentifier", "win-x64")], buildEventContext: first));
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile2, buildEventContext: second));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, buildEventContext: first));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile2, buildEventContext: second));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Compile", first));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile2, "Build", second));
+
+            string firstTitle = Convert.ToBase64String(Encoding.UTF8.GetBytes("project.proj (net11.0) (win-x64)"));
+            string secondTitle = Convert.ToBase64String(Encoding.UTF8.GetBytes("project2.proj"));
+            output.ToString().ShouldBe(
+                "\x1b]7501;state=working:app=msbuild\x1b\\" +
+                $"\x1b]7501;state=working:id=build/s-1/n1/p1:title={firstTitle}\x1b\\" +
+                $"\x1b]7501;state=working:id=build/s-1/n2/p2:title={secondTitle}\x1b\\" +
+                "\x1b]7501;state=working:id=build/s-1/n1/p1/t1:title=Q29tcGlsZQ==\x1b\\" +
+                "\x1b]7501;state=working:id=build/s-1/n2/p2/t1:title=QnVpbGQ=\x1b\\");
+
+            output.GetStringBuilder().Clear();
+            eventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "Compile", succeeded, first));
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded, first));
+
+            output.ToString().ShouldBe(
+                "\x1b]7501;state=clear:id=build/s-1/n1/p1/t1\x1b\\" +
+                "\x1b]7501;state=clear:id=build/s-1/n1/p1\x1b\\");
+
+            output.GetStringBuilder().Clear();
+            // Clearing a project also clears its outstanding target subtree.
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile2, true, second));
+            eventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile2, "Build", true, second));
+            eventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
+
+            output.ToString().ShouldBe(
+                "\x1b]7501;state=clear:id=build/s-1/n2/p2\x1b\\" +
+                "\x1b]7501;state=clear:id=build\x1b\\" +
+                $"\x1b]7501;state={(succeeded ? "done" : "error")}:app=msbuild\x1b\\");
+        }
+
+        [Fact]
+        public void ReportsProgramStatusDuringRestore()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, 80, 25) { SupportsProgramStatusReporting = true };
+            TerminalLogger logger = new(terminal) { Verbosity = LoggerVerbosity.Quiet };
+            MockBuildEventSink eventSource = new(0);
+            logger.Initialize(eventSource, 2);
+            BuildEventContext nested = MakeBuildEventContext(projectContextId: 2, nodeId: 2);
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, "Restore"));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile2, buildEventContext: nested));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile2, "Restore", nested));
+            eventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile2, "Restore", true, nested));
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile2, true, nested));
+
+            output.ToString().ShouldContain("\x1b]7501;state=working:id=build/s-1/n2/p2/t1:title=UmVzdG9yZQ==\x1b\\");
+            output.ToString().ShouldEndWith(
+                "\x1b]7501;state=clear:id=build/s-1/n2/p2/t1\x1b\\" +
+                "\x1b]7501;state=clear:id=build/s-1/n2/p2\x1b\\");
+        }
+
+        [Fact]
+        public void ProgramStatusTitlesRespectEncodingAndSizeLimits()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, 80, 25) { SupportsProgramStatusReporting = true };
+            TerminalLogger logger = new(terminal) { Verbosity = LoggerVerbosity.Quiet };
+            MockBuildEventSink eventSource = new(0);
+            logger.Initialize(eventSource, 1);
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, "Restore"));
+            output.GetStringBuilder().Clear();
+
+            string title = "\0\r\n\x1b\x7f\u0085" + new string('\u4e00', 57) + "\U00010000";
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, title));
+            string encoded = output.ToString().Split(["title="], StringSplitOptions.None)[1].Split('\x1b')[0];
+            byte[] decoded = Convert.FromBase64String(encoded);
+
+            decoded.Length.ShouldBeLessThanOrEqualTo(192);
+            encoded.Length.ShouldBeLessThanOrEqualTo(256);
+            Encoding.UTF8.GetString(decoded).ShouldBe(new string(' ', 6) + new string('\u4e00', 57));
+        }
+
+        [Fact]
+        public void ProgramStatusRecordsAreBoundedAndCapacityIsReused()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, 80, 25) { SupportsProgramStatusReporting = true };
+            TerminalLogger logger = new(terminal) { Verbosity = LoggerVerbosity.Quiet };
+            MockBuildEventSink eventSource = new(0);
+            logger.Initialize(eventSource, 1);
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+
+            for (int i = 1; i <= 65; i++)
+            {
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile,
+                    buildEventContext: MakeBuildEventContext(projectContextId: i)));
+            }
+
+            output.ToString().Split(["state=working:"], StringSplitOptions.None).Length.ShouldBe(64);
+            output.GetStringBuilder().Clear();
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true,
+                MakeBuildEventContext(projectContextId: 1)));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build",
+                MakeBuildEventContext(projectContextId: 64)));
+            // A target is not reported without its project, even when capacity becomes available.
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build",
+                MakeBuildEventContext(projectContextId: 2)));
+
+            output.ToString().ShouldBe(
+                "\x1b]7501;state=clear:id=build/s-1/n1/p1\x1b\\" +
+                "\x1b]7501;state=working:id=build/s-1/n1/p2/t1:title=QnVpbGQ=\x1b\\");
+        }
+
         private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action? additionalCallbacks = null, string? projectFile = null, List<(string, string)>? properties = null)
         {
             projectFile ??= _projectFile;
@@ -541,6 +710,57 @@ namespace Microsoft.Build.UnitTests
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () => { });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        public async Task ProgramStatusInterleavesWithParallelBuildOutput(bool succeeded, bool supportsProgramStatusReporting)
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 80, height: 25)
+            {
+                SupportsProgramStatusReporting = supportsProgramStatusReporting
+            };
+            TerminalLogger logger = new(terminal)
+            {
+                _createStopwatch = () => new MockStopwatch()
+            };
+            MockBuildEventSink eventSource = new(0);
+            logger.Initialize(eventSource, 2);
+            BuildEventContext first = MakeBuildEventContext(evalId: 1, projectContextId: 1, nodeId: 1);
+            BuildEventContext second = MakeBuildEventContext(evalId: 2, projectContextId: 2, nodeId: 2);
+
+            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs("project.proj",
+                properties: [("TargetFramework", "net11.0")], buildEventContext: first));
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs("project2.proj", buildEventContext: second));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs("project.proj", buildEventContext: first));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs("project.proj", "Compile", first));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs("project2.proj", buildEventContext: second));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs("project2.proj", "Build", second));
+            logger.Refresh();
+
+            if (!succeeded)
+            {
+                eventSource.InvokeErrorRaised(new BuildErrorEventArgs(
+                    null, "AA0000", "project.proj", 1, 2, 0, 0, "Compilation failed.", null, null)
+                {
+                    BuildEventContext = first
+                });
+            }
+
+            eventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs("project.proj", "Compile", succeeded, first));
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs("project.proj", succeeded, first));
+            logger.Refresh();
+            eventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs("project2.proj", "Build", true, second));
+            eventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs("project2.proj", true, second));
+            eventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
+            logger.Shutdown();
+
+            await Verify(output.ToString().Replace("\x1b", "<ESC>"), _settings)
+                .UseParameters(succeeded, supportsProgramStatusReporting);
         }
 
         [Fact]

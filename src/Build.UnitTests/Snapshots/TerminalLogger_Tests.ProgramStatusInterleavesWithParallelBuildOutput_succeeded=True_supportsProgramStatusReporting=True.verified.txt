@@ -1,0 +1,12 @@
+<ESC>]7501;state=working:app=msbuild<ESC>\<ESC>]7501;state=working:id=build/s-1/n1/p1:title=cHJvamVjdC5wcm9qIChuZXQxMS4wKQ==<ESC>\<ESC>]7501;state=working:id=build/s-1/n1/p1/t1:title=Q29tcGlsZQ==<ESC>\<ESC>]7501;state=working:id=build/s-1/n2/p2:title=cHJvamVjdDIucHJvag==<ESC>\<ESC>]7501;state=working:id=build/s-1/n2/p2/t1:title=QnVpbGQ=<ESC>\<ESC>[?25l<ESC>[1F
+  project <ESC>[36;1mnet11.0<ESC>[m <ESC>[120G<ESC>[14DCompile (0.2s)
+  project2 <ESC>[120G<ESC>[12DBuild (0.2s)
+<ESC>[?25h<ESC>]7501;state=clear:id=build/s-1/n1/p1/t1<ESC>\<ESC>]7501;state=clear:id=build/s-1/n1/p1<ESC>\<ESC>[3F
+<ESC>[J<ESC>[?25l<ESC>[1F
+  project2 <ESC>[120G<ESC>[12DBuild (0.2s)
+<ESC>[?25h<ESC>[?25l<ESC>[2F
+<ESC>[120G<ESC>[6D(0.2s)
+<ESC>[?25h<ESC>]7501;state=clear:id=build/s-1/n2/p2/t1<ESC>\<ESC>]7501;state=clear:id=build/s-1/n2/p2<ESC>\<ESC>[2F
+<ESC>[J
+Build <ESC>[32;1msucceeded<ESC>[m in 5.0s
+<ESC>]7501;state=clear:id=build<ESC>\<ESC>]7501;state=done:app=msbuild<ESC>\

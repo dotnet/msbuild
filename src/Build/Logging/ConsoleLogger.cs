@@ -52,6 +52,7 @@ namespace Microsoft.Build.Logging
         private string _parameters;
         private bool _skipProjectStartedText = false;
         private bool? _showSummary;
+        private bool _supportsProgramStatusReporting;
 
         #region Constructors
 
@@ -72,7 +73,7 @@ namespace Microsoft.Build.Logging
         public ConsoleLogger(LoggerVerbosity verbosity) :
             this(verbosity, Console.Out.Write, BaseConsoleLogger.SetColor, BaseConsoleLogger.ResetColor)
         {
-            // do nothing
+            _supportsProgramStatusReporting = !Console.IsOutputRedirected && ConsoleConfiguration.AcceptAnsiColorCodes;
         }
 
         /// <summary>
@@ -87,11 +88,22 @@ namespace Microsoft.Build.Logging
             WriteHandler write,
             ColorSetter colorSet,
             ColorResetter colorReset)
+            : this(verbosity, write, colorSet, colorReset, supportsProgramStatusReporting: false)
+        {
+        }
+
+        internal ConsoleLogger(
+            LoggerVerbosity verbosity,
+            WriteHandler write,
+            ColorSetter colorSet,
+            ColorResetter colorReset,
+            bool supportsProgramStatusReporting)
         {
             _verbosity = verbosity;
             _write = write;
             _colorSet = colorSet;
             _colorReset = colorReset;
+            _supportsProgramStatusReporting = supportsProgramStatusReporting;
         }
 
         /// <summary>
@@ -146,6 +158,8 @@ namespace Microsoft.Build.Logging
             }
 
             _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+            _consoleLogger.SupportsProgramStatusReporting =
+                _supportsProgramStatusReporting && this is not FileLogger;
 
             if (_showSummary != null)
             {
@@ -278,6 +292,7 @@ namespace Microsoft.Build.Logging
 
             set
             {
+                _supportsProgramStatusReporting = false;
                 if (_consoleLogger == null)
                 {
                     _write = value;
@@ -285,6 +300,7 @@ namespace Microsoft.Build.Logging
                 else
                 {
                     _consoleLogger.WriteHandler = value;
+                    _consoleLogger.SupportsProgramStatusReporting = false;
                 }
             }
         }
