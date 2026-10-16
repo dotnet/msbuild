@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -93,8 +94,12 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput.ShouldContain("MaxNodeCount=2");
     }
 
-    [Fact]
-    public async Task NestedBuild_InheritsCoordinatorGrant_DoesNotDeadlock()
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task NestedBuild_InheritsCoordinatorGrant_DoesNotDeadlock(bool multiThreaded, bool taskHost)
     {
         using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
 
@@ -108,18 +113,20 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             </Project>
             """);
 
+        string taskFactory = taskHost ? """TaskFactory="TaskHostFactory" """ : string.Empty;
         TransientTestFile rootProject = helper.CreateFile(
             "root.proj",
-            """
+            $"""
             <Project>
+              <UsingTask TaskName="Exec" AssemblyFile="$([System.IO.Path]::Combine('$(MSBuildToolsPath)', 'Microsoft.Build.Tasks.Core.dll'))" {taskFactory}/>
               <Target Name="Build">
-                <Exec Command="$(NestedMSBuildCommand) &quot;$(ChildProject)&quot; /m:8 /p:UseSharedCompilation=false /v:n" />
+                <Exec Command="$(NestedMSBuildCommand) &quot;$(ChildProject)&quot; /m:8 /nr:false /p:UseSharedCompilation=false /v:n" />
               </Target>
             </Project>
             """);
 
         var (success, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
-            $"\"{rootProject.Path}\" /m:1 /v:n /p:NestedMSBuildCommand=\"{RunnerUtilities.BootstrapMSBuildCommand}\" /p:ChildProject=\"{childProject.Path}\"",
+            $"\"{rootProject.Path}\" /m:1 /mt:{multiThreaded} /nr:false /v:n /p:NestedMSBuildCommand=\"{RunnerUtilities.BootstrapMSBuildCommand}\" /p:ChildProject=\"{childProject.Path}\"",
             outputHelper: outputHelper,
             timeoutMilliseconds: 60_000);
 
@@ -127,7 +134,53 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
 
         success.ShouldBeTrue("Build failed");
         buildOutput.ShouldContain("NestedMaxNodeCount=1");
-        buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
+        AssertNestedGrantReceived(buildOutput);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task StaticGraphRestore_SharesCoordinatorGrant(bool multiThreaded)
+    {
+        using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
+        helper.TestEnvironment.SetEnvironmentVariable(
+            "DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", Path.Combine(RunnerUtilities.BootstrapRootPath, "core"));
+
+        TransientTestFolder folder = helper.CreateFolder();
+        helper.CreateFile(folder, "NuGet.Config", """
+            <configuration>
+              <packageSources><clear /></packageSources>
+            </configuration>
+            """);
+        TransientTestFile project = helper.CreateFile(folder, "restore.csproj", """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>net11.0</TargetFramework>
+              </PropertyGroup>
+              <Target Name="RestoreCompleted" AfterTargets="Restore">
+                <Message Text="STATIC_GRAPH_RESTORE_COMPLETED" Importance="High" />
+              </Target>
+            </Project>
+            """);
+
+        var (success, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
+            $"\"{project.Path}\" /t:Restore /p:RestoreUseStaticGraphEvaluation=true /mt:{multiThreaded} /m:8 /nr:false /v:n",
+            outputHelper: outputHelper,
+            timeoutMilliseconds: 60_000);
+
+        success.ShouldBeTrue(buildOutput);
+        buildOutput.ShouldContain("STATIC_GRAPH_RESTORE_COMPLETED");
+        File.Exists(Path.Combine(folder.Path, "obj", "project.assets.json")).ShouldBeTrue();
+        AssertNestedGrantReceived(buildOutput);
+    }
+
+    private static void AssertNestedGrantReceived(string buildOutput)
+    {
+        // With the parent's one-node grant still active, a second grant can only be a nested join.
+        string grantMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("CoordinatorNodeGrantReceived", 1);
+        int parentGrant = buildOutput.IndexOf(grantMessage, StringComparison.Ordinal);
+        parentGrant.ShouldBeGreaterThanOrEqualTo(0);
+        buildOutput.IndexOf(grantMessage, parentGrant + grantMessage.Length, StringComparison.Ordinal).ShouldBeGreaterThan(parentGrant);
     }
 
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/14488")]
@@ -183,6 +236,8 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
             TestEnvironment.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
             TestEnvironment.SetEnvironmentVariable(Constants.PipeNameEnvVarName, pipeName);
+            TestEnvironment.SetEnvironmentVariable(Constants.GrantIdEnvVarName, null);
+            TestEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
 
             if (nodeBudget is int nodeBudgetValue)
             {
