@@ -24,6 +24,7 @@ jobs:
 
   templateContext:
     outputParentDirectory: '$(Build.SourcesDirectory)\artifacts\official'
+    # Arcade's Publish target owns AssetManifests; do not republish them here.
     outputs:
     # Publish OptProf configuration files
     - output: artifactsDrop
@@ -53,23 +54,24 @@ jobs:
       ArtifactName: VSSetup
       condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
-    # Archive NuGet packages to DevOps.
-    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
-    # arcade templates depend on the name.
+    # Arcade owns the flat per-build packages in PackageArtifacts. Retain the full archive
+    # until final-package signing validation and external Release/PreRelease consumers migrate.
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\packages\$(BuildConfiguration)'
       ArtifactName: PackageArtifacts
+
+    # Release handoff only; the later signing-validation stage still checks PackageArtifacts.
+    - ${{ if and(not(parameters.isExperimental), eq(parameters.signTypeParameter, 'real')) }}:
+      - output: pipelineArtifact
+        targetPath: '$(Build.SourcesDirectory)\artifacts\official\packages\$(BuildConfiguration)\Release'
+        artifactName: ReleasePackages
+        condition: succeeded()
 
     # Publish "IntelliSense" XSD files to their own artifact
     # so it can be consumed by the insertion-to-VS job
     - output: pipelineArtifact
       targetPath: '$(Build.SourcesDirectory)\artifacts\official\xsd'
       artifactName: xsd
-
-    # Publish Asset Manifests for Build Asset Registry job
-    - output: buildArtifacts
-      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\log\$(BuildConfiguration)\AssetManifest'
-      ArtifactName: AssetManifests
 
   variables:
   - name: TeamName
