@@ -52,11 +52,7 @@ and signing are unchanged: Arcade repacks shipping packages into `Release` and
 
 V3 container download filters match artifact-prefixed paths, so insertion uses
 `PackageArtifacts/Microsoft.Build.*.nupkg` (and the corresponding StringTools and
-ExternalAPIs patterns), not bare filename patterns. Successful
-[insertion 15713315](https://dev.azure.com/devdiv/DevDiv/_build/results?buildId=15713315),
-logs 65 and 89, shows the artifact-prefixed matching paths and the ten flat
-packages actually pushed. It predates these filters; it confirms the path and
-consumer contract, not successful execution of the changed filter.
+ExternalAPIs patterns), not bare filename patterns.
 
 ### Validation and compatibility
 
@@ -65,7 +61,7 @@ Arcade's `SigningValidation` task against that folder **before** staging and
 publishing `ReleasePackages`. A failure fails the build job and prevents release
 publication, BAR registration, and downstream publishing. The existing
 `enableSigningValidation` switch controls signature validation here and in the
-unchanged post-build check of flat `PackageArtifacts`; the nonempty-payload check
+post-build check of flat `PackageArtifacts`; the nonempty-payload check
 always runs. Validation logs remain in `logs`.
 The payload check also records each final package's relative path and SHA-256 in
 `logs/ReleasePackages.sha256` before staging; release retrieval can compare the
@@ -78,23 +74,10 @@ approval before publishing to nuget.org. The release checklist records
 build/artifact URLs, source SHA, BAR build ID, and package hashes rather than
 relying on payload copies for traceability.
 
-The old full-tree `PackageArtifacts` upload is removed. There are no nested
-`Shipping`, `NonShipping`, `Release`, or `PreRelease` package copies. Per-build
-packages remain at the artifact root; final packages move to `ReleasePackages`.
-The generated `PreRelease` repacks are not published: they are neither
-manifest-listed dependency assets nor the final release handoff, and the
-investigated insertion/OptProf paths do not use them. Consumers of the old nested
-layout must migrate; main does not retain a compatibility archive for speculative
-external consumers. Package production/signing itself is unchanged.
-
-V3 remains the official-build publishing protocol. V4 would change manifest
-locations, package staging, source-build registration, and post-build/insertion
-downloads without eliminating the need to validate the distinct final-package
-payload. A repo-owned validation step is simpler than that migration or a fork of
-mirrored `eng/common` templates. Arcade's major version is independent of its
-publishing protocol: the interfaces used here also exist in the Arcade 12 update
-in [#15289](https://github.com/dotnet/msbuild/pull/15289); no SDK pin, downgrade, or
-mirrored-template modification is required.
+`PackageArtifacts` contains per-build packages at its root, without nested
+`Shipping`, `NonShipping`, `Release`, or `PreRelease` copies. Final packages are
+in `ReleasePackages`; generated `PreRelease` repacks are not published. Consumers
+of older nested layouts must use the flat per-build packages or `ReleasePackages`.
 
 ### OptProf dependencies
 
@@ -111,33 +94,6 @@ generates stores for the MSBuild profiling-input drop and the VS test drop
 identified by the bootstrapper, not local official-build package artifacts.
 Consequently the execution hook downloads only `VSSetup` runsettings. Keep the
 profiling-input drop, bootstrapper, metadata, and VS payload generation intact.
-
-### Evidence and service acceptance
-
-The publication overlap was observed in successful real-signed official
-[build 15712807](https://dev.azure.com/devdiv/DevDiv/_build/results?buildId=15712807)
-(source `b879db1322ae7b3553e96d1490a19eee16a81e8a`, BAR build `336915`):
-build log 129 uploads flat packages and `Windows_NT.xml` through Arcade; logs
-176 and 178 upload the full package tree and the same manifest through YAML.
-That run predates this change and is not acceptance evidence for the new layout.
-
-Before accepting the new contract, run a real-signed official build and record
-package identities against the Windows asset manifest, relative paths, and
-SHA-256 equality between `logs/ReleasePackages.sha256` and downloaded `ReleasePackages`;
-successful final-package signing validation;
-VS insertion using the flat packages; BAR registration, Darc publishing and
-downstream flow; and release-team retrieval. Check experimental/test-signing
-absence of `ReleasePackages` and OptProf enabled/disabled behavior as applicable.
-Local YAML and staging checks do not substitute for these service-side checks.
-These are validation gates for [#15260](https://github.com/dotnet/msbuild/issues/15260),
-not deferred implementation.
-
-Servicing rollout is separate: additive release-artifact PRs
-[#15261](https://github.com/dotnet/msbuild/pull/15261) (`vs18.11`) and
-[#15302](https://github.com/dotnet/msbuild/pull/15302) (`vs18.12`) do not depend on
-this cleanup. Servicing branch inventories and backport decisions are outside
-this main-only layout change; use the release checklist's combined SDK/VS
-lifecycle rules when evaluating them separately.
 
 ## Public API
 
