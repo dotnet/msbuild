@@ -1037,6 +1037,66 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void StringReferenceCachePreservesSerializedBytesUnderChurn()
+        {
+            string[] messages = new string[8196];
+            messages[0] = string.Empty;
+            messages[1] = new string('x', 4096);
+            messages[2] = new string('y', 4097);
+            messages[3] = "Unicode: \u00e9\u03bb\u4e2d";
+            for (int i = 4; i < messages.Length; i++)
+            {
+                messages[i] = $"Message {i}: {new string('x', i % 127)}";
+            }
+
+            byte[] sharedStringBytes = SerializeMessages(cloneStrings: false);
+            sharedStringBytes.ShouldBe(SerializeMessages(cloneStrings: true));
+
+            using var stream = new MemoryStream(sharedStringBytes);
+            using var binaryReader = new BinaryReader(stream);
+            using var reader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+            for (int pass = 0; pass < 2; pass++)
+            {
+                foreach (string message in messages)
+                {
+                    for (int repeat = 0; repeat < 2; repeat++)
+                    {
+                        reader.Read().ShouldBeOfType<BuildMessageEventArgs>().Message.ShouldBe(message);
+                    }
+                }
+            }
+
+            reader.Read().ShouldBeNull();
+            stream.Position.ShouldBe(stream.Length);
+
+            byte[] SerializeMessages(bool cloneStrings)
+            {
+                using var output = new MemoryStream();
+                using var binaryWriter = new BinaryWriter(output, Encoding.UTF8, leaveOpen: true);
+                var writer = new BuildEventArgsWriter(binaryWriter);
+                for (int pass = 0; pass < 2; pass++)
+                {
+                    foreach (string message in messages)
+                    {
+                        for (int repeat = 0; repeat < 2; repeat++)
+                        {
+                            string text = cloneStrings ? new string(message.ToCharArray()) : message;
+                            writer.Write(new BuildMessageEventArgs(
+                                text,
+                                helpKeyword: null,
+                                senderName: "MSBuild",
+                                MessageImportance.Low,
+                                DateTime.MinValue));
+                        }
+                    }
+                }
+
+                binaryWriter.Write((byte)BinaryLogRecordKind.EndOfFile);
+                return output.ToArray();
+            }
+        }
+
+        [Fact]
         public void TaskParameterSerializationReusesSharedBackingMetadata()
         {
             ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata

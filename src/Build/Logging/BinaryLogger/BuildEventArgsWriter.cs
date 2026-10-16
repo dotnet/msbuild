@@ -31,7 +31,7 @@ namespace Microsoft.Build.Logging
     /// </summary>
     internal class BuildEventArgsWriter
     {
-        private const int StringReferenceCacheSize = 256; // Must remain a power of two.
+        private const int StringReferenceCacheSize = 4096; // Must remain a power of two.
         private const int MaxCachedStringLength = 4096;
 
         private readonly Stream originalStream;
