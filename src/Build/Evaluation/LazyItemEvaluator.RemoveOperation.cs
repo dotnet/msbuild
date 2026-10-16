@@ -68,10 +68,8 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 if (listBuilder.Count >= Traits.Instance.DictionaryBasedItemRemoveThreshold)
                 {
-                    // Perf optimization: If the number of items in the running list is large, construct a dictionary,
-                    // enumerate all items referenced by the item spec, and perform dictionary look-ups to find items
-                    // to remove.
-                    IList<string> matches = _itemSpec.IntersectsWith(listBuilder.Dictionary);
+                    // For large item lists, index normalized paths and use membership lookups to find items to remove.
+                    ISet<string> matches = _itemSpec.IntersectsWith(listBuilder.NormalizedItemPaths);
                     listBuilder.RemoveAll(matches);
                     return;
                 }

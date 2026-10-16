@@ -24,9 +24,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             private ImmutableList<ItemData>.Builder _listBuilder;
 
             /// <summary>
-            /// A dictionary of items keyed by their normalized value.
+            ///  The normalized item paths present in the collection.
             /// </summary>
-            private Dictionary<string, ItemDataCollectionValue<I>> _dictionaryBuilder;
+            private HashSet<string> _normalizedItemPaths;
 
             internal Builder(ImmutableList<ItemData>.Builder listBuilder)
             {
@@ -52,76 +52,54 @@ internal partial class LazyItemEvaluator<P, I, M, D>
 
                 set
                 {
-                    // Update the dictionary if it exists.
-                    if (_dictionaryBuilder is not null)
+                    if (_normalizedItemPaths is not null
+                        && !_normalizedItemPaths.Comparer.Equals(_listBuilder[index].NormalizedItemValue, value.NormalizedItemValue))
                     {
-                        ItemData oldItemData = _listBuilder[index];
-                        string oldNormalizedValue = oldItemData.NormalizedItemValue;
-                        string newNormalizedValue = value.NormalizedItemValue;
-                        if (!string.Equals(oldNormalizedValue, newNormalizedValue, StringComparison.OrdinalIgnoreCase))
-                        {
-                            // Normalized values are different - delete from the old entry and add to the new entry.
-                            ItemDataCollectionValue<I> oldDictionaryEntry = _dictionaryBuilder[oldNormalizedValue];
-                            oldDictionaryEntry.Delete(oldItemData.Item);
-                            if (oldDictionaryEntry.IsEmpty)
-                            {
-                                _dictionaryBuilder.Remove(oldNormalizedValue);
-                            }
-                            else
-                            {
-                                _dictionaryBuilder[oldNormalizedValue] = oldDictionaryEntry;
-                            }
-
-                            ItemDataCollectionValue<I> newDictionaryEntry = _dictionaryBuilder[newNormalizedValue];
-                            newDictionaryEntry.Add(value.Item);
-                            _dictionaryBuilder[newNormalizedValue] = newDictionaryEntry;
-                        }
-                        else
-                        {
-                            // Normalized values are the same - replace the item in the entry.
-                            ItemDataCollectionValue<I> dictionaryEntry = _dictionaryBuilder[newNormalizedValue];
-                            dictionaryEntry.Replace(oldItemData.Item, value.Item);
-                            _dictionaryBuilder[newNormalizedValue] = dictionaryEntry;
-                        }
+                        // Another item may still have the old path, so rebuild rather than removing that path.
+                        _normalizedItemPaths = null;
                     }
+
                     _listBuilder[index] = value;
                 }
             }
 
             /// <summary>
-            /// Gets or creates a dictionary keyed by normalized values.
+            ///  Gets or creates an index of the normalized item paths.
             /// </summary>
-            public Dictionary<string, ItemDataCollectionValue<I>> Dictionary
+            public HashSet<string> NormalizedItemPaths
             {
                 get
                 {
-                    if (_dictionaryBuilder == null)
+                    if (_normalizedItemPaths is null)
                     {
-                        _dictionaryBuilder = new Dictionary<string, ItemDataCollectionValue<I>>(StringComparer.OrdinalIgnoreCase);
+                        _normalizedItemPaths = [with(StringComparer.OrdinalIgnoreCase)];
                         for (int i = 0; i < _listBuilder.Count; i++)
                         {
                             ItemData itemData = _listBuilder[i];
-                            AddToDictionary(ref itemData);
+                            _normalizedItemPaths.Add(itemData.NormalizedItemValue);
+
+                            // Persist the lazily computed normalized value for later removal scans.
                             _listBuilder[i] = itemData;
                         }
                     }
-                    return _dictionaryBuilder;
+                    return _normalizedItemPaths;
                 }
             }
 
             public void Add(ItemData data)
             {
-                if (_dictionaryBuilder is not null)
+                if (_normalizedItemPaths is not null)
                 {
-                    AddToDictionary(ref data);
+                    _normalizedItemPaths.Add(data.NormalizedItemValue);
                 }
+
                 _listBuilder.Add(data);
             }
 
             public void Clear()
             {
                 _listBuilder.Clear();
-                _dictionaryBuilder?.Clear();
+                _normalizedItemPaths?.Clear();
             }
 
             /// <summary>
@@ -130,34 +108,22 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             public void RemoveAll(ICollection<I> itemsToRemove)
             {
                 _listBuilder.RemoveAll(item => itemsToRemove.Contains(item.Item));
-                // This is a rare operation, don't bother updating the dictionary for now. It will be recreated as needed.
-                _dictionaryBuilder = null;
+                _normalizedItemPaths = null;
             }
 
             /// <summary>
-            /// Removes all items whose normalized path is passed in a collection.
+            ///  Removes all items whose normalized path is in <paramref name="itemPathsToRemove"/>.
             /// </summary>
-            public void RemoveAll(ICollection<string> itemPathsToRemove)
+            /// <param name="itemPathsToRemove">The matched paths, using the normalized-path index's comparison rules.</param>
+            public void RemoveAll(ISet<string> itemPathsToRemove)
             {
-                var dictionary = Dictionary;
-                HashSet<I> itemsToRemove = null;
-                foreach (string itemValue in itemPathsToRemove)
+                if (itemPathsToRemove.Count == 0)
                 {
-                    if (dictionary.TryGetValue(itemValue, out var multiItem))
-                    {
-                        foreach (I item in multiItem)
-                        {
-                            itemsToRemove ??= new HashSet<I>();
-                            itemsToRemove.Add(item);
-                        }
-                        _dictionaryBuilder.Remove(itemValue);
-                    }
+                    return;
                 }
 
-                if (itemsToRemove is not null)
-                {
-                    _listBuilder.RemoveAll(item => itemsToRemove.Contains(item.Item));
-                }
+                _listBuilder.RemoveAll(item => itemPathsToRemove.Contains(item.NormalizedItemValue));
+                _normalizedItemPaths?.ExceptWith(itemPathsToRemove);
             }
 
             /// <summary>
@@ -166,21 +132,6 @@ internal partial class LazyItemEvaluator<P, I, M, D>
             public OrderedItemDataCollection ToImmutable()
             {
                 return new OrderedItemDataCollection(_listBuilder.ToImmutable());
-            }
-
-            private void AddToDictionary(ref ItemData itemData)
-            {
-                string key = itemData.NormalizedItemValue;
-
-                if (!_dictionaryBuilder.TryGetValue(key, out var dictionaryValue))
-                {
-                    dictionaryValue = new ItemDataCollectionValue<I>(itemData.Item);
-                }
-                else
-                {
-                    dictionaryValue.Add(itemData.Item);
-                }
-                _dictionaryBuilder[key] = dictionaryValue;
             }
         }
     }
