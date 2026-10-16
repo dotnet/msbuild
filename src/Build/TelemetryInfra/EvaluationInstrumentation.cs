@@ -13,6 +13,14 @@ internal static class EvaluationInstrumentation
     private const string BuildSubmission = "build_submission";
     private const string OutsideBuildSubmission = "outside_build_submission";
 
+    internal sealed class GlobbingMeasurement
+    {
+        internal double DurationSeconds { get; private set; }
+
+        internal void AddMeasurement(long startTimestamp)
+            => DurationSeconds += EndPassMeasurement(startTimestamp);
+    }
+
     internal static long StartMeasurement()
         => IsEnabled() ? Stopwatch.GetTimestamp() : 0;
 
@@ -57,7 +65,8 @@ internal static class EvaluationInstrumentation
         int submissionId,
         bool succeeded,
         string projectFile,
-        int evaluationId)
+        int evaluationId,
+        GlobbingMeasurement? globbingMeasurement = null)
     {
         if (!IsEnabled())
         {
@@ -70,6 +79,14 @@ internal static class EvaluationInstrumentation
 
         MSBuildEventSource.Log.ProjectEvaluationCompleted(
             durationSeconds,
+            GetStage(stage),
+            GetOrigin(submissionId),
+            succeeded,
+            projectFile,
+            evaluationId);
+
+        MSBuildEventSource.Log.ProjectEvaluationGlobbingCompleted(
+            succeeded && globbingMeasurement is not null ? globbingMeasurement.DurationSeconds : double.NaN,
             GetStage(stage),
             GetOrigin(submissionId),
             succeeded,

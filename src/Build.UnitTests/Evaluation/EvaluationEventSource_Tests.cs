@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
@@ -11,10 +12,12 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Shouldly;
 using Xunit;
 
@@ -66,10 +69,16 @@ public sealed class EvaluationEventSource_Tests : IDisposable
             114,
             ["durationSeconds", "stage", "pass", "origin", "projectFile", "evaluationId"],
             [typeof(double), typeof(string), typeof(string), typeof(string), typeof(string), typeof(int)]);
+        AssertEventContract(
+            nameof(MSBuildEventSource.ProjectEvaluationGlobbingCompleted),
+            117,
+            ["durationSeconds", "stage", "origin", "succeeded", "projectFile", "evaluationId"],
+            [typeof(double), typeof(string), typeof(string), typeof(bool), typeof(string), typeof(int)]);
 
         using var listener = new EvaluationEventListener();
         listener.Enable(MSBuildEventSource.Keywords.All);
         MSBuildEventSource.Log.ProjectEvaluationCompleted(1, "full", "outside_build_submission", succeeded: true, "", 1);
+        MSBuildEventSource.Log.ProjectEvaluationGlobbingCompleted(0, "full", "outside_build_submission", succeeded: true, "", 1);
         listener.Events.ShouldBeEmpty();
 
         listener.Enable(MSBuildEventSource.Keywords.EvaluationMeasurements);
@@ -81,6 +90,12 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         observed.Opcode.ShouldBe(EventOpcode.Info);
         observed.PayloadNames.ShouldBe(["durationSeconds", "stage", "origin", "succeeded", "projectFile", "evaluationId"]);
         observed.Payload.Select(value => value?.GetType()).ShouldBe(
+            [typeof(double), typeof(string), typeof(string), typeof(bool), typeof(string), typeof(int)]);
+
+        MSBuildEventSource.Log.ProjectEvaluationGlobbingCompleted(0, "full", "outside_build_submission", succeeded: true, "", 1);
+        EvaluationEvent globbing = listener.Events.Where(e => e.Id == 117).ShouldHaveSingleItem();
+        globbing.PayloadNames.ShouldBe(observed.PayloadNames);
+        globbing.Payload.Select(value => value?.GetType()).ShouldBe(
             [typeof(double), typeof(string), typeof(string), typeof(bool), typeof(string), typeof(int)]);
     }
 
@@ -137,6 +152,7 @@ public sealed class EvaluationEventSource_Tests : IDisposable
             .Where(e => e.Id == 114)
             .ShouldAllBe(e => (string)e.Payload[4]! == string.Empty
                 && (int)e.Payload[5]! == evaluationId);
+        AssertGlobbingMeasurement(listener, total, 0);
     }
 
     [Theory]
@@ -156,6 +172,7 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         total.Payload[1].ShouldBe(stageName);
         total.Payload[3].ShouldBe(true);
         AssertEvaluationIdentity(listener, total);
+        AssertGlobbingMeasurement(listener, total, 0);
     }
 
     [Fact]
@@ -174,6 +191,7 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
         total.Payload[3].ShouldBe(false);
         AssertEvaluationIdentity(listener, total);
+        AssertGlobbingMeasurement(listener, total, double.NaN);
     }
 
     [Fact]
@@ -202,6 +220,213 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         double.IsNaN((double)total.Payload[0]!).ShouldBeTrue();
         total.Payload[4].ShouldBe(string.Empty);
         total.Payload[5].ShouldBe(BuildEventContext.InvalidEvaluationId);
+        AssertGlobbingMeasurement(listener, total, double.NaN);
+    }
+
+    [Fact]
+    public void GlobbingDurationAccumulatesSearchesButNotCachedOrLiteralResults()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.CreateFile("a.cs", "");
+        env.CreateFile("b.cs", "");
+        env.CreateFile("a.txt", "");
+        var context = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared);
+        var measurement = new EvaluationInstrumentation.GlobbingMeasurement();
+        using var listener = new EvaluationEventListener();
+        listener.Enable(MSBuildEventSource.Keywords.EvaluationMeasurements);
+
+        string[] Expand(string pattern) => EngineFileUtilities.GetFileListEscaped(
+            env.DefaultTestDirectory.Path,
+            pattern,
+            fileMatcher: context.FileMatcher,
+            globbingMeasurement: measurement);
+
+        Expand("literal.cs").ShouldBe(["literal.cs"]);
+        Expand("escaped%2A.cs").ShouldBe(["escaped%2A.cs"]);
+        measurement.DurationSeconds.ShouldBe(0);
+
+        Expand("*.cs").ShouldBe(["a.cs", "b.cs"]);
+        double firstSearch = measurement.DurationSeconds;
+        firstSearch.ShouldBeGreaterThan(0);
+
+        Expand("*.cs").ShouldBe(["a.cs", "b.cs"]);
+        measurement.DurationSeconds.ShouldBe(firstSearch);
+
+        Expand("*.txt").ShouldBe(["a.txt"]);
+        measurement.DurationSeconds.ShouldBeGreaterThan(firstSearch);
+    }
+
+    [Theory]
+    [InlineData(ProjectEvaluationStage.Properties, "properties")]
+    [InlineData(ProjectEvaluationStage.Items, "items")]
+    [InlineData(ProjectEvaluationStage.Full, "full")]
+    public void EvaluationAggregatesItemAndImportSearchesAndReportsZeroForWarmCache(ProjectEvaluationStage stage, string stageName)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.CreateFile("import.targets", "<Project />");
+        env.CreateFile("a.cs", "");
+        env.CreateFile("b.cs", "");
+        string projectPath = env.CreateFile("globbing.proj", """
+            <Project>
+              <Import Project="*.targets" />
+              <ItemGroup>
+                <Compile Include="*.cs" Exclude="b.cs" />
+                <Copy Include="@(Compile);@(Compile)" />
+                <Literal Include="literal.cs;escaped%2A.cs" />
+                <Skipped Include="*.txt" Condition="false" />
+              </ItemGroup>
+            </Project>
+            """).Path;
+        var context = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared);
+        using var listener = new EvaluationEventListener();
+        listener.Enable(MSBuildEventSource.Keywords.EvaluationMeasurements);
+
+        for (int i = 0; i < 2; i++)
+        {
+            ProjectInstance instance = ProjectInstance.FromFile(projectPath, new ProjectOptions
+            {
+                ProjectCollection = _collection,
+                EvaluationContext = context,
+                EvaluationStage = stage,
+            });
+            if (stage >= ProjectEvaluationStage.Items)
+            {
+                instance.GetItems("Compile").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("a.cs");
+                instance.GetItems("Copy").Count.ShouldBe(2);
+                instance.GetItems("Literal").Count.ShouldBe(2);
+                instance.GetItems("Skipped").ShouldBeEmpty();
+            }
+        }
+
+        EvaluationEvent[] totals = listener.Events.Where(e => e.Id == 113).ToArray();
+        EvaluationEvent[] globbing = listener.Events.Where(e => e.Id == 117).ToArray();
+        globbing.Length.ShouldBe(2);
+        ((double)globbing[0].Payload[0]!).ShouldBeGreaterThan(0);
+        ((double)globbing[0].Payload[0]!).ShouldBeLessThanOrEqualTo((double)totals[0].Payload[0]!);
+        globbing[1].Payload[0].ShouldBe(0d);
+        for (int i = 0; i < 2; i++)
+        {
+            globbing[i].Payload.Skip(1).ShouldBe(totals[i].Payload.Skip(1));
+            globbing[i].Payload[1].ShouldBe(stageName);
+            globbing[i].Payload[2].ShouldBe("outside_build_submission");
+            globbing[i].Payload[3].ShouldBe(true);
+            globbing[i].Payload[4].ShouldBe(projectPath);
+        }
+        globbing.Select(e => (int)e.Payload[5]!).Distinct().Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public void MissingGlobTimestampInvalidatesAggregateRatherThanReportingZero()
+    {
+        using var listener = new EvaluationEventListener();
+        listener.Enable(MSBuildEventSource.Keywords.EvaluationMeasurements);
+        var measurement = new EvaluationInstrumentation.GlobbingMeasurement();
+        measurement.AddMeasurement(Stopwatch.GetTimestamp());
+        measurement.AddMeasurement(0);
+
+        EvaluationInstrumentation.RecordEvaluation(
+            EvaluationInstrumentation.StartMeasurement(),
+            ProjectEvaluationStage.Full,
+            BuildEventContext.InvalidSubmissionId,
+            succeeded: true,
+            "",
+            BuildEventContext.InvalidEvaluationId,
+            measurement);
+
+        EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
+        AssertGlobbingMeasurement(listener, total, double.NaN);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LazyWildcardsAreMeasuredOnlyWhenATransformExpandsThem(bool expand)
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.SetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes", ".*");
+        EngineFileUtilities.CaptureLazyWildcardRegexes();
+        env.CreateFile("a.cs", "");
+        string projectPath = env.CreateFile("lazy-globbing.proj", """
+            <Project>
+              <ItemGroup>
+                <Deferred Include="*.cs" />
+                <Expanded Include="@(Deferred->'%(Identity)')" Condition="'$(Expand)' == 'true'" />
+              </ItemGroup>
+            </Project>
+            """).Path;
+        using var listener = new EvaluationEventListener();
+        listener.Enable(MSBuildEventSource.Keywords.EvaluationMeasurements);
+
+        ProjectInstance instance = ProjectInstance.FromFile(projectPath, new ProjectOptions
+        {
+            ProjectCollection = _collection,
+            GlobalProperties = new Dictionary<string, string> { ["Expand"] = expand ? "true" : "false" },
+        });
+
+        instance.GetItems("Deferred").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("*.cs");
+        EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
+        if (expand)
+        {
+            instance.GetItems("Expanded").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("a.cs");
+            EvaluationEvent globbing = listener.Events.Where(e => e.Id == 117).ShouldHaveSingleItem();
+            ((double)globbing.Payload[0]!).ShouldBeGreaterThan(0);
+            ((double)globbing.Payload[0]!).ShouldBeLessThanOrEqualTo((double)total.Payload[0]!);
+            globbing.Payload.Skip(1).ShouldBe(total.Payload.Skip(1));
+        }
+        else
+        {
+            instance.GetItems("Expanded").ShouldBeEmpty();
+            AssertGlobbingMeasurement(listener, total, 0);
+        }
+    }
+
+    [Fact]
+    public void GeneralTracingPreservesGlobPairsWithoutEnablingMeasurements()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.CreateFile("a.cs", "");
+        string projectPath = env.CreateFile("globbing.proj", """
+            <Project>
+              <ItemGroup>
+                <Compile Include="*.cs" />
+              </ItemGroup>
+            </Project>
+            """).Path;
+        using var listener = new EvaluationEventListener();
+        listener.Enable(MSBuildEventSource.Keywords.All);
+
+        ProjectInstance.FromFile(projectPath, new ProjectOptions { ProjectCollection = _collection })
+            .GetItems("Compile").ShouldHaveSingleItem();
+
+        listener.Events.ShouldNotContain(e => e.Id == 113 || e.Id == 114 || e.Id == 117);
+        listener.Events.Where(e => e.Id is 41 or 42).Select(e => e.Id).ShouldBe([41, 42]);
+    }
+
+    [Fact]
+    public void FailedEvaluationDoesNotReportAPartialGlobAggregate()
+    {
+        using TestEnvironment env = TestEnvironment.Create(_output);
+        env.CreateFile("a.cs", "");
+        string projectPath = env.CreateFile("failed-globbing.proj", """
+            <Project>
+              <ItemGroup>
+                <Compile Include="*.cs">
+                  <Invalid>$([System.Int32]::Parse('not_an_integer'))</Invalid>
+                </Compile>
+              </ItemGroup>
+            </Project>
+            """).Path;
+        using var listener = new EvaluationEventListener();
+        listener.Enable(MSBuildEventSource.Keywords.All | MSBuildEventSource.Keywords.EvaluationMeasurements);
+
+        Should.Throw<InvalidProjectFileException>(() => ProjectInstance.FromFile(
+            projectPath,
+            new ProjectOptions { ProjectCollection = _collection }));
+
+        listener.Events.Where(e => e.Id is 41 or 42).Select(e => e.Id).ShouldBe([41, 42]);
+        EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
+        total.Payload[3].ShouldBe(false);
+        AssertGlobbingMeasurement(listener, total, double.NaN);
     }
 
     [Fact]
@@ -222,6 +447,7 @@ public sealed class EvaluationEventSource_Tests : IDisposable
         EvaluationEvent total = listener.Events.Where(e => e.Id == 113).ShouldHaveSingleItem();
         total.Payload[4].ShouldBe(projectPath);
         AssertEvaluationIdentity(listener, total);
+        AssertGlobbingMeasurement(listener, total, 0);
     }
 
     [Fact]
@@ -253,8 +479,10 @@ public sealed class EvaluationEventSource_Tests : IDisposable
             .ShouldBe(totalEvaluationIds.ToDictionary(id => id, _ => 6));
 
         listener.Events
-            .Where(e => e.Id is 113 or 114)
+            .Where(e => e.Id is 113 or 114 or 117)
             .ShouldAllBe(e => (string)e.Payload[4]! == string.Empty);
+        listener.Events.Where(e => e.Id == 117).Select(e => (int)e.Payload[5]!).ShouldBe(totalEvaluationIds);
+        listener.Events.Where(e => e.Id == 117).ShouldAllBe(e => (double)e.Payload[0]! == 0);
     }
 
     private ProjectInstance Evaluate(ProjectEvaluationStage stage)
@@ -284,8 +512,22 @@ public sealed class EvaluationEventSource_Tests : IDisposable
 
         total.Payload[5].ShouldBe(evaluationId);
         listener.Events
-            .Where(e => e.Id == 114)
+            .Where(e => e.Id is 114 or 117)
             .ShouldAllBe(e => (int)e.Payload[5]! == evaluationId);
+    }
+
+    private static void AssertGlobbingMeasurement(EvaluationEventListener listener, EvaluationEvent total, double durationSeconds)
+    {
+        EvaluationEvent globbing = listener.Events.Where(e => e.Id == 117).ShouldHaveSingleItem();
+        if (double.IsNaN(durationSeconds))
+        {
+            double.IsNaN((double)globbing.Payload[0]!).ShouldBeTrue();
+        }
+        else
+        {
+            ((double)globbing.Payload[0]!).ShouldBe(durationSeconds);
+        }
+        globbing.Payload.Skip(1).ShouldBe(total.Payload.Skip(1));
     }
 
     private static void AssertEventContract(string methodName, int id, string[] parameterNames, Type[] parameterTypes)
