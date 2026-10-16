@@ -79,7 +79,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         TelemetryManager.Instance.Initialize(isStandalone: true);
 
         Guid grantId = Guid.NewGuid();
-        var grant = new BuildGrant(Guid.NewGuid(), processId: 42, requestedNodes: 8, grantId, isNested: true)
+        var grant = new BuildGrant(Guid.NewGuid(), processId: 42, requestedNodes: 8, grantId: grantId, isNested: true)
         {
             GrantedNodes = 4,
         };

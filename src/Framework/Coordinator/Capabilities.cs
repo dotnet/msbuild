@@ -12,4 +12,9 @@ internal static class Capabilities
     ///  Supports flowing coordinator grant tokens to nested clients.
     /// </summary>
     public const string NestedGrants = "nested-grants";
+
+    /// <summary>
+    ///  Supports priority-aware coordinator requests.
+    /// </summary>
+    public const string Priority = "priority";
 }
