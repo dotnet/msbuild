@@ -18,9 +18,9 @@ internal partial class LazyItemEvaluator<P, I, M, D>
         ///  Gets the condition-true items visible at the captured position.
         /// </summary>
         /// <returns>
-        ///  The matching items in evaluation order.
+        ///  A non-default array of matching items in evaluation order.
         /// </returns>
-        public ImmutableList<I> GetMatchedItems()
+        public ImmutableArray<I> GetMatchedItems()
             => sequence.GetMatchedItems(operationCount);
 
         /// <summary>

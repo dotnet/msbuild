@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -130,6 +131,46 @@ public sealed class LazyItemEvaluator_Tests(ITestOutputHelper output)
         for (int i = 0; i < items.Length; i++)
         {
             items[i].ConditionResult.ShouldBe(expectedConditions[i]);
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void MatchedItemArraysPreserveFilteringOrderAndStorage(bool includeMatchingItems)
+    {
+        using ProjectCollection collection = new();
+        Project project = CreateProject(
+            $"""
+            <Project>
+                <ItemGroup>
+                    <Source Include="skipped-before.cs" Condition="false" />
+                    <Source Include="first.cs;second.cs" Condition="{includeMatchingItems}" />
+                    <Source Include="skipped-after.cs" Condition="false" />
+                    <Captured Include="@(Source)" />
+                    <Other Include="other.cs" />
+                </ItemGroup>
+            </Project>
+            """,
+            collection);
+        var evaluator = CreateEvaluator(project, default);
+        evaluator.ProcessItemGroups([.. project.Xml.ItemGroups], project.Xml.DirectoryPath);
+        IItemProvider<ProjectItem> provider = evaluator;
+
+        ImmutableArray<ProjectItem> firstRead = provider.GetItems("Source").ShouldBeOfType<ImmutableArray<ProjectItem>>();
+        ImmutableArray<ProjectItem> capturedRead = provider.GetItems("Captured").ShouldBeOfType<ImmutableArray<ProjectItem>>();
+        provider.GetItems("Other").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("other.cs");
+        ImmutableArray<ProjectItem> secondRead = provider.GetItems("Source").ShouldBeOfType<ImmutableArray<ProjectItem>>();
+        string[] expectedIncludes = includeMatchingItems ? ["first.cs", "second.cs"] : [];
+
+        firstRead.Length.ShouldBe(expectedIncludes.Length);
+        capturedRead.Length.ShouldBe(expectedIncludes.Length);
+        secondRead.Length.ShouldBe(expectedIncludes.Length);
+        for (int i = 0; i < expectedIncludes.Length; i++)
+        {
+            firstRead[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
+            capturedRead[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
+            secondRead[i].EvaluatedInclude.ShouldBe(expectedIncludes[i]);
         }
     }
 
