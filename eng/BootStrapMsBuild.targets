@@ -7,6 +7,8 @@
    -->
 
   <PropertyGroup>
+    <UseDailyBootstrapSdk Condition="'$(UseDailyBootstrapSdk)' == ''">false</UseDailyBootstrapSdk>
+
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
     <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
 
@@ -259,9 +261,13 @@
 
     <!-- Download the bootstrap .NET SDK -->
     <InstallDotNetCoreTask
-      DotNetInstallScriptRootPath="$(DotNetInstallScriptRootPath)" 
+      DotNetInstallScriptRootPath="$(DotNetInstallScriptRootPath)"
       InstallDir="$(InstallDir)"
-      Version="$(BootstrapSdkVersion)" />
+      Version="$(BootstrapSdkVersion)"
+      UseDailySdk="$(UseDailyBootstrapSdk)"
+      Channel="$(BootstrapSdkChannel)">
+      <Output TaskParameter="InstalledSdkVersion" PropertyName="ResolvedBootstrapSdkVersion" />
+    </InstallDotNetCoreTask>
 
     <PropertyGroup>
       <_DotNetInstallScript>$(RepositoryEngineeringDir)common\dotnet-install.cmd</_DotNetInstallScript>
@@ -303,7 +309,7 @@
          version. Per the design intent documented in Version.Details.xml ("at runtime we bind to whatever the host
          SDK ships"), let the SDK's aligned NuGet tooling win. -->
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
-          DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(ResolvedBootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <!--
       The .NET SDK layout keeps some of MSBuild's own props/targets under sdk\<ver>\Current\ rather than at the
@@ -321,13 +327,13 @@
       correctly left alone.
     -->
     <ItemGroup>
-      <_AcquiredSdkCurrentFile Include="$(InstallDir)sdk\$(BootstrapSdkVersion)\Current\*.*" />
+      <_AcquiredSdkCurrentFile Include="$(InstallDir)sdk\$(ResolvedBootstrapSdkVersion)\Current\*.*" />
       <_FreshlyBuiltCurrentFile Include="$(OutDir)%(_AcquiredSdkCurrentFile.Filename)%(_AcquiredSdkCurrentFile.Extension)"
                                 Condition="Exists('$(OutDir)%(_AcquiredSdkCurrentFile.Filename)%(_AcquiredSdkCurrentFile.Extension)')" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_FreshlyBuiltCurrentFile)"
-          DestinationFolder="$(InstallDir)sdk\$(BootstrapSdkVersion)\Current" />
+          DestinationFolder="$(InstallDir)sdk\$(ResolvedBootstrapSdkVersion)\Current" />
 
     <!--
       MSBuild can target an earlier .NET runtime than the SDK we overlay it onto.
@@ -339,14 +345,14 @@
 
       The exact runtime version (including any prerelease suffix) is read from the restored SDK's
       Microsoft.NETCoreSdk.BundledVersions.props ($(BundledNETCoreAppPackageVersion)). We must not derive it from
-      BootstrapSdkVersion (that's the SDK version, e.g. 11.0.100-*, not the runtime version 11.0.0-*), nor use the
+      ResolvedBootstrapSdkVersion (that's the SDK version, e.g. 11.0.100-*, not the runtime version 11.0.0-*), nor use the
       MSBuild property $(BundledNETCoreAppPackageVersion), which resolves to the runtime of the SDK building this
       project rather than the one restored into the bootstrap. A wrong/rounded version (e.g. 11.0.0 without the
       prerelease suffix) still lets the top-level SDK host roll forward, but the child apphosts (worker node,
       TaskHost) fail with hostfxr error 150. We only care about Microsoft.NETCore.App, so the replacement is keyed
       on that framework name and leaves the version untouched (a no-op) once MSBuild targets the SDK's runtime. -->
     <PropertyGroup>
-      <_BootstrapBundledVersionsFile>$(InstallDir)sdk\$(BootstrapSdkVersion)\Microsoft.NETCoreSdk.BundledVersions.props</_BootstrapBundledVersionsFile>
+      <_BootstrapBundledVersionsFile>$(InstallDir)sdk\$(ResolvedBootstrapSdkVersion)\Microsoft.NETCoreSdk.BundledVersions.props</_BootstrapBundledVersionsFile>
       <!-- The exact runtime version restored into the bootstrap, e.g. 11.0.0-preview.5.26302.115. -->
       <_BootstrapNetCoreVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_BootstrapBundledVersionsFile)')), '&lt;BundledNETCoreAppPackageVersion&gt;([^&lt;]+)&lt;').Groups[1].Value)</_BootstrapNetCoreVersion>
       <_BootstrapNetCoreVersionPattern>(&quot;name&quot;:\s*&quot;Microsoft\.NETCore\.App&quot;,\s*&quot;version&quot;:\s*&quot;)[^&quot;]*</_BootstrapNetCoreVersionPattern>
@@ -357,7 +363,7 @@
            Text="Could not read BundledNETCoreAppPackageVersion from '$(_BootstrapBundledVersionsFile)'; the bootstrap runtimeconfig.json files cannot be rewritten to a valid runtime version." />
 
     <ItemGroup>
-      <_BootstrapRuntimeConfigFile Include="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')"
+      <_BootstrapRuntimeConfigFile Include="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(ResolvedBootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')"
                                    Condition="'%(Extension)' == '.json' and $([System.String]::Copy('%(Filename)').EndsWith('.runtimeconfig'))" />
     </ItemGroup>
 
@@ -369,6 +375,15 @@
          Ad-hoc re-sign to prevent SIGKILL (exit code 137) when tests invoke the bootstrap dotnet. -->
     <Exec Command="codesign --force --sign - &quot;$(InstallDir)dotnet&quot;"
           Condition="$([MSBuild]::IsOSPlatform('osx'))" />
+
+    <WriteLinesToFile File="$(InstallDir)global.json"
+                      Lines="{ &quot;sdk&quot;: { &quot;version&quot;: &quot;$(ResolvedBootstrapSdkVersion)&quot;, &quot;rollForward&quot;: &quot;disable&quot;, &quot;allowPrerelease&quot;: true, &quot;paths&quot;: [ &quot;$host$&quot; ] } }"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+    <WriteLinesToFile File="$(InstallDir)bootstrap-sdk.version"
+                      Lines="$(ResolvedBootstrapSdkVersion)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
   </Target>
 
 </Project>
