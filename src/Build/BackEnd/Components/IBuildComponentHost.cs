@@ -152,6 +152,11 @@ namespace Microsoft.Build.BackEnd
         /// The component which collects telemetry data in worker node and forwards it to the main node.
         /// </summary>
         TelemetryCollector,
+
+        /// <summary>
+        /// Per-build declared-I/O task input file digests.
+        /// </summary>
+        TaskResultCacheFileDigestCache,
     }
 
     /// <summary>
