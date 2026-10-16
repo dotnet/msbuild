@@ -131,7 +131,7 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem sourceItem in SourceFiles.TakeWhile(i => !_cancellationTokenSource.IsCancellationRequested))
                     {
-                        FileInfo sourceFile = new FileInfo(TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec).Value);
+                        FileInfo sourceFile = new FileInfo(TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec));
 
                         if (!FileSystems.Default.FileExists(sourceFile.FullName))
                         {
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Tasks
         /// <returns><see langword="true"/> if the destination directory was created; otherwise <see langword="false"/>.</returns>
         private bool TryCreateDestinationDirectory([NotNullWhen(true)] out DirectoryInfo? destinationDirectory)
         {
-            string destinationFolderPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec).Value;
+            string destinationFolderPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec);
 
             try
             {

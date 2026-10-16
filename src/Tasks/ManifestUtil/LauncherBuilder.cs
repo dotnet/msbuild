@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     return _results;
                 }
 
-                if (String.IsNullOrEmpty(outputPath.Value))
+                if (String.IsNullOrEmpty(outputPath))
                 {
                     _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.NoOutputPath"));
                     return _results;
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 // Copy setup.bin to the output directory.
                 AbsolutePath outputExe = new AbsolutePath(
-                    Path.Combine(outputPath.Value, launcherFilename),
+                    Path.Combine(outputPath, launcherFilename),
                     Path.Combine(outputPath.OriginalValue, launcherFilename),
                     ignoreRootedCheck: true);
                 if (!CopyLauncherToOutputDirectory(launcherPath, outputExe))
@@ -97,7 +97,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private bool CopyLauncherToOutputDirectory(AbsolutePath launcher, AbsolutePath outputExe)
         {
-            if (!FileSystems.Default.FileExists(launcher.Value))
+            if (!FileSystems.Default.FileExists(launcher))
             {
                 _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.MissingLauncherExe", launcher.OriginalValue));
                 return false;
@@ -105,9 +105,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             try
             {
-                EnsureFolderExists(Path.GetDirectoryName(outputExe.Value));
-                File.Copy(launcher.Value, outputExe.Value, true);
-                ClearReadOnlyAttribute(outputExe.Value);
+                EnsureFolderExists(Path.GetDirectoryName(outputExe));
+                File.Copy(launcher, outputExe, true);
+                ClearReadOnlyAttribute(outputExe);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {

@@ -255,6 +255,42 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Theory]
+    [InlineData("File.Exists(path);", false)]
+    [InlineData("string file = path; File.Exists(file);", false)]
+    [InlineData("File.Exists(path.Value);", true)]
+    [InlineData("string file = path.Value; File.Exists(file);", true)]
+    public async Task HelperWithAbsolutePathConversion(string statement, bool expectDiagnostic)
+    {
+        var source = $$"""
+            using System.IO;
+            using Microsoft.Build.Framework;
+
+            public static class FileHelper
+            {
+                public static void Read(AbsolutePath path)
+                {
+                    {{statement}}
+                }
+            }
+
+            [MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public override bool Execute()
+                {
+                    FileHelper.Read(TaskEnvironment.GetAbsolutePath("input.txt"));
+                    return true;
+                }
+            }
+            """;
+
+        var diags = await GetAllDiagnosticsAsync(source);
+
+        diags.Count(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBe(expectDiagnostic ? 1 : 0);
+    }
+
+    [Theory]
     [InlineData("path.OriginalValue")]
     [InlineData("relative")]
     [InlineData("other.Value")]
