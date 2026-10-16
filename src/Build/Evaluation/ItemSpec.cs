@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -324,45 +325,47 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns a list of normalized paths that are common between this itemspec and keys of the given dictionary.
+        ///  Returns the normalized item paths matched by this item specification.
         /// </summary>
-        /// <param name="itemsByNormalizedValue">The dictionary to match this itemspec against.</param>
-        /// <returns>The keys of <paramref name="itemsByNormalizedValue"/> that are also referenced by this itemspec.</returns>
-        public IList<string> IntersectsWith(IReadOnlyDictionary<string, ItemDataCollectionValue<I>> itemsByNormalizedValue)
+        /// <param name="normalizedItemPaths">The normalized item paths to match against.</param>
+        /// <returns>
+        ///  The set of matching paths, using the comparison rules of <paramref name="normalizedItemPaths"/>.
+        /// </returns>
+        public ISet<string> IntersectsWith(HashSet<string> normalizedItemPaths)
         {
-            IList<string> matches = null;
+            HashSet<string> matches = null;
 
             foreach (var fragment in Fragments)
             {
                 IEnumerable<string> referencedItems = fragment.GetReferencedItems();
-                if (referencedItems != null)
+                if (referencedItems is not null)
                 {
-                    // The fragment can enumerate its referenced items, we can do dictionary lookups.
+                    // The fragment can enumerate its referenced items, so use path membership lookups.
                     foreach (var spec in referencedItems)
                     {
                         string key = FileUtilities.NormalizePathForComparisonNoThrow(spec, fragment.ProjectDirectory);
-                        if (itemsByNormalizedValue.TryGetValue(key, out var multiValue))
+                        if (normalizedItemPaths.Contains(key))
                         {
-                            matches ??= new List<string>();
+                            matches ??= [with(normalizedItemPaths.Comparer)];
                             matches.Add(key);
                         }
                     }
                 }
                 else
                 {
-                    // The fragment cannot enumerate its referenced items. Iterate over the dictionary and test each item.
-                    foreach (var kvp in itemsByNormalizedValue)
+                    // The fragment cannot enumerate its referenced items. Test each indexed path.
+                    foreach (string path in normalizedItemPaths)
                     {
-                        if (fragment.IsMatchNormalized(kvp.Key))
+                        if (fragment.IsMatchNormalized(path))
                         {
-                            matches ??= new List<string>();
-                            matches.Add(kvp.Key);
+                            matches ??= [with(normalizedItemPaths.Comparer)];
+                            matches.Add(path);
                         }
                     }
                 }
             }
 
-            return matches ?? [];
+            return matches is not null ? matches : FrozenSet<string>.Empty;
         }
 
         /// <summary>
