@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
@@ -32,6 +33,97 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public ProjectInstance_Internal_Tests(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ItemLocationsPreserveEscapedProjectFileNames(bool inferOutputs)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var testProject = env.CreateTestProjectWithFiles(
+                "app%3B.proj",
+                """
+                <Project>
+                  <ItemGroup>
+                    <Source Include="source.txt" />
+                    <EvaluatedCopy Include="@(Source)" />
+                  </ItemGroup>
+                  <Target Name="Build" Inputs="input.in" Outputs="input.out">
+                    <ItemGroup>
+                      <Literal Include="target.txt" />
+                      <TargetCopy Include="@(Source)" />
+                    </ItemGroup>
+                    <CreateItem Include="@(TargetCopy);task.txt">
+                      <Output TaskParameter="Include" ItemName="TaskOutput" />
+                    </CreateItem>
+                  </Target>
+                </Project>
+                """,
+                ["input.in", "input.out"]);
+            DateTime timestamp = DateTime.UtcNow.AddHours(-1);
+            File.SetLastWriteTimeUtc(Path.Combine(testProject.TestRoot, "input.in"), timestamp);
+            File.SetLastWriteTimeUtc(Path.Combine(testProject.TestRoot, "input.out"), timestamp.AddMinutes(inferOutputs ? 1 : -1));
+            using ProjectCollection projectCollection = new();
+            ProjectRootElement xml = ProjectRootElement.Open(testProject.ProjectFile, projectCollection);
+            ProjectInstance project = new(xml);
+            MockLogger logger = new(_output);
+
+            project.Build("Build", [logger]).ShouldBeTrue();
+            logger.TaskStartedEvents.Count.ShouldBe(inferOutputs ? 0 : 1);
+
+            ProjectTargetElement target = xml.Targets.Single();
+            foreach (ProjectItemElement element in xml.Items.Concat(target.ItemGroups.Single().Items))
+            {
+                ProjectItemInstance item = project.GetItems(element.ItemType).Single();
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(element.Location.Line.ToString(CultureInfo.InvariantCulture));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(element.Location.Column.ToString(CultureInfo.InvariantCulture));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(testProject.ProjectFile);
+            }
+
+            ElementLocation outputLocation = target.Tasks.Single().Outputs.Single().Location;
+            project.GetItems("TaskOutput").Count.ShouldBe(2);
+            foreach (ProjectItemInstance item in project.GetItems("TaskOutput"))
+            {
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath).ShouldBe(testProject.ProjectFile);
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(outputLocation.Line.ToString(CultureInfo.InvariantCulture));
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(outputLocation.Column.ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SourceLocationMetadataCanBeOptedOut(bool optOut)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", optOut ? ChangeWaves.Wave18_13.ToString() : null);
+            ChangeWaves.ResetStateForTests();
+            using ProjectRootElementFromString xml = new(
+                """
+                <Project>
+                  <ItemGroup>
+                    <Source Include="source.txt" />
+                  </ItemGroup>
+                </Project>
+                """);
+            xml.Project.AddItem("UnknownLocation", "@(Source)");
+            ProjectInstance project = new(xml.Project);
+            ProjectItemInstance item = project.GetItems("Source").Single();
+            project.GetItems("UnknownLocation").Single().GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBeEmpty();
+            item.MetadataCount.ShouldBe(optOut ? 15 : 17);
+            item.MetadataNames.Cast<string>().Contains(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(!optOut);
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe(optOut ? "" : xml.Project.Items.First().Location.Line.ToString(CultureInfo.InvariantCulture));
+            item.GetMetadataValue(ItemSpecModifiers.DefiningProjectColumnNumber).ShouldBe(optOut ? "" : xml.Project.Items.First().Location.Column.ToString(CultureInfo.InvariantCulture));
+            if (optOut)
+            {
+                item.SetMetadata(ItemSpecModifiers.DefiningProjectLineNumber, "custom");
+                item.GetMetadataValue(ItemSpecModifiers.DefiningProjectLineNumber).ShouldBe("custom");
+            }
+            else
+            {
+                Should.Throw<ArgumentException>(() => item.SetMetadata(ItemSpecModifiers.DefiningProjectLineNumber, "custom"));
+            }
         }
 
         /// <summary>
